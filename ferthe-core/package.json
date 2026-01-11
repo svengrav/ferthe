@@ -1,0 +1,22 @@
+{
+  "name": "ferthe-core",
+  "version": "1.0.0",
+  "description": "Core business logic and data layer for ferthe",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.4.1",
+    "@azure/identity": "^4.10.0",
+    "@azure/keyvault-secrets": "^4.9.0",
+    "@azure/storage-blob": "^12.27.0",
+    "bcryptjs": "^3.0.2",
+    "openai": "^5.0.1",
+    "twilio": "^5.7.2",
+    "zod": "^3.25.46"
+  }
+}

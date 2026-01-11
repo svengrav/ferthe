@@ -1,0 +1,92 @@
+### Automated Authentication API Tests
+### This file automatically extracts Bearer tokens from responses
+@baseUrl = https://foxhole.ferthe.eu/core/api/v1
+# @baseUrl = http://localhost:3000/api/v1
+@phoneNumber = +49123456789
+@testDeviceId = test-device-automated
+
+@code = {{requestSMS.response.body.data.code}}
+
+@authToken = {{verifySMS.response.body.data.session.sessionToken}}
+
+###
+# @name requestSMS
+POST {{baseUrl}}/account/sms/request
+Content-Type: application/json
+
+{
+  "phoneNumber": "{{phoneNumber}}",
+  "deviceInfo": {
+    "deviceId": "{{testDeviceId}}",
+    "platform": "web",
+    "ipAddress": "127.0.0.1"
+  }
+}
+
+###
+# @name verifySMS
+POST {{baseUrl}}/account/sms/verify
+Content-Type: application/json
+
+{
+  "phoneNumber": "{{phoneNumber}}",
+  "code": "{{code}}"
+}
+
+### Extract Bearer token from response automatically
+
+###
+# @name getAccountDetails
+GET {{baseUrl}}/account/collections/accounts
+Authorization: Bearer {{authToken}}
+
+###
+# @name validateSession
+POST {{baseUrl}}/account/session/validate
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "sessionToken": "{{authToken}}"
+}
+
+###
+# @name createLocalAccount
+POST {{baseUrl}}/account/local-account
+Content-Type: application/json
+
+{
+  "deviceInfo": {
+    "deviceId": "{{testDeviceId}}-local",
+    "platform": "web"
+  }
+}
+
+###
+# Extract the local Bearer token
+@localAuthToken = {{createLocalAccount.response.body.sessionToken}}
+
+###
+# @name getAccountDetailsLocal
+GET {{baseUrl}}/account/collections/accounts
+Authorization: Bearer {{localAuthToken}}
+
+### Error Test Cases
+
+###
+# @name testNoAuth
+GET {{baseUrl}}/account/collections/accounts
+
+###
+# @name testInvalidAuth
+GET {{baseUrl}}/account/collections/accounts
+Authorization: Bearer invalid-token-here
+
+###
+# @name testInvalidPhone
+POST {{baseUrl}}/account/sms/request
+Content-Type: application/json
+
+{
+  "phoneNumber": "invalid-phone"
+}

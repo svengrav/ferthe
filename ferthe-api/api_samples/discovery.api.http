@@ -1,0 +1,242 @@
+### Discovery API Tests
+### This file contains comprehensive tests for the Discovery API
+### First creates a session, then tests discovery endpoints
+
+@baseUrl = http://localhost:3000
+@phoneNumber = +49123456789
+@testDeviceId = discovery-test-device
+@testTrailId = clx4j9k2n000101mh8d4k9n2q
+@testSpotId = clx4j9k2n000301mh9e5p6t4w
+
+###
+# 1. Session Creation - Create Local Account (No SMS required)
+# @name createLocalAccount
+POST {{baseUrl}}/core/api/v1/account/local-account
+Content-Type: application/json
+
+{
+  "deviceInfo": {
+    "deviceId": "{{testDeviceId}}",
+    "platform": "web"
+  }
+}
+
+###
+# Extract Bearer token from local account
+@authToken = {{createLocalAccount.response.body.data.sessionToken}}
+
+
+### =================================================================
+### DISCOVERY API TESTS (Using Local Account Token)
+### =================================================================
+
+###
+# 3. Process Location - Discover spots by location
+POST {{baseUrl}}/core/api/v1/discoveries/process
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "location": {
+    "lat": 51.797,
+    "lon": 7.627
+  },
+  "trailId": "{{testTrailId}}"
+}
+
+###
+# 4. Get All Discoveries for User
+GET {{baseUrl}}/core/api/v1/discovery/collections/discoveries
+Authorization: Bearer {{authToken}}
+
+###
+# 5. Get Discoveries for Specific Trail
+GET {{baseUrl}}/core/api/v1/discovery/collections/discoveries?trailId={{testTrailId}}
+Authorization: Bearer {{authToken}}
+
+###
+# 6. Get Discovered Spots (All)
+GET {{baseUrl}}/core/api/v1/discovery/collections/spots
+Authorization: Bearer {{authToken}}
+
+###
+# 7. Get Discovered Spots for Specific Trail
+GET {{baseUrl}}/core/api/v1/discovery/collections/spots?trailId={{testTrailId}}
+Authorization: Bearer {{authToken}}
+
+###
+# 8. Get Preview Clues for Trail
+GET {{baseUrl}}/core/api/v1/discovery/collections/trails/{{testTrailId}}/clues
+Authorization: Bearer {{authToken}}
+
+###
+# 9. Get Discovery Trail Data
+GET {{baseUrl}}/core/api/v1/discovery/collections/trails/{{testTrailId}}
+Authorization: Bearer {{authToken}}
+
+###
+# 10. Process Multiple Locations - Simulate Movement
+POST {{baseUrl}}/core/api/v1/discoveries/process
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "location": {
+    "lat": 51.794,
+    "lon": 7.619
+  },
+  "trailId": "{{testTrailId}}"
+}
+
+###
+# 11. Test Discovery on Nature Trail
+POST {{baseUrl}}/core/api/v1/discoveries/process
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "location": {
+    "lat": 51.778,
+    "lon": 7.625
+  },
+  "trailId": "clx4j9k2n000201mh7b3m5r8x"
+}
+
+###
+# 12. Get Discoveries for Nature Trail
+GET {{baseUrl}}/core/api/v1/discovery/collections/discoveries?trailId=clx4j9k2n000201mh7b3m5r8x
+Authorization: Bearer {{authToken}}
+
+### =================================================================
+### ERROR TESTING
+### =================================================================
+
+###
+# 13. Test Invalid Location (should not discover anything)
+POST {{baseUrl}}/core/api/v1/discoveries/process
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "location": {
+    "lat": 0.0,
+    "lon": 0.0
+  },
+  "trailId": "{{testTrailId}}"
+}
+
+###
+# 14. Test Invalid Trail ID
+POST {{baseUrl}}/core/api/v1/discoveries/process
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "location": {
+    "lat": 51.797,
+    "lon": 7.627
+  },
+  "trailId": "invalid-trail-id"
+}
+
+###
+# 15. Test Without Authentication (should fail)
+POST {{baseUrl}}/core/api/v1/discoveries/process
+Content-Type: application/json
+
+{
+  "location": {
+    "lat": 51.797,
+    "lon": 7.627
+  },
+  "trailId": "{{testTrailId}}"
+}
+
+###
+# 16. Test Invalid Bearer Token
+POST {{baseUrl}}/core/api/v1/discoveries/process
+Content-Type: application/json
+Authorization: Bearer invalid-token-here
+
+{
+  "location": {
+    "lat": 51.797,
+    "lon": 7.627
+  },
+  "trailId": "{{testTrailId}}"
+}
+
+### =================================================================
+### VALIDATION REQUESTS
+### =================================================================
+
+###
+# 17. Validate Session
+POST {{baseUrl}}/core/api/v1/account/session/validate
+Content-Type: application/json
+
+{
+  "sessionToken": "{{authToken}}"
+}
+
+###
+# 18. Get Account Details
+GET {{baseUrl}}/core/api/v1/account/collections/accounts
+Authorization: Bearer {{authToken}}
+
+###
+# 19. Get All Trails (for reference)
+GET {{baseUrl}}/core/api/v1/trail/collections/trails
+Authorization: Bearer {{authToken}}
+
+###
+# 20. Get Specific Trail Data
+GET {{baseUrl}}/core/api/v1/trail/collections/trails/{{testTrailId}}
+Authorization: Bearer {{authToken}}
+
+###
+# 21. Get All Spots (for reference)
+GET {{baseUrl}}/core/api/v1/trail/collections/spots
+Authorization: Bearer {{authToken}}
+
+### =================================================================
+### ADVANCED DISCOVERY SCENARIOS
+### =================================================================
+
+###
+# 22. Rapid Location Updates (simulate real movement)
+POST {{baseUrl}}/core/api/v1/discoveries/process
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "location": {
+    "lat": 51.799,
+    "lon": 7.63
+  },
+  "trailId": "{{testTrailId}}"
+}
+
+###
+# 23. Test Boundary Location (edge of discovery radius)
+POST {{baseUrl}}/core/api/v1/discoveries/process
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "location": {
+    "lat": 51.7972,
+    "lon": 7.6272
+  },
+  "trailId": "{{testTrailId}}"
+}
+
+###
+# 24. Final Discovery Status Check
+GET {{baseUrl}}/core/api/v1/discovery/collections/discoveries
+Authorization: Bearer {{authToken}}
+
+###
+# 25. Final Discovered Spots Check
+GET {{baseUrl}}/core/api/v1/discovery/collections/spots
+Authorization: Bearer {{authToken}}

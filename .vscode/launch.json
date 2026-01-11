@@ -1,0 +1,65 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    // {
+    //   "name": "🔵 API Server",
+    //   "type": "node",
+    //   "request": "launch",
+    //   "program": "${workspaceFolder}/ferthe-api/src/index.ts",
+    //   "cwd": "${workspaceFolder}/ferthe-api",
+    //   "preLaunchTask": "Build All",
+    //   "runtimeExecutable": "npx",
+    //   "runtimeArgs": ["tsx", "watch", "src/index.ts"],
+    //   "env": {
+    //     "NODE_ENV": "development"
+    //   },
+    //   "console": "integratedTerminal",
+    //   "internalConsoleOptions": "neverOpen",
+    //   "skipFiles": ["<node_internals>/**", "node_modules/**"],
+    //   "sourceMaps": true,
+    //   "restart": true,
+    //   "envFile": "${workspaceFolder}/.env",
+    //   "outputCapture": "std"
+    // },   
+    {
+      "name": "🔵 Run API",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/ferthe-api/src/index.ts",
+      "cwd": "${workspaceFolder}/ferthe-api",
+      "preLaunchTask": "Build Core Watch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["tsx", "watch", "--inspect=9229", "src/index.ts"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"],
+      "sourceMaps": true,
+      "restart": true,
+      "envFile": "${workspaceFolder}/.env",
+      "outputCapture": "std"
+    },
+    {
+      "name": "🟢 Run App",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8081",
+      "webRoot": "${workspaceFolder}/ferthe-app",
+      "preLaunchTask": "Start Expo Web Server",
+      "sourceMapPathOverrides": {
+        "webpack:///./src/*": "${webRoot}/src/*",
+        "webpack:///src/*": "${webRoot}/src/*",
+        "webpack:///./*": "${webRoot}/*"
+      }
+    },
+  ],
+  "compounds": [
+    {
+      "name": "⚪ Run Full",
+      "configurations": ["🟢 Run App", "🔵 Run API"],
+      "stopAll": true
+    }
+  ]
+}

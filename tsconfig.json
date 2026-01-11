@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "strict": false,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "strictNullChecks": true
+  },
+  "references": [
+    {
+      "path": "./ferthe-shared"
+    },
+    {
+      "path": "./ferthe-core"
+    },
+    {
+      "path": "./ferthe-app"
+    },
+    {
+      "path": "./ferthe-test"
+    },
+    {
+      "path": "./ferthe-api"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "folders": [
+    {
+      "name": "🛠️ settings",
+      "path": "."
+    },
+    {
+      "name": "⚪ root",
+      "path": ".."
+    },
+    {
+      "name": "🟣 shared-src",
+      "path": "../ferthe-shared/src"
+    },
+    {
+      "name": "🟢 app-src",
+      "path": "../ferthe-app/src"
+    },
+    {
+      "name": "🔵 api-src",
+      "path": "../ferthe-api/src"
+    },
+    {
+      "name": "🔴 core-src",
+      "path": "../ferthe-core/src"
+    },
+    {
+      "name": "🟡 test-src",
+      "path": "../ferthe-test/src"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true,
+      "**/.expo": true,
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/*.tsbuildinfo": true,
+      "**/*package-lock.json": false,
+      "**/tsconfig.json": false,
+      "**/metro.config.js": true,
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/dist": true
+    },
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "workbench.editor.enablePreview": true,
+    "github.copilot.chat.codesearch.enabled": true,
+    "editor.tabSize": 2,
+    "editor.detectIndentation": false,
+    "prettier.enable": true,
+    "prettier.configPath": "../../.prettierrc",
+    "prettier.requireConfig": false,
+    "editor.formatOnSave": true,
+    "typescript.preferences.useAliasesForRenames": false,
+    "javascript.preferences.useAliasesForRenames": false,
+    "jest.runMode": "on-demand",
+    "jest.rootPath": "..",
+    "jest.disabledWorkspaceFolders": [
+      "🛠️ settings",
+      "🟢 app-src",
+      "🔵 api-src",
+      "🔴 core-src"
+    ],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "prettier.bracketSameLine": true,
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.formatOnSave": true
+    },
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.formatOnSave": true
+    },
+    "[jsonc]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.formatOnSave": false
+    },
+    "powershell.cwd": "🛠️ settings",
+    "[powershell]": {
+      "editor.defaultFormatter": "ms-vscode.powershell"
+    }
+  }
+}
