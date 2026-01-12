@@ -14,9 +14,16 @@
     "@azure/identity": "^4.10.0",
     "@azure/keyvault-secrets": "^4.9.0",
     "@azure/storage-blob": "^12.27.0",
+    "@fastify/cors": "^11.0.1",
     "bcryptjs": "^3.0.2",
+    "fastify": "^5.3.3",
     "openai": "^5.0.1",
+    "shared": "*",
     "twilio": "^5.7.2",
     "zod": "^3.25.46"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.6",
+    "typescript": "^5.9.3"
   }
 }

@@ -1,4 +1,4 @@
-// TypeScript Configuration for ferthe-api package
+// TypeScript Configuration for ferthe-shared package
 //
 // Key Configuration Explained:
 // - extends: "../tsconfig.json" inherits base TypeScript configuration from the monorepo root
@@ -6,57 +6,21 @@
 // - paths: Maps TypeScript path aliases (like @shared/*) to actual file locations relative to baseUrl
 // - composite: true enables this package to be used as a TypeScript project reference by other packages
 // - rootDir: "src" tells TypeScript that all source files are located in the src/ directory of this package
+
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
     "composite": true,
     "outDir": "dist",
     "rootDir": "src",
     "sourceMap": true,
-    "baseUrl": "..",
-    "types": [
-      "jest",
-      "node"
-    ],
+    "baseUrl": "..", 
+    "types": [],
     "paths": {
-      "@test/*": [
-        "./ferthe-test/src/*"
-      ],
-      "@app/*": [
-        "./ferthe-app/src/*"
-      ],
-      "@core/*": [
-        "./ferthe-core/src/*"
-      ],
       "@shared/*": [
         "./ferthe-shared/src/*"
-      ],
-      "@api/*": [
-        "./ferthe-api/src/*"
       ]
     }
   },
-  "references": [
-    {
-      "path": "../ferthe-core"
-    },
-    {
-      "path": "../ferthe-shared"
-    },
-    {
-      "path": "../ferthe-api"
-    },
-    {
-      "path": "../ferthe-app"
-    }
-  ],
-  "include": [
-    "src/**/*",
-  ],
-  "exclude": [
-    ".old",
-    "dist",
-    "node_modules",
-    "**/node_modules/*"
-  ]
+  "include": ["src/**/*"],
+  "exclude": [".old", "dist", "node_modules", "**/node_modules/*"]
 }

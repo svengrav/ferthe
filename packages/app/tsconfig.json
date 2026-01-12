@@ -17,6 +17,5 @@
   },
   "include": ["src/**/*", "index.ts", "app.config.ts"],
   "exclude": [".old", "dist", "node_modules", "**/node_modules/*"],
-  "references": [{ "path": "../ferthe-shared" }]
 }
 // Ferthe App TypeScript Configuration

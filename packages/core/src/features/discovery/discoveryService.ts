@@ -196,7 +196,7 @@ function createDiscoveryId(accountId: string, spotId: string, trailId?: string):
 /**
  * Gets all discovered spots for a trail
  */
-const getDiscoveredSpotIds = (accountId: string, discoveries: Discovery[], trailId: string): string[] => {
+const getDiscoveredSpotIds = (accountId: string, discoveries: Discovery[], trailId?: string): string[] => {
   return discoveries
     .filter(discovery => discovery.accountId === accountId)
     .filter(discovery => !trailId || discovery.trailId === trailId)

@@ -1,5 +1,5 @@
 import { Account, AccountSession, Discovery, DiscoveryApplicationContract, DiscoveryProfile, SMSCode, Spot, Trail, TrailApplicationContract } from '@shared/contracts'
-import { createJWTService } from 'ferthe-core/src/features/account/jwtService'
+import { createJWTService } from './features/account/jwtService'
 import { createConsoleSMSConnector, createTwilioSMSConnector, SMSConnector, TwilioConfig } from './connectors/smsConnector'
 import { AccountApplicationActions, createAccountApplication } from './features/account/accountApplication'
 import { createSMSService } from './features/account/smsService'

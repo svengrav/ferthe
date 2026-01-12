@@ -1,27 +1,13 @@
 {
   "compilerOptions": {
     "target": "ES2022",
+    "lib": ["ES2022"],
     "module": "commonjs",
-    "strict": false,
     "skipLibCheck": true,
-    "baseUrl": ".",
-    "strictNullChecks": true
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "strict": true
   },
-  "references": [
-    {
-      "path": "./ferthe-shared"
-    },
-    {
-      "path": "./ferthe-core"
-    },
-    {
-      "path": "./ferthe-app"
-    },
-    {
-      "path": "./ferthe-test"
-    },
-    {
-      "path": "./ferthe-api"
-    }
-  ]
+  "include": [],
+  "exclude": ["node_modules", "dist", ".old"]
 }

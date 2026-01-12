@@ -3,21 +3,14 @@
   "description": "Monorepo for the ferthe project",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "ferthe-app",
-    "ferthe-core",
-    "ferthe-shared",
-    "ferthe-test",
-    "ferthe-api"
-  ],
   "scripts": {
     "start": "tsx ./.tools/startup.ts -c -b -s",
     "build": "tsx ./.tools/startup.ts -c -b",
     "clean": "tsx ./.tools/startup.ts -c",
-    "test": "cd ferthe-test && npm test",
-    "dev:api": "cd ferthe-api && npm run dev",
-    "dev:app": "cd ferthe-app && npm run web",
-    "export:data": "cd ferthe-test && tsx ./src/sandbox/export.ts"
+    "test": "cd packages/test && npm test",
+    "dev:api": "cd packages/core && npm run dev:api",
+    "dev:app": "cd packages/app && npm run web",
+    "export:data": "cd packages/test && tsx ./src/sandbox/export.ts"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
