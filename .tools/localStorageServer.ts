@@ -70,7 +70,7 @@ server.get<{ Params: { key: string } }>('/storage/:key', async (request, reply) 
 
     return reply.send({ success: true, data })
   } catch (error) {
-    server.log.error('Read error:', error)
+    server.log.error(error)
     return reply.code(500).send({ error: 'Failed to read data' })
   }
 })
@@ -94,7 +94,7 @@ server.post<{
 
     return reply.send({ success: true, message: 'Data saved' })
   } catch (error) {
-    server.log.error('Write error:', error)
+    server.log.error(error)
     return reply.code(500).send({ error: 'Failed to save data' })
   }
 })
@@ -115,7 +115,7 @@ server.delete<{ Params: { key: string } }>('/storage/:key', async (request, repl
 
     return reply.send({ success: true, message: 'Data deleted' })
   } catch (error) {
-    server.log.error('Delete error:', error)
+    server.log.error(error)
     return reply.code(500).send({ error: 'Failed to delete data' })
   }
 })
@@ -132,7 +132,7 @@ server.get<{ Params: { key: string } }>('/storage/:key/exists', async (request, 
 
     return reply.send({ success: true, exists })
   } catch (error) {
-    server.log.error('Exists check error:', error)
+    server.log.error( error)
     return reply.code(500).send({ error: 'Failed to check existence' })
   }
 })
@@ -155,7 +155,7 @@ server.get('/storage', async (request, reply) => {
 
     return reply.send({ success: true, keys })
   } catch (error) {
-    server.log.error('List keys error:', error)
+    server.log.error(error)
     return reply.code(500).send({ error: 'Failed to list keys' })
   }
 })
@@ -173,7 +173,7 @@ server.delete('/storage', async (request, reply) => {
 
     return reply.send({ success: true, message: 'All data cleared' })
   } catch (error) {
-    server.log.error('Clear error:', error)
+    server.log.error(error)
     return reply.code(500).send({ error: 'Failed to clear data' })
   }
 })

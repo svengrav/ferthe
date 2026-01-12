@@ -3,11 +3,14 @@
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "commonjs",
+    "outDir": "dist",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "strict": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true,
-    "strict": true
+    "resolveJsonModule": true,
   },
-  "include": [],
-  "exclude": ["node_modules", "dist", ".old"]
+  "include": [".tools/**/*.ts"],
+  "exclude": [".old", "dist", "node_modules", "**/node_modules/*", "packages"],
 }

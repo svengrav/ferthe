@@ -7,10 +7,10 @@
     "start": "tsx ./.tools/startup.ts -c -b -s",
     "build": "tsx ./.tools/startup.ts -c -b",
     "clean": "tsx ./.tools/startup.ts -c",
-    "test": "cd packages/test && npm test",
+    "test": "npm test --workspace=packages/app",
     "dev:api": "cd packages/core && npm run dev:api",
     "dev:app": "cd packages/app && npm run web",
-    "export:data": "cd packages/test && tsx ./src/sandbox/export.ts"
+    "export:data": "cd packages/app && tsx ./tests/fixtures/export.ts"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
@@ -19,13 +19,18 @@
     "@typescript-eslint/parser": "^6.0.0",
     "concurrently": "^9.1.2",
     "dotenv": "^16.5.0",
+    "esbuild": "^0.19.0",
     "eslint": "^8.0.0",
     "eslint-config-prettier": "^9.0.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
-    "esbuild": "^0.19.0",
-    "tsx": "^4.19.4"
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.9.0",
+    "@fastify/cors": "^11.2.0",
+    "fastify": "^5.6.2"
   }
 }
