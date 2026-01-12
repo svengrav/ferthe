@@ -1,5 +1,5 @@
 import { Account, AccountSession, Discovery, DiscoveryMode, PreviewMode, ScanEvent, Spot, Trail } from '@shared/contracts'
-import { getCoreStoreIdentifiers } from 'ferthe-core'
+import { getCoreStoreIdentifiers } from '@core/index'
 
 interface DataSchema<T> {
   id: string

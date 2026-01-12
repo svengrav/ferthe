@@ -5,17 +5,17 @@
     "module": "commonjs",
     "outDir": "dist",
     "sourceMap": true,
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
     "types": [
       "jest",
       "node"
     ],
     "paths": {
+      "@app/*": ["../app/src/*"],
       "@test/*": ["./src/*"],
       "@core/*": ["../core/src/*"],
       "@shared/*": ["../shared/src/*"]

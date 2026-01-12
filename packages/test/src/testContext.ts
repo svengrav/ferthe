@@ -2,7 +2,7 @@ import { createAppContext } from '@app/appContext'
 import { getMemoryStoreConnector } from '@app/shared/device/memoryStoreConnector'
 import { createCoreContext, getCoreStoreIdentifiers } from '@core/core'
 import { AccountSession, Discovery, Spot, Trail } from '@shared/contracts'
-import { createMemoryStore } from 'ferthe-core'
+import { createMemoryStore } from '@core/index'
 import { getSandboxData } from './sandbox/data'
 
 interface TestContextState {
