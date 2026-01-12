@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "moduleResolution": "bundler",
     "target": "ES2023",
     "strict": false,
     "jsx": "react-jsx",
@@ -8,12 +9,27 @@
     "noEmit": false,
     "skipLibCheck": true,
     "paths": {
-      "@app/*": ["./src/*"],
-      "@app/shared/*": ["./src/shared/*"],
-      "@shared/*": ["../shared/src/*"]
+      "@app/*": [
+        "./src/*"
+      ],
+      "@app/shared/*": [
+        "./src/shared/*"
+      ],
+      "@shared/*": [
+        "../shared/src/*"
+      ]
     }
   },
-  "include": ["src/**/*", "index.ts", "app.config.ts"],
-  "exclude": [".old", "dist", "node_modules", "**/node_modules/*"],
+  "include": [
+    "src/**/*",
+    "index.ts",
+    "app.config.ts"
+  ],
+  "exclude": [
+    ".old",
+    "dist",
+    "node_modules",
+    "**/node_modules/*"
+  ],
+  "extends": "expo/tsconfig.base"
 }
-// Ferthe App TypeScript Configuration

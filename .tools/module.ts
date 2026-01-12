@@ -29,12 +29,19 @@ const cleanAll = (cleanNodeModules?: boolean): void => {
 }
 
 // Build all packages
-const buildAll = (packages: string[] = ['ferthe-shared', 'ferthe-core', 'ferthe-api', 'ferthe-app']): void => {
+const buildAll = (packages: string[] = ['shared', 'core']): void => {
   console.log('🚀 Starting build process...')
   console.log('📦 Build packages...')
   packages.forEach(pkg => {
-    execSync(`cd ${pkg} && npm run build`, { stdio: 'inherit' })
-    console.log(`✅ Built ${pkg}`)
+    const buildCommand = `cd packages/${pkg} && npm run build`
+    console.log(`📦 Building ${pkg}...`)
+    try {
+      execSync(buildCommand, { stdio: 'inherit' })
+      console.log(`✅ Built ${pkg}`)
+    } catch (error) {
+      console.error(`❌ Failed to build ${pkg}`)
+      throw error
+    }
   })
 }
 
