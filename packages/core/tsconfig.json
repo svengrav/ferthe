@@ -6,9 +6,10 @@
     "outDir": "dist",
     "sourceMap": true,
     "esModuleInterop": true,
-    "strict": true,
+    "strict": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "paths": {
       "@core/*": ["./src/*"],

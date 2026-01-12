@@ -1,6 +1,6 @@
-import { createFastifyServer } from '@api/fastify/server'
+import { createFastifyServer } from '@core/api/fastify/server'
 import { createStoreConnector, STORE_TYPES } from '@core/store/storeFactory'
-import { createCoreContext } from 'ferthe-core'
+import { createCoreContext } from '@core/index'
 import { getConfig } from './env'
 import createRoutes from './routes'
 

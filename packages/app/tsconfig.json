@@ -8,11 +8,10 @@
     "outDir": "dist",
     "noEmit": false,
     "skipLibCheck": true,
-    "composite": true,
     "paths": {
       "@app/*": ["./src/*"],
       "@app/shared/*": ["./src/shared/*"],
-      "@shared/*": ["../ferthe-shared/src/*"]
+      "@shared/*": ["../shared/src/*"]
     }
   },
   "include": ["src/**/*", "index.ts", "app.config.ts"],

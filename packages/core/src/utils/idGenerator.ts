@@ -43,14 +43,16 @@ const getRandomBlock = (): string => {
 
 // Create a fingerprint from the environment
 const createFingerprint = (): string => {
-  const navigator = typeof window !== 'undefined' ? window.navigator : null
-  // const process = typeof global !== 'undefined' ? global.process : null
+  const hasWindow = typeof globalThis !== 'undefined' && 'navigator' in globalThis
+  const navigator = hasWindow ? (globalThis as any).navigator : null
+  const hasScreen = typeof globalThis !== 'undefined' && 'screen' in globalThis
+  const screen = hasScreen ? (globalThis as any).screen : null
 
   const components = [
     navigator?.userAgent || '',
     new Date().getTimezoneOffset(),
     process?.env?.HOSTNAME || '',
-    typeof screen !== 'undefined' ? `${screen.width}x${screen.height}` : '',
+    screen ? `${screen.width}x${screen.height}` : '',
   ]
 
   const fingerprint = hash(components.join('')).toString(36)

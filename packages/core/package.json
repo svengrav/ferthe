@@ -16,6 +16,7 @@
     "@azure/storage-blob": "^12.27.0",
     "@fastify/cors": "^11.0.1",
     "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.3",
     "fastify": "^5.3.3",
     "openai": "^5.0.1",
     "shared": "*",

@@ -1,4 +1,4 @@
-import { createAsyncRequestHandler } from '@api/fastify/requestHandler'
+import { createAsyncRequestHandler } from '@core/api/fastify/requestHandler'
 
 import {
   Account,
