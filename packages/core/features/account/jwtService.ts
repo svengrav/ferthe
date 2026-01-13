@@ -1,7 +1,6 @@
 // JWT utility for secure Bearer token authentication
 import { AccountSession } from '@shared/contracts/index.ts'
-import console from 'console';
-import { createHmac } from 'crypto'
+import { createHmac } from 'node:crypto'
 
 const JWT_DEVELOPMENT_SECRET = 'development'
 

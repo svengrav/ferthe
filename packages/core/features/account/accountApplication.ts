@@ -19,7 +19,6 @@ import {
 } from '@shared/contracts/index.ts'
 import { JWTService, createJWTService } from './jwtService.ts'
 import { SMSService, createSMSService } from './smsService.ts'
-import console from 'console';
 
 export interface AccountApplicationActions extends AccountApplicationContract {}
 

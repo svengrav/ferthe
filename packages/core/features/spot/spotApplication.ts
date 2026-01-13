@@ -1,6 +1,5 @@
 import { Store } from '@core/store/storeFactory.ts'
 import { Result, Spot, SpotApplicationContract, SpotPreview } from '@shared/contracts/index.ts'
-import console from 'console';
 
 export interface SpotApplicationActions extends SpotApplicationContract {}
 

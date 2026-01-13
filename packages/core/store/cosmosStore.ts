@@ -1,6 +1,5 @@
 import { createCosmosConnector } from '@core/connectors/cosmos/cosmosConnector.ts'
 import { StoreInterface, StoreItem } from './storeInterface.ts'
-import console from 'console';
 
 interface CosmosStoreOptions {
   connectionString?: string

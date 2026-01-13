@@ -1,4 +1,3 @@
-import console from "console";
 import { buildAll, cleanAll, startAll } from './module.ts'
 
 interface StartupArgs {

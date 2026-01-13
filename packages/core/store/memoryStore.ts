@@ -1,6 +1,5 @@
 import { createCuid2 } from '@core/utils/idGenerator.ts'
 import { StoreInterface, StoreItem } from './storeInterface.ts'
-import console from 'console';
 
 /**
  * Creates a memory storage implementation using the unified StoreInterface

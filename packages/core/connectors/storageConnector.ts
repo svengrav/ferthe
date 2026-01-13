@@ -1,5 +1,5 @@
 import { BlobSASPermissions, BlobServiceClient, generateBlobSASQueryParameters, StorageSharedKeyCredential } from '@azure/storage-blob'
-import console from 'console'
+
 interface StorageItem {
   id: string
   url: string

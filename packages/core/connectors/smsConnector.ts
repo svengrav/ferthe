@@ -1,5 +1,4 @@
 // SMS connector interface for sending SMS messages
-import console from 'console';
 import { Twilio } from 'twilio'
 
 export interface SMSRequest {

@@ -3,7 +3,6 @@ import { createStoreConnector, STORE_TYPES } from '@core/store/storeFactory.ts'
 import { createCoreContext } from '@core/index.ts'
 import { getConfig } from './env.ts'
 import createRoutes from './routes.ts'
-import console from 'console'
 
 const run = async () => {
   const config = await getConfig()

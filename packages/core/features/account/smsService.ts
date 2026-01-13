@@ -2,9 +2,7 @@
 import { SMSRequest } from '@core/connectors/smsConnector.ts'
 import { createCuid2 } from '@core/utils/idGenerator.ts'
 import { SMSCode } from '@shared/contracts/index.ts'
-import * as bcrypt from 'bcryptjs'
-import console from 'console';
-
+import { hash, verify } from 'npm:argon2'
 const DEVELOPER_HASH_SALT = 'ferthe-developer-salt'
 
 export interface SMSValidationResult {
@@ -40,7 +38,7 @@ export function createSMSService(options: SMSServiceOptions = {}): SMSService {
       const phoneWithSalt = phoneNumber + phoneSalt
 
       // Use bcrypt to create secure hash
-      const phoneHash = await bcrypt.hash(phoneWithSalt, saltRounds)
+      const phoneHash = await hash(phoneWithSalt)
 
       return phoneHash
     } catch (error) {
@@ -54,7 +52,7 @@ export function createSMSService(options: SMSServiceOptions = {}): SMSService {
       const phoneWithSalt = phoneNumber + phoneSalt
 
       // Use bcrypt.compare to check if phone number matches stored hash
-      return await bcrypt.compare(phoneWithSalt, phoneHash)
+      return await verify(phoneHash, phoneWithSalt)
     } catch (error) {
       console.error('Error verifying phone hash:', error)
       return false

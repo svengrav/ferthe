@@ -1,8 +1,17 @@
 {
-  "exclude": ["packages/app/**","packages/test/**", "packages/web/**", "node_modules", "**/dist"],
+  "exclude": [
+    "packages/app/**",
+    "packages/test/**",
+    "scripts/**",
+    "docs/**"
+  ],
   "imports": {
+    "@azure/storage-blob": "npm:@azure/storage-blob@^12.29.1",
     "@shared/": "./packages/shared/",
-    "@core/": "./packages/core/"
+    "@core/": "./packages/core/",
+    "argon2": "npm:argon2@^0.44.0",
+    "crypto": "npm:crypto@^1.0.1",
+    "twilio": "npm:twilio@^5.11.2"
   },
   "compilerOptions": {
     "lib": ["deno.ns", "deno.unstable", "esnext", "dom"],
