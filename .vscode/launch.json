@@ -23,32 +23,23 @@
     // },   
     {
       "name": "🔵 Run API",
-      "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/packages/core/index.ts",
+      "type": "node",
       "cwd": "${workspaceFolder}/packages/core",
-      "preLaunchTask": "Build Core Watch",
       "runtimeExecutable": "deno",
       "runtimeArgs": [
         "run",
-        "--watch",
-        "--inspect=127.0.0.1:9229",
         "-A",
-       "api/index.ts"
+        "--watch",
+        "--inspect-brk",
+        "api/index.ts"
       ],
+      "attachSimplePort": 9229,
       "env": {
         "NODE_ENV": "development"
       },
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "skipFiles": [
-        "<node_internals>/**",
-        "node_modules/**"
-      ],
-      "sourceMaps": true,
-      "restart": true,
-      "envFile": "${workspaceFolder}/.env",
-      "outputCapture": "std"
+      "envFile": "${workspaceFolder}/.env"
     },
     {
       "name": "🟢 Run App",
