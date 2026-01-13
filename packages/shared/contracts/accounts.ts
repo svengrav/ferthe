@@ -1,0 +1,125 @@
+import { FirebaseConfig } from './config.ts'
+import { Result } from './results.ts'
+
+export interface AccountApplicationContract {
+  // Authentication - No context needed (creating sessions)
+  requestSMSCode: (phoneNumber: string, deviceInfo?: AccountDeviceInfo) => Promise<Result<SMSCodeRequest>>
+  verifySMSCode: (phoneNumber: string, code: string, deviceInfo?: AccountDeviceInfo) => Promise<Result<SMSVerificationResult>>
+  createLocalAccount: (deviceInfo?: AccountDeviceInfo) => Promise<Result<AccountSession>>
+
+  // Session management - Token-based, no context needed
+  validateSession: (sessionToken: string) => Promise<Result<SessionValidationResult>>
+  revokeSession: (sessionToken: string) => Promise<Result<void>>
+
+  // Account operations - Require authenticated context
+  getAccount: (context: AccountContext) => Promise<Result<Account | null>>
+  upgradeToPhoneAccount: (context: AccountContext, phoneNumber: string, code: string) => Promise<Result<AccountSession>>
+
+  // Configuration - Require authenticated context
+  getFirebaseConfig: (context: AccountContext) => Promise<Result<FirebaseConfig>>
+}
+
+/**
+ * Represents the type of account based on verification status.
+ * - 'sms_verified' indicates a verified account with a phone number,
+ * - 'local_unverified' indicates a local account without phone verification,
+ * - 'public' indicates a public account without any phone or local verification.
+ */
+export type AccountType = 'sms_verified' | 'local_unverified' | 'public'
+
+/**
+ * Represents an account in the system.
+ * Contains the account ID, optional phone hash (verified only), creation date, last login date,
+ */
+export interface Account {
+  id: string
+  phoneHash?: string // Optional for local accounts
+  createdAt: Date
+  lastLoginAt?: Date
+  accountType: AccountType
+  isPhoneVerified: boolean
+}
+
+/**
+ * Represents the context of an account, which includes the account ID and type.
+ * - This context is used to perform operations that require knowledge of the account.
+ * - This is the short version of a session.
+ */
+export interface AccountContext {
+  accountId: string
+  accountType: AccountType
+}
+
+/**
+ * Represents a session for an account, which includes the session token,
+ * expiration time, and associated account context.
+ * - Extends the AccountContext to include session-specific information.
+ */
+export interface AccountSession extends AccountContext {
+  id: string
+  accountId: string
+  sessionToken: string
+  expiresAt: Date
+  accountType: AccountType
+}
+
+/**
+ * Represents device information associated with an account session.
+ * - Contains details such as device ID, platform, OS version, IP address, and geolocation.
+ */
+export interface AccountDeviceInfo {
+  readonly deviceId: string
+  readonly platform?: 'ios' | 'android' | 'web'
+  readonly osVersion?: string
+  readonly ipAddress?: string
+  readonly geolocation?: {
+    latitude: number
+    longitude: number
+    accuracy?: number
+  }
+}
+
+/**
+ * Represents a an SMS verification code.
+ * - ⚠️ Code has to be sent to the user's phone number.
+ * - Contains the hashed phone number, code, expiration time, and verification status.
+ */
+export interface SMSCode {
+  id: string
+  phoneHash: string // Hashed phone number for security
+  code: string // The actual verification code sent to the user
+  expiresAt: Date
+  createdAt: Date
+  verified: boolean
+}
+
+/**
+ * Represents a request for an SMS verification code.
+ * Contains the request ID, expiration time.
+ * This is used to track the SMS request and its validity.
+ * - ⚠️ Code has to be sent to the user's phone number.
+ * - This is a simplified version of SMSCodeRequest that does not include the code itself.
+ */
+export interface SMSCodeRequest {
+  requestId: string
+  expiresAt: Date
+}
+
+/**
+ * Represents the result of an SMS verification attempt.
+ * Contains the success status, optional account context, and error details if any.
+ */
+export interface SMSVerificationResult {
+  success: boolean
+  context?: AccountSession
+  error?: string
+  errorCode?: 'NO_REQUEST' | 'INVALID_CODE' | 'EXPIRED_CODE' | 'ALREADY_VERIFIED'
+}
+
+/**
+ * Represents the result of validating a session.
+ */
+export interface SessionValidationResult {
+  accountId: string
+  valid: boolean
+}

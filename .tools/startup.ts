@@ -1,4 +1,5 @@
-import { buildAll, cleanAll, startAll } from './module'
+import console from "console";
+import { buildAll, cleanAll, startAll } from './module.ts'
 
 interface StartupArgs {
   clean?: boolean
@@ -16,6 +17,7 @@ const parseArgs = (args: string[]): StartupArgs => {
   }
 }
 
+// deno-lint-ignore require-await
 const startWithEnvironment = async (args: string[] = []): Promise<void> => {
   console.log('🚀Ferthe Development Environment...')
   const { profile, clean, build, start } = parseArgs(args)
@@ -29,8 +31,6 @@ const startWithEnvironment = async (args: string[] = []): Promise<void> => {
   start && startAll(profile)
 }
 
-if (require.main === module) {
-  // Parse command line args (skip first 2: node and script path)
-  const args = process.argv.slice(2)
-  startWithEnvironment(args)
+if (import.meta.main) {
+  await startWithEnvironment(Deno.args)
 }

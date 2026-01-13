@@ -1,4 +1,5 @@
 import { execSync } from 'child_process'
+import console from "console";
 import * as dotenv from 'dotenv'
 import * as fs from 'fs'
 import * as path from 'path'

@@ -16,6 +16,7 @@
  */
 
 import cors from '@fastify/cors'
+import console from "console";
 import Fastify from 'fastify'
 import * as fs from 'fs'
 import * as path from 'path'

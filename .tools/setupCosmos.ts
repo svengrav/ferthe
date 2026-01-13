@@ -1,4 +1,5 @@
 import { CosmosClient } from '@azure/cosmos'
+import console from "console";
 import * as fs from 'fs/promises'
 import * as path from 'path'
 

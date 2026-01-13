@@ -1,0 +1,18 @@
+{
+  "exclude": ["packages/app/**","packages/test/**", "packages/web/**", "node_modules", "**/dist"],
+  "imports": {
+    "@shared/": "./packages/shared/",
+    "@core/": "./packages/core/"
+  },
+  "compilerOptions": {
+    "lib": ["deno.ns", "deno.unstable", "esnext", "dom"],
+    "strict": true,
+    "allowJs": false,
+    "noImplicitAny": false,
+    "module": "esnext",
+    "checkJs": false,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "types": ["vite/client"]
+  }
+}
