@@ -16,7 +16,6 @@
 - A feature is a core concept and comparable to a domain in DDD (Domain-Driven Design).
 - In main packages like `app` or `core`, features are implemented as modules in their own folders.
 - If a feature has a service, it should be placed in a `services` folder within the feature folder and only accessed by the feature application.
-- Features can be implemented as packages, but this is not mandatory.
 - Every feature has its own store, which is a centralized state management system for the feature.
 - The application connects the store with the service and the feature.
 - Features have their own contracts, which define the data types and processes shared between applications.

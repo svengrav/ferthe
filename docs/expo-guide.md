@@ -16,8 +16,6 @@ npx expo export --platform web
 
 # Clean and Reliable Expo Build Setup (Monorepo)
 
-## Goals
-
 - Avoid version mismatches (e.g., multiple Expo SDKs)
 - Ensure stable and reproducible builds locally and on EAS Cloud
 - Keep monorepo dependency management clean and centralized
