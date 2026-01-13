@@ -1,14 +1,23 @@
 {
+  "tasks": {
+    "start:core": "deno run -A --watch=packages/core/ packages/core/api/index.ts",    
+    "start:web": "deno run -A --watch=static/,routes/,packages/web/ dev.ts",
+    "build:web": "deno run -A build.ts",
+    "lint": "deno lint",
+    "test": "deno test --allow-net --allow-env --allow-read"
+  },
   "workspace": [
     "packages/web",
-    // "packages/app"
+    "packages/core"
   ],
   "exclude": [
-    // "packages/app/**",
-    // "packages/web/**",
+    "packages/app/**",
     "packages/test/**",
     "scripts/**",
-    "docs/**"
+    "docs/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.expo/**"
   ],
   "nodeModulesDir": "auto",
   "imports": {

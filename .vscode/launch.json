@@ -25,17 +25,26 @@
       "name": "🔵 Run API",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/packages/core/src/index.ts",
+      "program": "${workspaceFolder}/packages/core/index.ts",
       "cwd": "${workspaceFolder}/packages/core",
       "preLaunchTask": "Build Core Watch",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["tsx", "watch", "--inspect=9229", "src/index.ts"],
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--watch",
+        "--inspect=127.0.0.1:9229",
+        "-A",
+       "api/index.ts"
+      ],
       "env": {
         "NODE_ENV": "development"
       },
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "skipFiles": ["<node_internals>/**", "node_modules/**"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "node_modules/**"
+      ],
       "sourceMaps": true,
       "restart": true,
       "envFile": "${workspaceFolder}/.env",
@@ -58,7 +67,10 @@
   "compounds": [
     {
       "name": "⚪ Run Full",
-      "configurations": ["🟢 Run App", "🔵 Run API"],
+      "configurations": [
+        "🟢 Run App",
+        "🔵 Run API"
+      ],
       "stopAll": true
     }
   ]

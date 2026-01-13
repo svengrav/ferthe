@@ -1,0 +1,14 @@
+{
+  "tasks": {
+    "dev": "deno run ./index.ts"
+  },
+  "lint": {
+    "rules": {
+      "exclude": ["no-sloppy-imports"]
+    }
+  },
+  "imports": {
+
+    "@/": "./"
+  }
+}
