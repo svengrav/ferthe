@@ -18,7 +18,7 @@ export function createJsonStore(options: JsonStoreOptions = {}): StoreInterface 
   const ensureDirectoryExists = async (): Promise<void> => {
     try {
       await fs.mkdir(baseDir, { recursive: true })
-    } catch (error) {
+    } catch (_error) {
       // Directory might already exist, ignore error
     }
   }
@@ -30,7 +30,7 @@ export function createJsonStore(options: JsonStoreOptions = {}): StoreInterface 
       const parsed = JSON.parse(content)
 
       return parsed || []
-    } catch (error) {
+    } catch (_error) {
       // File doesn't exist or is empty, return empty array
       return []
     }
