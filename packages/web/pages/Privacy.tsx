@@ -1,6 +1,6 @@
-import { PageLayout } from '@components/PageLayout'
-import privacyDe from '@content/de/privacy.md'
-import privacyEn from '@content/en/privacy.md'
+import { PageLayout } from '@/components/PageLayout.tsx'
+import privacyDe from '@/content/de/privacy.md'
+import privacyEn from '@/content/en/privacy.md'
 
 export function Privacy() {
   return (

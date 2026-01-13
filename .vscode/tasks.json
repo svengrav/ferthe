@@ -67,7 +67,7 @@
 		{
 			"label": "Start Storage Server",
 			"type": "shell",
-			"command": "npx tsx ${workspaceFolder}/.tools/localStorageServer.ts",
+			"command": "npx tsx ${workspaceFolder}/tools/localStorageServer.ts",
 			"group": "build",
 			"isBackground": true,
 			"problemMatcher": {

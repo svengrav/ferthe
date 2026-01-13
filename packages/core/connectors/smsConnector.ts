@@ -1,5 +1,5 @@
 // SMS connector interface for sending SMS messages
-import { Twilio } from 'twilio'
+import Twilio from 'twilio'
 
 export interface SMSRequest {
   phoneNumber: string

@@ -1,4 +1,4 @@
-import { createAsyncRequestHandler } from '@core/api/fastify/requestHandler.ts'
+import { createAsyncRequestHandler } from '@core/api/oak/requestHandler.ts'
 
 import {
   Account,
@@ -15,7 +15,7 @@ import {
   Trail,
 } from '@shared/contracts/index.ts'
 import { ApplicationContract, SMSCodeRequest } from '@shared/contracts/index.ts'
-import { Route } from './fastify/types.ts'
+import { Route } from './oak/types.ts'
 
 const createRoutes = (ctx: ApplicationContract): Route[] => {
   const { discoveryApplication, sensorApplication, trailApplication, accountApplication } = ctx
@@ -29,6 +29,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       version: 'v1',
       url: '/health',
       config: { isPublic: true },
+      // deno-lint-ignore require-await
       handler: asyncRequestHandler(async () => {
         return {
           success: true,

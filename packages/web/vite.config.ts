@@ -1,16 +1,15 @@
-import tailwindcss from '@tailwindcss/vite'
-import react from '@vitejs/plugin-react'
-import fs from 'fs'
-import path from 'path'
 import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import deno from "@deno/vite-plugin";
 
 // Simple plugin to load .md files as strings
 const markdownPlugin = () => {
   return {
     name: 'markdown-loader',
-    load(id: string) {
+    async load(id: string) {
       if (id.endsWith('.md')) {
-        const content = fs.readFileSync(id, 'utf-8')
+        const content = await Deno.readTextFile(id)
         return `export default ${JSON.stringify(content)}`
       }
     }
@@ -20,15 +19,13 @@ const markdownPlugin = () => {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    deno(),
     tailwindcss(),
     react(),
     markdownPlugin()
-  ],  resolve: {
+  ], resolve: {
     alias: {
-      '@pages': path.resolve(__dirname, './src/pages'),
-      '@content': path.resolve(__dirname, './src/content'),
-      '@hooks': path.resolve(__dirname, './src/hooks'),
-      '@components': path.resolve(__dirname, './src/components')
+      '@/': `${import.meta.dirname}/`,
     }
   }
 })

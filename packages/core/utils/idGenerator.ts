@@ -93,7 +93,7 @@ export const isCuid2 = (id: string): boolean => {
   return /^[0-9a-z]+$/i.test(id)
 }
 
-import { createHash } from 'crypto'
+import { createHash } from 'node:crypto'
 
 /**
  * Creates a deterministic ID based on the provided string arguments.

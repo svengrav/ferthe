@@ -1,5 +1,3 @@
-import { buildAll, cleanAll, startAll } from './module.ts'
-
 interface StartupArgs {
   clean?: boolean
   build?: boolean
@@ -16,18 +14,37 @@ const parseArgs = (args: string[]): StartupArgs => {
   }
 }
 
-// deno-lint-ignore require-await
 const startWithEnvironment = async (args: string[] = []): Promise<void> => {
   console.log('🚀Ferthe Development Environment...')
-  const { profile, clean, build, start } = parseArgs(args)
-
-  console.log(`🧭 Using profile: ${profile}`)
-  console.log(`⚙ -> Options - Clean: ${clean}, Build: ${build}, Start: ${start}`)
+  const { start } = parseArgs(args)
   
-  console.log('🧹 Cleaned previous builds and ensured environment files are set up.')
-  clean && cleanAll()
-  build && buildAll()
-  start && startAll(profile)
+  if (start) {
+    console.log('🌐 Starting all servers...')
+    
+    // Start storage server
+    const storageServer = new Deno.Command('deno', {
+      args: ['run', '--allow-all', './tools/localStorageServer.ts'],
+      stdout: 'inherit',
+      stderr: 'inherit',
+    }).spawn()
+    
+    // Start API server
+    const apiServer = new Deno.Command('deno', {
+      args: ['run', '--allow-all', './packages/core/api/index.ts'],
+      stdout: 'inherit',
+      stderr: 'inherit',
+    }).spawn()
+    
+    console.log('✅ Storage Server started (PID: ' + storageServer.pid + ')')
+    console.log('✅ API Server started (PID: ' + apiServer.pid + ')')
+    console.log('⚠️  Web app needs to be started separately with: cd packages/app && npm run web')
+    
+    // Wait for both processes
+    await Promise.all([
+      storageServer.status,
+      apiServer.status
+    ])
+  }
 }
 
 if (import.meta.main) {

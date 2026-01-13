@@ -1,0 +1,37 @@
+{
+  "tasks": {
+    "build": "deno run -A npm:vite build",
+    "dev": "deno run -A npm:vite"
+  },
+  "lint": {
+    "rules": {
+      "exclude": ["no-sloppy-imports"]
+    }
+  },
+  "imports": {
+    "@/": "./",
+    "marked": "npm:marked@^17.0.1",
+    "react-markdown": "npm:react-markdown",
+    "react-router-dom": "npm:react-router-dom@^7",
+    "@headlessui/react": "npm:@headlessui/react@^2.1.1",
+    "@heroicons/react": "npm:@heroicons/react@^2.1.5",
+    "@types/react": "npm:@types/react@^19.2.7",
+    "@types/react-dom": "npm:@types/react-dom@^19.2.3",
+    "@vitejs/plugin-react": "npm:@vitejs/plugin-react@^4.4.1",
+    "classnames": "npm:classnames@^2.5.1",
+    "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.6",
+    "react-zoom-pan-pinch": "npm:react-zoom-pan-pinch@^3.7.0",
+    "rolldown-vite": "npm:rolldown-vite@^7.3.0",
+    "tailwind-scrollbar": "npm:tailwind-scrollbar@^3.0.5",
+    "vite-plugin-pwa": "npm:vite-plugin-pwa@^1.2.0",
+    "zustand": "npm:zustand@^5.0.1",
+    "react": "npm:react@^19.1.0",
+    "react-dom": "npm:react-dom@^19.1.0",
+    "react/jsx-runtime": "npm:react@^19.1.0/jsx-runtime",
+    "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.17",
+    "tailwindcss": "npm:tailwindcss@^4.1.17",
+    "vite": "npm:rolldown-vite@7.2.5",
+    "mdast-util-to-hast": "npm:mdast-util-to-hast",
+"remark-rehype": "npm:remark-rehype"
+  }
+}

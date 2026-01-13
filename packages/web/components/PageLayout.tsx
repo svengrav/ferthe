@@ -1,4 +1,4 @@
-import { useMarkdown } from '@hooks/useMarkdown'
+import { useMarkdown } from '@/hooks/useMarkdown'
 import { Link } from 'react-router-dom'
 import Markdown from './Markdown'
 

@@ -1,8 +1,8 @@
-import Markdown from '@components/Markdown'
-import Page from '@components/Page'
-import enHomeDe from '@content/de/home.md'
-import enHomeMd from '@content/en/home.md'
-import { useMarkdown } from '@hooks/useMarkdown'
+import Markdown from '@/components/Markdown'
+import Page from '@/components/Page'
+import enHomeDe from '@/content/de/home.md'
+import enHomeMd from '@/content/en/home.md'
+import { useMarkdown } from '@/hooks/useMarkdown'
 import { useEffect, useState } from 'react'
 import { Logo } from '../logo'
 

@@ -1,207 +1,146 @@
 /**
- * Local Storage Server
+ * Local Storage Server (Deno Native)
  * ---
- * This server provides a simple file-based storage system for key-value pairs.
- * It allows reading, writing, updating, and deleting data stored in JSON files.
- * It also supports CORS for specific origins.
+ * Simple file-based key-value storage using Deno.serve()
  * 
- * ---
- * * Usage:
- * 1. Start the server: `node localStorageServer.js`
- * 2. Use the endpoints to interact with the storage:
- *    - GET /storage/:key - Read value
- *    - POST /storage/:key - Write value
- *    - PUT /storage/:key - Update value
- *    - DELETE /storage/:key - Delete value
+ * Endpoints:
+ * - GET /storage/:key - Read value
+ * - POST /storage/:key - Write value
+ * - DELETE /storage/:key - Delete value
+ * - GET /storage/:key/exists - Check existence
+ * - GET /storage - List all keys
+ * - DELETE /storage - Clear all data
+ * - GET /health - Health check
  */
 
-import cors from '@fastify/cors'
-import console from "console";
-import Fastify from 'fastify'
-import * as fs from 'fs'
-import * as path from 'path'
+const STORAGE_DIR = `${Deno.cwd()}/_data/app`
+const PORT = 3010
+const ALLOWED_ORIGINS = ['http://localhost:8081', 'http://localhost:3000', 'http://localhost:19006']
 
-const server = Fastify({ logger: true })
+// Ensure storage directory exists
+try {
+  await Deno.mkdir(STORAGE_DIR, { recursive: true })
+} catch { /* already exists */ }
 
-// Enable CORS for specific origins
-// This allows requests from localhost:8081, localhost:3000, and localhost:19006
-server.register(cors, {
-  origin: ['http://localhost:8081', 'http://localhost:3000', 'http://localhost:19006'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-})
-
-/**
-  * Local Storage Server
-  * This server provides a simple file-based storage system for key-value pairs.
-  * It allows reading, writing, updating, and deleting data stored in JSON files.
-  */
-const STORAGE_DIR = path.join(process.cwd(), './_data', 'app')
-console.log(`Storage directory: ${STORAGE_DIR}`)
-// Ensure the storage directory exists
-if (!fs.existsSync(STORAGE_DIR)) {
-  console.log(`Creating storage directory: ${STORAGE_DIR}`)
-  fs.mkdirSync(STORAGE_DIR, { recursive: true })
-}
-/**
- * Helper function to get the file path for a given key.
- * It sanitizes the key to ensure it is a valid filename.
- */
-function getFilePath(key: string): string {
+const getFilePath = (key: string): string => {
   const sanitizedKey = key.replace(/[^a-zA-Z0-9.-_]/g, '_')
-  return path.join(STORAGE_DIR, `${sanitizedKey}.json`)
+  return `${STORAGE_DIR}/${sanitizedKey}.json`
 }
 
-/**
- * GET /storage/:key - Read value
- * This endpoint reads a value from a file with the given key.
- * If the file does not exist, it returns a 404 error.
- */
-server.get<{ Params: { key: string } }>('/storage/:key', async (request, reply) => {
-  try {
-    const { key } = request.params
-    const filePath = getFilePath(key)
-
-    if (!fs.existsSync(filePath)) {
-      return reply.code(404).send({ error: 'Key not found' })
-    }
-
-    const content = fs.readFileSync(filePath, 'utf-8')
-    const data = JSON.parse(content)
-
-    return reply.send({ success: true, data })
-  } catch (error) {
-    server.log.error(error)
-    return reply.code(500).send({ error: 'Failed to read data' })
-  }
-})
-
-/**
- * POST /storage/:key - Write value
- * This endpoint writes a value to a file with the given key.
- * If the file already exists, it will overwrite the existing data.
- */
-server.post<{
-  Params: { key: string },
-  Body: { value: any }
-}>('/storage/:key', async (request, reply) => {
-  try {
-    const { key } = request.params
-    const { value } = request.body
-
-    const filePath = getFilePath(key)
-    const serializedValue = JSON.stringify(value, null, 2)
-    fs.writeFileSync(filePath, serializedValue, 'utf-8')
-
-    return reply.send({ success: true, message: 'Data saved' })
-  } catch (error) {
-    server.log.error(error)
-    return reply.code(500).send({ error: 'Failed to save data' })
-  }
-})
-
-/**
- * PUT /storage/:key - Update value
- * This endpoint updates the value for a given key.
- * If the key does not exist, it will create a new entry.
- */
-server.delete<{ Params: { key: string } }>('/storage/:key', async (request, reply) => {
-  try {
-    const { key } = request.params
-    const filePath = getFilePath(key)
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath)
-    }
-
-    return reply.send({ success: true, message: 'Data deleted' })
-  } catch (error) {
-    server.log.error(error)
-    return reply.code(500).send({ error: 'Failed to delete data' })
-  }
-})
-
-/**
- * GET /storage/:key/exists - Check if key exists
- * This endpoint checks if a key exists in the storage directory.
- */
-server.get<{ Params: { key: string } }>('/storage/:key/exists', async (request, reply) => {
-  try {
-    const { key } = request.params
-    const filePath = getFilePath(key)
-    const exists = fs.existsSync(filePath)
-
-    return reply.send({ success: true, exists })
-  } catch (error) {
-    server.log.error( error)
-    return reply.code(500).send({ error: 'Failed to check existence' })
-  }
-})
-
-/**
- * GET /storage - List all keys
- * This endpoint lists all keys stored in the storage directory.
- * It returns an array of keys (without the .json extension).
- */
-server.get('/storage', async (request, reply) => {
-  try {
-    if (!fs.existsSync(STORAGE_DIR)) {
-      return reply.send({ success: true, keys: [] })
-    }
-
-    const files = fs.readdirSync(STORAGE_DIR)
-    const keys = files
-      .filter(file => file.endsWith('.json'))
-      .map(file => file.replace('.json', ''))
-
-    return reply.send({ success: true, keys })
-  } catch (error) {
-    server.log.error(error)
-    return reply.code(500).send({ error: 'Failed to list keys' })
-  }
-})
-
-/**
- * DELETE /storage - Remove all data
- * This endpoint clears all data in the storage directory.
- */
-server.delete('/storage', async (request, reply) => {
-  try {
-    if (fs.existsSync(STORAGE_DIR)) {
-      fs.rmSync(STORAGE_DIR, { recursive: true, force: true })
-      fs.mkdirSync(STORAGE_DIR, { recursive: true })
-    }
-
-    return reply.send({ success: true, message: 'All data cleared' })
-  } catch (error) {
-    server.log.error(error)
-    return reply.code(500).send({ error: 'Failed to clear data' })
-  }
-})
-
-// Health Check
-server.get('/health', async (request, reply) => {
-  return reply.send({
-    success: true,
-    service: 'Local Storage Server',
-    storage: STORAGE_DIR,
-    timestamp: new Date().toISOString()
+const json = (data: unknown, status = 200): Response => 
+  new Response(JSON.stringify(data), { 
+    status, 
+    headers: { 'Content-Type': 'application/json' } 
   })
-})
 
-// Start the server
-const start = async () => {
+const cors = (response: Response, origin: string | null): Response => {
+  const headers = new Headers(response.headers)
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    headers.set('Access-Control-Allow-Origin', origin)
+  }
+  headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+  headers.set('Access-Control-Allow-Headers', 'Content-Type')
+  headers.set('Access-Control-Allow-Credentials', 'true')
+  return new Response(response.body, { status: response.status, headers })
+}
+
+const fileExists = async (path: string): Promise<boolean> => {
   try {
-    const port = 3010
-    const host = '0.0.0.0'
-
-    await server.listen({ port, host })
-    server.log.info(`🗂️  Local Storage Server running on http://${host}:${port}`)
-    server.log.info(`📁 Storage directory: ${STORAGE_DIR}`)
-  } catch (err) {
-    server.log.error(err)
-    process.exit(1)
+    await Deno.stat(path)
+    return true
+  } catch {
+    return false
   }
 }
 
-start()
+const handler = async (req: Request): Promise<Response> => {
+  const url = new URL(req.url)
+  const origin = req.headers.get('Origin')
+  const path = url.pathname
+
+  // CORS Preflight
+  if (req.method === 'OPTIONS') {
+    return cors(new Response(null, { status: 204 }), origin)
+  }
+
+  try {
+    // Health Check
+    if (path === '/health' && req.method === 'GET') {
+      return cors(json({
+        success: true,
+        service: 'Local Storage Server',
+        storage: STORAGE_DIR,
+        timestamp: new Date().toISOString()
+      }), origin)
+    }
+
+    // List all keys
+    if (path === '/storage' && req.method === 'GET') {
+      const keys: string[] = []
+      for await (const entry of Deno.readDir(STORAGE_DIR)) {
+        if (entry.isFile && entry.name.endsWith('.json')) {
+          keys.push(entry.name.replace('.json', ''))
+        }
+      }
+      return cors(json({ success: true, keys }), origin)
+    }
+
+    // Clear all data
+    if (path === '/storage' && req.method === 'DELETE') {
+      await Deno.remove(STORAGE_DIR, { recursive: true })
+      await Deno.mkdir(STORAGE_DIR, { recursive: true })
+      return cors(json({ success: true, message: 'All data cleared' }), origin)
+    }
+
+    // Route: /storage/:key or /storage/:key/exists
+    const match = path.match(/^\/storage\/([^/]+)(\/exists)?$/)
+    if (!match) {
+      return cors(json({ error: 'Not found' }, 404), origin)
+    }
+
+    const key = match[1]
+    const isExistsCheck = match[2] === '/exists'
+    const filePath = getFilePath(key)
+
+    // Check existence
+    if (isExistsCheck && req.method === 'GET') {
+      const exists = await fileExists(filePath)
+      return cors(json({ success: true, exists }), origin)
+    }
+
+    // Read value
+    if (req.method === 'GET') {
+      if (!await fileExists(filePath)) {
+        return cors(json({ error: 'Key not found' }, 404), origin)
+      }
+      const content = await Deno.readTextFile(filePath)
+      const data = JSON.parse(content)
+      return cors(json({ success: true, data }), origin)
+    }
+
+    // Write value
+    if (req.method === 'POST') {
+      const body = await req.json()
+      await Deno.writeTextFile(filePath, JSON.stringify(body.value, null, 2))
+      return cors(json({ success: true, message: 'Data saved' }), origin)
+    }
+
+    // Delete value
+    if (req.method === 'DELETE') {
+      if (await fileExists(filePath)) {
+        await Deno.remove(filePath)
+      }
+      return cors(json({ success: true, message: 'Data deleted' }), origin)
+    }
+
+    return cors(json({ error: 'Method not allowed' }, 405), origin)
+  } catch (error) {
+    console.error('Error:', error)
+    return cors(json({ error: 'Internal server error' }, 500), origin)
+  }
+}
+
+console.log(`🗂️  Local Storage Server running on http://0.0.0.0:${PORT}`)
+console.log(`📁 Storage directory: ${STORAGE_DIR}`)
+
+Deno.serve({ port: PORT, hostname: '0.0.0.0' }, handler)

@@ -1,5 +1,5 @@
-import { Home } from '@pages/Home'
-import { Privacy } from '@pages/Privacy'
+import { Home } from '@/pages/Home'
+import { Privacy } from '@/pages/Privacy'
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 
 function App() {

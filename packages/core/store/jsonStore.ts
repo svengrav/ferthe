@@ -1,6 +1,6 @@
 // JSON file store implementation for local development and testing
 import { createCuid2 } from '@core/utils/idGenerator.ts'
-import * as fs from 'fs/promises'
+import * as fs from 'fs'
 import * as path from 'path'
 import { StoreInterface } from './storeInterface.ts'
 

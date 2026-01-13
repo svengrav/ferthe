@@ -1,4 +1,4 @@
-import { createKeyVaultConnector } from '@core/connectors/azureKeyVaultConnector'
+import { createKeyVaultConnector } from '../../connectors/azureKeyVaultConnector.ts'
 
 export interface EnvironmentConfigSecrets {
   STORAGE_ACCESS_KEY: string

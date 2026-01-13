@@ -1,20 +1,38 @@
 {
+  "workspace": [
+    "packages/web",
+    // "packages/app"
+  ],
   "exclude": [
-    "packages/app/**",
+    // "packages/app/**",
+    // "packages/web/**",
     "packages/test/**",
     "scripts/**",
     "docs/**"
   ],
+  "nodeModulesDir": "auto",
   "imports": {
-    "@azure/storage-blob": "npm:@azure/storage-blob@^12.29.1",
     "@shared/": "./packages/shared/",
     "@core/": "./packages/core/",
-    "argon2": "npm:argon2@^0.44.0",
-    "crypto": "npm:crypto@^1.0.1",
-    "twilio": "npm:twilio@^5.11.2"
+    "@azure/storage-blob": "npm:@azure/storage-blob@^12.29.1",
+    "@azure/cosmos": "npm:@azure/cosmos@^4",
+    "@azure/identity": "npm:@azure/identity@^4",
+    "@azure/keyvault-secrets": "npm:@azure/keyvault-secrets@^4",
+    "@std/path": "jsr:@std/path@^1.1.4",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225",
+    "dotenv": "npm:dotenv@^16",
+    "twilio": "npm:twilio@^5.11.2",
+    "oak": "jsr:@oak/oak@^17",
+    "path": "npm:path@^0.12.7",
+    "fs": "node:fs/promises"
   },
   "compilerOptions": {
-    "lib": ["deno.ns", "deno.unstable", "esnext", "dom"],
+    "lib": [
+      "deno.ns",
+      "deno.unstable",
+      "esnext",
+      "dom"
+    ],
     "strict": true,
     "allowJs": false,
     "noImplicitAny": false,
@@ -22,6 +40,8 @@
     "checkJs": false,
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "types": ["vite/client"]
+    "types": [
+      "vite/client"
+    ]
   }
 }

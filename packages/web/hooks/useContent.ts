@@ -9,17 +9,17 @@ export function useContent(language: Language = 'en') {
     switch (language) {
       case 'en':
         return {
-          privacy: () => import('@content/en/privacy.md'),
+          privacy: () => import('@/content/en/privacy.md'),
           // Weitere Inhalte können hier hinzugefügt werden
         }
       case 'de':
         return {
-          privacy: () => import('@content/de/privacy.md'),
+          privacy: () => import('@/content/de/privacy.md'),
           // Deutsche Inhalte
         }
       default:
         return {
-          privacy: () => import('@content/en/privacy.md'),
+          privacy: () => import('@/content/en/privacy.md'),
         }
     }
   }, [language])

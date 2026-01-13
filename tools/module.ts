@@ -1,8 +1,8 @@
-import { execSync } from 'child_process'
-import console from "console";
 import * as dotenv from 'dotenv'
-import * as fs from 'fs'
-import * as path from 'path'
+import * as path from "@std/path";
+import * as fs from 'node:fs';
+import { execSync } from 'node:child_process';
+
 
 const cleanAll = (cleanNodeModules?: boolean): void => {
   const cleanDirectories = ['dist', 'build', 'coverage']
@@ -62,7 +62,7 @@ const startAll = (profile: string | undefined) => {
   console.log(`📋 Profile: ${profile}`)
   
   // Option 1: Storage Server in concurrently mit einbauen
-  execSync('npx concurrently --names STORAGE,API,WEB --prefix-colors yellow,blue,green "npx tsx ./.tools/localStorageServer.ts" "npm run dev:api" "npm run dev:app"', {
+  execSync('npx concurrently --names STORAGE,API,WEB --prefix-colors yellow,blue,green "npx tsx ./tools/localStorageServer.ts" "npm run dev:api" "npm run dev:app"', {
     stdio: 'inherit',
     env: { ...process.env, ...variables }
   })

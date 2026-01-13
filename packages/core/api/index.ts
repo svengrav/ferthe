@@ -1,4 +1,4 @@
-import { createFastifyServer } from '@core/api/fastify/server.ts'
+import { createOakServer } from '@core/api/oak/server.ts'
 import { createStoreConnector, STORE_TYPES } from '@core/store/storeFactory.ts'
 import { createCoreContext } from '@core/index.ts'
 import { getConfig } from './env.ts'
@@ -33,9 +33,9 @@ const run = async () => {
     environment: config.FERTHE_ENV,
   })
 
-  const server = createFastifyServer({
+  const server = createOakServer({
     host: config.API_HOST,
-    path: config.API_PORT,
+    port: Number(config.API_PORT) || 8080,
     prefix: config.API_PREFIX,
     logger: true,
     origins: config.ORIGINS,
