@@ -6,27 +6,27 @@
     },
     {
       "name": "⚪ root",
-      "path": ".."
+      "path": "."
     },
     {
       "name": "🟣 shared-src",
-      "path": "../ferthe-shared/src"
+      "path": "packages/shared/src"
     },
     {
       "name": "🟢 app-src",
-      "path": "../ferthe-app/src"
+      "path": "packages/app/src"
     },
     {
-      "name": "🔵 api-src",
-      "path": "../ferthe-api/src"
+      "name": "🔵 core-src",
+      "path": "packages/core/src"
     },
     {
-      "name": "🔴 core-src",
-      "path": "../ferthe-core/src"
+      "name": "🔴 web-src",
+      "path": "packages/web/src"
     },
     {
       "name": "🟡 test-src",
-      "path": "../ferthe-test/src"
+      "path": "packages/test/src"
     }
   ],
   "settings": {
