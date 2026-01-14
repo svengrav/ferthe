@@ -1,45 +1,52 @@
-# Basis-Image: Node.js + Java
+# Base image: Node.js + Java
 FROM node:20-bookworm
 
-# ENV Variablen
+# ============================================
+# VERSION CONFIGURATION
+# Update these variables for version upgrades
+# ============================================
+ARG NODE_VERSION=20
+ARG JAVA_VERSION=17
+ARG ANDROID_API_LEVEL=35
+ARG ANDROID_BUILD_TOOLS_VERSION=35.0.0
+ARG ANDROID_NDK_VERSION=26.1.10909125
+ARG ANDROID_COMMANDLINE_TOOLS_VERSION=11076708
+ARG GRADLE_VERSION=8.14.3
+
+# Environment variables
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 ENV PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools
+ENV JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64
 
-# Abhängigkeiten installieren
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-  openjdk-17-jdk \
+  openjdk-${JAVA_VERSION}-jdk \
   wget \
   unzip \
   git \
-  python3 \
-  python3-pip \
-  build-essential \
   && rm -rf /var/lib/apt/lists/*
 
-# Android SDK installieren
+# Install Android SDK
 RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
   cd ${ANDROID_SDK_ROOT}/cmdline-tools && \
-  wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O commandlinetools.zip && \
+  wget https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_COMMANDLINE_TOOLS_VERSION}_latest.zip -O commandlinetools.zip && \
   unzip -q commandlinetools.zip && \
   mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/latest && \
   mv cmdline-tools/* ${ANDROID_SDK_ROOT}/cmdline-tools/latest/ && \
-  rm -rf cmdline-tools commandlinetools.zip && \
-  ls -la ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/
+  rm -rf cmdline-tools commandlinetools.zip
 
-# Jetzt stimmt die Struktur:
-# /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager
-
-# Android SDK Komponenten installieren
-RUN yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --verbose --sdk_root=${ANDROID_SDK_ROOT} --licenses && \
-  ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --verbose --sdk_root=${ANDROID_SDK_ROOT} \
+# Install Android SDK components
+RUN yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses && \
+  ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} \
   "platform-tools" \
-  "platforms;android-33" \
-  "build-tools;33.0.2"
+  "platforms;android-${ANDROID_API_LEVEL}" \
+  "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
+  "ndk;${ANDROID_NDK_VERSION}"
 
-# Expo und EAS installieren
-RUN npm install -g expo-cli eas-cli
+# Install EAS CLI (expo-cli is deprecated)
+RUN npm install -g eas-cli@latest
 
-# Arbeitsverzeichnis
+# Working directory
 WORKDIR /app
 
 CMD [ "bash" ]
