@@ -6,7 +6,7 @@ echo "=== Ferthe Android Build (Docker) ==="
 # setup configuration
 WORKSPACE_ROOT="/root/workspace/ferthe"
 APP_DIR="$WORKSPACE_ROOT/packages/app"
-BUILD_DIR="$APP_DIR/build/emulator"
+BUILD_DIR="$APP_DIR/tools/emulator"
 IMAGE_NAME="ferthe-android-builder"
 BUILD_DATE=$(date +%Y%m%d_%H%M%S)
 APK_NAME="ferthe-${BUILD_DATE}.apk"

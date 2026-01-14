@@ -6,7 +6,7 @@ param (
     [string] $EmulatorName = 'Medium_Phone_API_36',
     [string] $RemoteHost = 'devbox.home',
     [string] $RemoteUser = 'root',
-    [string] $RemoteApkPath = '/root/workspace/ferthe/packages/app/dist/*.apk',
+    [string] $RemoteApkPath = '/root/workspace/ferthe/packages/app/tools/emulator/*.apk',
     [string] $LocalArtifactDir = "$($HOME)\android-dev",
     [string] $AppPackage = 'de.ferthe.app',
     [int] $ExpoPort = 19000

@@ -22,6 +22,6 @@
 - Starte den Emulator via PowerShell Script 
 - [start-emulator.ps1](./start-emulator.ps1)
 
-## 
-- Devclient auf dem Server starten:
+## Start
+- Expo Client auf dem Server starten:
 ` npx expo start --dev-client`
