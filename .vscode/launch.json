@@ -1,28 +1,8 @@
 {
   "version": "0.2.0",
-  "configurations": [
-    // {
-    //   "name": "🔵 API Server",
-    //   "type": "node",
-    //   "request": "launch",
-    //   "program": "${workspaceFolder}/ferthe-api/src/index.ts",
-    //   "cwd": "${workspaceFolder}/ferthe-api",
-    //   "preLaunchTask": "Build All",
-    //   "runtimeExecutable": "npx",
-    //   "runtimeArgs": ["tsx", "watch", "src/index.ts"],
-    //   "env": {
-    //     "NODE_ENV": "development"
-    //   },
-    //   "console": "integratedTerminal",
-    //   "internalConsoleOptions": "neverOpen",
-    //   "skipFiles": ["<node_internals>/**", "node_modules/**"],
-    //   "sourceMaps": true,
-    //   "restart": true,
-    //   "envFile": "${workspaceFolder}/.env",
-    //   "outputCapture": "std"
-    // },   
+  "configurations": [  
     {
-      "name": "🔵 Run API",
+      "name": "🟦 Run API",
       "request": "launch",
       "type": "node",
       "cwd": "${workspaceFolder}/packages/core",
@@ -42,7 +22,7 @@
       "envFile": "${workspaceFolder}/.env"
     },
     {
-      "name": "🟢 Run App",
+      "name": "🟥 Run App",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:8081",
@@ -59,8 +39,8 @@
     {
       "name": "⚪ Run Full",
       "configurations": [
-        "🟢 Run App",
-        "🔵 Run API"
+        "🟥 Run App",
+        "🟦 Run API"
       ],
       "stopAll": true
     }

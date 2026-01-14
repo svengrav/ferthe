@@ -5,28 +5,28 @@
       "path": "."
     },
     {
-      "name": "⚪ root",
-      "path": "."
+      "name": "⬛ root",
+      "path": ".."
     },
     {
-      "name": "🟣 shared-src",
-      "path": "packages/shared/src"
+      "name": "🟩 shared/src",
+      "path": "../packages/shared/"
     },
     {
-      "name": "🟢 app-src",
-      "path": "packages/app/src"
+      "name": "🟥 app/src",
+      "path": "../packages/app/"
     },
     {
-      "name": "🔵 core-src",
-      "path": "packages/core/src"
+      "name": "🟦 core/src",
+      "path": "../packages/core/"
     },
     {
-      "name": "🔴 web-src",
-      "path": "packages/web/src"
+      "name": "🟨 web/src",
+      "path": "../packages/web/"
     },
     {
-      "name": "🟡 test-src",
-      "path": "packages/test/src"
+      "name": "🟪 test/src",
+      "path": "../packages/test/"
     }
   ],
   "settings": {
@@ -63,7 +63,7 @@
     "jest.disabledWorkspaceFolders": [
       "🛠️ settings",
       "🟢 app-src",
-      "🔵 api-src",
+      "🟥 api-src",
       "🔴 core-src"
     ],
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -84,5 +84,8 @@
     "[powershell]": {
       "editor.defaultFormatter": "ms-vscode.powershell"
     }
+  },
+  "extensions": {
+    "recommendations": ["denoland.vscode-deno"]
   }
 }
