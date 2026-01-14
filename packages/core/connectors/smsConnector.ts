@@ -29,7 +29,7 @@ export interface TwilioConfig {
 
 // Twilio implementation for production
 export function createTwilioSMSConnector(config: TwilioConfig): SMSConnector {
-  const client = new Twilio(config.accountSid, config.authToken)
+  const client = Twilio(config.accountSid, config.authToken)
 
   const sendSMS = async (request: SMSRequest): Promise<SMSResponse> => {
     try {
