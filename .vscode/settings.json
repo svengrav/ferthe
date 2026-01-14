@@ -1,3 +1,8 @@
-{
-  "deno.enable": true
-}
+ {
+  "deno.enable": true,
+  "deno.enablePaths": [
+    "packages/web",
+    "packages/core",
+    "tools"
+  ]
+ }

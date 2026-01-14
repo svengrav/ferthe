@@ -4,10 +4,12 @@ set -e
 echo "=== Ferthe Android Build (Docker) ==="
 
 # setup configuration
-WORKSPACE_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+WORKSPACE_ROOT="/root/workspace/ferthe"
 APP_DIR="$WORKSPACE_ROOT/packages/app"
-BUILD_DIR="$WORKSPACE_ROOT/_build/android"
+BUILD_DIR="$APP_DIR/build/emulator"
 IMAGE_NAME="ferthe-android-builder"
+BUILD_DATE=$(date +%Y%m%d_%H%M%S)
+APK_NAME="ferthe-${BUILD_DATE}.apk"
 
 # setup build dir
 mkdir -p "$BUILD_DIR"
@@ -39,9 +41,8 @@ docker run --rm \
   -e EXPO_PUBLIC_ENVIRONMENT=development \
   -e EXPO_TOKEN=H5UOUgNlXLVFAsLRjsb_bamDRsvAJce7J67D5gDU \
   "$IMAGE_NAME" \
-  bash -c "eas build --platform android --profile development --local --output ./dist"
+  bash -c "eas build --platform android --profile development --local --output $BUILD_DIR/$APK_NAME"
   # bash -c "npx expo prebuild --clean && cd android && ./gradlew assembleRelease"
 
 echo ""
 echo "✓ Build complete!"
-echo "APK location: $APP_DIR/android/app/build/outputs/apk/release/app-release.apk"

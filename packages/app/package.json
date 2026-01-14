@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "android": "npx expo start --android --clear",
-    "android:build": "bash .docker/build.sh",
+    "emulator:build": "bash .docker/build.sh",
     "web": "expo start --web --clear",
     "ios": "expo run:ios"
   },

@@ -7,20 +7,12 @@ import { Icon } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import useThemeStore from '@app/shared/theme/useThemeStore'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { createNavigationContainerRef, NavigationContainer } from '@react-navigation/native'
+import { NavigationContainer } from '@react-navigation/native'
 import { useOverlayStore } from '../overlay/useOverlayStore'
 import { CardIcon, TreeIcon } from './NavigationIcons'
+import { navigationRef } from './navigationRef'
 
 const Tab = createBottomTabNavigator()
-const navigationRef = createNavigationContainerRef<any>()
-
-
-export const appNavigator = {
-  toTrails: () => navigationRef.current?.navigate('Trails'),
-  toFindings: () => navigationRef.current?.navigate('Feed'),
-  toAbout: () => navigationRef.current?.navigate('About'),
-  toAccount: () => navigationRef.current?.navigate('Account'),
-}
 
 export function Navigation() {
   const { colors, constants } = useThemeStore()
