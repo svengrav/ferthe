@@ -21,7 +21,7 @@ echo "Build Dir: $BUILD_DIR"
 # build Docker image
 echo ""
 echo "1/3 Building Docker image..."
-docker build -t "$IMAGE_NAME" -f "$APP_DIR/.docker/Dockerfile" "$WORKSPACE_ROOT"
+docker build -t "$IMAGE_NAME" -f "$BUILD_DIR/Dockerfile" "$WORKSPACE_ROOT"
 
 # install dependencies
 echo ""
@@ -41,8 +41,8 @@ docker run --rm \
   -e EXPO_PUBLIC_ENVIRONMENT=development \
   -e EXPO_TOKEN=H5UOUgNlXLVFAsLRjsb_bamDRsvAJce7J67D5gDU \
   "$IMAGE_NAME" \
-  bash -c "eas build --platform android --profile development --local --output $BUILD_DIR/$APK_NAME"
-  # bash -c "npx expo prebuild --clean && cd android && ./gradlew assembleRelease"
+  bash -c "eas build --platform android --profile development --local --output /$APK_NAME && \
+    mkdir -p /workspace/_build && cp /$APK_NAME /workspace/_build/$APK_NAME"
 
 echo ""
 echo "✓ Build complete!"

@@ -13,3 +13,13 @@
 ## Android Emulator
 - For Android development, it's recommended to use an Android Emulator.
 - Follow the instructions in [tools/emulator/README.md](./tools/emulator/README.md)
+
+## Smartphone USB Debugging
+- Enable USB Debugging on the smartphone.
+- Connect the smartphone via USB.
+
+```
+adb devices # Show devices
+adb reverse tcp:8081 tcp:8081
+adb install <app>
+``` 
