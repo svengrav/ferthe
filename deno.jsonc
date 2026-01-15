@@ -44,7 +44,6 @@
       "dom"
     ],
     "strict": true,
-    "allowJs": false,
     "noImplicitAny": false,
     "module": "esnext",
     "checkJs": false,

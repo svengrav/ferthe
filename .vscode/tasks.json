@@ -1,35 +1,16 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-    {
-			"label": "Emulator",
-			"type": "shell",
-			"command": "./.tools/_run.ps1",
-			"group": "build",
-      "options": {
-        "cwd": "${workspaceFolder}/packages/app"
-      },
-		},
-    {
-			"label": "Build All",
-			"type": "shell",
-			"command": "npm run build",
-			"group": "build",
-      "options": {
-        "cwd": "${workspaceFolder}/"
-      },
-		},
+  "version": "2.0.0",
+  "tasks": [
     {
       "label": "Start Expo Web Server",
       "type": "shell",
-      "command": "npm",
-      "args": ["run", "web"],
+      "command": "npm run dev",
       "options": {
         "cwd": "${workspaceFolder}/packages/app"
       },
-			"dependsOn":[
-				"Start Storage Server"
-			],
+      "dependsOn": [
+        "Start Storage Server"
+      ],
       "isBackground": true,
       "problemMatcher": {
         "pattern": {
@@ -41,91 +22,42 @@
           "endsPattern": "Web Bundled"
         }
       }
-    },		{
-			"label": "Start API Server",
-			"type": "shell",
-			"command": "npm run dev:api",
-			"group": "build",
-			"isBackground": true,
-			"problemMatcher": [
-				"$tsc"
-			]
-		},
-		{
-			"label": "Build Core Watch",
-			"type": "shell",
-			"command": "npx tsc --build --watch",
-			"options": {
-				"cwd": "${workspaceFolder}/packages/core"
-			},
-			"group": "build",
-			"isBackground": true,
-			"problemMatcher": [
-				"$tsc-watch"
-			]
-		},
-		{
-			"label": "Start Storage Server",
-			"type": "shell",
-			"command": "npx tsx ${workspaceFolder}/tools/localStorageServer.ts",
-			"group": "build",
-			"isBackground": true,
-			"problemMatcher": {
-				"pattern": {
-					"regexp": "^.*$",
-					"file": 1,
-					"location": 2,
-					"message": 3
-				},
-				"background": {
-					"activeOnStart": true,
-					"beginsPattern": "^.*tsx.*localStorageServer|Starting",
-					"endsPattern": "Local Storage Server running|running on|Server running|listening"
-				}
-			}
-		},
-		{
-			"label": "Start App (Web)",
-			"type": "shell",
-			"command": "npm run dev:app",
-			"group": "build",
-			"isBackground": true,
-			"problemMatcher": []
-		},
-		{
-			"label": "Start Development Environment",
-			"type": "shell",
-			"command": "npm run dev:full",
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"isBackground": true,
-			"problemMatcher": []
-		},
-		{
-			"label": "Start Mobile Development",
-			"type": "shell",
-			"command": "npm run dev:mobile",
-			"group": "build",
-			"isBackground": true,
-			"problemMatcher": []
-		},
-		{
-			"label": "Build Dependencies",
-			"type": "shell",
-			"command": "npm run build",
-			"group": "build",
-			"problemMatcher": [
-				"$tsc"
-			]
-		},
-		{
-			"label": "Clean All",
-			"type": "shell",
-			"command": "npm run clean",
-			"group": "build",
-			"problemMatcher": []
-		}
-	]
+    },
+    {
+      "label": "Start Storage Server",
+      "type": "shell",
+      "command": "deno run --allow-all ${workspaceFolder}/tools/localStorageServer.ts",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*tsx.*localStorageServer|Starting",
+          "endsPattern": "Local Storage Server running|running on|Server running|listening"
+        }
+      }
+    },
+    {
+      "label": "Start Dev Environment",
+      "type": "shell",
+      "command": "deno run --allow-all ${workspaceFolder}/tools/startDev.ts",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting",
+          "endsPattern": "Bundled|Metro|listening"
+        }
+      }
+    }
+  ]
 }

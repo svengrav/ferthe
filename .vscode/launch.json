@@ -37,7 +37,7 @@
   ],
   "compounds": [
     {
-      "name": "⚪ Run Full",
+      "name": "🟩 Run All",
       "configurations": [
         "🟥 Run App",
         "🟦 Run API"
