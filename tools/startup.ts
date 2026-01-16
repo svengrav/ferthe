@@ -1,3 +1,6 @@
+import { dirname, fromFileUrl, join } from "@std/path";
+import * as fs from 'node:fs';
+
 interface StartupArgs {
   clean?: boolean
   build?: boolean
@@ -5,13 +8,7 @@ interface StartupArgs {
   profile?: string
 }
 
-import * as dotenv from 'dotenv'
-import { dirname, fromFileUrl, join } from "@std/path";
-import * as fs from 'node:fs';
-import { execSync } from 'node:child_process';
-
-const __dirname = dirname(fromFileUrl(import.meta.url));
-const rootDir = join(__dirname, '..');
+const rootDir = dirname(fromFileUrl(import.meta.url)).replace('/tools', '');
 
 const cleanAll = (cleanNodeModules?: boolean): void => {
   const cleanDirectories = ['dist', 'build', 'coverage']

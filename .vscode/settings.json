@@ -1,8 +1,5 @@
  {
-  "deno.enable": true,
-  "deno.enablePaths": [
-    "packages/web",
-    "packages/core",
-    "tools"
-  ]
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#0b2263"
+  }
  }

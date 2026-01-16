@@ -20,11 +20,13 @@ import {
   SpotPreview,
   Trail,
 } from '@shared/contracts'
+import { checkAPIHealth, fetchWithTimeout, StatusResult } from './apiUtils'
 
 export interface ApiContextOptions {
   apiEndpoint: string
   environment?: 'production' | 'development' | 'test'
   getAccountSession: () => AccountSession | null
+  timeout?: number
 }
 
 interface CoreConfiguration {
@@ -33,26 +35,30 @@ interface CoreConfiguration {
 
 export type APIContext = Omit<ApplicationContract, 'spotApplication'> & {
   readonly config: CoreConfiguration
+  system: {
+    checkStatus: () => Promise<StatusResult>
+  }
 }
 
 // Base API Client Factory
-const createAPIClient = (apiEndpoint: string, getAccountSession: () => AccountSession | null) => {
+const createAPIClient = (apiEndpoint: string, getAccountSession: () => AccountSession | null, timeout: number = 10000) => {
   const send = async <T>(endpoint: string, method: string = 'GET', body?: any): Promise<T> => {
     const credentials = getAccountSession()
 
     const headers: HeadersInit = {}
     if (body) {
-      headers['Content-Type'] = 'application/json' // Set content type for JSON body
+      headers['Content-Type'] = 'application/json'
     }
 
     if (credentials?.sessionToken) {
       headers['Authorization'] = `Bearer ${credentials.sessionToken}`
     }
 
-    const response = await fetch(`${apiEndpoint}${endpoint}`, {
-      method: method.toUpperCase(), // Ensure HTTP method is uppercase
+    const response = await fetchWithTimeout(`${apiEndpoint}${endpoint}`, {
+      method: method.toUpperCase(),
       headers,
-      body: body ? JSON.stringify(body) : null, // Ensure body is always a JSON string
+      body: body ? JSON.stringify(body) : null,
+      timeout,
     })
 
     return response.json()
@@ -63,11 +69,14 @@ const createAPIClient = (apiEndpoint: string, getAccountSession: () => AccountSe
 
 // Main API Context Factory
 export const createApiContext = (options: ApiContextOptions): APIContext => {
-  const { apiEndpoint, environment = 'production', getAccountSession: getAccountSession } = options
-  const API = createAPIClient(apiEndpoint, getAccountSession)
+  const { apiEndpoint, environment = 'production', getAccountSession: getAccountSession, timeout = 10000 } = options
+  const API = createAPIClient(apiEndpoint, getAccountSession, timeout)
 
   return {
     config: { environment },
+    system: {
+      checkStatus: () => checkAPIHealth(apiEndpoint, 5000),
+    },
 
     /**
      * Discovery Application API Methods

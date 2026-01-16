@@ -5,10 +5,11 @@ import '@expo/metro-runtime'
 // ---------------------------------------
 import { Notification, SplashScreenWrapper } from '@app/shared/components'
 import { Navigation } from '@app/shared/navigation/Navigation'
+import { useEffect, useState } from 'react'
 import { LogBox } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { createApiContext } from './api'
+import { APIContext, createApiContext } from './api'
 import { configureAppContext } from './appContext'
 import { getAppConfig } from './env'
 import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
@@ -19,32 +20,53 @@ import OverlayProvider from './shared/overlay/OverlayProvider'
 import { useAppDimensions } from './shared/useApp'
 
 LogBox.ignoreAllLogs()
-const run = async () => {
+
+let appInitialized = false
+
+const initializeApp = async (apiContext: APIContext) => {
+  if (appInitialized) return
+
   const APP_ENV_CONFIG = await getAppConfig()
 
   configureAppContext({
     environment: APP_ENV_CONFIG.FERTHE_ENV,
-    apiContext: createApiContext({
-      getAccountSession: getSession,
-      apiEndpoint: APP_ENV_CONFIG.API_ENDPOINT,
-    }),
+    apiContext,
     connectors: {
       deviceConnector: getDeviceConnector(),
       secureStoreConnector: createStoreConnector({
         json: {
-          baseDirectory: APP_ENV_CONFIG.JSON_STORE_BASE_DIRECTORY
+          baseDirectory: APP_ENV_CONFIG.JSON_STORE_BASE_DIRECTORY,
         },
-        type: APP_ENV_CONFIG.STORE_TYPE
-      })
-    }
+        type: APP_ENV_CONFIG.STORE_TYPE,
+      }),
+    },
   })
+
+  appInitialized = true
 }
-run()
 
 export default function App() {
-  // execOnNative([registerForPushNotificationsAsync])
-  // execOnNative([useNotificationHandler])
   const { setHeight, setWidth } = useAppDimensions()
+  const [apiContext, setApiContext] = useState<APIContext | null>(null)
+
+  useEffect(() => {
+    const setupApiContext = async () => {
+      const APP_ENV_CONFIG = await getAppConfig()
+      const context = createApiContext({
+        getAccountSession: getSession,
+        apiEndpoint: APP_ENV_CONFIG.API_ENDPOINT,
+        timeout: APP_ENV_CONFIG.API_TIMEOUT,
+      })
+      setApiContext(context)
+    }
+    setupApiContext()
+  }, [])
+
+  useEffect(() => {
+    if (apiContext) {
+      initializeApp(apiContext)
+    }
+  }, [apiContext])
 
   return (
     <SafeAreaProvider onLayout={(e) => {
@@ -52,7 +74,7 @@ export default function App() {
       setHeight(height)
       setWidth(width)
     }}>
-      <SplashScreenWrapper>
+      <SplashScreenWrapper checkStatus={apiContext?.system.checkStatus}>
         <GestureHandlerRootView>
           <Notification />
           <AccountAuthWrapper>

@@ -2,19 +2,21 @@ import { createAsyncRequestHandler } from '@core/api/oak/requestHandler.ts'
 
 import {
   Account,
+  ApplicationContract,
   Clue,
   Discovery,
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoveryTrail,
   FirebaseConfig,
+  SMSCodeRequest,
   SMSVerificationResult,
   ScanEvent,
   Spot,
   SpotPreview,
   Trail,
 } from '@shared/contracts/index.ts'
-import { ApplicationContract, SMSCodeRequest } from '@shared/contracts/index.ts'
+import { manifest } from './manifest.ts'
 import { Route } from './oak/types.ts'
 
 const createRoutes = (ctx: ApplicationContract): Route[] => {
@@ -24,6 +26,19 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
   const asyncRequestHandler = createAsyncRequestHandler(accountApplication)
 
   return [
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/',
+      config: { isPublic: true },
+      // deno-lint-ignore require-await
+      handler: asyncRequestHandler(async () => {
+        return {
+          success: true,
+          data: manifest,
+        }
+      }),
+    },
     {
       method: 'GET',
       version: 'v1',

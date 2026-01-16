@@ -1,5 +1,6 @@
 import { APIContext } from '@app/api/apiContext'
 import { AccountSession } from '@shared/contracts'
+import { StatusResult } from './api/apiUtils'
 import { AccountApplication, createAccountApplication } from './features/account'
 import { createDiscoveryApplication, DiscoveryApplication } from './features/discovery/discoveryApplication'
 import { createMapApplication, MapApplication } from './features/map/mapApplication'
@@ -10,7 +11,10 @@ import { SecureStoreConnector } from './shared/device/secureStoreConnector'
 
 export interface AppContext {
   readonly config: AppConfiguration
-  isDevelopment: boolean
+  system: {
+    isDevelopment: boolean,
+    checkStatus: () => Promise<StatusResult>
+  }
   discoveryApplication: DiscoveryApplication
   trailApplication: TrailApplication
   sensorApplication: SensorApplication
@@ -68,7 +72,10 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
     config: {
       environment,
     },
-    isDevelopment: environment === 'development',
+    system: {
+      isDevelopment: environment === 'development',
+      checkStatus: apiContext.system.checkStatus,
+    },
     discoveryApplication,
     trailApplication,
     sensorApplication,
