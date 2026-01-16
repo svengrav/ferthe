@@ -40,19 +40,13 @@ export interface StatusResult {
   error?: string
 }
 
-/**
- * Check API health with quick timeout
- */
-export const checkAPIHealth = async (
-  apiEndpoint: string,
-  timeout: number = 5000
-): Promise<StatusResult> => {
+export const checkStatus = async (endpoint: string): Promise<StatusResult> => {
   const startTime = Date.now()
 
   try {
-    const response = await fetchWithTimeout(`${apiEndpoint}/v1/health`, {
+    const response = await fetchWithTimeout(endpoint, {
       method: 'GET',
-      timeout,
+      timeout: 5000,
     })
 
     const latency = Date.now() - startTime
@@ -77,3 +71,4 @@ export const checkAPIHealth = async (
     }
   }
 }
+

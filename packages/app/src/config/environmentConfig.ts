@@ -1,4 +1,3 @@
-import { logger } from "@app/shared/utils/logger"
 
 export interface AppEnvironmentConfigSecrets {
   // Secrets that might be needed for the app
@@ -26,7 +25,5 @@ export interface AppEnvironmentConfig {
 
 export function createAppEnvironmentConfig(config: AppEnvironmentConfig): AppEnvironmentConfig & AppEnvironmentConfigSecrets {
   const updatedConfig = { ...config } as AppEnvironmentConfig & AppEnvironmentConfigSecrets
-
-  logger.log('Creating app environment config for:', updatedConfig.ENV_TYPE)
   return updatedConfig
 }

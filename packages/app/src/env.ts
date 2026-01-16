@@ -1,10 +1,8 @@
 import { createAppEnvironmentConfig } from './config/environmentConfig'
-import { logger } from './shared/utils/logger'
 
 // Expo/React Native environment detection
 const IS_PRODUCTION = process.env.EXPO_PUBLIC_ENVIRONMENT === 'production'
 
-logger.log(`Running in ${IS_PRODUCTION ? 'production' : 'development'} mode`)
 // const IS_PRODUCTION = true // Force development mode for testing purposes
 
 export const getAppConfig = () =>

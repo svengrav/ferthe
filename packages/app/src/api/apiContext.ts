@@ -20,7 +20,9 @@ import {
   SpotPreview,
   Trail,
 } from '@shared/contracts'
-import { checkAPIHealth, fetchWithTimeout, StatusResult } from './apiUtils'
+import { createAPIClient } from './client'
+import { checkStatus, StatusResult } from './utils'
+
 
 export interface ApiContextOptions {
   apiEndpoint: string
@@ -40,42 +42,16 @@ export type APIContext = Omit<ApplicationContract, 'spotApplication'> & {
   }
 }
 
-// Base API Client Factory
-const createAPIClient = (apiEndpoint: string, getAccountSession: () => AccountSession | null, timeout: number = 10000) => {
-  const send = async <T>(endpoint: string, method: string = 'GET', body?: any): Promise<T> => {
-    const credentials = getAccountSession()
-
-    const headers: HeadersInit = {}
-    if (body) {
-      headers['Content-Type'] = 'application/json'
-    }
-
-    if (credentials?.sessionToken) {
-      headers['Authorization'] = `Bearer ${credentials.sessionToken}`
-    }
-
-    const response = await fetchWithTimeout(`${apiEndpoint}${endpoint}`, {
-      method: method.toUpperCase(),
-      headers,
-      body: body ? JSON.stringify(body) : null,
-      timeout,
-    })
-
-    return response.json()
-  }
-
-  return { send }
-}
-
 // Main API Context Factory
 export const createApiContext = (options: ApiContextOptions): APIContext => {
-  const { apiEndpoint, environment = 'production', getAccountSession: getAccountSession, timeout = 10000 } = options
+  const { apiEndpoint, environment = 'production', getAccountSession, timeout = 10000 } = options
   const API = createAPIClient(apiEndpoint, getAccountSession, timeout)
+
 
   return {
     config: { environment },
     system: {
-      checkStatus: () => checkAPIHealth(apiEndpoint, 5000),
+      checkStatus: () => checkStatus(`${apiEndpoint}/status`),
     },
 
     /**

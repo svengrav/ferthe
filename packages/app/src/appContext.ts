@@ -1,6 +1,6 @@
 import { APIContext } from '@app/api/apiContext'
 import { AccountSession } from '@shared/contracts'
-import { StatusResult } from './api/apiUtils'
+import { StatusResult } from './api/utils'
 import { AccountApplication, createAccountApplication } from './features/account'
 import { createDiscoveryApplication, DiscoveryApplication } from './features/discovery/discoveryApplication'
 import { createMapApplication, MapApplication } from './features/map/mapApplication'

@@ -42,7 +42,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/health',
+      url: '/status',
       config: { isPublic: true },
       // deno-lint-ignore require-await
       handler: asyncRequestHandler(async () => {

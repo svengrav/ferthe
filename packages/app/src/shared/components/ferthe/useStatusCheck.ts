@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { StatusResult } from '../../../api/apiUtils'
+import { StatusResult } from '../../../api/utils'
 
 interface StatusCheckOptions {
   checkStatus: () => Promise<StatusResult>
