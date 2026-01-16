@@ -1,3 +1,5 @@
+import { logger } from "@app/shared/utils/logger"
+
 export interface AppEnvironmentConfigSecrets {
   // Secrets that might be needed for the app
   API_SECRET?: string
@@ -17,13 +19,14 @@ export interface AppEnvironmentConfig {
   JSON_STORE_BASE_DIRECTORY: string
 
   // Features
+  ENABLE_LOGGER: boolean
   ENABLE_ANALYTICS: boolean
   ENABLE_DEBUG_LOGS: boolean
 }
 
-export async function createAppEnvironmentConfig(config: AppEnvironmentConfig): Promise<AppEnvironmentConfig & AppEnvironmentConfigSecrets> {
+export function createAppEnvironmentConfig(config: AppEnvironmentConfig): AppEnvironmentConfig & AppEnvironmentConfigSecrets {
   const updatedConfig = { ...config } as AppEnvironmentConfig & AppEnvironmentConfigSecrets
 
-  console.log('Creating app environment config for:', updatedConfig.FERTHE_ENV)
+  logger.log('Creating app environment config for:', updatedConfig.FERTHE_ENV)
   return updatedConfig
 }

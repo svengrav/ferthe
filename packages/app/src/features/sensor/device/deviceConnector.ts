@@ -1,3 +1,4 @@
+import { logger } from '@app/shared/utils/logger'
 import { createEventSystem } from '@shared/events/eventHandler'
 import * as Location from 'expo-location'
 import { hasSignificantLocationChange } from './deviceUtils'
@@ -44,10 +45,10 @@ export const createDeviceConnector = (): DeviceConnector => {
   const requestLocationPermission = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync()
     if (status !== 'granted') {
-      console.error('Location permission not granted')
+      logger.error('Location permission not granted')
       return
     } else {
-      console.log('Location permission granted')
+      logger.log('Location permission granted')
     }
   }
 
@@ -71,7 +72,7 @@ export const createDeviceConnector = (): DeviceConnector => {
       const { latitude, longitude } = position.coords
 
       if (!isValidCoordinate(latitude, longitude)) {
-        console.error('Invalid initial coordinates:', latitude, longitude)
+        logger.error('Invalid initial coordinates:', latitude, longitude)
         return
       }
 
@@ -97,7 +98,7 @@ export const createDeviceConnector = (): DeviceConnector => {
             const { latitude, longitude } = newLocation.coords
 
             if (!isValidCoordinate(latitude, longitude)) {
-              console.warn('Invalid coordinates received:', latitude, longitude)
+              logger.warn('Invalid coordinates received:', latitude, longitude)
               return
             }
 
@@ -110,7 +111,7 @@ export const createDeviceConnector = (): DeviceConnector => {
             }
             emitIfSignificant(updatedDevice)
           } catch (error) {
-            console.error('Location update error:', error)
+            logger.error('Location update error:', error)
           }
         }
       )
@@ -130,14 +131,14 @@ export const createDeviceConnector = (): DeviceConnector => {
             emitIfSignificant(updatedDevice)
           }
         } catch (error) {
-          console.error('Heading update error:', error)
+          logger.error('Heading update error:', error)
         }
       })
 
       // Start health check to monitor subscriptions
       startHealthCheck()
     } catch (error) {
-      console.error('Failed to initialize location tracking:', error)
+      logger.error('Failed to initialize location tracking:', error)
     }
   }
 
@@ -148,7 +149,7 @@ export const createDeviceConnector = (): DeviceConnector => {
 
     healthCheckInterval = setInterval(() => {
       if (!locationSubscription || !headingSubscription) {
-        console.warn('Location subscriptions lost, attempting to reinitialize...')
+        logger.warn('Location subscriptions lost, attempting to reinitialize...')
         initializeLocationTracking()
       }
     }, 30000) // Check every 30 seconds

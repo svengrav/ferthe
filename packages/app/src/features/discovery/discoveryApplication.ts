@@ -1,5 +1,6 @@
 import { getSensorDevice, SensorApplication } from '@app/features/sensor'
 import { getTrailData } from '@app/features/trail'
+import { logger } from '@app/shared/utils/logger'
 import { AccountContext, Discovery, DiscoveryApplicationContract, Result } from '@shared/contracts'
 import { Unsubscribe } from '@shared/events/eventHandler'
 import { GeoLocation, geoUtils } from '@shared/geo'
@@ -120,9 +121,9 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     // Update profile with new lastActiveTrailId
     try {
       await updateDiscoveryProfile(accountSession.data, { lastActiveTrailId: id })
-      console.log(`Updated profile with lastActiveTrailId: ${id}`)
+      logger.log(`Updated profile with lastActiveTrailId: ${id}`)
     } catch (error) {
-      console.error('Error updating discovery profile:', error)
+      logger.error('Error updating discovery profile:', error)
     }
 
     const result = await getDiscoveryTrail(accountSession.data, id, device.location)
@@ -153,9 +154,9 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       if (!result.data) return
 
       setSpots(result.data)
-      console.log(`Discovery spots for trail ${trailId} requested and set.`)
+      logger.log(`Discovery spots for trail ${trailId} requested and set.`)
     } catch (error) {
-      console.error('Error retrieving discovery spots:', error)
+      logger.error('Error retrieving discovery spots:', error)
     }
   }
 
@@ -165,11 +166,11 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     if (profileResult.data?.lastActiveTrailId) {
       // Use trail from profile
       await setActiveTrail(profileResult.data.lastActiveTrailId)
-      console.log(`Discovery state requested and set active trail from profile: ${profileResult.data.lastActiveTrailId}`)
+      logger.log(`Discovery state requested and set active trail from profile: ${profileResult.data.lastActiveTrailId}`)
     } else {
       // No trail in profile, use default
       await setDefaultTrail()
-      console.log('Discovery state requested and default trail set.')
+      logger.log('Discovery state requested and default trail set.')
     }
   }
 
@@ -184,7 +185,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       getDiscoveredSpots(accountSession.data).then(spots => spots.data && setSpots(spots.data)),
     ]
 
-    await Promise.all(promises).catch(error => console.error('Error retrieving discovery data:', error))
+    await Promise.all(promises).catch(error => logger.error('Error retrieving discovery data:', error))
 
     // Load profile and set active trail from profile or use default
     try {
@@ -193,14 +194,14 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       if (profileResult.data?.lastActiveTrailId) {
         // Use trail from profile
         await setActiveTrail(profileResult.data.lastActiveTrailId)
-        console.log(`Discovery state requested and set active trail from profile: ${profileResult.data.lastActiveTrailId}`)
+        logger.log(`Discovery state requested and set active trail from profile: ${profileResult.data.lastActiveTrailId}`)
       } else {
         // No trail in profile, use default
         await setDefaultTrail()
-        console.log('Discovery state requested and default trail set.')
+        logger.log('Discovery state requested and default trail set.')
       }
     } catch (error) {
-      console.error('Error loading discovery profile, falling back to default trail:', error)
+      logger.error('Error loading discovery profile, falling back to default trail:', error)
       await setDefaultTrail()
     }
 
@@ -220,7 +221,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     const trailId = getDiscoveryTrailId()
     const { discoveries } = getDiscoveryData()
     if (!trailId) {
-      console.warn('No active discovery trail set, skipping location processing.')
+      logger.warn('No active discovery trail set, skipping location processing.')
       await loadDiscoveryTrailFromProfile(accountSession.data)
       return
     }

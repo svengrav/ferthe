@@ -3,6 +3,7 @@ import { Button, Card, Text } from '@app/shared/components'
 import Divider from '@app/shared/components/divider/Divider'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
+import { logger } from '@app/shared/utils/logger'
 import { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import AccountVerification from './AccountVerification'
@@ -41,9 +42,9 @@ export default function AccountLogin({ onClose }: AccountLoginProps) {
 
     const result = await accountApplication.verifySMSCode(phoneNumber, code)
     if (result.success) {
-      console.log('Code verified successfully')
+      logger.log('Code verified successfully')
     } else {
-      console.error('Code verification failed:', result.error)
+      logger.error('Code verification failed:', result.error)
     }
 
     setIsCreatingWithPhone(false)
@@ -58,9 +59,9 @@ export default function AccountLogin({ onClose }: AccountLoginProps) {
     setIsCreatingWithPhone(true)
     const result = await accountApplication.requestSMSCode(phoneNumber.trim())
     if (result.success) {
-      console.log('Code verified successfully')
+      logger.log('Code verified successfully')
     } else {
-      console.error('Code verification failed:', result.error)
+      logger.error('Code verification failed:', result.error)
     }
     setIsCreatingWithPhone(false)
   }

@@ -9,6 +9,7 @@ import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import React, { useEffect, useRef, useState } from 'react'
 import { Animated, StyleSheet, Text, View } from 'react-native'
+import { logger } from '../../utils/logger'
 import PulseAnimation from '../animation/PulseAnimation'
 import { FertheLabel, FertheLogo } from './Logo'
 import { useStatusCheck } from './useStatusCheck'
@@ -51,7 +52,7 @@ const SplashScreenWrapper: React.FC<SplashScreenWrapperProps> = ({ children, che
         await loadFonts()
         setFontsLoaded(true)
       } catch (e) {
-        console.warn(e)
+        logger.warn(e)
         setFontsLoaded(true)
       }
     }

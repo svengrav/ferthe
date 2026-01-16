@@ -15,7 +15,6 @@ const useNewDiscoveryHandler = () => {
 
   // Listen for new discoveries and show the first one
   useEvent(discoveryApplication.onNewDiscoveries, (discoveries: DiscoveryCardState[]) => {
-    console.log('New discoveries received:', discoveries)
     if (discoveries.length > 0) {
       setCurrentDiscovery(discoveries[0])
       setIsVisible(true)

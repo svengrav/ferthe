@@ -1,12 +1,13 @@
 import { createAppEnvironmentConfig } from './config/environmentConfig'
+import { logger } from './shared/utils/logger'
 
 // Expo/React Native environment detection
 const IS_PRODUCTION = process.env.EXPO_PUBLIC_ENVIRONMENT === 'production'
 
-console.log(`Running in ${IS_PRODUCTION ? 'production' : 'development'} mode`)
+logger.log(`Running in ${IS_PRODUCTION ? 'production' : 'development'} mode`)
 // const IS_PRODUCTION = true // Force development mode for testing purposes
 
-export const getAppConfig = async () =>
+export const getAppConfig = () =>
   createAppEnvironmentConfig({
     // Environment
     FERTHE_ENV: IS_PRODUCTION ? 'production' : 'development',
@@ -20,6 +21,7 @@ export const getAppConfig = async () =>
     JSON_STORE_BASE_DIRECTORY: '../_data/app', // dev only, secure in production
 
     // Features
+    ENABLE_LOGGER: !IS_PRODUCTION,
     ENABLE_ANALYTICS: process.env.EXPO_PUBLIC_ENABLE_ANALYTICS === 'true' || IS_PRODUCTION,
     ENABLE_DEBUG_LOGS: process.env.EXPO_PUBLIC_ENABLE_DEBUG_LOGS === 'true' || !IS_PRODUCTION,
   })

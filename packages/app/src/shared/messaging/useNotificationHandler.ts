@@ -1,14 +1,15 @@
+import { logger } from "@app/shared/utils/logger"
 import notifee, {
-  AndroidImportance,
-  EventType,
-  AndroidStyle,
   AndroidCategory,
+  AndroidImportance,
+  AndroidStyle,
   AndroidVisibility,
+  EventType,
 } from '@notifee/react-native'
+import { AuthorizationStatus, getMessaging } from '@react-native-firebase/messaging'
 import { useEffect } from 'react'
 import { Platform } from 'react-native'
-import { appNavigator } from '@app/shared/navigation/Navigation'
-import { AuthorizationStatus, getMessaging } from '@react-native-firebase/messaging'
+import { appNavigator } from "../navigation/navigationRef"
 
 async function setBackgroundMessageHandler() {
   const messagingInstance = getMessaging()
@@ -32,7 +33,7 @@ async function requestUserPermission() {
   const enabled = authStatus === AuthorizationStatus.AUTHORIZED || authStatus === AuthorizationStatus.PROVISIONAL
 
   if (enabled) {
-    console.log('Authorization status:', authStatus)
+    logger.log('Authorization status:', authStatus)
   }
 
   if (Platform.OS === 'android') {

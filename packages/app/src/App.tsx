@@ -26,7 +26,7 @@ let appInitialized = false
 const initializeApp = async (apiContext: APIContext) => {
   if (appInitialized) return
 
-  const APP_ENV_CONFIG = await getAppConfig()
+  const APP_ENV_CONFIG = getAppConfig()
 
   configureAppContext({
     environment: APP_ENV_CONFIG.FERTHE_ENV,
@@ -50,16 +50,13 @@ export default function App() {
   const [apiContext, setApiContext] = useState<APIContext | null>(null)
 
   useEffect(() => {
-    const setupApiContext = async () => {
-      const APP_ENV_CONFIG = await getAppConfig()
-      const context = createApiContext({
-        getAccountSession: getSession,
-        apiEndpoint: APP_ENV_CONFIG.API_ENDPOINT,
-        timeout: APP_ENV_CONFIG.API_TIMEOUT,
-      })
-      setApiContext(context)
-    }
-    setupApiContext()
+    const APP_ENV_CONFIG = getAppConfig()
+    const context = createApiContext({
+      getAccountSession: getSession,
+      apiEndpoint: APP_ENV_CONFIG.API_ENDPOINT,
+      timeout: APP_ENV_CONFIG.API_TIMEOUT,
+    })
+    setApiContext(context)
   }, [])
 
   useEffect(() => {

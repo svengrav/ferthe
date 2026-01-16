@@ -2,6 +2,7 @@ import { getMapService } from './utils/mapService'
 
 import { DiscoveryApplication, getDiscoveryTrailData } from '@app/features/discovery'
 import { getSensorData, SensorApplication } from '@app/features/sensor'
+import { logger } from '@app/shared/utils/logger'
 import { discoveryTrailStore } from '../discovery/stores/discoveryTrailStore'
 import { getMapState, getMapStoreActions } from './stores/mapStore'
 import { createMapState, MAP_DEFAULT } from './types/map'
@@ -46,17 +47,17 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
   })
 
   discoveryTrailStore.subscribe(st => {
-    console.log('Discovery Store Updated:', st)
+    logger.log('Discovery Store Updated:', st)
   })
 
-  discoveryApplication?.onNewDiscoveries(d => {})
+  discoveryApplication?.onNewDiscoveries(d => { })
 
   const newMapState = async (viewbox?: { width: number; height: number }) => {
     const { trail, scannedClues, previewClues, spots, snap } = getDiscoveryTrailData()
     const viewboxSize = getMapState().viewport
     const { device } = getSensorData()
     if (!trail) {
-      console.error('No trail found')
+      logger.error('No trail found')
       discoveryApplication?.requestDiscoveryState()
       return
     }
