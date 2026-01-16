@@ -8,7 +8,7 @@ export interface AppEnvironmentConfigSecrets {
 
 export interface AppEnvironmentConfig {
   // Environment
-  FERTHE_ENV: 'production' | 'development'
+  ENV_TYPE: 'production' | 'development'
 
   // API Configuration
   API_ENDPOINT: string
@@ -27,6 +27,6 @@ export interface AppEnvironmentConfig {
 export function createAppEnvironmentConfig(config: AppEnvironmentConfig): AppEnvironmentConfig & AppEnvironmentConfigSecrets {
   const updatedConfig = { ...config } as AppEnvironmentConfig & AppEnvironmentConfigSecrets
 
-  logger.log('Creating app environment config for:', updatedConfig.FERTHE_ENV)
+  logger.log('Creating app environment config for:', updatedConfig.ENV_TYPE)
   return updatedConfig
 }

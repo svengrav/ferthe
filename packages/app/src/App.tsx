@@ -29,7 +29,7 @@ const initializeApp = async (apiContext: APIContext) => {
   const APP_ENV_CONFIG = getAppConfig()
 
   configureAppContext({
-    environment: APP_ENV_CONFIG.FERTHE_ENV,
+    environment: APP_ENV_CONFIG.ENV_TYPE,
     apiContext,
     connectors: {
       deviceConnector: getDeviceConnector(),

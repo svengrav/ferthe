@@ -10,7 +10,7 @@ logger.log(`Running in ${IS_PRODUCTION ? 'production' : 'development'} mode`)
 export const getAppConfig = () =>
   createAppEnvironmentConfig({
     // Environment
-    FERTHE_ENV: IS_PRODUCTION ? 'production' : 'development',
+    ENV_TYPE: IS_PRODUCTION ? 'production' : 'development',
 
     // API Configuration
     API_ENDPOINT: IS_PRODUCTION ? 'https://foxhole.ferthe.eu/core/api/v1' : 'http://localhost:3000/core/api/v1',
