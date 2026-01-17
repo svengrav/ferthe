@@ -19,14 +19,14 @@
         "background": {
           "activeOnStart": true,
           "beginsPattern": "Starting Metro Bundler",
-          "endsPattern": "Web Bundled"
+          "endsPattern": "Logs for your project will appear below"
         }
       }
     },
     {
       "label": "Start Storage Server",
       "type": "shell",
-      "command": "deno run --allow-all ${workspaceFolder}/tools/localStorageServer.ts",
+      "command": "deno run --allow-all ${workspaceFolder}/tools/start-localstorage.ts",
       "group": "build",
       "isBackground": true,
       "problemMatcher": {

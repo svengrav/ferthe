@@ -22,7 +22,7 @@ export const getConfig = async () =>
 
     // Database
     COSMOS_DATABASE_NAME: IS_PRODUCTION ? 'ferthe-core-prod-v1' : 'ferthe-core-dev-v1',
-    JSON_STORE_BASE_DIRECTORY: '../_data/core',
+    JSON_STORE_BASE_DIRECTORY: '../../_data/core',
 
     STORAGE_ACCESS_KEY_ID: 'key-stferthecore',
     JWT_SIGN_KEY_ID: 'api-jwt-sign-key',

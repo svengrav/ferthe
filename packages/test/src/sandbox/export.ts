@@ -1,7 +1,5 @@
-import { promises as fs } from 'fs'
-import * as path from 'path'
-import { join } from 'path'
-import { getSandboxData } from './data'
+import { join } from 'jsr:@std/path'
+import { getSandboxData } from './data.ts'
 
 /**
  * Exports all databox data to JSON files in the specified directory for test database initialization
@@ -14,15 +12,15 @@ export async function sandboxDataboxToLocalDatabase(outputPath?: string): Promis
 
     // Define output directory (custom path or default to _data in project root)
     // exports to {{workspaceRoot}}/_data/core by default
-    const outputDir = outputPath || path.join(process.cwd(), '../', './_data', 'core')
+    const outputDir = outputPath || join(Deno.cwd(), '../', './_data', 'core')
 
     // Ensure output directory exists
-    await fs.mkdir(outputDir, { recursive: true })
+    await Deno.mkdir(outputDir, { recursive: true })
 
     Object.keys(sandboxData).forEach(key => {
       const dataArray = Array.isArray(sandboxData[key].data) ? sandboxData[key].data : [sandboxData[key].data]
 
-      fs.writeFile(join(outputDir, sandboxData[key].fileName), JSON.stringify(dataArray, null, 2))
+      Deno.writeTextFile(join(outputDir, sandboxData[key].fileName), JSON.stringify(dataArray, null, 2))
     })
 
     console.log('✅ Successfully exported databox data to _data directory:')
@@ -38,7 +36,7 @@ export async function sandboxDataboxToLocalDatabase(outputPath?: string): Promis
 
 /**
  * Test script to export databox data to _data directory
- * Usage: npx tsx src/sandbox/testExport.ts
+ * Usage: deno run --allow-all src/sandbox/export.ts
  */
 async function main() {
   console.log('🚀 Starting databox export test...')
@@ -51,12 +49,12 @@ async function main() {
     console.log('\n✅ All export tests completed successfully!')
   } catch (error) {
     console.error('\n❌ Export test failed:', error)
-    process.exit(1)
+    Deno.exit(1)
   }
 }
 
 // Run if this script is executed directly
-if (require.main === module) {
+if (import.meta.main) {
   main()
 }
 

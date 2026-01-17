@@ -22,7 +22,7 @@ const PageModal = ({ visible, label, onClose, children, options }: PageModalProp
       <PageHeader
         label={label}
         options={options}
-        action={<IconButton onPress={onClose} name='arrow-back' size={24} />}
+        action={<IconButton onPress={onClose} name='arrow-back' variant='outlined' size={24} />}
       />
       <ScrollView
         contentContainerStyle={styles.scrolLView}
