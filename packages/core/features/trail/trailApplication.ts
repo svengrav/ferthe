@@ -1,26 +1,45 @@
 import { Store } from '@core/store/storeFactory.ts'
 import { createCuid2 } from '@core/utils/idGenerator.ts'
 import { createSlug } from '@core/utils/slug.ts'
-import { AccountContext, Result, Spot, SpotPreview, Trail, TrailApplicationContract } from '@shared/contracts/index.ts'
+import { AccountContext, Result, Spot, SpotPreview, Trail, TrailApplicationContract, TrailSpot } from '@shared/contracts/index.ts'
 
 interface TrailApplicationOptions {
   trailStore: Store<Trail>
   spotStore: Store<Spot>
+  trailSpotStore: Store<TrailSpot>
 }
 
-export function createTrailApplication({ trailStore, spotStore }: TrailApplicationOptions): TrailApplicationContract {
+export function createTrailApplication({ trailStore, spotStore, trailSpotStore }: TrailApplicationOptions): TrailApplicationContract {
   return {
     listSpotPreviews: async (context: AccountContext, trailId?: string): Promise<Result<SpotPreview[]>> => {
       try {
+        if (!trailId) {
+          const spotsResult = await spotStore.list()
+          if (!spotsResult.success) {
+            return { success: false, error: { message: 'Failed to list spots', code: 'GET_SPOT_PREVIEWS_ERROR' } }
+          }
+          return { success: true, data: spotsResult.data || [] }
+        }
+
+        // Get trail-spot relationships
+        const trailSpotsResult = await trailSpotStore.list()
+        if (!trailSpotsResult.success) {
+          return { success: false, error: { message: 'Failed to list trail spots', code: 'GET_SPOT_PREVIEWS_ERROR' } }
+        }
+
+        const trailSpots = (trailSpotsResult.data || []).filter(ts => ts.trailId === trailId)
+        const spotIds = trailSpots.map(ts => ts.spotId)
+
+        // Get spots
         const spotsResult = await spotStore.list()
         if (!spotsResult.success) {
           return { success: false, error: { message: 'Failed to list spots', code: 'GET_SPOT_PREVIEWS_ERROR' } }
         }
-        const spots = spotsResult.data || []
-        const filteredSpots = spots.filter(spot => !trailId || spot.trailId === trailId)
-        return { success: true, data: filteredSpots }
-      } catch (error: any) {
-        return { success: false, error: { message: error.message, code: 'GET_SPOT_PREVIEWS_ERROR' } }
+
+        const spots = (spotsResult.data || []).filter(spot => spotIds.includes(spot.id))
+        return { success: true, data: spots }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_SPOT_PREVIEWS_ERROR' } }
       }
     },
 
@@ -31,8 +50,8 @@ export function createTrailApplication({ trailStore, spotStore }: TrailApplicati
           return { success: false, error: { message: 'Failed to get spot', code: 'GET_SPOT_ERROR' } }
         }
         return { success: true, data: spotResult.data }
-      } catch (error: any) {
-        return { success: false, error: { message: error.message, code: 'GET_SPOT_ERROR' } }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_SPOT_ERROR' } }
       }
     },
 
@@ -43,8 +62,8 @@ export function createTrailApplication({ trailStore, spotStore }: TrailApplicati
           return { success: false, error: { message: 'Failed to get trail', code: 'GET_TRAIL_ERROR' } }
         }
         return { success: true, data: trailResult.data }
-      } catch (error: any) {
-        return { success: false, error: { message: error.message, code: 'GET_TRAIL_ERROR' } }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_TRAIL_ERROR' } }
       }
     },
 
@@ -55,22 +74,40 @@ export function createTrailApplication({ trailStore, spotStore }: TrailApplicati
           return { success: false, error: { message: 'Failed to list trails', code: 'LIST_TRAILS_ERROR' } }
         }
         return { success: true, data: trailsResult.data || [] }
-      } catch (error: any) {
-        return { success: false, error: { message: error.message, code: 'LIST_TRAILS_ERROR' } }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'LIST_TRAILS_ERROR' } }
       }
     },
 
     listSpots: async (context: AccountContext, trailId?: string): Promise<Result<Spot[]>> => {
       try {
+        if (!trailId) {
+          const spotsResult = await spotStore.list()
+          if (!spotsResult.success) {
+            return { success: false, error: { message: 'Failed to list spots', code: 'LIST_SPOTS_ERROR' } }
+          }
+          return { success: true, data: spotsResult.data || [] }
+        }
+
+        // Get trail-spot relationships
+        const trailSpotsResult = await trailSpotStore.list()
+        if (!trailSpotsResult.success) {
+          return { success: false, error: { message: 'Failed to list trail spots', code: 'LIST_SPOTS_ERROR' } }
+        }
+
+        const trailSpots = (trailSpotsResult.data || []).filter(ts => ts.trailId === trailId)
+        const spotIds = trailSpots.map(ts => ts.spotId)
+
+        // Get spots
         const spotsResult = await spotStore.list()
         if (!spotsResult.success) {
           return { success: false, error: { message: 'Failed to list spots', code: 'LIST_SPOTS_ERROR' } }
         }
-        const spots = spotsResult.data || []
-        const filteredSpots = spots.filter(spot => !trailId || spot.trailId === trailId)
-        return { success: true, data: filteredSpots }
-      } catch (error: any) {
-        return { success: false, error: { message: error.message, code: 'LIST_SPOTS_ERROR' } }
+
+        const spots = (spotsResult.data || []).filter(spot => spotIds.includes(spot.id))
+        return { success: true, data: spots }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'LIST_SPOTS_ERROR' } }
       }
     },
 
@@ -82,8 +119,8 @@ export function createTrailApplication({ trailStore, spotStore }: TrailApplicati
           return { success: false, error: { message: 'Failed to create trail', code: 'CREATE_TRAIL_ERROR' } }
         }
         return { success: true, data: createdTrailResult.data! }
-      } catch (error: any) {
-        return { success: false, error: { message: error.message, code: 'CREATE_TRAIL_ERROR' } }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'CREATE_TRAIL_ERROR' } }
       }
     },
 
@@ -95,8 +132,60 @@ export function createTrailApplication({ trailStore, spotStore }: TrailApplicati
           return { success: false, error: { message: 'Failed to create spot', code: 'CREATE_SPOT_ERROR' } }
         }
         return { success: true, data: createdSpotResult.data! }
-      } catch (error: any) {
-        return { success: false, error: { message: error.message, code: 'CREATE_SPOT_ERROR' } }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'CREATE_SPOT_ERROR' } }
+      }
+    },
+
+    addSpotToTrail: async (context: AccountContext, trailId: string, spotId: string, order?: number): Promise<Result<TrailSpot>> => {
+      try {
+        // Check if relationship already exists
+        const existingResult = await trailSpotStore.list()
+        if (existingResult.success) {
+          const existing = (existingResult.data || []).find(ts => ts.trailId === trailId && ts.spotId === spotId)
+          if (existing) {
+            return { success: false, error: { message: 'Spot already added to trail', code: 'SPOT_ALREADY_IN_TRAIL' } }
+          }
+        }
+
+        const trailSpot: TrailSpot = {
+          id: createCuid2(),
+          trailId,
+          spotId,
+          order,
+          createdAt: new Date(),
+        }
+
+        const result = await trailSpotStore.create(trailSpot)
+        if (!result.success) {
+          return { success: false, error: { message: 'Failed to add spot to trail', code: 'ADD_SPOT_TO_TRAIL_ERROR' } }
+        }
+        return { success: true, data: result.data! }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'ADD_SPOT_TO_TRAIL_ERROR' } }
+      }
+    },
+
+    removeSpotFromTrail: async (context: AccountContext, trailId: string, spotId: string): Promise<Result<void>> => {
+      try {
+        const trailSpotsResult = await trailSpotStore.list()
+        if (!trailSpotsResult.success) {
+          return { success: false, error: { message: 'Failed to list trail spots', code: 'REMOVE_SPOT_FROM_TRAIL_ERROR' } }
+        }
+
+        const trailSpot = (trailSpotsResult.data || []).find(ts => ts.trailId === trailId && ts.spotId === spotId)
+        if (!trailSpot) {
+          return { success: false, error: { message: 'Spot not found in trail', code: 'SPOT_NOT_IN_TRAIL' } }
+        }
+
+        const deleteResult = await trailSpotStore.delete(trailSpot.id)
+        if (!deleteResult.success) {
+          return { success: false, error: { message: 'Failed to remove spot from trail', code: 'REMOVE_SPOT_FROM_TRAIL_ERROR' } }
+        }
+
+        return { success: true, data: undefined }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'REMOVE_SPOT_FROM_TRAIL_ERROR' } }
       }
     },
   }

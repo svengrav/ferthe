@@ -15,6 +15,7 @@ import {
   Spot,
   SpotPreview,
   Trail,
+  TrailSpot,
 } from '@shared/contracts/index.ts'
 import { manifest } from './manifest.ts'
 import { Route } from './oak/types.ts'
@@ -151,6 +152,22 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       url: '/trail/collections/spots/:id',
       handler: asyncRequestHandler<Spot | undefined, { id: string }, never>(async ({ params, context }) => {
         return await trailApplication.getSpot(context, params!.id)
+      }),
+    },
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/trail/:trailId/spots/:spotId',
+      handler: asyncRequestHandler<TrailSpot, { trailId: string; spotId: string }, { order?: number }>(async ({ params, context, body }) => {
+        return await trailApplication.addSpotToTrail(context, params!.trailId, params!.spotId, body?.order)
+      }),
+    },
+    {
+      method: 'DELETE',
+      version: 'v1',
+      url: '/trail/:trailId/spots/:spotId',
+      handler: asyncRequestHandler<void, { trailId: string; spotId: string }, never>(async ({ params, context }) => {
+        return await trailApplication.removeSpotFromTrail(context, params!.trailId, params!.spotId)
       }),
     },
 

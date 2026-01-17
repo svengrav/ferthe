@@ -10,7 +10,6 @@ export interface SpotApplicationContract {
 
 export interface Spot {
   id: string
-  trailId: string
   slug: string
   name: string
   description: string
@@ -30,7 +29,6 @@ export interface Spot {
 
 export interface SpotPreview {
   id: string
-  trailId: string
   image?: {
     id: string
     previewUrl?: string

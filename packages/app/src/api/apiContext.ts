@@ -19,6 +19,7 @@ import {
   Spot,
   SpotPreview,
   Trail,
+  TrailSpot,
 } from '@shared/contracts'
 import { createAPIClient } from './client'
 import { checkStatus, StatusResult } from './utils'
@@ -127,6 +128,12 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
       },
 
       createSpot: (_context: AccountContext, spot: any) => API.send<Result<Spot>>('/trail/collections/spots', 'POST', spot),
+
+      addSpotToTrail: (_context: AccountContext, trailId: string, spotId: string, order?: number) =>
+        API.send<Result<TrailSpot>>(`/trail/${trailId}/spots/${spotId}`, 'POST', { order }),
+
+      removeSpotFromTrail: (_context: AccountContext, trailId: string, spotId: string) =>
+        API.send<Result<void>>(`/trail/${trailId}/spots/${spotId}`, 'DELETE'),
     },
 
     /**

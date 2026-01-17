@@ -1,4 +1,4 @@
-import { Account, AccountSession, Discovery, DiscoveryApplicationContract, DiscoveryProfile, Spot, Trail, TrailApplicationContract, TwilioVerification } from '@shared/contracts/index.ts'
+import { Account, AccountSession, Discovery, DiscoveryApplicationContract, DiscoveryProfile, Spot, Trail, TrailApplicationContract, TrailSpot, TwilioVerification } from '@shared/contracts/index.ts'
 import { createConsoleSMSConnector, createTwilioSMSConnector, SMSConnector, TwilioConfig } from './connectors/smsConnector.ts'
 import { AccountApplicationActions, createAccountApplication } from './features/account/accountApplication.ts'
 import { createJWTService } from './features/account/jwtService.ts'
@@ -37,7 +37,8 @@ export interface CoreContext {
 
 export const INTERNAL_STORE_IDS = {
   TRAILS: 'trail-collection',
-  TRAIL_SPOTS: 'spot-collection',
+  SPOTS: 'spot-collection',
+  TRAIL_SPOTS: 'trail-spot-relations',
   ACCOUNTS: 'account-collection',
   ACCOUNT_SESSIONS: 'account-sessions',
   ACCOUNT_SMS_CODES: 'account-sms-codes',
@@ -59,11 +60,12 @@ export function createCoreContext(config: CoreConfiguration = {}): CoreContext {
 
   const trailApplication = createTrailApplication({
     trailStore: createStore<Trail>(storeConnector, INTERNAL_STORE_IDS.TRAILS),
-    spotStore: createStore<Spot>(storeConnector, INTERNAL_STORE_IDS.TRAIL_SPOTS),
+    spotStore: createStore<Spot>(storeConnector, INTERNAL_STORE_IDS.SPOTS),
+    trailSpotStore: createStore<TrailSpot>(storeConnector, INTERNAL_STORE_IDS.TRAIL_SPOTS),
   })
 
   const spotApplication = createSpotApplication({
-    spotStore: createStore<Spot>(storeConnector, INTERNAL_STORE_IDS.TRAIL_SPOTS),
+    spotStore: createStore<Spot>(storeConnector, INTERNAL_STORE_IDS.SPOTS),
   })
 
   const accountApplication = createAccountApplication({

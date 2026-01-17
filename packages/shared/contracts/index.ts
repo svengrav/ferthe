@@ -8,3 +8,5 @@ export * from './results.ts'
 export * from './sensors.ts'
 export * from './spots.ts'
 export * from './trails.ts'
+export * from './trailSpots.ts'
+

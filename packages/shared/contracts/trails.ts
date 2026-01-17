@@ -2,6 +2,7 @@ import { Spot, SpotPreview } from '@shared/contracts/index.ts'
 import { GeoLocation } from '@shared/geo/index.ts'
 import { AccountContext } from './accounts.ts'
 import { Result } from './results.ts'
+import { TrailSpot } from './trailSpots.ts'
 
 /**
  * Application contract for managing trails and their associated spots.
@@ -15,6 +16,8 @@ export interface TrailApplicationContract {
   getTrail: (context: AccountContext, trailId: string) => Promise<Result<Trail | undefined>>
   createTrail: (context: AccountContext, trailData: Omit<Trail, 'id'>) => Promise<Result<Trail>>
   createSpot: (context: AccountContext, spotData: Omit<Spot, 'id'>) => Promise<Result<Spot>>
+  addSpotToTrail: (context: AccountContext, trailId: string, spotId: string, order?: number) => Promise<Result<TrailSpot>>
+  removeSpotFromTrail: (context: AccountContext, trailId: string, spotId: string) => Promise<Result<void>>
 }
 
 /**
@@ -33,7 +36,6 @@ export interface Trail {
     id: string
     url: string
   }
-  spots: string[] // IDs of spots
   region?: Region
   options: Options
   createdAt: Date
