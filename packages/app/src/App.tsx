@@ -10,7 +10,7 @@ import { LogBox } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { APIContext, createApiContext } from './api'
-import { configureAppContext } from './appContext'
+import { configureAppContext, getAppContext } from './appContext'
 import { getAppConfig } from './env'
 import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
 import { getSession } from './features/account/stores/accountStore'
@@ -41,6 +41,15 @@ const initializeApp = async (apiContext: APIContext) => {
       }),
     },
   })
+
+  // Load initial app data (trails and discovery state with last active trail)
+  const { trailApplication, discoveryApplication } = getAppContext()
+  try {
+    await trailApplication.requestTrailState()
+    await discoveryApplication.requestDiscoveryState()
+  } catch (error) {
+    console.error('Error loading initial app data:', error)
+  }
 
   appInitialized = true
 }

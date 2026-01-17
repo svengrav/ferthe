@@ -4,8 +4,6 @@ applyTo: '**/*.ts'
 
 Coding standards, domain knowledge, and preferences that AI should follow.
 
-Use #codebase as context
-
 # Project coding standards
 
 ## Architecture

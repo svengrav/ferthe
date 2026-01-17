@@ -1,44 +1,35 @@
-// SMS service for phone authentication - pure functional code generation and validation
-import { SMSRequest } from '@core/connectors/smsConnector.ts'
-import { createCuid2 } from '@core/utils/idGenerator.ts'
-import { SMSCode } from '@shared/contracts/index.ts'
-import { hash, verify } from 'npm:argon2'
+// Phone hash service for secure phone number storage
+// Using SHA-256 with hex encoding for simple, portable hash storage
+
 const DEVELOPER_HASH_SALT = 'ferthe-developer-salt'
 
-export interface SMSValidationResult {
-  valid: boolean
-  errorCode?: 'ALREADY_VERIFIED' | 'EXPIRED_CODE' | 'INVALID_CODE'
-  errorMessage?: string
-}
-
 export interface SMSService {
-  generateCodeRequest: (phoneNumber: string) => Promise<SMSCode>
-  validateCode: (smsRequest: SMSCode, code: string) => boolean
-  validateCodeWithErrorDetails: (smsRequest: SMSCode, code: string) => SMSValidationResult
-  isRequestExpired: (smsRequest: SMSCode) => boolean
   createPhoneHash: (phoneNumber: string) => Promise<string>
   verifyPhoneHash: (phoneNumber: string, phoneHash: string) => Promise<boolean>
-  createSMSMessage: (phoneNumber: string, code: string, expiresAt: Date, requestId: string) => SMSRequest
   validatePhoneNumber: (phoneNumber: string) => { valid: boolean; error?: string }
+  normalizePhoneNumber: (phoneNumber: string, defaultCountryCode?: string) => string
 }
 
 interface SMSServiceOptions {
   phoneSalt?: string
-  codeLength?: number
-  saltRounds?: number
-  expiryMinutes?: number
 }
 
 export function createSMSService(options: SMSServiceOptions = {}): SMSService {
-  const { codeLength = 6, expiryMinutes = 5, phoneSalt = DEVELOPER_HASH_SALT, saltRounds = 12 } = options
+  const { phoneSalt = DEVELOPER_HASH_SALT } = options
 
   const createPhoneHash = async (phoneNumber: string): Promise<string> => {
     try {
       // Combine phone number with salt to create consistent input for hashing
       const phoneWithSalt = phoneNumber + phoneSalt
 
-      // Use bcrypt to create secure hash
-      const phoneHash = await hash(phoneWithSalt)
+      // Use Web Crypto API for SHA-256 hashing
+      const encoder = new TextEncoder()
+      const data = encoder.encode(phoneWithSalt)
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+
+      // Convert to hex string
+      const hashArray = Array.from(new Uint8Array(hashBuffer))
+      const phoneHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 
       return phoneHash
     } catch (error) {
@@ -49,10 +40,17 @@ export function createSMSService(options: SMSServiceOptions = {}): SMSService {
 
   const verifyPhoneHash = async (phoneNumber: string, phoneHash: string): Promise<boolean> => {
     try {
-      const phoneWithSalt = phoneNumber + phoneSalt
+      // Check if phoneHash is in valid hex format
+      if (!phoneHash || !/^[a-f0-9]{64}$/i.test(phoneHash)) {
+        console.warn('Invalid phoneHash format - expected 64-character hex string')
+        return false
+      }
 
-      // Use bcrypt.compare to check if phone number matches stored hash
-      return await verify(phoneHash, phoneWithSalt)
+      // Create hash from phone number and compare
+      const calculatedHash = await createPhoneHash(phoneNumber)
+
+      // Case-insensitive comparison
+      return calculatedHash.toLowerCase() === phoneHash.toLowerCase()
     } catch (error) {
       console.error('Error verifying phone hash:', error)
       return false
@@ -108,111 +106,42 @@ export function createSMSService(options: SMSServiceOptions = {}): SMSService {
     return { valid: false, error: 'Invalid phone number format' }
   }
 
-  const createSMSMessage = (phoneNumber: string, code: string, expiresAt: Date, requestId: string): SMSRequest => {
-    return {
-      phoneNumber,
-      message: `Your verification code is: ${code}. This code expires at ${expiresAt.toISOString()}.`,
-      metadata: {
-        code,
-        expiresAt,
-        requestId,
-      },
-    }
-  }
-
-  const generateCodeRequest = async (phoneNumber: string): Promise<SMSCode> => {
-    // Generate random numeric code
-    const code = Array.from({ length: codeLength }, () => Math.floor(Math.random() * 10)).join('')
-
-    const expiresAt = new Date()
-    expiresAt.setMinutes(expiresAt.getMinutes() + expiryMinutes)
-
-    // Create secure hash of phone number
-    const phoneHash = await createPhoneHash(phoneNumber)
-    const smsRequest: SMSCode = {
-      id: createCuid2(),
-      phoneHash,
-      code,
-      expiresAt,
-      createdAt: new Date(),
-      verified: false,
+  const normalizePhoneNumber = (phoneNumber: string, defaultCountryCode: string = '+49'): string => {
+    // If already in international format, return as is
+    if (phoneNumber.startsWith('+')) {
+      return phoneNumber
     }
 
-    // Note: SMS sending is now handled by the application layer using createSMSMessage
-
-    return smsRequest
-  }
-
-  const validateCode = (smsRequest: SMSCode, code: string): boolean => {
-    // Check if already verified
-    if (smsRequest.verified) {
-      console.log(`SMS code already verified for request: ${smsRequest.id}`)
-      return false
-    }
-
-    // Check if expired
-    if (new Date() > smsRequest.expiresAt) {
-      console.log(`SMS code expired for request: ${smsRequest.id}`)
-      return false
-    }
-
-    // Check if code matches
-    if (smsRequest.code !== code) {
-      console.log(`Invalid SMS code for request: ${smsRequest.id}`)
-      return false
-    }
-
-    console.log(`SMS code successfully validated for request: ${smsRequest.id}`)
-    return true
-  }
-  const validateCodeWithErrorDetails = (smsRequest: SMSCode, code: string): SMSValidationResult => {
-    // Check if already verified
-    if (smsRequest.verified) {
-      console.log(`SMS code already verified for request: ${smsRequest.id}`)
-      return {
-        valid: false,
-        errorCode: 'ALREADY_VERIFIED',
-        errorMessage: 'SMS code already verified',
+    // If starts with common country code without + (e.g., 49, 1, 43, 41), just add +
+    const commonCountryCodes = ['1', '49', '43', '41', '44', '33', '34', '39', '31', '32']
+    for (const code of commonCountryCodes) {
+      if (phoneNumber.startsWith(code)) {
+        // Check if it's likely a country code (not just a regular number starting with these digits)
+        // For single digit codes (like 1), check if followed by area code
+        // For multi-digit codes, assume it's a country code if long enough
+        if (code === '1' && phoneNumber.length >= 11) {
+          return '+' + phoneNumber
+        } else if (code !== '1' && phoneNumber.length >= 10) {
+          return '+' + phoneNumber
+        }
       }
     }
 
-    // Check if expired
-    if (new Date() > smsRequest.expiresAt) {
-      console.log(`SMS code expired for request: ${smsRequest.id}`)
-      return {
-        valid: false,
-        errorCode: 'EXPIRED_CODE',
-        errorMessage: 'SMS code has expired',
-      }
+    // If starts with 0, replace with country code
+    if (phoneNumber.startsWith('0')) {
+      // Remove leading 0 and add country code
+      return defaultCountryCode + phoneNumber.substring(1)
     }
 
-    // Check if code matches
-    if (smsRequest.code !== code) {
-      console.log(`Invalid SMS code for request: ${smsRequest.id}`)
-      return {
-        valid: false,
-        errorCode: 'INVALID_CODE',
-        errorMessage: 'Invalid SMS code',
-      }
-    }
-
-    console.log(`SMS code successfully validated for request: ${smsRequest.id}`)
-    return {
-      valid: true,
-    }
+    // If no prefix, assume it needs country code
+    return defaultCountryCode + phoneNumber
   }
 
-  const isRequestExpired = (smsRequest: SMSCode): boolean => {
-    return new Date() > smsRequest.expiresAt
-  }
   return {
-    generateCodeRequest,
-    validateCode,
-    validateCodeWithErrorDetails,
-    isRequestExpired,
     createPhoneHash,
     verifyPhoneHash,
-    createSMSMessage,
     validatePhoneNumber,
+    normalizePhoneNumber,
   }
 }
+

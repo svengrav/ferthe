@@ -25,6 +25,7 @@ export const API_ERROR_CODES = {
   INVALID_SMS_CODE: { code: 'INVALID_SMS_CODE', message: 'Invalid or expired SMS code', httpStatus: 400 },
   SMS_CODE_EXPIRED: { code: 'SMS_CODE_EXPIRED', message: 'SMS code has expired', httpStatus: 400 },
   SMS_CODE_ALREADY_VERIFIED: { code: 'SMS_CODE_ALREADY_VERIFIED', message: 'SMS code already verified', httpStatus: 400 },
+  SMS_CONNECTOR_NOT_CONFIGURED: { code: 'SMS_CONNECTOR_NOT_CONFIGURED', message: 'SMS connector is not configured', httpStatus: 500 },
   PHONE_ALREADY_USED: { code: 'PHONE_ALREADY_USED', message: 'Phone number is already associated with another account', httpStatus: 409 },
 
   // Account Management (404-409)

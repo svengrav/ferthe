@@ -1,99 +1,120 @@
-// SMS connector interface for sending SMS messages
+// SMS connector interface for Twilio Verify API
 import Twilio from 'twilio'
 
-export interface SMSRequest {
-  phoneNumber: string
-  message: string
-  metadata?: {
-    code?: string
-    expiresAt?: Date
-    requestId?: string
-  }
+export interface TwilioVerificationRequest {
+  verificationSid: string
+  expiresAt: Date
 }
 
-export interface SMSResponse {
+export interface TwilioVerificationResult {
   success: boolean
-  messageId?: string
   error?: string
 }
 
 export interface SMSConnector {
-  sendSMS: (request: SMSRequest) => Promise<SMSResponse>
+  requestVerification: (phoneNumber: string) => Promise<TwilioVerificationRequest>
+  verifyCode: (phoneNumber: string, code: string) => Promise<TwilioVerificationResult>
 }
 
 export interface TwilioConfig {
   accountSid: string
   authToken: string
-  fromNumber: string
+  verifyServiceId: string
 }
 
-// Twilio implementation for production
+// Twilio Verify API implementation
 export function createTwilioSMSConnector(config: TwilioConfig): SMSConnector {
   const client = Twilio(config.accountSid, config.authToken)
 
-  const sendSMS = async (request: SMSRequest): Promise<SMSResponse> => {
+  const requestVerification = async (phoneNumber: string): Promise<TwilioVerificationRequest> => {
     try {
-      const { phoneNumber, message } = request
+      const verification = await client.verify.v2
+        .services(config.verifyServiceId)
+        .verifications
+        .create({ to: phoneNumber, channel: 'sms' })
 
-      const twilioMessage = await client.messages.create({
-        body: message,
-        from: config.fromNumber,
-        to: phoneNumber,
-      })
+      // Twilio verifications expire in 10 minutes by default
+      const expiresAt = new Date()
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10)
 
       return {
-        success: true,
-        messageId: twilioMessage.sid,
+        verificationSid: verification.sid,
+        expiresAt,
       }
     } catch (error) {
-      console.error('Twilio SMS Error:', error)
+      console.error('Twilio requestVerification Error:', error)
+      throw new Error(error instanceof Error ? error.message : 'Unknown Twilio error')
+    }
+  }
+
+  const verifyCode = async (phoneNumber: string, code: string): Promise<TwilioVerificationResult> => {
+    try {
+      const verificationCheck = await client.verify.v2
+        .services(config.verifyServiceId)
+        .verificationChecks
+        .create({ to: phoneNumber, code })
+
+      return {
+        success: verificationCheck.status === 'approved',
+        error: verificationCheck.status !== 'approved' ? `Verification status: ${verificationCheck.status}` : undefined,
+      }
+    } catch (error) {
+      console.error('Twilio verifyCode Error:', error)
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown Twilio SMS error',
+        error: error instanceof Error ? error.message : 'Unknown Twilio error',
       }
     }
   }
 
   return {
-    sendSMS,
+    requestVerification,
+    verifyCode,
   }
 }
 
 // Console log implementation for development
 export function createConsoleSMSConnector(): SMSConnector {
-  const sendSMS = async (request: SMSRequest): Promise<SMSResponse> => {
-    try {
-      const { phoneNumber, message, metadata } = request
+  const requestVerification = (phoneNumber: string): Promise<TwilioVerificationRequest> => {
+    console.log(
+      {
+        phone: phoneNumber,
+        action: 'requestVerification',
+      },
+      '📱 SMS Connector - Requesting verification'
+    )
 
-      // Log SMS details (development only)
-      console.log(
-        {
-          phone: phoneNumber,
-          message,
-          code: metadata?.code,
-          expiresAt: metadata?.expiresAt?.toISOString(),
-          requestId: metadata?.requestId,
-        },
-        '📱 SMS Connector - Sending SMS'
-      )
+    const expiresAt = new Date()
+    expiresAt.setMinutes(expiresAt.getMinutes() + 10)
 
-      // Simulate successful SMS sending
-      const messageId = `sim_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return Promise.resolve({
+      verificationSid: `sim_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      expiresAt,
+    })
+  }
 
-      return {
-        success: true,
-        messageId,
-      }
-    } catch (error) {
-      console.log('SMS Connector Error:', error)
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown SMS error',
-      }
-    }
+  const verifyCode = (phoneNumber: string, code: string): Promise<TwilioVerificationResult> => {
+    console.log(
+      {
+        phone: phoneNumber,
+        code,
+        action: 'verifyCode',
+      },
+      '📱 SMS Connector - Verifying code'
+    )
+
+    // In development, accept code "123456"
+    const success = code === '123456'
+
+    return Promise.resolve({
+      success,
+      error: success ? undefined : 'Invalid code (use 123456 for dev)',
+    })
   }
 
   return {
-    sendSMS,
+    requestVerification,
+    verifyCode,
   }
 }
+

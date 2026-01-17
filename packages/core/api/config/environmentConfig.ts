@@ -9,11 +9,13 @@ export interface EnvironmentConfigSecrets {
 }
 
 export interface EnvironmentConfig {
-  FERTHE_ENV: 'production' | 'development'
+  ENV_TYPE: 'production' | 'development'
   API_PORT: string
   API_HOST: string
   API_PREFIX: string
   ORIGINS: string[]
+  TWILIO_ACCOUNT_SID: string
+  TWILIO_VERIFY_SERVICE_ID: string
 
   // KeyVault & Secrets
   KEY_VAULT_NAME: string
@@ -33,7 +35,7 @@ export async function createEnvironmentConfig(config: EnvironmentConfig): Promis
   const updatedConfig = { ...config } as EnvironmentConfig & EnvironmentConfigSecrets
   console.log('Creating environment config with:', updatedConfig)
   // Load secrets from Azure Key Vault if in production environment
-  if (config.FERTHE_ENV === 'production') {
+  if (config.ENV_TYPE === 'production') {
     console.warn('This is production! Loading secrets from Azure Key Vault...')
     const keyVaultConnector = createKeyVaultConnector(config.KEY_VAULT_NAME)
     const [storageSecret, jwtSecret, cosmosSecret, twilioSecret, phoneSecret] = await Promise.all([

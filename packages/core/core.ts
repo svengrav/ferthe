@@ -1,7 +1,7 @@
-import { Account, AccountSession, Discovery, DiscoveryApplicationContract, DiscoveryProfile, SMSCode, Spot, Trail, TrailApplicationContract } from '@shared/contracts/index.ts'
-import { createJWTService } from './features/account/jwtService.ts'
+import { Account, AccountSession, Discovery, DiscoveryApplicationContract, DiscoveryProfile, Spot, Trail, TrailApplicationContract, TwilioVerification } from '@shared/contracts/index.ts'
 import { createConsoleSMSConnector, createTwilioSMSConnector, SMSConnector, TwilioConfig } from './connectors/smsConnector.ts'
 import { AccountApplicationActions, createAccountApplication } from './features/account/accountApplication.ts'
+import { createJWTService } from './features/account/jwtService.ts'
 import { createSMSService } from './features/account/smsService.ts'
 import { createDiscoveryApplication } from './features/discovery/discoveryApplication.ts'
 import { createDiscoveryService } from './features/discovery/discoveryService.ts'
@@ -69,7 +69,7 @@ export function createCoreContext(config: CoreConfiguration = {}): CoreContext {
   const accountApplication = createAccountApplication({
     accountStore: createStore<Account>(storeConnector, INTERNAL_STORE_IDS.ACCOUNTS),
     accountSessionStore: createStore<AccountSession>(storeConnector, INTERNAL_STORE_IDS.ACCOUNT_SESSIONS),
-    smsCodeStore: createStore<SMSCode>(storeConnector, INTERNAL_STORE_IDS.ACCOUNT_SMS_CODES),
+    twilioVerificationStore: createStore<TwilioVerification>(storeConnector, INTERNAL_STORE_IDS.ACCOUNT_SMS_CODES),
     smsConnector,
     jwtService: createJWTService({ secret: config.secrets?.jwtSecret }),
     smsService: createSMSService({ phoneSalt: config.secrets?.phoneHashSalt }),

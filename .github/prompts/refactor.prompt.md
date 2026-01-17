@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: agent
 ---
 # Introduction
 - Firstly the code should be refactored to follow the guidelines.

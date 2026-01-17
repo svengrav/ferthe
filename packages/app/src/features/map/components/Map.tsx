@@ -20,7 +20,7 @@ import MapTrailPath from './surface/MapTrailPath'
 
 
 export function Map() {
-  const { sensorApplication, isDevelopment } = getAppContext()
+  const { sensorApplication, system } = getAppContext()
   const viewbox = useMapViewport()
   const canvas = useMapCanvas()
   const trailId = useMapTrailId()
@@ -32,7 +32,7 @@ export function Map() {
   const onTap = (position: { x: number, y: number }) => {
     const geoPosition = mapUtils.positionToCoordinates(position, boundary, canvas.size)
 
-    if (isDevelopment)
+    if (system.isDevelopment)
       sensorApplication.setDevice({
         location: geoPosition,
         heading: 0,

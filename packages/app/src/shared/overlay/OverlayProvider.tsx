@@ -1,3 +1,4 @@
+import { useBackHandler } from "../navigation/useBackHandler"
 import OverlayContainer from "./Overlay"
 import { useOverlayStore } from "./useOverlayStore"
 
@@ -6,6 +7,15 @@ import { useOverlayStore } from "./useOverlayStore"
  */
 function OverlayProvider() {
   const overlayStore = useOverlayStore()
+
+  // Handle Android back button - close overlay if any are open
+  useBackHandler(() => {
+    if (overlayStore.overlays?.length > 0) {
+      overlayStore.pop()
+      return true // Prevent default behavior (app exit)
+    }
+    return false // Allow default behavior
+  }, overlayStore.overlays?.length > 0)
 
   if (overlayStore.overlays?.length > 0) {
     return overlayStore.overlays.map((overlayItem) => (

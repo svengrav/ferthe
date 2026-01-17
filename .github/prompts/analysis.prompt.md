@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: agent
 ---
 
 Analyse the code and architecture and provide feedback as markdown file.

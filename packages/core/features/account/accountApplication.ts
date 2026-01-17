@@ -10,50 +10,50 @@ import {
   AccountSession,
   FirebaseConfig,
   Result,
-  SMSCode,
   SMSCodeRequest,
   SMSVerificationResult,
   SessionValidationResult,
+  TwilioVerification,
   createErrorResult,
   createSuccessResult,
 } from '@shared/contracts/index.ts'
 import { JWTService, createJWTService } from './jwtService.ts'
 import { SMSService, createSMSService } from './smsService.ts'
 
-export interface AccountApplicationActions extends AccountApplicationContract {}
+export interface AccountApplicationActions extends AccountApplicationContract { }
 
 interface AccountApplicationOptions {
   accountStore: Store<Account>
   accountSessionStore: Store<AccountSession>
-  smsCodeStore: Store<SMSCode>
+  twilioVerificationStore: Store<TwilioVerification>
   smsConnector?: SMSConnector
   smsService?: SMSService
   jwtService?: JWTService
 }
 
 export function createAccountApplication(options: AccountApplicationOptions): AccountApplicationActions {
-  const { accountStore, accountSessionStore, smsCodeStore, smsConnector, smsService = createSMSService(), jwtService } = options
+  const { accountStore, accountSessionStore, twilioVerificationStore, smsConnector, smsService = createSMSService(), jwtService } = options
   const { createJWT, verifyJWT } = jwtService || createJWTService()
 
   // Helper functions
-  const findSMSRequestByPhone = async (phoneNumber: string): Promise<SMSCode | null> => {
+  const findVerificationByPhone = async (phoneNumber: string): Promise<TwilioVerification | null> => {
     try {
-      const allRequestsResult = await smsCodeStore.list()
-      if (!allRequestsResult.success) {
+      const allVerificationsResult = await twilioVerificationStore.list()
+      if (!allVerificationsResult.success) {
         return null
       }
-      const allRequests = allRequestsResult.data || []
+      const allVerifications = allVerificationsResult.data || []
 
-      for (const request of allRequests) {
-        const isMatch = await smsService.verifyPhoneHash(phoneNumber, request.phoneHash)
+      for (const verification of allVerifications) {
+        const isMatch = await smsService.verifyPhoneHash(phoneNumber, verification.phoneHash)
         if (isMatch) {
-          return request
+          return verification
         }
       }
 
       return null
     } catch (error) {
-      console.error('Error finding SMS request by phone:', error)
+      console.error('Error finding verification by phone:', error)
       return null
     }
   }
@@ -81,7 +81,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       return null
     }
   }
-  const createAuthSession = async (accountId: string): Promise<AccountSession> => {
+  const createAuthSession = (accountId: string): AccountSession => {
     const expiresAt = new Date()
     expiresAt.setFullYear(expiresAt.getFullYear() + 1) // 1 year expiry for verified accounts
 
@@ -100,64 +100,88 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
   }
 
   // API methods
-  const requestSMSCode = async (phoneNumber: string, deviceInfo?: AccountDeviceInfo): Promise<Result<SMSCodeRequest>> => {
+  const requestSMSCode = async (phoneNumber: string, _deviceInfo?: AccountDeviceInfo): Promise<Result<SMSCodeRequest>> => {
     try {
       const isValidPhoneNumber = smsService.validatePhoneNumber(phoneNumber)
       if (!isValidPhoneNumber.valid) {
         return createErrorResult('INVALID_PHONE_NUMBER')
       }
 
-      const existingRequest = await findSMSRequestByPhone(phoneNumber)
-      if (existingRequest) {
-        await smsCodeStore.delete(existingRequest.id)
+      if (!smsConnector) {
+        return createErrorResult('SMS_CONNECTOR_NOT_CONFIGURED')
       }
 
-      const codeRequest = await smsService.generateCodeRequest(phoneNumber)
-      const createResult = await smsCodeStore.create(codeRequest)
+      // Delete existing verification for this phone number
+      const existingVerification = await findVerificationByPhone(phoneNumber)
+      if (existingVerification) {
+        await twilioVerificationStore.delete(existingVerification.id)
+      }
+
+      // Normalize phone number to international format for Twilio
+      const normalizedPhoneNumber = smsService.normalizePhoneNumber(phoneNumber)
+
+      // Request verification via Twilio Verify API
+      const twilioRequest = await smsConnector.requestVerification(normalizedPhoneNumber)
+
+      // Create phone hash and store verification
+      const phoneHash = await smsService.createPhoneHash(phoneNumber)
+      const verification: TwilioVerification = {
+        id: createCuid2(),
+        phoneHash,
+        verificationSid: twilioRequest.verificationSid,
+        expiresAt: twilioRequest.expiresAt,
+        createdAt: new Date(),
+        verified: false,
+      }
+
+      const createResult = await twilioVerificationStore.create(verification)
       if (!createResult.success) {
         return createErrorResult('REQUEST_SMS_CODE_ERROR')
       }
 
-      const smsMessage = smsService.createSMSMessage(phoneNumber, codeRequest.code, codeRequest.expiresAt, codeRequest.id)
-
-      if (smsConnector) {
-        await smsConnector.sendSMS(smsMessage)
-      } else {
-        console.warn('No SMS connector configured, skipping SMS sending')
-      }
       const result: SMSCodeRequest = {
-        requestId: codeRequest.id,
-        expiresAt: codeRequest.expiresAt,
+        requestId: verification.id,
+        expiresAt: verification.expiresAt,
       }
 
       return createSuccessResult(result)
-    } catch (error: any) {
-      return createErrorResult('REQUEST_SMS_CODE_ERROR', { originalError: error.message })
+    } catch (error: unknown) {
+      return createErrorResult('REQUEST_SMS_CODE_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 
   const verifySMSCode = async (phoneNumber: string, code: string): Promise<Result<SMSVerificationResult>> => {
     try {
-      const smsRequest = await findSMSRequestByPhone(phoneNumber)
-      if (!smsRequest) {
+      if (!smsConnector) {
+        return createErrorResult('SMS_CONNECTOR_NOT_CONFIGURED')
+      }
+
+      const verification = await findVerificationByPhone(phoneNumber)
+      if (!verification) {
         const result: SMSVerificationResult = {
           success: false,
-          error: 'No SMS request found for this phone number',
+          error: 'No verification request found for this phone number',
           errorCode: 'NO_REQUEST',
         }
         return createSuccessResult(result)
       }
-      const validation = smsService.validateCodeWithErrorDetails(smsRequest, code)
-      if (!validation.valid) {
+
+      // Normalize phone number to international format for Twilio
+      const normalizedPhoneNumber = smsService.normalizePhoneNumber(phoneNumber)
+
+      // Verify code via Twilio Verify API
+      const twilioResult = await smsConnector.verifyCode(normalizedPhoneNumber, code)
+
+      if (!twilioResult.success) {
         const result: SMSVerificationResult = {
           success: false,
-          error: validation.errorMessage || 'SMS validation failed',
-          errorCode: validation.errorCode || 'INVALID_CODE',
+          error: twilioResult.error || 'Code verification failed',
+          errorCode: 'INVALID_CODE',
         }
         return createSuccessResult(result)
       }
 
-      await smsCodeStore.update(smsRequest.id, { verified: true })
+      await twilioVerificationStore.update(verification.id, { verified: true })
 
       let account = await findAccountByPhoneHash(phoneNumber)
       if (!account) {
@@ -180,26 +204,27 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         account.lastLoginAt = new Date()
         await accountStore.update(account.id!, account)
       }
-      const authSession = await createAuthSession(account.id!)
+
+      const authSession = createAuthSession(account.id!)
       const result: SMSVerificationResult = {
         success: true,
         context: authSession,
       }
 
       return createSuccessResult(result)
-    } catch (error: any) {
-      return createErrorResult('VERIFY_SMS_CODE_ERROR', { originalError: error.message })
+    } catch (error: unknown) {
+      return createErrorResult('VERIFY_SMS_CODE_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 
-  const validateSession = async (sessionToken: string): Promise<Result<SessionValidationResult>> => {
+  const validateSession = (sessionToken: string): Promise<Result<SessionValidationResult>> => {
     try {
       // First, try to validate the JWT token
       const jwtPayload = verifyJWT(sessionToken)
 
       if (!jwtPayload) {
         const result: SessionValidationResult = { accountId: '', valid: false }
-        return createSuccessResult(result)
+        return Promise.resolve(createSuccessResult(result))
       }
 
       // JWT is valid, return the account info from the token
@@ -207,9 +232,9 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         accountId: jwtPayload.accountId,
         valid: true,
       }
-      return createSuccessResult(result)
-    } catch (error: any) {
-      return createErrorResult('VALIDATE_SESSION_ERROR', { originalError: error.message })
+      return Promise.resolve(createSuccessResult(result))
+    } catch (error: unknown) {
+      return Promise.resolve(createErrorResult('VALIDATE_SESSION_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' }))
     }
   }
 
@@ -227,8 +252,8 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       }
 
       return createSuccessResult(undefined)
-    } catch (error: any) {
-      return createErrorResult('REVOKE_SESSION_ERROR', { originalError: error.message })
+    } catch (error: unknown) {
+      return createErrorResult('REVOKE_SESSION_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
   const getAccount = async (context: AccountContext): Promise<Result<Account | null>> => {
@@ -245,8 +270,8 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       const accounts = accountsResult.data || []
       const account = accounts.find(account => account.id === accountId) || null
       return createSuccessResult(account)
-    } catch (error: any) {
-      return createErrorResult('GET_ACCOUNT_ERROR', { originalError: error.message })
+    } catch (error: unknown) {
+      return createErrorResult('GET_ACCOUNT_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   } // New methods for local account support
   const createLocalAccount = async (): Promise<Result<AccountSession>> => {
@@ -267,10 +292,10 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       }
 
       // Create session for local account with longer expiry
-      const authSession = await createLocalAuthSession(createResult.data!.id!)
+      const authSession = createLocalAuthSession(createResult.data!.id!)
       return createSuccessResult(authSession)
-    } catch (error: any) {
-      return createErrorResult('CREATE_LOCAL_ACCOUNT_ERROR', { originalError: error.message })
+    } catch (error: unknown) {
+      return createErrorResult('CREATE_LOCAL_ACCOUNT_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
   const upgradeToPhoneAccount = async (context: AccountContext, phoneNumber: string, code: string): Promise<Result<AccountSession>> => {
@@ -280,14 +305,21 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
-      // First verify the SMS code
-      const smsRequest = await findSMSRequestByPhone(phoneNumber)
-      if (!smsRequest) {
+      if (!smsConnector) {
+        return createErrorResult('SMS_CONNECTOR_NOT_CONFIGURED')
+      }
+
+      // Verify the SMS code via Twilio
+      const verification = await findVerificationByPhone(phoneNumber)
+      if (!verification) {
         return createErrorResult('NO_SMS_REQUEST')
       }
 
-      const isValid = smsService.validateCode(smsRequest, code)
-      if (!isValid) {
+      // Normalize phone number to international format for Twilio
+      const normalizedPhoneNumber = smsService.normalizePhoneNumber(phoneNumber)
+
+      const twilioResult = await smsConnector.verifyCode(normalizedPhoneNumber, code)
+      if (!twilioResult.success) {
         return createErrorResult('INVALID_SMS_CODE')
       }
 
@@ -319,16 +351,16 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       }
 
       await accountStore.update(localAccount.id!, updatedAccount)
-      await smsCodeStore.update(smsRequest.id, { verified: true })
+      await twilioVerificationStore.update(verification.id, { verified: true })
 
       // Create new session for upgraded account
-      const authSession = await createAuthSession(accountId)
+      const authSession = createAuthSession(accountId)
       return createSuccessResult(authSession)
-    } catch (error: any) {
-      return createErrorResult('UPGRADE_ACCOUNT_ERROR', { originalError: error.message })
+    } catch (error: unknown) {
+      return createErrorResult('UPGRADE_ACCOUNT_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
-  const createLocalAuthSession = async (accountId: string): Promise<AccountSession> => {
+  const createLocalAuthSession = (accountId: string): AccountSession => {
     // Local accounts get longer session duration (30 days)
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 30)
@@ -366,8 +398,8 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       }
 
       return createSuccessResult(firebaseConfig)
-    } catch (error: any) {
-      return createErrorResult('ACCOUNT_NOT_FOUND', { originalError: error.message })
+    } catch (error: unknown) {
+      return createErrorResult('ACCOUNT_NOT_FOUND', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 

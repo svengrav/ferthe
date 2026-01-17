@@ -80,14 +80,14 @@ export interface AccountDeviceInfo {
 }
 
 /**
- * Represents a an SMS verification code.
- * - ⚠️ Code has to be sent to the user's phone number.
- * - Contains the hashed phone number, code, expiration time, and verification status.
+ * Represents a Twilio verification request.
+ * - Phone number is never stored in plaintext, only as irreversible hash
+ * - verificationSid is provided by Twilio Verify API for code verification
  */
-export interface SMSCode {
+export interface TwilioVerification {
   id: string
-  phoneHash: string // Hashed phone number for security
-  code: string // The actual verification code sent to the user
+  phoneHash: string // Hashed phone number for security (argon2)
+  verificationSid: string // Twilio Verify API verification SID
   expiresAt: Date
   createdAt: Date
   verified: boolean

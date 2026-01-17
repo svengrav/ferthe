@@ -11,7 +11,7 @@ export const getAppConfig = () =>
     ENV_TYPE: IS_PRODUCTION ? 'production' : 'development',
 
     // API Configuration
-    API_ENDPOINT: IS_PRODUCTION ? 'https://foxhole.ferthe.eu/core/api/v1' : 'http://localhost:3000/core/api/v1',
+    API_ENDPOINT: IS_PRODUCTION ? 'https://foxhole.ferthe.eu/core/api/v1' : 'http://192.168.0.200:3000/core/api/v1',
     API_TIMEOUT: parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '5000'),
 
     // Storage Configuration

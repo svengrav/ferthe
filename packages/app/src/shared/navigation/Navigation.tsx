@@ -26,6 +26,7 @@ export function Navigation() {
     }}>
       <Tab.Navigator
         id={undefined}
+        initialRouteName='Map'
         screenOptions={{
           tabBarStyle: {
             height: constants.NAV_HEIGHT,

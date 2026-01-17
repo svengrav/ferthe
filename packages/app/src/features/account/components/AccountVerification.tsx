@@ -127,7 +127,7 @@ function AccountVerification() {
                 description: PHONE_VERIFICATION_NOTICE,
                 validation: (value) => {
                   if (!value) return 'Phone number is required'
-                  if (!/^\+?[1-9]\d{1,14}$/.test(value)) return 'Invalid phone number'
+                  if (!/^\+?[0-9]\d{1,14}$/.test(value)) return 'Invalid phone number'
                   return true
                 }
               }

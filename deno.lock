@@ -6,6 +6,7 @@
     "jsr:@std/assert@1": "1.0.16",
     "jsr:@std/bytes@1": "1.0.6",
     "jsr:@std/crypto@1": "1.0.5",
+    "jsr:@std/dotenv@0.225": "0.225.6",
     "jsr:@std/encoding@1": "1.0.10",
     "jsr:@std/encoding@^1.0.10": "1.0.10",
     "jsr:@std/http@1": "1.0.23",
@@ -26,6 +27,7 @@
     "npm:@types/react@^19.2.7": "19.2.8",
     "npm:@vitejs/plugin-react@^4.4.1": "4.7.0_vite@7.3.1__picomatch@4.0.3_@babel+core@7.28.5",
     "npm:argon2@*": "0.44.0",
+    "npm:argon2@0.44": "0.44.0",
     "npm:classnames@^2.5.1": "2.5.1",
     "npm:dotenv@16": "16.6.1",
     "npm:marked@^17.0.1": "17.0.1",
@@ -79,6 +81,9 @@
     },
     "@std/crypto@1.0.5": {
       "integrity": "0dcfbb319fe0bba1bd3af904ceb4f948cde1b92979ec1614528380ed308a3b40"
+    },
+    "@std/dotenv@0.225.6": {
+      "integrity": "1d6f9db72f565bd26790fa034c26e45ecb260b5245417be76c2279e5734c421b"
     },
     "@std/encoding@1.0.10": {
       "integrity": "8783c6384a2d13abd5e9e87a7ae0520a30e9f56aeeaa3bdf910a3eaaf5c811a1"
@@ -4736,6 +4741,11 @@
       "npm:twilio@^5.11.2"
     ],
     "members": {
+      "packages/core": {
+        "dependencies": [
+          "npm:argon2@0.44"
+        ]
+      },
       "packages/web": {
         "dependencies": [
           "npm:@deno/vite-plugin@^1.0.6",

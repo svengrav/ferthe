@@ -1,21 +1,12 @@
 import { createOakServer } from '@core/api/oak/server.ts'
-import { createStoreConnector, STORE_TYPES } from '@core/store/storeFactory.ts'
 import { createCoreContext } from '@core/index.ts'
+import { createStoreConnector, STORE_TYPES } from '@core/store/storeFactory.ts'
+import { createTwilioSMSConnector } from "../connectors/smsConnector.ts"
 import { getConfig } from './env.ts'
 import createRoutes from './routes.ts'
 
 const run = async () => {
   const config = await getConfig()
-
-  // Parse Twilio configuration from access key (JSON format)
-  let twilioConfig = undefined
-  if (config.TWILIO_ACCESS_KEY) {
-    try {
-      twilioConfig = JSON.parse(config.TWILIO_ACCESS_KEY)
-    } catch (error) {
-      console.warn('Failed to parse Twilio configuration:', error)
-    }
-  }
 
   const context = createCoreContext({
     secrets: {
@@ -28,9 +19,13 @@ const run = async () => {
         database: config.COSMOS_DATABASE_NAME,
         baseDirectory: config.JSON_STORE_BASE_DIRECTORY,
       }),
+      smsConnector: createTwilioSMSConnector({
+        authToken: config.TWILIO_ACCESS_KEY,
+        accountSid: config.TWILIO_ACCOUNT_SID,
+        verifyServiceId: config.TWILIO_VERIFY_SERVICE_ID,
+      })
     },
-    twilio: twilioConfig,
-    environment: config.FERTHE_ENV,
+    environment: config.ENV_TYPE,
   })
 
   const server = createOakServer({

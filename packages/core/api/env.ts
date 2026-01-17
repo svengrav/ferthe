@@ -2,23 +2,26 @@ import * as dotenv from 'dotenv'
 import { createEnvironmentConfig } from './config/environmentConfig.ts'
 dotenv.config()
 
-const IS_PRODUCTION = process.env.PRODUCTION?.toLowerCase() === 'true'
+const IS_PRODUCTION = Deno.env.get('PRODUCTION')?.toLowerCase() === 'true'
 
 export const getConfig = async () =>
-  createEnvironmentConfig({
+  await createEnvironmentConfig({
     // Development Environment
-    FERTHE_ENV: IS_PRODUCTION ? 'production' : 'development',
+    ENV_TYPE: IS_PRODUCTION ? 'production' : 'development',
 
     // STORE_TYPE: process.env.STORE_TYPE || 'memory', // Default store type for development
     STORE_TYPE: IS_PRODUCTION ? 'cosmos' : 'json',
 
     // API Configuration
-    API_PORT: process.env.PORT || '3000',
-    API_HOST: process.env.HOST || '0.0.0.0',
+    API_PORT: Deno.env.get('PORT') || '3000',
+    API_HOST: Deno.env.get('HOST') || '0.0.0.0',
     API_PREFIX: '/core/api',
-    ORIGINS: ['http://localhost:8081', 'http://localhost:3000', 'https://ferthe.eu'],
+    ORIGINS: ['http://localhost:8081', 'http://localhost:3000', 'http://192.168.0.200:8081', 'https://ferthe.eu'],
 
     KEY_VAULT_NAME: 'kv-ferthe-core',
+
+    TWILIO_ACCOUNT_SID: 'ACbc7e6616309b1343392a088525d4f7df',
+    TWILIO_VERIFY_SERVICE_ID: 'VA0e3f1ea84078e623af55f01e0aa6bf85',
 
     // Database
     COSMOS_DATABASE_NAME: IS_PRODUCTION ? 'ferthe-core-prod-v1' : 'ferthe-core-dev-v1',
