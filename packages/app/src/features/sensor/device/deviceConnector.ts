@@ -24,6 +24,10 @@ export const createDeviceConnector = (): DeviceConnector => {
     heading: 0,
   }
 
+  // Smoothing state for heading (EMA - Exponential Moving Average)
+  let smoothedHeading: number | null = null
+  const SMOOTHING_FACTOR = 0.3 // α: 30% new value, 70% previous value
+
   // Event emitter function to notify subscribers of location updates
   const emitUpdate = (update: DeviceLocation) => {
     // Create a new object to avoid reference issues
@@ -118,11 +122,25 @@ export const createDeviceConnector = (): DeviceConnector => {
       // Watch Heading with error handling
       headingSubscription = await Location.watchHeadingAsync(headingData => {
         try {
-          const heading = headingData.magHeading ?? headingData.trueHeading ?? 0
-          const roundedHeading = Math.round(heading / 5) * 5
+          const rawHeading = headingData.magHeading ?? headingData.trueHeading ?? 0
 
-          // Only update if heading changed significantly
-          if (Math.abs(roundedHeading - lastDeviceUpdate.heading) >= 5) {
+          // Apply Exponential Moving Average for smooth transitions
+          if (smoothedHeading === null) {
+            smoothedHeading = rawHeading
+          } else {
+            // Handle circular nature of degrees (0° = 360°)
+            let delta = rawHeading - smoothedHeading
+            if (delta > 180) delta -= 360
+            if (delta < -180) delta += 360
+            
+            smoothedHeading = (smoothedHeading + SMOOTHING_FACTOR * delta + 360) % 360
+          }
+
+          // Round to 10° increments for less jitter
+          const roundedHeading = Math.round(smoothedHeading / 10) * 10
+
+          // Only update if heading changed significantly (10° threshold)
+          if (Math.abs(roundedHeading - lastDeviceUpdate.heading) >= 10) {
             const updatedDevice = {
               ...lastDeviceUpdate, // Keep the current location
               heading: roundedHeading,
