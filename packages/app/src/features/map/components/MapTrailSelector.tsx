@@ -35,13 +35,24 @@ export const MapTrailSelector = () => {
   const openTrailSelector = (): void => {
     let removeOverlay: (() => void) | undefined
 
-    const renderTrailItem = ({ item }: { item: Trail }): React.ReactElement => (
-      <TouchableOpacity style={styles.trailItem} onPress={() => handleSelectTrail(item, removeOverlay!)}>
-        <View style={styles.trailInfo}>
-          <Text style={styles.trailName}>{item.name}</Text>
-        </View>
-      </TouchableOpacity>
-    )
+    const renderTrailItem = ({ item }: { item: Trail }): React.ReactElement => {
+      const isActive = item.id === activeTrail?.trail?.id
+      
+      return (
+        <TouchableOpacity 
+          style={[styles.trailItem, isActive && styles.trailItemActive]} 
+          onPress={() => handleSelectTrail(item, removeOverlay!)}
+        >
+          <View style={styles.avatarContainer}>
+            <TrailAvatar trail={item} />
+          </View>
+          <View style={styles.trailInfo}>
+            <Text style={styles.trailName}>{item.name}</Text>
+            <Text variant='secondary' size='small'>Trail</Text>
+          </View>
+        </TouchableOpacity>
+      )
+    }
 
     removeOverlay = setOverlay(
       <OverlayContent title='Select a Trail' variant='page' onClose={() => removeOverlay?.()}>
@@ -108,6 +119,15 @@ const useStyles = createThemedStyles(theme => ({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
+    borderRadius: 8,
+    gap: 12,
+  },
+  trailItemActive: {
+    backgroundColor: theme.deriveColor(theme.colors.background, -0.5),
+  },
+  avatarContainer: {
+    width: 50,
+    height: 50,
   },
   trailInfo: {
     flex: 1,
