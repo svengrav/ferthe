@@ -15,9 +15,9 @@ import { getAppConfig } from './env'
 import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
 import { getSession } from './features/account/stores/accountStore'
 import { getDeviceConnector } from './features/sensor/device/deviceConnector'
+import { useThemeStore } from './shared'
 import { createStoreConnector } from './shared/device'
 import OverlayProvider from './shared/overlay/OverlayProvider'
-import { useAppDimensions } from './shared/useApp'
 
 LogBox.ignoreAllLogs()
 
@@ -55,8 +55,8 @@ const initializeApp = async (apiContext: APIContext) => {
 }
 
 export default function App() {
-  const { setHeight, setWidth } = useAppDimensions()
   const [apiContext, setApiContext] = useState<APIContext | null>(null)
+  const theme = useThemeStore()
 
   useEffect(() => {
     const APP_ENV_CONFIG = getAppConfig()
@@ -75,11 +75,7 @@ export default function App() {
   }, [apiContext])
 
   return (
-    <SafeAreaProvider onLayout={(e) => {
-      const { height, width } = e.nativeEvent.layout
-      setHeight(height)
-      setWidth(width)
-    }}>
+    <SafeAreaProvider style={{ backgroundColor: theme.colors.background }}>
       <SplashScreenWrapper checkStatus={apiContext?.system.checkStatus}>
         <GestureHandlerRootView>
           <Notification />

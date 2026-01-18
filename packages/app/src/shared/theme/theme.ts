@@ -6,12 +6,12 @@ import { Colors, ThemeConstants } from './types'
  */
 
 export const DARK_THEME: Colors = {
-  background: 'rgb(18, 18, 30)',
+  background: '#12121e',
   onBackground: '#FFFFFF',
   primary: '#ffffff',
   secondary: '#696969',
   divider: '#7a7a7a38',
-  surface: 'rgb(32, 32, 43)',
+  surface: '#161623',
   disabled: '#7a7a7a',
   onDisabled: '#535353',
   primaryVariant: '',
@@ -77,7 +77,7 @@ export const TEXT_THEME = {
 }
 
 export const THEME_CONSTANTS: ThemeConstants = {
-  HEADER_HEIGHT: 56,
+  HEADER_HEIGHT: 60,
   NAV_HEIGHT: 56,
   BOTTOM_SHEET_HEIGHT: 80,
   OVERLAY_TRANSPARENCY: 0.5,

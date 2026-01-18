@@ -2,10 +2,12 @@ import { getAppContext } from '@app/appContext'
 import { useDiscoveryTrail } from '@app/features/discovery'
 import { useTrailData } from '@app/features/trail'
 import { TrailAvatar } from '@app/features/trail/components/TrailCard'
-import { IconButton, Modal, Text } from '@app/shared/components'
+import { IconButton, Text } from '@app/shared/components'
+import { OverlayContent } from '@app/shared/overlay'
+import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles, useThemeStore } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
-import React, { useState } from 'react'
+import React from 'react'
 import { FlatList, TouchableOpacity, View } from 'react-native'
 
 const useMapBottomSheet = () => {
@@ -24,58 +26,55 @@ export const MapTrailSelector = () => {
   const selectedTrail = activeTrail?.trail
   const theme = useThemeStore()
   const styles = useStyles(theme)
-  const [isOpen, setIsOpen] = useState<boolean>(false)
 
-  const toggleSelector = (): void => {
-    setIsOpen(!isOpen)
-  }
-
-  const handleSelectTrail = (trail: Trail): void => {
+  const handleSelectTrail = (trail: Trail, closeOverlay: () => void): void => {
     setActiveTrail(trail.id)
-    setIsOpen(false)
+    closeOverlay()
   }
 
-  const renderTrailItem = ({ item }: { item: Trail }): React.ReactElement => (
-    <TouchableOpacity style={styles.trailItem} onPress={() => handleSelectTrail(item)}>
-      <View style={styles.trailInfo}>
-        <Text style={styles.trailName}>{item.name}</Text>
+  const openTrailSelector = (): void => {
+    let removeOverlay: (() => void) | undefined
+
+    const renderTrailItem = ({ item }: { item: Trail }): React.ReactElement => (
+      <TouchableOpacity style={styles.trailItem} onPress={() => handleSelectTrail(item, removeOverlay!)}>
+        <View style={styles.trailInfo}>
+          <Text style={styles.trailName}>{item.name}</Text>
+        </View>
+      </TouchableOpacity>
+    )
+
+    removeOverlay = setOverlay(
+      <OverlayContent title='Select a Trail' variant='page' onClose={() => removeOverlay?.()}>
+        <FlatList data={trails} renderItem={renderTrailItem} keyExtractor={item => item.id} />
+      </OverlayContent>
+    )
+  }
+
+  return (
+    <TouchableOpacity style={styles.selector} onPress={openTrailSelector}>
+      {/* Trail Logo */}
+      {selectedTrail && (
+        <View style={styles.logoContainer}>
+          <TrailAvatar trail={selectedTrail} />
+        </View>
+      )}
+      
+      {/* Trail Name */}
+      <View style={styles.nameContainer}>
+        <Text style={styles.selectedTrailName}>
+          {selectedTrail ? selectedTrail.name : 'Select Trail'}
+        </Text>
+        <Text variant='secondary' size='small'>
+           Trail
+        </Text>
+      </View>
+      
+      {/* Selector Icon */}
+      <View style={styles.iconContainer}>
+        <IconButton name='swap-horiz' onPress={openTrailSelector} size={20} variant='outlined' />
       </View>
     </TouchableOpacity>
   )
-
-  return <>
-      <TouchableOpacity style={styles.selector} onPress={toggleSelector}>
-        {/* Trail Logo */}
-        {selectedTrail && (
-          <View style={styles.logoContainer}>
-            <TrailAvatar trail={selectedTrail} />
-          </View>
-        )}
-        
-        {/* Trail Name */}
-        <View style={styles.nameContainer}>
-          <Text style={styles.selectedTrailName}>
-            {selectedTrail ? selectedTrail.name : 'Select Trail'}
-          </Text>
-          <Text variant='secondary' size='small'>
-             Trail
-          </Text>
-        </View>
-        
-        {/* Selector Icon */}
-        <View style={styles.iconContainer}>
-          <IconButton name='swap-horiz' onPress={toggleSelector} size={20} variant='outlined' />
-        </View>
-      </TouchableOpacity>
-
-      <Modal label='Select a Trail' visible={isOpen} onClose={() => setIsOpen(false)}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <FlatList data={trails} renderItem={renderTrailItem} keyExtractor={item => item.id} />
-          </View>
-        </View>
-      </Modal>
-    </>
 }
 
 const useStyles = createThemedStyles(theme => ({
@@ -116,24 +115,6 @@ const useStyles = createThemedStyles(theme => ({
   trailName: {
     fontFamily: theme.text.primary.semiBold,
     fontSize: 14,
-    color: theme.colors.onSurface,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-start',
-  },
-  modalContent: {
-    backgroundColor: theme.colors.surface,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-  },
-  modalTitle: {
-    fontFamily: theme.text.primary.semiBold,
-    fontSize: 18,
     color: theme.colors.onSurface,
   },
 }))

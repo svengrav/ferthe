@@ -1,7 +1,8 @@
 import { createThemedStyles } from '@app/shared/theme'
-import { useApp, useAppDimensions } from '@app/shared/useApp'
+import { useApp } from '@app/shared/useApp'
 import React, { useEffect, useRef } from 'react'
 import { Animated, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { hexToRgbaWithIntensity } from '../utils/colors'
 import { useOverlayStore } from './useOverlayStore'
 
@@ -104,21 +105,22 @@ function OverlayContainer({
 }: OverlayContainerProps) {
   const { styles, theme } = useApp(useStyles)
   const { fadeAnim, scaleAnim, shouldRender } = useOverlayAnimation(visible)
-  const { height, width } = useAppDimensions()
+  const insets = useSafeAreaInsets()
+  
   if (!shouldRender || !styles) {
     return null
   }
 
-  const overlayHeight = height - theme.constants.HEADER_HEIGHT - theme.constants.NAV_HEIGHT + 1
   const overlayTransparency = transparent ? theme.constants.OVERLAY_TRANSPARENCY : 1
   const backgroundColor = hexToRgbaWithIntensity(theme.colors.background, overlayTransparency)
+  
   return (
     <Animated.View
       style={[
         styles.container,
         {
-          top: theme.constants.HEADER_HEIGHT,
-          height: overlayHeight,
+          top: insets.top,
+          bottom: insets.bottom,
           opacity: fadeAnim,
         }
       ]}
@@ -159,7 +161,7 @@ const useStyles = createThemedStyles(theme => ({
     right: 0,
     bottom: 0,
     zIndex: OVERLAY_Z_INDEX,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.background
   },
   animatedContainer: {
     height: '100%',
@@ -169,7 +171,6 @@ const useStyles = createThemedStyles(theme => ({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: OVERLAY_PADDING,
   },
   backdropPress: {
     position: 'absolute',

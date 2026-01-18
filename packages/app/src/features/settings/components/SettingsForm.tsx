@@ -1,28 +1,27 @@
-import React from 'react'
-import { View, StyleSheet } from 'react-native'
-import { PageModal, Picker, Card, Text } from '@app/shared/components'
+import { Card, Picker, Text } from '@app/shared/components'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { OverlayContent } from '@app/shared/overlay'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { Formik } from 'formik'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { LanguageOptions, Settings, ThemeMode } from '../types/types'
+import React from 'react'
+import { StyleSheet, View } from 'react-native'
 import useSettings from '../hooks/useSettings'
+import { LanguageOptions, Settings, ThemeMode } from '../types/types'
 
-interface SettingsForm {
+interface SettingsFormProps {
   onClose: () => void
   onSubmit: (settings: Settings) => void
-  visible: boolean
 }
 
-export const SettingsForm = ({ onClose, onSubmit, visible }: SettingsForm) => {
+export const SettingsForm = ({ onClose, onSubmit }: SettingsFormProps) => {
   const theme = useThemeStore()
   const styles = createStyles(theme)
   const { t } = useLocalizationStore()
   const { initialValues, handleSubmit } = useSettings()
 
   return (
-    <PageModal visible={visible} onClose={() => onClose()}>
+    <OverlayContent variant='page' title={t.settings.customize} onClose={onClose} scrollable>
       <Card>
-        <Text style={styles.title}>{t.settings.customize}</Text>
         <Text style={styles.subtitle}>{t.settings.yourSettings}</Text>
 
         <Formik
@@ -69,7 +68,7 @@ export const SettingsForm = ({ onClose, onSubmit, visible }: SettingsForm) => {
           )}
         </Formik>
       </Card>
-    </PageModal>
+    </OverlayContent>
   )
 }
 

@@ -17,7 +17,7 @@ const FONT_SIZE = 16
  * Hook to calculate dropdown menu position based on anchor element
  */
 const useMenuPosition = (
-  anchorRef: React.RefObject<View> | undefined,
+  anchorRef: React.RefObject<View | null>,
   isVisible: boolean,
   optionsCount: number
 ) => {
@@ -59,7 +59,7 @@ interface DropdownMenuProps {
   isVisible: boolean
   onClose: () => void
   options: Option[]
-  anchorRef?: React.RefObject<View>
+  anchorRef: React.RefObject<View | null>
 }
 
 /**

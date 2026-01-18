@@ -2,9 +2,10 @@ import { getAppContext } from '@app/appContext'
 import { SettingsForm } from '@app/features/settings'
 import { useTrailData, useTrailStatus } from '@app/features/trail/stores/trailStore'
 import { FertheLogo, Page, Text } from '@app/shared/components'
+import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { FlatList, View } from 'react-native'
 import TrailCard from './TrailCard'
 
@@ -25,7 +26,6 @@ const LIST_GAP = 16
 const useTrailScreen = () => {
   const { trails } = useTrailData()
   const status = useTrailStatus()
-  const [settingsVisible, setSettingsVisible] = useState(false)
   const { trailApplication } = getAppContext()
 
   // Initialize trail data if needed
@@ -39,20 +39,26 @@ const useTrailScreen = () => {
     trailApplication.requestTrailState()
   }
 
-  const openSettings = () => setSettingsVisible(true)
-  const closeSettings = () => setSettingsVisible(false)
+  const openSettings = () => {
+    let removeOverlay: (() => void) | undefined
+    
+    removeOverlay = setOverlay(
+      <SettingsForm 
+        onClose={() => removeOverlay?.()} 
+        onSubmit={() => removeOverlay?.()} 
+      />
+    )
+  }
 
   const isRefreshing = status === 'loading'
   const hasTrails = trails.length > 0
 
   return {
     trails,
-    settingsVisible,
     isRefreshing,
     hasTrails,
     handleRefresh,
     openSettings,
-    closeSettings,
   }
 }
 
@@ -64,21 +70,15 @@ function TrailScreen() {
   const { styles, locales, theme } = useApp(useStyles)
   const {
     trails,
-    settingsVisible,
     isRefreshing,
     hasTrails,
     handleRefresh,
     openSettings,
-    closeSettings,
   } = useTrailScreen()
 
   if (!styles) return null
 
   const pageOptions = [{ label: 'Settings', onPress: openSettings }]
-
-  const handleSettingsSubmit = () => {
-    // TODO: Implement settings submission logic
-  }
 
   const renderTrailItem = ({ item }) => (
     <TrailCard trail={item} />
@@ -107,13 +107,6 @@ function TrailScreen() {
           </View>
         )}
       </View>
-
-      {/* Settings modal */}
-      <SettingsForm
-        visible={settingsVisible}
-        onClose={closeSettings}
-        onSubmit={handleSettingsSubmit}
-      />
     </Page>
   )
 }
