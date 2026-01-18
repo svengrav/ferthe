@@ -9,7 +9,7 @@ import { DeviceLocation } from './types'
  * @param minDistanceMeters Minimum distance change to consider significant (in meters)
  * @returns true if the change exceeds minimum thresholds
  */
-export const hasSignificantLocationChange = (prevUpdate: DeviceLocation, currentUpdate: DeviceLocation, minHeadingDegrees = 1, minDistanceMeters = 1): boolean => {
+export const hasSignificantLocationChange = (prevUpdate: DeviceLocation, currentUpdate: DeviceLocation, minHeadingDegrees = 15, minDistanceMeters = 10): boolean => {
   // Warn if we get 0,0 coordinates (likely an error)
   if (currentUpdate.location.lat === 0 && currentUpdate.location.lon === 0) {
     console.warn('Received 0,0 coordinates - potential GPS issue')

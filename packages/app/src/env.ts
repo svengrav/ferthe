@@ -17,6 +17,7 @@ export const getAppConfig = () =>
     // Storage Configuration
     STORE_TYPE: IS_PRODUCTION ? 'secure' : 'json',
     JSON_STORE_BASE_DIRECTORY: '../_data/app', // dev only, secure in production
+    JSON_STORE_SERVER_URL: IS_PRODUCTION ? undefined : 'http://192.168.0.200:3010',
 
     // Features
     ENABLE_LOGGER: !IS_PRODUCTION,

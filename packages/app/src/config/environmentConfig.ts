@@ -16,6 +16,7 @@ export interface AppEnvironmentConfig {
   // Storage Configuration
   STORE_TYPE: 'secure' | 'memory' | 'json'
   JSON_STORE_BASE_DIRECTORY: string
+  JSON_STORE_SERVER_URL?: string
 
   // Features
   ENABLE_LOGGER: boolean

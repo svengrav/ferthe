@@ -90,7 +90,6 @@ export const createDeviceConnector = (): DeviceConnector => {
       locationSubscription = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
-          timeInterval: 1000,
           distanceInterval: 5,
         },
         newLocation => {
