@@ -4,7 +4,7 @@ import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { useEffect } from 'react'
 import { useDiscoveryData, useDiscoveryStatus } from '../stores/discoveryStore'
-import { DiscoveryImageCardList } from './DiscoveryCardList'
+import { DiscoveryCardList } from './DiscoveryCardList'
 
 // Status constants
 const STATUS_UNINITIALIZED = 'uninitialized'
@@ -55,7 +55,7 @@ function DiscoveryScreen() {
     <Page >
       <Text style={theme.layout.header}>Discoveries</Text>
 
-      <DiscoveryImageCardList
+      <DiscoveryCardList
         cards={cards}
         refreshing={isLoading}
         onRefresh={requestDiscoveryState}

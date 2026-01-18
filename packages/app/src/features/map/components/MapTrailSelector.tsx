@@ -1,16 +1,27 @@
+import { getAppContext } from '@app/appContext'
+import { useDiscoveryTrail } from '@app/features/discovery'
+import { useTrailData } from '@app/features/trail'
+import { TrailAvatar } from '@app/features/trail/components/TrailCard'
 import { IconButton, Modal, Text } from '@app/shared/components'
 import { createThemedStyles, useThemeStore } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
 import React, { useState } from 'react'
 import { FlatList, TouchableOpacity, View } from 'react-native'
 
-interface MapTrailSelectorProps {
-  trails: Trail[]
-  selectedTrail?: Trail
-  onSelectTrail: (trail: Trail) => void
+const useMapBottomSheet = () => {
+  const { trails } = useTrailData()
+  const activeTrail = useDiscoveryTrail()
+  const { discoveryApplication } = getAppContext()
+  return {
+    trails,
+    activeTrail,
+    setActiveTrail: discoveryApplication.setActiveTrail,
+  }
 }
 
-export const MapTrailSelector = ({ trails, selectedTrail, onSelectTrail }: MapTrailSelectorProps) => {
+export const MapTrailSelector = () => {
+  const { trails, activeTrail, setActiveTrail } = useMapBottomSheet()
+  const selectedTrail = activeTrail?.trail
   const theme = useThemeStore()
   const styles = useStyles(theme)
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -20,7 +31,7 @@ export const MapTrailSelector = ({ trails, selectedTrail, onSelectTrail }: MapTr
   }
 
   const handleSelectTrail = (trail: Trail): void => {
-    onSelectTrail(trail)
+    setActiveTrail(trail.id)
     setIsOpen(false)
   }
 
@@ -32,13 +43,29 @@ export const MapTrailSelector = ({ trails, selectedTrail, onSelectTrail }: MapTr
     </TouchableOpacity>
   )
 
-  const renderModal = (): React.ReactElement => (
-    <>
+  return <>
       <TouchableOpacity style={styles.selector} onPress={toggleSelector}>
-        <View style={styles.selectedTrailDisplay}>
-          <Text style={styles.selectedTrailName}>{selectedTrail ? selectedTrail.name : 'change'}</Text>
+        {/* Trail Logo */}
+        {selectedTrail && (
+          <View style={styles.logoContainer}>
+            <TrailAvatar trail={selectedTrail} />
+          </View>
+        )}
+        
+        {/* Trail Name */}
+        <View style={styles.nameContainer}>
+          <Text style={styles.selectedTrailName}>
+            {selectedTrail ? selectedTrail.name : 'Select Trail'}
+          </Text>
+          <Text variant='secondary' size='small'>
+             Trail
+          </Text>
         </View>
-        <IconButton name='expand-more' onPress={toggleSelector} size={16} variant='outlined' />
+        
+        {/* Selector Icon */}
+        <View style={styles.iconContainer}>
+          <IconButton name='swap-horiz' onPress={toggleSelector} size={20} variant='outlined' />
+        </View>
       </TouchableOpacity>
 
       <Modal label='Select a Trail' visible={isOpen} onClose={() => setIsOpen(false)}>
@@ -49,52 +76,33 @@ export const MapTrailSelector = ({ trails, selectedTrail, onSelectTrail }: MapTr
         </View>
       </Modal>
     </>
-  )
-
-  return renderModal()
 }
 
 const useStyles = createThemedStyles(theme => ({
-  dropdownContainer: {
-    position: 'relative',
-    zIndex: 1000,
-  },
   selector: {
-    paddingHorizontal: 4,
-    paddingVertical: 4,
+    paddingVertical: 8,
     flexDirection: 'row',
+    paddingHorizontal: 8,
     alignItems: 'center',
-    backgroundColor: theme.colors.surface,
-    borderRadius: 8,
-    alignSelf: 'center',
+    borderTopColor: theme.colors.divider,
+    borderTopWidth: 1,
+    gap: 12,
   },
-  selectedTrailDisplay: {},
+  logoContainer: {
+    width: 50,
+    height: 50,
+  },
+  nameContainer: {
+    flex: 1,
+  },
+  iconContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   selectedTrailName: {
     fontFamily: theme.text.primary.semiBold,
-    fontSize: 12,
+    fontSize: 14,
     color: theme.colors.onSurface,
-  },
-  selectedTrailType: {
-    fontFamily: theme.text.primary.regular,
-    fontSize: 12,
-    color: theme.deriveColor(theme.colors.onSurface, 0.7),
-  },
-  dropdownList: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    backgroundColor: theme.colors.surface,
-    borderRadius: 8,
-    marginTop: 4,
-    maxHeight: 300,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: theme.deriveColor(theme.colors.divider, 0.3),
-    elevation: 4,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
   },
   trailItem: {
     flexDirection: 'row',

@@ -1,5 +1,5 @@
 import { Theme, useThemeStore } from '@app/shared/theme'
-import { SafeAreaView, StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { IconButton } from '../button/Button'
 import { FertheLabel } from '../ferthe/Logo'
 import Text from '../text/Text'
@@ -16,7 +16,7 @@ const PageHeader = ({ label, action, options }: PageHeaderProps) => {
   const styles = createStyles(theme)
   const showOptions = options && options.length > 0
   return (
-    <SafeAreaView style={styles.header}>
+    <View style={styles.header}>
       <View style={styles.leftContainer}>{action && action}</View>
       <View style={styles.labelContainer}>
         {label ? (
@@ -28,7 +28,7 @@ const PageHeader = ({ label, action, options }: PageHeaderProps) => {
       <View style={styles.rightContainer}>
         {showOptions && <IconButton variant='outlined' options={options} name={'more-vert'} style={styles.iconButton} />}
       </View>
-    </SafeAreaView>
+    </View>
   )
 }
 
@@ -40,7 +40,6 @@ const createStyles = (theme: Theme) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      backgroundColor: theme.colors.surface,
       paddingVertical: 8,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.divider,

@@ -59,7 +59,7 @@ interface TrailCardProps {
 /**
  * Avatar component for displaying trail initial
  */
-function TrailAvatar({ trail }: { trail: Trail }) {
+export function TrailAvatar({ trail }: { trail: Trail }) {
   const { styles } = useApp(useAvatarStyles)
 
   if (!styles) return null

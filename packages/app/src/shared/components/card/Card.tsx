@@ -1,7 +1,6 @@
 import { Theme, useThemeStore } from '@app/shared/theme'
 import React, { forwardRef } from 'react'
 import Native, { StyleSheet, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 interface CardProps extends Native.ViewProps {
   children?: React.ReactNode
@@ -12,9 +11,9 @@ const Card = forwardRef<View, CardProps>(({ children, style, ...props }, ref) =>
   const styles = createStyles(theme)
 
   return (
-    <SafeAreaView ref={ref} style={[styles.container, style]} edges={['top']} {...props}>
+    <View ref={ref} style={[styles.container, style]} edges={['top']} {...props}>
       {children}
-    </SafeAreaView>
+    </View>
   )
 })
 

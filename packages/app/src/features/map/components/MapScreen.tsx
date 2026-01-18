@@ -5,9 +5,9 @@ import { useEffect, useRef } from 'react'
 import { Animated, View } from 'react-native'
 import { useMapStatus, useMapViewport, useSetViewport } from '../stores/mapStore'
 import { Map } from './Map'
-import { MapBottomSheet } from './MapBottomSheet'
 import MapCompass from './MapCompass'
 import MapDiscoveryCard from './MapDiscoveryCard'
+import { MapTrailSelector } from './MapTrailSelector'
 
 function MapScreen() {
   const { styles, context } = useApp(theme => useStyles(theme))
@@ -49,8 +49,8 @@ function MapScreen() {
               <Map />
             </Animated.View>
           )}
-          <MapBottomSheet />
         </View>
+        <MapTrailSelector />
       </View>
     </Page>
   )
@@ -63,9 +63,7 @@ const useStyles = createThemedStyles(theme => ({
   },
   container: {
     overflow: 'hidden',
-    borderRadius: 10,
     flex: 1,
-    backgroundColor: theme.colors.surface,
   },
 }))
 

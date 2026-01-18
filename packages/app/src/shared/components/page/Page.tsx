@@ -2,7 +2,7 @@ import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { StyleProp, View, ViewStyle } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Option } from '../types'
 import { PageHeader } from './PageHeader'
 
@@ -22,6 +22,7 @@ interface PageProps {
  */
 function Page({ children, label, style, options, scrollable = false }: PageProps) {
   const { styles } = useApp(useStyles)
+  const insets = useSafeAreaInsets()
 
   if (!styles) return null
 
@@ -30,7 +31,7 @@ function Page({ children, label, style, options, scrollable = false }: PageProps
   const contentProps = scrollable ? { contentContainerStyle: { flexGrow: 1 } } : {}
 
   return (
-    <SafeAreaView style={[styles.page, style]} edges={['top']}>
+    <View style={[styles.page, style, { paddingTop: insets.top}]} >
       {/* Page header with optional label and actions */}
       <PageHeader label={label} options={options} />
 
@@ -38,7 +39,7 @@ function Page({ children, label, style, options, scrollable = false }: PageProps
       <ContentContainer style={styles.container} {...contentProps}>
         {children}
       </ContentContainer>
-    </SafeAreaView>
+    </View>
   )
 }
 
@@ -48,9 +49,7 @@ const useStyles = createThemedStyles(theme => ({
     backgroundColor: theme.colors.background,
   },
   container: {
-    padding: CONTAINER_PADDING,
     flex: 1,
-    flexGrow: 1,
     backgroundColor: theme.colors.background,
   },
 }))

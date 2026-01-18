@@ -30,7 +30,7 @@ function useDiscoveryCardList() {
   }
 }
 
-export function DiscoveryImageCardList({
+export function DiscoveryCardList({
   cards,
   refreshing,
   onRefresh,
