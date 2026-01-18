@@ -132,7 +132,7 @@ export const createDeviceConnector = (): DeviceConnector => {
             let delta = rawHeading - smoothedHeading
             if (delta > 180) delta -= 360
             if (delta < -180) delta += 360
-            
+
             smoothedHeading = (smoothedHeading + SMOOTHING_FACTOR * delta + 360) % 360
           }
 
