@@ -218,11 +218,13 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
     const { setDiscoveries } = getDiscoveryActions()
     const { setSnap } = getDiscoveryTrailActions()
+    const { status } = getDiscoveryTrailData()
     const trailId = getDiscoveryTrailId()
     const { discoveries } = getDiscoveryData()
-    if (!trailId) {
+    
+    // Vermeide Processing während Loading oder wenn kein Trail gesetzt ist
+    if (status === 'loading' || !trailId) {
       logger.warn('No active discovery trail set, skipping location processing.')
-      await loadDiscoveryTrailFromProfile(accountSession.data)
       return
     }
 

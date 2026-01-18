@@ -31,7 +31,7 @@ export const discoveryTrailStore = create<DiscoveryTrailData & DiscoveryTrailAct
   error: undefined,
 
   // Discovery Trail specific data
-  trailId: '',
+  trailId: undefined,
   trail: undefined,
   discoveries: [],
   spots: [],
