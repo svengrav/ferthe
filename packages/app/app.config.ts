@@ -12,15 +12,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-asset",
     "expo-secure-store",
     [
-    "expo-build-properties",
-    {
-      android: {
-        compileSdkVersion: 35,
-        targetSdkVersion: 35,
-        minSdkVersion: 24
+      "expo-build-properties",
+      {
+        android: {
+          compileSdkVersion: 35,
+          targetSdkVersion: 35,
+          minSdkVersion: 24
+        }
       }
-    }
-  ],
+    ],
 
   ],
   splash: {
@@ -44,6 +44,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#1B1C21',
     },
     package: 'de.ferthe.app',
+    navigationBar: {
+      backgroundColor: '#1B1C21',
+    },
   },
   web: {
     favicon: './assets/favicon.png',

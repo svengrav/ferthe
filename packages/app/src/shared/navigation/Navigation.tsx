@@ -8,6 +8,7 @@ import { useLocalizationStore } from '@app/shared/localization/useLocalizationSt
 import useThemeStore from '@app/shared/theme/useThemeStore'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { NavigationContainer } from '@react-navigation/native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useOverlayStore } from '../overlay/useOverlayStore'
 import { CardIcon, TreeIcon } from './NavigationIcons'
 import { navigationRef } from './navigationRef'
@@ -18,6 +19,7 @@ export function Navigation() {
   const { colors, constants } = useThemeStore()
   const { t } = useLocalizationStore()
   const clearAll = useOverlayStore((s) => s.clearAll)
+  const insets = useSafeAreaInsets()
 
   return (
     <NavigationContainer ref={navigationRef} onStateChange={() => {
@@ -29,7 +31,8 @@ export function Navigation() {
         initialRouteName='Map'
         screenOptions={{
           tabBarStyle: {
-            height: constants.NAV_HEIGHT,
+            height: constants.NAV_HEIGHT + insets.bottom,
+            paddingBottom: insets.bottom,
             backgroundColor: colors.background,
             elevation: 0,
             shadowOpacity: 0,
