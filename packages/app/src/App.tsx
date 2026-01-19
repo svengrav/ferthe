@@ -3,77 +3,109 @@
 // Web Only:
 import '@expo/metro-runtime'
 // ---------------------------------------
-import { Notification, SplashScreenWrapper } from '@app/shared/components'
+import { Notification, SplashView } from '@app/shared/components'
 import { Navigation } from '@app/shared/navigation/Navigation'
+import { Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter'
+import {
+  Merriweather_400Regular,
+  Merriweather_600SemiBold,
+  Merriweather_700Bold,
+} from '@expo-google-fonts/merriweather'
+import * as Font from 'expo-font'
+import * as SplashScreen from 'expo-splash-screen'
 import { useEffect, useState } from 'react'
 import { LogBox } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { APIContext, createApiContext } from './api'
+import { createApiContext } from './api'
 import { configureAppContext } from './appContext'
 import { getAppConfig } from './env'
-import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
-import { getSession } from './features/account/stores/accountStore'
+import { AccountAuthWrapper, getSession } from './features/account/'
 import { getDeviceConnector } from './features/sensor/device/deviceConnector'
 import { createStoreConnector } from './shared/device'
 import OverlayProvider from './shared/overlay/OverlayProvider'
 
-LogBox.ignoreAllLogs()
+SplashScreen.preventAutoHideAsync()
 
-let appInitialized = false
+const useAppInitialization = () => {
+  const [isReady, setIsReady] = useState(false)
 
-const initializeApp = async (apiContext: APIContext) => {
-  if (appInitialized) return
+  useEffect(() => {
+    async function initialize() {
+      try {
+        const config = getAppConfig()
 
-  const APP_ENV_CONFIG = getAppConfig()
+        // Global Configuration
+        LogBox.ignoreAllLogs()
 
-  configureAppContext({
-    environment: APP_ENV_CONFIG.ENV_TYPE,
-    apiContext,
-    connectors: {
-      deviceConnector: getDeviceConnector(),
-      secureStoreConnector: createStoreConnector({
-        json: {
-          baseDirectory: APP_ENV_CONFIG.JSON_STORE_BASE_DIRECTORY,
-        },
-        type: APP_ENV_CONFIG.STORE_TYPE,
-      }),
-    },
-  })
+        // Load Fonts
+        await Font.loadAsync({
+          Inter_400Regular,
+          Inter_600SemiBold,
+          Inter_700Bold,
+          Merriweather_400Regular,
+          Merriweather_600SemiBold,
+          Merriweather_700Bold,
+        }).catch(() => {})
 
-  appInitialized = true
+        // Create API Context
+        const api = createApiContext({
+          getAccountSession: getSession,
+          apiEndpoint: config.API_ENDPOINT,
+          timeout: config.API_TIMEOUT,
+        })
+
+        // Backend Health Check - wait until available
+        while (true) {
+          const status = await api.system.checkStatus().catch(() => ({ available: false }))
+          if (status.available) break
+          await new Promise(resolve => setTimeout(resolve, 3000))
+        }
+
+        // Configure App Context
+        const context = configureAppContext({
+          environment: config.ENV_TYPE,
+          apiContext: api,
+          connectors: {
+            deviceConnector: getDeviceConnector(),
+            secureStoreConnector: createStoreConnector({
+              json: { baseDirectory: config.JSON_STORE_BASE_DIRECTORY },
+              type: config.STORE_TYPE,
+            }),
+          },
+        })
+
+        // Load Trail Data
+        await context.trailApplication.requestTrailState()
+
+        await SplashScreen.hideAsync()
+        setIsReady(true)
+      } catch (err) {
+        await SplashScreen.hideAsync()
+      }
+    }
+
+    initialize()
+  }, [])
+  return isReady
 }
 
 export default function App() {
-  const [apiContext, setApiContext] = useState<APIContext | null>(null)
+  const isReady = useAppInitialization()
 
-  useEffect(() => {
-    const APP_ENV_CONFIG = getAppConfig()
-    const context = createApiContext({
-      getAccountSession: getSession,
-      apiEndpoint: APP_ENV_CONFIG.API_ENDPOINT,
-      timeout: APP_ENV_CONFIG.API_TIMEOUT,
-    })
-    setApiContext(context)
-  }, [])
-
-  useEffect(() => {
-    if (apiContext) {
-      initializeApp(apiContext)
-    }
-  }, [apiContext])
+  if (!isReady) {
+    return <SplashView />
+  }
 
   return (
     <SafeAreaProvider>
-      <SplashScreenWrapper checkStatus={apiContext?.system.checkStatus}>
-        <GestureHandlerRootView>
-          <Notification />
-          <AccountAuthWrapper>
-            <Navigation />
-          </AccountAuthWrapper>
-          <OverlayProvider />
-        </GestureHandlerRootView>
-      </SplashScreenWrapper>
+      <GestureHandlerRootView>
+        <Notification />
+        <AccountAuthWrapper>
+          <Navigation />
+        </AccountAuthWrapper>
+        <OverlayProvider />
+      </GestureHandlerRootView>
     </SafeAreaProvider>
   )
 }
