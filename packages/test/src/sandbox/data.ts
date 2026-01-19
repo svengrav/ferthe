@@ -1,5 +1,5 @@
-import { Account, AccountSession, Discovery, DiscoveryMode, PreviewMode, ScanEvent, Spot, Trail } from '@shared/contracts'
 import { getCoreStoreIdentifiers } from '@core/index'
+import { Account, AccountSession, Discovery, DiscoveryMode, PreviewMode, ScanEvent, Spot, Trail, TrailSpot } from '@shared/contracts'
 
 interface DataSchema<T> {
   id: string
@@ -11,6 +11,7 @@ interface SandboxDataSet {
   account: DataSchema<Account>
   trails: DataSchema<Trail[]>
   spots: DataSchema<Spot[]>
+  trailSpots: DataSchema<TrailSpot[]>
   discoveries: DataSchema<Discovery[]>
   scanEvents: DataSchema<ScanEvent[]>
 }
@@ -53,7 +54,7 @@ const sandboxData: SandboxDataSet = {
         name: 'Discovery Trail',
         slug: 'discovery-trail-2025',
         description: 'Free exploration of interesting spots in your area',
-        spots: ['clx4j9k2n000301mh9e5p6t4w', 'clx4j9k2n000401mh2f7q8y5z', 'clx4j9k2n000501mh3h8r9a6b', 'clx4j9k2n000601mh4j9s2c7d', 'clx4j9k2n000701mh5k1t3e8f'],
+        spots: [],
         map: {
           image:
             'https://stferthecore.blob.core.windows.net/resources/discovery-bg-1.png?sp=r&st=2025-06-15T21:13:41Z&se=2025-07-05T05:13:41Z&spr=https&sv=2024-11-04&sr=b&sig=dOGCg%2B%2Fwm7LxUTRM0BLZMx076CYT8cph6Zh5eNGbw14%3D',
@@ -79,7 +80,7 @@ const sandboxData: SandboxDataSet = {
           image:
             'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/ascheberg-kirmes-trail-8010-map.png?sp=r&st=2025-06-19T12:01:23Z&se=2030-06-19T20:01:23Z&spr=https&sv=2024-11-04&sr=b&sig=jDXqCynRcQRMKt167h1vKCQjP2ycJcD40%2B4yzM4mB4k%3D',
         },
-        spots: ['cmc35ne37jbzs2db624de78df', 'cmc35ne37bh0ue0d1ed0cc2ef', 'cmc35ne37epofcdec5574228c', 'cmc35ne372b0oc4427fc3c857', 'cmc35ne37bm8k939abb15c837'],
+        spots: [],
         region: {
           center: { lat: 51.788581, lon: 7.619051 },
           radius: 206,
@@ -100,13 +101,12 @@ const sandboxData: SandboxDataSet = {
     ],
   },
   spots: {
-    id: STORES.TRAIL_SPOTS,
-    fileName: jsonFile(STORES.TRAIL_SPOTS),
+    id: STORES.SPOTS,
+    fileName: jsonFile(STORES.SPOTS),
     data: [
       // Spots for Discovery Trail
       {
         id: 'clx4j9k2n000301mh9e5p6t4w',
-        trailId: 'clx4j9k2n000101mh8d4k9n2q',
         name: 'Central Park Fountain',
         slug: 'central-park-fountain-8472',
         description: 'A beautiful modern fountain in the heart of the central park.',
@@ -127,7 +127,6 @@ const sandboxData: SandboxDataSet = {
       },
       {
         id: 'clx4j9k2n000401mh2f7q8y5z',
-        trailId: 'clx4j9k2n000101mh8d4k9n2q',
         name: 'Historic City Gate',
         slug: 'historic-city-gate-2948',
         description: 'The remaining gate of the old city wall, dating back to the 15th century.',
@@ -148,7 +147,6 @@ const sandboxData: SandboxDataSet = {
       },
       {
         id: 'clx4j9k2n000501mh3h8r9a6b',
-        trailId: 'clx4j9k2n000101mh8d4k9n2q',
         name: 'Botanical Garden',
         slug: 'botanical-garden-6138',
         description: 'A small botanical garden featuring local and exotic plants.',
@@ -169,7 +167,6 @@ const sandboxData: SandboxDataSet = {
       },
       {
         id: 'clx4j9k2n000601mh4j9s2c7d',
-        trailId: 'clx4j9k2n000101mh8d4k9n2q',
         name: 'Old Windmill',
         slug: 'old-windmill-4657',
         description: 'A preserved windmill from the 18th century that once produced flour for the town.',
@@ -190,7 +187,6 @@ const sandboxData: SandboxDataSet = {
       },
       {
         id: 'clx4j9k2n000701mh5k1t3e8f',
-        trailId: 'clx4j9k2n000101mh8d4k9n2q',
         name: 'Lakeside Viewpoint',
         slug: 'lakeside-viewpoint-9321',
         description: 'A peaceful spot by the lake with benches and a beautiful view.',
@@ -212,7 +208,6 @@ const sandboxData: SandboxDataSet = {
       // Spots for Trail 01
       {
         id: 'clx4j9k2n000801mh6m2u4g9h',
-        trailId: 'clx4j9k2n000201mh7b3m5r8x',
         name: 'Ancient Oak Tree',
         slug: 'ancient-oak-tree-7249',
         description: 'This 300-year-old oak tree stands as a natural landmark in the forest.',
@@ -233,7 +228,6 @@ const sandboxData: SandboxDataSet = {
       },
       {
         id: 'clx4j9k2n000901mh7n3v5i1j',
-        trailId: 'clx4j9k2n000201mh7b3m5r8x',
         name: 'Forest Stream',
         slug: 'forest-stream-3856',
         description: 'A small stream cutting through the forest, home to various amphibians.',
@@ -254,7 +248,6 @@ const sandboxData: SandboxDataSet = {
       },
       {
         id: 'clx4j9k2n001001mh8p4w6k2l',
-        trailId: 'clx4j9k2n000201mh7b3m5r8x',
         name: 'Wildflower Meadow',
         slug: 'wildflower-meadow-5143',
         description: 'An open area filled with native wildflowers and buzzing with pollinators.',
@@ -275,7 +268,6 @@ const sandboxData: SandboxDataSet = {
       },
       {
         id: 'clx4j9k2n001101mh9q5x7m3n',
-        trailId: 'clx4j9k2n000201mh7b3m5r8x',
         name: 'Scenic Viewpoint',
         slug: 'scenic-viewpoint-9067',
         description: 'A high point offering panoramic views of the surrounding countryside.',
@@ -297,7 +289,6 @@ const sandboxData: SandboxDataSet = {
       // Spots for Ascheberg Kirmes Trail
       {
         id: 'cmc35ne37jbzs2db624de78df',
-        trailId: 'cmc35a2qc12ome60777f19f2b',
         name: 'Startpunkt',
         slug: 'startpunkt-ascheberg',
         description: 'Der Startpunkt des Ascheberg Kirmes Trails.',
@@ -318,7 +309,6 @@ const sandboxData: SandboxDataSet = {
       },
       {
         id: 'cmc35ne37bh0ue0d1ed0cc2ef',
-        trailId: 'cmc35a2qc12ome60777f19f2b',
         name: 'Kirchplatz',
         slug: 'kirchplatz-ascheberg',
         description: 'Der historische Kirchplatz in Ascheberg.',
@@ -339,7 +329,6 @@ const sandboxData: SandboxDataSet = {
       },
       {
         id: 'cmc35ne37epofcdec5574228c',
-        trailId: 'cmc35a2qc12ome60777f19f2b',
         name: 'Weinlaube',
         slug: 'weinlaube-ascheberg',
         description: 'Die gemütliche Weinlaube auf der Kirmes.',
@@ -360,7 +349,6 @@ const sandboxData: SandboxDataSet = {
       },
       {
         id: 'cmc35ne372b0oc4427fc3c857',
-        trailId: 'cmc35a2qc12ome60777f19f2b',
         name: 'Raupe',
         slug: 'raupe-ascheberg',
         description: 'Das beliebte Raupe-Karussell auf der Kirmes.',
@@ -380,7 +368,6 @@ const sandboxData: SandboxDataSet = {
       },
       {
         id: 'cmc35ne37bm8k939abb15c837',
-        trailId: 'cmc35a2qc12ome60777f19f2b',
         name: 'Katharinenplatz',
         slug: 'katharinenplatz-ascheberg',
         description: 'Der zentrale Katharinenplatz mit Kirmesständen.',
@@ -397,6 +384,84 @@ const sandboxData: SandboxDataSet = {
         },
         createdAt: LAST_WEEK,
         updatedAt: YESTERDAY,
+      },
+    ],
+  },
+  trailSpots: {
+    id: STORES.TRAIL_SPOTS,
+    fileName: jsonFile(STORES.TRAIL_SPOTS),
+    data: [
+      // Discovery Trail spots
+      {
+        id: 'clx4j9k2n010101mh1a2b3c4d',
+        trailId: 'clx4j9k2n000101mh8d4k9n2q',
+        spotId: 'clx4j9k2n000301mh9e5p6t4w',
+        order: 0,
+        createdAt: LAST_WEEK,
+      },
+      {
+        id: 'clx4j9k2n010102mh2b3c4d5e',
+        trailId: 'clx4j9k2n000101mh8d4k9n2q',
+        spotId: 'clx4j9k2n000401mh2f7q8y5z',
+        order: 1,
+        createdAt: LAST_WEEK,
+      },
+      {
+        id: 'clx4j9k2n010103mh3c4d5e6f',
+        trailId: 'clx4j9k2n000101mh8d4k9n2q',
+        spotId: 'clx4j9k2n000501mh3h8r9a6b',
+        order: 2,
+        createdAt: LAST_WEEK,
+      },
+      {
+        id: 'clx4j9k2n010104mh4d5e6f7g',
+        trailId: 'clx4j9k2n000101mh8d4k9n2q',
+        spotId: 'clx4j9k2n000601mh4j9s2c7d',
+        order: 3,
+        createdAt: LAST_WEEK,
+      },
+      {
+        id: 'clx4j9k2n010105mh5e6f7g8h',
+        trailId: 'clx4j9k2n000101mh8d4k9n2q',
+        spotId: 'clx4j9k2n000701mh5k1t3e8f',
+        order: 4,
+        createdAt: LAST_WEEK,
+      },
+      // Ascheberg Trail spots
+      {
+        id: 'clx4j9k2n010106mh6f7g8h9i',
+        trailId: 'cmc35a2qc12ome60777f19f2b',
+        spotId: 'cmc35ne37jbzs2db624de78df',
+        order: 0,
+        createdAt: LAST_WEEK,
+      },
+      {
+        id: 'clx4j9k2n010107mh7g8h9i1j',
+        trailId: 'cmc35a2qc12ome60777f19f2b',
+        spotId: 'cmc35ne37bh0ue0d1ed0cc2ef',
+        order: 1,
+        createdAt: LAST_WEEK,
+      },
+      {
+        id: 'clx4j9k2n010108mh8h9i1j2k',
+        trailId: 'cmc35a2qc12ome60777f19f2b',
+        spotId: 'cmc35ne37epofcdec5574228c',
+        order: 2,
+        createdAt: LAST_WEEK,
+      },
+      {
+        id: 'clx4j9k2n010109mh9i2j3l4m',
+        trailId: 'cmc35a2qc12ome60777f19f2b',
+        spotId: 'cmc35ne372b0oc4427fc3c857',
+        order: 3,
+        createdAt: LAST_WEEK,
+      },
+      {
+        id: 'clx4j9k2n010110mh1j3k4m5n',
+        trailId: 'cmc35a2qc12ome60777f19f2b',
+        spotId: 'cmc35ne37bm8k939abb15c837',
+        order: 4,
+        createdAt: LAST_WEEK,
       },
     ],
   },

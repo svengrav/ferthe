@@ -12,16 +12,28 @@ export async function sandboxDataboxToLocalDatabase(outputPath?: string): Promis
 
     // Define output directory (custom path or default to _data in project root)
     // exports to {{workspaceRoot}}/_data/core by default
-    const outputDir = outputPath || join(Deno.cwd(), '../', './_data', 'core')
+    let outputDir = outputPath
+    if (!outputDir) {
+      // Get the workspace root from the script location
+      // Script is at packages/test/src/sandbox/export.ts
+      // Workspace root is ../../../..
+      const scriptUrl = new URL(import.meta.url)
+      const scriptPath = scriptUrl.pathname
+      const workspaceRoot = scriptPath.split('/packages/')[0]
+      outputDir = join(workspaceRoot, '_data', 'core')
+    }
 
     // Ensure output directory exists
     await Deno.mkdir(outputDir, { recursive: true })
 
-    Object.keys(sandboxData).forEach(key => {
+    // Write all files and wait for completion
+    const writePromises = Object.keys(sandboxData).map(key => {
       const dataArray = Array.isArray(sandboxData[key].data) ? sandboxData[key].data : [sandboxData[key].data]
-
-      Deno.writeTextFile(join(outputDir, sandboxData[key].fileName), JSON.stringify(dataArray, null, 2))
+      const filePath = join(outputDir, sandboxData[key].fileName)
+      return Deno.writeTextFile(filePath, JSON.stringify(dataArray, null, 2))
     })
+
+    await Promise.all(writePromises)
 
     console.log('✅ Successfully exported databox data to _data directory:')
     Object.keys(sandboxData).forEach(key => {

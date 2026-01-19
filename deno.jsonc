@@ -5,7 +5,8 @@
     "start:expo": "cd packages/app/ && npx expo start --dev-client",
     "build:web": "deno run -A build.ts",
     "lint": "deno lint",
-    "test": "deno test --allow-net --allow-env --allow-read"
+    "test": "deno test --allow-net --allow-env --allow-read",
+    "api:export": "deno run -A packages/test/src/sandbox/export.ts"
   },
   "workspace": [
     "packages/web",

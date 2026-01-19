@@ -143,18 +143,28 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       status: 'ready' as const,
     }
     setDiscoveryTrail(discoveryTrail)
+    
+    // Load discovered spots
+    await requestDiscoverySpots(accountSession.data, id)
+    
     emitDiscoveryTrailUpdated(discoveryTrail)
   }
 
   const requestDiscoverySpots = async (accountSession: AccountContext, trailId: string) => {
     const { setSpots } = getDiscoveryActions()
+    const { setDiscoveryTrail } = getDiscoveryTrailActions()
     if (!accountSession || !trailId) throw new Error('Account session or Trail ID not provided!')
     try {
       const result = await getDiscoveredSpots(accountSession, trailId)
       if (!result.data) return
 
       setSpots(result.data)
+      setDiscoveryTrail({ spots: result.data })
       logger.log(`Discovery spots for trail ${trailId} requested and set.`)
+      
+      // Emit update to trigger map refresh
+      const currentTrailData = getDiscoveryTrailData()
+      emitDiscoveryTrailUpdated(currentTrailData)
     } catch (error) {
       logger.error('Error retrieving discovery spots:', error)
     }
