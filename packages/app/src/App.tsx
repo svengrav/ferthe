@@ -20,10 +20,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { createApiContext } from './api'
 import { configureAppContext } from './appContext'
 import { getAppConfig } from './env'
-import { AccountAuthWrapper, getSession } from './features/account/'
+import { getSession } from './features/account/'
+import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
 import { getDeviceConnector } from './features/sensor/device/deviceConnector'
 import { createStoreConnector } from './shared/device'
-import OverlayProvider from './shared/overlay/OverlayProvider'
+import { OverlayProvider } from './shared/overlay'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -75,8 +76,11 @@ const useAppInitialization = () => {
           },
         })
 
-        // Load Trail Data
-        await context.trailApplication.requestTrailState()
+        // Load Trail and Discovery Data
+        await Promise.all([
+          context.trailApplication.requestTrailState(),
+          context.discoveryApplication.requestDiscoveryState()
+        ]).catch(error => console.error('Error loading initial app data:', error))
 
         await SplashScreen.hideAsync()
         setIsReady(true)

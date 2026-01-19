@@ -47,7 +47,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
   })
 
   discoveryTrailStore.subscribe(st => {
-    logger.log('Discovery Store Updated:', st)
+    logger.log('Discovery Store Updated')
   })
 
   discoveryApplication?.onNewDiscoveries(d => { })
@@ -57,8 +57,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     const viewboxSize = getMapState().viewport
     const { device } = getSensorData()
     if (!trail) {
-      logger.error('No trail found')
-      discoveryApplication?.requestDiscoveryState()
+      // Trail not loaded yet - silently return and wait for discovery state
       return
     }
     const { boundary, region } = calculateMapRegion(trail.region, device?.location)

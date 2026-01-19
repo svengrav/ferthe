@@ -53,7 +53,6 @@ export const MapTrailSelector = () => {
         </TouchableOpacity>
       )
     }
-
     removeOverlay = setOverlay(
       <OverlayContainer title='Select a Trail' variant='compact' onClose={() => removeOverlay?.()}>
         <FlatList data={trails} renderItem={renderTrailItem} keyExtractor={item => item.id} />

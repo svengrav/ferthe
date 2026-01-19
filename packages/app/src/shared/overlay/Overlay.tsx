@@ -1,4 +1,6 @@
-import { IconButton, PageHeader, Text } from '@app/shared/components'
+import { IconButton } from '@app/shared/components/button/Button'
+import PageHeader from '@app/shared/components/page/PageHeader'
+import Text from '@app/shared/components/text/Text'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import React, { useEffect, useRef } from 'react'
@@ -77,16 +79,7 @@ function OverlayProvider() {
   const overlayStore = useOverlayStore()
 
   if (overlayStore.overlays?.length > 0) {
-    return overlayStore.overlays.map((overlayItem) => (
-      <OverlayContainer
-        key={overlayItem.id}
-        visible
-        transparent={overlayItem.settings?.transparent}
-        closeOnBackdropPress={overlayItem.settings?.closeOnBackdropPress}
-      >
-        {overlayItem.overlay}
-      </OverlayContainer>
-    ))
+    return overlayStore.overlays.map((overlayItem) => (overlayItem.overlay))
   }
   return null
 }

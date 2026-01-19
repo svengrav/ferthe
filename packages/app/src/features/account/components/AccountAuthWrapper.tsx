@@ -1,4 +1,4 @@
-import { Page } from '@app/shared/components'
+import Page from '@app/shared/components/page/Page'
 import useThemeStore from '@app/shared/theme/useThemeStore'
 import React from 'react'
 import { View } from 'react-native'

@@ -1,8 +1,7 @@
-import { Theme, useThemeStore } from '@app/shared'
 import { Icon } from '@app/shared/components'
+import { Theme, useThemeStore } from '@app/shared/theme'
 import { memo, useState } from 'react'
-import { StyleSheet, View } from 'react-native'
-import { TouchableOpacity } from 'react-native-gesture-handler'
+import { Pressable, StyleSheet, View } from 'react-native'
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useMapScannerAnimation } from '../hooks/useMapScannerAnimation'
 import { useMapBoundary, useMapCanvas, useMapDevice, useMapScanner } from '../stores/mapStore'
@@ -75,9 +74,9 @@ const MapScannerControl = ({ startScan }: { startScan: () => void }) => {
   return (
     <View style={styles.controlsContainer}>
       <Animated.View style={animatedButtonStyle}>
-        <TouchableOpacity onPress={handleStartScan} disabled={isOnCooldown}>
+        <Pressable onPress={handleStartScan} disabled={isOnCooldown}>
           <Icon name="sensors" />
-        </TouchableOpacity>
+        </Pressable>
       </Animated.View>
     </View>
   )
