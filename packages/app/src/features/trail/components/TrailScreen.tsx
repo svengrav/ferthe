@@ -80,10 +80,6 @@ function TrailScreen() {
 
   const pageOptions = [{ label: 'Settings', onPress: openSettings }]
 
-  const renderTrailItem = ({ item }) => (
-    <TrailCard trail={item} />
-  )
-
   return (
     <Page options={pageOptions}>
       {/* Header section */}
@@ -95,7 +91,7 @@ function TrailScreen() {
           <FlatList
             data={trails}
             contentContainerStyle={styles.listContent}
-            renderItem={renderTrailItem}
+            renderItem={({ item }) => (<TrailCard trail={item} />)}
             keyExtractor={item => item.id}
             onRefresh={handleRefresh}
             refreshing={isRefreshing}
@@ -112,21 +108,7 @@ function TrailScreen() {
 }
 
 const useStyles = createThemedStyles(theme => ({
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: HEADER_PADDING_HORIZONTAL,
-    paddingVertical: HEADER_PADDING_VERTICAL,
-    marginBottom: HEADER_MARGIN_BOTTOM,
-  },
-  headerContent: {
-    paddingVertical: HEADER_PADDING_VERTICAL,
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    justifyContent: 'flex-end',
-  },
+
   title: {
     ...theme.text.size.lg,
     fontFamily: theme.text.primary.semiBold,

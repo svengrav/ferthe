@@ -11,13 +11,13 @@ export const getAppConfig = () =>
     ENV_TYPE: IS_PRODUCTION ? 'production' : 'development',
 
     // API Configuration
-    API_ENDPOINT: IS_PRODUCTION ? 'https://foxhole.ferthe.eu/core/api/v1' : 'http://192.168.0.200:3000/core/api/v1',
+    API_ENDPOINT: IS_PRODUCTION ? 'https://foxhole.ferthe.eu/core/api/v1' : 'http://localhost:3000/core/api/v1',
     API_TIMEOUT: parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '5000'),
 
     // Storage Configuration
     STORE_TYPE: IS_PRODUCTION ? 'secure' : 'json',
     JSON_STORE_BASE_DIRECTORY: '../_data/app', // dev only, secure in production
-    JSON_STORE_SERVER_URL: IS_PRODUCTION ? undefined : 'http://192.168.0.200:3010',
+    JSON_STORE_SERVER_URL: IS_PRODUCTION ? undefined : 'http://localhost:3010',
 
     // Features
     ENABLE_LOGGER: !IS_PRODUCTION,

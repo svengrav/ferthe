@@ -16,7 +16,7 @@ export const getConfig = async () =>
     API_PORT: Deno.env.get('PORT') || '3000',
     API_HOST: Deno.env.get('HOST') || '0.0.0.0',
     API_PREFIX: '/core/api',
-    ORIGINS: ['http://localhost:8081', 'http://localhost:3000', 'http://192.168.0.200:8081', 'https://ferthe.eu'],
+    ORIGINS: ['http://localhost:8081', 'http://localhost:3000', 'https://ferthe.eu'],
 
     KEY_VAULT_NAME: 'kv-ferthe-core',
 

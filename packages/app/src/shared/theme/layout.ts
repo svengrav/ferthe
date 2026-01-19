@@ -12,6 +12,7 @@ export const createLayoutTheme = (theme: ThemeBase): LayoutTheme => ({
     paddingHorizontal: DESIGN_TOKENS.spacing.md,
     paddingVertical: DESIGN_TOKENS.spacing.sm,
     marginBottom: DESIGN_TOKENS.spacing.sm,
+    paddingTop: 8,
   },
 
   title: {

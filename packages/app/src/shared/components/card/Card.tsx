@@ -11,7 +11,7 @@ const Card = forwardRef<View, CardProps>(({ children, style, ...props }, ref) =>
   const styles = createStyles(theme)
 
   return (
-    <View ref={ref} style={[styles.container, style]} edges={['top']} {...props}>
+    <View ref={ref} style={[styles.container, style]}  {...props}>
       {children}
     </View>
   )
@@ -20,10 +20,7 @@ const Card = forwardRef<View, CardProps>(({ children, style, ...props }, ref) =>
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
-      padding: 8,
-      backgroundColor: theme.colors.surface,
-      color: theme.colors.onBackground,
-      borderRadius: 8,
+      padding: 6,
     },
   })
 

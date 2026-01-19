@@ -3,7 +3,7 @@ import { useDiscoveryTrail } from '@app/features/discovery'
 import { useTrailData } from '@app/features/trail'
 import { TrailAvatar } from '@app/features/trail/components/TrailCard'
 import { IconButton, Text } from '@app/shared/components'
-import { OverlayContent } from '@app/shared/overlay'
+import { OverlayContainer } from '@app/shared/overlay'
 import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles, useThemeStore } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
@@ -55,9 +55,9 @@ export const MapTrailSelector = () => {
     }
 
     removeOverlay = setOverlay(
-      <OverlayContent title='Select a Trail' variant='page' onClose={() => removeOverlay?.()}>
+      <OverlayContainer title='Select a Trail' variant='compact' onClose={() => removeOverlay?.()}>
         <FlatList data={trails} renderItem={renderTrailItem} keyExtractor={item => item.id} />
-      </OverlayContent>
+      </OverlayContainer>
     )
   }
 

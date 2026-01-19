@@ -1,6 +1,6 @@
 import { Card, DropdownMenu, Image, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { OverlayContent } from '@app/shared/overlay'
+import { OverlayContainer } from '@app/shared/overlay'
 import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
@@ -33,9 +33,9 @@ const useTrailCard = (trail: Trail) => {
     let removeOverlay: (() => void) | undefined
 
     removeOverlay = setOverlay(
-      <OverlayContent title={trail.name} onClose={() => removeOverlay?.()}>
+      <OverlayContainer title={trail.name} onClose={() => removeOverlay?.()}>
         <TrailDetails trail={trail} />
-      </OverlayContent>
+      </OverlayContainer>
     )
   }
 

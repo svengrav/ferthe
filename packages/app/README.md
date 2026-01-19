@@ -20,6 +20,8 @@
 
 ```
 adb devices # Show devices
-adb reverse tcp:8081 tcp:8081
+adb reverse tcp:8081 tcp:8081; # EXPO 
+adb reverse tcp:3000 tcp:3000; # API
+adb reverse tcp:3010 tcp:3010; # API Storage
 adb install <app>
 ``` 

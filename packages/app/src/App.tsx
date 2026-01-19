@@ -10,12 +10,11 @@ import { LogBox } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { APIContext, createApiContext } from './api'
-import { configureAppContext, getAppContext } from './appContext'
+import { configureAppContext } from './appContext'
 import { getAppConfig } from './env'
 import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
 import { getSession } from './features/account/stores/accountStore'
 import { getDeviceConnector } from './features/sensor/device/deviceConnector'
-import { useThemeStore } from './shared'
 import { createStoreConnector } from './shared/device'
 import OverlayProvider from './shared/overlay/OverlayProvider'
 
@@ -42,21 +41,11 @@ const initializeApp = async (apiContext: APIContext) => {
     },
   })
 
-  // Load initial app data (trails and discovery state with last active trail)
-  const { trailApplication, discoveryApplication } = getAppContext()
-  try {
-    await trailApplication.requestTrailState()
-    await discoveryApplication.requestDiscoveryState()
-  } catch (error) {
-    console.error('Error loading initial app data:', error)
-  }
-
   appInitialized = true
 }
 
 export default function App() {
   const [apiContext, setApiContext] = useState<APIContext | null>(null)
-  const theme = useThemeStore()
 
   useEffect(() => {
     const APP_ENV_CONFIG = getAppConfig()
@@ -75,7 +64,7 @@ export default function App() {
   }, [apiContext])
 
   return (
-    <SafeAreaProvider style={{ backgroundColor: theme.colors.background }}>
+    <SafeAreaProvider>
       <SplashScreenWrapper checkStatus={apiContext?.system.checkStatus}>
         <GestureHandlerRootView>
           <Notification />

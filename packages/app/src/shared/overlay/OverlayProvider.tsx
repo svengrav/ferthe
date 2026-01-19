@@ -1,5 +1,5 @@
+import { View } from "react-native"
 import { useBackHandler } from "../navigation/useBackHandler"
-import OverlayContainer from "./Overlay"
 import { useOverlayStore } from "./useOverlayStore"
 
 /**
@@ -19,14 +19,7 @@ function OverlayProvider() {
 
   if (overlayStore.overlays?.length > 0) {
     return overlayStore.overlays.map((overlayItem) => (
-      <OverlayContainer
-        key={overlayItem.id}
-        visible
-        transparent={overlayItem.settings?.transparent}
-        closeOnBackdropPress={overlayItem.settings?.closeOnBackdropPress}
-      >
-        {overlayItem.overlay}
-      </OverlayContainer>
+      <View key={overlayItem.id}>{overlayItem.overlay}</View>
     ))
   }
   return null

@@ -1,9 +1,10 @@
+import { IconButton, PageHeader, Text } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import React, { useEffect, useRef } from 'react'
-import { Animated, TouchableOpacity, View } from 'react-native'
+import { Animated, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { hexToRgbaWithIntensity } from '../utils/colors'
+import { Option } from '../components/types'
 import { useOverlayStore } from './useOverlayStore'
 
 // Animation constants
@@ -15,6 +16,12 @@ const INITIAL_SCALE = 0.9
 const FINAL_SCALE = 1
 const OVERLAY_Z_INDEX = 1000
 const OVERLAY_PADDING = 16
+
+// Content styling constants
+const BORDER_RADIUS = 12
+const CONTENT_PADDING = 16
+
+export type OverlayVariant = 'compact' | 'fullscreen' | 'page'
 
 /**
  * Hook to manage overlay animation logic
@@ -86,25 +93,35 @@ function OverlayProvider() {
 
 
 interface OverlayContainerProps {
-  visible: boolean
+  visible?: boolean
   onClose?: () => void
   children: React.ReactNode
   transparent?: boolean
   closeOnBackdropPress?: boolean
+  variant?: OverlayVariant
+  title?: string
+  closable?: boolean
+  options?: Option[]
+  scrollable?: boolean
 }
 
 /**
- * Plain overlay container with animation and backdrop - no styling or content wrapper
+ * Overlay container with animation, backdrop, and content variants
+ * Supports compact (centered modal), fullscreen (default), and page (with PageHeader) layouts
  */
 function OverlayContainer({
   visible,
   onClose,
   children,
   transparent = true,
-  closeOnBackdropPress = true
+  variant = 'fullscreen',
+  title,
+  closable = true,
+  options,
+  scrollable = false
 }: OverlayContainerProps) {
   const { styles, theme } = useApp(useStyles)
-  const { fadeAnim, scaleAnim, shouldRender } = useOverlayAnimation(visible)
+  const { fadeAnim, scaleAnim, shouldRender } = useOverlayAnimation(visible ?? true)
   const insets = useSafeAreaInsets()
   
   if (!shouldRender || !styles) {
@@ -112,7 +129,83 @@ function OverlayContainer({
   }
 
   const overlayTransparency = transparent ? theme.constants.OVERLAY_TRANSPARENCY : 1
-  const backgroundColor = hexToRgbaWithIntensity(theme.colors.background, overlayTransparency)
+  
+  // Render content based on variant
+  const renderContent = () => {
+    // Compact variant - centered modal with rounded corners
+    if (variant === 'compact') {
+      return (
+        <View style={styles.compactContainer}>
+          {/* Header with title and close button */}
+          {(title || closable) && (
+            <View style={styles.compactHeader}>
+              {title && <Text style={styles.compactTitle}>{title}</Text>}
+              {closable && (
+                <IconButton
+                  name="close"
+                  variant="outlined"
+                  onPress={onClose}
+                  size={20}
+                />
+              )}
+            </View>
+          )}
+          {/* Content area */}
+          <View style={styles.compactContent}>{children}</View>
+        </View>
+      )
+    }
+
+    // Page variant - fullscreen with PageHeader
+    if (variant === 'page') {
+      const ContentContainer = scrollable ? ScrollView : View
+      const contentProps = scrollable 
+        ? { contentContainerStyle: styles.pageScrollContent } 
+        : { style: styles.pageContent }
+      
+      return (
+        <View style={styles.pageContainer}>
+          <PageHeader
+            label={title}
+            options={options}
+            action={<IconButton onPress={onClose} name='arrow-back' variant='outlined' size={24} />}
+          />
+          <ContentContainer {...contentProps}>
+            {children}
+          </ContentContainer>
+        </View>
+      )
+    }
+
+    // Default fullscreen variant
+    return (
+      <View style={[styles.fullscreenContainer]}>
+        {/* Header with title and close button */}
+        {(title || closable) && (
+          <View style={styles.fullscreenHeader}>
+            {title && (
+              <Text style={styles.fullscreenTitle}>
+                {title}
+              </Text>
+            )}
+            {closable && (
+              <IconButton
+                name="close"
+                variant="outlined"
+                onPress={onClose}
+                style={{ marginRight: -8 }}
+              />
+            )}
+          </View>
+        )}
+
+        {/* Content area */}
+        <View style={styles.fullscreenContent}>
+          {children}
+        </View>
+      </View>
+    )
+  }
   
   return (
     <Animated.View
@@ -133,21 +226,10 @@ function OverlayContainer({
           }
         ]}
       >
-        <View
-          style={[styles.overlay, { backgroundColor }]}
-          pointerEvents="box-none"
-        >
-          {closeOnBackdropPress && (
-            <TouchableOpacity
-              style={styles.backdropPress}
-              activeOpacity={1}
-              onPress={onClose}
-            />
-          )}
+
           <View style={styles.contentArea} pointerEvents="auto">
-            {children}
+            {renderContent()}
           </View>
-        </View>
       </Animated.View>
     </Animated.View>
   )
@@ -161,7 +243,6 @@ const useStyles = createThemedStyles(theme => ({
     right: 0,
     bottom: 0,
     zIndex: OVERLAY_Z_INDEX,
-    backgroundColor: theme.colors.background
   },
   animatedContainer: {
     height: '100%',
@@ -185,6 +266,73 @@ const useStyles = createThemedStyles(theme => ({
     height: '100%',
     borderRadius: 12,
     overflow: 'hidden',
+  },
+  
+  // Fullscreen variant (default)
+  fullscreenContainer: {
+    flex: 1,
+    borderRadius: BORDER_RADIUS,
+    backgroundColor: theme.colors.background,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  fullscreenHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: theme.constants.HEADER_HEIGHT,
+    paddingHorizontal: CONTENT_PADDING,
+    backgroundColor: theme.deriveColor(theme.colors.surface, 0.2),
+    paddingVertical: CONTENT_PADDING / 2,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.onSurface + '20',
+  },
+  fullscreenTitle: {
+    ...theme.text.size.sm,
+    color: theme.colors.onSurface,
+    flex: 1,
+  },
+  fullscreenContent: {
+    flex: 1,
+    padding: CONTENT_PADDING,
+  },
+  
+  // Compact variant - centered modal
+  compactContainer: {
+    marginTop: 60,
+    flex:1,
+    backgroundColor: theme.colors.background
+  },
+  compactHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+    padding: 8,
+    borderRadius: 8,
+    gap: 8,
+  },
+  compactTitle: {
+    ...theme.text.size.lg,
+    color: theme.colors.onSurface,
+  },
+  compactContent: {
+    gap: 12,
+    padding: 8,
+    borderRadius: 8,
+  },
+  
+  // Page variant - fullscreen with PageHeader
+  pageContainer: {
+    flex: 1,
+  },
+  pageContent: {
+    flex: 1,
+  },
+  pageScrollContent: {
+    gap: 12,
+    padding: 12,
+    borderRadius: 8,
   },
 }))
 
