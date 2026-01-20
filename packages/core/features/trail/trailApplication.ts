@@ -67,6 +67,31 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore }
       }
     },
 
+    getTrailSpotIds: async (context: AccountContext, trailId: string): Promise<Result<string[]>> => {
+      try {
+        const trailSpotsResult = await trailSpotStore.list()
+        if (!trailSpotsResult.success) {
+          return { success: false, error: { message: 'Failed to list trail spots', code: 'GET_TRAIL_SPOT_IDS_ERROR' } }
+        }
+
+        const trailSpots = (trailSpotsResult.data || [])
+          .filter(ts => ts.trailId === trailId)
+          .sort((a, b) => {
+            // Sort by order if available, otherwise by createdAt
+            if (a.order !== undefined && b.order !== undefined) {
+              return a.order - b.order
+            }
+            if (a.order !== undefined) return -1
+            if (b.order !== undefined) return 1
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          })
+
+        return { success: true, data: trailSpots.map(ts => ts.spotId) }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_TRAIL_SPOT_IDS_ERROR' } }
+      }
+    },
+
     listTrails: async (context: AccountContext): Promise<Result<Trail[]>> => {
       try {
         const trailsResult = await trailStore.list()

@@ -6,6 +6,9 @@ Coding standards, domain knowledge, and preferences that AI should follow.
 
 # Project coding standards
 
+- Only use english for code, comments and documentation
+- Follow the existing architecture and coding style
+
 ## Architecture
 
 - Try to be specific and generate minimal code
@@ -35,7 +38,6 @@ Coding standards, domain knowledge, and preferences that AI should follow.
 
 - Use functional components
 - Try to seperate logik from hooks and from componentes
-- Follow the React hooks rules (no conditional hooks)
 - Keep components small and focused
 
 ## Naming Conventions

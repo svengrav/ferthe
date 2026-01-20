@@ -13,6 +13,7 @@ export interface DiscoveryApplicationContract {
   getDiscoveredSpots: (context: AccountContext, trailId?: string) => Promise<Result<Spot[]>>
   getDiscoveredPreviewClues: (context: AccountContext, trailId: string) => Promise<Result<Clue[]>>
   getDiscoveryTrail: (context: AccountContext, trailId: string, userLocation?: GeoLocation) => Promise<Result<DiscoveryTrail>>
+  getDiscoveryStats: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryStats>>
 
   // Profile methods
   getDiscoveryProfile: (context: AccountContext) => Promise<Result<DiscoveryProfile>>
@@ -45,6 +46,16 @@ export interface Discovery {
   scanEventId?: string
   createdAt: Date
   updatedAt: Date
+}
+
+export interface DiscoveryStats {
+  discoveryId: string
+  rank: number // Which user number discovered this spot
+  totalDiscoverers: number // Total number of discoverers for this spot
+  trailPosition: number // Position in trail (e.g., 5 in 5/10)
+  trailTotal: number // Total number of spots in trail (e.g., 10 in 5/10)
+  timeSinceLastDiscovery?: number // Seconds since last own discovery
+  distanceFromLastDiscovery?: number // Meters to last own discovery
 }
 
 export interface DiscoveryTrail {

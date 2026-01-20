@@ -7,6 +7,7 @@ import {
   Discovery,
   DiscoveryLocationRecord,
   DiscoveryProfile,
+  DiscoveryStats,
   DiscoveryTrail,
   FirebaseConfig,
   SMSCodeRequest,
@@ -102,6 +103,14 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       url: '/discovery/profile',
       handler: asyncRequestHandler<DiscoveryProfile>(async ({ context: session }) => {
         return await discoveryApplication.getDiscoveryProfile(session)
+      }),
+    },
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/discoveries/:discoveryId/stats',
+      handler: asyncRequestHandler<DiscoveryStats, { discoveryId: string }>(async ({ context: session, params }) => {
+        return await discoveryApplication.getDiscoveryStats(session, params!.discoveryId)
       }),
     },
     {

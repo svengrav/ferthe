@@ -10,6 +10,7 @@ import {
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoveryProfileUpdateData,
+  DiscoveryStats,
   DiscoveryTrail,
   LocationWithDirection,
   Result,
@@ -57,8 +58,14 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       const allSpotsResult = await trailApplication.listSpots(context, trailId)
       const allSpots = allSpotsResult.data || []
 
+      // Get trail spot IDs in order
+      const trailSpotIdsResult = await trailApplication.getTrailSpotIds(context, trailId)
+      if (!trailSpotIdsResult.success) {
+        return createErrorResult('TRAIL_NOT_FOUND')
+      }
+
       // Pure calculation moved to service, with map boundary filtering
-      const discoveryTrail = discoveryService.createDiscoveryTrail(accountId, trailResult.data, discoveries, allSpots, userLocation)
+      const discoveryTrail = discoveryService.createDiscoveryTrail(accountId, trailResult.data, discoveries, allSpots, trailSpotIdsResult.data || [], userLocation)
 
       return createSuccessResult(discoveryTrail)
     } catch (error: any) {
@@ -271,6 +278,58 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     }
   }
 
+  const getDiscoveryStats = async (context: AccountContext, discoveryId: string): Promise<Result<DiscoveryStats>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      // Get the specific discovery
+      const discoveryResult = await getDiscovery(context, discoveryId)
+      if (!discoveryResult.data) {
+        return createErrorResult('DISCOVERY_NOT_FOUND')
+      }
+      const discovery = discoveryResult.data
+
+      // Get all discoveries for this spot (all users) for ranking
+      const allDiscoveriesResult = await discoveryStore.list()
+      if (!allDiscoveriesResult.success) {
+        return createErrorResult('GET_DISCOVERIES_ERROR')
+      }
+      const allDiscoveries = allDiscoveriesResult.data || []
+      const allDiscoveriesForSpot = allDiscoveries.filter(d => d.spotId === discovery.spotId)
+
+      // Get all user's discoveries sorted by date for time/distance calculation
+      const userDiscoveries = allDiscoveries
+        .filter(d => d.accountId === accountId)
+        .sort((a, b) => new Date(a.discoveredAt).getTime() - new Date(b.discoveredAt).getTime())
+
+      // Get trail spot IDs in order
+      const trailSpotIdsResult = await trailApplication.getTrailSpotIds(context, discovery.trailId)
+      if (!trailSpotIdsResult.success || !trailSpotIdsResult.data) {
+        return createErrorResult('TRAIL_NOT_FOUND')
+      }
+
+      // Get all spots for distance calculation
+      const spotsResult = await trailApplication.listSpots(context)
+      const spots = spotsResult.data || []
+
+      // Calculate stats using service
+      const stats = discoveryService.getDiscoveryStats(
+        discovery,
+        allDiscoveriesForSpot,
+        userDiscoveries,
+        trailSpotIdsResult.data,
+        spots
+      )
+
+      return createSuccessResult(stats)
+    } catch (error: any) {
+      return createErrorResult('GET_DISCOVERY_STATS_ERROR', { originalError: error.message })
+    }
+  }
+
   return {
     getDiscoveryTrail,
     processLocation,
@@ -281,5 +340,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     getDiscoveredPreviewClues,
     getDiscoveryProfile,
     updateDiscoveryProfile,
+    getDiscoveryStats,
   }
 }
