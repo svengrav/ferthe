@@ -1,6 +1,6 @@
 import { Button, Card, Page } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { OverlayContainer, setOverlay } from '@app/shared/overlay'
+import { setOverlay } from '@app/shared/overlay'
 import { Theme } from '@app/shared/theme'
 import { createLayoutTheme } from '@app/shared/theme/layout'
 import useThemeStore from '@app/shared/theme/useThemeStore'
@@ -16,7 +16,7 @@ const AccountScreen: React.FC = () => {
   const { account, accountType } = useAccountData()
 
   const showAccountRegistration = () => {
-    const close = setOverlay(<OverlayContainer title={'Verify your Account'} onClose={() => close()}><AccountVerification /></OverlayContainer>)
+    setOverlay(<AccountVerification />, { title: 'Verify your Account', variant: 'fullscreen', closable: true })
   }
   const styles = createStyles(theme)
   const comp = createLayoutTheme(theme)

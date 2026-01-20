@@ -70,7 +70,10 @@ function DiscoveryImageCard({ width, height, card }: { width: number; height: nu
   return (<>
 
     <Pressable onPress={() => {
-      const close = setOverlay(<DiscoveryCardDetails card={card} onClose={() => close()} />)
+      const close = setOverlay(
+        <DiscoveryCardDetails card={card} onClose={() => close()} />,
+        { variant: 'compact', transparent: true, closable: true,}
+      )
     }}>
       <View style={[styles.placeholder, { width, height }]}>
         <Text style={styles.label}>{card.title}</Text>

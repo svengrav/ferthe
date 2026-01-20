@@ -1,17 +1,12 @@
-import { IconButton } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { Animated, ScrollView, Text, useWindowDimensions, View } from 'react-native'
 import { DiscoveryCardState as Card } from '../logic/types'
 
 const PAGE_PADDING = 16
 const CARD_ASPECT_RATIO = 3 / 2
-const ANIMATION_DURATION = 400
-const SPRING_FRICTION = 6
 const CARD_BORDER_RADIUS = 18
-const CLOSE_BUTTON_TOP = 5
-const CLOSE_BUTTON_RIGHT = 5
 
 // Z-Index hierarchy (from bottom to top)
 const Z_INDEX = {
@@ -61,28 +56,10 @@ const useCardDimensions = () => {
 }
 
 /**
- * Hook to handle card animation logic including fade in, scale, and scroll animations
+ * Hook to handle scroll-based animations for title and overlay effects
  */
 const useCardAnimations = (IMAGE_HEIGHT: number) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current
-  const scaleAnim = useRef(new Animated.Value(0.95)).current
   const scrollY = useRef(new Animated.Value(0)).current
-
-  // Start entrance animation on mount
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: ANIMATION_DURATION,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: SPRING_FRICTION,
-        useNativeDriver: true,
-      }),
-    ]).start()
-  }, [fadeAnim, scaleAnim])
 
   // Calculate scroll-based animations
   const titleOpacity = scrollY.interpolate({
@@ -98,8 +75,6 @@ const useCardAnimations = (IMAGE_HEIGHT: number) => {
   })
 
   return {
-    fadeAnim,
-    scaleAnim,
     scrollY,
     titleOpacity,
     overlayOpacity,
@@ -119,7 +94,7 @@ function DiscoveryCardDetails({ card, onClose }: DiscoveryCardProps) {
   const { styles, theme } = useApp(useStyles)
   const { title, image, description } = card
   const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT } = useCardDimensions()
-  const { fadeAnim, scaleAnim, scrollY, titleOpacity, overlayOpacity } = useCardAnimations(IMAGE_HEIGHT)
+  const { scrollY, titleOpacity, overlayOpacity } = useCardAnimations(IMAGE_HEIGHT)
 
   // Dynamic styles that depend on dimensions
   const cardDynamicStyles = {
@@ -132,11 +107,6 @@ function DiscoveryCardDetails({ card, onClose }: DiscoveryCardProps) {
     height: IMAGE_HEIGHT,
   }
 
-  const overlayDynamicStyles = {
-    width: CARD_WIDTH,
-    height: IMAGE_HEIGHT,
-  }
-
   const titleContainerDynamicStyles = {
     width: CARD_WIDTH,
     top: IMAGE_HEIGHT - 70,
@@ -145,23 +115,8 @@ function DiscoveryCardDetails({ card, onClose }: DiscoveryCardProps) {
   if (!styles) return null
 
   return (
-    <Animated.View
-      style={[
-        styles.overlay,
-        {
-          opacity: fadeAnim,
-          transform: [{ scale: scaleAnim }]
-        }
-      ]}
-    >
-      {/* Close button */}
-      {onClose && (
-        <View style={styles.closeButtonContainer}>
-          <IconButton name='close' variant='outlined' onPress={onClose} />
-        </View>
-      )}
-
-      {/* Main card container */}
+    <View style={styles.container} id="discovery-card">
+      {/* Fixed card container with image */}
       <View style={[styles.card, cardDynamicStyles]} id='discovery-card' pointerEvents="box-none">
         {/* Background image */}
         <Animated.Image
@@ -183,21 +138,25 @@ function DiscoveryCardDetails({ card, onClose }: DiscoveryCardProps) {
         </Animated.View>
       </View>
 
-      {/* Scrollable content */}
+      {/* Scrollable content that overlays the image */}
       <ScrollView
+        id='discovery-card-scrollview'
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={true}
         bounces={true}
         scrollEventThrottle={16}
-        pointerEvents="auto"
-        nestedScrollEnabled={true}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
       >
         {/* Empty space to allow scrolling past the image */}
-        <View style={{ height: IMAGE_HEIGHT }} />
+        <View style={{ height: IMAGE_HEIGHT }} id='discovery-card-spacer'/>
 
         {/* Content area */}
-        <View style={styles.contentContainer}>
+        <View style={styles.contentContainer} id='discovery-card-content'>
+          <View id='discovery-card-content-header' style={{backgroundColor: theme.deriveColor(theme.colors.onBackground, 0.6), marginTop: 10, borderRadius: 10, height: 3, width: 40, alignSelf: 'center'}} />
           <Text style={[theme.layout.title, { textAlign: 'center' }]}>{title}</Text>
           <Text style={styles.discoveredAt}>
             Discovered: {card.discoveredAt ? new Date(card.discoveredAt).toLocaleDateString() : ''}
@@ -207,35 +166,22 @@ function DiscoveryCardDetails({ card, onClose }: DiscoveryCardProps) {
           )}
         </View>
       </ScrollView>
-    </Animated.View>
+    </View>
   )
 }
 
 const useStyles = createThemedStyles(theme => ({
-  overlay: {
-    position: 'absolute',
-    backgroundColor: theme.colors.background,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    overflow: 'hidden',
-    alignItems: 'center',
-    zIndex: 1,
+  container: {
     flex: 1,
-  },
-  closeButtonContainer: {
-    position: 'absolute',
+    alignItems: 'center',
     backgroundColor: theme.colors.background,
-    borderRadius: 20,
-    top: CLOSE_BUTTON_TOP,
-    right: CLOSE_BUTTON_RIGHT,
-    zIndex: Z_INDEX.CLOSE_BUTTON,
   },
   card: {
+    padding: 4,
+    position: 'absolute',
+    top: 0,
     zIndex: Z_INDEX.CARD_BACKGROUND,
     borderRadius: CARD_BORDER_RADIUS,
-    position: 'absolute',
     overflow: 'hidden',
   },
   fixedImage: {
@@ -261,12 +207,13 @@ const useStyles = createThemedStyles(theme => ({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
+  /** Scroll */
   scrollView: {
     width: '100%',
-    flexGrow: 1,
+    top: 0,
     flex: 1,
     zIndex: Z_INDEX.SCROLL_VIEW,
-    backgroundColor: 'transparent',
+    backgroundColor: 'transparent'
   },
   scrollContent: {
     width: '100%',
@@ -274,11 +221,9 @@ const useStyles = createThemedStyles(theme => ({
     paddingTop: 16,
   },
   contentContainer: {
-    borderRadius: CARD_BORDER_RADIUS,
     backgroundColor: theme.colors.surface,
     width: '100%',
     paddingHorizontal: 8,
-    flexGrow: 1,
     minHeight: 400,
   },
   contentTitle: {

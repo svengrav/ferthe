@@ -79,7 +79,26 @@ function OverlayProvider() {
   const overlayStore = useOverlayStore()
 
   if (overlayStore.overlays?.length > 0) {
-    return overlayStore.overlays.map((overlayItem) => (overlayItem.overlay))
+    return overlayStore.overlays.map((overlayItem) => {
+      const settings = overlayItem.settings || {}
+      const removeOverlay = () => overlayStore.remove(overlayItem.id)
+      
+      return (
+        <OverlayContainer
+          key={overlayItem.id}
+          visible={true}
+          onClose={removeOverlay}
+          transparent={settings.transparent}
+          variant={settings.variant}
+          title={settings.title}
+          closable={settings.closable}
+          options={settings.options}
+          scrollable={settings.scrollable}
+        >
+          {overlayItem.overlay}
+        </OverlayContainer>
+      )
+    })
   }
   return null
 }
@@ -128,7 +147,7 @@ function OverlayContainer({
     // Compact variant - centered modal with rounded corners
     if (variant === 'compact') {
       return (
-        <View style={styles.compactContainer}>
+        <View style={styles.compactContainer}  id='overlay-compact-container'>
           {/* Header with title and close button */}
           {(title || closable) && (
             <View style={styles.compactHeader}>
@@ -144,7 +163,7 @@ function OverlayContainer({
             </View>
           )}
           {/* Content area */}
-          <View style={styles.compactContent}>{children}</View>
+          <View style={styles.compactContent} id='overlay-compact-content'>{children}</View>
         </View>
       )
     }
@@ -157,13 +176,13 @@ function OverlayContainer({
         : { style: styles.pageContent }
       
       return (
-        <View style={styles.pageContainer}>
+        <View style={styles.pageContainer} id='overlay-page-container'>
           <PageHeader
             label={title}
             options={options}
             action={<IconButton onPress={onClose} name='arrow-back' variant='outlined' size={24} />}
           />
-          <ContentContainer {...contentProps}>
+          <ContentContainer {...contentProps} id='overlay-page-content'>
             {children}
           </ContentContainer>
         </View>
@@ -172,7 +191,7 @@ function OverlayContainer({
 
     // Default fullscreen variant
     return (
-      <View style={[styles.fullscreenContainer]}>
+      <View style={[styles.fullscreenContainer]} id='overlay-fullscreen-container'>
         {/* Header with title and close button */}
         {(title || closable) && (
           <View style={styles.fullscreenHeader}>
@@ -193,7 +212,7 @@ function OverlayContainer({
         )}
 
         {/* Content area */}
-        <View style={styles.fullscreenContent}>
+        <View style={styles.fullscreenContent} id='overlay-fullscreen-content'>
           {children}
         </View>
       </View>
@@ -230,6 +249,7 @@ function OverlayContainer({
 
 const useStyles = createThemedStyles(theme => ({
   container: {
+    flex: 1,
     position: 'absolute',
     overflow: 'hidden',
     left: 0,
@@ -287,21 +307,23 @@ const useStyles = createThemedStyles(theme => ({
   },
   fullscreenContent: {
     flex: 1,
-    padding: CONTENT_PADDING,
   },
   
   // Compact variant - centered modal
   compactContainer: {
+    position: 'relative',
     marginTop: 60,
     flex:1,
     backgroundColor: theme.colors.background
   },
   compactHeader: {
     flexDirection: 'row',
+    alignContent: 'flex-end',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: theme.colors.surface,
     padding: 8,
+    marginLeft: 'auto',
     borderRadius: 8,
     gap: 8,
   },
@@ -310,6 +332,7 @@ const useStyles = createThemedStyles(theme => ({
     color: theme.colors.onSurface,
   },
   compactContent: {
+    flex:1,
     gap: 12,
     padding: 8,
     borderRadius: 8,

@@ -10,6 +10,11 @@ type OverlayItemSettings = {
   closeOnBackdropPress?: boolean
   transparent?: boolean
   animationType?: 'slide' | 'fade'
+  title?: string
+  variant?: 'compact' | 'fullscreen' | 'page'
+  closable?: boolean
+  options?: any[]
+  scrollable?: boolean
 }
 
 type OverlayStore = {
@@ -39,9 +44,9 @@ export const useOverlayStore = create<OverlayStore>(set => ({
   clearAll: () => set({ overlays: [] }),
 }))
 
-export const setOverlay = (overlay: React.ReactNode, settings?: OverlayItemSettings): (() => void) => {
+export const setOverlay = (content: React.ReactNode, options?: OverlayItemSettings): (() => void) => {
   const store = useOverlayStore.getState()
-  const id = store.show(overlay, settings)
+  const id = store.show(content, options)
 
   // Return remove function
   return () => {
