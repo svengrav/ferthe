@@ -1,5 +1,5 @@
 import { Store } from '@core/store/storeFactory.ts'
-import { AccountContext, Result, ScanEvent, SensorApplicationContract, TrailApplicationContract } from '@shared/contracts'
+import { AccountContext, Discovery, Result, ScanEvent, SensorApplicationContract, TrailApplicationContract } from '@shared/contracts'
 import { GeoLocation } from '@shared/geo'
 import { createSensorService, SensorServiceType } from './sensorService.ts'
 
@@ -7,11 +7,12 @@ interface SensorApplicationOptions {
   sensorService: SensorServiceType
   scanStore: Store<ScanEvent>
   trailApplication: TrailApplicationContract
+  discoveryStore: Store<Discovery>
 }
 
-export interface SensorApplicationActions extends SensorApplicationContract {}
+export interface SensorApplicationActions extends SensorApplicationContract { }
 
-export function createSensorApplication({ sensorService = createSensorService(), scanStore, trailApplication }: SensorApplicationOptions): SensorApplicationActions {
+export function createSensorApplication({ sensorService = createSensorService(), scanStore, trailApplication, discoveryStore }: SensorApplicationOptions): SensorApplicationActions {
   const createScanEvent = async (context: AccountContext, location: GeoLocation, trailId?: string): Promise<Result<ScanEvent>> => {
     try {
       const userId = context.accountId
@@ -33,10 +34,13 @@ export function createSensorApplication({ sensorService = createSensorService(),
         return { success: false, error: { message: 'Failed to get spots', code: 'SPOTS_ERROR' } }
       }
 
+      const discoveriesResult = await discoveryStore.list()
+      const discoveries = discoveriesResult.data || []
+
       const trail = trailResult.data
       const scannerRadius = trail.options?.scannerRadius || 50 // Default 50m if not specified
 
-      const scanEvent = sensorService.generateScanEvent(userId, location, spotsResult.data || [], scannerRadius, trailId)
+      const scanEvent = sensorService.generateScanEvent(userId, location, spotsResult.data || [], scannerRadius, discoveries, trailId)
 
       const createResult = await scanStore.create(scanEvent)
       if (!createResult.success) {

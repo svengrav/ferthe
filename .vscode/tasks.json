@@ -58,6 +58,22 @@
           "endsPattern": "Bundled|Metro|listening"
         }
       }
+    },
+    {
+      "label": "Export Sandboxdata",
+      "type": "shell",
+      "command": "deno run -A ${workspaceFolder}/packages/test/src/sandbox/export.ts",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting",
+          "endsPattern": "Bundled|Metro|listening"
+        }
+      }
     }
   ]
 }

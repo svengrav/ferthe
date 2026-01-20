@@ -81,6 +81,7 @@ export function createCoreContext(config: CoreConfiguration = {}): CoreContext {
     trailApplication: trailApplication,
     scanStore: createStore(storeConnector, INTERNAL_STORE_IDS.SENSOR_SCANS),
     sensorService: createSensorService(),
+    discoveryStore: createStore(storeConnector, INTERNAL_STORE_IDS.DISCOVERIES),
   })
 
   const discoveryApplication = createDiscoveryApplication({

@@ -1,14 +1,18 @@
 import { createCuid2 } from '@core/utils/idGenerator'
-import { Clue, ClueSource, ScanEvent, Spot } from '@shared/contracts'
+import { Clue, ClueSource, Discovery, ScanEvent, Spot } from '@shared/contracts'
 import { GeoLocation } from '@shared/geo'
 import { geoUtils } from '@shared/geo/geoUtils'
 
 export type SensorServiceType = {
-  generateScanEvent: (accountId: string, location: GeoLocation, spots: Spot[], radiusUsed: number, trailId?: string) => ScanEvent
+  generateScanEvent: (accountId: string, location: GeoLocation, spots: Spot[], radiusUsed: number, discoveries: Discovery[], trailId?: string) => ScanEvent
 }
 
 export const createSensorService = (): SensorServiceType => ({
-  generateScanEvent: (accountId: string, location: GeoLocation, spots: Spot[], radiusUsed: number, trailId?: string): ScanEvent => {
+  generateScanEvent: (accountId: string, location: GeoLocation, spots: Spot[], radiusUsed: number, discoveries: Discovery[], trailId?: string): ScanEvent => {
+    const discoveredSpotIds = discoveries
+      .filter(d => d.accountId === accountId)
+      .map(d => d.spotId)
+
     const spotsInRange = spots.filter(spot => {
       const distance = geoUtils.calculateDistance(location, spot.location)
       return distance <= radiusUsed
@@ -17,7 +21,7 @@ export const createSensorService = (): SensorServiceType => ({
     const clues: Clue[] = spots
       .filter(spot => {
         const distance = geoUtils.calculateDistance(location, spot.location)
-        return distance <= radiusUsed && distance > spot.options.discoveryRadius
+        return distance <= radiusUsed && distance > spot.options.discoveryRadius && !discoveredSpotIds.includes(spot.id)
       })
       .map(spot => ({
         id: createCuid2(),
