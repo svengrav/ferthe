@@ -121,7 +121,9 @@ export interface LocalizationSet {
     logout: string
     upgradeAccount: string
     phoneVerification: string
+    accountId: string
     loggedInAs: string
+    notLoggedIn: string
     notVerified: string
     loginToSync: string
     localAccountDescription: string

@@ -1,4 +1,4 @@
-import { Button, Card, Page } from '@app/shared/components'
+import { Button, Card, InfoField, Page } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay } from '@app/shared/overlay'
 import { Theme } from '@app/shared/theme'
@@ -28,35 +28,43 @@ const AccountScreen: React.FC = () => {
       {/* Account Status Section */}
       <View style={styles.grid}>
         <Card style={styles.card}>
-          {account ? (
-            <View style={styles.userInfo}>
-              <Text style={comp.header}>{'Account'}</Text>
-              <Text style={styles.userIdText}>
-                {t.account.loggedInAs}: {account.id}
-              </Text>
-              <Text style={styles.accountTypeText}>
-                {t.account.accountType}: {accountType === 'sms_verified'
+          {accountType ? (
+            <View>
+              <InfoField
+                icon="account-circle"
+                label={t.account.accountStatus}
+                value={accountType === 'sms_verified'
                   ? t.account.phoneAccount
                   : t.account.localAccount}
-              </Text>
+              />
+              {account?.id && (
+                <InfoField
+                  icon="badge"
+                  label={t.account.accountId}
+                  value={account.id}
+                />
+              )}
             </View>
           ) : (
-            <Text style={comp.textBase}>
-              {t.account.notVerified}
-            </Text>
+            <InfoField
+              icon="account-circle"
+              label={t.account.accountStatus}
+              value={t.account.notLoggedIn}
+            />
           )}
         </Card>
 
         {/* Feature Access Information */}
         <Card style={styles.card}>
-          <Text style={comp.section}>{t.account.featureAccess}</Text>
-          <Text style={comp.textBase}>
-            {accountType === 'local_unverified'
+          <InfoField
+            icon="sync"
+            label={t.account.featureAccess}
+            value={accountType === 'local_unverified'
               ? t.account.localAccountDescription
               : accountType === 'sms_verified'
                 ? t.account.phoneAccountDescription
                 : t.account.loginToSync}
-          </Text>
+          />
 
           {accountType === 'local_unverified' && (
             <View>
@@ -105,18 +113,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     color: theme.colors.onBackground,
   },
   description: {
-    color: theme.colors.onSurface,
-  },
-  statusIndicator: {
-    marginBottom: 5,
-  },
-  userInfo: {
-    marginTop: 5,
-  },
-  userIdText: {
-    color: theme.colors.onSurface,
-  },
-  accountTypeText: {
     color: theme.colors.onSurface,
   },
   actionSection: {
