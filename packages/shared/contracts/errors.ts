@@ -49,6 +49,17 @@ export const API_ERROR_CODES = {
   UPDATE_PROFILE_ERROR: { code: 'UPDATE_PROFILE_ERROR', message: 'Failed to update discovery profile', httpStatus: 500 },
   UPDATE_TRAIL_ERROR: { code: 'UPDATE_TRAIL_ERROR', message: 'Failed to update last active trail', httpStatus: 500 },
 
+  // Community Management (404-500)
+  COMMUNITY_NOT_FOUND: { code: 'COMMUNITY_NOT_FOUND', message: 'Community not found', httpStatus: 404 },
+  NOT_A_MEMBER: { code: 'NOT_A_MEMBER', message: 'User is not a member of this community', httpStatus: 403 },
+  ALREADY_MEMBER: { code: 'ALREADY_MEMBER', message: 'User is already a member of this community', httpStatus: 409 },
+  CREATE_COMMUNITY_ERROR: { code: 'CREATE_COMMUNITY_ERROR', message: 'Failed to create community', httpStatus: 500 },
+  JOIN_COMMUNITY_ERROR: { code: 'JOIN_COMMUNITY_ERROR', message: 'Failed to join community', httpStatus: 500 },
+  LEAVE_COMMUNITY_ERROR: { code: 'LEAVE_COMMUNITY_ERROR', message: 'Failed to leave community', httpStatus: 500 },
+  GET_COMMUNITY_ERROR: { code: 'GET_COMMUNITY_ERROR', message: 'Failed to retrieve community', httpStatus: 500 },
+  GET_COMMUNITIES_ERROR: { code: 'GET_COMMUNITIES_ERROR', message: 'Failed to retrieve communities', httpStatus: 500 },
+  GET_MEMBERS_ERROR: { code: 'GET_MEMBERS_ERROR', message: 'Failed to retrieve community members', httpStatus: 500 },
+
   // Server Errors (500)
   REQUEST_SMS_CODE_ERROR: { code: 'REQUEST_SMS_CODE_ERROR', message: 'Failed to request SMS code', httpStatus: 500 },
   VERIFY_SMS_CODE_ERROR: { code: 'VERIFY_SMS_CODE_ERROR', message: 'Failed to verify SMS code', httpStatus: 500 },

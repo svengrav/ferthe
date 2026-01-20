@@ -123,7 +123,7 @@ interface DiscoveryCardProps {
  */
 function DiscoveryCard({ card, onTap, options }: DiscoveryCardProps) {
   const { styles, theme } = useApp(useStyles)
-  const { title, image } = card
+  const { title, image, discoveredBy } = card
   const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT } = useCardDimensions()
   const { fadeAnim, scaleAnim, scrollY, titleOpacity, overlayOpacity } = useCardAnimations(IMAGE_HEIGHT)
   const { showTitle = true, showBorder = false } = options || {}
@@ -161,6 +161,13 @@ function DiscoveryCard({ card, onTap, options }: DiscoveryCardProps) {
             resizeMode='cover'
           />
         </View>
+
+        {/* Discovered By Badge (if community discovery) */}
+        {discoveredBy && (
+          <View style={styles.discoveredByBadge}>
+            <Text style={styles.discoveredByText}>by {discoveredBy}</Text>
+          </View>
+        )}
 
         {/* Fixed title overlay */}
         <Animated.View
@@ -267,6 +274,21 @@ const useStyles = createThemedStyles(theme => ({
     textAlign: 'left',
     lineHeight: 24,
     fontFamily: theme.text.primary.regular,
+  },
+  discoveredByBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: theme.colors.primaryContainer,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    zIndex: Z_INDEX.TITLE_OVERLAY,
+  },
+  discoveredByText: {
+    ...theme.text.size.xs,
+    fontFamily: theme.text.primary.semiBold,
+    color: theme.colors.onPrimaryContainer,
   },
 }))
 

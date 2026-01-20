@@ -6,13 +6,13 @@ import { Spot } from './spots.ts'
 import { Trail } from './trails.ts'
 
 export interface DiscoveryApplicationContract {
-  processLocation: (context: AccountContext, locationWithDirection: LocationWithDirection, trailId: string) => Promise<Result<DiscoveryLocationRecord>>
-  getDiscoveries: (context: AccountContext, trailId?: string) => Promise<Result<Discovery[]>>
+  processLocation: (context: AccountContext, locationWithDirection: LocationWithDirection, trailId: string, communityId?: string) => Promise<Result<DiscoveryLocationRecord>>
+  getDiscoveries: (context: AccountContext, trailId?: string, communityId?: string) => Promise<Result<Discovery[]>>
   getDiscovery: (context: AccountContext, discoveryId: string) => Promise<Result<Discovery | undefined>>
   getDiscoveredSpotIds: (context: AccountContext, trailId?: string) => Promise<Result<string[]>>
   getDiscoveredSpots: (context: AccountContext, trailId?: string) => Promise<Result<Spot[]>>
   getDiscoveredPreviewClues: (context: AccountContext, trailId: string) => Promise<Result<Clue[]>>
-  getDiscoveryTrail: (context: AccountContext, trailId: string, userLocation?: GeoLocation) => Promise<Result<DiscoveryTrail>>
+  getDiscoveryTrail: (context: AccountContext, trailId: string, userLocation?: GeoLocation, communityId?: string) => Promise<Result<DiscoveryTrail>>
   getDiscoveryStats: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryStats>>
 
   // Profile methods
@@ -42,6 +42,7 @@ export interface Discovery {
   accountId: string
   spotId: string
   trailId: string
+  communityId?: string // Optional: if discovery is shared within a community
   discoveredAt: Date
   scanEventId?: string
   createdAt: Date

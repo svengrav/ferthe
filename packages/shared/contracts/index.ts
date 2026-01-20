@@ -1,5 +1,6 @@
 export * from './accounts.ts'
 export * from './applications.ts'
+export * from './communities.ts'
 export * from './config.ts'
 export * from './discoveries.ts'
 export * from './discoveryProfile.ts'
