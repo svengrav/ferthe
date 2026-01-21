@@ -1,8 +1,11 @@
 import { getAppContext } from '@app/appContext'
 import { Page, Text } from '@app/shared/components'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { useEffect } from 'react'
+import { SettingsForm } from '../../settings/components/SettingsForm'
 import { useDiscoveryData, useDiscoveryStatus } from '../stores/discoveryStore'
 import { DiscoveryCardList } from './DiscoveryCardList'
 
@@ -43,6 +46,7 @@ const useDiscoveryScreen = () => {
  */
 function DiscoveryScreen() {
   const { styles, theme } = useApp(useStyles)
+  const { t } = useLocalizationStore()
   const {
     cards,
     isLoading,
@@ -52,7 +56,7 @@ function DiscoveryScreen() {
   if (!styles) return null
 
   return (
-    <Page >
+    <Page options={[{ label: t.navigation.settings, onPress: () => setOverlay(<SettingsForm onClose={() => {}} onSubmit={() => {}} />) }]}>
       <Text style={theme.layout.header}>Discoveries</Text>
 
       <DiscoveryCardList

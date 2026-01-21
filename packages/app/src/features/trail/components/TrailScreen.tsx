@@ -2,6 +2,7 @@ import { getAppContext } from '@app/appContext'
 import { SettingsForm } from '@app/features/settings'
 import { useTrailData, useTrailStatus } from '@app/features/trail/stores/trailStore'
 import { FertheLogo, Page, Text } from '@app/shared/components'
+import { appNavigator } from '@app/shared/navigation/navigationRef'
 import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
@@ -46,8 +47,11 @@ const useTrailScreen = () => {
       <SettingsForm 
         onClose={() => removeOverlay?.()} 
         onSubmit={() => removeOverlay?.()} 
-      />
-    )
+      />,{ variant: 'page', title: 'Settings'})
+  }
+
+  const openAccount = () => {
+    appNavigator.toAccount()
   }
 
   const isRefreshing = status === 'loading'
@@ -59,6 +63,7 @@ const useTrailScreen = () => {
     hasTrails,
     handleRefresh,
     openSettings,
+    openAccount,
   }
 }
 
@@ -74,11 +79,15 @@ function TrailScreen() {
     hasTrails,
     handleRefresh,
     openSettings,
+    openAccount,
   } = useTrailScreen()
 
   if (!styles) return null
 
-  const pageOptions = [{ label: 'Settings', onPress: openSettings }]
+  const pageOptions = [
+    { label: locales.navigation.settings, onPress: openSettings },
+    { label: locales.navigation.account, onPress: openAccount },
+  ]
 
   return (
     <Page options={pageOptions}>
@@ -108,16 +117,8 @@ function TrailScreen() {
 }
 
 const useStyles = createThemedStyles(theme => ({
-
-  title: {
-    ...theme.text.size.lg,
-    fontFamily: theme.text.primary.semiBold,
-    width: '100%',
-    textAlign: 'center',
-    position: 'absolute',
-    color: theme.colors.onBackground,
-  },
   content: {
+    paddingHorizontal: 4,
     flex: 1,
   },
   intro: {

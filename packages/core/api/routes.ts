@@ -4,6 +4,8 @@ import {
   Account,
   ApplicationContract,
   Clue,
+  Community,
+  CommunityMember,
   Discovery,
   DiscoveryLocationRecord,
   DiscoveryProfile,
@@ -22,7 +24,7 @@ import { manifest } from './manifest.ts'
 import { Route } from './oak/types.ts'
 
 const createRoutes = (ctx: ApplicationContract): Route[] => {
-  const { discoveryApplication, sensorApplication, trailApplication, accountApplication } = ctx
+  const { discoveryApplication, sensorApplication, trailApplication, accountApplication, communityApplication } = ctx
 
   // Create the request handler with account application access
   const asyncRequestHandler = createAsyncRequestHandler(accountApplication)
@@ -276,6 +278,47 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
         return await accountApplication.getFirebaseConfig(context)
       }),
     },
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/community/collections/communities',
+      handler: asyncRequestHandler<Community>(async ({ context, body }) => {
+        return await communityApplication.createCommunity(context, body?.name)
+      }),
+    },
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/community/collections/communities',
+      handler: asyncRequestHandler<Community[]>(async ({ context }) => {
+        return await communityApplication.listCommunities(context)
+      }),
+    },
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/community/collections/communities/:communityId',
+      handler: asyncRequestHandler<Community | undefined, { communityId: string }>(async ({ context, params }) => {
+        return await communityApplication.getCommunity(context, params!.communityId)
+      }),
+    },
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/community/collections/communities/:communityId/leave',
+      handler: asyncRequestHandler<void, { communityId: string }>(async ({ context, params }) => {
+        return await communityApplication.leaveCommunity(context, params!.communityId)
+      }),
+    },
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/community/collections/communities/:communityId/members',
+      handler: asyncRequestHandler<CommunityMember[], { communityId: string }>(async ({ context, params }) => {
+        return await communityApplication.listCommunityMembers(context, params!.communityId)
+      }),
+    },
   ]
 }
 export default createRoutes
+

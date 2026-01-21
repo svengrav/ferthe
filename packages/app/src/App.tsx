@@ -25,11 +25,13 @@ import AccountAuthWrapper from './features/account/components/AccountAuthWrapper
 import { getDeviceConnector } from './features/sensor/device/deviceConnector'
 import { createStoreConnector } from './shared/device'
 import { OverlayProvider } from './shared/overlay'
+import { logger } from './shared/utils/logger'
 
 SplashScreen.preventAutoHideAsync()
 
 const useAppInitialization = () => {
   const [isReady, setIsReady] = useState(false)
+  logger.log('App initialization started')
 
   useEffect(() => {
     async function initialize() {
@@ -59,6 +61,7 @@ const useAppInitialization = () => {
         // Backend Health Check - wait until available
         while (true) {
           const status = await api.system.checkStatus().catch(() => ({ available: false }))
+          logger.log('Backend status:', status)
           if (status.available) break
           await new Promise(resolve => setTimeout(resolve, 3000))
         }
@@ -85,6 +88,7 @@ const useAppInitialization = () => {
         await SplashScreen.hideAsync()
         setIsReady(true)
       } catch (err) {
+        logger.error('Error during app initialization:', err)
         await SplashScreen.hideAsync()
       }
     }

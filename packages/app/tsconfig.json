@@ -5,6 +5,7 @@
     "strict": false,
     "jsx": "react-jsx",
     "strictNullChecks": true,
+    "rootDir": ".",
     "outDir": "dist",
     "noEmit": false,
     "skipLibCheck": true,

@@ -1,6 +1,5 @@
 import { Card, Picker, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { OverlayContainer } from '@app/shared/overlay'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { Formik } from 'formik'
 import React from 'react'
@@ -20,7 +19,8 @@ export const SettingsForm = ({ onClose, onSubmit }: SettingsFormProps) => {
   const { initialValues, handleSubmit } = useSettings()
 
   return (
-    <OverlayContainer variant='page' title={t.settings.customize} onClose={onClose} scrollable>
+    <>
+      {/* Settings Section */}
       <Card>
         <Text style={styles.subtitle}>{t.settings.yourSettings}</Text>
 
@@ -68,7 +68,7 @@ export const SettingsForm = ({ onClose, onSubmit }: SettingsFormProps) => {
           )}
         </Formik>
       </Card>
-    </OverlayContainer>
+    </>
   )
 }
 

@@ -1,8 +1,11 @@
 import { LoadingSpinner, Page } from '@app/shared/components'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { useEffect, useRef } from 'react'
 import { Animated, View } from 'react-native'
+import { SettingsForm } from '../../settings/components/SettingsForm'
 import { useMapStatus, useMapViewport, useSetViewport } from '../stores/mapStore'
 import { Map } from './Map'
 import MapCompass from './MapCompass'
@@ -11,6 +14,7 @@ import { MapTrailSelector } from './MapTrailSelector'
 
 function MapScreen() {
   const { styles, context } = useApp(theme => useStyles(theme))
+  const { t } = useLocalizationStore()
   const status = useMapStatus()
   const setViewport = useSetViewport()
   const viewPort = useMapViewport()
@@ -37,7 +41,7 @@ function MapScreen() {
   }
 
   return (
-    <Page>
+    <Page options={[{ label: t.navigation.settings, onPress: () => setOverlay(<SettingsForm onClose={() => {}} onSubmit={() => {}} />) }]}>
       <View style={styles?.container} >
         <MapDiscoveryCard />
         <MapCompass />

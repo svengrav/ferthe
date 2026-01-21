@@ -33,6 +33,7 @@ export interface LocalizationSet {
     feed: string
     about: string
     account: string
+    socials: string
   }
   trails: {
     yourTrails: string

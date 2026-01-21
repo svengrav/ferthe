@@ -1,8 +1,9 @@
-import { Account, AccountSession, Discovery, DiscoveryApplicationContract, DiscoveryProfile, Spot, Trail, TrailApplicationContract, TrailSpot, TwilioVerification } from '@shared/contracts/index.ts'
+import { Account, AccountSession, Community, CommunityMember, Discovery, DiscoveryApplicationContract, DiscoveryProfile, DiscoveryReaction, Spot, Trail, TrailApplicationContract, TrailSpot, TwilioVerification } from '@shared/contracts/index.ts'
 import { createConsoleSMSConnector, createTwilioSMSConnector, SMSConnector, TwilioConfig } from './connectors/smsConnector.ts'
 import { AccountApplicationActions, createAccountApplication } from './features/account/accountApplication.ts'
 import { createJWTService } from './features/account/jwtService.ts'
 import { createSMSService } from './features/account/smsService.ts'
+import { createCommunityApplication } from './features/community/communityApplication.ts'
 import { createDiscoveryApplication } from './features/discovery/discoveryApplication.ts'
 import { createDiscoveryService } from './features/discovery/discoveryService.ts'
 import { createSensorApplication, SensorApplicationActions } from './features/sensor/sensorApplication.ts'
@@ -33,6 +34,7 @@ export interface CoreContext {
   spotApplication: SpotApplicationActions
   sensorApplication: SensorApplicationActions
   accountApplication: AccountApplicationActions
+  communityApplication: any
 }
 
 export const INTERNAL_STORE_IDS = {
@@ -45,6 +47,9 @@ export const INTERNAL_STORE_IDS = {
   DISCOVERIES: 'discovery-collection',
   DISCOVERY_PROFILES: 'discovery-profile-collection',
   SENSOR_SCANS: 'sensor-scans',
+  COMMUNITIES: 'community-collection',
+  COMMUNITY_MEMBERS: 'community-members',
+  DISCOVERY_REACTIONS: 'discovery-reactions',
 }
 
 export function createCoreContext(config: CoreConfiguration = {}): CoreContext {
@@ -92,6 +97,14 @@ export function createCoreContext(config: CoreConfiguration = {}): CoreContext {
     profileStore: createStore<DiscoveryProfile>(storeConnector, INTERNAL_STORE_IDS.DISCOVERY_PROFILES),
   })
 
+  const communityApplication = createCommunityApplication({
+    communityStore: {
+      communities: createStore<Community>(storeConnector, INTERNAL_STORE_IDS.COMMUNITIES),
+      members: createStore<CommunityMember>(storeConnector, INTERNAL_STORE_IDS.COMMUNITY_MEMBERS),
+      reactions: createStore<DiscoveryReaction>(storeConnector, INTERNAL_STORE_IDS.DISCOVERY_REACTIONS),
+    },
+  })
+
   return {
     config: config,
     discoveryApplication,
@@ -99,6 +112,7 @@ export function createCoreContext(config: CoreConfiguration = {}): CoreContext {
     spotApplication,
     sensorApplication,
     accountApplication,
+    communityApplication,
   }
 }
 

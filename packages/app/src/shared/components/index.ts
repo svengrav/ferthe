@@ -22,7 +22,6 @@ export { default as InfoField } from './infoField/InfoField'
 export { default as Markdown } from './markdown/Markdown'
 export { default as Notification } from './notification/Notification'
 export { default as Page } from './page/Page'
-export { default as PageHeader } from './page/PageHeader'
 export { default as Text } from './text/Text'
 export { Option } from './types'
 

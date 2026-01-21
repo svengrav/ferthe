@@ -13,6 +13,7 @@ interface PageProps {
   label?: string
   style?: StyleProp<ViewStyle>
   options?: Option[]
+  action?: React.ReactNode
   scrollable?: boolean
 }
 
@@ -20,7 +21,7 @@ interface PageProps {
  * Page wrapper component that provides consistent layout structure
  * with optional header, scrollable content, and safe area handling.
  */
-function Page({ children, label, style, options, scrollable = false }: PageProps) {
+function Page({ children, label, style, options, scrollable = false, action }: PageProps) {
   const { styles } = useApp(useStyles)
   const insets = useSafeAreaInsets()
 
@@ -33,7 +34,7 @@ function Page({ children, label, style, options, scrollable = false }: PageProps
   return (
     <View style={[styles.page, style, { paddingTop: insets.top}]} >
       {/* Page header with optional label and actions */}
-      <PageHeader label={label} options={options} />
+      <PageHeader label={label} options={options} action={action} />
 
       {/* Main content area */}
       <ContentContainer style={styles.container} {...contentProps}>

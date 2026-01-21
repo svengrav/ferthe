@@ -1,4 +1,4 @@
-import { Card, DropdownMenu, Image, Text } from '@app/shared/components'
+import { Card, Image, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { OverlayContainer } from '@app/shared/overlay'
 import { setOverlay } from '@app/shared/overlay/useOverlayStore'
@@ -118,12 +118,6 @@ function TrailCard({ trail }: TrailCardProps) {
 
   return (
     <View>
-      <DropdownMenu
-        isVisible={contextMenu}
-        anchorRef={cardRef}
-        onClose={closeContextMenu}
-        options={[]}
-      />
       <TouchableOpacity onPress={handleOpenTrailOverview} onLongPress={openContextMenu}>
         <Card ref={cardRef}>
           {renderCardContent()}

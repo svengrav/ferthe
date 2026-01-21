@@ -35,6 +35,7 @@ const de: LocalizationSet = {
     feed: 'Cards',
     about: 'Über uns',
     account: 'Konto',
+    socials: 'Soziales',
   },
   trails: {
     yourTrails: 'Deine Pfade',

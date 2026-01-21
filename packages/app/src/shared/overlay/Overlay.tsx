@@ -238,10 +238,9 @@ function OverlayContainer({
           }
         ]}
       >
-
-          <View style={styles.contentArea} pointerEvents="auto">
-            {renderContent()}
-          </View>
+        <View style={styles.contentArea} pointerEvents="auto">
+          {renderContent()}
+        </View>
       </Animated.View>
     </Animated.View>
   )
@@ -256,6 +255,7 @@ const useStyles = createThemedStyles(theme => ({
     right: 0,
     bottom: 0,
     zIndex: OVERLAY_Z_INDEX,
+    backgroundColor: theme.colors.background
   },
   animatedContainer: {
     height: '100%',
@@ -307,6 +307,7 @@ const useStyles = createThemedStyles(theme => ({
   },
   fullscreenContent: {
     flex: 1,
+    paddingHorizontal: 12,
   },
   
   // Compact variant - centered modal
@@ -314,7 +315,7 @@ const useStyles = createThemedStyles(theme => ({
     position: 'relative',
     marginTop: 60,
     flex:1,
-    backgroundColor: theme.colors.background
+    backgroundColor: theme.colors.background,
   },
   compactHeader: {
     flexDirection: 'row',

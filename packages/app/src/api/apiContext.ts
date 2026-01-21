@@ -4,6 +4,8 @@ import {
   AccountSession,
   ApplicationContract,
   Clue,
+  Community,
+  CommunityMember,
   Discovery,
   DiscoveryLocationRecord,
   DiscoveryProfile,
@@ -180,6 +182,30 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
         API.send<Result<AccountSession>>('/account/upgrade-account', 'POST', { phoneNumber, code }),
 
       getFirebaseConfig: (_context: AccountContext) => API.send<Result<FirebaseConfig>>('/account/config/firebase'),
+    },
+
+    /**
+     * Community Application API Methods
+     * These methods handle community creation, joining, and member management.
+     */
+    communityApplication: {
+      createCommunity: (_context: AccountContext, name: string) =>
+        API.send<Result<Community>>('/community/collections/communities', 'POST', { name }),
+
+      joinCommunity: (_context: AccountContext, inviteCode: string) =>
+        API.send<Result<Community>>('/community/join', 'POST', { inviteCode }),
+
+      leaveCommunity: (_context: AccountContext, communityId: string) =>
+        API.send<Result<void>>(`/community/collections/communities/${communityId}/leave`, 'POST'),
+
+      getCommunity: (_context: AccountContext, communityId: string) =>
+        API.send<Result<Community | undefined>>(`/community/collections/communities/${communityId}`),
+
+      listCommunities: (_context: AccountContext) =>
+        API.send<Result<Community[]>>('/community/collections/communities'),
+
+      listCommunityMembers: (_context: AccountContext, communityId: string) =>
+        API.send<Result<CommunityMember[]>>(`/community/collections/communities/${communityId}/members`),
     },
   }
 }

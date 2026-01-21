@@ -35,6 +35,7 @@ const en: LocalizationSet = {
     feed: 'Cards',
     about: 'About',
     account: 'Account',
+    socials: 'Socials',
   },
   trails: {
     yourTrails: 'Your Trails',

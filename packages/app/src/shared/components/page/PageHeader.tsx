@@ -17,7 +17,7 @@ const PageHeader = ({ label, action, options }: PageHeaderProps) => {
   const showOptions = options && options.length > 0
   return (
     <View style={styles.header}>
-      <View style={styles.leftContainer}>{action && action}</View>
+      <View style={styles.leftContainer}></View>
       <View style={styles.labelContainer}>
         {label ? (
           <Text style={styles.label}>{label}</Text>
@@ -25,7 +25,7 @@ const PageHeader = ({ label, action, options }: PageHeaderProps) => {
           <FertheLabel style={styles.logo} fill={theme.colors.onBackground} />
         )}
       </View>
-      <View style={styles.rightContainer}>
+      <View style={styles.rightContainer}>{action && action}
         {showOptions && <IconButton variant='outlined' options={options} name={'more-vert'} style={styles.iconButton} />}
       </View>
     </View>

@@ -33,3 +33,7 @@ export type { SMSConnector, SMSRequest, SMSResponse, TwilioConfig } from './conn
 // Sensor feature
 export { createSensorApplication } from './features/sensor/sensorApplication.ts'
 export type { SensorApplicationActions } from './features/sensor/sensorApplication.ts'
+
+// Community feature
+export { createCommunityApplication } from './features/community/communityApplication.ts'
+

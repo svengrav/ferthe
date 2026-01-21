@@ -13,6 +13,7 @@ export interface AccountApplicationContract {
 
   // Account operations - Require authenticated context
   getAccount: (context: AccountContext) => Promise<Result<Account | null>>
+  updateAccount: (context: AccountContext, data: AccountUpdateData) => Promise<Result<Account>>
   upgradeToPhoneAccount: (context: AccountContext, phoneNumber: string, code: string) => Promise<Result<AccountSession>>
 
   // Configuration - Require authenticated context
@@ -34,6 +35,7 @@ export type AccountType = 'sms_verified' | 'local_unverified' | 'public'
 export interface Account {
   id: string
   phoneHash?: string // Optional for local accounts
+  displayName?: string // Optional display name set by user
   createdAt: Date
   lastLoginAt?: Date
   accountType: AccountType
@@ -48,6 +50,13 @@ export interface Account {
 export interface AccountContext {
   accountId: string
   accountType: AccountType
+}
+
+/**
+ * Data for updating an account
+ */
+export interface AccountUpdateData {
+  displayName?: string
 }
 
 /**

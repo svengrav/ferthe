@@ -44,7 +44,9 @@ export const communityStore = create<CommunityData & CommunityActions>(set => ({
     })),
 }))
 
-export const useCommunityData = () => communityStore(state => ({ communities: state.communities, members: state.members }))
+export const useCommunityData = () => communityStore(state => state)
+export const useCommunities = () => communityStore(state => state.communities)
+export const useCommunityMembers = () => communityStore(state => state.members)
 export const useCommunityStatus = () => communityStore(state => state.status)
 export const useActiveCommunityId = () => communityStore(state => state.activeCommunityId)
 

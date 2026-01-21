@@ -8,6 +8,7 @@ import {
   AccountContext,
   AccountDeviceInfo,
   AccountSession,
+  AccountUpdateData,
   FirebaseConfig,
   Result,
   SMSCodeRequest,
@@ -273,7 +274,45 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     } catch (error: unknown) {
       return createErrorResult('GET_ACCOUNT_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
-  } // New methods for local account support
+  }
+
+  const updateAccount = async (context: AccountContext, data: AccountUpdateData): Promise<Result<Account>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      const accountsResult = await accountStore.list()
+      if (!accountsResult.success) {
+        return createErrorResult('GET_ACCOUNT_ERROR')
+      }
+      const accounts = accountsResult.data || []
+      const account = accounts.find(a => a.id === accountId)
+
+      if (!account) {
+        return createErrorResult('ACCOUNT_NOT_FOUND')
+      }
+
+      // Update only provided fields
+      const updatedAccount: Account = {
+        ...account,
+        ...data,
+        updatedAt: new Date(),
+      }
+
+      const updateResult = await accountStore.update(accountId, updatedAccount)
+      if (!updateResult.success) {
+        return createErrorResult('UPDATE_ACCOUNT_ERROR')
+      }
+
+      return createSuccessResult(updateResult.data!)
+    } catch (error: unknown) {
+      return createErrorResult('UPDATE_ACCOUNT_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  // New methods for local account support
   const createLocalAccount = async (): Promise<Result<AccountSession>> => {
     try {
       // Create a local user account without phone verification
@@ -409,6 +448,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     validateSession,
     revokeSession,
     getAccount,
+    updateAccount,
     createLocalAccount,
     upgradeToPhoneAccount,
     getFirebaseConfig,

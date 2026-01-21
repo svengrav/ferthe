@@ -1,5 +1,8 @@
 import { getAppContext } from '@app/appContext'
-import { Button, Page, Text } from '@app/shared/components'
+import { AccountView } from '@app/features/account/components/AccountView'
+import { Button, IconButton, Page, Text } from '@app/shared/components'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { useEffect, useState } from 'react'
@@ -67,6 +70,7 @@ const useCommunitiesScreen = () => {
 
 function CommunitiesScreen() {
   const { styles, theme } = useApp(useStyles)
+  const { t } = useLocalizationStore()
   const {
     communities,
     isLoading,
@@ -84,9 +88,8 @@ function CommunitiesScreen() {
   if (!styles) return null
 
   return (
-    <Page>
+    <Page action={<IconButton name="person" onPress={() => setOverlay(<AccountView/>)} />}>
       <Text style={theme.layout.header}>Communities</Text>
-
       <View style={styles.content}>
         {/* Create Community Section */}
         <View style={styles.section}>

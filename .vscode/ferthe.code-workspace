@@ -55,18 +55,9 @@
     "editor.formatOnSave": true,
     "typescript.preferences.useAliasesForRenames": false,
     "javascript.preferences.useAliasesForRenames": false,
-    "jest.runMode": "on-demand",
-    "jest.rootPath": "..",
-    "jest.disabledWorkspaceFolders": [
-      "🛠️ settings",
-      "🟢 app-src",
-      "🟥 api-src",
-      "🔴 core-src"
-    ],
     "workbench.colorCustomizations": {
       "titleBar.activeBackground": "#032e8a"
     },
-    "prettier.bracketSameLine": true,
     "[jsonc]": {
       "editor.defaultFormatter": "denoland.vscode-deno",
       "editor.formatOnSave": false

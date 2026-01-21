@@ -1,5 +1,5 @@
 import DevScreen from '@app/dev/components/DevScreen'
-import AccountScreen from '@app/features/account/components/AccountScreen'
+import CommunitiesScreen from '@app/features/community/components/CommunitiesScreen'
 import DiscoveryScreen from '@app/features/discovery/components/DiscoveryScreen'
 import MapScreen from '@app/features/map/components/MapScreen'
 import TrailScreen from '@app/features/trail/components/TrailScreen'
@@ -74,23 +74,14 @@ export function Navigation() {
           }}
         />
         <Tab.Screen
-          name='Account'
-          component={AccountScreen}
+          name='Socials'
+          component={CommunitiesScreen}
           options={{
-            tabBarIcon: ({ color, size }) => <Icon name='account-circle' color={color} size={size} />,
+            tabBarIcon: ({ color, size }) => <Icon name='people' color={color} size={size} />,
             headerShown: false,
-            title: t.navigation.account,
+            title: t.navigation.socials,
           }}
         />
-        {/* <Tab.Screen
-          name='About'
-          component={AboutScreen}
-          options={{
-            tabBarIcon: ({ color, size }) => <FoxIcon color={color} />,
-            headerShown: false,
-            title: t.navigation.about,
-          }}
-        /> */}
         {__DEV__ && (
           <Tab.Screen
             name='Dev'
