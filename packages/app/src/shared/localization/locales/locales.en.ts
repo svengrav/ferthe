@@ -112,7 +112,7 @@ const en: LocalizationSet = {
     verifyPhoneNumber: 'Verify Phone Number',
   },
   account: {
-    myAccount: 'My Account',
+    myAccount: 'Account',
     accountStatus: 'Account Status',
     localAccount: 'Local Account',
     phoneAccount: 'Phone Account',
@@ -132,6 +132,11 @@ const en: LocalizationSet = {
     loginToSync: 'Login to sync your data across devices',
     localAccountDescription: 'Your data is stored locally on this device',
     phoneAccountDescription: 'Your data is synced across all your devices',
+    displayName: 'Display Name',
+    setDisplayName: 'Set Display Name',
+    displayNamePlaceholder: 'Enter your name',
+    save: 'Save',
+    displayNameUpdated: 'Display name updated',
   },
 }
 

@@ -129,5 +129,10 @@ export interface LocalizationSet {
     loginToSync: string
     localAccountDescription: string
     phoneAccountDescription: string
+    displayName: string
+    setDisplayName: string
+    displayNamePlaceholder: string
+    save: string
+    displayNameUpdated: string
   }
 }

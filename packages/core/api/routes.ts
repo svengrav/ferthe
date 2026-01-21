@@ -236,6 +236,14 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       }),
     },
     {
+      method: 'PUT',
+      version: 'v1',
+      url: '/account/collections/accounts',
+      handler: asyncRequestHandler<Account>(async ({ context, body }) => {
+        return await accountApplication.updateAccount(context, body)
+      }),
+    },
+    {
       method: 'POST',
       version: 'v1',
       url: '/account/session/validate',

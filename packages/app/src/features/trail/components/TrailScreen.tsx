@@ -92,7 +92,7 @@ function TrailScreen() {
   return (
     <Page options={pageOptions}>
       {/* Header section */}
-      <Text style={theme.layout.header}>{locales.trails.yourTrails}</Text>
+      <Text variant='heading'>{locales.trails.yourTrails}</Text>
 
       {/* Main content */}
       <View style={styles.content}>

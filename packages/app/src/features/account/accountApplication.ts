@@ -5,6 +5,7 @@ import {
   AccountContext,
   AccountDeviceInfo,
   AccountSession,
+  AccountUpdateData,
   FirebaseConfig,
   Result,
   SessionValidationResult,
@@ -29,6 +30,7 @@ export interface AccountApplication {
   validateSession: () => Promise<Result<SessionValidationResult>>
   revokeSession: () => Promise<Result<void>>
   getAccount: () => Promise<Result<Account | null>>
+  updateAccount: (data: AccountUpdateData) => Promise<Result<Account>>
   upgradeToPhoneAccount: (phoneNumber: string, code: string) => Promise<Result<AccountSession>>
   getFirebaseConfig: () => Promise<Result<FirebaseConfig>>
 }
@@ -159,6 +161,17 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       const session = getSession()
       if (!session) return Promise.resolve({ success: false, data: undefined })
       return accountAPI.getAccount(session)
+    },
+
+    updateAccount: async function (data: AccountUpdateData): Promise<Result<Account>> {
+      const session = getSession()
+      if (!session) return Promise.resolve({ success: false, data: undefined })
+
+      const result = await accountAPI.updateAccount(session, data)
+      if (result.success && result.data) {
+        storeActions.setAccount(result.data)
+      }
+      return result
     },
 
     upgradeToPhoneAccount: function (phoneNumber: string, code: string): Promise<Result<AccountSession>> {

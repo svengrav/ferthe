@@ -1,12 +1,14 @@
-import { Button, Card, InfoField, Text } from '@app/shared/components'
+import { Button, InfoField, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay } from '@app/shared/overlay'
 import { Theme } from '@app/shared/theme'
 import useThemeStore from '@app/shared/theme/useThemeStore'
+import { logger } from '@app/shared/utils/logger'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 import { useAccountData } from '../stores/accountStore'
 import AccountVerification from './AccountVerification'
+import { DisplayNameEditor } from './DisplayNameEditor'
 
 
 export const AccountView: React.FC = () => {
@@ -19,13 +21,21 @@ export const AccountView: React.FC = () => {
   }
   const styles = createStyles(theme)
 
+  logger.log('Rendering AccountView with account:', account, 'and accountType:', accountType)
+
   return (
     <View>
       <Text variant="heading">{t.account.myAccount}</Text>
 
       {/* Account Status Section */}
       <View style={styles.grid}>
-        <Card style={styles.card}>
+          {/* Display Name Editor */}
+          <InfoField
+            icon="person-2"
+            label={t.account.displayName}
+            value={account?.displayName || 'Not set'}
+            onEdit={() => { const close = setOverlay(<DisplayNameEditor onSubmit={() => close()} /> , { title: t.account.setDisplayName, closable: true, variant: 'compact' }) }}
+          />
           {accountType ? (
             <View>
               <InfoField
@@ -50,10 +60,8 @@ export const AccountView: React.FC = () => {
               value={t.account.notLoggedIn}
             />
           )}
-        </Card>
 
         {/* Feature Access Information */}
-        <Card style={styles.card}>
           <InfoField
             icon="sync"
             label={t.account.featureAccess}
@@ -77,7 +85,6 @@ export const AccountView: React.FC = () => {
               </Text>
             </View>
           )}
-        </Card>
       </View>
     </View>
   )

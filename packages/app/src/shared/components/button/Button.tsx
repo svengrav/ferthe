@@ -108,12 +108,13 @@ const createButtonStyles = (theme: Theme, variant: ButtonVariant, dense: boolean
   }
 }
 interface IconButtonProps extends IconProps {
+  disabled?: boolean
   onPress?: () => void
   options?: Option[]
   variant?: ButtonVariant
 }
 
-export const IconButton = ({ onPress, options, variant = 'primary', style, ...props }: IconButtonProps) => {
+export const IconButton = ({ onPress, options, variant = 'primary', style, disabled, ...props }: IconButtonProps) => {
   const theme = useThemeStore()
   const styles = createIconButtonStyles(theme, variant)
   const [isMenuVisible, setMenuVisible] = useState(false)
@@ -123,7 +124,8 @@ export const IconButton = ({ onPress, options, variant = 'primary', style, ...pr
     <>
       <View>
         <TouchableOpacity
-          style={[styles.iconButton, { height: 28, width: 28 }, style]}
+          disabled={disabled}
+          style={[styles.iconButton, { height: 20, width: 20 }, style]}
           onPress={options ? () => setMenuVisible(true) : onPress}
           ref={ref}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>

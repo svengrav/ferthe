@@ -97,7 +97,7 @@ function CommunitiesScreen() {
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
-              placeholder="Community name"
+              placeholder="Community Name"
               value={newCommunityName}
               onChangeText={setNewCommunityName}
             />
@@ -111,7 +111,7 @@ function CommunitiesScreen() {
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
-              placeholder="ABCD12"
+              placeholder="Your Code"
               value={inviteCode}
               onChangeText={text => setInviteCode(text.toUpperCase())}
               maxLength={6}

@@ -139,31 +139,30 @@ function OverlayContainer({
   if (!shouldRender || !styles) {
     return null
   }
-
-  const overlayTransparency = transparent ? theme.constants.OVERLAY_TRANSPARENCY : 1
   
   // Render content based on variant
   const renderContent = () => {
     // Compact variant - centered modal with rounded corners
     if (variant === 'compact') {
       return (
-        <View style={styles.compactContainer}  id='overlay-compact-container'>
-          {/* Header with title and close button */}
-          {(title || closable) && (
-            <View style={styles.compactHeader}>
-              {title && <Text style={styles.compactTitle}>{title}</Text>}
-              {closable && (
-                <IconButton
-                  name="close"
-                  variant="outlined"
-                  onPress={onClose}
-                  size={20}
-                />
-              )}
-            </View>
-          )}
-          {/* Content area */}
-          <View style={styles.compactContent} id='overlay-compact-content'>{children}</View>
+        <View style={{backgroundColor: theme.opacity(theme.colors.background, 0.6), paddingTop: 60, flex: 1}}  id='overlay-compact-container'>
+          <View style={[styles.compactContainer, ]}>
+            {/* Header with title and close button */}
+            {(title || closable) && (
+              <View style={styles.compactHeader}>
+                {title && <Text style={{paddingHorizontal: 8, paddingVertical: 8}} >{title}</Text>}
+                {closable && (
+                  <IconButton
+                    name="close"
+                    variant="outlined"
+                    onPress={onClose}
+                  />
+                )}
+              </View>
+            )}
+            {/* Content area */}
+            <View style={styles.compactContent} id='overlay-compact-content'>{children}</View>
+          </View>
         </View>
       )
     }
@@ -205,6 +204,7 @@ function OverlayContainer({
                 name="close"
                 variant="outlined"
                 onPress={onClose}
+                size={20}
                 style={{ marginRight: -8 }}
               />
             )}
@@ -311,7 +311,6 @@ const useStyles = createThemedStyles(theme => ({
   
   // Compact variant - centered modal
   compactContainer: {
-    marginTop: 60,
     flex:1,
     backgroundColor: theme.colors.background,
   },

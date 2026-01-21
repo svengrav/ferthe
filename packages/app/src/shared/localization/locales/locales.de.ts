@@ -131,6 +131,11 @@ const de: LocalizationSet = {
     loginToSync: 'Melde dich an, um Daten geräteübergreifend zu synchronisieren',
     localAccountDescription: 'Deine Daten werden lokal auf diesem Gerät gespeichert',
     phoneAccountDescription: 'Deine Daten werden auf allen deinen Geräten synchronisiert',
+    displayName: 'Anzeigename',
+    setDisplayName: 'Anzeigename festlegen',
+    displayNamePlaceholder: 'Gib deinen Namen ein',
+    save: 'Speichern',
+    displayNameUpdated: 'Anzeigename aktualisiert',
   },
 }
 
