@@ -2,6 +2,7 @@ import {
   Account,
   AccountContext,
   AccountSession,
+  AccountUpdateData,
   ApplicationContract,
   Clue,
   Community,
@@ -10,6 +11,7 @@ import {
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoveryProfileUpdateData,
+  DiscoveryStats,
   DiscoveryTrail,
   FirebaseConfig,
   LocationWithDirection,
@@ -92,6 +94,8 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
       getDiscoveryProfile: (_context: AccountContext) => API.send<Result<DiscoveryProfile>>('/discovery/profile'),
 
       updateDiscoveryProfile: (_context: AccountContext, updateData: DiscoveryProfileUpdateData) => API.send<Result<DiscoveryProfile>>('/discovery/profile', 'PUT', updateData),
+
+      getDiscoveryStats: (_context: AccountContext, discoveryId: string) => API.send<Result<DiscoveryStats>>(`/discoveries/${discoveryId}/stats`),
     },
 
     /**
@@ -128,6 +132,8 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
         const params = trailId ? `?trailId=${trailId}` : ''
         return API.send<Result<SpotPreview[]>>(`/trail/collections/spot-previews${params}`)
       },
+
+      getTrailSpotIds: (_context: AccountContext, trailId: string) => API.send<Result<string[]>>(`/trail/collections/trails/${trailId}/spots`),
 
       createSpot: (_context: AccountContext, spot: any) => API.send<Result<Spot>>('/trail/collections/spots', 'POST', spot),
 
@@ -171,6 +177,8 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
           throw error
         }
       },
+
+      updateAccount: (_context: AccountContext, data: AccountUpdateData) => API.send<Result<Account>>('/account/collections/accounts', 'PUT', data),
 
       validateSession: (sessionToken: string) => API.send<Result<SessionValidationResult>>('/account/session/validate', 'POST', { sessionToken }),
 

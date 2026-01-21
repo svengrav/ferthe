@@ -1,11 +1,10 @@
-import { Button, Card, InfoField } from '@app/shared/components'
+import { Button, Card, InfoField, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay } from '@app/shared/overlay'
 import { Theme } from '@app/shared/theme'
-import { createLayoutTheme } from '@app/shared/theme/layout'
 import useThemeStore from '@app/shared/theme/useThemeStore'
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { useAccountData } from '../stores/accountStore'
 import AccountVerification from './AccountVerification'
 
@@ -19,11 +18,10 @@ export const AccountView: React.FC = () => {
     setOverlay(<AccountVerification />, { title: 'Verify your Account', variant: 'fullscreen', closable: true })
   }
   const styles = createStyles(theme)
-  const comp = createLayoutTheme(theme)
 
   return (
     <View>
-      <Text style={comp.header}>{t.account.myAccount}</Text>
+      <Text variant="heading">{t.account.myAccount}</Text>
 
       {/* Account Status Section */}
       <View style={styles.grid}>
@@ -74,7 +72,7 @@ export const AccountView: React.FC = () => {
                 label={'Upgrade Now'}
                 variant="primary"
                 onPress={() => showAccountRegistration()} />
-              <Text style={comp.hint}>
+              <Text variant="caption">
                 {t.account.upgradeToUnlock}
               </Text>
             </View>

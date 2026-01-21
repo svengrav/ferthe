@@ -33,7 +33,7 @@ function CommunityCard({ community }: CommunityCardProps) {
         {isActive && <Text style={styles.activeBadge}>Active</Text>}
       </View>
       <Text style={styles.inviteCode}>Invite Code: {community.inviteCode}</Text>
-      <Text style={styles.meta}>Created {community.createdAt.toLocaleDateString()}</Text>
+      <Text style={styles.meta}>Created {new Date(community.createdAt).toLocaleDateString()}</Text>
     </Pressable>
   )
 }

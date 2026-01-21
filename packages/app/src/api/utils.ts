@@ -34,6 +34,44 @@ export const fetchWithTimeout = async (
   }
 }
 
+/**
+ * Known date field names that should be deserialized from ISO strings to Date objects
+ */
+const DATE_FIELDS = ['createdAt', 'updatedAt', 'joinedAt', 'discoveredAt', 'timestamp']
+
+/**
+ * Deserializes ISO date strings to Date objects in API responses
+ */
+export const deserializeDates = <T>(data: any): T => {
+  if (!data || typeof data !== 'object') {
+    return data
+  }
+
+  if (Array.isArray(data)) {
+    return data.map(item => deserializeDates(item)) as T
+  }
+
+  const result: any = {}
+  for (const key in data) {
+    const value = data[key]
+
+    // Convert known date fields from ISO strings to Date objects
+    if (DATE_FIELDS.includes(key) && typeof value === 'string') {
+      try {
+        result[key] = new Date(value)
+      } catch {
+        result[key] = value
+      }
+    } else if (typeof value === 'object' && value !== null) {
+      result[key] = deserializeDates(value)
+    } else {
+      result[key] = value
+    }
+  }
+
+  return result as T
+}
+
 export interface StatusResult {
   available: boolean
   latency?: number

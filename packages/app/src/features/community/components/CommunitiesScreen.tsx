@@ -89,11 +89,11 @@ function CommunitiesScreen() {
 
   return (
     <Page action={<IconButton name="person" onPress={() => setOverlay(<AccountView/>)} />}>
-      <Text style={theme.layout.header}>Communities</Text>
+      <Text variant="heading">Communities</Text>
       <View style={styles.content}>
         {/* Create Community Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Create New Community</Text>
+          <Text variant="section">Create New Community</Text>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
@@ -107,7 +107,7 @@ function CommunitiesScreen() {
 
         {/* Join Community Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Join with Invite Code</Text>
+          <Text variant="section">Join with Invite Code</Text>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
@@ -122,9 +122,9 @@ function CommunitiesScreen() {
 
         {/* Communities List */}
         <View style={styles.listSection}>
-          <Text style={styles.sectionTitle}>My Communities</Text>
+          <Text variant="section">My Communities</Text>
           {communities.length === 0 ? (
-            <Text style={styles.emptyText}>No communities yet. Create or join one!</Text>
+            <Text variant="caption" style={{ textAlign: 'center', marginTop: 24 }}>No communities yet. Create or join one!</Text>
           ) : (
             <FlatList
               data={communities}
@@ -149,12 +149,6 @@ const useStyles = createThemedStyles(theme => ({
   section: {
     marginBottom: 24,
   },
-  sectionTitle: {
-    ...theme.text.size.md,
-    fontFamily: theme.text.primary.semiBold,
-    marginBottom: 12,
-    color: theme.colors.onBackground,
-  },
   inputRow: {
     flexDirection: 'row',
     gap: 8,
@@ -173,12 +167,6 @@ const useStyles = createThemedStyles(theme => ({
   },
   listContent: {
     gap: 12,
-  },
-  emptyText: {
-    ...theme.text.size.sm,
-    color: theme.deriveColor(theme.colors.onSurface, 0.6),
-    textAlign: 'center',
-    marginTop: 24,
   },
 }))
 

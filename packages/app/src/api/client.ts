@@ -1,5 +1,5 @@
 import { AccountSession } from '@shared/contracts/accounts.js';
-import { fetchWithTimeout } from './utils';
+import { deserializeDates, fetchWithTimeout } from './utils';
 
 // Base API Client Factory
 export const createAPIClient = (apiEndpoint: string, getAccountSession: () => AccountSession | null, timeout: number = 10000) => {
@@ -22,7 +22,8 @@ export const createAPIClient = (apiEndpoint: string, getAccountSession: () => Ac
       timeout,
     })
 
-    return response.json()
+    const json = await response.json()
+    return deserializeDates<T>(json)
   }
 
   return { send }
