@@ -35,7 +35,7 @@ function TrailDetails({ trail }: TrailDetailsProps) {
   const trailDescription = trail.description || locales.trails.noDescription
 
   return (
-    <View>
+    <View style={{ paddingTop: 8}}>
       <Image
         source={{ uri: trail.image?.url || 'default_image_url' }}
         resizeMode='cover'

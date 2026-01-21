@@ -144,7 +144,7 @@ function CommunitiesScreen() {
 const useStyles = createThemedStyles(theme => ({
   content: {
     flex: 1,
-    padding: 16,
+    padding: 8,
   },
   section: {
     marginBottom: 24,

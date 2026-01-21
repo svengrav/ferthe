@@ -255,7 +255,6 @@ const useStyles = createThemedStyles(theme => ({
     right: 0,
     bottom: 0,
     zIndex: OVERLAY_Z_INDEX,
-    backgroundColor: theme.colors.background
   },
   animatedContainer: {
     height: '100%',
@@ -312,19 +311,16 @@ const useStyles = createThemedStyles(theme => ({
   
   // Compact variant - centered modal
   compactContainer: {
-    position: 'relative',
     marginTop: 60,
     flex:1,
     backgroundColor: theme.colors.background,
   },
   compactHeader: {
     flexDirection: 'row',
-    alignContent: 'flex-end',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: theme.colors.surface,
     padding: 8,
-    marginLeft: 'auto',
     borderRadius: 8,
     gap: 8,
   },
@@ -342,6 +338,7 @@ const useStyles = createThemedStyles(theme => ({
   // Page variant - fullscreen with PageHeader
   pageContainer: {
     flex: 1,
+    backgroundColor: theme.colors.background
   },
   pageContent: {
     flex: 1,

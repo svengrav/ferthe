@@ -4,14 +4,14 @@ import React, { useEffect, useState } from 'react'
 import { Dimensions, Modal, Text, TouchableOpacity, View } from 'react-native'
 import { Option } from '../types'
 
-const MENU_WIDTH = 200
+const MENU_WIDTH = 150
 const MENU_ITEM_HEIGHT = 50
 const SCREEN_MARGIN = 10
 const BACKDROP_OPACITY = 0.5
-const BORDER_RADIUS = 8
-const MENU_PADDING = 8
-const OPTION_PADDING = 10
-const FONT_SIZE = 16
+const BORDER_RADIUS = 4
+const MENU_PADDING = 4
+const OPTION_PADDING = 8
+const FONT_SIZE = 14
 
 /**
  * Hook to calculate dropdown menu position based on anchor element
