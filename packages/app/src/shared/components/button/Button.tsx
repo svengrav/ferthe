@@ -123,7 +123,7 @@ export const IconButton = ({ onPress, options, variant = 'primary', style, ...pr
     <>
       <View>
         <TouchableOpacity
-          style={[styles.iconButton, { height: 32, width: 32 }, style]}
+          style={[styles.iconButton, { height: 28, width: 28 }, style]}
           onPress={options ? () => setMenuVisible(true) : onPress}
           ref={ref}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
