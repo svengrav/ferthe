@@ -1,13 +1,13 @@
 import { getAppContext } from '@app/appContext'
 import { useDiscoveryTrail } from '@app/features/discovery'
 import { useTrailData } from '@app/features/trail'
-import { TrailAvatar } from '@app/features/trail/components/TrailItem'
-import { IconButton, Text } from '@app/shared/components'
+import TrailItem from '@app/features/trail/components/TrailItem'
+import { IconButton } from '@app/shared/components'
 import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles, useThemeStore } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
 import React from 'react'
-import { FlatList, TouchableOpacity, View } from 'react-native'
+import { FlatList, TouchableOpacity } from 'react-native'
 
 const useMapBottomSheet = () => {
   const { trails } = useTrailData()
@@ -38,18 +38,11 @@ export const MapTrailSelector = () => {
       const isActive = item.id === activeTrail?.trail?.id
       
       return (
-        <TouchableOpacity 
-          style={[styles.trailItem, isActive && styles.trailItemActive]} 
-          onPress={() => handleSelectTrail(item, removeOverlay!)}
-        >
-          <View style={styles.avatarContainer}>
-            <TrailAvatar trail={item} />
-          </View>
-          <View style={styles.trailInfo}>
-            <Text variant='label'>{item.name}</Text>
-            <Text variant='hint' numberOfLines={1}>{item.description}</Text>
-          </View>
-        </TouchableOpacity>
+        <TrailItem 
+          trail={item} 
+          onPress={() => handleSelectTrail(item, removeOverlay!)} 
+          actions={<IconButton name='chevron-right' size={24} variant='primary'/>} 
+        />
       )
     }
     
@@ -69,27 +62,9 @@ export const MapTrailSelector = () => {
 
   return (
     <TouchableOpacity style={styles.selector} onPress={openTrailSelector}>
-      {/* Trail Logo */}
-      {selectedTrail && (
-        <View style={styles.logoContainer}>
-          <TrailAvatar trail={selectedTrail} />
-        </View>
-      )}
-      
-      {/* Trail Name */}
-      <View style={styles.nameContainer}>
-        <Text variant='title' size='md'>
-          {selectedTrail ? selectedTrail.name : 'Select Trail'}
-        </Text>
-        <Text variant='hint'>
-           Trail
-        </Text>
-      </View>
-      
-      {/* Selector Icon */}
-      <View style={styles.iconContainer}>
-        <IconButton name='swap-horiz' onPress={openTrailSelector} size={20} variant='outlined' />
-      </View>
+      {selectedTrail && <TrailItem trail={selectedTrail} onPress={openTrailSelector} actions={
+        <IconButton name='swap-horiz' size={24}  variant='outlined'/>
+      }/>}
     </TouchableOpacity>
   )
 }
@@ -109,7 +84,6 @@ const useStyles = createThemedStyles(theme => ({
     height: 50,
   },
   nameContainer: {
-    gap:4,
     flex: 1,
   },
   iconContainer: {

@@ -21,7 +21,7 @@ const DESCRIPTION_MAX_LINES = 2
 /**
  * Hook to manage trail card interactions and state
  */
-const useTrailCard = (trail: Trail) => {
+const useTrailItem = (trail: Trail) => {
   const [contextMenu, setContextMenu] = useState(false)
   const cardRef = useRef<View>(null)
   const { t } = useLocalizationStore()
@@ -41,10 +41,6 @@ const useTrailCard = (trail: Trail) => {
     openContextMenu,
     closeContextMenu,
   }
-}
-
-interface TrailCardProps {
-  trail: Trail
 }
 
 /**
@@ -75,17 +71,24 @@ export function TrailAvatar({ trail }: { trail: Trail }) {
   )
 }
 
+interface TrailCardProps {
+  onPress?: (trail: Trail) => void
+  actions?: React.ReactNode
+  trail: Trail
+}
+
 /**
  * Trail card component displaying trail information with context menu and overlay
  */
-function TrailItem({ trail }: TrailCardProps) {
+function TrailItem({ trail, actions, onPress }: TrailCardProps) {
   const { styles } = useApp(useStyles)
   const {
     cardRef,
     t,
     handleOpenTrailOverview,
     openContextMenu,
-  } = useTrailCard(trail)
+  } = useTrailItem(trail)
+  const itemTap = onPress ?? handleOpenTrailOverview
 
   if (!styles) return null
 
@@ -93,7 +96,7 @@ function TrailItem({ trail }: TrailCardProps) {
     <View style={styles.content}>
       <TrailAvatar trail={trail} />
       <View style={styles.textContainer}>
-        <Text variant='title' size='md'>{trail.name}</Text>
+        <Text variant='title' >{trail.name}</Text>
         <Text
           variant='body'
           size='sm'
@@ -103,12 +106,15 @@ function TrailItem({ trail }: TrailCardProps) {
           {trail?.description || t.trails.noDescription}
         </Text>
       </View>
+      <View> 
+        {actions}
+      </View>
     </View>
   )
 
   return (
-    <View>
-      <TouchableOpacity onPress={handleOpenTrailOverview} onLongPress={openContextMenu}>
+    <View id="trail-item-container" style={styles.container}> 
+      <TouchableOpacity onPress={() => itemTap(trail)} onLongPress={openContextMenu}>
         <Card ref={cardRef}>
           {renderCardContent()}
         </Card>
@@ -134,6 +140,11 @@ const useAvatarStyles = createThemedStyles(theme => ({
 }))
 
 const useStyles = createThemedStyles(theme => ({
+  container: {
+    flex:1, 
+    alignItems: 'stretch',
+    justifyContent: 'center',
+  },
   content: {
     flex: 1,
     flexDirection: 'row',
@@ -144,6 +155,7 @@ const useStyles = createThemedStyles(theme => ({
     flex: 1,
     flexDirection: 'column',
     overflow: 'hidden',
+    flexGrow:1
   },
 
 }))

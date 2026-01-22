@@ -90,7 +90,7 @@ export const createTypography = (theme: ThemeBase) => {
       paddingVertical: 12,
     },
     title: {
-      fontSize: 20,
+      fontSize: 15,
       lineHeight: 30,
       fontWeight: '600' as const,
       fontFamily: 'Inter_600SemiBold',
