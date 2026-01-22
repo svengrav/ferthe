@@ -12,7 +12,7 @@ import TrailDetails from './TrailDetails'
 const AVATAR_SIZE = 50
 const AVATAR_BORDER_RADIUS = 4
 const AVATAR_LINE_HEIGHT = 50
-const DESCRIPTION_MAX_LINES = 2
+const DESCRIPTION_MAX_LINES = 1
 
 /**
  * Hook to manage trail card interactions and state

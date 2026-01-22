@@ -29,8 +29,8 @@ const createMapThemeFromBase = (): MapTheme => {
       strokeWidth: 2,
     },
     device: {
-      strokeColor: '#fa1c4c',
-      fill: '#fa1c4c',
+      strokeColor: '#ffffff',
+      fill: '#ffffff',
       strokeWidth: 1.5,
     },
     spot: {
@@ -54,12 +54,12 @@ const createMapThemeFromBase = (): MapTheme => {
       strokeWidth: 1.5,
     },
     snap: {
-      strokeColor: '#fa1c4c',
+      strokeColor: '#ffffff',
       strokeWidth: 1.5,
     },
     scanner: {
-      strokeColor: '#fa1c4c',
-      fill: '#fa1c4c59',
+      strokeColor: '#ffffff',
+      fill: '#ffffff',
       strokeWidth: 1,
     },
     compass: {
