@@ -195,7 +195,7 @@ function OverlayContainer({
         {(title || closable) && (
           <View style={styles.fullscreenHeader}>
             {title && (
-              <Text variant='title'>
+              <Text variant='title' size='md'>
                 {title}
               </Text>
             )}
@@ -290,7 +290,7 @@ const useStyles = createThemedStyles(theme => ({
   },
   fullscreenHeader: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
     height: theme.dimensions.HEADER_HEIGHT,
     paddingHorizontal: CONTENT_PADDING,

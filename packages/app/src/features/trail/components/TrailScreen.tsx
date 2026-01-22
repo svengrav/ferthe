@@ -43,7 +43,11 @@ const useTrailScreen = () => {
       <SettingsForm 
         onClose={() => removeOverlay?.()} 
         onSubmit={() => removeOverlay?.()} 
-      />,{ variant: 'page', title: 'Settings'})
+      />,
+      { 
+        variant: 'fullscreen', 
+        title: 'Settings'
+      })
   }
 
   const isRefreshing = status === 'loading'

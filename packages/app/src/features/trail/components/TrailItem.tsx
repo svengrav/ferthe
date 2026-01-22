@@ -12,10 +12,6 @@ import TrailDetails from './TrailDetails'
 const AVATAR_SIZE = 50
 const AVATAR_BORDER_RADIUS = 4
 const AVATAR_LINE_HEIGHT = 50
-
-// Card constants
-const TEXT_CONTAINER_PADDING = 8
-const DESCRIPTION_WIDTH = '95%'
 const DESCRIPTION_MAX_LINES = 2
 
 /**
@@ -27,7 +23,10 @@ const useTrailItem = (trail: Trail) => {
   const { t } = useLocalizationStore()
 
   const handleOpenTrailOverview = () => {
-    setOverlay(<TrailDetails trail={trail} />)
+    setOverlay(<TrailDetails trail={trail} />, { 
+      title: 'Trail',
+      variant: 'fullscreen'
+    })
   }
 
   const openContextMenu = () => setContextMenu(true)
