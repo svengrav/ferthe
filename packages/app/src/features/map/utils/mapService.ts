@@ -1,4 +1,4 @@
-import { Spot } from '@shared/contracts'
+import { Discovery, Spot } from '@shared/contracts'
 import { GeoBoundary, GeoLocation, GeoRegion, geoUtils } from '@shared/geo'
 import { Direction, DIRECTIONS, MapCompass } from '../types/compass'
 import { DeviceBoundaryStatus, MAP_SPECIFICATION_DEFAULTS } from '../types/map'
@@ -63,11 +63,42 @@ export const mapService = {
     return { region, boundary }
   },
 
-  calculateMapSnap: (spots: Spot[], deviceLocation: GeoLocation | undefined, snapIntensity?: number) => {
+  calculateMapSnap: (spots: Spot[], discoveries: Discovery[], deviceLocation: GeoLocation | undefined, snapIntensity?: number) => {
+    if (!deviceLocation || !snapIntensity || snapIntensity === 0) {
+      return {
+        startPoint: deviceLocation ?? { lat: 0, lon: 0 },
+        endPoint: deviceLocation ?? { lat: 0, lon: 0 },
+        intensity: 0,
+      }
+    }
+
+    // Find the most recent discovery to use as start point
+    const lastDiscovery = discoveries.length > 0
+      ? [...discoveries].sort((a, b) => new Date(b.discoveredAt).getTime() - new Date(a.discoveredAt).getTime())[0]
+      : undefined
+
+    const lastDiscoveredSpot = lastDiscovery
+      ? spots.find(spot => spot.id === lastDiscovery.spotId)
+      : undefined
+
+    // Find unexplored spots to determine end point
+    const exploredSpotIds = discoveries.map(d => d.spotId)
+    const unexploredSpots = spots.filter(spot => !exploredSpotIds.includes(spot.id))
+
+    // Find nearest unexplored spot as end point
+    let nearestUnexploredSpot: Spot | undefined
+    if (unexploredSpots.length > 0) {
+      nearestUnexploredSpot = unexploredSpots.reduce((closest, spot) => {
+        const distanceToCurrent = geoUtils.calculateDistance(deviceLocation, closest.location)
+        const distanceToSpot = geoUtils.calculateDistance(deviceLocation, spot.location)
+        return distanceToSpot < distanceToCurrent ? spot : closest
+      })
+    }
+
     return {
-      startPoint: spots.at(-1)?.location ?? deviceLocation ?? { lat: 0, lon: 0 },
-      endPoint: deviceLocation ?? { lat: 0, lon: 0 },
-      intensity: snapIntensity ?? 0,
+      startPoint: lastDiscoveredSpot?.location ?? deviceLocation,
+      endPoint: nearestUnexploredSpot?.location ?? deviceLocation,
+      intensity: snapIntensity,
     }
   },
 }

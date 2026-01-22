@@ -10,8 +10,15 @@ function MapSnap() {
   const boundary = useMapBoundary()
   const size = useMapSize()
   const mapTheme = useMapTheme()
+  
+  // Don't render if intensity is 0 or if start and end points are the same
+  if (intensity === 0) {
+    return null
+  }
+  
   const color = hexToRgbaWithIntensity(mapTheme.snap.strokeColor || '#ffffff', intensity)
   return <GeoPath
+    key={'map-snap-line'}
     boundary={boundary}
     size={size}
     points={[startPoint, endPoint]}
