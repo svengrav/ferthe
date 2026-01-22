@@ -36,7 +36,7 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     header: {
       width: '100%',
-      height: theme.constants.HEADER_HEIGHT,
+      height: theme.dimensions.HEADER_HEIGHT,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -48,9 +48,7 @@ const createStyles = (theme: Theme) =>
       height: 24,
     },
     label: {
-      ...theme.text.size.lg,
-      fontFamily: theme.text.primary.semiBold,
-      color: theme.colors.onBackground,
+      ...theme.typo.heading,
       textAlign: 'center',
     },
     leftContainer: {

@@ -37,8 +37,8 @@ const InfoField: React.FC<InfoFieldProps> = ({
         />
       </View>
       <View style={styles.content}>
-        <Text style={styles.label}>{label}</Text>
-        {value && <Text style={styles.value}>{value}</Text>}
+        <Text variant='caption' size='sm'>{label}</Text>
+        {value && <Text variant='body'>{value}</Text>}
       </View>
       {action}
       {onEdit && <IconButton name={'edit'} variant='outlined' size={16} onPress={onEdit}  />}
@@ -61,17 +61,8 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   content: {
     flex: 1,
-    gap: 4,
   },
-  label: {
-    ...theme.text.size.xs,
-    color: theme.colors.onSurface,
-    opacity: 0.6,
-  },
-  value: {
-    ...theme.text.size.sm,
-    color: theme.colors.onSurface,
-  },
+
 })
 
 export default InfoField

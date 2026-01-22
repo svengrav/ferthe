@@ -153,20 +153,15 @@ const createStyles = (theme: Theme) => {
     },
     slug: {
       color: theme.deriveColor(theme.colors.onBackground),
-      ...theme.text.size.xs,
     },
     date: {
       color: theme.deriveColor(theme.colors.onBackground),
-      ...theme.text.size.xs,
     },
     title: {
-      ...theme.text.size.lg,
-      fontFamily: theme.text.primary.bold,
       color: theme.colors.onBackground,
       paddingVertical: 12,
     },
     content: {
-      ...theme.text.size.md,
       color: theme.colors.onSurface,
     },
     bottom: {

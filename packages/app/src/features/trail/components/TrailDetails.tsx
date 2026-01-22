@@ -35,14 +35,15 @@ function TrailDetails({ trail }: TrailDetailsProps) {
   const trailDescription = trail.description || locales.trails.noDescription
 
   return (
-    <View style={{ paddingTop: 8}}>
+    <View>
+      <Text variant="heading">{trailName}</Text>
       <Image
         source={{ uri: trail.image?.url || 'default_image_url' }}
         resizeMode='cover'
-        style={{ width: 'auto', height: 150, borderRadius: 8 }}
+        style={{ width: 'auto', height: 150 }}
       />
-      <Text style={theme.layout.title}>{trailName}</Text>
-      <Text style={theme.layout.textBase}>{trailDescription}</Text>
+      <Text variant="section">Description</Text>
+      <Text variant="body">{trailDescription}</Text>
 
       {/* <SpotCardList cards={previews.map(p => ({
         image: {
@@ -54,28 +55,7 @@ function TrailDetails({ trail }: TrailDetailsProps) {
 }
 
 const useStyles = createThemedStyles(theme => ({
-  title: {
-    ...theme.text.size.lg,
-    fontFamily: theme.text.primary.bold,
-    color: theme.colors.onBackground,
-    marginBottom: TITLE_MARGIN_BOTTOM,
-  },
-  description: {
-    ...theme.text.size.md,
-    color: theme.colors.onSecondary,
-    marginBottom: DESCRIPTION_MARGIN_BOTTOM,
-  },
-  sectionTitle: {
-    ...theme.text.size.md,
-    fontFamily: theme.text.primary.semiBold,
-    color: theme.colors.onBackground,
-    marginTop: SECTION_TITLE_MARGIN_TOP,
-    marginBottom: SECTION_TITLE_MARGIN_BOTTOM,
-  },
-  text: {
-    ...theme.text.size.md,
-    color: theme.colors.onBackground,
-  },
+
 }))
 
 export default TrailDetails

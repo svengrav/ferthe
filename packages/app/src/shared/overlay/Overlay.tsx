@@ -195,7 +195,7 @@ function OverlayContainer({
         {(title || closable) && (
           <View style={styles.fullscreenHeader}>
             {title && (
-              <Text style={styles.fullscreenTitle}>
+              <Text variant='title'>
                 {title}
               </Text>
             )}
@@ -290,19 +290,14 @@ const useStyles = createThemedStyles(theme => ({
   },
   fullscreenHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    height: theme.constants.HEADER_HEIGHT,
+    height: theme.dimensions.HEADER_HEIGHT,
     paddingHorizontal: CONTENT_PADDING,
     backgroundColor: theme.deriveColor(theme.colors.surface, 0.2),
     paddingVertical: CONTENT_PADDING / 2,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.onSurface + '20',
-  },
-  fullscreenTitle: {
-    ...theme.text.size.sm,
-    color: theme.colors.onSurface,
-    flex: 1,
   },
   fullscreenContent: {
     flex: 1,
@@ -322,10 +317,6 @@ const useStyles = createThemedStyles(theme => ({
     padding: 8,
     borderRadius: 8,
     gap: 8,
-  },
-  compactTitle: {
-    ...theme.text.size.lg,
-    color: theme.colors.onSurface,
   },
   compactContent: {
     flex:1,

@@ -125,11 +125,11 @@ export const IconButton = ({ onPress, options, variant = 'primary', style, disab
       <View>
         <TouchableOpacity
           disabled={disabled}
-          style={[styles.iconButton, { height: 20, width: 20 }, style]}
+          style={[styles.iconButton, { height: 22, width: 22 }, style]}
           onPress={options ? () => setMenuVisible(true) : onPress}
           ref={ref}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Icon color={styles.iconButton.color} {...props} />
+          <Icon color={styles.iconButton.color} size={22} {...props} />
         </TouchableOpacity>
         {options && (
           <DropdownMenu

@@ -2,24 +2,20 @@ import { getAppContext } from '@app/appContext'
 import { SettingsForm } from '@app/features/settings'
 import { useTrailData, useTrailStatus } from '@app/features/trail/stores/trailStore'
 import { FertheLogo, Page, Text } from '@app/shared/components'
-import { appNavigator } from '@app/shared/navigation/navigationRef'
 import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { useEffect } from 'react'
 import { FlatList, View } from 'react-native'
-import TrailCard from './TrailCard'
+import TrailItem from './TrailItem'
 
-const HEADER_PADDING_HORIZONTAL = 4
-const HEADER_PADDING_VERTICAL = 8
-const HEADER_MARGIN_BOTTOM = 8
 const INTRO_PADDING = 16
 const INTRO_MAX_WIDTH = 200
 const INTRO_MARGIN_TOP = 10
 const INTRO_MARGIN_BOTTOM = 25
 const INTRO_LINE_HEIGHT = 30
 const LOGO_MARGIN_BOTTOM = 10
-const LIST_GAP = 16
+const LIST_GAP = 0
 
 /**
  * Hook to manage trail screen state and interactions
@@ -50,10 +46,6 @@ const useTrailScreen = () => {
       />,{ variant: 'page', title: 'Settings'})
   }
 
-  const openAccount = () => {
-    appNavigator.toAccount()
-  }
-
   const isRefreshing = status === 'loading'
   const hasTrails = trails.length > 0
 
@@ -63,7 +55,6 @@ const useTrailScreen = () => {
     hasTrails,
     handleRefresh,
     openSettings,
-    openAccount,
   }
 }
 
@@ -79,14 +70,12 @@ function TrailScreen() {
     hasTrails,
     handleRefresh,
     openSettings,
-    openAccount,
   } = useTrailScreen()
 
   if (!styles) return null
 
   const pageOptions = [
     { label: locales.navigation.settings, onPress: openSettings },
-    { label: locales.navigation.account, onPress: openAccount },
   ]
 
   return (
@@ -100,7 +89,7 @@ function TrailScreen() {
           <FlatList
             data={trails}
             contentContainerStyle={styles.listContent}
-            renderItem={({ item }) => (<TrailCard trail={item} />)}
+            renderItem={({ item }) => (<TrailItem trail={item} />)}
             keyExtractor={item => item.id}
             onRefresh={handleRefresh}
             refreshing={isRefreshing}
@@ -128,13 +117,11 @@ const useStyles = createThemedStyles(theme => ({
     justifyContent: 'center',
   },
   introText: {
-    ...theme.text.size.md,
     maxWidth: INTRO_MAX_WIDTH,
     textAlign: 'center',
     color: theme.colors.onBackground,
     marginTop: INTRO_MARGIN_TOP,
     marginBottom: INTRO_MARGIN_BOTTOM,
-    fontFamily: theme.text.primary.semiBold,
     lineHeight: INTRO_LINE_HEIGHT,
   },
   logo: {

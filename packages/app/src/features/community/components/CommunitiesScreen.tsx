@@ -93,7 +93,7 @@ function CommunitiesScreen() {
       <View style={styles.content}>
         {/* Create Community Section */}
         <View style={styles.section}>
-          <Text variant="section">Create New Community</Text>
+          <Text variant="label">Create New Community</Text>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
@@ -107,7 +107,7 @@ function CommunitiesScreen() {
 
         {/* Join Community Section */}
         <View style={styles.section}>
-          <Text variant="section">Join with Invite Code</Text>
+          <Text variant="label">Join with Invite Code</Text>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
@@ -124,7 +124,7 @@ function CommunitiesScreen() {
         <View style={styles.listSection}>
           <Text variant="section">My Communities</Text>
           {communities.length === 0 ? (
-            <Text variant="caption" style={{ textAlign: 'center', marginTop: 24 }}>No communities yet. Create or join one!</Text>
+            <Text variant="body" style={{ textAlign: 'center', marginTop: 24 }}>No communities yet. Create or join one!</Text>
           ) : (
             <FlatList
               data={communities}
@@ -144,7 +144,7 @@ function CommunitiesScreen() {
 const useStyles = createThemedStyles(theme => ({
   content: {
     flex: 1,
-    padding: 8,
+    paddingHorizontal: 16
   },
   section: {
     marginBottom: 24,

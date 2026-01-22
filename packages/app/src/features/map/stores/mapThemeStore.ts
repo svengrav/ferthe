@@ -1,4 +1,4 @@
-import useThemeStore from '@app/shared/theme/useThemeStore'
+import useThemeStore from '@app/shared/theme/themeStore'
 import { create } from 'zustand'
 
 interface MapThemeStore {

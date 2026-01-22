@@ -1,6 +1,7 @@
 import { useThemeStore } from '@app/shared/theme'
 import { Theme } from '@app/shared/theme/types'
-import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native'
+import { StyleSheet, TextInput, TextInputProps, View } from 'react-native'
+import Text from '../text/Text'
 
 interface FormFieldProps extends Omit<TextInputProps, 'style'> {
   label?: string
@@ -40,7 +41,7 @@ const FormField = ({
         multiline={variant === 'textarea'}
       />
       {error && <Text style={styles.errorText}>{error}</Text>}
-      {description && <Text style={styles.descriptionText}>{description}</Text>}
+      {description && <Text variant="hint">{description}</Text>}
     </View>
   )
 }

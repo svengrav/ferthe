@@ -1,7 +1,5 @@
-import { useThemeStore, Theme } from '@app/shared/theme'
-import { StyleSheet } from 'react-native'
-import { View, TouchableOpacity } from 'react-native'
-import { Text } from 'react-native'
+import { Theme, useThemeStore } from '@app/shared/theme'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 interface ChipProps {
   label: string
@@ -57,18 +55,18 @@ const createStyles = (
     case 'small':
       paddingVertical = 2
       paddingHorizontal = 8
-      fontSize = theme.text.size.xs.fontSize ?? 12
+      fontSize = 12
       break
     case 'large':
       paddingVertical = 8
       paddingHorizontal = 20
-      fontSize = theme.text.size.md.fontSize ?? 18
+      fontSize = 18
       break
     case 'medium':
     default:
       paddingVertical = 4
       paddingHorizontal = 12
-      fontSize = theme.text.size.sm.fontSize ?? 14
+      fontSize = 14
       break
   }
 
@@ -84,8 +82,6 @@ const createStyles = (
       borderColor,
     },
     chipText: {
-      ...theme.text.size.sm,
-      fontFamily: theme.text.primary.regular,
       color: textColor,
       fontSize,
     },

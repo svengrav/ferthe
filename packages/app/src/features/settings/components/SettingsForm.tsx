@@ -1,4 +1,4 @@
-import { Card, Picker, Text } from '@app/shared/components'
+import { Picker, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { Formik } from 'formik'
@@ -21,8 +21,7 @@ export const SettingsForm = ({ onClose, onSubmit }: SettingsFormProps) => {
   return (
     <>
       {/* Settings Section */}
-      <Card>
-        <Text style={styles.subtitle}>{t.settings.yourSettings}</Text>
+        <Text variant='heading'>{t.settings.yourSettings}</Text>
 
         <Formik
           initialValues={initialValues}
@@ -67,7 +66,6 @@ export const SettingsForm = ({ onClose, onSubmit }: SettingsFormProps) => {
             </View>
           )}
         </Formik>
-      </Card>
     </>
   )
 }
@@ -78,7 +76,7 @@ function FormRow({ label, children }: { label: string; children?: React.ReactNod
 
   return (
     <View style={styles.settingsRow}>
-      <Text style={styles.label}>{label}</Text>
+      <Text variant='body' >{label}</Text>
       {children}
     </View>
   )
@@ -100,16 +98,5 @@ const createRowStyles = (theme: Theme) => {
 }
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    title: {
-      ...theme.text.size.lg,
-      textAlign: 'center',
-      color: theme.colors.onBackground,
-      paddingVertical: 8,
-    },
-    subtitle: {
-      ...theme.text.size.xs,
-      marginBottom: 20,
-      textAlign: 'center',
-      color: theme.deriveColor(theme.colors.onSurface),
-    },
+
   })

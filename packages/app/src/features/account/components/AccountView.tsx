@@ -2,7 +2,7 @@ import { Button, InfoField, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay } from '@app/shared/overlay'
 import { Theme } from '@app/shared/theme'
-import useThemeStore from '@app/shared/theme/useThemeStore'
+import useThemeStore from '@app/shared/theme/themeStore'
 import { logger } from '@app/shared/utils/logger'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
@@ -19,73 +19,57 @@ export const AccountView: React.FC = () => {
   const showAccountRegistration = () => {
     setOverlay(<AccountVerification />, { title: 'Verify your Account', variant: 'fullscreen', closable: true })
   }
-  const styles = createStyles(theme)
 
-  logger.log('Rendering AccountView with account:', account, 'and accountType:', accountType)
+  logger.log('[AccountView] Rendering with account:', account, 'accountType:', accountType)
 
   return (
-    <View>
+    <View style={{flex: 1, gap: 4}}>
       <Text variant="heading">{t.account.myAccount}</Text>
 
       {/* Account Status Section */}
-      <View style={styles.grid}>
-          {/* Display Name Editor */}
-          <InfoField
-            icon="person-2"
-            label={t.account.displayName}
-            value={account?.displayName || 'Not set'}
-            onEdit={() => { const close = setOverlay(<DisplayNameEditor onSubmit={() => close()} /> , { title: t.account.setDisplayName, closable: true, variant: 'compact' }) }}
-          />
-          {accountType ? (
-            <View>
-              <InfoField
-                icon="account-circle"
-                label={t.account.accountStatus}
-                value={accountType === 'sms_verified'
-                  ? t.account.phoneAccount
-                  : t.account.localAccount}
-              />
-              {account?.id && (
-                <InfoField
-                  icon="badge"
-                  label={t.account.accountId}
-                  value={account.id}
-                />
-              )}
-            </View>
-          ) : (
-            <InfoField
-              icon="account-circle"
-              label={t.account.accountStatus}
-              value={t.account.notLoggedIn}
-            />
-          )}
+        {/* Display Name Editor */}
+        <InfoField
+          icon="person-2"
+          label={t.account.displayName}
+          value={account?.displayName || 'Not set'}
+          onEdit={() => { const close = setOverlay(<DisplayNameEditor onSubmit={() => close()} /> , { title: t.account.setDisplayName, closable: true, variant: 'compact' }) }}
+        />
+        <InfoField
+          icon="account-circle"
+          label={t.account.accountStatus}
+          value={accountType === 'sms_verified'
+            ? t.account.phoneAccount
+            : t.account.localAccount}
+        />
+        <InfoField
+          icon="badge"
+          label={t.account.accountId}
+          value={account?.id}
+        />
 
-        {/* Feature Access Information */}
-          <InfoField
-            icon="sync"
-            label={t.account.featureAccess}
-            value={accountType === 'local_unverified'
-              ? t.account.localAccountDescription
-              : accountType === 'sms_verified'
-                ? t.account.phoneAccountDescription
-                : t.account.loginToSync}
-          />
+        <InfoField
+          icon="sync"
+          label={t.account.featureAccess}
+          value={accountType === 'local_unverified'
+            ? t.account.localAccountDescription
+            : accountType === 'sms_verified'
+              ? t.account.phoneAccountDescription
+              : t.account.loginToSync}
+        />
 
-          {accountType === 'local_unverified' && (
-            <View>
-
-              <Button
-                style={{ alignSelf: 'stretch', marginTop: 20 }}
-                label={'Upgrade Now'}
-                variant="primary"
-                onPress={() => showAccountRegistration()} />
-              <Text variant="caption">
-                {t.account.upgradeToUnlock}
-              </Text>
-            </View>
-          )}
-      </View>
+        {/* Upgrade if not verified */}
+        {accountType === 'local_unverified' && (
+          <View style={{flex: 1}}>
+            <Button
+              style={{ alignSelf: 'center', marginTop: 20 }}
+              label={'Upgrade now'}
+              variant="primary"
+              onPress={() => showAccountRegistration()} />
+            <Text variant="hint" style={{textAlign: 'center', paddingTop: 8}}>
+              {t.account.upgradeToUnlock}
+            </Text>
+          </View>
+        )}
     </View>
   )
 }
@@ -113,19 +97,10 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   card: {
     width: '100%',
   },
-  sectionTitle: {
-    ...theme.text.size.md,
-    color: theme.colors.onBackground,
-  },
   description: {
     color: theme.colors.onSurface,
   },
   actionSection: {
     gap: 5,
-  },
-  upgradeHint: {
-    ...theme.text.size.sm,
-    color: theme.deriveColor(theme.colors.onSurface, 0.2),
-    textAlign: 'center',
   },
 })

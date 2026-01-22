@@ -1,5 +1,5 @@
 import Page from '@app/shared/components/page/Page'
-import useThemeStore from '@app/shared/theme/useThemeStore'
+import useThemeStore from '@app/shared/theme/themeStore'
 import React from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'

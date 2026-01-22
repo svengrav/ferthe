@@ -1,9 +1,9 @@
-import { Image } from '@app/shared/components'
+import { Image, Text } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useRef } from 'react'
-import { Animated, Pressable, Text, useWindowDimensions, View } from 'react-native'
+import { Animated, Pressable, useWindowDimensions, View } from 'react-native'
 import { DiscoveryCardState as Card } from '../logic/types'
 
 const PAGE_PADDING = 16
@@ -165,7 +165,7 @@ function DiscoveryCard({ card, onTap, options }: DiscoveryCardProps) {
         {/* Discovered By Badge (if community discovery) */}
         {discoveredBy && (
           <View style={styles.discoveredByBadge}>
-            <Text style={styles.discoveredByText}>by {discoveredBy}</Text>
+            <Text variant="body">by {discoveredBy}</Text>
           </View>
         )}
 
@@ -253,42 +253,15 @@ const useStyles = createThemedStyles(theme => ({
     flexGrow: 1,
     minHeight: 400,
   },
-  contentTitle: {
-    paddingVertical: 8,
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: theme.colors.onSurface,
-    textAlign: 'center',
-    fontFamily: theme.text.primary.bold,
-  },
-  discoveredAt: {
-    fontSize: 14,
-    color: theme.deriveColor(theme.colors.onSurface, 0.4),
-    marginBottom: 16,
-    textAlign: 'center',
-    fontFamily: theme.text.primary.regular,
-  },
-  description: {
-    ...theme.text.size.md,
-    color: theme.colors.onSurface,
-    textAlign: 'left',
-    lineHeight: 24,
-    fontFamily: theme.text.primary.regular,
-  },
   discoveredByBadge: {
     position: 'absolute',
     top: 12,
     left: 12,
-    backgroundColor: theme.colors.primaryContainer,
+    backgroundColor: theme.colors.background,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
     zIndex: Z_INDEX.TITLE_OVERLAY,
-  },
-  discoveredByText: {
-    ...theme.text.size.xs,
-    fontFamily: theme.text.primary.semiBold,
-    color: theme.colors.onPrimaryContainer,
   },
 }))
 

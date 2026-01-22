@@ -1,4 +1,5 @@
-import useThemeStore, { createThemedStyles } from './useThemeStore'
+import useThemeStore, { createThemedStyles } from './themeStore'
 import { Theme } from './types'
 
-export { useThemeStore, Theme, createThemedStyles }
+export { createThemedStyles, Theme, useThemeStore }
+

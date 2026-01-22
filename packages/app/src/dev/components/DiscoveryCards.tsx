@@ -1,11 +1,9 @@
 import { useDiscoveryData } from '@app/features/discovery'
-import DiscoveryCardHighlight from '@app/features/discovery/components/DiscoveryCardHighlight'
 import { DiscoveryHorizontalList } from '@app/features/discovery/components/DiscoveryHorizontalList'
 import { useDiscoveryTrailId } from '@app/features/discovery/stores/discoveryTrailStore'
 import { Page, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
-import { formatDatetime } from '@app/shared/utils/dateTimeUtils'
 import { Discovery, Spot } from '@shared/contracts'
 import { useState } from 'react'
 import { Image, Pressable, StyleSheet, View } from 'react-native'
@@ -101,7 +99,7 @@ export default function DevScreen() {
                   alignContent: 'center',
                 }}>
                 <Text style={{ textAlign: 'center' }}>{item.title}</Text>
-                <Text variant='third' style={{ paddingVertical: 4 }}>
+                <Text variant='caption' style={{ paddingVertical: 4 }}>
                   {item.createdAt}
                 </Text>
               </View>

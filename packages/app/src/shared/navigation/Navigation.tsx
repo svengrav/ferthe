@@ -5,7 +5,7 @@ import MapScreen from '@app/features/map/components/MapScreen'
 import TrailScreen from '@app/features/trail/components/TrailScreen'
 import { Icon } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import useThemeStore from '@app/shared/theme/useThemeStore'
+import useThemeStore from '@app/shared/theme/themeStore'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { NavigationContainer } from '@react-navigation/native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -16,7 +16,7 @@ import { navigationRef } from './navigationRef'
 const Tab = createBottomTabNavigator()
 
 export function Navigation() {
-  const { colors, constants } = useThemeStore()
+  const { colors, dimensions } = useThemeStore()
   const { t } = useLocalizationStore()
   const clearAll = useOverlayStore((s) => s.clearAll)
   const insets = useSafeAreaInsets()
@@ -31,7 +31,7 @@ export function Navigation() {
         initialRouteName='Map'
         screenOptions={{
           tabBarStyle: {
-            height: constants.NAV_HEIGHT + insets.bottom,
+            height: dimensions.NAV_HEIGHT + insets.bottom,
             paddingBottom: insets.bottom,
             backgroundColor: colors.background,
             elevation: 0,

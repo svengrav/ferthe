@@ -120,7 +120,7 @@ const useStyles = createThemedStyles(theme => ({
   container: {
     overflow: 'hidden',
     flex: 1,
-    borderRadius: 12,
+    borderRadius: 6,
   },
   image: {
     width: '100%',

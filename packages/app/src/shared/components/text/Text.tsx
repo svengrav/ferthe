@@ -1,43 +1,29 @@
-import { Theme, useThemeStore } from '@app/shared/theme'
-import { createLayoutTheme } from '@app/shared/theme/layout'
+import { useThemeStore } from '@app/shared/theme'
+import { PRIMITIVES } from '@app/shared/theme/theme'
+import { TextTheme } from '@app/shared/theme/types'
 import * as Native from 'react-native'
 
-type TextVariant = 'body' | 'caption' | 'heading' | 'title' | 'section' | 'hint' | 'subtitle'
+type TextVariant = keyof TextTheme
+type TextSize = 'sm' | 'md' | 'lg'
 
 interface TextProps extends Native.TextProps {
   variant?: TextVariant
+  size?: TextSize
 }
 
-const Text = ({ style, children, variant = 'body', ...props }: TextProps) => {
-  const theme = useThemeStore() as Theme
-  const layout = createLayoutTheme(theme)
-  const variantStyle = getVariantStyle(layout, variant)
+const Text = ({ style, children, variant = 'body', size, ...props }: TextProps) => {
+  const theme = useThemeStore()
+
+  const sizeOverride = size ? {
+    fontSize: PRIMITIVES.fontSize[size],
+    lineHeight: PRIMITIVES.fontSize[size] * 1.4,
+  } : {}
 
   return (
-    <Native.Text style={[variantStyle, style]} {...props}>
+    <Native.Text style={[theme.typo[variant], sizeOverride, style]} {...props}>
       {children}
     </Native.Text>
   )
-}
-
-const getVariantStyle = (layout: ReturnType<typeof createLayoutTheme>, variant: TextVariant) => {
-  switch (variant) {
-    case 'heading':
-      return layout.header
-    case 'title':
-      return layout.title
-    case 'section':
-      return layout.section
-    case 'caption':
-      return layout.hint
-    case 'hint':
-      return layout.hint
-    case 'subtitle':
-      return layout.subtitle
-    case 'body':
-    default:
-      return layout.textBase
-  }
 }
 
 export default Text

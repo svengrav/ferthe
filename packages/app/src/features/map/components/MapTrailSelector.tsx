@@ -1,7 +1,7 @@
 import { getAppContext } from '@app/appContext'
 import { useDiscoveryTrail } from '@app/features/discovery'
 import { useTrailData } from '@app/features/trail'
-import { TrailAvatar } from '@app/features/trail/components/TrailCard'
+import { TrailAvatar } from '@app/features/trail/components/TrailItem'
 import { IconButton, Text } from '@app/shared/components'
 import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles, useThemeStore } from '@app/shared/theme'
@@ -46,16 +46,24 @@ export const MapTrailSelector = () => {
             <TrailAvatar trail={item} />
           </View>
           <View style={styles.trailInfo}>
-            <Text style={styles.trailName}>{item.name}</Text>
-            <Text variant='secondary' size='small'>Trail</Text>
+            <Text variant='label'>{item.name}</Text>
+            <Text variant='hint' numberOfLines={1}>{item.description}</Text>
           </View>
         </TouchableOpacity>
       )
     }
     
     removeOverlay = setOverlay(
-      <FlatList data={trails} renderItem={renderTrailItem} keyExtractor={item => item.id} />,
-      { title: 'Select a Trail', variant: 'compact', closable: true }
+      <FlatList 
+        data={trails} 
+        renderItem={renderTrailItem} 
+        contentContainerStyle={{flex: 1, gap: 12}} 
+        keyExtractor={item => item.id} />,
+        { 
+          title: 'Select a Trail', 
+          variant: 'compact', 
+          closable: true 
+        }
     )
   }
 
@@ -70,10 +78,10 @@ export const MapTrailSelector = () => {
       
       {/* Trail Name */}
       <View style={styles.nameContainer}>
-        <Text style={styles.selectedTrailName}>
+        <Text variant='title' size='md'>
           {selectedTrail ? selectedTrail.name : 'Select Trail'}
         </Text>
-        <Text variant='secondary' size='small'>
+        <Text variant='hint'>
            Trail
         </Text>
       </View>
@@ -101,6 +109,7 @@ const useStyles = createThemedStyles(theme => ({
     height: 50,
   },
   nameContainer: {
+    gap:4,
     flex: 1,
   },
   iconContainer: {
@@ -108,7 +117,6 @@ const useStyles = createThemedStyles(theme => ({
     alignItems: 'center',
   },
   selectedTrailName: {
-    fontFamily: theme.text.primary.semiBold,
     fontSize: 14,
     color: theme.colors.onSurface,
   },
@@ -116,12 +124,11 @@ const useStyles = createThemedStyles(theme => ({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
     borderRadius: 8,
     gap: 12,
   },
   trailItemActive: {
-    backgroundColor: theme.deriveColor(theme.colors.background, -0.5),
+    backgroundColor: theme.colors.surface,
   },
   avatarContainer: {
     width: 50,
@@ -129,10 +136,5 @@ const useStyles = createThemedStyles(theme => ({
   },
   trailInfo: {
     flex: 1,
-  },
-  trailName: {
-    fontFamily: theme.text.primary.semiBold,
-    fontSize: 14,
-    color: theme.colors.onSurface,
   },
 }))

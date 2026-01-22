@@ -10,13 +10,11 @@ import TrailDetails from './TrailDetails'
 
 // Avatar constants
 const AVATAR_SIZE = 50
-const AVATAR_BORDER_RADIUS = 8
-const AVATAR_MARGIN_RIGHT = 16
+const AVATAR_BORDER_RADIUS = 4
 const AVATAR_LINE_HEIGHT = 50
 
 // Card constants
 const TEXT_CONTAINER_PADDING = 8
-const TEXT_CONTAINER_GAP = 4
 const DESCRIPTION_WIDTH = '95%'
 const DESCRIPTION_MAX_LINES = 2
 
@@ -29,12 +27,7 @@ const useTrailCard = (trail: Trail) => {
   const { t } = useLocalizationStore()
 
   const handleOpenTrailOverview = () => {
-    let removeOverlay: (() => void) | undefined
-
-    removeOverlay = setOverlay(
-        <TrailDetails trail={trail} />
-
-    )
+    setOverlay(<TrailDetails trail={trail} />)
   }
 
   const openContextMenu = () => setContextMenu(true)
@@ -85,15 +78,13 @@ export function TrailAvatar({ trail }: { trail: Trail }) {
 /**
  * Trail card component displaying trail information with context menu and overlay
  */
-function TrailCard({ trail }: TrailCardProps) {
+function TrailItem({ trail }: TrailCardProps) {
   const { styles } = useApp(useStyles)
   const {
-    contextMenu,
     cardRef,
     t,
     handleOpenTrailOverview,
     openContextMenu,
-    closeContextMenu,
   } = useTrailCard(trail)
 
   if (!styles) return null
@@ -102,9 +93,10 @@ function TrailCard({ trail }: TrailCardProps) {
     <View style={styles.content}>
       <TrailAvatar trail={trail} />
       <View style={styles.textContainer}>
-        <Text style={styles.title}>{trail.name}</Text>
+        <Text variant='title' size='md'>{trail.name}</Text>
         <Text
-          style={styles.description}
+          variant='body'
+          size='sm'
           ellipsizeMode="tail"
           numberOfLines={DESCRIPTION_MAX_LINES}
         >
@@ -146,25 +138,14 @@ const useStyles = createThemedStyles(theme => ({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12
   },
   textContainer: {
     flex: 1,
-    paddingLeft: 16,
     flexDirection: 'column',
-    paddingHorizontal: TEXT_CONTAINER_PADDING,
     overflow: 'hidden',
   },
-  title: {
-    ...theme.text.size.md,
-    fontFamily: theme.text.primary.semiBold,
-    color: theme.colors.onSurface,
-  },
-  description: {
-    ...theme.text.size.xs,
-    color: theme.colors.onSurface,
-    width: DESCRIPTION_WIDTH,
-    overflow: 'hidden',
-  },
+
 }))
 
-export default TrailCard
+export default TrailItem

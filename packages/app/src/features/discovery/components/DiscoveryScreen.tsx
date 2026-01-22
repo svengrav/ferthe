@@ -57,7 +57,7 @@ function DiscoveryScreen() {
 
   return (
     <Page options={[{ label: t.navigation.settings, onPress: () => setOverlay(<SettingsForm onClose={() => {}} onSubmit={() => {}} />) }]}>
-      <Text style={theme.layout.header}>Discoveries</Text>
+      <Text variant='heading'>Discoveries</Text>
 
       <DiscoveryCardList
         cards={cards}

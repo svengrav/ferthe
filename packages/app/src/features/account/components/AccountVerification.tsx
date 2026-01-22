@@ -1,11 +1,12 @@
 import { getAppContext } from '@app/appContext'
 import { Theme } from '@app/shared'
+import { Text } from '@app/shared/components'
 import Button from '@app/shared/components/button/Button'
 import type { FormRef } from '@app/shared/components/form/Form'
 import Form from '@app/shared/components/form/Form'
 import { useApp } from '@app/shared/useApp'
 import { useRef, useState } from 'react'
-import { StyleSheet, Text, TextInput, View } from 'react-native'
+import { StyleSheet, TextInput, View } from 'react-native'
 
 // Constants
 const PHONE_VERIFICATION_NOTICE = "Your number will only be used once and won't be stored."
@@ -114,7 +115,7 @@ function AccountVerification() {
     <>
       {!showCodeInput && (
         <View style={componentStyles.section}>
-          <Text style={componentStyles.sectionTitle}>{locales.auth.enterPhoneNumber}</Text>
+          <Text variant="title">{locales.auth.enterPhoneNumber}</Text>
           {error && <Text style={componentStyles.error}>{error}</Text>}
           <Form
             ref={formRef}
@@ -139,6 +140,7 @@ function AccountVerification() {
           />
           <Button
             label={locales.auth.sendSms || 'Send Code'}
+            style={{ alignSelf: 'center'}}
             onPress={handleRequestSmsCode}
             variant="primary"
             disabled={isRequestingSmsCode}

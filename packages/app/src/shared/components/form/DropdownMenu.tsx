@@ -1,7 +1,8 @@
-import { createThemedStyles } from '@app/shared/theme/useThemeStore'
+import { Text } from '@app/shared/components'
+import { createThemedStyles } from '@app/shared/theme/themeStore'
 import { useApp } from '@app/shared/useApp'
 import React, { useEffect, useState } from 'react'
-import { Dimensions, Modal, Text, TouchableOpacity, View } from 'react-native'
+import { Dimensions, Modal, TouchableOpacity, View } from 'react-native'
 import { Option } from '../types'
 
 const MENU_WIDTH = 150
@@ -103,7 +104,7 @@ function DropdownMenu({ isVisible, onClose, options, anchorRef }: DropdownMenuPr
               ]}
               onPress={() => handleOptionPress(option)}
             >
-              <Text style={styles.menuOptionText}>{option.label}</Text>
+              <Text >{option.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -138,9 +139,7 @@ const useStyles = createThemedStyles(theme => ({
     borderBottomWidth: 0,
   },
   menuOptionText: {
-    fontSize: FONT_SIZE,
-    color: theme.colors.onBackground,
-    fontFamily: theme.text.primary.regular,
+
   },
 }))
 

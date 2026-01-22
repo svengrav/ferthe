@@ -69,7 +69,13 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       // Try to load and set account data
       try {
         const accountResult = await accountAPI.getAccount(session)
-        if (!accountResult.data) return // No account data found, do not update store
+        if (!accountResult.data) {
+          // No account data found - session is invalid
+          console.warn(`[AccountApp] Session exists (accountType: ${session.accountType}) but account not found (accountId: ${session.accountId}). Invalidating session.`)
+          await secureStore.delete(AUTH_SESSION_KEY)
+          storeActions.clearAccount()
+          return
+        }
         storeActions.setAccount(accountResult.data)
       } catch (error) {
         console.error('Failed to load account data for store sync:', error)

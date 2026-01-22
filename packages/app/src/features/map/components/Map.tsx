@@ -77,8 +77,6 @@ const createStyles = (theme: Theme, mapTheme: MapTheme, size: { width: number; h
     justifyContent: 'center' as const,
     top: 0,
     alignItems: 'center' as const,
-    ...theme.text.size.sm,
-    fontFamily: theme.text.primary.regular,
     color: theme.deriveColor(theme.colors.onSurface, 0.4),
   },
   map: {
