@@ -150,7 +150,7 @@ function OverlayContainer({
             {/* Header with title and close button */}
             {(title || closable) && (
               <View style={styles.compactHeader}>
-                {title && <Text style={{paddingHorizontal: 8, paddingVertical: 8}} >{title}</Text>}
+                <Text style={{paddingHorizontal: 8, paddingVertical: 8}} >{title}</Text>
                 {closable && (
                   <IconButton
                     name="close"
@@ -194,11 +194,9 @@ function OverlayContainer({
         {/* Header with title and close button */}
         {(title || closable) && (
           <View style={styles.fullscreenHeader}>
-            {title && (
-              <Text variant='title' size='md'>
-                {title}
-              </Text>
-            )}
+            <Text variant='title' size='md'>
+              {title}
+            </Text>
             {closable && (
               <IconButton
                 name="close"

@@ -1,9 +1,9 @@
+import { Text } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { useRef } from 'react'
-import { Animated, ScrollView, Text, useWindowDimensions, View } from 'react-native'
+import { Animated, ScrollView, useWindowDimensions, View } from 'react-native'
 import { DiscoveryCardState as Card } from '../logic/types'
-
 const PAGE_PADDING = 16
 const CARD_ASPECT_RATIO = 3 / 2
 const CARD_BORDER_RADIUS = 18
@@ -157,7 +157,7 @@ function DiscoveryCardDetails({ card, onClose }: DiscoveryCardProps) {
         {/* Content area */}
         <View style={styles.contentContainer} id='discovery-card-content'>
           <View id='discovery-card-content-header' style={{backgroundColor: theme.deriveColor(theme.colors.onBackground, 0.6), marginTop: 10, borderRadius: 10, height: 3, width: 40, alignSelf: 'center'}} />
-          <Text style={[theme.layout.title, { textAlign: 'center' }]}>{title}</Text>
+          <Text variant="heading">{title}</Text>
           <Text style={styles.discoveredAt}>
             Discovered: {card.discoveredAt ? new Date(card.discoveredAt).toLocaleDateString() : ''}
           </Text>
@@ -232,21 +232,17 @@ const useStyles = createThemedStyles(theme => ({
     fontWeight: 'bold',
     color: theme.colors.onSurface,
     textAlign: 'center',
-    fontFamily: theme.text.primary.bold,
   },
   discoveredAt: {
     fontSize: 14,
     color: theme.deriveColor(theme.colors.onSurface, 0.4),
     marginBottom: 16,
     textAlign: 'center',
-    fontFamily: theme.text.primary.regular,
   },
   description: {
-    ...theme.text.size.md,
     color: theme.colors.onSurface,
     textAlign: 'left',
     lineHeight: 24,
-    fontFamily: theme.text.primary.regular,
   },
 }))
 
