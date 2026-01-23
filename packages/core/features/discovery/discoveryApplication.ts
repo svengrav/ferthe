@@ -479,6 +479,39 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     }
   }
 
+  const deleteDiscoveryContent = async (
+    context: AccountContext,
+    discoveryId: string
+  ): Promise<Result<void>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      // Get existing content
+      const existingResult = await getDiscoveryContent(context, discoveryId)
+      if (!existingResult.data) {
+        return createErrorResult('CONTENT_NOT_FOUND')
+      }
+
+      // Verify ownership
+      if (existingResult.data.accountId !== accountId) {
+        return createErrorResult('NOT_AUTHORIZED')
+      }
+
+      // Delete the content
+      const deleteResult = await contentStore.delete(existingResult.data.id)
+      if (!deleteResult.success) {
+        return createErrorResult('DELETE_CONTENT_ERROR')
+      }
+
+      return createSuccessResult(undefined)
+    } catch (error: any) {
+      return createErrorResult('DELETE_CONTENT_ERROR', { originalError: error.message })
+    }
+  }
+
   // Reaction methods (like/dislike)
   const reactToDiscovery = async (
     context: AccountContext,
@@ -562,6 +595,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     addDiscoveryContent,
     getDiscoveryContent,
     updateDiscoveryContent,
+    deleteDiscoveryContent,
     reactToDiscovery,
     removeReaction,
     getReactionSummary,

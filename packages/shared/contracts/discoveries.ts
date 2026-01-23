@@ -19,6 +19,7 @@ export interface DiscoveryApplicationContract {
   addDiscoveryContent: (context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
   getDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
   updateDiscoveryContent: (context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
+  deleteDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<void>>
   reactToDiscovery: (context: AccountContext, discoveryId: string, reaction: 'like' | 'dislike') => Promise<Result<DiscoveryReaction>>
   removeReaction: (context: AccountContext, discoveryId: string) => Promise<Result<void>>
   getReactionSummary: (context: AccountContext, discoveryId: string) => Promise<Result<ReactionSummary>>
@@ -111,7 +112,6 @@ export interface DiscoveryReaction {
  * Aggregated reaction counts for a discovery.
  */
 export interface ReactionSummary {
-  discoveryId: string
   likes: number
   dislikes: number
   userReaction?: 'like' | 'dislike' // Current user's reaction, if any

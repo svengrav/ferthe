@@ -152,6 +152,14 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
         return await discoveryApplication.updateDiscoveryContent(session, params!.discoveryId, body)
       }),
     },
+    {
+      method: 'DELETE',
+      version: 'v1',
+      url: '/discoveries/:discoveryId/content',
+      handler: asyncRequestHandler<void, { discoveryId: string }>(async ({ context: session, params }) => {
+        return await discoveryApplication.deleteDiscoveryContent(session, params!.discoveryId)
+      }),
+    },
 
     // Discovery Reaction Routes
     {

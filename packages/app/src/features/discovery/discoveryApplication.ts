@@ -28,6 +28,8 @@ export interface DiscoveryApplication {
   getDiscoveryCards: () => DiscoveryCardState[]
   // Content methods
   addDiscoveryContent: (discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
+  updateDiscoveryContent: (discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
+  deleteDiscoveryContent: (discoveryId: string) => Promise<Result<void>>
   getDiscoveryContent: (discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
   // Reaction methods
   reactToDiscovery: (discoveryId: string, reaction: 'like' | 'dislike') => Promise<Result<void>>
@@ -304,6 +306,17 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     return result
   }
 
+  const updateDiscoveryContent = async (discoveryId: string, content: { imageUrl?: string; comment?: string }): Promise<Result<DiscoveryContent>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined as any }
+
+    const result = await discoveryAPI.updateDiscoveryContent(session.data, discoveryId, content)
+    if (result.data) {
+      getDiscoveryContentActions().setContent(discoveryId, result.data)
+    }
+    return result
+  }
+
   const getDiscoveryContent = async (discoveryId: string): Promise<Result<DiscoveryContent | undefined>> => {
     const session = await getSession()
     if (!session.data) return { success: false, data: undefined }
@@ -311,6 +324,17 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     const result = await discoveryAPI.getDiscoveryContent(session.data, discoveryId)
     if (result.data) {
       getDiscoveryContentActions().setContent(discoveryId, result.data)
+    }
+    return result
+  }
+
+  const deleteDiscoveryContent = async (discoveryId: string): Promise<Result<void>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined }
+
+    const result = await discoveryAPI.deleteDiscoveryContent(session.data, discoveryId)
+    if (result.success) {
+      getDiscoveryContentActions().clearContent(discoveryId)
     }
     return result
   }
@@ -363,6 +387,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     onDiscoveryTrailUpdate: onDiscoveryTrailUpdated,
     onNewDiscoveries,
     addDiscoveryContent,
+    updateDiscoveryContent,
+    deleteDiscoveryContent,
     getDiscoveryContent,
     reactToDiscovery,
     removeReaction,

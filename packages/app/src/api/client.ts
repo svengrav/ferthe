@@ -22,6 +22,10 @@ export const createAPIClient = (apiEndpoint: string, getAccountSession: () => Ac
       timeout,
     })
 
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    }
+
     const json = await response.json()
     return deserializeDates<T>(json)
   }

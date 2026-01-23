@@ -1,13 +1,12 @@
 import { getAppContext } from '@app/appContext'
 import { Text } from '@app/shared/components'
-import ReactionButtons from '@app/shared/components/reaction/ReactionButtons'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { useEffect, useRef, useState } from 'react'
 import { Animated, ScrollView, useWindowDimensions, View } from 'react-native'
-import { useDiscoveryContent, useDiscoveryReactionSummary } from '../index'
 import { DiscoveryCardState as Card } from '../logic/types'
-import DiscoveryContentForm from './DiscoveryContentForm'
+import DiscoveryReactionSection from './DiscoveryReactionSection'
+import DiscoveryUserContentSection from './DiscoveryUserContentSection'
 const PAGE_PADDING = 16
 const CARD_ASPECT_RATIO = 3 / 2
 const CARD_BORDER_RADIUS = 18
@@ -60,7 +59,7 @@ const useCardDimensions = () => {
 }
 
 /**
- * Hook to handle scroll-based animations for title and overlay effects
+ * Hook to handle scroll-based animations for title effects
  */
 const useCardAnimations = (IMAGE_HEIGHT: number) => {
   const scrollY = useRef(new Animated.Value(0)).current
@@ -72,16 +71,9 @@ const useCardAnimations = (IMAGE_HEIGHT: number) => {
     extrapolate: 'clamp',
   })
 
-  const overlayOpacity = scrollY.interpolate({
-    inputRange: [0, IMAGE_HEIGHT],
-    outputRange: [0.2, 0.5],
-    extrapolate: 'clamp',
-  })
-
   return {
     scrollY,
     titleOpacity,
-    overlayOpacity,
   }
 }
 
@@ -94,83 +86,33 @@ interface DiscoveryCardProps {
  * Discovery card component that displays a discovered spot with image, title, and description.
  * Features smooth animations and scroll-based parallax effects.
  */
-function DiscoveryCardDetails({ card, onClose }: DiscoveryCardProps) {
+function DiscoveryCardDetails({ card }: DiscoveryCardProps) {
   const { styles, theme } = useApp(useStyles)
   const { discoveryApplication } = getAppContext()
   const { title, image, description, id } = card
   const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT } = useCardDimensions()
-  const { scrollY, titleOpacity, overlayOpacity } = useCardAnimations(IMAGE_HEIGHT)
+  const { scrollY, titleOpacity } = useCardAnimations(IMAGE_HEIGHT)
 
-  // Content and reactions state
-  const content = useDiscoveryContent(id ?? '')
-  const reactionSummary = useDiscoveryReactionSummary(id ?? '')
-  const [showContentForm, setShowContentForm] = useState(false)
+  // Content state
   const [isLoading, setIsLoading] = useState(false)
 
-  // Load content and reactions on mount
+  // Load content on mount
   useEffect(() => {
     if (id) {
       discoveryApplication.getDiscoveryContent(id)
-      discoveryApplication.getReactionSummary(id)
     }
-  }, [id])
-
-  const handleLike = async () => {
-    if (!id || isLoading) return
-    setIsLoading(true)
-    if (reactionSummary?.userReaction === 'like') {
-      await discoveryApplication.removeReaction(id)
-    } else {
-      await discoveryApplication.reactToDiscovery(id, 'like')
-    }
-    setIsLoading(false)
-  }
-
-  const handleDislike = async () => {
-    if (!id || isLoading) return
-    setIsLoading(true)
-    if (reactionSummary?.userReaction === 'dislike') {
-      await discoveryApplication.removeReaction(id)
-    } else {
-      await discoveryApplication.reactToDiscovery(id, 'dislike')
-    }
-    setIsLoading(false)
-  }
-
-  const handleContentSubmit = async (data: { imageUrl?: string; comment?: string }) => {
-    if (!id) return
-    setIsLoading(true)
-    await discoveryApplication.addDiscoveryContent(id, data)
-    setShowContentForm(false)
-    setIsLoading(false)
-  }
-
-  // Dynamic styles that depend on dimensions
-  const cardDynamicStyles = {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-  }
-
-  const imageDynamicStyles = {
-    width: CARD_WIDTH,
-    height: IMAGE_HEIGHT,
-  }
-
-  const titleContainerDynamicStyles = {
-    width: CARD_WIDTH,
-    top: IMAGE_HEIGHT - 70,
-  }
+  }, [id, discoveryApplication])
 
   if (!styles) return null
 
   return (
-    <View style={styles.container} id="discovery-card">
+    <View style={styles.container}>
       {/* Fixed card container with image */}
-      <View style={[styles.card, cardDynamicStyles]} id='discovery-card' pointerEvents="box-none">
+      <View style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT }]} pointerEvents="box-none">
         {/* Background image */}
         <Animated.Image
           source={{ uri: image.url || '' }}
-          style={[styles.fixedImage, imageDynamicStyles]}
+          style={[styles.fixedImage, { width: CARD_WIDTH, height: IMAGE_HEIGHT }]}
           resizeMode='cover'
         />
 
@@ -178,7 +120,7 @@ function DiscoveryCardDetails({ card, onClose }: DiscoveryCardProps) {
         <Animated.View
           style={[
             styles.fixedTitleContainer,
-            titleContainerDynamicStyles,
+            { width: CARD_WIDTH, top: IMAGE_HEIGHT - 70 },
             { opacity: titleOpacity }
           ]}
           pointerEvents='none'
@@ -189,7 +131,6 @@ function DiscoveryCardDetails({ card, onClose }: DiscoveryCardProps) {
 
       {/* Scrollable content that overlays the image */}
       <ScrollView
-        id='discovery-card-scrollview'
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={true}
@@ -201,68 +142,30 @@ function DiscoveryCardDetails({ card, onClose }: DiscoveryCardProps) {
         )}
       >
         {/* Empty space to allow scrolling past the image */}
-        <View style={{ height: IMAGE_HEIGHT }} id='discovery-card-spacer'/>
+        <View style={{ height: IMAGE_HEIGHT }} />
 
         {/* Content area */}
-        <View style={styles.contentContainer} id='discovery-card-content'>
-          <View id='discovery-card-content-header' style={{backgroundColor: theme.deriveColor(theme.colors.onBackground, 0.6), marginTop: 10, borderRadius: 10, height: 3, width: 40, alignSelf: 'center'}} />
+        <View style={styles.contentContainer}>
+          <View style={styles.contentHeader} />
           <Text variant="heading">{title}</Text>
           <Text style={styles.discoveredAt}>
             Discovered: {card.discoveredAt ? new Date(card.discoveredAt).toLocaleDateString() : ''}
           </Text>
+          
+          {/* Reaction buttons */}
+          <DiscoveryReactionSection
+            id={id}
+            isLoading={isLoading}
+          />
+
           {description && (
             <Text style={styles.description}>{description}</Text>
           )}
 
-          {/* Reaction buttons */}
-          {id && (
-            <View style={styles.reactionsContainer}>
-              <ReactionButtons
-                summary={reactionSummary}
-                onLike={handleLike}
-                onDislike={handleDislike}
-                disabled={isLoading}
-              />
-            </View>
-          )}
-
           {/* User content section */}
-          {id && (
-            <View style={styles.userContentSection}>
-              {content ? (
-                <View style={styles.userContent}>
-                  {content.comment && (
-                    <Text style={styles.userComment}>{content.comment}</Text>
-                  )}
-                  {content.imageUrl && (
-                    <Animated.Image
-                      source={{ uri: content.imageUrl }}
-                      style={styles.userImage}
-                      resizeMode='cover'
-                    />
-                  )}
-                </View>
-              ) : (
-                !showContentForm && (
-                  <Text
-                    style={styles.addContentLink}
-                    onPress={() => setShowContentForm(true)}
-                  >
-                    + Add your discovery note
-                  </Text>
-                )
-              )}
-
-              {showContentForm && (
-                <DiscoveryContentForm
-                  existingContent={content}
-                  onSubmit={handleContentSubmit}
-                  onCancel={() => setShowContentForm(false)}
-                  isLoading={isLoading}
-                />
-              )}
-            </View>
-          )}
+          <DiscoveryUserContentSection
+            id={id}
+          />
         </View>
       </ScrollView>
     </View>
@@ -306,7 +209,6 @@ const useStyles = createThemedStyles(theme => ({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
-  /** Scroll */
   scrollView: {
     width: '100%',
     top: 0,
@@ -325,12 +227,13 @@ const useStyles = createThemedStyles(theme => ({
     paddingHorizontal: 8,
     minHeight: 400,
   },
-  contentTitle: {
-    paddingVertical: 8,
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: theme.colors.onSurface,
-    textAlign: 'center',
+  contentHeader: {
+    backgroundColor: theme.deriveColor(theme.colors.onBackground, 0.6),
+    marginTop: 10,
+    borderRadius: 10,
+    height: 3,
+    width: 40,
+    alignSelf: 'center',
   },
   discoveredAt: {
     fontSize: 14,
@@ -342,36 +245,6 @@ const useStyles = createThemedStyles(theme => ({
     color: theme.colors.onSurface,
     textAlign: 'left',
     lineHeight: 24,
-  },
-  reactionsContainer: {
-    marginTop: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: theme.deriveColor(theme.colors.onSurface, 0.1),
-  },
-  userContentSection: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: theme.deriveColor(theme.colors.onSurface, 0.1),
-  },
-  userContent: {
-    gap: 12,
-  },
-  userComment: {
-    color: theme.colors.onSurface,
-    fontStyle: 'italic',
-    lineHeight: 22,
-  },
-  userImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 8,
-  },
-  addContentLink: {
-    color: theme.colors.primary,
-    textAlign: 'center',
-    paddingVertical: 8,
   },
 }))
 

@@ -43,7 +43,7 @@ const useStyles = createThemedStyles(theme => ({
   },
   input: {
     borderWidth: 1,
-    borderColor: theme.deriveColor(theme.colors.onBackground, 0.1),
+    borderColor: theme.colors.divider,
     backgroundColor: theme.colors.surface,
     color: theme.colors.onSurface,
     paddingHorizontal: 12,

@@ -2,33 +2,26 @@ import { IconButton } from '@app/shared/components/button/Button'
 import Text from '@app/shared/components/text/Text'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
+import { ReactionSummary } from '@shared/contracts'
 import { View } from 'react-native'
-
-interface ReactionSummary {
-  likes: number
-  dislikes: number
-  userReaction?: 'like' | 'dislike'
-}
 
 interface ReactionButtonsProps {
   summary?: ReactionSummary
   onLike: () => void
   onDislike: () => void
   disabled?: boolean
-  variant?: 'default' | 'compact'
 }
 
 /**
- * Generic Like/Dislike buttons with reaction counts
+ * Generic Like/Dislike buttons with reaction counts.
  * Reusable across different entities (discoveries, spots, etc.)
  */
-const ReactionButtons = ({
+function ReactionButtons({
   summary,
   onLike,
   onDislike,
   disabled = false,
-  variant = 'default',
-}: ReactionButtonsProps) => {
+}: ReactionButtonsProps) {
   const { styles, theme } = useApp(useStyles)
 
   if (!styles) return null
@@ -40,24 +33,24 @@ const ReactionButtons = ({
     <View style={styles.container}>
       <View style={styles.buttonGroup}>
         <IconButton
-          name="thumb-up"
-          variant={isLiked ? 'primary' : 'outlined'}
+          name="thumb-up-off-alt"
+          variant="outlined"
           onPress={onLike}
           disabled={disabled}
-          size={variant === 'compact' ? 16 : 20}
-          color={isLiked ? theme.colors.primary : undefined}
+          color={isLiked ? theme.colors.primary : theme.colors.secondary}
+          size={18}
         />
         <Text style={styles.count}>{summary?.likes ?? 0}</Text>
       </View>
 
       <View style={styles.buttonGroup}>
         <IconButton
-          name="thumb-down"
-          variant={isDisliked ? 'primary' : 'outlined'}
+          name="thumb-down-off-alt"
+          variant="outlined"
           onPress={onDislike}
           disabled={disabled}
-          size={variant === 'compact' ? 16 : 20}
-          color={isDisliked ? theme.colors.error : undefined}
+          size={18}
+          color={isDisliked ? theme.colors.primary : theme.colors.secondary}
         />
         <Text style={styles.count}>{summary?.dislikes ?? 0}</Text>
       </View>
@@ -78,7 +71,7 @@ const useStyles = createThemedStyles(theme => ({
   },
   count: {
     fontSize: 14,
-    color: theme.deriveColor(theme.colors.onSurface, 0.6),
+    color: theme.colors.secondary,
   },
 }))
 

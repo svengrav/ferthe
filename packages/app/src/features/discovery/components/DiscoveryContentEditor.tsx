@@ -1,4 +1,4 @@
-import { Button, TextInput } from '@app/shared/components'
+import { Button, IconButton, TextInput } from '@app/shared/components'
 import Text from '@app/shared/components/text/Text'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { useImageUpload } from '@app/shared/hooks/useImageUpload'
@@ -9,40 +9,43 @@ import { DiscoveryContent } from '@shared/contracts'
 import { useState } from 'react'
 import { Image, View } from 'react-native'
 
-interface DiscoveryContentFormProps {
+interface DiscoveryContentEditorProps {
   existingContent?: DiscoveryContent
-  onSubmit: (content: { imageUrl?: string; comment?: string }) => void
-  onCancel?: () => void
+  onSubmit: (data: { imageUrl?: string; comment?: string }) => void
+  onCancel: () => void
   isLoading?: boolean
 }
 
 /**
- * Form to add or edit discovery content (image URL + comment)
+ * Form to add or edit discovery content (device photo + comment) in overlay mode.
+ * Only supports image upload from device, not URL input.
  */
-const DiscoveryContentForm = ({
+function DiscoveryContentEditor({
   existingContent,
   onSubmit,
   onCancel,
   isLoading = false,
-}: DiscoveryContentFormProps) => {
+}: DiscoveryContentEditorProps) {
   const { styles } = useApp(useStyles)
   const { selectedImageUri, pickImage, clearImage, isLoading: isPickingImage } = useImagePicker()
   const { convertImageToBase64, isConverting } = useImageUpload()
 
-  const [imageUrl, setImageUrl] = useState(existingContent?.imageUrl ?? '')
   const [comment, setComment] = useState(existingContent?.comment ?? '')
+  const [hasExistingImage, setHasExistingImage] = useState(!!existingContent?.imageUrl)
 
   const handleSubmit = async () => {
     try {
-      let imageDataToSubmit = selectedImageUri || imageUrl
+      let imageDataToSubmit: string | undefined
 
       if (selectedImageUri) {
         const base64 = await convertImageToBase64(selectedImageUri)
         imageDataToSubmit = `data:image/jpeg;base64,${base64}`
+      } else if (hasExistingImage) {
+        imageDataToSubmit = existingContent?.imageUrl
       }
 
       onSubmit({
-        imageUrl: imageDataToSubmit || undefined,
+        imageUrl: imageDataToSubmit,
         comment: comment.trim() || undefined,
       })
       clearImage()
@@ -51,44 +54,47 @@ const DiscoveryContentForm = ({
     }
   }
 
-  const displayImageUrl = selectedImageUri || imageUrl
+  const handleDeleteImage = () => {
+    clearImage()
+    setHasExistingImage(false)
+  }
+
+  const displayImageUrl = selectedImageUri || (hasExistingImage ? existingContent?.imageUrl : undefined)
   const isEditing = !!existingContent
-  const hasChanges = imageUrl !== (existingContent?.imageUrl ?? '') ||
-    comment !== (existingContent?.comment ?? '')
+  const commentChanged = comment !== (existingContent?.comment ?? '')
+  const imageChanged = selectedImageUri || !hasExistingImage
 
   if (!styles) return null
+
+  const renderImageSection = () => {
+    if (!displayImageUrl) return null
+
+    return (
+      <View style={styles.imagePreviewContainer}>
+        <Image
+          source={{ uri: displayImageUrl }}
+          style={styles.imagePreview}
+          resizeMode="cover"
+        />
+        <View style={styles.imageActions}>
+          <IconButton
+            name="delete"
+            variant="outlined"
+            onPress={handleDeleteImage}
+            disabled={isLoading || isConverting}
+          />
+        </View>
+      </View>
+    )
+  }
 
   return (
     <View style={styles.container}>
       <Text variant="label" style={styles.label}>
         {isEditing ? 'Edit your discovery' : 'Document your discovery'}
       </Text>
-      { Boolean(displayImageUrl) && (
-        <View style={styles.imagePreviewContainer}>
-          <Image
-            source={{ uri: displayImageUrl }}
-            style={styles.imagePreview}
-            resizeMode="cover"
-          />
-          <Button
-            label="Remove"
-            variant="outlined"
-            onPress={() => {
-              setImageUrl('')
-              clearImage()
-            }}
-            disabled={isLoading}
-          />
-        </View>
-      )}
-      <TextInput
-        label="Image URL (optional)"
-        value={imageUrl}
-        onChangeText={setImageUrl}
-        placeholder="https://..."
-        autoCapitalize="none"
-        keyboardType="url"
-      />
+
+      {renderImageSection()}
 
       <Button
         label={isPickingImage ? 'Picking image...' : 'Pick Image from Device'}
@@ -108,19 +114,17 @@ const DiscoveryContentForm = ({
       />
 
       <View style={styles.buttonRow}>
-        {onCancel && (
-          <Button
-            label="Cancel"
-            variant="outlined"
-            onPress={onCancel}
-            disabled={isLoading || isConverting}
-          />
-        )}
+        <Button
+          label="Cancel"
+          variant="outlined"
+          onPress={onCancel}
+          disabled={isLoading || isConverting}
+        />
         <Button
           label={isConverting ? 'Processing...' : isLoading ? 'Saving...' : isEditing ? 'Update' : 'Save'}
           variant="primary"
           onPress={handleSubmit}
-          disabled={isLoading || isConverting || (!hasChanges && isEditing && !selectedImageUri)}
+          disabled={isLoading || isConverting || (!commentChanged && !imageChanged && isEditing)}
         />
       </View>
     </View>
@@ -145,6 +149,10 @@ const useStyles = createThemedStyles(theme => ({
     borderRadius: 8,
     backgroundColor: theme.colors.surface,
   },
+  imageActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -153,4 +161,4 @@ const useStyles = createThemedStyles(theme => ({
   },
 }))
 
-export default DiscoveryContentForm
+export default DiscoveryContentEditor

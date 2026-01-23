@@ -90,7 +90,7 @@ const createButtonStyles = (theme: Theme, variant: ButtonVariant, dense: boolean
         button: {
           backgroundColor: 'transparent',
           borderWidth: 1,
-          borderColor: disabled ? theme.colors.onSurface + '30' : theme.colors.primary,
+          borderColor: disabled ? theme.colors.onSurface + '30' : theme.colors.divider,
           padding: padding,
           borderRadius: 8,
           marginVertical: 8,

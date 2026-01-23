@@ -1,5 +1,5 @@
 ---
-name: Refactor Code According to React Native Guidelines
+name: refactor
 agent: agent
 tools: ['vscode', 'execute', 'read', 'agent', 'edit', 'search', 'web']
 description: This prompt is used to refactor code according to specified guidelines for React Native components and hooks.
@@ -33,6 +33,7 @@ description: This prompt is used to refactor code according to specified guideli
 ## Components 
 - Reuse shared components like Text instead of direct React Native components.
 - Make use of variants and themes for these components if possible. 
+- Try to design 
 
 ## Import Organization
 - Group imports: React/React Native → Third-party → Local imports
@@ -52,6 +53,7 @@ description: This prompt is used to refactor code according to specified guideli
 - When no question is asked, the default response should be a refactoring of the provided file. 
 
 When developing React Native components, please adhere to the following guidelines:
+- Use props in interfaces to define component inputs and deconstruct it in the component function.
 - Components should be written in TypeScript and use React Native.
 - Components should be functional components.
 - Try to avoid to much logic in the component, keep it simple.
@@ -66,6 +68,14 @@ When developing React Native components, please adhere to the following guidelin
 - Only use inline styles for dynamic styles that depend on props, state or complex logic.
 - For inline styles try to use const functions.
 - If views are deeply nested or complex, consider extracting them into separate const functions.
+- **Avoid deeply nested conditional rendering (ternary chains)**: Extract complex conditional JSX into separate const functions or subcomponents
+  - Bad: `{condition && (<View>{anotherCondition ? <ComponentA /> : <ComponentB />}</View>)}`
+  - Good: Extract into `const renderUserContent = () => { ... }` and call `{renderUserContent()}`
+  - Or extract as separate subcomponent `<UserContent />`
+- **Avoid pure wrapper components**: If a component only wraps another component and passes props through, move the logic (hooks, handlers) into it
+  - Bad: Component that only renders `<SharedComponent />` with prop pass-through
+  - Good: Move hooks and business logic (e.g., `useReactionHandlers`) into the wrapper component to give it real responsibility
+  - This applies when the wrapper would otherwise just be a thin layer without value
 
 ```TSX
 const MAGIC_NUMBER = 42
@@ -83,11 +93,15 @@ interface ComponentProps {
 }
 
 /**
-  * Add a brief description of the component here.
+  * Brief description of the component.
+  * Props interface for type safety, deconstruct in function body.
 **/
 function Component(props: ComponentProps) {
-  // Use the app hook to get the theme and styles and context
-  const { styles, theme, locales } = useApp(theme => useStyles(theme))
+  // Deconstruct props in the function body for clarity and readability
+  const { prop1, prop2 } = props
+  
+  // Use the app hook to get the theme and styles
+  const { styles, theme, locales } = useApp(useStyles)
 
   const deeplyNestedView = () => {
     // This function can be used to render deeply nested views
@@ -102,6 +116,12 @@ const useStyles = createThemedStyles(theme => ({
 }))
 
 export default Component
+```
+
+
+```
+
+
 ```
 
 # React Native Hook Development Guidelines
