@@ -7,4 +7,5 @@ export const appNavigator = {
   toFindings: () => navigationRef.current?.navigate('Feed'),
   toAbout: () => navigationRef.current?.navigate('About'),
   toAccount: () => navigationRef.current?.navigate('Account'),
+  toDiscoveryCard: (discoveryId: string) => navigationRef.current?.navigate('Discoveries', { discoveryId }),
 }

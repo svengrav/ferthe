@@ -15,6 +15,14 @@ import { navigationRef } from './navigationRef'
 
 const Tab = createBottomTabNavigator()
 
+export type RootParamList = {
+  Trails: undefined
+  Discoveries: { discoveryId?: string }
+  Map: undefined
+  Socials: undefined
+  Dev: undefined
+}
+
 export function Navigation() {
   const { colors, dimensions } = useThemeStore()
   const { t } = useLocalizationStore()

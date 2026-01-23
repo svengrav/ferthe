@@ -1,12 +1,16 @@
 import { getAppContext } from '@app/appContext'
+import { RootParamList } from '@app/shared'
 import { Page, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
+import { RouteProp, useRoute } from '@react-navigation/native'
 import { useEffect } from 'react'
 import { SettingsForm } from '../../settings/components/SettingsForm'
+import { DiscoveryCardState } from '../logic/types'
 import { useDiscoveryData, useDiscoveryStatus } from '../stores/discoveryStore'
+import DiscoveryCardDetails from './DiscoveryCardDetails'
 import { DiscoveryCardList } from './DiscoveryCardList'
 
 // Status constants
@@ -42,11 +46,24 @@ const useDiscoveryScreen = () => {
 }
 
 /**
- * Discovery screen component that displays a list of discovery cards with refresh functionality
+ * Discovery screen component that displays a list of discovery cards with refresh functionality.
+ * Supports deep-linking to specific discovery cards via route parameters.
  */
 function DiscoveryScreen() {
   const { styles, theme } = useApp(useStyles)
   const { t } = useLocalizationStore()
+  const route = useRoute<RouteProp<RootParamList, 'Discoveries'>>()
+  const discoveryId = route.params?.discoveryId
+
+  // Helper to open discovery card details
+  function openCardDetails(card: DiscoveryCardState) {
+    const close = setOverlay('discoveryCardDetails_' + card.id,
+      <DiscoveryCardDetails card={card} onClose={() => close()} />,
+      { variant: 'compact', transparent: true, closable: true }
+    )
+  }
+
+
   const {
     cards,
     isLoading,
@@ -55,14 +72,24 @@ function DiscoveryScreen() {
 
   if (!styles) return null
 
+  useEffect(() => {
+    if (discoveryId) {
+      const card = cards.find(c => c.id === discoveryId)
+      if (card) {
+        openCardDetails(card)
+      }
+    }
+  }, [discoveryId, cards])
+
   return (
-    <Page options={[{ label: t.navigation.settings, onPress: () => setOverlay(<SettingsForm onClose={() => {}} onSubmit={() => {}} />) }]}>
+    <Page options={[{ label: t.navigation.settings, onPress: () => setOverlay('settingsForm', <SettingsForm onClose={() => { }} onSubmit={() => { }} />) }]}>
       <Text variant='heading'>Discoveries</Text>
 
       <DiscoveryCardList
         cards={cards}
         refreshing={isLoading}
         onRefresh={requestDiscoveryState}
+        onTap={openCardDetails}
       />
     </Page>
   )

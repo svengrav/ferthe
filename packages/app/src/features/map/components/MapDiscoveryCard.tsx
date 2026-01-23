@@ -2,6 +2,7 @@ import { getAppContext } from '@app/appContext'
 import DiscoveryCardHighlight from '@app/features/discovery/components/DiscoveryCardHighlight'
 import { DiscoveryCardState } from '@app/features/discovery/logic/types'
 import { useEvent } from '@app/shared/events/useEvent'
+import { appNavigator } from '@app/shared/navigation/navigationRef'
 import { useState } from 'react'
 
 /**
@@ -35,10 +36,15 @@ const useNewDiscoveryHandler = () => {
 
 /**
  * Component that displays discovery cards on the map when new discoveries are made.
- * Shows a highlight card overlay when a discovery is triggered.
+ * Shows a highlight card overlay with options to view details or close.
  */
 function MapDiscoveryCard() {
   const { currentDiscovery, isVisible, handleCloseDiscovery } = useNewDiscoveryHandler()
+
+  const handleViewDetails = (discoveryId: string) => {
+    handleCloseDiscovery()
+    appNavigator.toDiscoveryCard(discoveryId)
+  }
 
   // Only render if there's a visible discovery
   if (!isVisible || !currentDiscovery) {
@@ -50,6 +56,7 @@ function MapDiscoveryCard() {
       visible={isVisible}
       card={currentDiscovery}
       onClose={handleCloseDiscovery}
+      onViewDetails={handleViewDetails}
     />
   )
 }

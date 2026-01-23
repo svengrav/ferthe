@@ -88,7 +88,7 @@ function CommunitiesScreen() {
   if (!styles) return null
 
   return (
-    <Page action={<IconButton name="person" onPress={() => setOverlay(<AccountView/>)} />}>
+    <Page action={<IconButton name="person" onPress={() => setOverlay('accountView', <AccountView/>)} />}>
       <Text variant="heading">Communities</Text>
       <View style={styles.content}>
         {/* Create Community Section */}

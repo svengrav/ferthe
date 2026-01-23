@@ -1,11 +1,9 @@
 import { Image, Text } from '@app/shared/components'
-import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useRef, useState } from 'react'
 import { FlatList, Pressable, StyleSheet, View } from 'react-native'
 import { DiscoveryCardState } from '../logic/types'
-import DiscoveryCardDetails from './DiscoveryCardDetails'
 
 // Layout constants for consistent spacing
 const GAP = 12
@@ -38,25 +36,30 @@ function useDiscoveryCardList() {
 }
 
 export function DiscoveryCardList({
+  onTap,
   cards,
   refreshing,
   onRefresh,
 }: {
+  onTap?: (card: DiscoveryCardState) => void
   cards: DiscoveryCardState[]
   refreshing?: boolean
   onRefresh?: () => void
 }) {
   const { numberOfColumns, cardSize, styles, containerRef } = useDiscoveryCardList()
+  const flatListRef = useRef<FlatList>(null)
 
   return (
     <View ref={containerRef} style={{ flex: 1 }}>
       <FlatList
+        ref={flatListRef}
         data={cards}
         renderItem={(list) => (
           <DiscoveryImageCard
             width={cardSize.width}
             height={cardSize.height}
             card={list.item}
+            onTap={onTap}
           />
         )}
         keyExtractor={(_, index) => index.toString()}
@@ -72,17 +75,12 @@ export function DiscoveryCardList({
   )
 }
 
-function DiscoveryImageCard({ width, height, card }: { width: number; height: number; card: DiscoveryCardState }) {
+function DiscoveryImageCard({ width, height, card, onTap }: { width: number; height: number; card: DiscoveryCardState; onTap?: (card: DiscoveryCardState) => void }) {
   const theme = useThemeStore()
   const styles = createStyles(theme)
   return (<>
 
-    <Pressable onPress={() => {
-      const close = setOverlay(
-        <DiscoveryCardDetails card={card} onClose={() => close()} />,
-        { variant: 'compact', transparent: true, closable: true,}
-      )
-    }}>
+    <Pressable onPress={() => onTap && onTap(card) }>
       <View style={[styles.placeholder, { width, height }]}>
         <Text style={styles.label}>{card.title}</Text>
         <LinearGradient

@@ -46,7 +46,7 @@ export const MapTrailSelector = () => {
       )
     }
     
-    removeOverlay = setOverlay(
+    removeOverlay = setOverlay('trailSelector',
       <FlatList 
         data={trails} 
         renderItem={renderTrailItem} 

@@ -17,7 +17,7 @@ export const AccountView: React.FC = () => {
   const { account, accountType } = useAccountData()
 
   const showAccountRegistration = () => {
-    setOverlay(<AccountVerification />, { title: 'Verify your Account', variant: 'fullscreen', closable: true })
+    setOverlay('accountVerification', <AccountVerification />, { title: 'Verify your Account', variant: 'fullscreen', closable: true })
   }
 
   logger.log('[AccountView] Rendering with account:', account, 'accountType:', accountType)
@@ -32,7 +32,7 @@ export const AccountView: React.FC = () => {
           icon="person-2"
           label={t.account.displayName}
           value={account?.displayName || 'Not set'}
-          onEdit={() => { const close = setOverlay(<DisplayNameEditor onSubmit={() => close()} /> , { title: t.account.setDisplayName, closable: true, variant: 'compact' }) }}
+          onEdit={() => { const close = setOverlay('displayNameEditor', <DisplayNameEditor onSubmit={() => close()} /> , { title: t.account.setDisplayName, closable: true, variant: 'compact' }) }}
         />
         <InfoField
           icon="account-circle"

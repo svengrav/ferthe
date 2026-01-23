@@ -67,13 +67,14 @@ interface DiscoveryCardProps {
   card: DiscoveryCardState
   visible: boolean
   onClose?: () => void
+  onViewDetails?: (discoveryId: string) => void
 }
 
 /**
  * Discovery card highlight component that shows a blur-to-clear reveal animation
  * when a new spot is discovered. Features gradient background and smooth transitions.
  */
-function DiscoveryCardHighlight({ card, visible, onClose }: DiscoveryCardProps) {
+function DiscoveryCardHighlight({ card, visible, onClose, onViewDetails }: DiscoveryCardProps) {
   const { styles } = useApp(useStyles)
   const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT, IMAGE_WIDTH } = useCardDimensions()
   const { fadeIn, fadeOut } = useDiscoveryAnimations(visible)
@@ -129,12 +130,19 @@ function DiscoveryCardHighlight({ card, visible, onClose }: DiscoveryCardProps) 
         />
 
         <View style={[styles.card, cardStyles]}>
-          {/* Close button */}
-          {onClose && (
-            <View style={styles.closeButtonContainer}>
+          {/* Close and view details buttons */}
+          <View style={styles.buttonContainer}>
+            {onViewDetails && (
+              <IconButton 
+                name='arrow-right' 
+                variant='primary' 
+                onPress={() => onViewDetails(card.id)} 
+              />
+            )}
+            {onClose && (
               <IconButton name='close' variant='outlined' onPress={onClose} />
-            </View>
-          )}
+            )}
+          </View>
 
           <View style={[styles.imageContainer, imageContainerStyles]}>
             {/* Main clear image with title */}
@@ -224,6 +232,16 @@ const useStyles = createThemedStyles(theme => ({
     top: CLOSE_BUTTON_TOP,
     right: CLOSE_BUTTON_RIGHT,
     zIndex: CLOSE_BUTTON_Z_INDEX,
+    flexDirection: 'row',
+    gap: 8,
+  },
+  buttonContainer: {
+    position: 'absolute',
+    top: CLOSE_BUTTON_TOP,
+    right: CLOSE_BUTTON_RIGHT,
+    zIndex: CLOSE_BUTTON_Z_INDEX,
+    flexDirection: 'row',
+    gap: 8,
   },
   imageContainer: {
     position: 'relative',

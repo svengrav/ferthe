@@ -41,7 +41,7 @@ function MapScreen() {
   }
 
   return (
-    <Page options={[{ label: t.navigation.settings, onPress: () => setOverlay(<SettingsForm onClose={() => {}} onSubmit={() => {}} />) }]}>
+    <Page options={[{ label: t.navigation.settings, onPress: () => setOverlay('settingsForm', <SettingsForm onClose={() => {}} onSubmit={() => {}} />) }]}>
       <View style={styles?.container} >
         <MapDiscoveryCard />
         <MapCompass />

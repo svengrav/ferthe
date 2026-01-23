@@ -39,7 +39,7 @@ const useTrailScreen = () => {
   const openSettings = () => {
     let removeOverlay: (() => void) | undefined
     
-    removeOverlay = setOverlay(
+    removeOverlay = setOverlay('settingsForm',
       <SettingsForm 
         onClose={() => removeOverlay?.()} 
         onSubmit={() => removeOverlay?.()} 

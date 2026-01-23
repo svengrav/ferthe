@@ -23,7 +23,7 @@ const useTrailItem = (trail: Trail) => {
   const { t } = useLocalizationStore()
 
   const handleOpenTrailOverview = () => {
-    setOverlay(<TrailDetails trail={trail} />, { 
+    setOverlay('trailDetails_' + trail.id, <TrailDetails trail={trail} />, { 
       title: 'Trail',
       variant: 'fullscreen'
     })

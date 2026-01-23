@@ -63,7 +63,7 @@ function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
   // Editor overlay management
   const showEditor = () => {
     let close: () => void
-    close = setOverlay(
+    close = setOverlay('discoveryContentEditor_' + id,
       <DiscoveryContentEditor
         existingContent={content}
         onSubmit={async (data) => {
@@ -118,15 +118,15 @@ function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
         />
       </View>
     </View>
-    )
+  )
 
-    return (
-      <View>
-        <Text variant='heading' size='md'>Notes</Text>
-        {content ? renderContent() : renderAddContent()}
-      </View>
-    )
-  }
+  return (
+    <View>
+      <Text variant='heading' size='md'>Notes</Text>
+      {content ? renderContent() : renderAddContent()}
+    </View>
+  )
+}
 
 
 const useStyles = createThemedStyles(theme => ({
