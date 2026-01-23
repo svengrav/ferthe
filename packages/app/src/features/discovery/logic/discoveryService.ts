@@ -1,6 +1,12 @@
 import { Discovery } from '@shared/contracts/discoveries'
 import { Spot } from '@shared/contracts/spots'
+import { GeoLocation } from '@shared/geo'
 import { DiscoveryCardState } from './types'
+
+const getLastDiscoverySpotLocation = (discovery: Discovery | undefined, spots: Spot[]): GeoLocation | undefined => {
+  if (!discovery) return undefined
+  return spots.find(s => s.id === discovery.spotId)?.location
+}
 
 const createDiscoveryCards = (discoveries: Discovery[], spots: Spot[]): DiscoveryCardState[] => {
   return discoveries.map(discovery => {
@@ -21,4 +27,5 @@ const createDiscoveryCards = (discoveries: Discovery[], spots: Spot[]): Discover
 
 export const discoveryService = {
   createDiscoveryCards,
+  getLastDiscoverySpotLocation,
 }

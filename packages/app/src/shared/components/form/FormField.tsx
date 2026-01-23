@@ -25,7 +25,7 @@ const FormField = ({
   return (
     <View style={styles.container}>
       {label && (
-        <Text style={styles.label}>
+        <Text variant='label'>
           {label}
           {required && <Text style={styles.required}> *</Text>}
         </Text>
@@ -53,18 +53,6 @@ const createStyles = (theme: Theme) =>
     container: {
       marginBottom: 16,
     },
-    descriptionText: {
-      ...theme.text.size.sm,
-      fontFamily: theme.text.primary.regular,
-      color: theme.colors.onSurface + '80',
-      marginTop: 4,
-    },
-    label: {
-      ...theme.text.size.md,
-      fontFamily: theme.text.primary.regular,
-      color: theme.colors.onSurface,
-      marginBottom: 8,
-    },
     required: {
       color: theme.colors.error,
     },
@@ -74,8 +62,6 @@ const createStyles = (theme: Theme) =>
       borderWidth: 1,
       borderRadius: 8,
       padding: 12,
-      ...theme.text.size.md,
-      fontFamily: theme.text.primary.regular,
       color: theme.colors.onSurface,
     },
     inputError: {
@@ -86,8 +72,6 @@ const createStyles = (theme: Theme) =>
       textAlignVertical: 'top',
     },
     errorText: {
-      ...theme.text.size.sm,
-      fontFamily: theme.text.primary.regular,
       color: theme.colors.error,
       marginTop: 4,
     },

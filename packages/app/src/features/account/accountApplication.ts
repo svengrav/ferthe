@@ -1,4 +1,5 @@
 // Account application for user authentication in the app
+import { logger } from '@app/shared/utils/logger'
 import {
   Account,
   AccountApplicationContract,
@@ -64,21 +65,21 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       storeActions.setIsAuthenticated(true)
 
       secureStore.write(AUTH_SESSION_KEY, session).catch(error => {
-        console.error('Failed to save session to secure store:', error)
+        logger.error('Failed to save session to secure store:', error)
       })
       // Try to load and set account data
       try {
         const accountResult = await accountAPI.getAccount(session)
         if (!accountResult.data) {
           // No account data found - session is invalid
-          console.warn(`[AccountApp] Session exists (accountType: ${session.accountType}) but account not found (accountId: ${session.accountId}). Invalidating session.`)
+          logger.warn(`[AccountApp] Session exists (accountType: ${session.accountType}) but account not found (accountId: ${session.accountId}). Invalidating session.`)
           await secureStore.delete(AUTH_SESSION_KEY)
           storeActions.clearAccount()
           return
         }
         storeActions.setAccount(accountResult.data)
       } catch (error) {
-        console.error('Failed to load account data for store sync:', error)
+        logger.error('Failed to load account data for store sync:', error)
       }
     } else {
       // Clear store when no session
@@ -106,14 +107,14 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         }
       }
     } catch (error) {
-      console.error('Failed to load stored session:', error)
+      logger.error('Failed to load stored session:', error)
     }
     return null
   }
 
   // Initialize by loading existing session (async)
   loadStoredSession().catch(error => {
-    console.error('Failed to initialize session store sync:', error)
+    logger.error('Failed to initialize session store sync:', error)
   })
 
   return {
@@ -142,7 +143,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         // If verification is successful, sync store with new session
         await syncStoreWithSession(result.data.context)
       } else {
-        console.error('SMS code verification failed:', result.error)
+        logger.error('SMS code verification failed:', result.error)
       }
       return result
     },
@@ -150,7 +151,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     createLocalAccount: async function (deviceInfo?: AccountDeviceInfo): Promise<Result<AccountSession>> {
       const accountSession = await accountAPI.createLocalAccount(deviceInfo)
       syncStoreWithSession(accountSession.data).catch(error => {
-        console.error('Failed to sync store with new account session:', error)
+        logger.error('Failed to sync store with new account session:', error)
       })
       return accountSession
     },

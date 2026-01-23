@@ -1,13 +1,15 @@
 import { getSensorDevice, SensorApplication } from '@app/features/sensor'
 import { getTrailData } from '@app/features/trail'
 import { logger } from '@app/shared/utils/logger'
-import { AccountContext, Discovery, DiscoveryApplicationContract, Result } from '@shared/contracts'
+import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, ReactionSummary, Result } from '@shared/contracts'
 import { Unsubscribe } from '@shared/events/eventHandler'
 import { GeoLocation, geoUtils } from '@shared/geo'
 import { getTrails } from '../trail/stores/trailStore'
 import { emitDiscoveryTrailUpdated, emitNewDiscoveries, onDiscoveryTrailUpdated, onNewDiscoveries } from './events/discoveryEvents'
 import { discoveryService } from './logic/discoveryService'
 import { DiscoveryCardState } from './logic/types'
+import { getDiscoveryContentActions } from './stores/discoveryContentStore'
+import { getDiscoveryReactionActions } from './stores/discoveryReactionStore'
 import { getDiscoveryActions, getDiscoveryData } from './stores/discoveryStore'
 import { getDiscoveryTrailActions, getDiscoveryTrailData, getDiscoveryTrailId } from './stores/discoveryTrailStore'
 
@@ -24,6 +26,13 @@ export interface DiscoveryApplication {
   onDiscoveryTrailUpdate: (handler: (state: any) => void) => Unsubscribe
   onNewDiscoveries: (handler: (discoveries: DiscoveryCardState[]) => void) => Unsubscribe
   getDiscoveryCards: () => DiscoveryCardState[]
+  // Content methods
+  addDiscoveryContent: (discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
+  getDiscoveryContent: (discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
+  // Reaction methods
+  reactToDiscovery: (discoveryId: string, reaction: 'like' | 'dislike') => Promise<Result<void>>
+  removeReaction: (discoveryId: string) => Promise<Result<void>>
+  getReactionSummary: (discoveryId: string) => Promise<Result<ReactionSummary>>
 }
 
 type DiscoveryApplicationOptions = {
@@ -261,6 +270,9 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     const filteredClues = currentTrailData.scannedClues.filter(clue => !allDiscoveredSpotIds.includes(clue.spotId))
     const filteredPreviewClues = currentTrailData.previewClues?.filter(clue => !allDiscoveredSpotIds.includes(clue.spotId))
 
+    // Set lastDiscovery to the newest discovery
+    const lastDiscovery = newDiscoveries[newDiscoveries.length - 1]
+
     setDiscoveryTrail({
       ...currentTrailData,
       trail: currentTrailData.trail,
@@ -269,6 +281,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       trailId: currentTrailData.trailId,
       scannedClues: filteredClues,
       previewClues: filteredPreviewClues,
+      lastDiscovery: lastDiscovery,
       updatedAt: new Date(),
     })
 
@@ -279,11 +292,80 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     emitNewDiscoveries(discoveryService.createDiscoveryCards(newDiscoveries, getDiscoveryData().spots))
   }
 
+  // Content methods
+  const addDiscoveryContent = async (discoveryId: string, content: { imageUrl?: string; comment?: string }): Promise<Result<DiscoveryContent>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined as any }
+
+    const result = await discoveryAPI.addDiscoveryContent(session.data, discoveryId, content)
+    if (result.data) {
+      getDiscoveryContentActions().setContent(discoveryId, result.data)
+    }
+    return result
+  }
+
+  const getDiscoveryContent = async (discoveryId: string): Promise<Result<DiscoveryContent | undefined>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined }
+
+    const result = await discoveryAPI.getDiscoveryContent(session.data, discoveryId)
+    if (result.data) {
+      getDiscoveryContentActions().setContent(discoveryId, result.data)
+    }
+    return result
+  }
+
+  // Reaction methods
+  const reactToDiscovery = async (discoveryId: string, reaction: 'like' | 'dislike'): Promise<Result<void>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined }
+
+    const result = await discoveryAPI.reactToDiscovery(session.data, discoveryId, reaction)
+    if (result.success) {
+      // Refresh reaction summary
+      const summaryResult = await discoveryAPI.getReactionSummary(session.data, discoveryId)
+      if (summaryResult.data) {
+        getDiscoveryReactionActions().setReactionSummary(discoveryId, summaryResult.data)
+      }
+    }
+    return { success: result.success, data: undefined }
+  }
+
+  const removeReaction = async (discoveryId: string): Promise<Result<void>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined }
+
+    const result = await discoveryAPI.removeReaction(session.data, discoveryId)
+    if (result.success) {
+      const summaryResult = await discoveryAPI.getReactionSummary(session.data, discoveryId)
+      if (summaryResult.data) {
+        getDiscoveryReactionActions().setReactionSummary(discoveryId, summaryResult.data)
+      }
+    }
+    return result
+  }
+
+  const getReactionSummary = async (discoveryId: string): Promise<Result<ReactionSummary>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined as any }
+
+    const result = await discoveryAPI.getReactionSummary(session.data, discoveryId)
+    if (result.data) {
+      getDiscoveryReactionActions().setReactionSummary(discoveryId, result.data)
+    }
+    return result
+  }
+
   return {
     getDiscoveryCards,
     setActiveTrail,
     requestDiscoveryState,
     onDiscoveryTrailUpdate: onDiscoveryTrailUpdated,
     onNewDiscoveries,
+    addDiscoveryContent,
+    getDiscoveryContent,
+    reactToDiscovery,
+    removeReaction,
+    getReactionSummary,
   }
 }

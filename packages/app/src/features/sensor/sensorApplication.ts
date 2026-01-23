@@ -4,6 +4,7 @@ import { sensorStore } from './stores/sensorStore'
 import { Result, ScanEvent } from '@shared/contracts'
 import { createEventSystem, Unsubscribe } from '@shared/events/eventHandler'
 
+import { logger } from '@app/shared/utils/logger'
 import { AccountContext, SensorApplicationContract } from '@shared/contracts'
 
 type SensorEvents = {
@@ -65,13 +66,13 @@ export const createSensorApplication = (options?: SensorApplicationOptions) => {
 
     const accountSession = await getAccountSession()
     if (!accountSession.data) {
-      console.error('Failed to get account session:', accountSession.error)
+      logger.error('Failed to get account session:', accountSession.error)
       return
     }
 
     const scanEvent = await core?.createScanEvent(accountSession.data, device.location, trailId)
     if (!scanEvent.data) {
-      console.error('Failed to create scan event:', scanEvent.error)
+      logger.error('Failed to create scan event:', scanEvent.error)
       return
     }
 

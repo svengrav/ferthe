@@ -1,5 +1,5 @@
 import { createDeterministicId } from '@core/utils/idGenerator'
-import { Clue, ClueSource, Discovery, DiscoveryLocationRecord, DiscoverySnap, DiscoveryStats, DiscoveryTrail, LocationWithDirection, ScanEvent, Spot, Trail } from '@shared/contracts'
+import { Clue, ClueSource, Discovery, DiscoveryContent, DiscoveryLocationRecord, DiscoveryReaction, DiscoverySnap, DiscoveryStats, DiscoveryTrail, LocationWithDirection, ReactionSummary, ScanEvent, Spot, Trail } from '@shared/contracts'
 import { GeoBoundary, GeoLocation, geoUtils } from '@shared/geo'
 
 export interface Target {
@@ -29,6 +29,10 @@ export type DiscoveryServiceActions = {
   processLocationUpdate: (accountId: string, locationWithDirection: LocationWithDirection, discoveries: Discovery[], spots: Spot[], trail: Trail, communityId?: string) => DiscoveryLocationRecord
   createDiscoveryTrail: (accountId: string, trail: Trail, discoveries: Discovery[], spots: Spot[], trailSpotIds: string[], userLocation?: GeoLocation, communityId?: string) => DiscoveryTrail
   getDiscoveryStats: (discovery: Discovery, allDiscoveriesForSpot: Discovery[], userDiscoveries: Discovery[], trailSpotIds: string[], spots: Spot[]) => DiscoveryStats
+  createDiscoveryContent: (accountId: string, discoveryId: string, content: { imageUrl?: string; comment?: string }) => DiscoveryContent
+  updateDiscoveryContent: (existing: DiscoveryContent, content: { imageUrl?: string; comment?: string }) => DiscoveryContent
+  createReaction: (accountId: string, discoveryId: string, reaction: 'like' | 'dislike') => DiscoveryReaction
+  getReactionSummary: (discoveryId: string, reactions: DiscoveryReaction[], accountId: string) => ReactionSummary
 }
 
 /**
@@ -411,6 +415,62 @@ const getDiscoveryStats = (
   }
 }
 
+/**
+ * Creates a new discovery content entry (image + comment)
+ */
+const createDiscoveryContent = (accountId: string, discoveryId: string, content: { imageUrl?: string; comment?: string }): DiscoveryContent => {
+  const now = new Date()
+  return {
+    id: createDeterministicId('discovery-content', discoveryId),
+    discoveryId,
+    accountId,
+    imageUrl: content.imageUrl,
+    comment: content.comment,
+    createdAt: now,
+    updatedAt: now,
+  }
+}
+
+/**
+ * Updates an existing discovery content entry
+ */
+const updateDiscoveryContent = (existing: DiscoveryContent, content: { imageUrl?: string; comment?: string }): DiscoveryContent => {
+  return {
+    ...existing,
+    imageUrl: content.imageUrl ?? existing.imageUrl,
+    comment: content.comment ?? existing.comment,
+    updatedAt: new Date(),
+  }
+}
+
+/**
+ * Creates a reaction (like/dislike) for a discovery
+ */
+const createReaction = (accountId: string, discoveryId: string, reaction: 'like' | 'dislike'): DiscoveryReaction => {
+  return {
+    id: createDeterministicId('discovery-reaction', discoveryId, accountId),
+    discoveryId,
+    accountId,
+    reaction,
+    createdAt: new Date(),
+  }
+}
+
+/**
+ * Aggregates reactions into a summary with current user's reaction
+ */
+const getReactionSummary = (discoveryId: string, reactions: DiscoveryReaction[], accountId: string): ReactionSummary => {
+  const discoveryReactions = reactions.filter(r => r.discoveryId === discoveryId)
+  const userReaction = discoveryReactions.find(r => r.accountId === accountId)?.reaction
+
+  return {
+    discoveryId,
+    likes: discoveryReactions.filter(r => r.reaction === 'like').length,
+    dislikes: discoveryReactions.filter(r => r.reaction === 'dislike').length,
+    userReaction,
+  }
+}
+
 export const createDiscoveryService = (): DiscoveryServiceActions => ({
   getDiscoveredSpots,
   getDiscoveries,
@@ -428,4 +488,8 @@ export const createDiscoveryService = (): DiscoveryServiceActions => ({
   processLocationUpdate,
   createDiscoveryTrail,
   getDiscoveryStats,
+  createDiscoveryContent,
+  updateDiscoveryContent,
+  createReaction,
+  getReactionSummary,
 })

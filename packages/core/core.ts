@@ -1,4 +1,4 @@
-import { Account, AccountSession, Community, CommunityMember, Discovery, DiscoveryApplicationContract, DiscoveryProfile, DiscoveryReaction, Spot, Trail, TrailApplicationContract, TrailSpot, TwilioVerification } from '@shared/contracts/index.ts'
+import { Account, AccountSession, Community, CommunityMember, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryProfile, DiscoveryReaction, Spot, Trail, TrailApplicationContract, TrailSpot, TwilioVerification } from '@shared/contracts/index.ts'
 import { createConsoleSMSConnector, createTwilioSMSConnector, SMSConnector, TwilioConfig } from './connectors/smsConnector.ts'
 import { AccountApplicationActions, createAccountApplication } from './features/account/accountApplication.ts'
 import { createJWTService } from './features/account/jwtService.ts'
@@ -46,10 +46,11 @@ export const INTERNAL_STORE_IDS = {
   ACCOUNT_SMS_CODES: 'account-sms-codes',
   DISCOVERIES: 'discovery-collection',
   DISCOVERY_PROFILES: 'discovery-profile-collection',
+  DISCOVERY_CONTENTS: 'discovery-content-collection',
+  DISCOVERY_REACTIONS: 'discovery-reactions',
   SENSOR_SCANS: 'sensor-scans',
   COMMUNITIES: 'community-collection',
   COMMUNITY_MEMBERS: 'community-members',
-  DISCOVERY_REACTIONS: 'discovery-reactions',
 }
 
 export function createCoreContext(config: CoreConfiguration = {}): CoreContext {
@@ -95,6 +96,8 @@ export function createCoreContext(config: CoreConfiguration = {}): CoreContext {
     discoveryService: createDiscoveryService(),
     discoveryStore: createStore<Discovery>(storeConnector, INTERNAL_STORE_IDS.DISCOVERIES),
     profileStore: createStore<DiscoveryProfile>(storeConnector, INTERNAL_STORE_IDS.DISCOVERY_PROFILES),
+    contentStore: createStore<DiscoveryContent>(storeConnector, INTERNAL_STORE_IDS.DISCOVERY_CONTENTS),
+    reactionStore: createStore<DiscoveryReaction>(storeConnector, INTERNAL_STORE_IDS.DISCOVERY_REACTIONS),
   })
 
   const communityApplication = createCommunityApplication({

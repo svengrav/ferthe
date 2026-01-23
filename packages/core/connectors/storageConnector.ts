@@ -1,4 +1,5 @@
-import { BlobSASPermissions, BlobServiceClient, generateBlobSASQueryParameters, StorageSharedKeyCredential } from '@azure/storage-blob'
+import { BlobSASPermissions, BlobServiceClient, generateBlobSASQueryParameters, StorageSharedKeyCredential } from '@azure/storage-blob';
+import { Buffer } from "node:buffer";
 
 interface StorageItem {
   id: string
@@ -7,6 +8,7 @@ interface StorageItem {
 
 interface StorageConnector {
   getItemUrl(key: string): Promise<StorageItem>
+  uploadFile(path: string, data: Buffer | string, contentType?: string): Promise<string>
 }
 
 const parseConnectionString = (connectionString: string): { accountName: string; accountKey: string } => {
@@ -28,6 +30,7 @@ export const createAzureStorageConnector = (connectionString: string, containerN
   const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
   const connectionParams = parseConnectionString(connectionString)
   const { accountName, accountKey } = connectionParams
+
   const getItemUrl = async (key: string): Promise<StorageItem> => {
     try {
       const blobClient = blobServiceClient.getContainerClient(containerName).getBlobClient(key)
@@ -59,7 +62,34 @@ export const createAzureStorageConnector = (connectionString: string, containerN
     }
   }
 
+  const uploadFile = async (path: string, data: Buffer | string): Promise<string> => {
+    try {
+      const containerClient = blobServiceClient.getContainerClient(containerName)
+      const blobClient = containerClient.getBlobClient(path)
+
+      await blobClient.getBlockBlobClient().upload(data, Buffer.isBuffer(data) ? data.length : Buffer.byteLength(data))
+
+      // Generate SAS URL for the uploaded file
+      const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey)
+      const sasOptions = {
+        containerName: containerName,
+        blobName: path,
+        permissions: BlobSASPermissions.parse('r'),
+        startsOn: new Date(),
+        expiresOn: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+      }
+      const sasToken = generateBlobSASQueryParameters(sasOptions, sharedKeyCredential).toString()
+      const urlWithSAS = `${blobClient.url}?${sasToken}`
+
+      return urlWithSAS
+    } catch (error) {
+      console.error('Error uploading file:', error)
+      throw error
+    }
+  }
+
   return {
     getItemUrl,
+    uploadFile,
   }
 }

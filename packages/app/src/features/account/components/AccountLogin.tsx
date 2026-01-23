@@ -72,7 +72,7 @@ export default function AccountLogin({ onClose }: AccountLoginProps) {
     <View style={styles.container}>
       <Card style={styles.card}>
 
-        <Text style={styles.title}>{t.auth.welcomeToFerthe}</Text>
+        <Text variant='heading'>{t.auth.welcomeToFerthe}</Text>
 
         {/* Phone Number Section */}
         <AccountVerification />
@@ -88,7 +88,7 @@ export default function AccountLogin({ onClose }: AccountLoginProps) {
             variant="outlined"
             disabled={isCreatingLocal}
           />
-          <Text style={styles.notice}>{t.auth.localAccountNotice}</Text>
+          <Text variant='hint'>{t.auth.localAccountNotice}</Text>
         </View>
       </Card>
     </View>
@@ -106,21 +106,8 @@ const createStyles = (theme: Theme) => {
     card: {
       padding: 24,
     },
-    title: {
-      ...theme.text.size.lg,
-      fontFamily: theme.text.primary.semiBold,
-      textAlign: 'center',
-      marginBottom: 32,
-      color: theme.colors.onSurface,
-    },
     section: {
       marginBottom: 24,
-    },
-    sectionTitle: {
-      ...theme.text.size.md,
-      fontFamily: theme.text.primary.semiBold,
-      marginBottom: 16,
-      color: theme.colors.onSurface,
     },
     input: {
       borderWidth: 1,
@@ -141,18 +128,6 @@ const createStyles = (theme: Theme) => {
       flex: 1,
       height: 1,
       backgroundColor: theme.colors.onSurface + '20',
-    },
-    dividerText: {
-      ...theme.text.size.sm,
-      marginHorizontal: 16,
-      color: theme.colors.onSurface + '80',
-    },
-    notice: {
-      ...theme.text.size.xs,
-      textAlign: 'center',
-      marginTop: 0,
-      color: theme.colors.onSurface + '80',
-      lineHeight: 18,
     },
   })
 }

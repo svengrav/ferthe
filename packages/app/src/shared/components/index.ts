@@ -22,7 +22,9 @@ export { default as InfoField } from './infoField/InfoField'
 export { default as Markdown } from './markdown/Markdown'
 export { default as Notification } from './notification/Notification'
 export { default as Page } from './page/Page'
+export { default as ReactionButtons } from './reaction/ReactionButtons'
 export { default as Text } from './text/Text'
+export { default as TextInput } from './textInput/TextInput'
 export { Option } from './types'
 
 

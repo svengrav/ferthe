@@ -1,6 +1,7 @@
 import { getMapService } from './utils/mapService'
 
 import { DiscoveryApplication, getDiscoveryTrailData } from '@app/features/discovery'
+import { discoveryService } from '@app/features/discovery/logic/discoveryService'
 import { getSensorData, SensorApplication } from '@app/features/sensor'
 import { logger } from '@app/shared/utils/logger'
 import { discoveryTrailStore } from '../discovery/stores/discoveryTrailStore'
@@ -22,14 +23,15 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
   const { getCompass, calculateMapRegion, calculateDeviceBoundaryStatus, calculateMapSnap, calculateOptimalScale } = getMapService()
 
   sensor?.onDeviceUpdate(device => {
-    const { trail, snap, discoveries, spots } = getDiscoveryTrailData()
+    const { trail, snap, discoveries, spots, lastDiscovery } = getDiscoveryTrailData()
 
     setDevice({
       location: device.location,
       heading: device.heading,
     })
     setCompass(getCompass(device.heading))
-    const snapState = calculateMapSnap(spots, discoveries, device.location, snap?.intensity)
+    const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
+    const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
     const { boundary, region } = calculateMapRegion(trail?.region, device?.location)
 
     setBoundary(boundary)
@@ -52,7 +54,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
   discoveryApplication?.onNewDiscoveries(d => { })
 
   const newMapState = async (viewbox?: { width: number; height: number }) => {
-    const { trail, scannedClues, previewClues, spots, snap, discoveries } = getDiscoveryTrailData()
+    const { trail, scannedClues, previewClues, spots, snap, discoveries, lastDiscovery } = getDiscoveryTrailData()
     const viewboxSize = getMapState().viewport
     const { device } = getSensorData()
     if (!trail) {
@@ -60,7 +62,8 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
       return
     }
     const { boundary, region } = calculateMapRegion(trail.region, device?.location)
-    const snapState = calculateMapSnap(spots, discoveries, device.location, snap?.intensity)
+    const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
+    const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
     setState(
       createMapState(defaults => ({
         status: 'ready',

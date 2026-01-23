@@ -49,6 +49,22 @@ export const API_ERROR_CODES = {
   UPDATE_PROFILE_ERROR: { code: 'UPDATE_PROFILE_ERROR', message: 'Failed to update discovery profile', httpStatus: 500 },
   UPDATE_TRAIL_ERROR: { code: 'UPDATE_TRAIL_ERROR', message: 'Failed to update last active trail', httpStatus: 500 },
 
+  // Discovery Content & Reactions (400-500)
+  CONTENT_ALREADY_EXISTS: { code: 'CONTENT_ALREADY_EXISTS', message: 'Content already exists for this discovery', httpStatus: 409 },
+  CONTENT_NOT_FOUND: { code: 'CONTENT_NOT_FOUND', message: 'Discovery content not found', httpStatus: 404 },
+  ADD_CONTENT_ERROR: { code: 'ADD_CONTENT_ERROR', message: 'Failed to add discovery content', httpStatus: 500 },
+  GET_CONTENT_ERROR: { code: 'GET_CONTENT_ERROR', message: 'Failed to retrieve discovery content', httpStatus: 500 },
+  UPDATE_CONTENT_ERROR: { code: 'UPDATE_CONTENT_ERROR', message: 'Failed to update discovery content', httpStatus: 500 },
+  SAVE_CONTENT_ERROR: { code: 'SAVE_CONTENT_ERROR', message: 'Failed to save discovery content', httpStatus: 500 },
+  NOT_AUTHORIZED: { code: 'NOT_AUTHORIZED', message: 'User is not authorized for this action', httpStatus: 403 },
+  REACT_ERROR: { code: 'REACT_ERROR', message: 'Failed to react to discovery', httpStatus: 500 },
+  SAVE_REACTION_ERROR: { code: 'SAVE_REACTION_ERROR', message: 'Failed to save reaction', httpStatus: 500 },
+  REMOVE_REACTION_ERROR: { code: 'REMOVE_REACTION_ERROR', message: 'Failed to remove reaction', httpStatus: 500 },
+  GET_REACTIONS_ERROR: { code: 'GET_REACTIONS_ERROR', message: 'Failed to retrieve reactions', httpStatus: 500 },
+  GET_REACTION_SUMMARY_ERROR: { code: 'GET_REACTION_SUMMARY_ERROR', message: 'Failed to retrieve reaction summary', httpStatus: 500 },
+  STORAGE_CONNECTOR_NOT_CONFIGURED: { code: 'STORAGE_CONNECTOR_NOT_CONFIGURED', message: 'Storage connector is not configured', httpStatus: 500 },
+  IMAGE_UPLOAD_ERROR: { code: 'IMAGE_UPLOAD_ERROR', message: 'Failed to upload image', httpStatus: 500 },
+
   // Community Management (404-500)
   COMMUNITY_NOT_FOUND: { code: 'COMMUNITY_NOT_FOUND', message: 'Community not found', httpStatus: 404 },
   NOT_A_MEMBER: { code: 'NOT_A_MEMBER', message: 'User is not a member of this community', httpStatus: 403 },

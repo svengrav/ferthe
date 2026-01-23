@@ -22,6 +22,7 @@ interface DiscoveryTrailData extends StoreData {
   previewClues?: Clue[]
   spots: Spot[]
   snap?: DiscoverySnap | undefined
+  lastDiscovery?: Discovery
 }
 
 export const discoveryTrailStore = create<DiscoveryTrailData & DiscoveryTrailActions>(set => ({
@@ -38,6 +39,7 @@ export const discoveryTrailStore = create<DiscoveryTrailData & DiscoveryTrailAct
   scannedClues: [],
   previewClues: [],
   snap: undefined,
+  lastDiscovery: undefined,
 
   // Actions
   setScannedClues: clues => set({ scannedClues: clues }),

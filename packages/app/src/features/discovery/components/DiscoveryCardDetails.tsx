@@ -1,9 +1,13 @@
+import { getAppContext } from '@app/appContext'
 import { Text } from '@app/shared/components'
+import ReactionButtons from '@app/shared/components/reaction/ReactionButtons'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Animated, ScrollView, useWindowDimensions, View } from 'react-native'
+import { useDiscoveryContent, useDiscoveryReactionSummary } from '../index'
 import { DiscoveryCardState as Card } from '../logic/types'
+import DiscoveryContentForm from './DiscoveryContentForm'
 const PAGE_PADDING = 16
 const CARD_ASPECT_RATIO = 3 / 2
 const CARD_BORDER_RADIUS = 18
@@ -92,9 +96,54 @@ interface DiscoveryCardProps {
  */
 function DiscoveryCardDetails({ card, onClose }: DiscoveryCardProps) {
   const { styles, theme } = useApp(useStyles)
-  const { title, image, description } = card
+  const { discoveryApplication } = getAppContext()
+  const { title, image, description, id } = card
   const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT } = useCardDimensions()
   const { scrollY, titleOpacity, overlayOpacity } = useCardAnimations(IMAGE_HEIGHT)
+
+  // Content and reactions state
+  const content = useDiscoveryContent(id ?? '')
+  const reactionSummary = useDiscoveryReactionSummary(id ?? '')
+  const [showContentForm, setShowContentForm] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Load content and reactions on mount
+  useEffect(() => {
+    if (id) {
+      discoveryApplication.getDiscoveryContent(id)
+      discoveryApplication.getReactionSummary(id)
+    }
+  }, [id])
+
+  const handleLike = async () => {
+    if (!id || isLoading) return
+    setIsLoading(true)
+    if (reactionSummary?.userReaction === 'like') {
+      await discoveryApplication.removeReaction(id)
+    } else {
+      await discoveryApplication.reactToDiscovery(id, 'like')
+    }
+    setIsLoading(false)
+  }
+
+  const handleDislike = async () => {
+    if (!id || isLoading) return
+    setIsLoading(true)
+    if (reactionSummary?.userReaction === 'dislike') {
+      await discoveryApplication.removeReaction(id)
+    } else {
+      await discoveryApplication.reactToDiscovery(id, 'dislike')
+    }
+    setIsLoading(false)
+  }
+
+  const handleContentSubmit = async (data: { imageUrl?: string; comment?: string }) => {
+    if (!id) return
+    setIsLoading(true)
+    await discoveryApplication.addDiscoveryContent(id, data)
+    setShowContentForm(false)
+    setIsLoading(false)
+  }
 
   // Dynamic styles that depend on dimensions
   const cardDynamicStyles = {
@@ -163,6 +212,56 @@ function DiscoveryCardDetails({ card, onClose }: DiscoveryCardProps) {
           </Text>
           {description && (
             <Text style={styles.description}>{description}</Text>
+          )}
+
+          {/* Reaction buttons */}
+          {id && (
+            <View style={styles.reactionsContainer}>
+              <ReactionButtons
+                summary={reactionSummary}
+                onLike={handleLike}
+                onDislike={handleDislike}
+                disabled={isLoading}
+              />
+            </View>
+          )}
+
+          {/* User content section */}
+          {id && (
+            <View style={styles.userContentSection}>
+              {content ? (
+                <View style={styles.userContent}>
+                  {content.comment && (
+                    <Text style={styles.userComment}>{content.comment}</Text>
+                  )}
+                  {content.imageUrl && (
+                    <Animated.Image
+                      source={{ uri: content.imageUrl }}
+                      style={styles.userImage}
+                      resizeMode='cover'
+                    />
+                  )}
+                </View>
+              ) : (
+                !showContentForm && (
+                  <Text
+                    style={styles.addContentLink}
+                    onPress={() => setShowContentForm(true)}
+                  >
+                    + Add your discovery note
+                  </Text>
+                )
+              )}
+
+              {showContentForm && (
+                <DiscoveryContentForm
+                  existingContent={content}
+                  onSubmit={handleContentSubmit}
+                  onCancel={() => setShowContentForm(false)}
+                  isLoading={isLoading}
+                />
+              )}
+            </View>
           )}
         </View>
       </ScrollView>
@@ -243,6 +342,36 @@ const useStyles = createThemedStyles(theme => ({
     color: theme.colors.onSurface,
     textAlign: 'left',
     lineHeight: 24,
+  },
+  reactionsContainer: {
+    marginTop: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: theme.deriveColor(theme.colors.onSurface, 0.1),
+  },
+  userContentSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: theme.deriveColor(theme.colors.onSurface, 0.1),
+  },
+  userContent: {
+    gap: 12,
+  },
+  userComment: {
+    color: theme.colors.onSurface,
+    fontStyle: 'italic',
+    lineHeight: 22,
+  },
+  userImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+  },
+  addContentLink: {
+    color: theme.colors.primary,
+    textAlign: 'center',
+    paddingVertical: 8,
   },
 }))
 

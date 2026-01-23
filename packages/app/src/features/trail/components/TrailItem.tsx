@@ -95,7 +95,7 @@ function TrailItem({ trail, actions, onPress }: TrailCardProps) {
     <View style={styles.content}>
       <TrailAvatar trail={trail} />
       <View style={styles.textContainer}>
-        <Text variant='title' >{trail.name}</Text>
+        <Text variant='title' >{trail.name} </Text>
         <Text
           variant='body'
           size='sm'
@@ -145,18 +145,13 @@ const useStyles = createThemedStyles(theme => ({
     justifyContent: 'center',
   },
   content: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12
   },
   textContainer: {
     flex: 1,
-    flexDirection: 'column',
-    overflow: 'hidden',
-    flexGrow:1
   },
-
 }))
 
 export default TrailItem

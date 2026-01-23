@@ -65,13 +65,7 @@ export const Dialog = ({
       paddingTop: 24,
       paddingBottom: 16,
     },
-    title: {
-      ...theme.text.size.lg,
-      fontFamily: theme.text.primary.semiBold,
-      color: theme.colors.onSurface,
-      flex: 1,
-      marginRight: 16,
-    },
+
     closeButton: {
       width: 32,
       height: 32,
@@ -81,7 +75,6 @@ export const Dialog = ({
       alignItems: 'center',
     },
     closeIcon: {
-      ...theme.text.size.lg,
       color: theme.colors.onSurface,
       fontWeight: 'bold',
     },
@@ -92,11 +85,7 @@ export const Dialog = ({
     scrollContent: {
       flexGrow: 1,
     },
-    content: {
-      ...theme.text.size.md,
-      color: theme.colors.onSurface,
-      lineHeight: 22,
-    },
+
     actionsContainer: {
       flexDirection: 'row',
       justifyContent: 'flex-end',
@@ -126,10 +115,7 @@ export const Dialog = ({
     disabledAction: {
       backgroundColor: theme.colors.disabled,
     },
-    actionText: {
-      ...theme.text.size.md,
-      fontFamily: theme.text.primary.semiBold,
-    },
+
     primaryActionText: {
       color: theme.colors.onPrimary || theme.colors.background,
     },
@@ -143,34 +129,6 @@ export const Dialog = ({
       color: theme.colors.onDisabled,
     },
   })
-
-  const getActionButtonStyle = (variant: DialogAction['variant'], disabled?: boolean) => {
-    if (disabled) return [styles.actionButton, styles.disabledAction]
-
-    switch (variant) {
-      case 'primary':
-        return [styles.actionButton, styles.primaryAction]
-      case 'danger':
-        return [styles.actionButton, styles.dangerAction]
-      case 'secondary':
-      default:
-        return [styles.actionButton, styles.secondaryAction]
-    }
-  }
-
-  const getActionTextStyle = (variant: DialogAction['variant'], disabled?: boolean) => {
-    if (disabled) return [styles.actionText, styles.disabledActionText]
-
-    switch (variant) {
-      case 'primary':
-        return [styles.actionText, styles.primaryActionText]
-      case 'danger':
-        return [styles.actionText, styles.dangerActionText]
-      case 'secondary':
-      default:
-        return [styles.actionText, styles.secondaryActionText]
-    }
-  }
 
   return (
     <Modal
@@ -190,7 +148,7 @@ export const Dialog = ({
             {(title || closable) && (
               <View style={styles.header}>
                 {title && (
-                  <Text style={styles.title} numberOfLines={2}>
+                  <Text  numberOfLines={2}>
                     {title}
                   </Text>
                 )}
@@ -213,7 +171,7 @@ export const Dialog = ({
               showsVerticalScrollIndicator={false}
             >
               {typeof children === 'string' ? (
-                <Text style={styles.content}>{children}</Text>
+                <Text>{children}</Text>
               ) : (
                 children
               )}
@@ -225,11 +183,10 @@ export const Dialog = ({
                 {actions.map((action, index) => (
                   <TouchableOpacity
                     key={index}
-                    style={getActionButtonStyle(action.variant, action.disabled)}
                     onPress={action.disabled ? undefined : action.onPress}
                     disabled={action.disabled}
                   >
-                    <Text style={getActionTextStyle(action.variant, action.disabled)}>
+                    <Text>
                       {action.label}
                     </Text>
                   </TouchableOpacity>

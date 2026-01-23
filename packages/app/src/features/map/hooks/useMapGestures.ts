@@ -1,3 +1,4 @@
+import { logger } from '@app/shared/utils/logger'
 import { useEffect, useState } from 'react'
 import { Platform } from 'react-native'
 import { Gesture } from 'react-native-gesture-handler'
@@ -244,7 +245,7 @@ export const useMapGestures = (
       if (!onTap) return
       onTap({ x, y })
     } catch (error) {
-      console.error('Tap conversion failed:', error)
+      logger.error('Tap conversion failed:', error)
     }
   }
 

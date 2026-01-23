@@ -29,7 +29,7 @@ function CommunityCard({ community }: CommunityCardProps) {
   return (
     <Pressable onPress={handlePress} style={[styles.card, isActive && styles.activeCard]}>
       <View style={styles.header}>
-        <Text style={styles.name}>{community.name}</Text>
+        <Text>{community.name}</Text>
         {isActive && <Text style={styles.activeBadge}>Active</Text>}
       </View>
       <Text style={styles.inviteCode}>Invite Code: {community.inviteCode}</Text>
@@ -56,14 +56,7 @@ const useStyles = createThemedStyles(theme => ({
     alignItems: 'center',
     marginBottom: 8,
   },
-  name: {
-    ...theme.text.size.lg,
-    fontFamily: theme.text.primary.semiBold,
-    color: theme.colors.onSurface,
-  },
   activeBadge: {
-    ...theme.text.size.xs,
-    fontFamily: theme.text.primary.semiBold,
     color: theme.colors.primary,
     backgroundColor: theme.opacity(theme.colors.primary, 10),
     paddingHorizontal: 8,
@@ -71,13 +64,10 @@ const useStyles = createThemedStyles(theme => ({
     borderRadius: 4,
   },
   inviteCode: {
-    ...theme.text.size.md,
-    fontFamily: theme.text.primary.semiBold,
     color: theme.deriveColor(theme.colors.onSurface, 0.6),
     marginBottom: 4,
   },
   meta: {
-    ...theme.text.size.sm,
     color: theme.deriveColor(theme.colors.onSurface, 0.6),
   },
 }))

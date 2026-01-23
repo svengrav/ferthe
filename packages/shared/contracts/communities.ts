@@ -48,14 +48,3 @@ export interface CommunityDiscoveryStats {
   likes: number
   dislikes: number
 }
-
-/**
- * Like/Dislike action for a discovery.
- */
-export interface DiscoveryReaction {
-  id: string
-  discoveryId: string
-  accountId: string
-  reaction: 'like' | 'dislike'
-  createdAt: Date
-}

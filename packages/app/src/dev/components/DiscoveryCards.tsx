@@ -129,8 +129,6 @@ const createStyles = (theme: Theme) =>
       justifyContent: 'flex-end',
     },
     title: {
-      ...theme.text.size.lg,
-      fontFamily: theme.text.primary.semiBold,
       width: '100%',
       textAlign: 'center',
       position: 'absolute',
@@ -143,14 +141,12 @@ const createStyles = (theme: Theme) =>
       color: theme.colors.primary,
     },
     introText: {
-      ...theme.text.size.md,
       maxWidth: 200,
       textAlign: 'center',
       backgroundColor: theme.colors.background,
       color: theme.colors.onBackground,
       marginTop: 10,
       marginBottom: 25,
-      fontFamily: theme.text.primary.semiBold,
       lineHeight: 30,
     },
     logo: {

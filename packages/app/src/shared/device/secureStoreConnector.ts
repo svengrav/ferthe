@@ -1,3 +1,4 @@
+import { logger } from '@app/shared/utils/logger'
 import * as SecureStore from 'expo-secure-store'
 
 /**
@@ -52,7 +53,7 @@ export const secureStoreConnector: SecureStoreConnector = {
       if (rawValue === null) {
         return null
       }
-      
+
       // If T is string, return raw value
       if (typeof rawValue === 'string' && rawValue.length > 0) {
         try {
@@ -62,10 +63,10 @@ export const secureStoreConnector: SecureStoreConnector = {
           return rawValue as T
         }
       }
-      
+
       return null
     } catch (error) {
-      console.error(`Failed to read from secure store with key: ${key}`, error)
+      logger.error(`Failed to read from secure store with key: ${key}`, error)
       return null
     }
   },
@@ -75,7 +76,7 @@ export const secureStoreConnector: SecureStoreConnector = {
       const serializedValue = typeof value === 'string' ? value : JSON.stringify(value)
       await SecureStore.setItemAsync(key, serializedValue)
     } catch (error) {
-      console.error(`Failed to write to secure store with key: ${key}`, error)
+      logger.error(`Failed to write to secure store with key: ${key}`, error)
       throw error
     }
   },
@@ -88,7 +89,7 @@ export const secureStoreConnector: SecureStoreConnector = {
     try {
       await SecureStore.deleteItemAsync(key)
     } catch (error) {
-      console.error(`Failed to delete from secure store with key: ${key}`, error)
+      logger.error(`Failed to delete from secure store with key: ${key}`, error)
       throw error
     }
   },
@@ -98,7 +99,7 @@ export const secureStoreConnector: SecureStoreConnector = {
       const value = await SecureStore.getItemAsync(key)
       return value !== null
     } catch (error) {
-      console.error(`Failed to check existence in secure store with key: ${key}`, error)
+      logger.error(`Failed to check existence in secure store with key: ${key}`, error)
       return false
     }
   }

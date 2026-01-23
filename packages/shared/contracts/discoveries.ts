@@ -14,10 +14,14 @@ export interface DiscoveryApplicationContract {
   getDiscoveredPreviewClues: (context: AccountContext, trailId: string) => Promise<Result<Clue[]>>
   getDiscoveryTrail: (context: AccountContext, trailId: string, userLocation?: GeoLocation, communityId?: string) => Promise<Result<DiscoveryTrail>>
   getDiscoveryStats: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryStats>>
-
-  // Profile methods
   getDiscoveryProfile: (context: AccountContext) => Promise<Result<DiscoveryProfile>>
   updateDiscoveryProfile: (context: AccountContext, updateData: DiscoveryProfileUpdateData) => Promise<Result<DiscoveryProfile>>
+  addDiscoveryContent: (context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
+  getDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
+  updateDiscoveryContent: (context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
+  reactToDiscovery: (context: AccountContext, discoveryId: string, reaction: 'like' | 'dislike') => Promise<Result<DiscoveryReaction>>
+  removeReaction: (context: AccountContext, discoveryId: string) => Promise<Result<void>>
+  getReactionSummary: (context: AccountContext, discoveryId: string) => Promise<Result<ReactionSummary>>
 }
 
 export interface LocationWithDirection {
@@ -76,4 +80,39 @@ export interface Clue {
   trailId: string
   location: GeoLocation
   source: ClueSource
+}
+
+/**
+ * User-generated content for a discovery (image + comment).
+ * Each discovery can have at most one content entry.
+ */
+export interface DiscoveryContent {
+  id: string
+  discoveryId: string
+  accountId: string
+  imageUrl?: string
+  comment?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+/**
+ * User reaction (like/dislike) for a discovery.
+ */
+export interface DiscoveryReaction {
+  id: string
+  discoveryId: string
+  accountId: string
+  reaction: 'like' | 'dislike'
+  createdAt: Date
+}
+
+/**
+ * Aggregated reaction counts for a discovery.
+ */
+export interface ReactionSummary {
+  discoveryId: string
+  likes: number
+  dislikes: number
+  userReaction?: 'like' | 'dislike' // Current user's reaction, if any
 }

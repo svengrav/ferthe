@@ -50,7 +50,7 @@ export const MapTrailSelector = () => {
       <FlatList 
         data={trails} 
         renderItem={renderTrailItem} 
-        contentContainerStyle={{flex: 1, gap: 12}} 
+        contentContainerStyle={{gap: 12}} 
         keyExtractor={item => item.id} />,
         { 
           title: 'Select a Trail', 

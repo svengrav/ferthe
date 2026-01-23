@@ -66,7 +66,6 @@ const useStyles = createThemedStyles(theme => ({
     justifyContent: 'center',
   },
   container: {
-    overflow: 'hidden',
     flex: 1,
   },
 }))

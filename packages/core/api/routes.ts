@@ -7,11 +7,14 @@ import {
   Community,
   CommunityMember,
   Discovery,
+  DiscoveryContent,
   DiscoveryLocationRecord,
   DiscoveryProfile,
+  DiscoveryReaction,
   DiscoveryStats,
   DiscoveryTrail,
   FirebaseConfig,
+  ReactionSummary,
   SMSCodeRequest,
   SMSVerificationResult,
   ScanEvent,
@@ -121,6 +124,58 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       url: '/discovery/profile',
       handler: asyncRequestHandler<DiscoveryProfile>(async ({ context: session, body }) => {
         return await discoveryApplication.updateDiscoveryProfile(session, body)
+      }),
+    },
+
+    // Discovery Content Routes
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/discoveries/:discoveryId/content',
+      handler: asyncRequestHandler<DiscoveryContent | undefined, { discoveryId: string }>(async ({ context: session, params }) => {
+        return await discoveryApplication.getDiscoveryContent(session, params!.discoveryId)
+      }),
+    },
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/discoveries/:discoveryId/content',
+      handler: asyncRequestHandler<DiscoveryContent, { discoveryId: string }>(async ({ context: session, params, body }) => {
+        return await discoveryApplication.addDiscoveryContent(session, params!.discoveryId, body)
+      }),
+    },
+    {
+      method: 'PUT',
+      version: 'v1',
+      url: '/discoveries/:discoveryId/content',
+      handler: asyncRequestHandler<DiscoveryContent, { discoveryId: string }>(async ({ context: session, params, body }) => {
+        return await discoveryApplication.updateDiscoveryContent(session, params!.discoveryId, body)
+      }),
+    },
+
+    // Discovery Reaction Routes
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/discoveries/:discoveryId/reactions',
+      handler: asyncRequestHandler<ReactionSummary, { discoveryId: string }>(async ({ context: session, params }) => {
+        return await discoveryApplication.getReactionSummary(session, params!.discoveryId)
+      }),
+    },
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/discoveries/:discoveryId/reactions',
+      handler: asyncRequestHandler<DiscoveryReaction, { discoveryId: string }>(async ({ context: session, params, body }) => {
+        return await discoveryApplication.reactToDiscovery(session, params!.discoveryId, body.reaction)
+      }),
+    },
+    {
+      method: 'DELETE',
+      version: 'v1',
+      url: '/discoveries/:discoveryId/reactions',
+      handler: asyncRequestHandler<void, { discoveryId: string }>(async ({ context: session, params }) => {
+        return await discoveryApplication.removeReaction(session, params!.discoveryId)
       }),
     },
 

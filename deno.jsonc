@@ -53,5 +53,13 @@
     "types": [
       "vite/client"
     ]
-  }
+  },
+  "lint": {
+    "rules": {
+      "exclude": [
+        "no-sloppy-imports",
+        "no-explicit-any"
+      ]
+    }
+  },
 }

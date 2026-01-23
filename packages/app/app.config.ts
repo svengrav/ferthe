@@ -22,7 +22,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         }
       }
     ],
-
+    [
+      "expo-image-picker",
+      {
+        photosPermission: "Allow ferthe to access your photos to document discoveries.",
+        cameraPermission: "Allow ferthe to access your camera.",
+        cameraRollPermission: "Allow ferthe to access your camera roll."
+      }
+    ]
   ],
   splash: {
     image: './assets/splash-icon.png',

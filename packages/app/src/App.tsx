@@ -7,9 +7,9 @@ import { Notification, SplashView } from '@app/shared/components'
 import { Navigation } from '@app/shared/navigation/Navigation'
 import { Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter'
 import {
-  Merriweather_400Regular,
-  Merriweather_600SemiBold,
-  Merriweather_700Bold,
+    Merriweather_400Regular,
+    Merriweather_600SemiBold,
+    Merriweather_700Bold,
 } from '@expo-google-fonts/merriweather'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
@@ -83,7 +83,7 @@ const useAppInitialization = () => {
         await Promise.all([
           context.trailApplication.requestTrailState(),
           context.discoveryApplication.requestDiscoveryState()
-        ]).catch(error => console.error('Error loading initial app data:', error))
+        ]).catch(error => logger.error('Error loading initial app data:', error))
 
         await SplashScreen.hideAsync()
         setIsReady(true)

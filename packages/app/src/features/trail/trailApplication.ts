@@ -1,3 +1,4 @@
+import { logger } from '@app/shared/utils/logger'
 import { AccountContext, Result, TrailApplicationContract } from '@shared/contracts'
 import { getTrailStoreActions } from './stores/trailStore'
 
@@ -32,7 +33,7 @@ export function createTrailApplication(options: TrailApplicationOptions) {
     setStatus('loading')
     const trails = await listTrails(accountSession.data)
     if (!trails.data || !trails.success) {
-      console.error('Failed to fetch trails:', trails.error)
+      logger.error('Failed to fetch trails:', trails.error)
       setStatus('error')
     } else {
       setTrails(trails.data)
@@ -47,7 +48,7 @@ export function createTrailApplication(options: TrailApplicationOptions) {
     setStatus('loading')
     const spots = await trailAPI.listSpotPreviews(accountSession.data, trailId)
     if (!spots.data || !spots.success) {
-      console.error('Failed to fetch spots:', spots.error)
+      logger.error('Failed to fetch spots:', spots.error)
       setStatus('error')
     } else {
       // Assuming there's a method to set spots in the store

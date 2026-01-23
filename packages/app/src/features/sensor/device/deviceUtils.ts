@@ -1,3 +1,4 @@
+import { logger } from '@app/shared/utils/logger'
 import { geoUtils } from '@shared/geo'
 import { DeviceLocation } from './types'
 
@@ -12,7 +13,7 @@ import { DeviceLocation } from './types'
 export const hasSignificantLocationChange = (prevUpdate: DeviceLocation, currentUpdate: DeviceLocation, minHeadingDegrees = 15, minDistanceMeters = 10): boolean => {
   // Warn if we get 0,0 coordinates (likely an error)
   if (currentUpdate.location.lat === 0 && currentUpdate.location.lon === 0) {
-    console.warn('Received 0,0 coordinates - potential GPS issue')
+    logger.warn('Received 0,0 coordinates - potential GPS issue')
     return false // Don't emit invalid coordinates
   }
 

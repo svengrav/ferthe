@@ -8,13 +8,16 @@ import {
   Community,
   CommunityMember,
   Discovery,
+  DiscoveryContent,
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoveryProfileUpdateData,
+  DiscoveryReaction,
   DiscoveryStats,
   DiscoveryTrail,
   FirebaseConfig,
   LocationWithDirection,
+  ReactionSummary,
   Result,
   ScanEvent,
   SessionValidationResult,
@@ -96,6 +99,25 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
       updateDiscoveryProfile: (_context: AccountContext, updateData: DiscoveryProfileUpdateData) => API.send<Result<DiscoveryProfile>>('/discovery/profile', 'PUT', updateData),
 
       getDiscoveryStats: (_context: AccountContext, discoveryId: string) => API.send<Result<DiscoveryStats>>(`/discoveries/${discoveryId}/stats`),
+
+      // Content methods
+      getDiscoveryContent: (_context: AccountContext, discoveryId: string) => API.send<Result<DiscoveryContent | undefined>>(`/discoveries/${discoveryId}/content`),
+
+      addDiscoveryContent: (_context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) =>
+        API.send<Result<DiscoveryContent>>(`/discoveries/${discoveryId}/content`, 'POST', content),
+
+      updateDiscoveryContent: (_context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) =>
+        API.send<Result<DiscoveryContent>>(`/discoveries/${discoveryId}/content`, 'PUT', content),
+
+      // Reaction methods
+      reactToDiscovery: (_context: AccountContext, discoveryId: string, reaction: 'like' | 'dislike') =>
+        API.send<Result<DiscoveryReaction>>(`/discoveries/${discoveryId}/reactions`, 'POST', { reaction }),
+
+      removeReaction: (_context: AccountContext, discoveryId: string) =>
+        API.send<Result<void>>(`/discoveries/${discoveryId}/reactions`, 'DELETE'),
+
+      getReactionSummary: (_context: AccountContext, discoveryId: string) =>
+        API.send<Result<ReactionSummary>>(`/discoveries/${discoveryId}/reactions`),
     },
 
     /**

@@ -156,7 +156,6 @@ const useStyles = createThemedStyles(theme => ({
     fontWeight: 'bold',
     textAlign: 'center',
     paddingTop: 20,
-    fontFamily: theme.text.primary.bold,
   },
   fixedTitleContainer: {
     position: 'absolute',
@@ -169,7 +168,6 @@ const useStyles = createThemedStyles(theme => ({
     fontWeight: 'bold',
     color: 'white',
     textAlign: 'center',
-    fontFamily: theme.text.primary.bold,
     textShadowColor: 'rgba(0, 0, 0, 0.7)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,

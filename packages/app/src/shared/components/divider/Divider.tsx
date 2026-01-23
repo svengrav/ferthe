@@ -26,8 +26,6 @@ const createStyles = (theme: Theme) => {
       padding: 24,
     },
     title: {
-      ...theme.text.size.lg,
-      fontFamily: theme.text.primary.semiBold,
       textAlign: 'center',
       marginBottom: 32,
       color: theme.colors.onSurface,
@@ -36,8 +34,6 @@ const createStyles = (theme: Theme) => {
       marginBottom: 24,
     },
     sectionTitle: {
-      ...theme.text.size.md,
-      fontFamily: theme.text.primary.semiBold,
       marginBottom: 16,
       color: theme.colors.onSurface,
     },
@@ -62,12 +58,10 @@ const createStyles = (theme: Theme) => {
       backgroundColor: theme.colors.onSurface + '20',
     },
     dividerText: {
-      ...theme.text.size.sm,
       marginHorizontal: 16,
       color: theme.colors.onSurface + '80',
     },
     notice: {
-      ...theme.text.size.xs,
       textAlign: 'center',
       marginTop: 8,
       color: theme.colors.onSurface + '80',

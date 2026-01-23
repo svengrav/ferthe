@@ -5,7 +5,8 @@
   "lint": {
     "rules": {
       "exclude": [
-        "no-sloppy-imports"
+        "no-sloppy-imports",
+        "no-explicit-any"
       ]
     }
   },

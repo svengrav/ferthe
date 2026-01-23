@@ -1,6 +1,6 @@
 /**
  * Simple Singleton Logger
- * API-kompatibel mit console.log/error/warn
+ * API-kompatibel mit logger.log/error/warn
  */
 
 import { getAppConfig } from "@app/env"

@@ -41,7 +41,6 @@ export function Map() {
 
   const { gesture, animatedStyles } = useMapGestures(canvas, viewbox, onTap)
 
-
   return (
     <>
       <View style={[styles.contentContainer]} id='map-content' >

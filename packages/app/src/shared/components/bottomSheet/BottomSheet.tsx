@@ -30,10 +30,10 @@ export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
     ref
   ) => {
     const bottomSheetRef = useRef<BottomSheetModal>(null)
-    const { constants } = useThemeStore()
+    const { dimensions } = useThemeStore()
 
     // Define default snap points if not provided
-    const snapPoints = propSnapPoints ?? [constants.BOTTOM_SHEET_HEIGHT, constants.NAV_HEIGHT]
+    const snapPoints = propSnapPoints ?? [dimensions.BOTTOM_SHEET_HEIGHT, dimensions.NAV_HEIGHT]
 
     // Expose methods to parent components
     useImperativeHandle(ref, () => ({

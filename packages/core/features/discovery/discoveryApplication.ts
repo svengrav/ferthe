@@ -7,17 +7,21 @@ import {
   createSuccessResult,
   Discovery,
   DiscoveryApplicationContract,
+  DiscoveryContent,
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoveryProfileUpdateData,
+  DiscoveryReaction,
   DiscoveryStats,
   DiscoveryTrail,
   LocationWithDirection,
+  ReactionSummary,
   Result,
   Spot,
   TrailApplicationContract,
 } from '@shared/contracts'
 import { GeoLocation } from '@shared/geo'
+import { Buffer } from "node:buffer"
 import { createDiscoveryService, DiscoveryServiceActions } from './discoveryService.ts'
 
 /**
@@ -29,12 +33,15 @@ interface DiscoveryApplicationOptions {
   discoveryService: DiscoveryServiceActions
   discoveryStore: Store<Discovery>
   profileStore: Store<DiscoveryProfile>
+  contentStore: Store<DiscoveryContent>
+  reactionStore: Store<DiscoveryReaction>
   sensorApplication: SensorApplicationActions
   trailApplication: TrailApplicationContract
+  storageConnector?: { uploadFile: (path: string, data: Buffer | string) => Promise<string> }
 }
 
 export function createDiscoveryApplication(options: DiscoveryApplicationOptions): DiscoveryApplicationContract {
-  const { discoveryService = createDiscoveryService(), discoveryStore, profileStore, trailApplication } = options
+  const { discoveryService = createDiscoveryService(), discoveryStore, profileStore, contentStore, reactionStore, trailApplication, storageConnector } = options
 
   const getDiscoveryTrail = async (context: AccountContext, trailId: string, userLocation?: GeoLocation): Promise<Result<DiscoveryTrail>> => {
     try {
@@ -173,7 +180,13 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       }
       const discoveries = discoveriesResult.data || []
 
-      const result = discoveryService.getCluesBasedOnPreviewMode(accountId, trailResult.data, discoveries, spotsResult.data || [])
+      // Get trail spot IDs in order
+      const trailSpotIdsResult = await trailApplication.getTrailSpotIds(context, trailId)
+      if (!trailSpotIdsResult.success || !trailSpotIdsResult.data) {
+        return createErrorResult('TRAIL_NOT_FOUND')
+      }
+
+      const result = discoveryService.getCluesBasedOnPreviewMode(accountId, trailResult.data, discoveries, spotsResult.data || [], trailSpotIdsResult.data)
       return createSuccessResult(result)
     } catch (error: any) {
       return createErrorResult('GET_CLUES_ERROR', { originalError: error.message })
@@ -330,6 +343,211 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     }
   }
 
+  // Content methods (image + comment)
+  const addDiscoveryContent = async (
+    context: AccountContext,
+    discoveryId: string,
+    content: { imageUrl?: string; comment?: string }
+  ): Promise<Result<DiscoveryContent>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      // Verify discovery exists and belongs to user
+      const discoveryResult = await getDiscovery(context, discoveryId)
+      if (!discoveryResult.data) {
+        return createErrorResult('DISCOVERY_NOT_FOUND')
+      }
+
+      // Check if content already exists
+      const existingResult = await contentStore.list()
+      const existing = existingResult.data?.find(c => c.discoveryId === discoveryId)
+      if (existing) {
+        return createErrorResult('CONTENT_ALREADY_EXISTS')
+      }
+
+      // Handle image upload if base64 data provided
+      let finalImageUrl = content.imageUrl
+      if (content.imageUrl && content.imageUrl.startsWith('data:image')) {
+        try {
+          if (!storageConnector) {
+            return createErrorResult('STORAGE_CONNECTOR_NOT_CONFIGURED')
+          }
+
+          // Extract base64 data
+          const base64Data = content.imageUrl.split(',')[1]
+          const buffer = Buffer.from(base64Data, 'base64')
+
+          // Upload to storage
+          const timestamp = Date.now()
+          const uploadPath = `discoveries/${accountId}/${discoveryId}-${timestamp}.jpg`
+          finalImageUrl = await storageConnector.uploadFile(uploadPath, buffer)
+        } catch (uploadError: any) {
+          return createErrorResult('IMAGE_UPLOAD_ERROR', { originalError: uploadError.message })
+        }
+      }
+
+      const newContent = discoveryService.createDiscoveryContent(accountId, discoveryId, {
+        ...content,
+        imageUrl: finalImageUrl,
+      })
+      const saveResult = await contentStore.create(newContent)
+      if (!saveResult.success) {
+        return createErrorResult('SAVE_CONTENT_ERROR')
+      }
+
+      return createSuccessResult(newContent)
+    } catch (error: any) {
+      return createErrorResult('ADD_CONTENT_ERROR', { originalError: error.message })
+    }
+  }
+
+  const getDiscoveryContent = async (
+    _context: AccountContext,
+    discoveryId: string
+  ): Promise<Result<DiscoveryContent | undefined>> => {
+    try {
+      const contentResult = await contentStore.list()
+      if (!contentResult.success) {
+        return createErrorResult('GET_CONTENT_ERROR')
+      }
+
+      const content = contentResult.data?.find(c => c.discoveryId === discoveryId)
+      return createSuccessResult(content)
+    } catch (error: any) {
+      return createErrorResult('GET_CONTENT_ERROR', { originalError: error.message })
+    }
+  }
+
+  const updateDiscoveryContent = async (
+    context: AccountContext,
+    discoveryId: string,
+    content: { imageUrl?: string; comment?: string }
+  ): Promise<Result<DiscoveryContent>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      // Get existing content
+      const existingResult = await getDiscoveryContent(context, discoveryId)
+      if (!existingResult.data) {
+        return createErrorResult('CONTENT_NOT_FOUND')
+      }
+
+      // Verify ownership
+      if (existingResult.data.accountId !== accountId) {
+        return createErrorResult('NOT_AUTHORIZED')
+      }
+
+      // Handle image upload if base64 data provided
+      let finalImageUrl = content.imageUrl
+      if (content.imageUrl && content.imageUrl.startsWith('data:image')) {
+        try {
+          if (!storageConnector) {
+            return createErrorResult('STORAGE_CONNECTOR_NOT_CONFIGURED')
+          }
+
+          // Extract base64 data
+          const base64Data = content.imageUrl.split(',')[1]
+          const buffer = Buffer.from(base64Data, 'base64')
+
+          // Upload to storage
+          const timestamp = Date.now()
+          const uploadPath = `discoveries/${accountId}/${discoveryId}-${timestamp}.jpg`
+          finalImageUrl = await storageConnector.uploadFile(uploadPath, buffer)
+        } catch (uploadError: any) {
+          return createErrorResult('IMAGE_UPLOAD_ERROR', { originalError: uploadError.message })
+        }
+      }
+
+      const updated = discoveryService.updateDiscoveryContent(existingResult.data, {
+        ...content,
+        imageUrl: finalImageUrl,
+      })
+      const saveResult = await contentStore.update(updated.id, updated)
+      if (!saveResult.success) {
+        return createErrorResult('UPDATE_CONTENT_ERROR')
+      }
+
+      return createSuccessResult(updated)
+    } catch (error: any) {
+      return createErrorResult('UPDATE_CONTENT_ERROR', { originalError: error.message })
+    }
+  }
+
+  // Reaction methods (like/dislike)
+  const reactToDiscovery = async (
+    context: AccountContext,
+    discoveryId: string,
+    reaction: 'like' | 'dislike'
+  ): Promise<Result<DiscoveryReaction>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      // Remove existing reaction if any
+      const existingResult = await reactionStore.list()
+      const existing = existingResult.data?.find(r => r.discoveryId === discoveryId && r.accountId === accountId)
+      if (existing) {
+        await reactionStore.delete(existing.id)
+      }
+
+      const newReaction = discoveryService.createReaction(accountId, discoveryId, reaction)
+      const saveResult = await reactionStore.create(newReaction)
+      if (!saveResult.success) {
+        return createErrorResult('SAVE_REACTION_ERROR')
+      }
+
+      return createSuccessResult(newReaction)
+    } catch (error: any) {
+      return createErrorResult('REACT_ERROR', { originalError: error.message })
+    }
+  }
+
+  const removeReaction = async (context: AccountContext, discoveryId: string): Promise<Result<void>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      const existingResult = await reactionStore.list()
+      const existing = existingResult.data?.find(r => r.discoveryId === discoveryId && r.accountId === accountId)
+      if (existing) {
+        await reactionStore.delete(existing.id)
+      }
+
+      return createSuccessResult(undefined)
+    } catch (error: any) {
+      return createErrorResult('REMOVE_REACTION_ERROR', { originalError: error.message })
+    }
+  }
+
+  const getReactionSummary = async (context: AccountContext, discoveryId: string): Promise<Result<ReactionSummary>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      const reactionsResult = await reactionStore.list()
+      if (!reactionsResult.success) {
+        return createErrorResult('GET_REACTIONS_ERROR')
+      }
+
+      const summary = discoveryService.getReactionSummary(discoveryId, reactionsResult.data || [], accountId)
+      return createSuccessResult(summary)
+    } catch (error: any) {
+      return createErrorResult('GET_REACTION_SUMMARY_ERROR', { originalError: error.message })
+    }
+  }
+
   return {
     getDiscoveryTrail,
     processLocation,
@@ -341,5 +559,11 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     getDiscoveryProfile,
     updateDiscoveryProfile,
     getDiscoveryStats,
+    addDiscoveryContent,
+    getDiscoveryContent,
+    updateDiscoveryContent,
+    reactToDiscovery,
+    removeReaction,
+    getReactionSummary,
   }
 }
