@@ -1,13 +1,19 @@
 ---
+name: Refactor Code According to React Native Guidelines
 agent: agent
+tools: ['vscode', 'execute', 'read', 'agent', 'edit', 'search', 'web']
+description: This prompt is used to refactor code according to specified guidelines for React Native components and hooks.
 ---
+
 # Introduction
 - Firstly the code should be refactored to follow the guidelines.
-- First thing to do ist to check, which code (component, hook, service, application) type it is and print it out.
+- First thing to do ist to check, which code (component, hook, service, application) type it is and print it out. 
+- Shortly describe your refactor plan.
 - Then the code should be refactored to follow the guidelines of this type and the general guidelines.
 
 # General Guidelines
-- Remove console logs (if it seems to be debug log) and unused code
+- Only use logger for logging, remove console.log statements.
+- Use async/await instead of .then()/.catch() for better readability.
 - Remove unnecessary and boilerplate code. Try to be simple and readable.
 - Try to avoid complex solutions, use simple and readable code.
 - Try to avoid magic strings and numbers, use constants `VALUE_X` instead. (Only for important values)
@@ -17,6 +23,16 @@ agent: agent
 - Group Related Functions
 - Comment major functions and logical sections of the code.
 - Try to avoid any
+
+# Styles
+- Remove not used styles.
+- Place styles outside the component.
+- Use createThemedStyles for styles that depend on the theme.
+- Use inline styles only for dynamic styles that depend on props, state or complex logic.
+
+## Components 
+- Reuse shared components like Text instead of direct React Native components.
+- Make use of variants and themes for these components if possible. 
 
 ## Import Organization
 - Group imports: React/React Native → Third-party → Local imports
