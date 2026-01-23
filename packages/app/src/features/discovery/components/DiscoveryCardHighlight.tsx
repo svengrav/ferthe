@@ -1,4 +1,5 @@
 import { IconButton } from '@app/shared/components'
+import { Flippable } from '@app/shared/components/animation/Flippable'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -120,72 +121,82 @@ function DiscoveryCardHighlight({ card, visible, onClose, onViewDetails }: Disco
     width: IMAGE_WIDTH,
   }
 
-  return (
-    <Animated.View style={styles.overlay}>
-      <View style={[styles.cardContainer, cardContainerStyles]}>
-        {/* Background gradient */}
-        <LinearGradient
-          style={[styles.gradient, gradientStyles]}
-          colors={GRADIENT_COLORS}
-        />
+  const renderFrondend = () => (<View style={[styles.cardContainer, cardContainerStyles]}>
+    {/* Background gradient */}
+    <LinearGradient
+      style={[styles.gradient, gradientStyles]}
+      colors={GRADIENT_COLORS}
+    />
 
-        <View style={[styles.card, cardStyles]}>
-          {/* Close and view details buttons */}
-          <View style={styles.buttonContainer}>
-            {onViewDetails && (
-              <IconButton 
-                name='arrow-right' 
-                variant='primary' 
-                onPress={() => onViewDetails(card.id)} 
-              />
-            )}
-            {onClose && (
-              <IconButton name='close' variant='outlined' onPress={onClose} />
-            )}
-          </View>
+    <View style={[styles.card, cardStyles]}>
+      {/* Close and view details buttons */}
+      <View style={styles.buttonContainer}>
+        {onViewDetails && (
+          <IconButton
+            name='arrow-right'
+            variant='primary'
+            onPress={() => onViewDetails(card.id)}
+          />
+        )}
+        {onClose && (
+          <IconButton name='close' variant='outlined' onPress={onClose} />
+        )}
+      </View>
 
-          <View style={[styles.imageContainer, imageContainerStyles]}>
-            {/* Main clear image with title */}
-            <View>
-              <Animated.Image
-                source={{ uri: card.image.url || '' }}
-                style={[styles.image, imageStyles]}
-                resizeMode='cover'
-              />
-              <Animated.View
-                style={[
-                  styles.fixedTitleContainer,
-                  titleContainerStyles,
-                  { opacity: fadeIn }
-                ]}
-                pointerEvents='none'
-              >
-                <Text style={styles.fixedTitle}>{card.title}</Text>
-              </Animated.View>
-            </View>
-
-            {/* Blurred image overlay with discovery message */}
-            <Animated.View
-              style={[
-                styles.blurredOverlay,
-                blurredOverlayStyles,
-                { opacity: fadeOut }
-              ]}
-            >
-              <View style={styles.preview}>
-                <Text style={styles.previewText}>
-                  You discovered a new spot!
-                </Text>
-              </View>
-
-              <Animated.Image
-                source={{ uri: card.image.blurredUrl || '' }}
-                style={[styles.image, imageStyles]}
-                resizeMode='cover'
-              />
-            </Animated.View>
-          </View>
+      <View style={[styles.imageContainer, imageContainerStyles]}>
+        {/* Main clear image with title */}
+        <View>
+          <Animated.Image
+            source={{ uri: card.image.url || '' }}
+            style={[styles.image, imageStyles]}
+            resizeMode='cover'
+          />
+          <Animated.View
+            style={[
+              styles.fixedTitleContainer,
+              titleContainerStyles,
+              { opacity: fadeIn }
+            ]}
+            pointerEvents='none'
+          >
+            <Text style={styles.fixedTitle}>{card.title}</Text>
+          </Animated.View>
         </View>
+
+        {/* Blurred image overlay with discovery message */}
+        <Animated.View
+          style={[
+            styles.blurredOverlay,
+            blurredOverlayStyles,
+            { opacity: fadeOut }
+          ]}
+        >
+          <View style={styles.preview}>
+            <Text style={styles.previewText}>
+              You discovered a new spot!
+            </Text>
+          </View>
+
+          <Animated.Image
+            source={{ uri: card.image.blurredUrl || '' }}
+            style={[styles.image, imageStyles]}
+            resizeMode='cover'
+          />
+        </Animated.View>
+      </View>
+    </View>
+  </View>)
+
+  const renderBackend = () => (<View style={[styles.cardContainer, {
+    backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center'
+  }]}>
+    <Text>Backend</Text>
+  </View>)
+
+  return (
+    <Animated.View style={[styles.overlay]}>
+      <View style={[styles.cardContainer, cardContainerStyles]}>
+        <Flippable front={renderFrondend()} back={renderBackend()}></Flippable>
       </View>
     </Animated.View>
   )
@@ -201,11 +212,9 @@ const useStyles = createThemedStyles(theme => ({
     backgroundColor: theme.opacity(theme.colors.background, 0.8),
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 999,
+    zIndex: 100,
   },
   cardContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
     borderRadius: BORDER_RADIUS,
     overflow: 'hidden',
   },

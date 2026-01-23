@@ -28,6 +28,7 @@ function MapSpots() {
   const { size } = useMapCanvas()
   const boundary = useMapBoundary()
   const spots = useMapSpots()
+
   // Helper function to create marker container styles
   const createMarkerContainerStyle = (spotSize: number) => ({
     borderRadius: MARKER_BORDER_RADIUS,

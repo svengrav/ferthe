@@ -47,6 +47,8 @@ export interface MapState {
 
   boundary: GeoBoundary // Boundary of the map
 
+  tappedSpot: Spot | undefined
+
   canvas: {
     size: { width: number; height: number } // Default map size
     scale: {
@@ -90,6 +92,7 @@ export interface MapStateActions {
   setPreviewClues: (clues: Clue[]) => void
   setScannedClues: (clues: Clue[]) => void
   setSpots: (spots: Spot[]) => void
+  setTappedSpot: (spot: Spot | undefined) => void
   setSnap: (snap: { startPoint: GeoLocation; endPoint: GeoLocation; intensity: number }) => void
   setStatus: (status: 'uninitialized' | 'loading' | 'ready' | 'error') => void
   setTrailId: (trailId: string) => void
@@ -143,6 +146,7 @@ export const useMapStore = create<MapState & MapStateActions>(set => ({
   previewClues: [],
   scannedClues: [],
   spots: [],
+  tappedSpot: undefined,
 
   // Actions - only update if values actually changed
   setState: (state: Partial<MapState>) => set(prev => ({ ...prev, ...state })),
@@ -163,6 +167,7 @@ export const useMapStore = create<MapState & MapStateActions>(set => ({
   setPreviewClues: previewClues => set({ previewClues }),
   setScannedClues: scannedClues => set({ scannedClues }),
   setSpots: spots => set({ spots }),
+  setTappedSpot: tappedSpot => set({ tappedSpot }),
   setSnap: snap => set({ snap }),
   setStatus: (status: 'uninitialized' | 'loading' | 'ready' | 'error') => set(state => (state.status !== status ? { status } : state)),
   setTrailId: (trailId: string) => set(state => (state.trailId !== trailId ? { trailId } : state)),
@@ -185,6 +190,7 @@ export const getMapStoreActions = () => ({
   setPreviewClues: useMapStore.getState().setPreviewClues,
   setScannedClues: useMapStore.getState().setScannedClues,
   setSpots: useMapStore.getState().setSpots,
+  setTappedSpot: useMapStore.getState().setTappedSpot,
   setSnap: useMapStore.getState().setSnap,
   setTrailId: useMapStore.getState().setTrailId,
   setStatus: useMapStore.getState().setStatus,
@@ -208,6 +214,7 @@ export const useMapSize = () => useMapStore(state => state.canvas.size)
 export const useMapPreviewClues = () => useMapStore(state => state.previewClues)
 export const useMapScannedClues = () => useMapStore(state => state.scannedClues)
 export const useMapSpots = () => useMapStore(state => state.spots)
+export const useMapSpotTap = () => useMapStore(state => state.tappedSpot)
 export const useMapSnap = () => useMapStore(state => state.snap)
 export const useMapStatus = () => useMapStore(state => state.status)
 
@@ -235,6 +242,7 @@ export const useSetRadius = () => useMapStore(state => state.setRadius)
 export const useSetPreviewClues = () => useMapStore(state => state.setPreviewClues)
 export const useSetScannedClues = () => useMapStore(state => state.setScannedClues)
 export const useSetSpots = () => useMapStore(state => state.setSpots)
+export const useSetTappedSpot = () => useMapStore(state => state.setTappedSpot)
 export const useSetSnap = () => useMapStore(state => state.setSnap)
 
 export const getMapState = () => useMapStore.getState()

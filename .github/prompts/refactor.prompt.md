@@ -11,6 +11,7 @@ description: This prompt is used to refactor code according to specified guideli
 - Shortly describe your refactor plan.
 - Then the code should be refactored to follow the guidelines of this type and the general guidelines.
 
+
 # General Guidelines
 - Only use logger for logging, remove console.log statements.
 - Use async/await instead of .then()/.catch() for better readability.

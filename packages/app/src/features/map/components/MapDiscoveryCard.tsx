@@ -4,6 +4,7 @@ import { DiscoveryCardState } from '@app/features/discovery/logic/types'
 import { useEvent } from '@app/shared/events/useEvent'
 import { appNavigator } from '@app/shared/navigation/navigationRef'
 import { useState } from 'react'
+import { useMapSpotTap, useSetTappedSpot } from '../stores/mapStore'
 
 /**
  * Custom hook to handle new discovery events and state management.
@@ -35,30 +36,80 @@ const useNewDiscoveryHandler = () => {
 }
 
 /**
- * Component that displays discovery cards on the map when new discoveries are made.
+ * Custom hook to handle spot tap events and convert to card format.
+ */
+const useSpotTapHandler = () => {
+  const tappedSpot = useMapSpotTap()
+  const setTappedSpot = useSetTappedSpot()
+  const [currentSpot, setCurrentSpot] = useState<DiscoveryCardState | undefined>(undefined)
+  const [isVisible, setIsVisible] = useState(false)
+
+  // Convert tapped spot to card format
+  if (tappedSpot && !isVisible) {
+    const spotCard: DiscoveryCardState = {
+      id: tappedSpot.id,
+      title: tappedSpot.name,
+      description: tappedSpot.description,
+      image: {
+        url: tappedSpot.image?.url || '',
+        blurredUrl: tappedSpot.image?.previewUrl || '',
+      },
+      discoveredAt: tappedSpot.createdAt,
+    }
+    setCurrentSpot(spotCard)
+    setIsVisible(true)
+  }
+
+  const handleCloseSpot = () => {
+    setIsVisible(false)
+    setCurrentSpot(undefined)
+    setTappedSpot(undefined)
+  }
+
+  return {
+    currentSpot,
+    isVisible,
+    handleCloseSpot,
+  }
+}
+
+/**
+ * Component that displays discovery cards and spot cards on the map.
  * Shows a highlight card overlay with options to view details or close.
  */
 function MapDiscoveryCard() {
-  const { currentDiscovery, isVisible, handleCloseDiscovery } = useNewDiscoveryHandler()
+  const { currentDiscovery, isVisible: discoveryVisible, handleCloseDiscovery } = useNewDiscoveryHandler()
+  const { currentSpot, isVisible: spotVisible, handleCloseSpot } = useSpotTapHandler()
 
-  const handleViewDetails = (discoveryId: string) => {
+  const handleViewDiscoveryDetails = (discoveryId: string) => {
     handleCloseDiscovery()
     appNavigator.toDiscoveryCard(discoveryId)
   }
 
-  // Only render if there's a visible discovery
-  if (!isVisible || !currentDiscovery) {
-    return null
+  // Show discovery card if available
+  if (discoveryVisible && currentDiscovery) {
+    return (
+      <DiscoveryCardHighlight
+        visible={discoveryVisible}
+        card={currentDiscovery}
+        onClose={handleCloseDiscovery}
+        onViewDetails={handleViewDiscoveryDetails}
+      />
+    )
   }
 
-  return (
-    <DiscoveryCardHighlight
-      visible={isVisible}
-      card={currentDiscovery}
-      onClose={handleCloseDiscovery}
-      onViewDetails={handleViewDetails}
-    />
-  )
+  // Show spot card if available
+  if (spotVisible && currentSpot) {
+    return (
+      <DiscoveryCardHighlight
+        visible={spotVisible}
+        card={currentSpot}
+        onClose={handleCloseSpot}
+      />
+    )
+  }
+
+  return null
 }
 
 export default MapDiscoveryCard

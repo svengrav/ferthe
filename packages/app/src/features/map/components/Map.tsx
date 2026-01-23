@@ -4,7 +4,7 @@ import { View } from 'react-native'
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
 import Animated from 'react-native-reanimated'
 import { useMapGestures } from '../hooks/useMapGestures'
-import { useMapBoundary, useMapCanvas, useMapTrailId, useMapViewport } from '../stores/mapStore'
+import { useMapBoundary, useMapCanvas, useMapSpots, useMapTrailId, useMapViewport, useSetTappedSpot } from '../stores/mapStore'
 import { MapTheme, useMapTheme } from '../stores/mapThemeStore'
 import { mapUtils } from '../utils/geoToScreenTransform.'
 import MapDeviceCords from './MapDeviceCords'
@@ -25,12 +25,30 @@ export function Map() {
   const canvas = useMapCanvas()
   const trailId = useMapTrailId()
   const boundary = useMapBoundary()
+  const spots = useMapSpots()
+  const setTappedSpot = useSetTappedSpot()
   const mapTheme = useMapTheme()
   const theme = useThemeStore()
   const styles = createStyles(theme, mapTheme, canvas.size)
 
   const onTap = (position: { x: number, y: number }) => {
     const geoPosition = mapUtils.positionToCoordinates(position, boundary, canvas.size)
+
+    // Check if tap is on a spot (with some tolerance)
+    const TAP_TOLERANCE = 20 // pixels
+    const tappedSpot = spots.find(spot => {
+      const spotScreenPos = mapUtils.coordinatesToPosition(spot.location, boundary, canvas.size)
+      const distance = Math.sqrt(
+        Math.pow(position.x - spotScreenPos.x, 2) + 
+        Math.pow(position.y - spotScreenPos.y, 2)
+      )
+      return distance <= TAP_TOLERANCE
+    })
+
+    if (tappedSpot) {
+      setTappedSpot(tappedSpot)
+      return
+    }
 
     if (system.isDevelopment)
       sensorApplication.setDevice({

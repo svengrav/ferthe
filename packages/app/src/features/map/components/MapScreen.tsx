@@ -41,7 +41,7 @@ function MapScreen() {
   }
 
   return (
-    <Page options={[{ label: t.navigation.settings, onPress: () => setOverlay('settingsForm', <SettingsForm onClose={() => {}} onSubmit={() => {}} />) }]}>
+    <Page options={[{ label: t.navigation.settings, onPress: () => setOverlay('settingsForm', <SettingsForm onClose={() => { }} onSubmit={() => { }} />) }]}>
       <View style={styles?.container} >
         <MapDiscoveryCard />
         <MapCompass />
@@ -66,6 +66,7 @@ const useStyles = createThemedStyles(theme => ({
     justifyContent: 'center',
   },
   container: {
+    position: 'relative' as const,
     flex: 1,
   },
 }))
