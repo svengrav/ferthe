@@ -86,25 +86,28 @@ function MapDiscoveryCard() {
     appNavigator.toDiscoveryCard(discoveryId)
   }
 
-  // Show discovery card if available
+  // Show discovery card if available (with tap-to-reveal)
   if (discoveryVisible && currentDiscovery) {
     return (
       <DiscoveryCardHighlight
         visible={discoveryVisible}
         card={currentDiscovery}
+        mode="reveal"
         onClose={handleCloseDiscovery}
         onViewDetails={handleViewDiscoveryDetails}
       />
     )
   }
 
-  // Show spot card if available
+  // Show spot card if available (instant reveal for known spots)
   if (spotVisible && currentSpot) {
     return (
       <DiscoveryCardHighlight
         visible={spotVisible}
         card={currentSpot}
+        mode="instant"
         onClose={handleCloseSpot}
+        onViewDetails={handleViewDiscoveryDetails}
       />
     )
   }

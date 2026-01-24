@@ -3,14 +3,15 @@ import { Flippable } from '@app/shared/components/animation/Flippable'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { LinearGradient } from 'expo-linear-gradient'
-import { useEffect } from 'react'
-import { Text, useWindowDimensions, View } from 'react-native'
+import { useEffect, useState } from 'react'
+import { Pressable, Text, useWindowDimensions, View } from 'react-native'
 import Animated, {
   useSharedValue,
   withDelay,
   withTiming
 } from 'react-native-reanimated'
 import { DiscoveryCardState } from '../logic/types'
+import { DiscoveryRevealOverlay } from './DiscoveryRevealOverlay'
 
 const CARD_WIDTH_RATIO = 0.9
 const MAX_CARD_WIDTH = 400
@@ -24,7 +25,6 @@ const CLOSE_BUTTON_RIGHT = 10
 const CLOSE_BUTTON_Z_INDEX = 4
 const GRADIENT_COLORS = ['#a341fffd', 'rgba(65, 73, 185, 0.767)'] as const
 const FADE_IN_DELAY = 2000
-const FADE_OUT_DELAY = 1000
 const ANIMATION_DURATION = 1500
 const TITLE_OFFSET = 70
 
@@ -44,29 +44,32 @@ const useCardDimensions = () => {
 
 /**
  * Hook to handle discovery card highlight animations
+ * Manages the title fadeIn animation based on reveal mode
  */
-const useDiscoveryAnimations = (visible: boolean) => {
-  const fadeIn = useSharedValue(0)
-  const fadeOut = useSharedValue(1)
+const useDiscoveryAnimations = (visible: boolean, mode: 'reveal' | 'instant') => {
+  const fadeIn = useSharedValue(mode === 'instant' ? 1 : 0)
 
   useEffect(() => {
-    if (visible) {
-      // Reset animation values
+    if (visible && mode === 'instant') {
+      fadeIn.value = 1
+    } else if (visible && mode === 'reveal') {
       fadeIn.value = 0
-      fadeOut.value = 1
-
-      // Start animation sequence
-      fadeIn.value = withDelay(FADE_IN_DELAY, withTiming(1, { duration: ANIMATION_DURATION }))
-      fadeOut.value = withDelay(FADE_OUT_DELAY, withTiming(0, { duration: ANIMATION_DURATION }))
     }
-  }, [visible, fadeIn, fadeOut])
+  }, [visible, mode, fadeIn])
 
-  return { fadeIn, fadeOut }
+  const triggerReveal = () => {
+    if (mode === 'reveal') {
+      fadeIn.value = withDelay(FADE_IN_DELAY, withTiming(1, { duration: ANIMATION_DURATION }))
+    }
+  }
+
+  return { fadeIn, triggerReveal }
 }
 
 interface DiscoveryCardProps {
   card: DiscoveryCardState
   visible: boolean
+  mode?: 'reveal' | 'instant'
   onClose?: () => void
   onViewDetails?: (discoveryId: string) => void
 }
@@ -75,10 +78,11 @@ interface DiscoveryCardProps {
  * Discovery card highlight component that shows a blur-to-clear reveal animation
  * when a new spot is discovered. Features gradient background and smooth transitions.
  */
-function DiscoveryCardHighlight({ card, visible, onClose, onViewDetails }: DiscoveryCardProps) {
+function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose, onViewDetails }: DiscoveryCardProps) {
   const { styles } = useApp(useStyles)
   const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT, IMAGE_WIDTH } = useCardDimensions()
-  const { fadeIn, fadeOut } = useDiscoveryAnimations(visible)
+  const { fadeIn, triggerReveal } = useDiscoveryAnimations(visible, mode)
+  const [isFlipped, setIsFlipped] = useState(false)
 
   if (!visible || !styles) return null
 
@@ -116,11 +120,6 @@ function DiscoveryCardHighlight({ card, visible, onClose, onViewDetails }: Disco
     top: IMAGE_HEIGHT - TITLE_OFFSET,
   }
 
-  const blurredOverlayStyles = {
-    height: IMAGE_HEIGHT,
-    width: IMAGE_WIDTH,
-  }
-
   const renderFrondend = () => (<View style={[styles.cardContainer, cardContainerStyles]}>
     {/* Background gradient */}
     <LinearGradient
@@ -128,19 +127,32 @@ function DiscoveryCardHighlight({ card, visible, onClose, onViewDetails }: Disco
       colors={GRADIENT_COLORS}
     />
 
-    <View style={[styles.card, cardStyles]}>
+    <Pressable
+      style={[styles.card, cardStyles]}
+      onPress={mode === 'reveal' ? triggerReveal : undefined}
+      disabled={mode === 'instant'}
+    >
       {/* Close and view details buttons */}
       <View style={styles.buttonContainer}>
         {onViewDetails && (
           <IconButton
-            name='arrow-right'
-            variant='primary'
+            name='zoom-out-map'
+            variant='secondary'
             onPress={() => onViewDetails(card.id)}
           />
         )}
         {onClose && (
-          <IconButton name='close' variant='outlined' onPress={onClose} />
+          <IconButton name='close' variant='secondary' onPress={onClose} />
         )}
+      </View>
+
+      {/* Swap button bottom right */}
+      <View style={styles.swapButtonContainer}>
+        <IconButton
+          name='swap-horiz'
+          variant='secondary'
+          onPress={() => setIsFlipped(isFlipped => !isFlipped)}
+        />
       </View>
 
       <View style={[styles.imageContainer, imageContainerStyles]}>
@@ -162,41 +174,38 @@ function DiscoveryCardHighlight({ card, visible, onClose, onViewDetails }: Disco
             <Text style={styles.fixedTitle}>{card.title}</Text>
           </Animated.View>
         </View>
-
-        {/* Blurred image overlay with discovery message */}
-        <Animated.View
-          style={[
-            styles.blurredOverlay,
-            blurredOverlayStyles,
-            { opacity: fadeOut }
-          ]}
-        >
-          <View style={styles.preview}>
-            <Text style={styles.previewText}>
-              You discovered a new spot!
-            </Text>
-          </View>
-
-          <Animated.Image
-            source={{ uri: card.image.blurredUrl || '' }}
-            style={[styles.image, imageStyles]}
-            resizeMode='cover'
-          />
-        </Animated.View>
       </View>
-    </View>
+    </Pressable>
   </View>)
 
   const renderBackend = () => (<View style={[styles.cardContainer, {
     backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center'
   }]}>
-    <Text>Backend</Text>
+    <View style={styles.swapButtonContainer}>
+      <IconButton
+        name='refresh'
+        variant='outlined'
+        onPress={() => setIsFlipped(isFlipped => !isFlipped)}
+      />
+    </View>
   </View>)
 
   return (
     <Animated.View style={[styles.overlay]}>
       <View style={[styles.cardContainer, cardContainerStyles]}>
-        <Flippable front={renderFrondend()} back={renderBackend()}></Flippable>
+        <DiscoveryRevealOverlay
+          mode={mode}
+          imageHeight={IMAGE_HEIGHT}
+          imageWidth={IMAGE_WIDTH}
+          blurredImageUrl={card.image.blurredUrl || ''}
+          onTriggerReveal={triggerReveal}
+        >
+          <Flippable
+            flipped={isFlipped}
+            front={renderFrondend()}
+            back={renderBackend()}
+          />
+        </DiscoveryRevealOverlay>
       </View>
     </Animated.View>
   )
@@ -252,6 +261,12 @@ const useStyles = createThemedStyles(theme => ({
     flexDirection: 'row',
     gap: 8,
   },
+  swapButtonContainer: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    zIndex: CLOSE_BUTTON_Z_INDEX,
+  },
   imageContainer: {
     position: 'relative',
     overflow: 'hidden',
@@ -259,25 +274,6 @@ const useStyles = createThemedStyles(theme => ({
   },
   image: {
     opacity: 1,
-  },
-  blurredOverlay: {
-    position: 'absolute',
-  },
-  preview: {
-    position: 'absolute',
-    flex: 1,
-    zIndex: 2,
-    height: '100%',
-    width: '100%',
-    alignContent: 'center',
-    justifyContent: 'center',
-  },
-  previewText: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    paddingTop: 20,
   },
   fixedTitleContainer: {
     position: 'absolute',
