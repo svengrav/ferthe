@@ -5,6 +5,7 @@ import { useApp } from '@app/shared/useApp'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useState } from 'react'
 import { Pressable, Text, useWindowDimensions, View } from 'react-native'
+import { ScrollView } from 'react-native-gesture-handler'
 import Animated, {
   useSharedValue,
   withDelay,
@@ -24,6 +25,7 @@ const CLOSE_BUTTON_TOP = 10
 const CLOSE_BUTTON_RIGHT = 10
 const CLOSE_BUTTON_Z_INDEX = 4
 const GRADIENT_COLORS = ['#a341fffd', 'rgba(65, 73, 185, 0.767)'] as const
+const GRADIENT_BACKEND_COLORS = ['#3f4394fd', 'rgb(38, 38, 91)'] as const
 const FADE_IN_DELAY = 2000
 const ANIMATION_DURATION = 1500
 const TITLE_OFFSET = 70
@@ -178,17 +180,59 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose, onVie
     </Pressable>
   </View>)
 
-  const renderBackend = () => (<View style={[styles.cardContainer, {
-    backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center'
-  }]}>
-    <View style={styles.swapButtonContainer}>
-      <IconButton
-        name='refresh'
-        variant='outlined'
-        onPress={() => setIsFlipped(isFlipped => !isFlipped)}
+  const renderBackend = () => (
+    <View style={[styles.backCard, cardContainerStyles]}>
+      {/* Background gradient */}
+      <LinearGradient
+        style={[styles.gradient, gradientStyles]}
+        colors={GRADIENT_BACKEND_COLORS}
       />
+
+      {/* Close and view details buttons */}
+      <View style={styles.buttonContainer}>
+        {onViewDetails && (
+          <IconButton
+            name='zoom-out-map'
+            variant='secondary'
+            onPress={() => onViewDetails(card.id)}
+          />
+        )}
+        {onClose && (
+          <IconButton name='close' variant='secondary' onPress={onClose} />
+        )}
+      </View>
+
+      {/* Scrollable content area */}
+      <ScrollView
+        style={styles.backScrollView}
+        contentContainerStyle={styles.backContentContainer}
+        id='scroll'
+      >
+        <View style={styles.backContent}>
+          <Text style={styles.backTitle}>{card.title}</Text>
+          <Text style={styles.backText}>Discovery Details</Text>
+          <Text style={styles.backText}>
+            Here you can add more information about this discovery.
+          </Text>
+          {/* Placeholder content to test scrolling */}
+          {Array.from({ length: 10 }).map((_, i) => (
+            <Text key={i} style={styles.backText}>
+              Item {i + 1}
+            </Text>
+          ))}
+        </View>
+      </ScrollView>
+
+      {/* Flip button bottom right */}
+      <View style={styles.swapButtonContainer}>
+        <IconButton
+          name='swap-horiz'
+          variant='secondary'
+          onPress={() => setIsFlipped(isFlipped => !isFlipped)}
+        />
+      </View>
     </View>
-  </View>)
+  )
 
   return (
     <Animated.View style={[styles.overlay]}>
@@ -266,6 +310,35 @@ const useStyles = createThemedStyles(theme => ({
     bottom: 16,
     right: 16,
     zIndex: CLOSE_BUTTON_Z_INDEX,
+  },
+  backCard: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: BORDER_RADIUS,
+    overflow: 'hidden',
+  },
+  backScrollView: {
+    flex: 1,
+    width: '100%',
+    paddingBottom: 60, // Space for bottom button
+  },
+  backContentContainer: {
+    padding: 20,
+  },
+  backContent: {
+    gap: 12,
+  },
+  backTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 8,
+  },
+  backText: {
+    fontSize: 16,
+    color: 'white',
+    lineHeight: 24,
   },
   imageContainer: {
     position: 'relative',

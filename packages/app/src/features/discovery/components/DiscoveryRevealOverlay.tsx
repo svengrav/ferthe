@@ -166,7 +166,7 @@ const useStyles = createThemedStyles(theme => ({
     width: TAP_ICON_SIZE,
     height: TAP_ICON_SIZE,
     borderRadius: TAP_ICON_SIZE / 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    backgroundColor: 'rgba(255, 255, 255, 0.91)',
   },
   previewText: {
     color: 'white',
@@ -175,7 +175,7 @@ const useStyles = createThemedStyles(theme => ({
     textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    textShadowRadius: 1,
   },
   image: {
     borderRadius: 14,
