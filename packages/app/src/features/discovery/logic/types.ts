@@ -1,7 +1,7 @@
 export interface DiscoveryCardState {
-  id: string
+  discoveryId?: string
   title: string
-  spotId?: string
+  spotId: string
   discoveredAt: Date
   discoveredBy?: string // accountId of the discoverer (for community discoveries)
   image: {

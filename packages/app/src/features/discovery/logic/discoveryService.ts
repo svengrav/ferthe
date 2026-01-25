@@ -12,7 +12,7 @@ const createDiscoveryCards = (discoveries: Discovery[], spots: Spot[]): Discover
   return discoveries.map(discovery => {
     const spot = spots.find(s => s.id === discovery.spotId)
     return {
-      id: discovery.id,
+      discoveryId: discovery.id,
       title: spot?.name || 'Unknown Spot',
       image: {
         url: spot?.image?.url || '',

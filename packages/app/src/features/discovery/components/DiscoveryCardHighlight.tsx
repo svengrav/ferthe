@@ -24,10 +24,10 @@ const IMAGE_BORDER_RADIUS = 14
 const CLOSE_BUTTON_TOP = 10
 const CLOSE_BUTTON_RIGHT = 10
 const CLOSE_BUTTON_Z_INDEX = 4
-const GRADIENT_COLORS = ['#a341fffd', 'rgba(65, 73, 185, 0.767)'] as const
-const GRADIENT_BACKEND_COLORS = ['#3f4394fd', 'rgb(38, 38, 91)'] as const
+const GRADIENT_COLORS = ['#3a3fa7fd', 'rgb(46, 46, 112)'] as const
+const GRADIENT_BACKEND_COLORS = ['#3a3fa7fd', 'rgb(46, 46, 112)'] as const
 const FADE_IN_DELAY = 2000
-const ANIMATION_DURATION = 1500
+const ANIMATION_DURATION = 600
 const TITLE_OFFSET = 70
 
 /**
@@ -73,7 +73,7 @@ interface DiscoveryCardProps {
   visible: boolean
   mode?: 'reveal' | 'instant'
   onClose?: () => void
-  onViewDetails?: (discoveryId: string) => void
+  onViewDetails?: (discoveryId: string | undefined) => void
 }
 
 /**
@@ -136,11 +136,11 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose, onVie
     >
       {/* Close and view details buttons */}
       <View style={styles.buttonContainer}>
-        {onViewDetails && (
+        {onViewDetails && card.discoveryId && (
           <IconButton
             name='zoom-out-map'
             variant='secondary'
-            onPress={() => onViewDetails(card.id)}
+            onPress={() => onViewDetails(card.discoveryId)}
           />
         )}
         {onClose && (
@@ -181,7 +181,7 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose, onVie
   </View>)
 
   const renderBackend = () => (
-    <View style={[styles.backCard, cardContainerStyles]}>
+    <View style={[styles.backCard, cardContainerStyles]} pointerEvents={isFlipped ? 'auto' : 'none'}>
       {/* Background gradient */}
       <LinearGradient
         style={[styles.gradient, gradientStyles]}
@@ -190,11 +190,11 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose, onVie
 
       {/* Close and view details buttons */}
       <View style={styles.buttonContainer}>
-        {onViewDetails && (
+        {onViewDetails && card.discoveryId && (
           <IconButton
             name='zoom-out-map'
             variant='secondary'
-            onPress={() => onViewDetails(card.id)}
+            onPress={() => onViewDetails(card.discoveryId)}
           />
         )}
         {onClose && (
@@ -210,16 +210,7 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose, onVie
       >
         <View style={styles.backContent}>
           <Text style={styles.backTitle}>{card.title}</Text>
-          <Text style={styles.backText}>Discovery Details</Text>
-          <Text style={styles.backText}>
-            Here you can add more information about this discovery.
-          </Text>
-          {/* Placeholder content to test scrolling */}
-          {Array.from({ length: 10 }).map((_, i) => (
-            <Text key={i} style={styles.backText}>
-              Item {i + 1}
-            </Text>
-          ))}
+          <Text style={styles.backText}>{card.description}</Text>
         </View>
       </ScrollView>
 

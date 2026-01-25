@@ -47,7 +47,8 @@ const useSpotTapHandler = () => {
   // Convert tapped spot to card format
   if (tappedSpot && !isVisible) {
     const spotCard: DiscoveryCardState = {
-      id: tappedSpot.id,
+      discoveryId: undefined,
+      spotId: tappedSpot.id,
       title: tappedSpot.name,
       description: tappedSpot.description,
       image: {
@@ -81,7 +82,8 @@ function MapDiscoveryCard() {
   const { currentDiscovery, isVisible: discoveryVisible, handleCloseDiscovery } = useNewDiscoveryHandler()
   const { currentSpot, isVisible: spotVisible, handleCloseSpot } = useSpotTapHandler()
 
-  const handleViewDiscoveryDetails = (discoveryId: string) => {
+  const handleViewDiscoveryDetails = (discoveryId: string | undefined) => {
+    if (!discoveryId) return
     handleCloseDiscovery()
     appNavigator.toDiscoveryCard(discoveryId)
   }

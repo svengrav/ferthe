@@ -6,6 +6,8 @@ import Animated, {
   runOnJS,
   useSharedValue,
   withDelay,
+  withRepeat,
+  withSequence,
   withTiming
 } from 'react-native-reanimated'
 
@@ -24,14 +26,14 @@ const useRevealAnimations = (onRevealComplete: () => void) => {
 
   useEffect(() => {
     // Start continuous pulsing animation for tap icon
-    const pulse = () => {
-      tapScale.value = withTiming(1.3, { duration: 1200 }, () => {
-        tapScale.value = withTiming(1, { duration: 1200 }, () => {
-          pulse()
-        })
-      })
-    }
-    pulse()
+    tapScale.value = withRepeat(
+      withSequence(
+        withTiming(1.3, { duration: 1200 }),
+        withTiming(1, { duration: 1200 })
+      ),
+      -1, // infinite loop
+      false // don't reverse
+    )
   }, [tapScale])
 
   const triggerReveal = () => {
@@ -84,15 +86,6 @@ export const DiscoveryRevealOverlay = ({
     return <>{children}</>
   }
 
-  const blurredOverlayStyles = {
-    height: imageHeight,
-    width: imageWidth,
-  }
-
-  const imageStyles = {
-    width: imageWidth,
-    height: imageHeight,
-  }
 
   const handlePress = () => {
     triggerReveal()
@@ -105,7 +98,6 @@ export const DiscoveryRevealOverlay = ({
       <Animated.View
         style={[
           styles.blurredOverlay,
-          blurredOverlayStyles,
           {
             opacity: fadeOut
           }
@@ -128,7 +120,7 @@ export const DiscoveryRevealOverlay = ({
 
         <Animated.Image
           source={{ uri: blurredImageUrl }}
-          style={[styles.image, imageStyles]}
+          style={[styles.image]}
           resizeMode='cover'
         />
       </Animated.View>
@@ -139,15 +131,14 @@ export const DiscoveryRevealOverlay = ({
 const useStyles = createThemedStyles(theme => ({
   blurredOverlay: {
     padding: 8,
-    position: 'absolute',
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
   },
   preview: {
     position: 'absolute',
-    flex: 1,
-    zIndex: 2,
-    height: '100%',
-    width: '100%',
-    alignContent: 'center',
+    zIndex: 99,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -178,6 +169,9 @@ const useStyles = createThemedStyles(theme => ({
     textShadowRadius: 1,
   },
   image: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
     borderRadius: 14,
     opacity: 1,
   },

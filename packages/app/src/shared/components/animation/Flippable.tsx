@@ -58,12 +58,14 @@ export const Flippable = ({ front, back, style, flipped, onTap }: FlippableProps
     <TouchableWithoutFeedback onPress={onTap}>
       <View style={[styles.container, style]}>
         <Animated.View
-          style={[styles.face, { transform: [{ perspective: 1000 }, { rotateY: frontRotate }] }]}
+          pointerEvents={flipped ? 'none' : 'auto'}
+          style={[styles.face, { transform: [{ perspective: 1000 }, { rotateY: frontRotate },] }]}
         >
           {front}
         </Animated.View>
 
         <Animated.View
+          pointerEvents={flipped ? 'auto' : 'none'}
           style={[styles.face, { transform: [{ perspective: 1000 }, { rotateY: backRotate }] }]}
         >
           {back}

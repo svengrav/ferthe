@@ -59,7 +59,7 @@ const createMapThemeFromBase = (): MapTheme => {
     },
     scanner: {
       strokeColor: '#ffffff',
-      fill: '#ffffff',
+      fill: '#ffffff3a',
       strokeWidth: 1,
     },
     compass: {

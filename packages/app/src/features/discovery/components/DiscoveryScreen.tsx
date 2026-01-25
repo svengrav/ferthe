@@ -57,7 +57,7 @@ function DiscoveryScreen() {
 
   // Helper to open discovery card details
   function openCardDetails(card: DiscoveryCardState) {
-    const close = setOverlay('discoveryCardDetails_' + card.id,
+    const close = setOverlay('discoveryCardDetails_' + card.discoveryId,
       <DiscoveryCardDetails card={card} onClose={() => close()} />,
       { variant: 'compact', transparent: true, closable: true }
     )
@@ -74,7 +74,7 @@ function DiscoveryScreen() {
 
   useEffect(() => {
     if (discoveryId) {
-      const card = cards.find(c => c.id === discoveryId)
+      const card = cards.find(c => c.discoveryId === discoveryId)
       if (card) {
         openCardDetails(card)
       }
