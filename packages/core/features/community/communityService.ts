@@ -106,6 +106,7 @@ const createCommunity = (accountId: string, name: string, inviteCode: string): C
  */
 const createMember = (communityId: string, accountId: string): CommunityMember => {
   return {
+    id: `${communityId}-${accountId}`,
     communityId,
     accountId,
     joinedAt: new Date(),

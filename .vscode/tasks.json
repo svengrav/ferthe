@@ -74,6 +74,38 @@
           "endsPattern": "Bundled|Metro|listening"
         }
       }
+    },
+    {
+      "label": "TypeScript Check: App",
+      "type": "shell",
+      "command": "npx tsc --noEmit",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/app"
+      },
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "TypeScript Check: Core",
+      "type": "shell",
+      "command": "deno check",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/core"
+      },
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "TypeScript Check: All",
+      "dependsOn": [
+        "TypeScript Check: App",
+        "TypeScript Check: Core"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
     }
   ]
 }

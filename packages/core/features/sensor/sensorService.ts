@@ -26,7 +26,7 @@ export const createSensorService = (): SensorServiceType => ({
       .map(spot => ({
         id: createCuid2(),
         spotId: spot.id,
-        trailId: spot.trailId,
+        trailId: trailId,
         location: spot.location,
         source: 'scanEvent' as ClueSource,
       }))

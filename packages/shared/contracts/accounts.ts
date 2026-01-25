@@ -38,6 +38,7 @@ export interface Account {
   displayName?: string // Optional display name set by user
   createdAt: Date
   lastLoginAt?: Date
+  updatedAt?: Date
   accountType: AccountType
   isPhoneVerified: boolean
 }

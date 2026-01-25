@@ -64,6 +64,7 @@ export const API_ERROR_CODES = {
   GET_REACTION_SUMMARY_ERROR: { code: 'GET_REACTION_SUMMARY_ERROR', message: 'Failed to retrieve reaction summary', httpStatus: 500 },
   STORAGE_CONNECTOR_NOT_CONFIGURED: { code: 'STORAGE_CONNECTOR_NOT_CONFIGURED', message: 'Storage connector is not configured', httpStatus: 500 },
   IMAGE_UPLOAD_ERROR: { code: 'IMAGE_UPLOAD_ERROR', message: 'Failed to upload image', httpStatus: 500 },
+  DELETE_CONTENT_ERROR: { code: 'DELETE_CONTENT_ERROR', message: 'Failed to delete discovery content', httpStatus: 500 },
 
   // Community Management (404-500)
   COMMUNITY_NOT_FOUND: { code: 'COMMUNITY_NOT_FOUND', message: 'Community not found', httpStatus: 404 },
@@ -83,6 +84,7 @@ export const API_ERROR_CODES = {
   VALIDATE_SESSION_ERROR: { code: 'VALIDATE_SESSION_ERROR', message: 'Failed to validate session', httpStatus: 500 },
   REVOKE_SESSION_ERROR: { code: 'REVOKE_SESSION_ERROR', message: 'Failed to revoke session', httpStatus: 500 },
   GET_ACCOUNT_ERROR: { code: 'GET_ACCOUNT_ERROR', message: 'Failed to get account', httpStatus: 500 },
+  UPDATE_ACCOUNT_ERROR: { code: 'UPDATE_ACCOUNT_ERROR', message: 'Failed to update account', httpStatus: 500 },
   CREATE_LOCAL_ACCOUNT_ERROR: { code: 'CREATE_LOCAL_ACCOUNT_ERROR', message: 'Failed to create local account', httpStatus: 500 },
   UPGRADE_ACCOUNT_ERROR: { code: 'UPGRADE_ACCOUNT_ERROR', message: 'Failed to upgrade account', httpStatus: 500 },
 } as const

@@ -31,6 +31,7 @@ export interface Community {
  * Represents a member of a community.
  */
 export interface CommunityMember {
+  id: string // Composite key: communityId-accountId
   communityId: string
   accountId: string
   joinedAt: Date

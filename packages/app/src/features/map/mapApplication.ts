@@ -76,7 +76,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
         scannedClues: scannedClues || [],
         previewClues: previewClues || [],
         trailId: trail?.id || '',
-        spots: spots || [],
+        spots: spots,
         deviceStatus: calculateDeviceBoundaryStatus(device?.location, boundary),
         region: {
           ...region,

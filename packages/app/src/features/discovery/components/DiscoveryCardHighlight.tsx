@@ -1,5 +1,6 @@
 import { IconButton } from '@app/shared/components'
 import { Flippable } from '@app/shared/components/animation/Flippable'
+import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -12,6 +13,7 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated'
 import { DiscoveryCardState } from '../logic/types'
+import DiscoveryCardDetails from './DiscoveryCardDetails'
 import { DiscoveryRevealOverlay } from './DiscoveryRevealOverlay'
 
 const CARD_WIDTH_RATIO = 0.9
@@ -73,14 +75,13 @@ interface DiscoveryCardProps {
   visible: boolean
   mode?: 'reveal' | 'instant'
   onClose?: () => void
-  onViewDetails?: (discoveryId: string | undefined) => void
 }
 
 /**
  * Discovery card highlight component that shows a blur-to-clear reveal animation
  * when a new spot is discovered. Features gradient background and smooth transitions.
  */
-function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose, onViewDetails }: DiscoveryCardProps) {
+function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: DiscoveryCardProps) {
   const { styles } = useApp(useStyles)
   const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT, IMAGE_WIDTH } = useCardDimensions()
   const { fadeIn, triggerReveal } = useDiscoveryAnimations(visible, mode)
@@ -122,6 +123,13 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose, onVie
     top: IMAGE_HEIGHT - TITLE_OFFSET,
   }
 
+  const onViewDetails = () => {
+    setOverlay('discoveryCardDetails_' + card.discoveryId,
+      <DiscoveryCardDetails card={card} onClose={() => close()} />,
+      { variant: 'compact', closable: true }
+    )
+  }
+
   const renderFrondend = () => (<View style={[styles.cardContainer, cardContainerStyles]}>
     {/* Background gradient */}
     <LinearGradient
@@ -136,13 +144,11 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose, onVie
     >
       {/* Close and view details buttons */}
       <View style={styles.buttonContainer}>
-        {onViewDetails && card.discoveryId && (
-          <IconButton
-            name='zoom-out-map'
-            variant='secondary'
-            onPress={() => onViewDetails(card.discoveryId)}
-          />
-        )}
+        <IconButton
+          name='zoom-out-map'
+          variant='secondary'
+          onPress={onViewDetails}
+        />
         {onClose && (
           <IconButton name='close' variant='secondary' onPress={onClose} />
         )}
@@ -190,11 +196,11 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose, onVie
 
       {/* Close and view details buttons */}
       <View style={styles.buttonContainer}>
-        {onViewDetails && card.discoveryId && (
+        {card.discoveryId && (
           <IconButton
             name='zoom-out-map'
             variant='secondary'
-            onPress={() => onViewDetails(card.discoveryId)}
+            onPress={onViewDetails}
           />
         )}
         {onClose && (

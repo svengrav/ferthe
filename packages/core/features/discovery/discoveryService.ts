@@ -1,5 +1,5 @@
 import { createDeterministicId } from '@core/utils/idGenerator'
-import { Clue, ClueSource, Discovery, DiscoveryContent, DiscoveryLocationRecord, DiscoveryReaction, DiscoverySnap, DiscoveryStats, DiscoveryTrail, LocationWithDirection, ReactionSummary, ScanEvent, Spot, Trail } from '@shared/contracts'
+import { Clue, ClueSource, Discovery, DiscoveryContent, DiscoveryLocationRecord, DiscoveryReaction, DiscoverySnap, DiscoverySpot, DiscoveryStats, DiscoveryTrail, LocationWithDirection, ReactionSummary, ScanEvent, Spot, Trail } from '@shared/contracts'
 import { GeoBoundary, GeoLocation, geoUtils } from '@shared/geo'
 
 export interface Target {
@@ -19,7 +19,7 @@ export type DiscoveryServiceActions = {
   isTrailCompleted: (accountId: string, trailId: string, discoveries: Discovery[], trailSpotIds: string[]) => boolean
   getTrailCompletionPercentage: (accountId: string, trailId: string, discoveries: Discovery[], trailSpotIds: string[]) => number
   getDiscoveredSpotIds: (accountId: string, discoveries: Discovery[], trailId?: string, communityId?: string) => string[]
-  getDiscoveredSpots: (accountId: string, discoveries: Discovery[], spots: Spot[], trailId?: string, communityId?: string) => Spot[]
+  getDiscoveredSpots: (accountId: string, discoveries: Discovery[], spots: Spot[], trailId?: string, communityId?: string) => DiscoverySpot[]
   getDiscoveries: (accountId: string, discoveries: Discovery[], trailId?: string, communityId?: string) => Discovery[]
   getDiscoverySpot: (id: string, spots: Spot[]) => Spot | undefined
   getCluesBasedOnPreviewMode: (accountId: string, trail: Trail, discoveries: Discovery[], spots: Spot[], trailSpotIds: string[]) => Clue[]
@@ -62,15 +62,31 @@ const getDiscoveries = (accountId: string, discoveries: Discovery[], trailId?: s
   })
 }
 
-const getDiscoveredSpots = (accountId: string, discoveries: Discovery[], spots: Spot[], trailId?: string, communityId?: string) => {
+const getDiscoveredSpots = (accountId: string, discoveries: Discovery[], spots: Spot[], trailId?: string, communityId?: string): DiscoverySpot[] => {
   const relevantDiscoveries = discoveries.filter(discovery => {
     const matchesAccount = discovery.accountId === accountId
     const matchesTrail = !trailId || discovery.trailId === trailId
     const matchesCommunity = !communityId || discovery.communityId === communityId
     return matchesAccount && matchesTrail && matchesCommunity
   })
-  const discoveredSpotIds = relevantDiscoveries.map(d => d.spotId)
-  return spots.filter(spot => discoveredSpotIds.includes(spot.id))
+
+  // Sort by discoveredAt (oldest first)
+  const sortedDiscoveries = relevantDiscoveries.sort((a, b) =>
+    new Date(a.discoveredAt).getTime() - new Date(b.discoveredAt).getTime()
+  )
+
+  return sortedDiscoveries.map(discovery => {
+    const spot = spots.find(s => s.id === discovery.spotId)
+    if (!spot) {
+      throw new Error(`Spot not found for discovery ${discovery.id}`)
+    }
+    return {
+      ...spot,
+      discoveredAt: discovery.discoveredAt,
+      discoveryId: discovery.id,
+      communityId: discovery.communityId,
+    }
+  })
 }
 /**
  * Determines valid targets for a user on a trail based on discovery mode
@@ -464,7 +480,6 @@ const getReactionSummary = (discoveryId: string, reactions: DiscoveryReaction[],
   const userReaction = discoveryReactions.find(r => r.accountId === accountId)?.reaction
 
   return {
-    discoveryId,
     likes: discoveryReactions.filter(r => r.reaction === 'like').length,
     dislikes: discoveryReactions.filter(r => r.reaction === 'dislike').length,
     userReaction,

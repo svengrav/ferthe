@@ -1,4 +1,4 @@
-import { Clue, Spot } from '@shared/contracts'
+import { Clue, DiscoverySpot } from '@shared/contracts'
 import { GeoBoundary, GeoLocation } from '@shared/geo'
 import { create } from 'zustand'
 
@@ -47,7 +47,7 @@ export interface MapState {
 
   boundary: GeoBoundary // Boundary of the map
 
-  tappedSpot: Spot | undefined
+  tappedSpot: DiscoverySpot | undefined
 
   canvas: {
     size: { width: number; height: number } // Default map size
@@ -75,7 +75,7 @@ export interface MapState {
   trailId: string // Optional trail ID for discovery context
   previewClues: Clue[]
   scannedClues: Clue[]
-  spots: Spot[]
+  spots: DiscoverySpot[]
 }
 
 export interface MapStateActions {
@@ -91,8 +91,8 @@ export interface MapStateActions {
   setRadius: (radius: { center: { lat: number; lon: number }; radius: number; innerRadius: number }) => void
   setPreviewClues: (clues: Clue[]) => void
   setScannedClues: (clues: Clue[]) => void
-  setSpots: (spots: Spot[]) => void
-  setTappedSpot: (spot: Spot | undefined) => void
+  setSpots: (spots: DiscoverySpot[]) => void
+  setTappedSpot: (spot: DiscoverySpot | undefined) => void
   setSnap: (snap: { startPoint: GeoLocation; endPoint: GeoLocation; intensity: number }) => void
   setStatus: (status: 'uninitialized' | 'loading' | 'ready' | 'error') => void
   setTrailId: (trailId: string) => void

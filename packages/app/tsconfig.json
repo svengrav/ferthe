@@ -8,6 +8,7 @@
     "outDir": "dist",
     "noEmit": false,
     "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
     "paths": {
       "@app/*": [
         "./src/*"

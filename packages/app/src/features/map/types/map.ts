@@ -1,4 +1,4 @@
-import { Clue, Spot } from '@shared/contracts'
+import { Clue, DiscoverySpot } from '@shared/contracts'
 import { GeoBoundary, GeoLocation, GeoRegion } from '@shared/geo'
 
 // Earth constants
@@ -98,7 +98,7 @@ export interface MapState {
   trailId: string // Optional trail ID for discovery context
   previewClues: Clue[]
   scannedClues: Clue[]
-  spots: Spot[]
+  spots: DiscoverySpot[]
 }
 
 export interface MapSpecification {

@@ -10,7 +10,7 @@ export interface DiscoveryApplicationContract {
   getDiscoveries: (context: AccountContext, trailId?: string, communityId?: string) => Promise<Result<Discovery[]>>
   getDiscovery: (context: AccountContext, discoveryId: string) => Promise<Result<Discovery | undefined>>
   getDiscoveredSpotIds: (context: AccountContext, trailId?: string) => Promise<Result<string[]>>
-  getDiscoveredSpots: (context: AccountContext, trailId?: string) => Promise<Result<Spot[]>>
+  getDiscoveredSpots: (context: AccountContext, trailId?: string) => Promise<Result<DiscoverySpot[]>>
   getDiscoveredPreviewClues: (context: AccountContext, trailId: string) => Promise<Result<Clue[]>>
   getDiscoveryTrail: (context: AccountContext, trailId: string, userLocation?: GeoLocation, communityId?: string) => Promise<Result<DiscoveryTrail>>
   getDiscoveryStats: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryStats>>
@@ -69,8 +69,19 @@ export interface DiscoveryTrail {
   trail: Trail | undefined
   clues: Clue[]
   previewClues?: Clue[]
-  spots: Spot[]
+  spots: DiscoverySpot[]
   discoveries: Discovery[]
+}
+
+
+/**
+ * Combines a Spot with its Discovery metadata.
+ * Extends Spot with discovery context (when/how it was discovered).
+ */
+export interface DiscoverySpot extends Spot {
+  discoveredAt: Date
+  discoveryId: string
+  communityId?: string
 }
 
 export type ClueSource = 'preview' | 'scanEvent'
@@ -78,7 +89,7 @@ export type ClueSource = 'preview' | 'scanEvent'
 export interface Clue {
   id: string
   spotId: string
-  trailId: string
+  trailId?: string
   location: GeoLocation
   source: ClueSource
 }

@@ -39,7 +39,7 @@ export function Map() {
     const tappedSpot = spots.find(spot => {
       const spotScreenPos = mapUtils.coordinatesToPosition(spot.location, boundary, canvas.size)
       const distance = Math.sqrt(
-        Math.pow(position.x - spotScreenPos.x, 2) + 
+        Math.pow(position.x - spotScreenPos.x, 2) +
         Math.pow(position.y - spotScreenPos.y, 2)
       )
       return distance <= TAP_TOLERANCE

@@ -12,13 +12,13 @@ import {
   DiscoveryProfile,
   DiscoveryProfileUpdateData,
   DiscoveryReaction,
+  DiscoverySpot,
   DiscoveryStats,
   DiscoveryTrail,
   LocationWithDirection,
   ReactionSummary,
   Result,
-  Spot,
-  TrailApplicationContract,
+  TrailApplicationContract
 } from '@shared/contracts'
 import { GeoLocation } from '@shared/geo'
 import { Buffer } from "node:buffer"
@@ -140,7 +140,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     }
   }
 
-  const getDiscoveredSpots = async (context: AccountContext, trailId?: string): Promise<Result<Spot[]>> => {
+  const getDiscoveredSpots = async (context: AccountContext, trailId?: string): Promise<Result<DiscoverySpot[]>> => {
     try {
       const accountId = context.accountId
       if (!accountId) {

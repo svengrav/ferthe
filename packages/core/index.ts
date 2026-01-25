@@ -28,7 +28,7 @@ export type { SMSService } from './features/account/smsService.ts'
 
 // SMS Connector
 export { createConsoleSMSConnector, createTwilioSMSConnector } from './connectors/smsConnector.ts'
-export type { SMSConnector, SMSRequest, SMSResponse, TwilioConfig } from './connectors/smsConnector.ts'
+export type { SMSConnector, TwilioConfig } from './connectors/smsConnector.ts'
 
 // Sensor feature
 export { createSensorApplication } from './features/sensor/sensorApplication.ts'

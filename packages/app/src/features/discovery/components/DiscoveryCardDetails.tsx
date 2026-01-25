@@ -89,7 +89,7 @@ interface DiscoveryCardProps {
 function DiscoveryCardDetails({ card }: DiscoveryCardProps) {
   const { styles, theme } = useApp(useStyles)
   const { discoveryApplication } = getAppContext()
-  const { title, image, description, id } = card
+  const { title, image, description, discoveryId } = card
   const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT } = useCardDimensions()
   const { scrollY, titleOpacity } = useCardAnimations(IMAGE_HEIGHT)
 
@@ -98,10 +98,10 @@ function DiscoveryCardDetails({ card }: DiscoveryCardProps) {
 
   // Load content on mount
   useEffect(() => {
-    if (id) {
-      discoveryApplication.getDiscoveryContent(id)
+    if (discoveryId) {
+      discoveryApplication.getDiscoveryContent(discoveryId)
     }
-  }, [id, discoveryApplication])
+  }, [discoveryId, discoveryApplication])
 
   if (!styles) return null
 
@@ -151,21 +151,25 @@ function DiscoveryCardDetails({ card }: DiscoveryCardProps) {
           <Text style={styles.discoveredAt}>
             Discovered: {card.discoveredAt ? new Date(card.discoveredAt).toLocaleDateString() : ''}
           </Text>
-          
+
           {/* Reaction buttons */}
-          <DiscoveryReactionSection
-            id={id}
-            isLoading={isLoading}
-          />
+          {discoveryId && (
+            <DiscoveryReactionSection
+              id={discoveryId}
+              isLoading={isLoading}
+            />
+          )}
 
           {description && (
             <Text style={styles.description}>{description}</Text>
           )}
 
           {/* User content section */}
-          <DiscoveryUserContentSection
-            id={id}
-          />
+          {discoveryId && (
+            <DiscoveryUserContentSection
+              id={discoveryId}
+            />
+          )}
         </View>
       </ScrollView>
     </View>

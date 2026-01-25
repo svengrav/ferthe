@@ -53,7 +53,6 @@ function DiscoveryScreen() {
   const { styles, theme } = useApp(useStyles)
   const { t } = useLocalizationStore()
   const route = useRoute<RouteProp<RootParamList, 'Discoveries'>>()
-  const discoveryId = route.params?.discoveryId
 
   // Helper to open discovery card details
   function openCardDetails(card: DiscoveryCardState) {
@@ -71,15 +70,6 @@ function DiscoveryScreen() {
   } = useDiscoveryScreen()
 
   if (!styles) return null
-
-  useEffect(() => {
-    if (discoveryId) {
-      const card = cards.find(c => c.discoveryId === discoveryId)
-      if (card) {
-        openCardDetails(card)
-      }
-    }
-  }, [discoveryId, cards])
 
   return (
     <Page options={[{ label: t.navigation.settings, onPress: () => setOverlay('settingsForm', <SettingsForm onClose={() => { }} onSubmit={() => { }} />) }]}>

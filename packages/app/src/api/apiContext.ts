@@ -13,6 +13,7 @@ import {
   DiscoveryProfile,
   DiscoveryProfileUpdateData,
   DiscoveryReaction,
+  DiscoverySpot,
   DiscoveryStats,
   DiscoveryTrail,
   FirebaseConfig,
@@ -81,7 +82,7 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
 
       getDiscoveredSpots: (_context: AccountContext, trailId?: string) => {
         const params = trailId ? `?trailId=${trailId}` : ''
-        return API.send<Result<Spot[]>>(`/discovery/collections/spots${params}`)
+        return API.send<Result<DiscoverySpot[]>>(`/discovery/collections/spots${params}`)
       },
 
       getDiscoveredSpotIds: async (_context: AccountContext, trailId?: string) => {

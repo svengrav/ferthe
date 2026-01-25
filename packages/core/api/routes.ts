@@ -11,6 +11,7 @@ import {
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoveryReaction,
+  DiscoverySpot,
   DiscoveryStats,
   DiscoveryTrail,
   FirebaseConfig,
@@ -82,7 +83,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       method: 'GET',
       version: 'v1',
       url: '/discovery/collections/spots',
-      handler: asyncRequestHandler<Spot[]>(async ({ context: session, query }) => {
+      handler: asyncRequestHandler<DiscoverySpot[]>(async ({ context: session, query }) => {
         return await discoveryApplication.getDiscoveredSpots(session, query?.trailId)
       }),
     },

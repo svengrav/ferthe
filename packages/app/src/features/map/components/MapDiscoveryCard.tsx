@@ -2,7 +2,6 @@ import { getAppContext } from '@app/appContext'
 import DiscoveryCardHighlight from '@app/features/discovery/components/DiscoveryCardHighlight'
 import { DiscoveryCardState } from '@app/features/discovery/logic/types'
 import { useEvent } from '@app/shared/events/useEvent'
-import { appNavigator } from '@app/shared/navigation/navigationRef'
 import { useState } from 'react'
 import { useMapSpotTap, useSetTappedSpot } from '../stores/mapStore'
 
@@ -82,11 +81,6 @@ function MapDiscoveryCard() {
   const { currentDiscovery, isVisible: discoveryVisible, handleCloseDiscovery } = useNewDiscoveryHandler()
   const { currentSpot, isVisible: spotVisible, handleCloseSpot } = useSpotTapHandler()
 
-  const handleViewDiscoveryDetails = (discoveryId: string | undefined) => {
-    if (!discoveryId) return
-    handleCloseDiscovery()
-    appNavigator.toDiscoveryCard(discoveryId)
-  }
 
   // Show discovery card if available (with tap-to-reveal)
   if (discoveryVisible && currentDiscovery) {
@@ -96,7 +90,6 @@ function MapDiscoveryCard() {
         card={currentDiscovery}
         mode="reveal"
         onClose={handleCloseDiscovery}
-        onViewDetails={handleViewDiscoveryDetails}
       />
     )
   }
@@ -109,7 +102,6 @@ function MapDiscoveryCard() {
         card={currentSpot}
         mode="instant"
         onClose={handleCloseSpot}
-        onViewDetails={handleViewDiscoveryDetails}
       />
     )
   }

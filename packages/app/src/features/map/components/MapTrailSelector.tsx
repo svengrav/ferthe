@@ -36,35 +36,35 @@ export const MapTrailSelector = () => {
 
     const renderTrailItem = ({ item }: { item: Trail }): React.ReactElement => {
       const isActive = item.id === activeTrail?.trail?.id
-      
+
       return (
-        <TrailItem 
-          trail={item} 
-          onPress={() => handleSelectTrail(item, removeOverlay!)} 
-          actions={<IconButton name='chevron-right' size={24} variant='primary'/>} 
+        <TrailItem
+          trail={item}
+          onPress={() => handleSelectTrail(item, removeOverlay!)}
+          actions={<IconButton name='chevron-right' size={24} variant='primary' />}
         />
       )
     }
-    
+
     removeOverlay = setOverlay('trailSelector',
-      <FlatList 
-        data={trails} 
-        renderItem={renderTrailItem} 
-        contentContainerStyle={{gap: 12}} 
+      <FlatList
+        data={trails}
+        renderItem={renderTrailItem}
+        contentContainerStyle={{ gap: 12 }}
         keyExtractor={item => item.id} />,
-        { 
-          title: 'Select a Trail', 
-          variant: 'compact', 
-          closable: true 
-        }
+      {
+        title: 'Select a Trail',
+        variant: 'compact',
+        closable: true
+      }
     )
   }
 
   return (
     <TouchableOpacity style={styles.selector} onPress={openTrailSelector}>
       {selectedTrail && <TrailItem trail={selectedTrail} onPress={openTrailSelector} actions={
-        <IconButton name='swap-horiz' size={24}  variant='outlined'/>
-      }/>}
+        <IconButton name='swap-horiz' size={24} onPress={openTrailSelector} variant='outlined' />
+      } />}
     </TouchableOpacity>
   )
 }

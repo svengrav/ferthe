@@ -40,6 +40,7 @@
     "npm:tailwind-scrollbar@^3.0.5": "3.1.0_tailwindcss@4.1.18",
     "npm:tailwindcss@^4.1.17": "4.1.18",
     "npm:twilio@^5.11.2": "5.12.0",
+    "npm:typescript@*": "5.9.3",
     "npm:vite-plugin-pwa@^1.2.0": "1.2.0_vite@7.3.1__picomatch@4.0.3_workbox-build@7.4.0__ajv@8.17.1__@babel+core@7.28.6__rollup@2.79.2_workbox-window@7.4.0",
     "npm:zustand@^5.0.1": "5.0.10_@types+react@19.2.9_react@19.2.3"
   },
@@ -4289,6 +4290,10 @@
         "possible-typed-array-names",
         "reflect.getprototypeof"
       ]
+    },
+    "typescript@5.9.3": {
+      "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
+      "bin": true
     },
     "unbox-primitive@1.1.0": {
       "integrity": "sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==",

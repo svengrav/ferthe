@@ -1,5 +1,5 @@
 import { StoreActions, StoreData } from '@app/shared/index'
-import { Clue, Discovery, Spot, Trail } from '@shared/contracts'
+import { Clue, Discovery, DiscoverySpot, Trail } from '@shared/contracts'
 import { create } from 'zustand'
 
 interface DiscoverySnap {
@@ -20,7 +20,7 @@ interface DiscoveryTrailData extends StoreData {
   scannedClues: Clue[]
   discoveries: Discovery[]
   previewClues?: Clue[]
-  spots: Spot[]
+  spots: DiscoverySpot[]
   snap?: DiscoverySnap | undefined
   lastDiscovery?: Discovery
 }
