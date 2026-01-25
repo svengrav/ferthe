@@ -50,7 +50,7 @@ const createMapThemeFromBase = (): MapTheme => {
       strokeWidth: 1.5,
     },
     trail: {
-      strokeColor: baseTheme.opacity(baseTheme.colors.onSurface, 80),
+      strokeColor: baseTheme.opacity(baseTheme.colors.onSurface, 20),
       strokeWidth: 1.5,
     },
     snap: {

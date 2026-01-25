@@ -7,7 +7,9 @@ import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles, useThemeStore } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
 import React from 'react'
-import { FlatList, TouchableOpacity } from 'react-native'
+import { FlatList, TouchableOpacity, View } from 'react-native'
+import { GestureDetector } from 'react-native-gesture-handler'
+import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
 
 const useMapBottomSheet = () => {
   const { trails } = useTrailData()
@@ -59,13 +61,18 @@ export const MapTrailSelector = () => {
       }
     )
   }
+  const swipeGesture = useSwipeUpGesture(openTrailSelector)
 
   return (
-    <TouchableOpacity style={styles.selector} onPress={openTrailSelector}>
-      {selectedTrail && <TrailItem trail={selectedTrail} onPress={openTrailSelector} actions={
-        <IconButton name='swap-horiz' size={24} onPress={openTrailSelector} variant='outlined' />
-      } />}
-    </TouchableOpacity>
+    <GestureDetector gesture={swipeGesture}>
+      <View>
+        <TouchableOpacity style={styles.selector} onPress={openTrailSelector}>
+          {selectedTrail && <TrailItem trail={selectedTrail} onPress={openTrailSelector} actions={
+            <IconButton name='swap-horiz' size={24} onPress={openTrailSelector} variant='outlined' />
+          } />}
+        </TouchableOpacity>
+      </View>
+    </GestureDetector>
   )
 }
 
