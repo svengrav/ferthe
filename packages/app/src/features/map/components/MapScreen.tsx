@@ -3,8 +3,9 @@ import { useLocalizationStore } from '@app/shared/localization/useLocalizationSt
 import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { useEffect, useRef } from 'react'
-import { Animated, View } from 'react-native'
+import { useEffect } from 'react'
+import { View } from 'react-native'
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { SettingsForm } from '../../settings/components/SettingsForm'
 import { useMapStatus, useMapViewport, useSetViewport } from '../stores/mapStore'
 import { Map } from './Map'
@@ -18,23 +19,24 @@ function MapScreen() {
   const status = useMapStatus()
   const setViewport = useSetViewport()
   const viewPort = useMapViewport()
-  const fadeAnim = useRef(new Animated.Value(0)).current
+  const opacity = useSharedValue(0)
 
   useEffect(() => {
-    context.mapApplication.requestMapState(viewPort)
+    context.mapApplication.requestMapState()
   }, [status, viewPort])
 
   useEffect(() => {
     if (status === 'ready') {
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }).start()
+      opacity.value = withTiming(1, { duration: 500 })
     } else {
-      fadeAnim.setValue(0)
+      opacity.value = 0
     }
-  }, [status, fadeAnim])
+  }, [status])
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    flex: 1,
+    opacity: opacity.value,
+  }))
 
   const onLayout = (layout: { nativeEvent: { layout: { width: number; height: number } } }) => {
     setViewport(layout.nativeEvent.layout)
@@ -49,7 +51,7 @@ function MapScreen() {
           {status !== 'ready' ? (
             <LoadingSpinner />
           ) : (
-            <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+            <Animated.View style={animatedStyle}>
               <Map />
             </Animated.View>
           )}

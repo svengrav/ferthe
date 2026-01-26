@@ -2,11 +2,64 @@ import { Store } from '@core/store/storeFactory.ts'
 import { createCuid2 } from '@core/utils/idGenerator.ts'
 import { createSlug } from '@core/utils/slug.ts'
 import { AccountContext, Result, Spot, SpotPreview, Trail, TrailApplicationContract, TrailSpot } from '@shared/contracts/index.ts'
+import { geoUtils } from '@shared/geo/index.ts'
 
 interface TrailApplicationOptions {
   trailStore: Store<Trail>
   spotStore: Store<Spot>
   trailSpotStore: Store<TrailSpot>
+}
+
+/**
+ * Helper: Enrich trail with calculated boundary from spots
+ * @param trail Trail to enrich
+ * @param trailSpotStore Store for trail-spot relationships
+ * @param spotStore Store for spots
+ * @returns Trail with boundary calculated from its spots
+ */
+async function enrichTrailWithBoundary(
+  trail: Trail,
+  trailSpotStore: Store<TrailSpot>,
+  spotStore: Store<Spot>
+): Promise<Trail> {
+  // If boundary already exists, return as-is
+  if (trail.boundary) {
+    return trail
+  }
+
+  // Get spots for this trail
+  const trailSpotsResult = await trailSpotStore.list()
+  if (!trailSpotsResult.success) {
+    return trail // Return original if can't fetch trail-spots
+  }
+
+  const spotIds = (trailSpotsResult.data || [])
+    .filter(ts => ts.trailId === trail.id)
+    .map(ts => ts.spotId)
+
+  if (spotIds.length === 0) {
+    return trail // No spots, return original
+  }
+
+  // Fetch actual spots
+  const spotsResult = await spotStore.list()
+  if (!spotsResult.success) {
+    return trail
+  }
+
+  const spots = (spotsResult.data || []).filter(spot => spotIds.includes(spot.id))
+
+  if (spots.length === 0) {
+    return trail
+  }
+
+  // Calculate boundary
+  const boundary = geoUtils.calculateSpotBoundingBox(spots, 500)
+
+  return {
+    ...trail,
+    boundary
+  }
 }
 
 export function createTrailApplication({ trailStore, spotStore, trailSpotStore }: TrailApplicationOptions): TrailApplicationContract {
@@ -61,7 +114,15 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore }
         if (!trailResult.success) {
           return { success: false, error: { message: 'Failed to get trail', code: 'GET_TRAIL_ERROR' } }
         }
-        return { success: true, data: trailResult.data }
+
+        if (!trailResult.data) {
+          return { success: true, data: undefined }
+        }
+
+        // Enrich trail with calculated boundary
+        const enrichedTrail = await enrichTrailWithBoundary(trailResult.data, trailSpotStore, spotStore)
+
+        return { success: true, data: enrichedTrail }
       } catch (error: unknown) {
         return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_TRAIL_ERROR' } }
       }
@@ -98,7 +159,15 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore }
         if (!trailsResult.success) {
           return { success: false, error: { message: 'Failed to list trails', code: 'LIST_TRAILS_ERROR' } }
         }
-        return { success: true, data: trailsResult.data || [] }
+
+        const trails = trailsResult.data || []
+
+        // Enrich each trail with calculated boundary
+        const enrichedTrails = await Promise.all(
+          trails.map(trail => enrichTrailWithBoundary(trail, trailSpotStore, spotStore))
+        )
+
+        return { success: true, data: enrichedTrails }
       } catch (error: unknown) {
         return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'LIST_TRAILS_ERROR' } }
       }

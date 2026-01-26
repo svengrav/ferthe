@@ -1,4 +1,4 @@
-import { getAppConfig } from '@app/env'
+import { ENV } from '@app/env'
 import { logger } from "@app/shared/utils/logger"
 import { JsonStoreConnector } from './jsonStoreConnector'
 import { memoryStoreConnector } from './memoryStoreConnector'
@@ -23,8 +23,7 @@ export function createStoreConnector(config: StoreConnectorConfig): SecureStoreC
     case 'secure':
       return secureStoreConnector
     case 'json':
-      const appConfig = getAppConfig()
-      return new JsonStoreConnector({ storageServerUrl: appConfig.JSON_STORE_SERVER_URL })
+      return new JsonStoreConnector({ storageServerUrl: ENV.jsonStoreUrl })
     default:
       return secureStoreConnector
   }

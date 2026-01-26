@@ -204,6 +204,96 @@ const calculateBoundaries = (location: GeoLocation, radius: number): GeoBoundary
 }
 
 /**
+ * Calculate bounding box from array of spots with antimeridian handling
+ * @param spots Array of spots with locations
+ * @param paddingMeters Optional padding in meters (default: 50)
+ * @returns Geographic boundary encompassing all spots
+ */
+const calculateSpotBoundingBox = (spots: { location: GeoLocation }[], paddingMeters: number = 50): GeoBoundary => {
+  if (!spots || spots.length === 0) {
+    return {
+      northEast: { lat: 0, lon: 0 },
+      southWest: { lat: 0, lon: 0 },
+    }
+  }
+
+  // Validate input coordinates
+  const validSpots = spots.filter(s => {
+    const { lat, lon } = s.location
+    return lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180
+  })
+
+  if (validSpots.length === 0) {
+    throw new Error('calculateSpotBoundingBox: No valid coordinates found')
+  }
+
+  if (validSpots.length === 1) {
+    return calculateBoundaries(validSpots[0].location, paddingMeters)
+  }
+
+  // Find min/max latitude (straightforward)
+  let minLat = Infinity
+  let maxLat = -Infinity
+
+  validSpots.forEach(spot => {
+    minLat = Math.min(minLat, spot.location.lat)
+    maxLat = Math.max(maxLat, spot.location.lat)
+  })
+
+  // Antimeridian handling: find minimal longitudinal span
+  const lons = validSpots.map(s => s.location.lon).sort((a, b) => a - b)
+
+  // Calculate gaps between consecutive longitudes
+  let maxGap = 0
+
+  for (let i = 0; i < lons.length - 1; i++) {
+    const gap = lons[i + 1] - lons[i]
+    if (gap > maxGap) {
+      maxGap = gap
+    }
+  }
+
+  // Check wrap-around gap
+  const wrapGap = 360 - (lons[lons.length - 1] - lons[0])
+  const useWrap = wrapGap < maxGap
+
+  let minLon: number
+  let maxLon: number
+
+  if (useWrap) {
+    // Points span across antimeridian - use wrap
+    minLon = lons[lons.length - 1]
+    maxLon = lons[0] + 360
+  } else {
+    // Normal case
+    minLon = lons[0]
+    maxLon = lons[lons.length - 1]
+  }
+
+  // Apply padding
+  const latPadding = (paddingMeters / 1000) / 111 // degrees
+  const avgLat = (minLat + maxLat) / 2
+  const lonPadding = (paddingMeters / 1000) / (111 * Math.cos(avgLat * (Math.PI / 180))) // degrees
+
+  minLat -= latPadding
+  maxLat += latPadding
+  minLon -= lonPadding
+  maxLon += lonPadding
+
+  // Normalize longitude to -180/+180 range
+  const normalizeLon = (lon: number): number => {
+    // Fast modulo-based normalization
+    const normalized = ((lon + 180) % 360) - 180
+    return normalized === -180 ? 180 : normalized
+  }
+
+  return {
+    northEast: { lat: maxLat, lon: normalizeLon(maxLon) },
+    southWest: { lat: minLat, lon: normalizeLon(minLon) },
+  }
+}
+
+/**
  * Calculate target coordinates from origin, distance, and bearing
  * @param origin Starting coordinate
  * @param distance Distance in meters
@@ -265,6 +355,7 @@ export const geoUtils = {
   calculateBearing,
   bearingToDirection,
   calculateBoundaries,
+  calculateSpotBoundingBox,
   findNearestCoordinate,
   calculateTargetLocation,
   calculateDistanceToBoundary,

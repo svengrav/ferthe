@@ -3,8 +3,9 @@ import PageHeader from '@app/shared/components/page/PageHeader'
 import Text from '@app/shared/components/text/Text'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import React, { useEffect, useRef } from 'react'
-import { Animated, ScrollView, View } from 'react-native'
+import React, { useEffect } from 'react'
+import { ScrollView, View } from 'react-native'
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Option } from '../components/types'
 import { useOverlayStore } from './useOverlayStore'
@@ -12,8 +13,8 @@ import { useOverlayStore } from './useOverlayStore'
 // Animation constants
 const FADE_IN_DURATION = 300
 const FADE_OUT_DURATION = 200
-const SCALE_TENSION = 100
-const SCALE_FRICTION = 8
+const SPRING_DAMPING = 15
+const SPRING_STIFFNESS = 150
 const INITIAL_SCALE = 0.9
 const FINAL_SCALE = 1
 const OVERLAY_Z_INDEX = 1000
@@ -29,47 +30,33 @@ export type OverlayVariant = 'compact' | 'fullscreen' | 'page'
  * Hook to manage overlay animation logic
  */
 const useOverlayAnimation = (visible: boolean) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current
-  const scaleAnim = useRef(new Animated.Value(INITIAL_SCALE)).current
+  const opacity = useSharedValue(0)
+  const scale = useSharedValue(INITIAL_SCALE)
   const [shouldRender, setShouldRender] = React.useState(visible)
 
   useEffect(() => {
     if (visible) {
       setShouldRender(true)
       // Fade in and scale up animation
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: FADE_IN_DURATION,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: FINAL_SCALE,
-          tension: SCALE_TENSION,
-          friction: SCALE_FRICTION,
-          useNativeDriver: true,
-        }),
-      ]).start()
+      opacity.value = withTiming(1, { duration: FADE_IN_DURATION })
+      scale.value = withSpring(FINAL_SCALE, { damping: SPRING_DAMPING, stiffness: SPRING_STIFFNESS })
     } else {
       // Fade out and scale down animation
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: FADE_OUT_DURATION,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: INITIAL_SCALE,
-          duration: FADE_OUT_DURATION,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setShouldRender(false)
+      opacity.value = withTiming(0, { duration: FADE_OUT_DURATION })
+      scale.value = withTiming(INITIAL_SCALE, { duration: FADE_OUT_DURATION }, (finished) => {
+        if (finished) {
+          setShouldRender(false)
+        }
       })
     }
-  }, [visible, fadeAnim, scaleAnim])
+  }, [visible])
 
-  return { fadeAnim, scaleAnim, shouldRender }
+  const animatedContainerStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }]
+  }))
+
+  return { animatedContainerStyle, shouldRender }
 }
 
 /**
@@ -82,7 +69,7 @@ function OverlayProvider() {
     return overlayStore.overlays.map((overlayItem) => {
       const settings = overlayItem.settings || {}
       const removeOverlay = () => overlayStore.remove(overlayItem.id)
-      
+
       return (
         <OverlayContainer
           key={overlayItem.id}
@@ -133,24 +120,24 @@ function OverlayContainer({
   scrollable = false
 }: OverlayContainerProps) {
   const { styles, theme } = useApp(useStyles)
-  const { fadeAnim, scaleAnim, shouldRender } = useOverlayAnimation(visible ?? true)
+  const { animatedContainerStyle, shouldRender } = useOverlayAnimation(visible ?? true)
   const insets = useSafeAreaInsets()
-  
+
   if (!shouldRender || !styles) {
     return null
   }
-  
+
   // Render content based on variant
   const renderContent = () => {
     // Compact variant - centered modal with rounded corners
     if (variant === 'compact') {
       return (
-        <View style={{backgroundColor: theme.opacity(theme.colors.background, 0.6), paddingTop: 60, flex: 1}}  id='overlay-compact-container'>
-          <View style={[styles.compactContainer, ]}>
+        <View style={{ backgroundColor: theme.opacity(theme.colors.background, 0.6), paddingTop: 60, flex: 1 }} id='overlay-compact-container'>
+          <View style={[styles.compactContainer,]}>
             {/* Header with title and close button */}
             {(title || closable) && (
               <View style={styles.compactHeader}>
-                <Text style={{paddingHorizontal: 8, paddingVertical: 8}} >{title}</Text>
+                <Text style={{ paddingHorizontal: 8, paddingVertical: 8 }} >{title}</Text>
                 {closable && (
                   <IconButton
                     name="close"
@@ -170,10 +157,10 @@ function OverlayContainer({
     // Page variant - fullscreen with PageHeader
     if (variant === 'page') {
       const ContentContainer = scrollable ? ScrollView : View
-      const contentProps = scrollable 
-        ? { contentContainerStyle: styles.pageScrollContent } 
+      const contentProps = scrollable
+        ? { contentContainerStyle: styles.pageScrollContent }
         : { style: styles.pageContent }
-      
+
       return (
         <View style={styles.pageContainer} id='overlay-page-container'>
           <PageHeader
@@ -216,7 +203,7 @@ function OverlayContainer({
       </View>
     )
   }
-  
+
   return (
     <Animated.View
       style={[
@@ -224,22 +211,13 @@ function OverlayContainer({
         {
           top: insets.top,
           bottom: insets.bottom,
-          opacity: fadeAnim,
-        }
+        },
+        animatedContainerStyle
       ]}
     >
-      <Animated.View
-        style={[
-          styles.animatedContainer,
-          {
-            transform: [{ scale: scaleAnim }]
-          }
-        ]}
-      >
-        <View style={styles.contentArea} pointerEvents="auto">
-          {renderContent()}
-        </View>
-      </Animated.View>
+      <View style={styles.contentArea} pointerEvents="auto">
+        {renderContent()}
+      </View>
     </Animated.View>
   )
 }
@@ -253,10 +231,6 @@ const useStyles = createThemedStyles(theme => ({
     right: 0,
     bottom: 0,
     zIndex: OVERLAY_Z_INDEX,
-  },
-  animatedContainer: {
-    height: '100%',
-    overflow: 'hidden'
   },
   overlay: {
     flex: 1,
@@ -277,7 +251,7 @@ const useStyles = createThemedStyles(theme => ({
     borderRadius: 12,
     overflow: 'hidden',
   },
-  
+
   // Fullscreen variant (default)
   fullscreenContainer: {
     flex: 1,
@@ -301,10 +275,10 @@ const useStyles = createThemedStyles(theme => ({
     flex: 1,
     paddingHorizontal: 12,
   },
-  
+
   // Compact variant - centered modal
   compactContainer: {
-    flex:1,
+    flex: 1,
     backgroundColor: theme.colors.background,
   },
   compactHeader: {
@@ -317,12 +291,12 @@ const useStyles = createThemedStyles(theme => ({
     gap: 8,
   },
   compactContent: {
-    flex:1,
+    flex: 1,
     gap: 12,
     padding: 8,
     borderRadius: 8,
   },
-  
+
   // Page variant - fullscreen with PageHeader
   pageContainer: {
     flex: 1,

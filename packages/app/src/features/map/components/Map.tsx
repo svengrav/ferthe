@@ -1,17 +1,23 @@
 import { getAppContext } from '@app/appContext'
+import { ENV } from '@app/env'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { View } from 'react-native'
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
 import Animated from 'react-native-reanimated'
 import { useMapGestures } from '../hooks/useMapGestures'
-import { useMapBoundary, useMapCanvas, useMapSpots, useMapTrailId, useMapViewport, useSetTappedSpot } from '../stores/mapStore'
+import { useMapBoundary, useMapCanvas, useMapLayer, useMapSpots, useMapTrailId, useMapViewport, useSetTappedSpot } from '../stores/mapStore'
 import { MapTheme, useMapTheme } from '../stores/mapThemeStore'
 import { mapUtils } from '../utils/geoToScreenTransform.'
 import MapDeviceCords from './MapDeviceCords'
+import MapLayerSwitch from './MapLayerSwitch'
+import MapOverlay from './MapOverlay'
 import { MapScanner, MapScannerControl } from './MapScanner'
+import MapZoomModeIndicator from './MapZoomModeIndicator'
 import MapCenterMarker from './surface/MapCenterMarker'
 import MapClues from './surface/MapClues'
+import MapDebugBoundaries from './surface/MapDebugBoundaries'
 import MapDeviceMarker from './surface/MapDeviceMarker'
+import MapOffscreenIndicators from './surface/MapOffscreenIndicators'
 import MapRadius from './surface/MapRadius'
 import MapSnap from './surface/MapSnap'
 import MapSpots from './surface/MapSpots'
@@ -26,10 +32,13 @@ export function Map() {
   const trailId = useMapTrailId()
   const boundary = useMapBoundary()
   const spots = useMapSpots()
+  const mapLayer = useMapLayer()
   const setTappedSpot = useSetTappedSpot()
   const mapTheme = useMapTheme()
   const theme = useThemeStore()
   const styles = createStyles(theme, mapTheme, canvas.size)
+
+  const isOverview = mapLayer === 'OVERVIEW'
 
   const onTap = (position: { x: number, y: number }) => {
     const geoPosition = mapUtils.positionToCoordinates(position, boundary, canvas.size)
@@ -63,23 +72,34 @@ export function Map() {
     <>
       <View style={[styles.contentContainer]} id='map-content' >
         <MapDeviceCords />
-        <GestureHandlerRootView id='map-gesture-root' style={{ width: canvas.size.width, height: canvas.size.height }}>
-          <GestureDetector gesture={gesture} >
-            {/* container = Visible view of the map for the user */}
-            <Animated.View style={[styles.map, animatedStyles,]} id='map-inner'>
-              <MapSurface />
-              <MapRadius />
-              <MapScanner />
-              <MapTrailPath />
-              <MapClues />
-              <MapSnap />
-              <MapCenterMarker />
-              <MapSpots />
-              <MapDeviceMarker />
-            </Animated.View>
-          </GestureDetector>
-        </GestureHandlerRootView>
-        <MapScannerControl startScan={() => sensorApplication.startScan(trailId)} />
+        <MapZoomModeIndicator />
+        <MapLayerSwitch />
+
+        {/* Overview mode: Show simplified overlay */}
+        {isOverview && <MapOverlay />}
+
+        {/* Canvas mode: Show interactive map */}
+        {!isOverview && (
+          <GestureHandlerRootView id='map-gesture-root' style={{ width: canvas.size.width, height: canvas.size.height }}>
+            <GestureDetector gesture={gesture} >
+              <Animated.View style={[styles.map, animatedStyles]} id='map-inner'>
+                <MapSurface />
+                <MapRadius />
+                <MapScanner />
+                <MapTrailPath />
+                <MapClues />
+                <MapSnap />
+                <MapCenterMarker />
+                <MapSpots />
+                <MapDeviceMarker />
+                {ENV.enableMapDebug && <MapDebugBoundaries />}
+              </Animated.View>
+            </GestureDetector>
+            <MapOffscreenIndicators />
+          </GestureHandlerRootView>
+        )}
+
+        {!isOverview && <MapScannerControl startScan={() => sensorApplication.startScan(trailId)} />}
       </View>
     </>
   )

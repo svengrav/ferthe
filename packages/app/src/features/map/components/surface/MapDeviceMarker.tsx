@@ -8,6 +8,12 @@ import { useCompensatedScale, useMapBoundary, useMapCanvas, useMapDevice } from 
 import { useMapTheme } from '../../stores/mapThemeStore'
 import { mapUtils } from '../../utils/geoToScreenTransform.'
 
+export interface MapDeviceMarkerProps {
+  boundary?: GeoBoundary
+  canvasSize?: { width: number; height: number }
+  compensatedScale?: number
+}
+
 // Arrow SVG constants
 const SVG_VIEWBOX = '0 0 18 18'
 const CIRCLE_CENTER = 9
@@ -75,14 +81,23 @@ function Arrow({ rotation = 0, fill }: ArrowProps) {
 
 /**
  * Map device marker component that displays the user's location and heading on the map
+ * @param props.boundary - Optional boundary override (uses store if not provided)
+ * @param props.canvasSize - Optional canvas size override (uses store if not provided)
+ * @param props.compensatedScale - Optional scale override for marker size compensation
  */
-function MapDeviceMarker() {
+function MapDeviceMarker({ boundary: propBoundary, canvasSize: propCanvasSize, compensatedScale: propScale }: MapDeviceMarkerProps = {}) {
   const { styles } = useApp(useMarkerStyles)
   const device = useMapDevice()
-  const scale = useCompensatedScale()
+  const storeScale = useCompensatedScale()
   const canvas = useMapCanvas()
-  const boundary = useMapBoundary()
-  const { getMarkerPosition } = useMarkerPosition(device.location, boundary, canvas.size)
+  const storeBoundary = useMapBoundary()
+
+  // Use props if provided, otherwise fall back to store
+  const boundary = propBoundary ?? storeBoundary
+  const size = propCanvasSize ?? canvas.size
+  const scale = propScale ?? storeScale
+
+  const { getMarkerPosition } = useMarkerPosition(device.location, boundary, size)
   const marker = getMarkerPosition()
   const mapTheme = useMapTheme()
 

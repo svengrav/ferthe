@@ -361,12 +361,12 @@ const createDiscoveryTrail = (accountId: string, trail: Trail, discoveries: Disc
 }
 
 /**
- * Determines map boundaries based on trail region or user location + radius
+ * Determines map boundaries based on trail boundary or user location + radius
  */
 const getMapBoundary = (trail: Trail, userLocation: GeoLocation, defaultRadiusInMeters: number = 5000): GeoBoundary => {
-  // If trail has a region defined, use that
-  if (trail.region) {
-    return geoUtils.calculateBoundaries(trail.region.center, trail.region.radius * 1000) // Convert km to meters
+  // If trail has a boundary defined, use that
+  if (trail.boundary) {
+    return trail.boundary
   }
 
   // Otherwise, use user location + default radius

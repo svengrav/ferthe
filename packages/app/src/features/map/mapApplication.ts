@@ -1,15 +1,14 @@
-import { getMapService } from './utils/mapService'
-
 import { DiscoveryApplication, getDiscoveryTrailData } from '@app/features/discovery'
 import { discoveryService } from '@app/features/discovery/logic/discoveryService'
 import { getSensorData, SensorApplication } from '@app/features/sensor'
 import { logger } from '@app/shared/utils/logger'
-import { discoveryTrailStore } from '../discovery/stores/discoveryTrailStore'
+
 import { getMapState, getMapStoreActions } from './stores/mapStore'
 import { createMapState, MAP_DEFAULT } from './types/map'
+import { getMapService } from './utils/mapService'
 
 export interface MapApplication {
-  requestMapState: (viewbox?: { width: number; height: number }) => Promise<void>
+  requestMapState: () => Promise<void>
 }
 
 interface MapApplicationOptions {
@@ -17,90 +16,115 @@ interface MapApplicationOptions {
   discoveryApplication?: DiscoveryApplication
 }
 
+const DEFAULT_VIEWPORT_WIDTH = 550
+const MAX_BOUNDARY_RADIUS = 5000
+
 export function createMapApplication(options: MapApplicationOptions = {}): MapApplication {
   const { discoveryApplication, sensor } = options
-  const { setDevice, setCompass, setSnap, setState, setRegion, setBoundary } = getMapStoreActions()
-  const { getCompass, calculateMapRegion, calculateDeviceBoundaryStatus, calculateMapSnap, calculateOptimalScale } = getMapService()
 
+  // Store actions
+  const { setDevice, setCompass, setSnap, setState } = getMapStoreActions()
+
+  // Service functions
+  const {
+    getCompass,
+    getTrailBoundary,
+    calculateMetersPerPixel,
+    evaluateZoomMode,
+    calculateDeviceBoundaryStatus,
+    calculateMapSnap,
+    calculateOptimalScale,
+    calculateZoomTransitionScale,
+    calculateCanvasSize,
+    clampBoundaryToRadius,
+  } = getMapService()
+
+  // Device updates → Update compass and snap state
   sensor?.onDeviceUpdate(device => {
-    const { trail, snap, discoveries, spots, lastDiscovery } = getDiscoveryTrailData()
+    const { trail, snap, spots, lastDiscovery } = getDiscoveryTrailData()
+    if (!trail) return
 
-    setDevice({
-      location: device.location,
-      heading: device.heading,
-    })
+    setDevice({ location: device.location, heading: device.heading })
     setCompass(getCompass(device.heading))
+
     const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
-    const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
-    const { boundary, region } = calculateMapRegion(trail?.region, device?.location)
-
-    setBoundary(boundary)
-    setRegion({
-      ...region,
-      innerRadius: 200,
-    })
-
-    setSnap(snapState)
+    setSnap(calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation))
   })
 
+  // Trail updates → Rebuild map state
   discoveryApplication?.onDiscoveryTrailUpdate(trail => {
-    newMapState()
+    logger.log('onDiscoveryTrailUpdate triggered', { trailId: trail?.id })
+    updateMapState()
   })
 
-  discoveryTrailStore.subscribe(st => {
-    logger.log('Discovery Store Updated')
-  })
-
-  discoveryApplication?.onNewDiscoveries(d => { })
-
-  const newMapState = async (viewbox?: { width: number; height: number }) => {
-    const { trail, scannedClues, previewClues, spots, snap, discoveries, lastDiscovery } = getDiscoveryTrailData()
-    const viewboxSize = getMapState().viewport
+  /**
+   * Builds complete map state from current discovery and sensor data
+   */
+  const updateMapState = async () => {
+    const { trail, scannedClues, previewClues, spots, snap, lastDiscovery } = getDiscoveryTrailData()
+    const currentState = getMapState()
+    const viewboxSize = currentState.viewport
     const { device } = getSensorData()
+
     if (!trail) {
-      // Trail not loaded yet - silently return and wait for discovery state
+      logger.log('updateMapState: No trail yet')
       return
     }
-    const { boundary, region } = calculateMapRegion(trail.region, device?.location)
+
+    // Calculate boundaries
+    const trailBoundary = getTrailBoundary(trail, spots)
+    const boundary = clampBoundaryToRadius(trailBoundary, device?.location, MAX_BOUNDARY_RADIUS)
+    const canvasSize = calculateCanvasSize(boundary)
+
+    // Calculate zoom mode
+    const viewportWidth = viewboxSize.width || DEFAULT_VIEWPORT_WIDTH
+    const metersPerPixel = calculateMetersPerPixel(boundary, viewportWidth)
+    const newZoomMode = evaluateZoomMode(metersPerPixel, viewportWidth, currentState.zoomMode)
+
+    // Calculate snap state
     const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
     const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
-    setState(
-      createMapState(defaults => ({
-        status: 'ready',
-        boundary: boundary,
-        compass: getCompass(device?.heading || 0),
-        device: {
-          location: device?.location || { lat: 0, lon: 0 },
-          heading: device?.heading || 0,
-        },
-        scannedClues: scannedClues || [],
-        previewClues: previewClues || [],
-        trailId: trail?.id || '',
-        spots: spots,
-        deviceStatus: calculateDeviceBoundaryStatus(device?.location, boundary),
-        region: {
-          ...region,
-          innerRadius: defaults.region.innerRadius,
-        },
-        canvas: {
-          size: {
-            width: MAP_DEFAULT.mapSize.width,
-            height: MAP_DEFAULT.mapSize.height,
-          },
-          scale: calculateOptimalScale(defaults.canvas.size, viewboxSize),
-          image: trail?.map?.image,
-        },
-        scanner: {
-          radius: trail?.options?.scannerRadius || MAP_DEFAULT.radius,
-        },
-        snap: snapState,
-        viewport: viewboxSize,
-        scale: MAP_DEFAULT.scale.init,
-      }))
-    )
+
+    // Build new state
+    const newState = createMapState(() => ({
+      status: 'ready',
+      zoomMode: newZoomMode,
+      boundary,
+      trailBoundary,
+      compass: getCompass(device?.heading || 0),
+      device: {
+        location: device?.location || { lat: 0, lon: 0 },
+        heading: device?.heading || 0,
+      },
+      scannedClues: scannedClues || [],
+      previewClues: previewClues || [],
+      trailId: trail?.id || '',
+      spots,
+      deviceStatus: calculateDeviceBoundaryStatus(device?.location, boundary),
+      canvas: {
+        size: canvasSize,
+        scale: calculateOptimalScale(canvasSize, viewboxSize),
+        image: trail?.map?.image,
+      },
+      scanner: {
+        radius: trail?.options?.scannerRadius || MAP_DEFAULT.radius,
+      },
+      snap: snapState,
+      viewport: viewboxSize,
+      scale: MAP_DEFAULT.scale.init,
+    }))
+
+    setState(newState)
+
+    // Handle zoom mode transition
+    if (newZoomMode !== currentState.zoomMode) {
+      const targetScale = calculateZoomTransitionScale(newZoomMode, boundary, viewboxSize, currentState.canvas)
+      logger.log(`Zoom mode transition: ${currentState.zoomMode} → ${newZoomMode}`)
+      setState({ ...newState, zoomMode: newZoomMode, scale: targetScale })
+    }
   }
 
   return {
-    requestMapState: newMapState,
+    requestMapState: updateMapState,
   }
 }

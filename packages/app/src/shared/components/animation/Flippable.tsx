@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
-import { Animated, StyleSheet, TouchableWithoutFeedback, View, ViewStyle } from 'react-native'
+import { StyleSheet, TouchableWithoutFeedback, View, ViewStyle } from 'react-native'
+import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 
 type FlippableProps = {
   flipped: boolean
@@ -10,40 +11,16 @@ type FlippableProps = {
 }
 
 export const Flippable = ({ front, back, style, flipped, onTap }: FlippableProps) => {
-  const animatedValue = useRef(new Animated.Value(0)).current
-
+  const rotation = useSharedValue(flipped ? 180 : 0)
   const didMount = useRef(false)
   const lastFlipped = useRef(flipped)
-
-  // Initialzustand: sofort setzen (keine Animation)
-  if (!didMount.current) {
-    animatedValue.setValue(flipped ? 180 : 0)
-  }
-
-  const frontRotate = animatedValue.interpolate({
-    inputRange: [0, 180],
-    outputRange: ['0deg', '180deg'],
-  })
-
-  const backRotate = animatedValue.interpolate({
-    inputRange: [0, 180],
-    outputRange: ['180deg', '360deg'],
-  })
-
-  const animateTo = (next: boolean) => {
-    Animated.spring(animatedValue, {
-      toValue: next ? 180 : 0,
-      useNativeDriver: true,
-      friction: 8,
-      tension: 10,
-    }).start()
-  }
 
   useEffect(() => {
     // Mark mount done
     if (!didMount.current) {
       didMount.current = true
       lastFlipped.current = flipped
+      rotation.value = flipped ? 180 : 0
       return
     }
 
@@ -51,22 +28,45 @@ export const Flippable = ({ front, back, style, flipped, onTap }: FlippableProps
     if (lastFlipped.current === flipped) return
     lastFlipped.current = flipped
 
-    animateTo(flipped)
+    rotation.value = withSpring(flipped ? 180 : 0, {
+      damping: 15,
+      stiffness: 100,
+    })
   }, [flipped])
+
+  const frontAnimatedStyle = useAnimatedStyle(() => {
+    const rotateY = interpolate(rotation.value, [0, 180], [0, 180])
+    return {
+      transform: [
+        { perspective: 1000 },
+        { rotateY: `${rotateY}deg` },
+      ],
+    }
+  })
+
+  const backAnimatedStyle = useAnimatedStyle(() => {
+    const rotateY = interpolate(rotation.value, [0, 180], [180, 360])
+    return {
+      transform: [
+        { perspective: 1000 },
+        { rotateY: `${rotateY}deg` },
+      ],
+    }
+  })
 
   return (
     <TouchableWithoutFeedback onPress={onTap}>
       <View style={[styles.container, style]}>
         <Animated.View
           pointerEvents={flipped ? 'none' : 'auto'}
-          style={[styles.face, { transform: [{ perspective: 1000 }, { rotateY: frontRotate },] }]}
+          style={[styles.face, frontAnimatedStyle]}
         >
           {front}
         </Animated.View>
 
         <Animated.View
           pointerEvents={flipped ? 'auto' : 'none'}
-          style={[styles.face, { transform: [{ perspective: 1000 }, { rotateY: backRotate }] }]}
+          style={[styles.face, backAnimatedStyle]}
         >
           {back}
         </Animated.View>

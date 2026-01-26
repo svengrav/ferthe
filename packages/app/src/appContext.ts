@@ -1,4 +1,5 @@
 import { APIContext } from '@app/api/apiContext'
+import { ENV } from '@app/env'
 import { AccountSession } from '@shared/contracts'
 import { StatusResult } from './api/utils'
 import { AccountApplication, createAccountApplication } from './features/account'
@@ -85,7 +86,7 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
       environment,
     },
     system: {
-      isDevelopment: environment === 'development',
+      isDevelopment: ENV.isDevelopment,
       checkStatus: apiContext.system.checkStatus,
     },
     discoveryApplication,
