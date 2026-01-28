@@ -25,7 +25,7 @@ startProcess("Storage", "deno", ["run", "--allow-all", "./tools/localStorageServ
 await new Promise(resolve => setTimeout(resolve, 2000));
 
 // Start API Server
-startProcess("API", "deno", ["run", "-A", "--watch", "api/index.ts"], "./packages/core")  
+startProcess("API", "deno", ["run", "-A", "--watch=.", "api/index.ts"], "./packages/core")  
 
 // Start Expo Web Server
 startProcess("App", "npm", ["run", "dev"], "./packages/app");

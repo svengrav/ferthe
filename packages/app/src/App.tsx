@@ -7,9 +7,9 @@ import { Notification, SplashView } from '@app/shared/components'
 import { Navigation } from '@app/shared/navigation/Navigation'
 import { Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter'
 import {
-    Merriweather_400Regular,
-    Merriweather_600SemiBold,
-    Merriweather_700Bold,
+  Merriweather_400Regular,
+  Merriweather_600SemiBold,
+  Merriweather_700Bold,
 } from '@expo-google-fonts/merriweather'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
@@ -19,7 +19,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { createApiContext } from './api'
 import { configureAppContext } from './appContext'
-import { getAppConfig } from './env'
+import { ENV } from './env'
 import { getSession } from './features/account/'
 import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
 import { getDeviceConnector } from './features/sensor/device/deviceConnector'
@@ -36,7 +36,7 @@ const useAppInitialization = () => {
   useEffect(() => {
     async function initialize() {
       try {
-        const config = getAppConfig()
+        const config = ENV
 
         // Global Configuration
         LogBox.ignoreAllLogs()
@@ -49,13 +49,13 @@ const useAppInitialization = () => {
           Merriweather_400Regular,
           Merriweather_600SemiBold,
           Merriweather_700Bold,
-        }).catch(() => {})
+        }).catch(() => { })
 
         // Create API Context
         const api = createApiContext({
           getAccountSession: getSession,
-          apiEndpoint: config.API_ENDPOINT,
-          timeout: config.API_TIMEOUT,
+          apiEndpoint: config.apiEndpoint,
+          timeout: config.apiTimeout,
         })
 
         // Backend Health Check - wait until available
@@ -68,13 +68,13 @@ const useAppInitialization = () => {
 
         // Configure App Context
         const context = configureAppContext({
-          environment: config.ENV_TYPE,
+          environment: config.isProduction ? 'production' : 'development',
           apiContext: api,
           connectors: {
             deviceConnector: getDeviceConnector(),
             secureStoreConnector: createStoreConnector({
-              json: { baseDirectory: config.JSON_STORE_BASE_DIRECTORY },
-              type: config.STORE_TYPE,
+              json: { baseDirectory: config.jsonStoreUrl },
+              type: config.storeType,
             }),
           },
         })

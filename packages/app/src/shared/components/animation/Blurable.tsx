@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
-import { Animated, Image, ImageStyle, StyleSheet, View, ViewStyle } from 'react-native'
+import React from 'react'
+import { Image, ImageStyle, StyleSheet, View, ViewStyle } from 'react-native'
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 
 type BlurableProps = {
   previewSource: any     // z. B. require(...) oder { uri: ... }
@@ -16,15 +17,15 @@ export const Blurable: React.FC<BlurableProps> = ({
   containerStyle,
   fadeDuration = 400,
 }) => {
-  const [loaded] = useState(new Animated.Value(0))
+  const opacity = useSharedValue(0)
 
   const onImageLoad = () => {
-    Animated.timing(loaded, {
-      toValue: 1,
-      duration: fadeDuration,
-      useNativeDriver: true,
-    }).start()
+    opacity.value = withTiming(1, { duration: fadeDuration })
   }
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }))
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -41,9 +42,7 @@ export const Blurable: React.FC<BlurableProps> = ({
         style={[
           style,
           styles.absolute,
-          {
-            opacity: loaded,
-          },
+          animatedStyle,
         ]}
         onLoad={onImageLoad}
         resizeMode="cover"

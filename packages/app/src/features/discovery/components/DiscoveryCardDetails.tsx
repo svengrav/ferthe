@@ -2,8 +2,9 @@ import { getAppContext } from '@app/appContext'
 import { Text } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { useEffect, useRef, useState } from 'react'
-import { Animated, ScrollView, useWindowDimensions, View } from 'react-native'
+import { useEffect, useState } from 'react'
+import { useWindowDimensions, View } from 'react-native'
+import Animated, { interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 import { DiscoveryCardState as Card } from '../logic/types'
 import DiscoveryReactionSection from './DiscoveryReactionSection'
 import DiscoveryUserContentSection from './DiscoveryUserContentSection'
@@ -62,18 +63,27 @@ const useCardDimensions = () => {
  * Hook to handle scroll-based animations for title effects
  */
 const useCardAnimations = (IMAGE_HEIGHT: number) => {
-  const scrollY = useRef(new Animated.Value(0)).current
+  const scrollY = useSharedValue(0)
 
-  // Calculate scroll-based animations
-  const titleOpacity = scrollY.interpolate({
-    inputRange: [0, IMAGE_HEIGHT * 0.4, IMAGE_HEIGHT * 0.6],
-    outputRange: [1, 1, 0],
-    extrapolate: 'clamp',
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y
+    },
+  })
+
+  const titleOpacityStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      scrollY.value,
+      [0, IMAGE_HEIGHT * 0.4, IMAGE_HEIGHT * 0.6],
+      [1, 1, 0],
+      'clamp'
+    )
+    return { opacity }
   })
 
   return {
-    scrollY,
-    titleOpacity,
+    scrollHandler,
+    titleOpacityStyle,
   }
 }
 
@@ -91,7 +101,7 @@ function DiscoveryCardDetails({ card }: DiscoveryCardProps) {
   const { discoveryApplication } = getAppContext()
   const { title, image, description, discoveryId } = card
   const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT } = useCardDimensions()
-  const { scrollY, titleOpacity } = useCardAnimations(IMAGE_HEIGHT)
+  const { scrollHandler, titleOpacityStyle } = useCardAnimations(IMAGE_HEIGHT)
 
   // Content state
   const [isLoading, setIsLoading] = useState(false)
@@ -121,7 +131,7 @@ function DiscoveryCardDetails({ card }: DiscoveryCardProps) {
           style={[
             styles.fixedTitleContainer,
             { width: CARD_WIDTH, top: IMAGE_HEIGHT - 70 },
-            { opacity: titleOpacity }
+            titleOpacityStyle
           ]}
           pointerEvents='none'
         >
@@ -130,16 +140,13 @@ function DiscoveryCardDetails({ card }: DiscoveryCardProps) {
       </View>
 
       {/* Scrollable content that overlays the image */}
-      <ScrollView
+      <Animated.ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={true}
         bounces={true}
         scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
+        onScroll={scrollHandler}
       >
         {/* Empty space to allow scrolling past the image */}
         <View style={{ height: IMAGE_HEIGHT }} />
@@ -171,7 +178,7 @@ function DiscoveryCardDetails({ card }: DiscoveryCardProps) {
             />
           )}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   )
 }

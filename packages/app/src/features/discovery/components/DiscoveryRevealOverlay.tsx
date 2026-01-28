@@ -1,15 +1,17 @@
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 import { ReactNode, useEffect, useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import Animated, {
-  runOnJS,
   useSharedValue,
   withDelay,
   withRepeat,
   withSequence,
   withTiming
 } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
+
+import { Text } from '@app/shared/components'
+import { createThemedStyles } from '@app/shared/theme'
+import { useApp } from '@app/shared/useApp'
 
 const FADE_IN_DELAY = 2000
 const FADE_OUT_DELAY = 1000
@@ -40,7 +42,7 @@ const useRevealAnimations = (onRevealComplete: () => void) => {
     fadeOut.value = withDelay(
       FADE_OUT_DELAY,
       withTiming(0, { duration: ANIMATION_DURATION }, () => {
-        runOnJS(onRevealComplete)()
+        scheduleOnRN(onRevealComplete)
       })
     )
   }
@@ -50,8 +52,6 @@ const useRevealAnimations = (onRevealComplete: () => void) => {
 
 interface DiscoveryRevealOverlayProps {
   mode: 'reveal' | 'instant'
-  imageHeight: number
-  imageWidth: number
   blurredImageUrl: string
   onTriggerReveal: () => void
   children: ReactNode
@@ -62,14 +62,8 @@ interface DiscoveryRevealOverlayProps {
  * Wraps children and shows blur-to-clear reveal animation in reveal mode
  * In instant mode, shows children immediately without overlay
  */
-export const DiscoveryRevealOverlay = ({
-  mode,
-  imageHeight,
-  imageWidth,
-  blurredImageUrl,
-  onTriggerReveal,
-  children
-}: DiscoveryRevealOverlayProps) => {
+export function DiscoveryRevealOverlay(props: DiscoveryRevealOverlayProps) {
+  const { mode, blurredImageUrl, onTriggerReveal, children } = props
   const { styles } = useApp(useStyles)
   const [isRevealed, setIsRevealed] = useState(mode === 'instant')
 
@@ -85,7 +79,6 @@ export const DiscoveryRevealOverlay = ({
   if (isRevealed) {
     return <>{children}</>
   }
-
 
   const handlePress = () => {
     triggerReveal()
@@ -113,7 +106,7 @@ export const DiscoveryRevealOverlay = ({
           </Animated.View>
 
           {/* Discovery message below tap icon */}
-          <Text style={styles.previewText}>
+          <Text variant="body" style={styles.previewText}>
             You discovered a new spot!
           </Text>
         </Pressable>

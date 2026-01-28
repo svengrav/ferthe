@@ -3,13 +3,12 @@
  * API-kompatibel mit logger.log/error/warn
  */
 
-import { getAppConfig } from "@app/env"
+import { ENV } from "@app/env"
 
 type LogLevel = 'log' | 'warn' | 'error'
 
 const write = (level: LogLevel, ...args: any[]): void => {
-  const { ENABLE_LOGGER } = getAppConfig()
-  if (!ENABLE_LOGGER) return
+  if (!ENV.enableLogger) return
 
   const timestamp = new Date().toISOString()
   const prefix = `[${timestamp}] [${level.toUpperCase()}]`
