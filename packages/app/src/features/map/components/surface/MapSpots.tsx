@@ -1,8 +1,9 @@
 import { Text } from '@app/shared/components'
+import { GeoBoundary } from '@shared/geo'
 import { Spot } from '@shared/contracts'
 import { memo } from 'react'
 import { Image, View } from 'react-native'
-import { useCompensatedScale, useMapBoundary, useMapCanvas, useMapSpots } from '../../stores/mapStore'
+import { useCompensatedScale, useMapCanvas, useMapSpots } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
 import { GeoPositioner } from './MapElements'
 
@@ -22,11 +23,10 @@ const FIRST_LETTER_LENGTH = 1
 /**
  * Component that renders spot markers on the map with images or initials
  */
-function MapSpots() {
+function MapSpots({ boundary }: { boundary: GeoBoundary }) {
   const scale = useCompensatedScale()
   const mapTheme = useMapTheme()
   const { size } = useMapCanvas()
-  const boundary = useMapBoundary()
   const spots = useMapSpots()
 
   // Helper function to create marker container styles

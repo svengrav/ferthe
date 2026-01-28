@@ -1,8 +1,9 @@
+import { GeoBoundary } from '@shared/geo'
 import { Clue } from '@shared/contracts'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import { useCompensatedScale, useMapBoundary, useMapCanvas, useMapPreviewClues, useMapScannedClues } from '../../stores/mapStore'
+import { useCompensatedScale, useMapCanvas, useMapPreviewClues, useMapScannedClues } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
 import { GeoPositioner } from './MapElements'
 
@@ -61,12 +62,11 @@ const useScanCluesAnimation = (scanClues: Clue[]) => {
 /**
  * Component that renders map clues with animation support for scan events
  */
-function MapClues() {
+function MapClues({ boundary }: { boundary: GeoBoundary }) {
   const scale = useCompensatedScale()
   const previewClues = useMapPreviewClues()
   const scannedClues = useMapScannedClues()
   const canvas = useMapCanvas()
-  const boundary = useMapBoundary()
   const mapTheme = useMapTheme()
   // Separate clues by source type
 

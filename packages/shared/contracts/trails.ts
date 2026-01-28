@@ -1,5 +1,5 @@
 import { Spot, SpotPreview } from '@shared/contracts/index.ts'
-import { GeoLocation } from '@shared/geo/index.ts'
+import { GeoBoundary } from '@shared/geo/index.ts'
 import { AccountContext } from './accounts.ts'
 import { Result } from './results.ts'
 import { TrailSpot } from './trailSpots.ts'
@@ -37,7 +37,7 @@ export interface Trail {
     id: string
     url: string
   }
-  region?: Region
+  boundary: GeoBoundary
   options: Options
   createdAt: Date
   updatedAt: Date
@@ -58,13 +58,6 @@ export type DiscoveryMode = 'free' | 'sequence'
  */
 export type PreviewMode = 'hidden' | 'preview' | 'discovered'
 
-/**
- * Represents a geographical location with latitude and longitude.
- */
-interface Region {
-  center: GeoLocation
-  radius: number
-}
 
 /**
  * Defines the options for a trail.

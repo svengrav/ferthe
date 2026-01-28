@@ -1,16 +1,16 @@
+import { GeoBoundary } from '@shared/geo'
 import { memo, useMemo } from 'react'
-import { useCompensatedScale, useMapBoundary, useMapSize, useMapSpots } from '../../stores/mapStore'
+import { useCompensatedScale, useMapSize, useMapSpots } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
 import { GeoPath } from './MapElements'
 
-function MapTrailPath() {
+function MapTrailPath({ boundary }: { boundary: GeoBoundary }) {
   const scale = useCompensatedScale()
   const spots = useMapSpots()
   const points = useMemo(() =>
     spots.map(spot => spot.location),
     [spots]
   )
-  const boundary = useMapBoundary()
   const size = useMapSize()
   const mapTheme = useMapTheme()
 

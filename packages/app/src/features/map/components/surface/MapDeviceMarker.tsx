@@ -1,12 +1,10 @@
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { GeoBoundary, GeoLocation } from '@shared/geo/'
 import { memo } from 'react'
 import { View } from 'react-native'
 import Svg, { Circle, Polygon } from 'react-native-svg'
-import { useCompensatedScale, useMapBoundary, useMapCanvas, useMapDevice } from '../../stores/mapStore'
+import { useCompensatedScale, useMapCanvas, useMapDevice } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
-import { mapUtils } from '../../utils/geoToScreenTransform.'
 
 // Arrow SVG constants
 const SVG_VIEWBOX = '0 0 18 18'
@@ -22,20 +20,6 @@ const MARKER_BORDER_RADIUS = 25
 // Default colors
 const DEFAULT_FILL_COLOR = 'rgba(255, 255, 255, 1)'
 const CIRCLE_BACKGROUND = '#4e4e4e48'
-
-/**
- * Hook to calculate marker position and styles
- */
-const useMarkerPosition = (location: GeoLocation, boundary: GeoBoundary, size: { width: number; height: number }) => {
-  const mapPosition = mapUtils.coordinatesToPosition(location, boundary, size)
-
-  const getMarkerPosition = () => ({
-    left: mapPosition.x,
-    top: mapPosition.y,
-  })
-
-  return { getMarkerPosition }
-}
 
 interface ArrowProps {
   rotation?: number
@@ -75,23 +59,27 @@ function Arrow({ rotation = 0, fill }: ArrowProps) {
 
 /**
  * Map device marker component that displays the user's location and heading on the map
+ * Fixed at viewport center - map moves around device
  */
 function MapDeviceMarker() {
   const { styles } = useApp(useMarkerStyles)
   const device = useMapDevice()
   const scale = useCompensatedScale()
-  const canvas = useMapCanvas()
-  const boundary = useMapBoundary()
-  const { getMarkerPosition } = useMarkerPosition(device.location, boundary, canvas.size)
-  const marker = getMarkerPosition()
   const mapTheme = useMapTheme()
+  const canvas = useMapCanvas()
 
   const fillColor = mapTheme.device.fill || DEFAULT_FILL_COLOR
+
+  // Device is always centered in viewport
+  const centerPosition = {
+    left: canvas.size.width / 2,
+    top: canvas.size.height / 2,
+  }
 
   return (
     <View style={[
       styles!.marker,
-      marker,
+      centerPosition,
       { transform: [{ scale: scale }] }
     ]}>
       <Arrow rotation={device.heading} fill={fillColor} />

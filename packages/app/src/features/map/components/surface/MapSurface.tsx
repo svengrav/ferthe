@@ -1,10 +1,11 @@
+import { GeoBoundary } from "@shared/geo"
 import { Image } from "@app/shared/components"
 import { memo } from "react"
 import { View } from "react-native"
 import { useMapCanvas } from "../../stores/mapStore"
 
 // Memoized Map Image Component to prevent unnecessary re-renders
-function MapSurface() {
+function MapSurface({ boundary }: { boundary?: GeoBoundary }) {
   const { size, image } = useMapCanvas()
   const imageStyle = {
     width: size.width,

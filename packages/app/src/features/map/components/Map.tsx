@@ -1,22 +1,14 @@
 import { getAppContext } from '@app/appContext'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { View } from 'react-native'
-import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
-import Animated from 'react-native-reanimated'
 import { useMapGestures } from '../hooks/useMapGestures'
-import { useMapBoundary, useMapCanvas, useMapSpots, useMapTrailId, useMapViewport, useSetTappedSpot } from '../stores/mapStore'
+import { useMapBoundary, useMapCanvas, useMapDevice, useMapSpots, useMapTrailId, useMapViewport, useSetTappedSpot } from '../stores/mapStore'
 import { MapTheme, useMapTheme } from '../stores/mapThemeStore'
 import { mapUtils } from '../utils/geoToScreenTransform.'
 import MapDeviceCords from './MapDeviceCords'
-import { MapScanner, MapScannerControl } from './MapScanner'
-import MapCenterMarker from './surface/MapCenterMarker'
-import MapClues from './surface/MapClues'
+import { MapScannerControl } from './MapScanner'
+import { MapViewport } from './MapViewport.tsx'
 import MapDeviceMarker from './surface/MapDeviceMarker'
-import MapRadius from './surface/MapRadius'
-import MapSnap from './surface/MapSnap'
-import MapSpots from './surface/MapSpots'
-import MapSurface from './surface/MapSurface'
-import MapTrailPath from './surface/MapTrailPath'
 
 
 export function Map() {
@@ -24,20 +16,24 @@ export function Map() {
   const viewbox = useMapViewport()
   const canvas = useMapCanvas()
   const trailId = useMapTrailId()
-  const boundary = useMapBoundary()
+  const trailBoundary = useMapBoundary()
   const spots = useMapSpots()
   const setTappedSpot = useSetTappedSpot()
   const mapTheme = useMapTheme()
   const theme = useThemeStore()
+  const device = useMapDevice()
   const styles = createStyles(theme, mapTheme, canvas.size)
 
+  // Calculate device-centered viewport boundary (1000m radius)
+  const deviceViewportBoundary = mapUtils.calculateDeviceViewportBoundary(device.location)
+
   const onTap = (position: { x: number, y: number }) => {
-    const geoPosition = mapUtils.positionToCoordinates(position, boundary, canvas.size)
+    const geoPosition = mapUtils.positionToCoordinates(position, deviceViewportBoundary, canvas.size)
 
     // Check if tap is on a spot (with some tolerance)
     const TAP_TOLERANCE = 20 // pixels
     const tappedSpot = spots.find(spot => {
-      const spotScreenPos = mapUtils.coordinatesToPosition(spot.location, boundary, canvas.size)
+      const spotScreenPos = mapUtils.coordinatesToPosition(spot.location, deviceViewportBoundary, canvas.size)
       const distance = Math.sqrt(
         Math.pow(position.x - spotScreenPos.x, 2) +
         Math.pow(position.y - spotScreenPos.y, 2)
@@ -63,22 +59,25 @@ export function Map() {
     <>
       <View style={[styles.contentContainer]} id='map-content' >
         <MapDeviceCords />
-        <GestureHandlerRootView id='map-gesture-root' style={{ width: canvas.size.width, height: canvas.size.height }}>
+        {/* <GestureHandlerRootView id='map-gesture-root' style={{ width: canvas.size.width, height: canvas.size.height }}>
           <GestureDetector gesture={gesture} >
-            {/* container = Visible view of the map for the user */}
             <Animated.View style={[styles.map, animatedStyles,]} id='map-inner'>
-              <MapSurface />
-              <MapRadius />
-              <MapScanner />
-              <MapTrailPath />
-              <MapClues />
-              <MapSnap />
+              <MapSurface boundary={deviceViewportBoundary} />
+              <MapRadius boundary={deviceViewportBoundary} />
+              <MapScanner boundary={deviceViewportBoundary} />
+              <MapTrailPath boundary={deviceViewportBoundary} />
+              <MapClues boundary={deviceViewportBoundary} />
+              <MapSnap boundary={deviceViewportBoundary} />
               <MapCenterMarker />
-              <MapSpots />
-              <MapDeviceMarker />
+              <MapSpots boundary={deviceViewportBoundary} />
             </Animated.View>
           </GestureDetector>
-        </GestureHandlerRootView>
+          <MapDeviceMarker />
+        </GestureHandlerRootView> */}
+        <MapViewport deviceLocation={device.location}>
+          <MapDeviceMarker />
+        </MapViewport>
+
         <MapScannerControl startScan={() => sensorApplication.startScan(trailId)} />
       </View>
     </>

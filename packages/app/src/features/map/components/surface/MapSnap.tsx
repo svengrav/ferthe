@@ -1,13 +1,13 @@
 import { hexToRgbaWithIntensity } from "@app/shared/utils/colors"
+import { GeoBoundary } from "@shared/geo"
 import { memo } from "react"
-import { useCompensatedScale, useMapBoundary, useMapSize, useMapSnap } from "../../stores/mapStore"
+import { useCompensatedScale, useMapSize, useMapSnap } from "../../stores/mapStore"
 import { useMapTheme } from "../../stores/mapThemeStore"
 import { GeoPath } from "./MapElements"
 
-function MapSnap() {
+function MapSnap({ boundary }: { boundary: GeoBoundary }) {
   const scale = useCompensatedScale()
   const { startPoint, endPoint, intensity } = useMapSnap()
-  const boundary = useMapBoundary()
   const size = useMapSize()
   const mapTheme = useMapTheme()
   

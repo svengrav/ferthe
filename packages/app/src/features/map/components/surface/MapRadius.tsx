@@ -1,6 +1,6 @@
-import { GeoLocation } from '@shared/geo/'
+import { GeoBoundary, GeoLocation } from '@shared/geo/'
 import { memo } from 'react'
-import { useMapBoundary, useMapCanvas, useMapRadius } from '../../stores/mapStore'
+import { useMapCanvas, useMapRadius } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
 import { GeoMarker } from './MapElements'
 
@@ -12,10 +12,9 @@ const TRANSPARENT_FILL = 'none'
 /**
  * Component that renders concentric circles for inner and outer radius visualization
  */
-function MapRadius() {
+function MapRadius({ boundary }: { boundary: GeoBoundary }) {
   const { center, radius, innerRadius } = useMapRadius()
   const { size } = useMapCanvas()
-  const boundary = useMapBoundary()
 
   const mapTheme = useMapTheme()
   // Style configurations for inner and outer markers

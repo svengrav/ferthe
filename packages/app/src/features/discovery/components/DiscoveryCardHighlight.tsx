@@ -236,8 +236,6 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
       <View style={[styles.cardContainer, cardContainerStyles]}>
         <DiscoveryRevealOverlay
           mode={mode}
-          imageHeight={IMAGE_HEIGHT}
-          imageWidth={IMAGE_WIDTH}
           blurredImageUrl={card.image.blurredUrl || ''}
           onTriggerReveal={triggerReveal}
         >

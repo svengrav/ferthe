@@ -1,18 +1,18 @@
 import { Icon } from '@app/shared/components'
 import { Theme, useThemeStore } from '@app/shared/theme'
+import { GeoBoundary } from '@shared/geo'
 import { memo, useState } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useMapScannerAnimation } from '../hooks/useMapScannerAnimation'
-import { useMapBoundary, useMapCanvas, useMapDevice, useMapScanner } from '../stores/mapStore'
+import { useMapCanvas, useMapDevice, useMapScanner } from '../stores/mapStore'
 import { useMapTheme } from '../stores/mapThemeStore'
 import { mapUtils } from '../utils/geoToScreenTransform.'
 
 
-function MapScanner() {
+function MapScanner({ boundary }: { boundary: GeoBoundary }) {
   const device = useMapDevice()
   const { size } = useMapCanvas()
-  const boundary = useMapBoundary()
   const { radius } = useMapScanner()
   const mapTheme = useMapTheme()
 

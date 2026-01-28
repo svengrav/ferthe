@@ -16,6 +16,8 @@ const deepEqual = <T>(objA: T, objB: T): boolean => {
   return keysA.every(key => deepEqual((objA as any)[key], (objB as any)[key]))
 }
 
+export type MapLayer = 'CANVAS' | 'OVERVIEW'
+
 export interface MapState {
   status: 'uninitialized' | 'loading' | 'ready' | 'error'
   // Volatile UI State - changes frequently
@@ -44,6 +46,8 @@ export interface MapState {
   scanner: {
     radius: number
   }
+
+  mapLayer: MapLayer,
 
   boundary: GeoBoundary // Boundary of the map
 
@@ -98,6 +102,7 @@ export interface MapStateActions {
   setTrailId: (trailId: string) => void
   setBoundary: (boundary: GeoBoundary) => void
   setRegion: (region: { center: { lat: number; lon: number }; radius: number; innerRadius: number }) => void
+  setMapLayer: (layer: 'CANVAS' | 'OVERVIEW') => void
 }
 
 export const useMapStore = create<MapState & MapStateActions>(set => ({
@@ -109,6 +114,7 @@ export const useMapStore = create<MapState & MapStateActions>(set => ({
     location: { lat: 0, lon: 0 },
     heading: 0,
   },
+  mapLayer: 'CANVAS',
   deviceStatus: {
     isOutsideBoundary: false,
     distanceFromBoundary: 0,
@@ -172,7 +178,7 @@ export const useMapStore = create<MapState & MapStateActions>(set => ({
   setStatus: (status: 'uninitialized' | 'loading' | 'ready' | 'error') => set(state => (state.status !== status ? { status } : state)),
   setTrailId: (trailId: string) => set(state => (state.trailId !== trailId ? { trailId } : state)),
   setBoundary: (boundary: GeoBoundary) => set(state => (deepEqual(state.boundary, boundary) ? state : { boundary })),
-
+  setMapLayer: (mapLayer: 'CANVAS' | 'OVERVIEW') => set(state => (state.mapLayer !== mapLayer ? { mapLayer } : state)),
   setRegion: (region: { center: { lat: number; lon: number }; radius: number; innerRadius: number }) => set(state => (deepEqual(state.region, region) ? state : { region })),
 }))
 
@@ -204,6 +210,7 @@ export const useMapDevice = () => useMapStore(state => state.device)
 export const useMapViewport = () => useMapStore(state => state.viewport)
 export const useMapRadius = () => useMapStore(state => state.region)
 export const useMapTrailId = () => useMapStore(state => state.trailId)
+export const useMapLayer = () => useMapStore(state => state.mapLayer)
 
 // Additional state hooks
 export const useMapDeviceStatus = () => useMapStore(state => state.deviceStatus)
@@ -244,5 +251,6 @@ export const useSetScannedClues = () => useMapStore(state => state.setScannedClu
 export const useSetSpots = () => useMapStore(state => state.setSpots)
 export const useSetTappedSpot = () => useMapStore(state => state.setTappedSpot)
 export const useSetSnap = () => useMapStore(state => state.setSnap)
+export const useSetMapLayer = () => useMapStore(state => state.setMapLayer)
 
 export const getMapState = () => useMapStore.getState()

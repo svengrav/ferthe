@@ -1,8 +1,6 @@
-import { Modal, View } from 'react-native'
-import { Text, TouchableOpacity } from 'react-native'
-import { StyleSheet } from 'react-native'
-import { create } from 'zustand'
 import { Theme, useThemeStore } from '@app/shared/theme'
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { create } from 'zustand'
 
 interface NotificationState {
   visible: boolean
@@ -64,13 +62,7 @@ const createStyles = (theme: Theme) =>
       backgroundColor: theme.colors.surface,
       borderRadius: 10,
       padding: 8,
-      shadowColor: '#0000007c',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
+      boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)',
       elevation: 5,
       width: '80%',
     },

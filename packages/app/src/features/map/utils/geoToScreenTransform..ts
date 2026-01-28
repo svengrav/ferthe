@@ -2,6 +2,7 @@ import { GeoBoundary, GeoLocation, geoUtils } from '@shared/geo'
 
 // Default map content dimensions
 const METERS_PER_DEGREE_LATITUDE = 111000
+const DEVICE_VIEWPORT_RADIUS = 1000 // meters
 
 interface ScreenSize {
   width: number
@@ -154,10 +155,21 @@ const positionToCoordinates = (position: ScreenPosition, boundary: GeoBoundary, 
   return { lat, lon }
 }
 
+/**
+ * Calculate device-centered viewport boundary
+ * @param deviceLocation Current device location
+ * @param radiusMeters Viewport radius in meters (default 1000m)
+ * @returns GeoBoundary centered on device
+ */
+const calculateDeviceViewportBoundary = (deviceLocation: GeoLocation, radiusMeters: number = DEVICE_VIEWPORT_RADIUS): GeoBoundary => {
+  return geoUtils.calculateBoundaries(deviceLocation, radiusMeters)
+}
+
 export const mapUtils = {
   coordinatesToPosition,
   positionToCoordinates,
   calculateCircleDimensions,
   calculateScreenDimensions,
   metersToPixels,
+  calculateDeviceViewportBoundary,
 }

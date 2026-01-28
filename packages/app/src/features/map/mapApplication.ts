@@ -23,7 +23,8 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
   const { getCompass, calculateMapRegion, calculateDeviceBoundaryStatus, calculateMapSnap, calculateOptimalScale } = getMapService()
 
   sensor?.onDeviceUpdate(device => {
-    const { trail, snap, discoveries, spots, lastDiscovery } = getDiscoveryTrailData()
+    const { trail, snap, spots, lastDiscovery } = getDiscoveryTrailData()
+    if (!trail) return;
 
     setDevice({
       location: device.location,
@@ -32,13 +33,8 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     setCompass(getCompass(device.heading))
     const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
     const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
-    const { boundary, region } = calculateMapRegion(trail?.region, device?.location)
 
-    setBoundary(boundary)
-    setRegion({
-      ...region,
-      innerRadius: 200,
-    })
+    setBoundary(trail?.boundary)
 
     setSnap(snapState)
   })
@@ -61,13 +57,12 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
       // Trail not loaded yet - silently return and wait for discovery state
       return
     }
-    const { boundary, region } = calculateMapRegion(trail.region, device?.location)
     const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
     const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
     setState(
       createMapState(defaults => ({
         status: 'ready',
-        boundary: boundary,
+        boundary: trail.boundary,
         compass: getCompass(device?.heading || 0),
         device: {
           location: device?.location || { lat: 0, lon: 0 },
@@ -77,9 +72,10 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
         previewClues: previewClues || [],
         trailId: trail?.id || '',
         spots: spots,
-        deviceStatus: calculateDeviceBoundaryStatus(device?.location, boundary),
+        deviceStatus: calculateDeviceBoundaryStatus(device?.location, trail.boundary),
         region: {
-          ...region,
+          center: { lat: 0, lon: 0 },
+          radius: 0,
           innerRadius: defaults.region.innerRadius,
         },
         canvas: {

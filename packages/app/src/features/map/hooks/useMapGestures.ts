@@ -1,9 +1,9 @@
 import { logger } from '@app/shared/utils/logger'
 import { useEffect, useState } from 'react'
-import { Platform } from 'react-native'
 import { Gesture } from 'react-native-gesture-handler'
 import { configureReanimatedLogger, ReanimatedLogLevel, runOnJS, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring } from 'react-native-reanimated'
 import { useSetScale } from '../stores/mapStore'
+import { useMapWheelZoom } from './useMapWheelZoom'
 
 // Map coordinate system:
 // mapSize = Real size of the map surface (eg. 1000x1000 pixels)
@@ -17,8 +17,6 @@ const EDGE_RESISTANCE = 0.5
 const SCALE_RESISTANCE = 0.2
 const TAP_MAX_DURATION = 250
 const PAN_MIN_DISTANCE = 1
-const WEB_ZOOM_OUT = 0.8
-const WEB_ZOOM_IN = 1.2
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
@@ -32,7 +30,9 @@ interface GestureHandlers {
 }
 /**
  * Custom hook to handle map gestures (pan, pinch, and tap)
- * @param mapData Map data containing scale, mapSize, and containerSize
+ * Device-centered viewport: Operates on device-centered boundary
+ * @param canvas Canvas configuration with scale and size
+ * @param viewBox Viewport dimensions
  * @param onTap Optional callback for tap-to-geo coordinate conversion
  * @returns Gesture handlers and related state
  */
@@ -73,26 +73,6 @@ export const useMapGestures = (
       baseScale.value = initialScale
     }
   }, [initialScale])
-
-  // Web mouse wheel support
-  useEffect(() => {
-    if (Platform.OS === 'web') {
-      const handleWheel = (event: WheelEvent) => {
-        event.preventDefault()
-        const zoomFactor = event.deltaY > 0 ? WEB_ZOOM_OUT : WEB_ZOOM_IN
-        const newScale = scale.value * zoomFactor
-
-        if (newScale >= minScale && newScale <= maxScale) {
-          scale.value = withSpring(newScale, springConfig)
-          applyBoundsWithBounce()
-        }
-      }
-
-      const element = document.getElementById('map-content')
-      element?.addEventListener('wheel', handleWheel)
-      return () => element?.removeEventListener('wheel', handleWheel)
-    }
-  }, [viewBoxWidth, viewBoxHeight])
 
   // Update reactive inverse scale when scale changes
   useAnimatedReaction(
@@ -187,6 +167,15 @@ export const useMapGestures = (
     return direction * (max + overflow * EDGE_RESISTANCE)
   }
 
+  // Mouse wheel zoom support (web only, for dev/test)
+  useMapWheelZoom({
+    scale,
+    minScale,
+    maxScale,
+    elementId: 'map-content',
+    onBoundsUpdate: applyBoundsWithBounce,
+  })
+
   // Event handlers
 
   /**
@@ -262,7 +251,11 @@ export const useMapGestures = (
   const gesture = Gesture.Simultaneous(pan, pinch, singleTap)
 
   const animatedStyles = useAnimatedStyle(() => ({
-    transform: [{ translateX: translationX.value }, { translateY: translationY.value }, { scale: scale.value }],
+    transform: [
+      { translateX: translationX.value },
+      { translateY: translationY.value },
+      { scale: scale.value }
+    ],
   }))
 
   // Return gesture handlers and state

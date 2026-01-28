@@ -1,6 +1,6 @@
 import { createDeterministicId } from '@core/utils/idGenerator'
 import { Clue, ClueSource, Discovery, DiscoveryContent, DiscoveryLocationRecord, DiscoveryReaction, DiscoverySnap, DiscoverySpot, DiscoveryStats, DiscoveryTrail, LocationWithDirection, ReactionSummary, ScanEvent, Spot, Trail } from '@shared/contracts'
-import { GeoBoundary, GeoLocation, geoUtils } from '@shared/geo'
+import { GeoLocation, geoUtils } from '@shared/geo'
 
 export interface Target {
   spotId: string
@@ -346,7 +346,7 @@ const createDiscoveryTrail = (accountId: string, trail: Trail, discoveries: Disc
   // Filter clues by map boundaries if user location is provided
   let filteredClues = allClues
   if (userLocation) {
-    const mapBoundary = getMapBoundary(trail, userLocation)
+    const mapBoundary = trail.boundary
     filteredClues = allClues.filter(clue => geoUtils.isCoordinateInBounds(clue.location, mapBoundary))
   }
 
@@ -358,19 +358,6 @@ const createDiscoveryTrail = (accountId: string, trail: Trail, discoveries: Disc
     discoveries: trailDiscoveries,
     createdAt: new Date(),
   }
-}
-
-/**
- * Determines map boundaries based on trail region or user location + radius
- */
-const getMapBoundary = (trail: Trail, userLocation: GeoLocation, defaultRadiusInMeters: number = 5000): GeoBoundary => {
-  // If trail has a region defined, use that
-  if (trail.region) {
-    return geoUtils.calculateBoundaries(trail.region.center, trail.region.radius * 1000) // Convert km to meters
-  }
-
-  // Otherwise, use user location + default radius
-  return geoUtils.calculateBoundaries(userLocation, defaultRadiusInMeters)
 }
 
 /**
