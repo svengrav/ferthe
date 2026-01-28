@@ -54,7 +54,7 @@ async function enrichTrailWithBoundary(
   }
 
   // Calculate boundary
-  const boundary = geoUtils.calculateSpotBoundingBox(spots, 500)
+  const boundary = geoUtils.calculateSpotBoundingBox(spots, 50)
 
   return {
     ...trail,
