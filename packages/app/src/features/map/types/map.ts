@@ -1,5 +1,5 @@
 import { Clue, DiscoverySpot } from '@shared/contracts'
-import { GeoBoundary, GeoLocation } from '@shared/geo'
+import { GeoBoundary, GeoLocation, GeoRegion } from '@shared/geo'
 
 // Earth constants
 export const EARTH_CONSTANTS = {
@@ -9,32 +9,6 @@ export const EARTH_CONSTANTS = {
   RADIUS_M: 6371000,
   // Meters per degree at equator
   METERS_PER_DEGREE: 111000,
-}
-
-// Zoom modes for map interaction
-export type ZoomMode = 'NAV' | 'OVERVIEW'
-
-// Map layer modes - distinct view modes with different behavior
-export type MapLayer = 'CANVAS' | 'OVERVIEW'
-
-// Map layer configuration
-export const MAP_LAYER_CONFIG = {
-  // Default layer
-  DEFAULT_LAYER: 'CANVAS' as MapLayer,
-  // Padding for fitBounds in Overview mode (pixels)
-  OVERVIEW_PADDING: 40,
-  // Zoom corridor in Overview mode (how much user can zoom from fitBounds)
-  OVERVIEW_ZOOM_CORRIDOR: 0.3, // ±30% from fit scale
-}
-
-// Zoom mode thresholds and constants
-export const ZOOM_MODE_CONFIG = {
-  // Threshold for switching from NAV to OVERVIEW (in kilometers of visible map width)
-  NAV_TO_OVERVIEW_KM: 5,
-  // Threshold for switching from OVERVIEW to NAV (in kilometers) - hysteresis protection
-  OVERVIEW_TO_NAV_KM: 4,
-  // Default mode
-  DEFAULT_MODE: 'NAV' as ZoomMode,
 }
 
 export const MAP_SPECIFICATION_DEFAULTS = {
@@ -69,8 +43,6 @@ export interface DeviceBoundaryStatus {
 
 export interface MapState {
   status: 'uninitialized' | 'loading' | 'ready' | 'error'
-  zoomMode: ZoomMode
-  mapLayer: MapLayer
   // Volatile UI State - changes frequently
 
   compass: {
@@ -98,8 +70,7 @@ export interface MapState {
     radius: number
   }
 
-  boundary: GeoBoundary // Boundary of the map (may be clamped in CANVAS mode)
-  trailBoundary: GeoBoundary // Full trail boundary (used in OVERVIEW mode)
+  boundary: GeoBoundary // Boundary of the map
 
   canvas: {
     size: { width: number; height: number } // Default map size
@@ -117,9 +88,11 @@ export interface MapState {
   }
   scale: number // Current scale factor for the map, used for zooming
 
-  // Navigation Canvas state
-  followMode: boolean
-  panOffset: { x: number; y: number }
+  region: {
+    center: { lat: number; lon: number } // Center of the region
+    radius: number
+    innerRadius: number // Inner radius for the scanner
+  }
 
   // discovery data
   trailId: string // Optional trail ID for discovery context
@@ -138,6 +111,11 @@ export interface MapSpecification {
    * This is the geo boundary of the whole map (radius + padding).
    */
   boundary: GeoBoundary
+
+  /**
+   * This is the region of the whole map (radius + padding).
+   */
+  region: GeoRegion
 
   /**
    * This is the size of the map surface in pixels (1000x1000)
@@ -188,14 +166,19 @@ export const MAP_DEFAULT: MapSpecification = {
     min: 0.5,
     max: 4,
   },
+  region: {
+    center: { lat: 0, lon: 0 },
+    radius: 3000,
+  },
 }
 
 const getDefaultMapState = (): MapState => ({
   status: 'uninitialized',
-  zoomMode: ZOOM_MODE_CONFIG.DEFAULT_MODE,
-  mapLayer: MAP_LAYER_CONFIG.DEFAULT_LAYER,
   boundary: MAP_DEFAULT.boundary,
-  trailBoundary: MAP_DEFAULT.boundary,
+  region: {
+    ...MAP_DEFAULT.region,
+    innerRadius: 500, // Default inner radius in meters
+  },
   canvas: {
     size: {
       width: MAP_DEFAULT.mapSize.width,
@@ -226,10 +209,8 @@ const getDefaultMapState = (): MapState => ({
   trailId: '',
   deviceStatus: {
     isOutsideBoundary: false,
-    distanceFromBoundary: 0,
+    distanceFromBoundary: 0, // Default to 0, meaning inside the boundary
   },
-  followMode: true,
-  panOffset: { x: 0, y: 0 },
 })
 
 export const createMapState = (configure?: (defaults: MapState) => Partial<MapState>): MapState => {

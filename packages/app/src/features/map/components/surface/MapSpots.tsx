@@ -1,17 +1,10 @@
 import { Text } from '@app/shared/components'
 import { Spot } from '@shared/contracts'
-import { GeoBoundary } from '@shared/geo'
 import { memo } from 'react'
 import { Image, View } from 'react-native'
 import { useCompensatedScale, useMapBoundary, useMapCanvas, useMapSpots } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
 import { GeoPositioner } from './MapElements'
-
-export interface MapSpotsProps {
-  boundary?: GeoBoundary
-  canvasSize?: { width: number; height: number }
-  compensatedScale?: number
-}
 
 const DEFAULT_SPOT_SIZE = 15
 const DEFAULT_SPOT_HEIGHT_OFFSET = 7
@@ -28,21 +21,13 @@ const FIRST_LETTER_LENGTH = 1
 
 /**
  * Component that renders spot markers on the map with images or initials
- * @param props.boundary - Optional boundary override (uses store if not provided)
- * @param props.canvasSize - Optional canvas size override (uses store if not provided)
- * @param props.compensatedScale - Optional scale override for marker size compensation
  */
-function MapSpots({ boundary: propBoundary, canvasSize: propCanvasSize, compensatedScale: propScale }: MapSpotsProps = {}) {
-  const storeScale = useCompensatedScale()
+function MapSpots() {
+  const scale = useCompensatedScale()
   const mapTheme = useMapTheme()
-  const { size: storeSize } = useMapCanvas()
-  const storeBoundary = useMapBoundary()
+  const { size } = useMapCanvas()
+  const boundary = useMapBoundary()
   const spots = useMapSpots()
-
-  // Use props if provided, otherwise fall back to store
-  const boundary = propBoundary ?? storeBoundary
-  const size = propCanvasSize ?? storeSize
-  const scale = propScale ?? storeScale
 
   // Helper function to create marker container styles
   const createMarkerContainerStyle = (spotSize: number) => ({
@@ -84,7 +69,7 @@ function MapSpots({ boundary: propBoundary, canvasSize: propCanvasSize, compensa
         offsetX={OFFSET_X}
         offsetY={OFFSET_Y}
       >
-        <View style={[createMarkerContainerStyle(spotSize), { transform: [{ scale: scale }] }
+        <View style={[createMarkerContainerStyle(spotSize), { transform: [{ scale: scale * 1.2 || 1 }] }
         ]}>
           {spot.image?.url ? (
             <Image

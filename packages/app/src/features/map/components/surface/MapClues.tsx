@@ -40,13 +40,13 @@ const useScanCluesAnimation = (scanClues: Clue[]) => {
     } else if (scanClues.length === 0 && isVisible) {
       // Clues were cleared - fade out
       opacity.value = withTiming(0, { duration: FADE_OUT_DURATION, easing: Easing.in(Easing.cubic) })
-      scale.value = withTiming(INITIAL_SCALE, { duration: FADE_OUT_DURATION, easing: Easing.in(Easing.cubic) }, (finished) => {
-        // Clear visible clues after animation completes
-        if (finished) {
-          setVisibleClues([])
-          setIsVisible(false)
-        }
-      })
+      scale.value = withTiming(INITIAL_SCALE, { duration: FADE_OUT_DURATION, easing: Easing.in(Easing.cubic) })
+
+      // Clear visible clues after animation completes
+      setTimeout(() => {
+        setVisibleClues([])
+        setIsVisible(false)
+      }, FADE_OUT_DURATION)
     }
   }, [scanCluesIds, isVisible])
 
