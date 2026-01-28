@@ -1,5 +1,6 @@
 import { Clue, DiscoverySpot } from '@shared/contracts'
 import { GeoBoundary, GeoLocation } from '@shared/geo'
+import { SharedValue } from 'react-native-reanimated'
 import { create } from 'zustand'
 
 // Utility function for efficient deep comparison
@@ -69,6 +70,12 @@ export interface MapState {
   }
   scale: number // Current scale factor for the map, used for zooming
 
+  viewportTransform: {
+    scale: SharedValue<number> | null
+    translationX: SharedValue<number> | null
+    translationY: SharedValue<number> | null
+  }
+
   region: {
     center: { lat: number; lon: number } // Center of the region
     radius: number
@@ -103,6 +110,7 @@ export interface MapStateActions {
   setBoundary: (boundary: GeoBoundary) => void
   setRegion: (region: { center: { lat: number; lon: number }; radius: number; innerRadius: number }) => void
   setMapLayer: (layer: 'CANVAS' | 'OVERVIEW') => void
+  setViewportTransform: (transform: { scale: SharedValue<number>; translationX: SharedValue<number>; translationY: SharedValue<number> }) => void
 }
 
 export const useMapStore = create<MapState & MapStateActions>(set => ({
@@ -115,6 +123,11 @@ export const useMapStore = create<MapState & MapStateActions>(set => ({
     heading: 0,
   },
   mapLayer: 'CANVAS',
+  viewportTransform: {
+    scale: null,
+    translationX: null,
+    translationY: null,
+  },
   deviceStatus: {
     isOutsideBoundary: false,
     distanceFromBoundary: 0,
@@ -180,6 +193,8 @@ export const useMapStore = create<MapState & MapStateActions>(set => ({
   setBoundary: (boundary: GeoBoundary) => set(state => (deepEqual(state.boundary, boundary) ? state : { boundary })),
   setMapLayer: (mapLayer: 'CANVAS' | 'OVERVIEW') => set(state => (state.mapLayer !== mapLayer ? { mapLayer } : state)),
   setRegion: (region: { center: { lat: number; lon: number }; radius: number; innerRadius: number }) => set(state => (deepEqual(state.region, region) ? state : { region })),
+  setViewportTransform: (viewportTransform: { scale: SharedValue<number>; translationX: SharedValue<number>; translationY: SharedValue<number> }) =>
+    set({ viewportTransform }),
 }))
 
 export const getMapStoreActions = () => ({

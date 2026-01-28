@@ -3,8 +3,9 @@ import { useApp } from '@app/shared/useApp'
 import { memo } from 'react'
 import { View } from 'react-native'
 import Svg, { Circle, Polygon } from 'react-native-svg'
-import { useCompensatedScale, useMapCanvas, useMapDevice } from '../../stores/mapStore'
+import { useMapCanvas, useMapDevice } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
+import { useViewportCompensationScale } from '../../stores/viewportStore'
 
 // Arrow SVG constants
 const SVG_VIEWBOX = '0 0 18 18'
@@ -32,6 +33,7 @@ interface ArrowProps {
  */
 function Arrow({ rotation = 0, fill }: ArrowProps) {
   const { styles } = useApp(useArrowStyles)
+  const viewportScale = useViewportCompensationScale() // von viewportStore
 
   if (!styles) return null
 
@@ -41,7 +43,7 @@ function Arrow({ rotation = 0, fill }: ArrowProps) {
   })
 
   return (
-    <View style={[styles.arrow, getArrowTransform()]}>
+    <View style={[styles.arrow, { transform: [{ rotate: `${rotation}deg` }, { scale: viewportScale }] }]}>
       <Svg viewBox={SVG_VIEWBOX}>
         <Circle
           cx={CIRCLE_CENTER}
@@ -64,7 +66,6 @@ function Arrow({ rotation = 0, fill }: ArrowProps) {
 function MapDeviceMarker() {
   const { styles } = useApp(useMarkerStyles)
   const device = useMapDevice()
-  const scale = useCompensatedScale()
   const mapTheme = useMapTheme()
   const canvas = useMapCanvas()
 
@@ -77,11 +78,7 @@ function MapDeviceMarker() {
   }
 
   return (
-    <View style={[
-      styles!.marker,
-      centerPosition,
-      { transform: [{ scale: scale }] }
-    ]}>
+    <View style={[styles!.marker, centerPosition]}>
       <Arrow rotation={device.heading} fill={fillColor} />
     </View>
   )

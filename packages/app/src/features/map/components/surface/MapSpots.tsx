@@ -1,11 +1,13 @@
 import { Text } from '@app/shared/components'
-import { GeoBoundary } from '@shared/geo'
 import { Spot } from '@shared/contracts'
+import { GeoBoundary } from '@shared/geo'
 import { memo } from 'react'
 import { Image, View } from 'react-native'
-import { useCompensatedScale, useMapCanvas, useMapSpots } from '../../stores/mapStore'
+import { useMapSpots } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
+import { useViewportScale } from '../../stores/viewportStore'
 import { GeoPositioner } from './MapElements'
+import { useMapSurfaceSize } from './MapSurfaceContext'
 
 const DEFAULT_SPOT_SIZE = 15
 const DEFAULT_SPOT_HEIGHT_OFFSET = 7
@@ -24,10 +26,11 @@ const FIRST_LETTER_LENGTH = 1
  * Component that renders spot markers on the map with images or initials
  */
 function MapSpots({ boundary }: { boundary: GeoBoundary }) {
-  const scale = useCompensatedScale()
+  const viewportScale = useViewportScale() // von viewportStore
+  const compensatedScale = 1 / viewportScale
   const mapTheme = useMapTheme()
-  const { size } = useMapCanvas()
   const spots = useMapSpots()
+  const surfaceSize = useMapSurfaceSize()
 
   // Helper function to create marker container styles
   const createMarkerContainerStyle = (spotSize: number) => ({
@@ -65,11 +68,11 @@ function MapSpots({ boundary }: { boundary: GeoBoundary }) {
         key={spot.id || index}
         location={spot.location}
         boundary={boundary}
-        size={size}
+        size={surfaceSize}
         offsetX={OFFSET_X}
         offsetY={OFFSET_Y}
       >
-        <View style={[createMarkerContainerStyle(spotSize), { transform: [{ scale: scale * 1.2 || 1 }] }
+        <View style={[createMarkerContainerStyle(spotSize), { transform: [{ scale: compensatedScale || 1 }] }
         ]}>
           {spot.image?.url ? (
             <Image

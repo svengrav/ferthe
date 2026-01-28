@@ -1,17 +1,6 @@
-import { GeoBoundary, GeoLocation } from '@shared/geo'
 import { useEffect, useRef } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
-import Animated, { SharedValue, useAnimatedStyle, useDerivedValue } from 'react-native-reanimated'
-
-interface ViewportDebugData {
-  boundary: GeoBoundary
-  deviceLocation: GeoLocation
-  viewportSize: { width: number; height: number }
-  radiusMeters: number
-  scale: SharedValue<number>
-  translationX: SharedValue<number>
-  translationY: SharedValue<number>
-}
+import { useViewportContext, useViewportDimensions, useViewportValues } from '../stores/viewportStore'
 
 interface DebugMetrics {
   metersPerPixel: number
@@ -25,8 +14,10 @@ interface DebugMetrics {
 /**
  * Hook to calculate debug metrics from viewport data
  */
-const useMapViewportDebug = (data: ViewportDebugData): DebugMetrics => {
-  const { boundary, viewportSize, radiusMeters, scale, translationX, translationY } = data
+const useMapViewportDebug = (): DebugMetrics => {
+  const { boundary, radiusMeters, deviceLocation } = useViewportContext()
+  const viewportSize = useViewportDimensions()
+  const { scale, translationX, translationY } = useViewportValues()
 
   // Calculate boundary dimensions in degrees
   const boundaryWidth = boundary.northEast.lon - boundary.southWest.lon
@@ -35,12 +26,7 @@ const useMapViewportDebug = (data: ViewportDebugData): DebugMetrics => {
   // Calculate meters per pixel (approximate)
   const metersPerPixel = (radiusMeters * 2) / viewportSize.width
 
-  // Get current transform values
-  const currentScale = useDerivedValue(() => scale.value, [scale])
-  const currentTransX = useDerivedValue(() => translationX.value, [translationX])
-  const currentTransY = useDerivedValue(() => translationY.value, [translationY])
-
-  // Console logging (debounced)
+  // Console logging (debounced) - use primitive values from store
   const logTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
@@ -51,10 +37,10 @@ const useMapViewportDebug = (data: ViewportDebugData): DebugMetrics => {
       console.log('Viewport Size:', viewportSize)
       console.log('Radius (m):', radiusMeters)
       console.log('Meters/Pixel:', metersPerPixel.toFixed(2))
-      console.log('Scale:', currentScale.value.toFixed(2))
+      console.log('Scale:', scale.toFixed(2))
       console.log('Translation:', {
-        x: currentTransX.value.toFixed(1),
-        y: currentTransY.value.toFixed(1),
+        x: translationX.toFixed(1),
+        y: translationY.toFixed(1),
       })
       console.log('GeoBoundary:', {
         NE: `${boundary.northEast.lat.toFixed(5)}, ${boundary.northEast.lon.toFixed(5)}`,
@@ -62,7 +48,7 @@ const useMapViewportDebug = (data: ViewportDebugData): DebugMetrics => {
         Width: `${boundaryWidth.toFixed(6)}°`,
         Height: `${boundaryHeight.toFixed(6)}°`,
       })
-      console.log('Device:', `${data.deviceLocation.lat.toFixed(5)}, ${data.deviceLocation.lon.toFixed(5)}`)
+      console.log('Device:', `${deviceLocation.lat.toFixed(5)}, ${deviceLocation.lon.toFixed(5)}`)
       console.groupEnd()
     }, 500)
 
@@ -74,9 +60,15 @@ const useMapViewportDebug = (data: ViewportDebugData): DebugMetrics => {
     viewportSize.height,
     radiusMeters,
     metersPerPixel,
-    currentScale.value,
-    currentTransX.value,
-    currentTransY.value,
+    scale,
+    translationX,
+    translationY,
+    deviceLocation.lat,
+    deviceLocation.lon,
+    boundary.northEast.lat,
+    boundary.northEast.lon,
+    boundary.southWest.lat,
+    boundary.southWest.lon,
   ])
 
   return {
@@ -84,10 +76,10 @@ const useMapViewportDebug = (data: ViewportDebugData): DebugMetrics => {
     pixelRatio: viewportSize.width / (radiusMeters * 2),
     boundaryWidth,
     boundaryHeight,
-    currentScale: currentScale.value,
+    currentScale: scale,
     currentTranslation: {
-      x: currentTransX.value,
-      y: currentTransY.value,
+      x: translationX,
+      y: translationY,
     },
   }
 }
@@ -101,9 +93,11 @@ const useMapViewportDebug = (data: ViewportDebugData): DebugMetrics => {
  * - Real-time metrics
  * - Console logging
  */
-export function MapViewportDebug(props: ViewportDebugData) {
-  const metrics = useMapViewportDebug(props)
-  const { viewportSize, radiusMeters, scale, translationX, translationY } = props
+export function MapViewportDebug() {
+  const metrics = useMapViewportDebug()
+  const { boundary, radiusMeters, deviceLocation } = useViewportContext()
+  const viewportSize = useViewportDimensions()
+  const { scale, translationX, translationY } = useViewportValues()
 
   // Static border showing the viewport boundary (1000x1000px)
   const staticBorderStyle = {
@@ -111,24 +105,24 @@ export function MapViewportDebug(props: ViewportDebugData) {
     height: viewportSize.height,
   }
 
-  // Animated border showing the transformed white area
-  const animatedBorderStyle = useAnimatedStyle(() => ({
-    width: viewportSize.width * scale.value,
-    height: viewportSize.height * scale.value,
+  // Border showing the transformed area (using primitive values)
+  const transformedBorderStyle = {
+    width: viewportSize.width * scale,
+    height: viewportSize.height * scale,
     transform: [
-      { translateX: translationX.value },
-      { translateY: translationY.value }
+      { translateX: translationX },
+      { translateY: translationY }
     ]
-  }))
+  }
 
   // Center marker always stays at center (device position)
   const centerMarkerStyle = {
     // No transform - stays centered
   }
 
-  // Info box calculations - reactive to scale/translation
-  const scaledWidth = useDerivedValue(() => viewportSize.width * scale.value)
-  const scaledHeight = useDerivedValue(() => viewportSize.height * scale.value)
+  // Calculate scaled dimensions from primitive values
+  const scaledWidth = viewportSize.width * scale
+  const scaledHeight = viewportSize.height * scale
 
   return (
     <View style={styles.debugContainer} pointerEvents="none" id="map-viewport-debug-overlay">
@@ -137,9 +131,9 @@ export function MapViewportDebug(props: ViewportDebugData) {
         style={[styles.border, staticBorderStyle]}
       />
 
-      {/* Animated border showing transformed white area */}
-      <Animated.View
-        style={[styles.animatedBorder, animatedBorderStyle]}
+      {/* Border showing transformed white area */}
+      <View
+        style={[styles.animatedBorder, transformedBorderStyle]}
       />
 
       {/* Center crosshair - static at center (device position) */}
@@ -177,8 +171,11 @@ export function MapViewportDebug(props: ViewportDebugData) {
       {/* Info Box */}
       <View style={styles.infoBox}>
         <Text style={styles.infoTitle}>DEBUG</Text>
+        <Text style={styles.infoText}>Center: {deviceLocation.lat.toFixed(5)}, {deviceLocation.lon.toFixed(5)}</Text>
         <Text style={styles.infoText}>Size: {viewportSize.width}×{viewportSize.height}px</Text>
-        <Text style={styles.infoText}>Scaled: {scaledWidth.value.toFixed(0)}×{scaledHeight.value.toFixed(0)}px</Text>
+        <Text style={styles.infoText}>
+          Scaled: {scaledWidth.toFixed(0)}×{scaledHeight.toFixed(0)}px
+        </Text>
         <Text style={styles.infoText}>Radius: {radiusMeters}m</Text>
         <Text style={styles.infoText}>m/px: {metrics.metersPerPixel.toFixed(2)}</Text>
         <Text style={styles.infoText}>Scale: {metrics.currentScale.toFixed(2)}x</Text>
