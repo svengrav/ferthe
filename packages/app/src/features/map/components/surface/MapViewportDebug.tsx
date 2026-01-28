@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
-import { useViewportContext, useViewportDimensions, useViewportValues } from '../stores/viewportStore'
+import { useViewportContext, useViewportDimensions, useViewportValues } from '../../stores/viewportStore'
 
 interface DebugMetrics {
   metersPerPixel: number
