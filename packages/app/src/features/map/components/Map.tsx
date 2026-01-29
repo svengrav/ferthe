@@ -78,8 +78,7 @@ export function Map() {
             <MapCenterMarker />
             <MapSpots boundary={trailBoundary || deviceViewportBoundary} />
           </MapSurface>
-          <MapScanner boundary={trailBoundary || deviceViewportBoundary} />
-
+          <MapScanner boundary={deviceViewportBoundary} />
           <MapDeviceMarker />
         </MapViewport>
 
