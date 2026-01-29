@@ -70,24 +70,20 @@ export function Map() {
         <MapViewport
           deviceLocation={device.location}
         >
-          <MapSurface boundary={trailBoundary || deviceViewportBoundary} deviceViewportBoundary={deviceViewportBoundary}>
-            <MapRadius boundary={trailBoundary || deviceViewportBoundary} />
-            <MapTrailPath boundary={trailBoundary || deviceViewportBoundary} />
-            <MapClues boundary={trailBoundary || deviceViewportBoundary} />
-            <MapSnap boundary={trailBoundary || deviceViewportBoundary} />
+          <MapSurface boundary={trailBoundary} deviceViewportBoundary={deviceViewportBoundary}>
+            <MapRadius boundary={trailBoundary} />
+            <MapTrailPath boundary={trailBoundary} />
+            <MapClues boundary={trailBoundary} />
+            <MapSnap boundary={trailBoundary} />
             <MapCenterMarker />
-            <MapSpots boundary={trailBoundary || deviceViewportBoundary} />
+            <MapSpots boundary={trailBoundary} />
           </MapSurface>
           <MapScanner boundary={deviceViewportBoundary} />
           <MapDeviceMarker />
+          {system.isDevelopment && (
+            <MapDebug spots={spots} trailBoundary={trailBoundary} />
+          )}
         </MapViewport>
-
-        {system.isDevelopment && (
-          <MapDebug
-            spots={spots}
-            trailBoundary={trailBoundary}
-          />
-        )}
         <MapScannerControl startScan={() => sensorApplication.startScan(trailId)} />
       </View>
     </>
