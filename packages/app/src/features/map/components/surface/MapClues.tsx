@@ -1,9 +1,9 @@
-import { GeoBoundary } from '@shared/geo'
 import { Clue } from '@shared/contracts'
+import { GeoBoundary } from '@shared/geo'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import { useCompensatedScale, useMapCanvas, useMapPreviewClues, useMapScannedClues } from '../../stores/mapStore'
+import { useCompensatedScale, useMapPreviewClues, useMapScannedClues, useMapSurface } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
 import { GeoPositioner } from './MapElements'
 
@@ -66,7 +66,7 @@ function MapClues({ boundary }: { boundary: GeoBoundary }) {
   const scale = useCompensatedScale()
   const previewClues = useMapPreviewClues()
   const scannedClues = useMapScannedClues()
-  const canvas = useMapCanvas()
+  const canvas = useMapSurface()
   const mapTheme = useMapTheme()
   // Separate clues by source type
 

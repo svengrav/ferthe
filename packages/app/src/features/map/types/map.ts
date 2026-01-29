@@ -112,14 +112,12 @@ export const MAP_DEFAULT: MapSpecification = {
   },
 }
 
-const getDefaultMapState = (): MapState => ({
+export const getDefaultMapState = (): MapState => ({
   status: 'uninitialized',
-  boundary: MAP_DEFAULT.boundary,
-  region: {
-    ...MAP_DEFAULT.region,
-    innerRadius: 500, // Default inner radius in meters
-  },
-  canvas: {
+  activeLayer: 'CANVAS',
+  tappedSpot: undefined,
+
+  surface: {
     size: {
       width: MAP_DEFAULT.mapSize.width,
       height: MAP_DEFAULT.mapSize.height,
@@ -129,45 +127,45 @@ const getDefaultMapState = (): MapState => ({
       min: MAP_DEFAULT.scale.min,
       max: MAP_DEFAULT.scale.max,
     },
-    image: undefined, // Optional map image
+    boundary: MAP_DEFAULT.boundary,
+    image: undefined,
   },
+
+  viewport: {
+    size: MAP_DEFAULT.containerSize,
+    radius: MAP_DEFAULT.radius,
+    scale: {
+      init: MAP_DEFAULT.scale.init,
+      min: MAP_DEFAULT.scale.min,
+      max: MAP_DEFAULT.scale.max,
+    },
+    offset: { x: 0, y: 0 },
+    boundary: MAP_DEFAULT.boundary,
+  },
+
+  device: {
+    heading: 0,
+    location: { lat: 0, lon: 0 },
+    direction: 'N',
+  },
+
+  deviceStatus: {
+    isOutsideBoundary: false,
+    distanceFromBoundary: 0,
+  },
+
   scanner: {
     radius: MAP_DEFAULT.radius,
   },
+
   snap: {
     startPoint: { lat: 0, lon: 0 },
     endPoint: { lat: 0, lon: 0 },
     intensity: 0,
   },
-  viewport: MAP_DEFAULT.containerSize,
-  scale: MAP_DEFAULT.scale.init,
-  compass: { heading: 0, direction: 'N' },
-  device: { location: { lat: 0, lon: 0 }, heading: 0 },
+
+  trailId: '',
   previewClues: [],
   scannedClues: [],
   spots: [],
-  trailId: '',
-  deviceStatus: {
-    isOutsideBoundary: false,
-    distanceFromBoundary: 0, // Default to 0, meaning inside the boundary
-  },
-  mapLayer: 'CANVAS',
-  tappedSpot: undefined,
-  surfaceSize: { width: 0, height: 0 },
-  viewportTransform: {
-    scale: null,
-    translationX: null,
-    translationY: null,
-  },
 })
-
-export const createMapState = (configure?: (defaults: MapState) => Partial<MapState>): MapState => {
-  const defaults = getDefaultMapState()
-
-  if (!configure) {
-    return defaults
-  }
-
-  const overrides = configure(defaults)
-  return { ...defaults, ...overrides }
-}

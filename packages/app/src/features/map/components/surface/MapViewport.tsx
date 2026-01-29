@@ -1,12 +1,13 @@
+import { getAppContext } from '@app/appContext'
 import { ENV } from '@app/env.ts'
 import { GeoLocation } from '@shared/geo'
-import { ReactNode, useEffect, useMemo } from 'react'
+import { ReactNode } from 'react'
 import { View } from 'react-native'
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
 import Animated, { useAnimatedReaction } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useViewportGestures } from '../../hooks/useViewportGestures'
-import { getViewportActions } from '../../stores/viewportStore'
+import { getViewportActions, useMapSurfaceBoundary, useMapViewport } from '../../stores/mapStore'
 import { mapUtils } from '../../utils/geoToScreenTransform.'
 import { MapViewportDebug } from './MapViewportDebug'
 
@@ -19,9 +20,6 @@ interface DeviceViewportWrapperProps {
   debug?: boolean
 }
 
-const DEFAULT_RADIUS = 1000 // meters
-const DEFAULT_VIEWPORT_SIZE = { width: 1000, height: 1000 } // pixels
-
 /**
  * DeviceViewportWrapper
  * 
@@ -31,55 +29,38 @@ const DEFAULT_VIEWPORT_SIZE = { width: 1000, height: 1000 } // pixels
  * Independent component - does not know about Map specifics
  */
 export function MapViewport({
-  deviceLocation,
-  radiusMeters = DEFAULT_RADIUS,
-  viewportSize = DEFAULT_VIEWPORT_SIZE,
   children,
   onLayout,
   debug = ENV.isDevelopment,
 }: DeviceViewportWrapperProps) {
+  const { size, boundary } = useMapViewport()
+  const surfaceBoundary = useMapSurfaceBoundary()
+  const { sensorApplication } = getAppContext()
 
-  // Calculate geographic boundary for the viewport (memoized)
-  const boundary = useMemo(
-    () => mapUtils.calculateDeviceViewportBoundary(deviceLocation, radiusMeters),
-    [deviceLocation.lat, deviceLocation.lon, radiusMeters]
-  )
+  // Handle long press for dev teleport
+  const handleLongPress = (x: number, y: number) => {
+    if (!surfaceBoundary) return
+
+    // Convert viewport position to geo coordinates
+    const geoPosition = mapUtils.positionToCoordinates({ x, y }, boundary, size)
+
+    console.log('📍 Teleport to:', geoPosition)
+    sensorApplication.setDevice({ location: geoPosition, heading: 0 })
+  }
 
   // Setup gesture handlers
   const { gesture, animatedStyles, scale, translationX, translationY } = useViewportGestures({
-    width: viewportSize.width,
-    height: viewportSize.height,
+    width: size.width,
+    height: size.height,
     elementId: 'device-viewport-content',
     snapToCenter: true,
+    onLongPress: debug ? handleLongPress : undefined,
   })
-
-  // Initialize store with SharedValue references and context data
-  useEffect(() => {
-    const actions = getViewportActions()
-    actions.setSharedValues(scale, translationX, translationY)
-  }, [scale, translationX, translationY])
-
-  // Update viewport dimensions and context when props change
-  useEffect(() => {
-    const actions = getViewportActions()
-    actions.setViewportDimensions(viewportSize.width, viewportSize.height)
-    actions.setViewportContext(deviceLocation, radiusMeters, boundary)
-  }, [
-    viewportSize.width,
-    viewportSize.height,
-    deviceLocation.lat,
-    deviceLocation.lon,
-    radiusMeters,
-    boundary.northEast.lat,
-    boundary.northEast.lon,
-    boundary.southWest.lat,
-    boundary.southWest.lon,
-  ])
 
   // Sync primitive values to store (JS-Thread accessible)
   const syncToStore = (s: number, tx: number, ty: number) => {
     const actions = getViewportActions()
-    actions.setViewportValues(s, tx, ty)
+    actions.setViewportTransform(s, { x: tx, y: ty })
   }
 
   useAnimatedReaction(
@@ -94,9 +75,9 @@ export function MapViewport({
 
   return (
     <View style={{ flex: 1, position: 'absolute', height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center' }} onLayout={handleLayout} id='device-viewport-content'>
-      <GestureHandlerRootView style={{ ...viewportSize }}>
+      <GestureHandlerRootView style={{ ...size }}>
         <GestureDetector gesture={gesture}>
-          <Animated.View style={[{ ...viewportSize, }, animatedStyles]}>
+          <Animated.View style={[{ ...size, }, animatedStyles]}>
             {children}
           </Animated.View>
         </GestureDetector>
@@ -106,6 +87,4 @@ export function MapViewport({
     </View>
   )
 }
-
-export { DEFAULT_RADIUS, DEFAULT_VIEWPORT_SIZE }
 

@@ -3,9 +3,8 @@ import { useApp } from '@app/shared/useApp'
 import { memo } from 'react'
 import { View } from 'react-native'
 import Svg, { Circle, Polygon } from 'react-native-svg'
-import { useMapCanvas, useMapDevice } from '../../stores/mapStore'
+import { useMapDevice, useMapSurface, useViewportCompensationScale } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
-import { useViewportCompensationScale } from '../../stores/viewportStore'
 
 // Arrow SVG constants
 const SVG_VIEWBOX = '0 0 18 18'
@@ -67,7 +66,7 @@ function MapDeviceMarker() {
   const { styles } = useApp(useMarkerStyles)
   const device = useMapDevice()
   const mapTheme = useMapTheme()
-  const canvas = useMapCanvas()
+  const canvas = useMapSurface()
 
   const fillColor = mapTheme.device.fill || DEFAULT_FILL_COLOR
 

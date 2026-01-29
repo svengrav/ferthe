@@ -6,7 +6,7 @@ import { scheduleOnRN } from 'react-native-worklets'
 
 import { Theme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { useMapBoundary, useMapViewport } from '../stores/mapStore'
+import { useMapSurfaceBoundary, useMapViewport } from '../stores/mapStore'
 import MapLayerSwitch from './MapLayerSwitch'
 import MapDeviceMarker from './surface/MapDeviceMarker'
 import MapSpots from './surface/MapSpots'
@@ -27,7 +27,7 @@ const EDGE_PADDING = 30 // Padding between canvas edge and viewport edge
  */
 export function MapOverlay() {
   const { theme } = useApp()
-  const trailBoundary = useMapBoundary()
+  const trailBoundary = useMapSurfaceBoundary()
   const viewport = useMapViewport()
 
   // Zoom state

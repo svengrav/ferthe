@@ -6,7 +6,7 @@ import { useApp } from '@app/shared/useApp'
 import { useEffect, useRef } from 'react'
 import { Animated, View } from 'react-native'
 import { SettingsForm } from '../../settings/components/SettingsForm'
-import { useMapStatus, useMapViewport, useSetViewport } from '../stores/mapStore'
+import { useMapStatus, useMapViewport } from '../stores/mapStore'
 import { Map } from './Map'
 import MapCompass from './MapCompass'
 import MapDiscoveryCard from './MapDiscoveryCard'
@@ -16,13 +16,12 @@ function MapScreen() {
   const { styles, context } = useApp(theme => useStyles(theme))
   const { t } = useLocalizationStore()
   const status = useMapStatus()
-  const setViewport = useSetViewport()
   const viewPort = useMapViewport()
   const fadeAnim = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
-    context.mapApplication.requestMapState(viewPort)
-  }, [status, viewPort])
+    context.mapApplication.requestMapState(viewPort.size)
+  }, [status])
 
   useEffect(() => {
     if (status === 'ready') {
@@ -36,16 +35,16 @@ function MapScreen() {
     }
   }, [status, fadeAnim])
 
-  const onLayout = (layout: { nativeEvent: { layout: { width: number; height: number } } }) => {
-    setViewport(layout.nativeEvent.layout)
-  }
+  // const onLayout = (layout: { nativeEvent: { layout: { width: number; height: number } } }) => {
+  //   setViewport(layout.nativeEvent.layout)
+  // }
 
   return (
     <Page options={[{ label: t.navigation.settings, onPress: () => setOverlay('settingsForm', <SettingsForm onClose={() => { }} onSubmit={() => { }} />) }]}>
       <View style={styles?.container} >
         <MapDiscoveryCard />
         <MapCompass />
-        <View style={styles?.map} onLayout={onLayout}>
+        <View style={styles?.map} /* onLayout={onLayout} */>
           {status !== 'ready' ? (
             <LoadingSpinner />
           ) : (

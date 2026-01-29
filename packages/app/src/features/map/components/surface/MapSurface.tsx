@@ -1,12 +1,8 @@
 import { Image } from "@app/shared/components"
 import { GeoBoundary } from "@shared/geo"
-import { memo, useEffect, useMemo } from "react"
+import { memo } from "react"
 import { View } from "react-native"
-import { useMapCanvas, useMapStore } from "../../stores/mapStore"
-import { useViewportDimensions } from "../../stores/viewportStore"
-import { mapUtils } from "../../utils/geoToScreenTransform."
-
-// Memoized Map Image Component to prevent unnecessary re-renders
+import { useMapSurface } from "../../stores/mapStore"
 
 interface MapSurfaceProps {
   children?: React.ReactNode
@@ -15,64 +11,28 @@ interface MapSurfaceProps {
 }
 
 function MapSurface(props: MapSurfaceProps) {
-  const { children, boundary, deviceViewportBoundary } = props
-  const { image } = useMapCanvas()
-  const viewportSize = useViewportDimensions()
-  const setSurfaceSize = useMapStore(state => state.setSurfaceSize)
-
-  // MapSurface represents the boundary passed to it
-  // Calculate surface size and position within the viewport
-  // The viewport canvas represents deviceViewportBoundary
-  // Surface boundary is transformed into viewport coordinates
-  const surfaceLayout = useMemo(() => {
-    // Top-left corner (NW): northEast.lat, southWest.lon
-    const topLeft = mapUtils.coordinatesToPosition(
-      { lat: boundary.northEast.lat, lon: boundary.southWest.lon },
-      deviceViewportBoundary,
-      viewportSize
-    )
-    // Bottom-right corner (SE): southWest.lat, northEast.lon
-    const bottomRight = mapUtils.coordinatesToPosition(
-      { lat: boundary.southWest.lat, lon: boundary.northEast.lon },
-      deviceViewportBoundary,
-      viewportSize
-    )
-
-    const width = bottomRight.x - topLeft.x
-    const height = bottomRight.y - topLeft.y
-
-    return {
-      left: topLeft.x,
-      top: topLeft.y,
-      width: width,
-      height: height,
-    }
-  }, [boundary, deviceViewportBoundary, viewportSize])
-
-  useEffect(() => {
-    setSurfaceSize({ width: surfaceLayout.width, height: surfaceLayout.height })
-  }, [surfaceLayout.width, surfaceLayout.height, setSurfaceSize])
+  const { children } = props
+  const { image, layout } = useMapSurface()
 
   const imageSrc = {
     uri: image || ''
   }
 
-  // Surface fills exactly the boundary in viewport coordinates
-  // Children should position themselves within this surface (0,0 to width,height)
-  // using the same boundary for coordinate transformations
+  // Surface layout is calculated in mapApplication and stored in store
+  // Layout position updates automatically when device moves
   return (
     <View id={'map-surface-inner'} style={{
       position: 'absolute',
-      left: surfaceLayout.left,
-      top: surfaceLayout.top,
-      width: surfaceLayout.width,
-      height: surfaceLayout.height,
+      left: layout.left,
+      top: layout.top,
+      width: layout.width,
+      height: layout.height,
       borderRadius: 8,
-      backgroundColor: 'rgba(255, 165, 0, 0.2)', // Debug: orange background
+      backgroundColor: 'rgba(224, 166, 57, 0.7)', // Debug: orange background
     }}>
       {imageSrc?.uri && <Image
-        width={surfaceLayout.width}
-        height={surfaceLayout.height}
+        width={layout.width}
+        height={layout.height}
         style={{ opacity: 0.7 }}
         source={imageSrc}
       />}

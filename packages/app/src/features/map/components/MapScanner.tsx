@@ -5,14 +5,14 @@ import { memo, useState } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useMapScannerAnimation } from '../hooks/useMapScannerAnimation'
-import { useMapCanvas, useMapDevice, useMapScanner } from '../stores/mapStore'
+import { useMapDevice, useMapScanner, useMapSurface } from '../stores/mapStore'
 import { useMapTheme } from '../stores/mapThemeStore'
 import { mapUtils } from '../utils/geoToScreenTransform.'
 
 
 function MapScanner({ boundary }: { boundary: GeoBoundary }) {
   const device = useMapDevice()
-  const { size } = useMapCanvas()
+  const { size } = useMapSurface()
   const { radius } = useMapScanner()
   const mapTheme = useMapTheme()
 

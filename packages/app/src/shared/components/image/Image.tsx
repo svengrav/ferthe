@@ -71,6 +71,7 @@ function Image({
   fill = DEFAULT_FILL_COLOR,
   ...props
 }: ImageProps) {
+
   const { styles } = useApp(useStyles)
   const [isLoading, setIsLoading] = useState(true)
 

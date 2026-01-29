@@ -10,6 +10,7 @@ interface ViewportGestureConfig {
   initialScale?: number
   elementId?: string
   snapToCenter?: boolean
+  onLongPress?: (x: number, y: number) => void
 }
 
 interface ViewportGestureHandlers {
@@ -40,6 +41,7 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
     initialScale = 1,
     elementId = 'viewport-content',
     snapToCenter = false,
+    onLongPress,
   } = config
 
   // Gesture state
@@ -112,8 +114,20 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
     onBoundsUpdate: handleBoundsUpdate,
   })
 
-  // Combined gesture
-  const gesture = Gesture.Simultaneous(pan, pinch)
+  // Long press gesture for debug teleport
+  const longPress = Gesture.LongPress()
+    .minDuration(500)
+    .onStart((event) => {
+      if (onLongPress) {
+        onLongPress(event.x, event.y)
+      }
+    })
+
+  // Combined gesture - long press runs simultaneously but doesn't block pan/pinch
+  const gesture = Gesture.Race(
+    longPress,
+    Gesture.Simultaneous(pan, pinch)
+  )
 
   // Animated styles
   const animatedStyles = useAnimatedStyle(() => ({

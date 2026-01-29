@@ -1,7 +1,7 @@
 import { getAppContext } from '@app/appContext'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { View } from 'react-native'
-import { useMapBoundary, useMapCanvas, useMapDevice, useMapSpots, useMapStore, useMapTrailId, useMapViewport } from '../stores/mapStore'
+import { useMapDevice, useMapSurface, useMapSurfaceBoundary, useMapTrailId } from '../stores/mapStore'
 import { MapTheme, useMapTheme } from '../stores/mapThemeStore'
 import { mapUtils } from '../utils/geoToScreenTransform.'
 import MapDeviceCords from './MapDeviceCords'
@@ -9,7 +9,6 @@ import { MapScanner, MapScannerControl } from './MapScanner'
 import MapCenterMarker from './surface/MapCenterMarker.tsx'
 import MapClues from './surface/MapClues.tsx'
 import MapDeviceMarker from './surface/MapDeviceMarker'
-import MapRadius from './surface/MapRadius.tsx'
 import MapSnap from './surface/MapSnap.tsx'
 import MapSpots from './surface/MapSpots.tsx'
 import MapSurface from './surface/MapSurface.tsx'
@@ -19,15 +18,12 @@ import { MapViewport } from './surface/MapViewport.tsx'
 
 export function Map() {
   const { sensorApplication, system } = getAppContext()
-  const viewbox = useMapViewport()
-  const canvas = useMapCanvas()
+  const canvas = useMapSurface()
   const trailId = useMapTrailId()
-  const trailBoundary = useMapBoundary()
-  const spots = useMapSpots()
+  const trailBoundary = useMapSurfaceBoundary()
   const mapTheme = useMapTheme()
   const theme = useThemeStore()
   const device = useMapDevice()
-  const setViewportTransform = useMapStore(state => state.setViewportTransform)
   const styles = createStyles(theme, mapTheme, canvas.size)
 
   // Calculate device-centered viewport boundary (1000m radius)
@@ -42,7 +38,6 @@ export function Map() {
           deviceLocation={device.location}
         >
           <MapSurface boundary={trailBoundary} deviceViewportBoundary={deviceViewportBoundary} >
-            <MapRadius boundary={trailBoundary} />
             <MapTrailPath />
             <MapClues boundary={trailBoundary} />
             <MapSnap boundary={trailBoundary} />
