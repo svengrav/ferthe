@@ -1,5 +1,6 @@
 import { Gesture } from 'react-native-gesture-handler'
 import { SharedValue, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 import { useMapWheelZoom } from './useMapWheelZoom'
 
 interface ViewportGestureConfig {
@@ -11,6 +12,7 @@ interface ViewportGestureConfig {
   elementId?: string
   snapToCenter?: boolean
   onLongPress?: (x: number, y: number) => void
+  onGestureEnd?: (scale: number, translationX: number, translationY: number) => void
 }
 
 interface ViewportGestureHandlers {
@@ -34,14 +36,13 @@ const SPRING_CONFIG = {
  */
 export const useViewportGestures = (config: ViewportGestureConfig): ViewportGestureHandlers => {
   const {
-    width,
-    height,
     minScale = 0.1,
     maxScale = 3,
     initialScale = 1,
     elementId = 'viewport-content',
     snapToCenter = false,
     onLongPress,
+    onGestureEnd,
   } = config
 
   // Gesture state
@@ -78,6 +79,13 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
         translationX.value = withSpring(0, SPRING_CONFIG)
         translationY.value = withSpring(0, SPRING_CONFIG)
       }
+
+      // Notify listeners of final values
+      if (onGestureEnd) {
+        scheduleOnRN(() => {
+          onGestureEnd(scale.value, translationX.value, translationY.value)
+        })
+      }
     })
 
   // Pinch gesture
@@ -101,6 +109,13 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
         translationX.value = withSpring(0, SPRING_CONFIG)
         translationY.value = withSpring(0, SPRING_CONFIG)
       }
+
+      // Notify listeners of final values
+      if (onGestureEnd) {
+        scheduleOnRN(() => {
+          onGestureEnd(scale.value, translationX.value, translationY.value)
+        })
+      }
     })
 
   // Mouse wheel zoom support (web only)
@@ -112,6 +127,7 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
     maxScale,
     elementId,
     onBoundsUpdate: handleBoundsUpdate,
+    onGestureEnd,
   })
 
   // Long press gesture for debug teleport
@@ -119,7 +135,9 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
     .minDuration(500)
     .onStart((event) => {
       if (onLongPress) {
-        onLongPress(event.x, event.y)
+        scheduleOnRN(() =>
+          onLongPress(event.x, event.y)
+        )
       }
     })
 

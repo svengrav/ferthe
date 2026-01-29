@@ -123,10 +123,6 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
       deviceStatus: calculateDeviceBoundaryStatus(device?.location, trail.boundary),
 
       surface: {
-        size: {
-          width: MAP_DEFAULT.mapSize.width,
-          height: MAP_DEFAULT.mapSize.height,
-        },
         scale: typeof optimalScale === 'number'
           ? { init: optimalScale, min: MAP_DEFAULT.scale.min, max: MAP_DEFAULT.scale.max }
           : optimalScale,

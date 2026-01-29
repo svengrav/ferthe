@@ -18,13 +18,13 @@ import { MapViewport } from './surface/MapViewport.tsx'
 
 export function Map() {
   const { sensorApplication, system } = getAppContext()
-  const canvas = useMapSurface()
+  const surface = useMapSurface()
   const trailId = useMapTrailId()
   const trailBoundary = useMapSurfaceBoundary()
   const mapTheme = useMapTheme()
   const theme = useThemeStore()
   const device = useMapDevice()
-  const styles = createStyles(theme, mapTheme, canvas.size)
+  const styles = createStyles(theme, mapTheme, surface.layout)
 
   // Calculate device-centered viewport boundary (1000m radius)
   const deviceViewportBoundary = mapUtils.calculateDeviceViewportBoundary(device.location)
@@ -39,7 +39,7 @@ export function Map() {
         >
           <MapSurface boundary={trailBoundary} deviceViewportBoundary={deviceViewportBoundary} >
             <MapTrailPath />
-            <MapClues boundary={trailBoundary} />
+            <MapClues />
             <MapSnap boundary={trailBoundary} />
             <MapCenterMarker />
             <MapSpots />

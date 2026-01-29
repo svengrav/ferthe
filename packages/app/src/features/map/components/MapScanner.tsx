@@ -5,19 +5,19 @@ import { memo, useState } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useMapScannerAnimation } from '../hooks/useMapScannerAnimation'
-import { useMapDevice, useMapScanner, useMapSurface } from '../stores/mapStore'
+import { useMapDevice, useMapScanner, useViewportDimensions } from '../stores/mapStore'
 import { useMapTheme } from '../stores/mapThemeStore'
 import { mapUtils } from '../utils/geoToScreenTransform.'
 
 
 function MapScanner({ boundary }: { boundary: GeoBoundary }) {
   const device = useMapDevice()
-  const { size } = useMapSurface()
+  const layout = useViewportDimensions()
   const { radius } = useMapScanner()
   const mapTheme = useMapTheme()
 
-  const point = mapUtils.coordinatesToPosition(device.location, boundary, size)
-  const width = mapUtils.calculateCircleDimensions(device.location, radius, boundary, size).width
+  const point = mapUtils.coordinatesToPosition(device.location, boundary, layout)
+  const width = mapUtils.calculateCircleDimensions(device.location, radius, boundary, layout).width
   const { animatedStyle } = useMapScannerAnimation({
     point, width, style: {
       fill: mapTheme.scanner.fill,

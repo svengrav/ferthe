@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react'
-import { useCompensatedScale, useMapSpots, useMapSurfaceBoundary, useMapSurfaceSize } from '../../stores/mapStore'
+import { useCompensatedScale, useMapSpots, useMapSurfaceBoundary, useMapSurfaceLayout } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
 import { GeoPath } from './MapElements'
 
@@ -11,7 +11,7 @@ function MapTrailPath() {
     spots.map(spot => spot.location),
     [spots]
   )
-  const size = useMapSurfaceSize()
+  const size = useMapSurfaceLayout()
   const mapTheme = useMapTheme()
 
   const pathStyle = {

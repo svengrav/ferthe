@@ -28,7 +28,6 @@ export interface MapState {
   // Volatile UI State - changes frequently
 
   surface: {
-    size: { width: number; height: number } // Default map size
     scale: {
       init: number
       min: number
@@ -113,7 +112,6 @@ export interface MapStateActions {
 
   // Surface setters
   setSurface: (surface: Partial<MapState['surface']>) => void
-  setSurfaceSize: (size: { width: number; height: number }) => void
   setSurfaceScale: (scale: { init: number; min: number; max: number }) => void
   setSurfaceBoundary: (boundary: GeoBoundary) => void
   setSurfaceLayout: (layout: { left: number; top: number; width: number; height: number }) => void
@@ -146,7 +144,6 @@ export const useMapStore = create<MapState & MapStateActions>(set => ({
   tappedSpot: undefined,
 
   surface: {
-    size: { width: 550, height: 550 },
     scale: {
       init: 1,
       min: 0.5,
@@ -218,14 +215,6 @@ export const useMapStore = create<MapState & MapStateActions>(set => ({
     set(state => {
       const newSurface = { ...state.surface, ...surface }
       return deepEqual(state.surface, newSurface) ? state : { surface: newSurface }
-    }),
-
-  setSurfaceSize: (size: { width: number; height: number }) =>
-    set(state => {
-      if (state.surface.size.width !== size.width || state.surface.size.height !== size.height) {
-        return { surface: { ...state.surface, size } }
-      }
-      return state
     }),
 
   setSurfaceScale: (scale: { init: number; min: number; max: number }) =>
@@ -350,7 +339,6 @@ export const getMapStoreActions = () => ({
   setScannedClues: useMapStore.getState().setScannedClues,
   setSpots: useMapStore.getState().setSpots,
   setSurface: useMapStore.getState().setSurface,
-  setSurfaceSize: useMapStore.getState().setSurfaceSize,
   setSurfaceScale: useMapStore.getState().setSurfaceScale,
   setSurfaceBoundary: useMapStore.getState().setSurfaceBoundary,
   setSurfaceLayout: useMapStore.getState().setSurfaceLayout,
@@ -384,7 +372,6 @@ export const useMapDeviceStatus = () => useMapStore(state => state.deviceStatus)
 export const useMapScanner = () => useMapStore(state => state.scanner)
 export const useMapSurface = () => useMapStore(state => state.surface)
 export const useMapSurfaceBoundary = () => useMapStore(state => state.surface.boundary)
-export const useMapSurfaceSize = () => useMapStore(state => state.surface.size)
 export const useMapSurfaceLayout = () => useMapStore(state => state.surface.layout)
 export const useMapPreviewClues = () => useMapStore(state => state.previewClues)
 export const useMapScannedClues = () => useMapStore(state => state.scannedClues)
@@ -418,7 +405,6 @@ export const useSetViewportOffset = () => useMapStore(state => state.setViewport
 export const useSetViewportBoundary = () => useMapStore(state => state.setViewportBoundary)
 export const useSetViewportTransform = () => useMapStore(state => state.setViewportTransform)
 export const useSetSurface = () => useMapStore(state => state.setSurface)
-export const useSetSurfaceSize = () => useMapStore(state => state.setSurfaceSize)
 export const useSetSurfaceScale = () => useMapStore(state => state.setSurfaceScale)
 export const useSetSurfaceBoundary = () => useMapStore(state => state.setSurfaceBoundary)
 export const useSetSurfaceImage = () => useMapStore(state => state.setSurfaceImage)

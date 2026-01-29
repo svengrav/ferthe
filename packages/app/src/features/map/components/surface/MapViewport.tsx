@@ -1,11 +1,11 @@
 import { getAppContext } from '@app/appContext'
 import { ENV } from '@app/env.ts'
+import { logger } from '@app/shared/utils/logger'
 import { GeoLocation } from '@shared/geo'
 import { ReactNode } from 'react'
 import { View } from 'react-native'
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
-import Animated, { useAnimatedReaction } from 'react-native-reanimated'
-import { scheduleOnRN } from 'react-native-worklets'
+import Animated from 'react-native-reanimated'
 import { useViewportGestures } from '../../hooks/useViewportGestures'
 import { getViewportActions, useMapSurfaceBoundary, useMapViewport } from '../../stores/mapStore'
 import { mapUtils } from '../../utils/geoToScreenTransform.'
@@ -36,6 +36,7 @@ export function MapViewport({
   const { size, boundary } = useMapViewport()
   const surfaceBoundary = useMapSurfaceBoundary()
   const { sensorApplication } = getAppContext()
+  const actions = getViewportActions()
 
   // Handle long press for dev teleport
   const handleLongPress = (x: number, y: number) => {
@@ -44,8 +45,14 @@ export function MapViewport({
     // Convert viewport position to geo coordinates
     const geoPosition = mapUtils.positionToCoordinates({ x, y }, boundary, size)
 
-    console.log('📍 Teleport to:', geoPosition)
+    logger.log('📍 Teleport to:', geoPosition)
     sensorApplication.setDevice({ location: geoPosition, heading: 0 })
+  }
+
+  // Handle gesture end - sync to store
+  const handleGestureEnd = (s: number, tx: number, ty: number) => {
+    logger.log('MapViewport Gesture End - Sync to Store')
+    actions.setViewportTransform(s, { x: tx, y: ty })
   }
 
   // Setup gesture handlers
@@ -55,18 +62,8 @@ export function MapViewport({
     elementId: 'device-viewport-content',
     snapToCenter: true,
     onLongPress: debug ? handleLongPress : undefined,
+    onGestureEnd: handleGestureEnd,
   })
-
-  // Sync primitive values to store (JS-Thread accessible)
-  const syncToStore = (s: number, tx: number, ty: number) => {
-    const actions = getViewportActions()
-    actions.setViewportTransform(s, { x: tx, y: ty })
-  }
-
-  useAnimatedReaction(
-    () => ({ scale: scale.value, tx: translationX.value, ty: translationY.value }),
-    (current) => scheduleOnRN(() => { syncToStore(current.scale, current.tx, current.ty) })
-  )
 
   const handleLayout = (event: any) => {
     const { width, height } = event.nativeEvent.layout

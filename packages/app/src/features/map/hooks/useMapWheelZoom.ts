@@ -20,13 +20,14 @@ interface UseMapWheelZoomOptions {
   maxScale: number
   elementId: string
   onBoundsUpdate: () => void
+  onGestureEnd?: (scale: number, translationX: number, translationY: number) => void
 }
 
 /**
  * Hook for mouse wheel zoom support (web only, dev/test purposes)
  * Separated from main gesture logic for clarity
  */
-export const useMapWheelZoom = ({ scale, translationX, translationY, minScale, maxScale, elementId, onBoundsUpdate }: UseMapWheelZoomOptions) => {
+export const useMapWheelZoom = ({ scale, translationX, translationY, minScale, maxScale, elementId, onBoundsUpdate, onGestureEnd }: UseMapWheelZoomOptions) => {
   const handleWheel = useCallback(
     (event: WheelEvent) => {
       event.preventDefault()
@@ -41,9 +42,14 @@ export const useMapWheelZoom = ({ scale, translationX, translationY, minScale, m
         if (translationY) translationY.value = 0
 
         onBoundsUpdate()
+
+        // Notify listeners of final values after wheel zoom
+        if (onGestureEnd) {
+          onGestureEnd(newScale, translationX?.value ?? 0, translationY?.value ?? 0)
+        }
       }
     },
-    [minScale, maxScale, onBoundsUpdate, translationX, translationY]
+    [minScale, maxScale, onBoundsUpdate, translationX, translationY, onGestureEnd]
   )
 
   useEffect(() => {

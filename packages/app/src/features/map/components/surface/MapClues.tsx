@@ -1,11 +1,10 @@
 import { Clue } from '@shared/contracts'
-import { GeoBoundary } from '@shared/geo'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import { useCompensatedScale, useMapPreviewClues, useMapScannedClues, useMapSurface } from '../../stores/mapStore'
+import { useCompensatedScale, useMapPreviewClues, useMapScannedClues, useMapSurfaceBoundary, useMapSurfaceLayout } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
-import { GeoPositioner } from './MapElements'
+import { mapUtils } from '../../utils/geoToScreenTransform.'
 
 const CLUE_SIZE = 20
 const CLUE_RADIUS = 10
@@ -61,47 +60,72 @@ const useScanCluesAnimation = (scanClues: Clue[]) => {
 
 /**
  * Component that renders map clues with animation support for scan events
+ * Surface-centric: Positions calculated once relative to surface.boundary + surface.layout
  */
-function MapClues({ boundary }: { boundary: GeoBoundary }) {
+function MapClues() {
   const scale = useCompensatedScale()
   const previewClues = useMapPreviewClues()
   const scannedClues = useMapScannedClues()
-  const canvas = useMapSurface()
+  const boundary = useMapSurfaceBoundary()
+  const surfaceLayout = useMapSurfaceLayout()
   const mapTheme = useMapTheme()
-  // Separate clues by source type
 
   const { visibleClues, animatedStyle } = useScanCluesAnimation(scannedClues)
 
-  // Helper function to render a single clue marker
-  const renderClueMarker = (clue: Clue, index: number) => (
-    <GeoPositioner
-      boundary={boundary}
-      size={canvas.size}
+  // Pre-calculate all clue positions (surface-centric)
+  // Memoized: only recalc when boundary or layout size changes
+  const previewPositions = useMemo(() => {
+    return previewClues.map(clue => ({
+      clue,
+      position: mapUtils.coordinatesToPosition(
+        clue.location,
+        boundary,
+        { width: surfaceLayout.width, height: surfaceLayout.height }
+      )
+    }))
+  }, [previewClues, boundary, surfaceLayout.width, surfaceLayout.height])
+
+  const scannedPositions = useMemo(() => {
+    return visibleClues.map(clue => ({
+      clue,
+      position: mapUtils.coordinatesToPosition(
+        clue.location,
+        boundary,
+        { width: surfaceLayout.width, height: surfaceLayout.height }
+      )
+    }))
+  }, [visibleClues, boundary, surfaceLayout.width, surfaceLayout.height])
+
+  // Render clue marker at pre-calculated position
+  const renderClueMarker = ({ clue, position }: { clue: Clue; position: { x: number; y: number } }, index: number) => (
+    <View
       key={clue.spotId || index}
-      location={clue.location}
-      offsetX={CLUE_OFFSET_X * scale}
-      offsetY={CLUE_OFFSET_Y * scale}
-    >
-      <View style={[clueMarkerStyle({
-        fill: mapTheme.clue.fill,
-        strokeColor: mapTheme.clue.strokeColor,
-        strokeWidth: mapTheme.clue.strokeWidth
-      }), {
-        width: CLUE_SIZE * scale,
-        height: CLUE_SIZE * scale,
-        borderRadius: CLUE_RADIUS * scale
-      }]} />
-    </GeoPositioner>
+      style={[
+        clueMarkerStyle({
+          fill: mapTheme.clue.fill,
+          strokeColor: mapTheme.clue.strokeColor,
+          strokeWidth: mapTheme.clue.strokeWidth
+        }),
+        {
+          position: 'absolute',
+          left: position.x - (CLUE_OFFSET_X * scale),
+          top: position.y - (CLUE_OFFSET_Y * scale),
+          width: CLUE_SIZE * scale,
+          height: CLUE_SIZE * scale,
+          borderRadius: CLUE_RADIUS * scale
+        }
+      ]}
+    />
   )
 
   return (
     <>
       {/* Static preview clues */}
-      {previewClues.map(renderClueMarker)}
+      {previewPositions.map(renderClueMarker)}
 
       {/* Animated scan clues */}
       <Animated.View style={animatedStyle}>
-        {visibleClues.map(renderClueMarker)}
+        {scannedPositions.map(renderClueMarker)}
       </Animated.View>
     </>
   )
@@ -109,7 +133,6 @@ function MapClues({ boundary }: { boundary: GeoBoundary }) {
 
 // Helper function for clue marker styling
 const clueMarkerStyle = (style: { fill: string; strokeColor: string; strokeWidth: number }) => ({
-  position: 'absolute' as const,
   backgroundColor: style.fill,
   borderWidth: style.strokeWidth,
   borderColor: style.strokeColor,

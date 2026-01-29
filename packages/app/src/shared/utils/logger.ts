@@ -5,7 +5,7 @@
 
 import { ENV } from "@app/env"
 
-type LogLevel = 'log' | 'warn' | 'error'
+type LogLevel = 'log' | 'warn' | 'error' | 'group'
 
 const write = (level: LogLevel, ...args: any[]): void => {
   if (!ENV.enableLogger) return
@@ -14,6 +14,9 @@ const write = (level: LogLevel, ...args: any[]): void => {
   const prefix = `[${timestamp}] [${level.toUpperCase()}]`
 
   switch (level) {
+    case 'group':
+      console.group(...[prefix, ...args])
+      break
     case 'error':
       console.error(prefix, ...args)
       break
@@ -26,6 +29,8 @@ const write = (level: LogLevel, ...args: any[]): void => {
 }
 
 export const logger = {
+  group: (...args: any[]) => write('log', ...args),
+  groupEnd: () => { console.groupEnd() }, // No-op for simplicity
   log: (...args: any[]) => write('log', ...args),
   warn: (...args: any[]) => write('warn', ...args),
   error: (...args: any[]) => write('error', ...args),

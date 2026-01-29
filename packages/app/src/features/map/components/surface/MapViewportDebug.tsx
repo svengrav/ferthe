@@ -1,10 +1,11 @@
-import { getAppContext } from '@app/appContext'
+import { logger } from '@app/shared/utils/logger'
+import { geoUtils } from '@shared/geo'
 import { useEffect, useMemo, useRef } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import {
   useMapSpots,
   useMapSurfaceBoundary,
-  useSetTappedSpot,
+  useMapSurfaceLayout,
   useViewportContext,
   useViewportDimensions,
   useViewportValues
@@ -15,113 +16,81 @@ interface DebugMetrics {
   // Viewport metrics
   metersPerPixel: number
   pixelRatio: number
-  viewportBoundaryWidth: number
-  viewportBoundaryHeight: number
-  viewportWidthMeters: number
-  viewportHeightMeters: number
+  viewport: {
+    degrees: { width: number; height: number }
+    meters: { width: number; height: number }
+  }
   currentScale: number
   currentTranslation: { x: number; y: number }
 
-  // Map metrics
-  spotCount: number
-  spotsInViewport: number
-  trailWidthDegrees: number | null
-  trailHeightDegrees: number | null
-  trailWidthMeters: number | null
-  trailHeightMeters: number | null
-  surfaceLayout: {
-    left: number
-    top: number
-    width: number
-    height: number
-  } | null
+  // Map/Trail metrics
+  trail: {
+    degrees: { width: number; height: number } | null
+    meters: { width: number; height: number } | null
+  }
+  spots: {
+    total: number
+    inViewport: number
+  }
+  surface: {
+    layout: { left: number; top: number; width: number; height: number } | null
+  }
 }
 
 /**
- * Hook to calculate consolidated debug metrics
+ * Hook to calculate consolidated debug metrics from store data and geoUtils
+ * Aggregates all viewport, trail, spot and surface metrics in one structured object
  */
 const useDebugMetrics = (): DebugMetrics => {
   const { boundary: viewportBoundary, radiusMeters, deviceLocation } = useViewportContext()
   const viewportSize = useViewportDimensions()
   const { scale, translationX, translationY } = useViewportValues()
+  const surfaceLayout = useMapSurfaceLayout()
   const spots = useMapSpots()
   const trailBoundary = useMapSurfaceBoundary()
 
-  // Viewport calculations
-  const viewportBoundaryWidth = viewportBoundary.northEast.lon - viewportBoundary.southWest.lon
-  const viewportBoundaryHeight = viewportBoundary.northEast.lat - viewportBoundary.southWest.lat
-  const viewportWidthMeters = viewportBoundaryWidth * 111000 * Math.cos((deviceLocation.lat * Math.PI) / 180)
-  const viewportHeightMeters = viewportBoundaryHeight * 111000
-  const metersPerPixel = (radiusMeters * 2) / viewportSize.width
+  // Calculate dimensions using geoUtils (consolidates degree/meter conversions)
+  const viewportDims = useMemo(
+    () => geoUtils.calculateBoundaryDimensions(viewportBoundary, deviceLocation.lat),
+    [viewportBoundary, deviceLocation.lat]
+  )
 
-  // Trail/Map calculations
-  const trailWidthDegrees = trailBoundary ? trailBoundary.northEast.lon - trailBoundary.southWest.lon : null
-  const trailHeightDegrees = trailBoundary ? trailBoundary.northEast.lat - trailBoundary.southWest.lat : null
-  const trailWidthMeters = trailWidthDegrees !== null ? trailWidthDegrees * 111000 * Math.cos((deviceLocation.lat * Math.PI) / 180) : null
-  const trailHeightMeters = trailHeightDegrees !== null ? trailHeightDegrees * 111000 : null
+  const trailDims = useMemo(
+    () => (trailBoundary ? geoUtils.calculateBoundaryDimensions(trailBoundary, deviceLocation.lat) : null),
+    [trailBoundary, deviceLocation.lat]
+  )
 
-  // Surface layout calculation
-  const surfaceLayout = useMemo(() => {
-    if (!trailBoundary) return null
+  // Filter spots in viewport
+  const spotsInViewport = useMemo(
+    () => spots.filter(spot => geoUtils.isCoordinateInBounds(spot.location, viewportBoundary)).length,
+    [spots, viewportBoundary]
+  )
 
-    const topLeft = mapUtils.coordinatesToPosition(
-      { lat: trailBoundary.northEast.lat, lon: trailBoundary.southWest.lon },
-      viewportBoundary,
-      viewportSize
-    )
-    const bottomRight = mapUtils.coordinatesToPosition(
-      { lat: trailBoundary.southWest.lat, lon: trailBoundary.northEast.lon },
-      viewportBoundary,
-      viewportSize
-    )
-
-    return {
-      left: topLeft.x,
-      top: topLeft.y,
-      width: bottomRight.x - topLeft.x,
-      height: bottomRight.y - topLeft.y,
-    }
-  }, [trailBoundary, viewportBoundary, viewportSize])
-
-  // Spots in viewport
-  const spotsInViewport = spots.filter(spot => {
-    const inLat = spot.location.lat >= viewportBoundary.southWest.lat && spot.location.lat <= viewportBoundary.northEast.lat
-    const inLon = spot.location.lon >= viewportBoundary.southWest.lon && spot.location.lon <= viewportBoundary.northEast.lon
-    return inLat && inLon
-  }).length
-
-  // Consolidated console logging
+  // Consolidated console logging with 500ms debounce
   const logTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (logTimeoutRef.current) clearTimeout(logTimeoutRef.current)
 
     logTimeoutRef.current = setTimeout(() => {
-      console.group('🗺️ Map Debug (Consolidated)')
-      console.log('📍 Device:', `${deviceLocation.lat.toFixed(5)}, ${deviceLocation.lon.toFixed(5)}`)
-      console.log('📐 Viewport:', {
+      logger.group('🗺️ Map Debug (Consolidated)')
+      logger.log('📍 Device:', `${deviceLocation.lat.toFixed(5)}, ${deviceLocation.lon.toFixed(5)}`)
+      logger.log('📐 Viewport:', {
         size: `${viewportSize.width}×${viewportSize.height}px`,
         radius: `${radiusMeters}m`,
-        degrees: `${viewportBoundaryWidth.toFixed(6)}° × ${viewportBoundaryHeight.toFixed(6)}°`,
-        meters: `${viewportWidthMeters.toFixed(1)}m × ${viewportHeightMeters.toFixed(1)}m`,
-        metersPerPixel: metersPerPixel.toFixed(2),
+        degrees: viewportDims.degrees,
+        meters: viewportDims.meters,
       })
-      console.log('🔍 Transform:', {
+      logger.log('🗺️ Trail:', { degrees: trailDims?.degrees, meters: trailDims?.meters })
+      logger.log('🔍 Transform:', {
         scale: scale.toFixed(2),
         offset: `${translationX.toFixed(0)}, ${translationY.toFixed(0)}`,
       })
-      if (trailBoundary && surfaceLayout) {
-        console.log('🗺️ Trail/Surface:', {
-          degrees: `${trailWidthDegrees?.toFixed(6)}° × ${trailHeightDegrees?.toFixed(6)}°`,
-          meters: `${trailWidthMeters?.toFixed(1)}m × ${trailHeightMeters?.toFixed(1)}m`,
-          pixels: `${surfaceLayout.width.toFixed(0)}×${surfaceLayout.height.toFixed(0)}px`,
-        })
-      }
-      console.log('📌 Spots:', {
+      logger.log('📌 Spots:', {
         total: spots.length,
         inViewport: spotsInViewport,
       })
-      console.groupEnd()
+      logger.groupEnd()
     }, 500)
 
     return () => {
@@ -136,26 +105,32 @@ const useDebugMetrics = (): DebugMetrics => {
     translationY,
     spots.length,
     spotsInViewport,
-    trailWidthMeters,
-    trailHeightMeters,
+    viewportDims,
+    trailDims,
+    deviceLocation.lat,
+    deviceLocation.lon,
   ])
+
+  // Compute derived metrics
+  const metersPerPixel = radiusMeters * 2 / viewportSize.width
 
   return {
     metersPerPixel,
     pixelRatio: viewportSize.width / (radiusMeters * 2),
-    viewportBoundaryWidth,
-    viewportBoundaryHeight,
-    viewportWidthMeters,
-    viewportHeightMeters,
+    viewport: viewportDims,
     currentScale: scale,
     currentTranslation: { x: translationX, y: translationY },
-    spotCount: spots.length,
-    spotsInViewport,
-    trailWidthDegrees,
-    trailHeightDegrees,
-    trailWidthMeters,
-    trailHeightMeters,
-    surfaceLayout,
+    trail: {
+      degrees: trailDims?.degrees ?? null,
+      meters: trailDims?.meters ?? null,
+    },
+    spots: {
+      total: spots.length,
+      inViewport: spotsInViewport,
+    },
+    surface: {
+      layout: surfaceLayout,
+    },
   }
 }
 
@@ -177,10 +152,7 @@ export function MapViewportDebug() {
   const { scale, translationX, translationY } = useViewportValues()
   const spots = useMapSpots()
   const trailBoundary = useMapSurfaceBoundary()
-  const setTappedSpot = useSetTappedSpot()
-  const { sensorApplication } = getAppContext()
   const viewRef = useRef<View>(null)
-  const touchStartTimeRef = useRef<number | null>(null)
 
   // Spot screen positions
   const spotPositions = useMemo(() =>
@@ -291,12 +263,12 @@ export function MapViewportDebug() {
         <Text style={styles.infoText}>Scale: {metrics.currentScale.toFixed(2)}x</Text>
         <Text style={styles.infoText}>Offset: {metrics.currentTranslation.x.toFixed(0)}, {metrics.currentTranslation.y.toFixed(0)}</Text>
         <Text style={styles.infoText}>
-          Viewport: {metrics.viewportWidthMeters.toFixed(0)}m × {metrics.viewportHeightMeters.toFixed(0)}m
+          Viewport: {metrics.viewport.meters.width.toFixed(0)}m × {metrics.viewport.meters.height.toFixed(0)}m
         </Text>
       </View>
 
       {/* Map Info Box (bottom-left) */}
-      {trailBoundary && metrics.surfaceLayout && (
+      {trailBoundary && metrics.surface.layout && (
         <View style={styles.mapInfoBox} pointerEvents="none">
           <Text style={styles.infoTitle}>MAP/TRAIL</Text>
           <Text style={styles.infoText}>
@@ -304,13 +276,13 @@ export function MapViewportDebug() {
             {((trailBoundary.northEast.lon + trailBoundary.southWest.lon) / 2).toFixed(5)}
           </Text>
           <Text style={styles.infoText}>
-            Boundary: {metrics.trailWidthMeters?.toFixed(0)}m × {metrics.trailHeightMeters?.toFixed(0)}m
+            Boundary: {metrics.trail.meters?.width.toFixed(0)}m × {metrics.trail.meters?.height.toFixed(0)}m
           </Text>
           <Text style={styles.infoText}>
-            Surface: {metrics.surfaceLayout.width.toFixed(0)}×{metrics.surfaceLayout.height.toFixed(0)}px
+            Surface: {metrics.surface.layout.width.toFixed(0)}×{metrics.surface.layout.height.toFixed(0)}px
           </Text>
           <Text style={styles.infoText}>
-            Spots: {metrics.spotCount} (in view: {metrics.spotsInViewport})
+            Spots: {metrics.spots.total} (in view: {metrics.spots.inViewport})
           </Text>
         </View>
       )}

@@ -3,7 +3,7 @@ import { useApp } from '@app/shared/useApp'
 import { memo } from 'react'
 import { View } from 'react-native'
 import Svg, { Circle, Polygon } from 'react-native-svg'
-import { useMapDevice, useMapSurface, useViewportCompensationScale } from '../../stores/mapStore'
+import { useMapDevice, useViewportCompensationScale, useViewportDimensions } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
 
 // Arrow SVG constants
@@ -66,14 +66,14 @@ function MapDeviceMarker() {
   const { styles } = useApp(useMarkerStyles)
   const device = useMapDevice()
   const mapTheme = useMapTheme()
-  const canvas = useMapSurface()
+  const layout = useViewportDimensions()
 
   const fillColor = mapTheme.device.fill || DEFAULT_FILL_COLOR
 
   // Device is always centered in viewport
   const centerPosition = {
-    left: canvas.size.width / 2,
-    top: canvas.size.height / 2,
+    left: layout.width / 2,
+    top: layout.height / 2,
   }
 
   return (

@@ -346,6 +346,35 @@ const calculateDistanceToBoundary = (point: GeoLocation, boundary: GeoBoundary):
   return { closestPoint, distance }
 }
 
+interface BoundaryDimensions {
+  degrees: { width: number; height: number }
+  meters: { width: number; height: number }
+}
+
+/**
+ * Calculate boundary dimensions in degrees and meters
+ * @param boundary The geographic boundary
+ * @param centerLat Optional latitude to use for longitude meter conversion
+ * @returns BoundaryDimensions object with width and height in degrees and meters
+ */
+const calculateBoundaryDimensions = (boundary: GeoBoundary, centerLat?: number): BoundaryDimensions => {
+  const widthDegrees = boundary.northEast.lon - boundary.southWest.lon
+  const heightDegrees = boundary.northEast.lat - boundary.southWest.lat
+
+  // Use provided centerLat or calculate from boundary center
+  const lat = centerLat ?? (boundary.northEast.lat + boundary.southWest.lat) / 2
+
+  // Convert degrees to meters: latitude is ~111km per degree everywhere
+  // Longitude depends on latitude (cos factor)
+  const widthMeters = widthDegrees * 111000 * Math.cos((lat * Math.PI) / 180)
+  const heightMeters = heightDegrees * 111000
+
+  return {
+    degrees: { width: widthDegrees, height: heightDegrees },
+    meters: { width: widthMeters, height: heightMeters },
+  }
+}
+
 export const geoUtils = {
   compareCoordinates,
   calculateDistance,
@@ -359,4 +388,5 @@ export const geoUtils = {
   findNearestCoordinate,
   calculateTargetLocation,
   calculateDistanceToBoundary,
+  calculateBoundaryDimensions,
 }

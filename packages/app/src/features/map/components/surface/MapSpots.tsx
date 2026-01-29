@@ -1,10 +1,10 @@
 import { Text } from '@app/shared/components'
 import { Spot } from '@shared/contracts'
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { Image, View } from 'react-native'
 import { useMapSpots, useMapSurfaceBoundary, useMapSurfaceLayout, useViewportScale } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
-import { GeoPositioner } from './MapElements'
+import { mapUtils } from '../../utils/geoToScreenTransform.'
 
 const DEFAULT_SPOT_SIZE = 15
 const DEFAULT_SPOT_HEIGHT_OFFSET = 7
@@ -21,14 +21,29 @@ const FIRST_LETTER_LENGTH = 1
 
 /**
  * Component that renders spot markers on the map with images or initials
+ * Surface-centric: Positions calculated once relative to surface.boundary + surface.layout
+ * Re-calc only when surface geometry changes, not on every render
  */
 function MapSpots() {
-  const viewportScale = useViewportScale() // von viewportStore
+  const viewportScale = useViewportScale()
   const compensatedScale = 1 / viewportScale
   const mapTheme = useMapTheme()
   const spots = useMapSpots()
   const surfaceLayout = useMapSurfaceLayout()
   const boundary = useMapSurfaceBoundary()
+
+  // Pre-calculate all spot positions (surface-centric)
+  // Memoized: only recalc when boundary or layout size changes, not on viewport transform
+  const spotPositions = useMemo(() => {
+    return spots.map(spot => ({
+      spot,
+      position: mapUtils.coordinatesToPosition(
+        spot.location,
+        boundary,
+        { width: surfaceLayout.width, height: surfaceLayout.height }
+      )
+    }))
+  }, [spots, boundary, surfaceLayout.width, surfaceLayout.height])
 
   // Helper function to create marker container styles
   const createMarkerContainerStyle = (spotSize: number) => ({
@@ -55,23 +70,24 @@ function MapSpots() {
     borderColor: spotColor,
   })
 
-  // Helper function to render individual spot marker
-  const renderSpotMarker = (spot: Spot, index: number) => {
+  // Render spot marker at pre-calculated position
+  const renderSpotMarker = ({ spot, position }: { spot: Spot; position: { x: number; y: number } }, index: number) => {
     const spotSize = mapTheme.spot.size || DEFAULT_SPOT_SIZE
     const spotColor = mapTheme.spot.fill || DEFAULT_SPOT_COLOR
     const spotInitial = spot.name.substring(FIRST_LETTER_INDEX, FIRST_LETTER_LENGTH)
 
     return (
-      <GeoPositioner
+      <View
         key={spot.id || index}
-        location={spot.location}
-        boundary={boundary}
-        size={{ width: surfaceLayout.width, height: surfaceLayout.height }}
-        offsetX={OFFSET_X}
-        offsetY={OFFSET_Y}
+        style={{
+          position: 'absolute',
+          left: position.x - OFFSET_X,
+          top: position.y - OFFSET_Y,
+          zIndex: 99,
+          transform: [{ scale: compensatedScale || 1 }]
+        }}
       >
-        <View id='map-spots' style={[createMarkerContainerStyle(spotSize), { transform: [{ scale: compensatedScale || 1 }] }
-        ]}>
+        <View style={[createMarkerContainerStyle(spotSize)]}>
           {spot.image?.url ? (
             <Image
               source={{ uri: spot.image.url }}
@@ -84,13 +100,13 @@ function MapSpots() {
             </View>
           )}
         </View>
-      </GeoPositioner>
+      </View>
     )
   }
 
   return (
     <>
-      {spots.map(renderSpotMarker)}
+      {spotPositions.map(renderSpotMarker)}
     </>
   )
 }
