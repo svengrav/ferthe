@@ -1,13 +1,11 @@
 import { Text } from '@app/shared/components'
 import { Spot } from '@shared/contracts'
-import { GeoBoundary } from '@shared/geo'
 import { memo } from 'react'
 import { Image, View } from 'react-native'
-import { useMapSpots } from '../../stores/mapStore'
+import { useMapBoundary, useMapSpots, useMapSurfaceSize } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
 import { useViewportScale } from '../../stores/viewportStore'
 import { GeoPositioner } from './MapElements'
-import { useMapSurfaceSize } from './MapSurfaceContext'
 
 const DEFAULT_SPOT_SIZE = 15
 const DEFAULT_SPOT_HEIGHT_OFFSET = 7
@@ -25,12 +23,13 @@ const FIRST_LETTER_LENGTH = 1
 /**
  * Component that renders spot markers on the map with images or initials
  */
-function MapSpots({ boundary }: { boundary: GeoBoundary }) {
+function MapSpots() {
   const viewportScale = useViewportScale() // von viewportStore
   const compensatedScale = 1 / viewportScale
   const mapTheme = useMapTheme()
   const spots = useMapSpots()
   const surfaceSize = useMapSurfaceSize()
+  const boundary = useMapBoundary()
 
   // Helper function to create marker container styles
   const createMarkerContainerStyle = (spotSize: number) => ({

@@ -64,6 +64,11 @@ export interface MapState {
     image?: string | undefined
   }
 
+  surfaceSize: {
+    width: number
+    height: number
+  }
+
   viewport: {
     width: number
     height: number
@@ -111,6 +116,7 @@ export interface MapStateActions {
   setRegion: (region: { center: { lat: number; lon: number }; radius: number; innerRadius: number }) => void
   setMapLayer: (layer: 'CANVAS' | 'OVERVIEW') => void
   setViewportTransform: (transform: { scale: SharedValue<number>; translationX: SharedValue<number>; translationY: SharedValue<number> }) => void
+  setSurfaceSize: (size: { width: number; height: number }) => void
 }
 
 export const useMapStore = create<MapState & MapStateActions>(set => ({
@@ -166,9 +172,12 @@ export const useMapStore = create<MapState & MapStateActions>(set => ({
   scannedClues: [],
   spots: [],
   tappedSpot: undefined,
+  surfaceSize: { width: 0, height: 0 },
 
   // Actions - only update if values actually changed
   setState: (state: Partial<MapState>) => set(prev => ({ ...prev, ...state })),
+  setSurfaceSize: (surfaceSize: { width: number; height: number }) =>
+    set(state => (state.surfaceSize.width !== surfaceSize.width || state.surfaceSize.height !== surfaceSize.height ? { surfaceSize } : state)),
   setScale: (scale: number) => set(state => (state.scale !== scale ? { scale } : state)),
   setCompass: (compass: { heading: number; direction: string }) =>
     set(state => (state.compass.heading !== compass.heading || state.compass.direction !== compass.direction ? { compass } : state)),
@@ -239,6 +248,7 @@ export const useMapSpots = () => useMapStore(state => state.spots)
 export const useMapSpotTap = () => useMapStore(state => state.tappedSpot)
 export const useMapSnap = () => useMapStore(state => state.snap)
 export const useMapStatus = () => useMapStore(state => state.status)
+export const useMapSurfaceSize = () => useMapStore(state => state.surfaceSize)
 
 // Compensated scale for UI elements - keeps objects visually stable
 export const useCompensatedScale = () => {

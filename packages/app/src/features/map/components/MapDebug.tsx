@@ -1,8 +1,10 @@
+import { getAppContext } from '@app/appContext'
 import { DiscoverySpot } from '@shared/contracts'
 import { GeoBoundary } from '@shared/geo'
 import { useEffect, useMemo, useRef } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
-import { useViewportContext, useViewportDimensions, useViewportValues } from '../stores/viewportStore'
+import { useSetTappedSpot } from '../stores/mapStore'
+import { useViewportContext, useViewportDimensions, useViewportScale, useViewportValues } from '../stores/viewportStore'
 import { mapUtils } from '../utils/geoToScreenTransform.'
 
 interface MapDebugData {
@@ -148,8 +150,101 @@ export function MapDebug(props: MapDebugData) {
   const { spots, trailBoundary } = props
   const { boundary: deviceViewportBoundary } = useViewportContext()
   const viewportSize = useViewportDimensions()
+  const setTappedSpot = useSetTappedSpot()
+  const { sensorApplication } = getAppContext()
+  const scale = useViewportScale()
+  const viewRef = useRef<View>(null)
+  const touchStartTimeRef = useRef<number | null>(null)
 
-  if (!trailBoundary) return;
+  if (!trailBoundary) return null;
+
+  const handleTouchStart = () => {
+    touchStartTimeRef.current = Date.now()
+  }
+
+  const handleTap = (event: any) => {
+    // Check if this is a tap (not a long press/drag)
+    const TAP_MAX_DURATION = 200 // milliseconds
+
+    if (touchStartTimeRef.current) {
+      const duration = Date.now() - touchStartTimeRef.current
+
+      if (duration > TAP_MAX_DURATION) {
+        // This was a long press or drag, not a tap
+        touchStartTimeRef.current = null
+        return
+      }
+    }
+
+    touchStartTimeRef.current = null
+
+    const touch = event.nativeEvent.changedTouches?.[0] || event.nativeEvent
+
+    // Get viewport-relative coordinates
+    // On native: locationX/Y are available
+    // On web: use pageX/Y and measure against the view
+    let viewportPosition = { x: 0, y: 0 }
+
+    if (touch.locationX !== undefined && touch.locationY !== undefined) {
+      // Native: locationX/Y relative to the view
+      viewportPosition = {
+        x: touch.locationX,
+        y: touch.locationY
+      }
+    } else if (viewRef.current) {
+      // Web: measure using getBoundingClientRect
+      const view = viewRef.current as any
+      if (view.getBoundingClientRect) {
+        const rect = view.getBoundingClientRect()
+        viewportPosition = {
+          x: (touch.pageX || touch.clientX) - rect.left,
+          y: (touch.pageY || touch.clientY) - rect.top
+        }
+      }
+    }
+
+    // Transform: Viewport → Surface-local coordinates
+    // locationX/Y are already in visual coordinates (after scale transform)
+    // surfaceLayout is also in visual coordinates
+    // So we just need to subtract the offset
+    const surfacePosition = {
+      x: viewportPosition.x - surfaceLayout.left,
+      y: viewportPosition.y - surfaceLayout.top
+    }
+
+    console.log('Touch transform:', {
+      viewport: viewportPosition,
+      surfaceOffset: { left: surfaceLayout.left, top: surfaceLayout.top },
+      surface: surfacePosition,
+      surfaceSize: { width: surfaceLayout.width, height: surfaceLayout.height }
+    })
+
+    const geoPosition = mapUtils.positionToCoordinates(surfacePosition, trailBoundary, { width: surfaceLayout.width, height: surfaceLayout.height })
+
+    // Check if tap is on a spot (with some tolerance)
+    const TAP_TOLERANCE = 20 // pixels
+    const tappedSpot = spots.find(spot => {
+      const spotScreenPos = mapUtils.coordinatesToPosition(spot.location, trailBoundary, { width: surfaceLayout.width, height: surfaceLayout.height })
+      const distance = Math.sqrt(
+        Math.pow(surfacePosition.x - spotScreenPos.x, 2) +
+        Math.pow(surfacePosition.y - spotScreenPos.y, 2)
+      )
+      return distance <= TAP_TOLERANCE
+    })
+
+    if (tappedSpot) {
+      setTappedSpot(tappedSpot)
+      return
+    }
+
+    console.log('Tapped Geo Position:', geoPosition)
+
+    // Set device position on tap (development only)
+    sensorApplication.setDevice({
+      location: geoPosition,
+      heading: 0,
+    })
+  }
 
   // Convert spots to screen positions
   const spotPositions = spots.map(spot => ({
@@ -203,7 +298,12 @@ export function MapDebug(props: MapDebugData) {
   })() : null
 
   return (
-    <View style={styles.debugContainer} pointerEvents="none">
+    <View
+      ref={viewRef}
+      style={styles.debugContainer}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTap}
+    >
       {/* Trail boundary box (if exists) */}
       {trailBoundary && trailBoundaryBox && (
         <View style={[
@@ -265,7 +365,7 @@ export function MapDebug(props: MapDebugData) {
               Boundary: {metrics.trailWidthMeters?.toFixed(0)}m × {metrics.trailHeightMeters?.toFixed(0)}m
             </Text>
             <Text style={styles.infoText}>
-              Boundary: {metrics.trailWidthDegrees?.toFixed(6)}° × {metrics.trailHeightDegrees?.toFixed(6)}°
+              Viewoundary: {metrics.trailWidthDegrees?.toFixed(6)}° × {metrics.trailHeightDegrees?.toFixed(6)}°
             </Text>
             <Text style={styles.infoText}>
               Boundary: {surfaceLayout.width.toFixed(0)}px × {surfaceLayout.height.toFixed(0)}px

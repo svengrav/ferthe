@@ -1,10 +1,9 @@
 import { getAppContext } from '@app/appContext'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { View } from 'react-native'
-import { useMapBoundary, useMapCanvas, useMapDevice, useMapSpots, useMapStore, useMapTrailId, useMapViewport, useSetTappedSpot } from '../stores/mapStore'
+import { useMapBoundary, useMapCanvas, useMapDevice, useMapSpots, useMapStore, useMapTrailId, useMapViewport } from '../stores/mapStore'
 import { MapTheme, useMapTheme } from '../stores/mapThemeStore'
 import { mapUtils } from '../utils/geoToScreenTransform.'
-import { MapDebug } from './MapDebug.tsx'
 import MapDeviceCords from './MapDeviceCords'
 import { MapScanner, MapScannerControl } from './MapScanner'
 import MapCenterMarker from './surface/MapCenterMarker.tsx'
@@ -25,7 +24,6 @@ export function Map() {
   const trailId = useMapTrailId()
   const trailBoundary = useMapBoundary()
   const spots = useMapSpots()
-  const setTappedSpot = useSetTappedSpot()
   const mapTheme = useMapTheme()
   const theme = useThemeStore()
   const device = useMapDevice()
@@ -35,33 +33,6 @@ export function Map() {
   // Calculate device-centered viewport boundary (1000m radius)
   const deviceViewportBoundary = mapUtils.calculateDeviceViewportBoundary(device.location)
 
-  const onTap = (position: { x: number, y: number }) => {
-    const geoPosition = mapUtils.positionToCoordinates(position, deviceViewportBoundary, canvas.size)
-
-    // Check if tap is on a spot (with some tolerance)
-    const TAP_TOLERANCE = 20 // pixels
-    const tappedSpot = spots.find(spot => {
-      const spotScreenPos = mapUtils.coordinatesToPosition(spot.location, deviceViewportBoundary, canvas.size)
-      const distance = Math.sqrt(
-        Math.pow(position.x - spotScreenPos.x, 2) +
-        Math.pow(position.y - spotScreenPos.y, 2)
-      )
-      return distance <= TAP_TOLERANCE
-    })
-
-    if (tappedSpot) {
-      setTappedSpot(tappedSpot)
-      return
-    }
-
-    if (system.isDevelopment)
-      sensorApplication.setDevice({
-        location: geoPosition,
-        heading: 0,
-      })
-  }
-
-
   return (
     <>
       <View style={[styles.contentContainer]} id='map-content' >
@@ -70,19 +41,19 @@ export function Map() {
         <MapViewport
           deviceLocation={device.location}
         >
-          <MapSurface boundary={trailBoundary} deviceViewportBoundary={deviceViewportBoundary}>
+          <MapSurface boundary={trailBoundary} deviceViewportBoundary={deviceViewportBoundary} >
             <MapRadius boundary={trailBoundary} />
-            <MapTrailPath boundary={trailBoundary} />
+            <MapTrailPath />
             <MapClues boundary={trailBoundary} />
             <MapSnap boundary={trailBoundary} />
             <MapCenterMarker />
-            <MapSpots boundary={trailBoundary} />
+            <MapSpots />
           </MapSurface>
           <MapScanner boundary={deviceViewportBoundary} />
           <MapDeviceMarker />
-          {system.isDevelopment && (
+          {/* {system.isDevelopment && (
             <MapDebug spots={spots} trailBoundary={trailBoundary} />
-          )}
+          )} */}
         </MapViewport>
         <MapScannerControl startScan={() => sensorApplication.startScan(trailId)} />
       </View>

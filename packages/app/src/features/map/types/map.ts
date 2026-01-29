@@ -1,5 +1,5 @@
-import { Clue, DiscoverySpot } from '@shared/contracts'
 import { GeoBoundary, GeoLocation, GeoRegion } from '@shared/geo'
+import type { MapState } from '../stores/mapStore'
 
 // Earth constants
 export const EARTH_CONSTANTS = {
@@ -39,66 +39,6 @@ export interface DeviceBoundaryStatus {
   isOutsideBoundary: boolean
   distanceFromBoundary: number // Distance in meters, 0 if inside, positive if outside
   closestBoundaryPoint?: GeoLocation // The closest point on the boundary
-}
-
-export interface MapState {
-  status: 'uninitialized' | 'loading' | 'ready' | 'error'
-  // Volatile UI State - changes frequently
-
-  compass: {
-    heading: number
-    direction: string
-  }
-
-  device: {
-    heading: number
-    location: GeoLocation
-  }
-
-  deviceStatus: {
-    isOutsideBoundary: boolean
-    distanceFromBoundary: number // Distance in meters, 0 if inside, positive if outside
-  }
-
-  snap: {
-    startPoint: GeoLocation
-    endPoint: GeoLocation
-    intensity: number
-  }
-
-  scanner: {
-    radius: number
-  }
-
-  boundary: GeoBoundary // Boundary of the map
-
-  canvas: {
-    size: { width: number; height: number } // Default map size
-    scale: {
-      init: number
-      min: number
-      max: number
-    }
-    image?: string | undefined
-  }
-
-  viewport: {
-    width: number
-    height: number
-  }
-  scale: number // Current scale factor for the map, used for zooming
-
-  region: {
-    center: { lat: number; lon: number } // Center of the region
-    radius: number
-    innerRadius: number // Inner radius for the scanner
-  }
-
-  // discovery data
-  trailId: string // Optional trail ID for discovery context
-  previewClues: Clue[]
-  scannedClues: Clue[]
-  spots: DiscoverySpot[]
 }
 
 export interface MapSpecification {
@@ -210,6 +150,14 @@ const getDefaultMapState = (): MapState => ({
   deviceStatus: {
     isOutsideBoundary: false,
     distanceFromBoundary: 0, // Default to 0, meaning inside the boundary
+  },
+  mapLayer: 'CANVAS',
+  tappedSpot: undefined,
+  surfaceSize: { width: 0, height: 0 },
+  viewportTransform: {
+    scale: null,
+    translationX: null,
+    translationY: null,
   },
 })
 
