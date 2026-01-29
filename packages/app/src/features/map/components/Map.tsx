@@ -33,10 +33,7 @@ export function Map() {
     <>
       <View style={[styles.contentContainer]} id='map-content' >
         <MapDeviceCords />
-
-        <MapViewport
-          deviceLocation={device.location}
-        >
+        <MapViewport deviceLocation={device.location} >
           <MapSurface boundary={trailBoundary} deviceViewportBoundary={deviceViewportBoundary} >
             <MapTrailPath />
             <MapClues />
@@ -46,9 +43,6 @@ export function Map() {
           </MapSurface>
           <MapScanner boundary={deviceViewportBoundary} />
           <MapDeviceMarker />
-          {/* {system.isDevelopment && (
-            <MapDebug spots={spots} trailBoundary={trailBoundary} />
-          )} */}
         </MapViewport>
         <MapScannerControl startScan={() => sensorApplication.startScan(trailId)} />
       </View>

@@ -11,11 +11,11 @@ const write = (level: LogLevel, ...args: any[]): void => {
   if (!ENV.enableLogger) return
 
   const timestamp = new Date().toISOString()
-  const prefix = `[${timestamp}] [${level.toUpperCase()}]`
+  const prefix = `[${timestamp}]`
 
   switch (level) {
     case 'group':
-      console.group(...[prefix, ...args])
+      console.group(prefix, ...args)
       break
     case 'error':
       console.error(prefix, ...args)
@@ -29,7 +29,7 @@ const write = (level: LogLevel, ...args: any[]): void => {
 }
 
 export const logger = {
-  group: (...args: any[]) => write('log', ...args),
+  group: (...args: any[]) => write('group', ...args),
   groupEnd: () => { console.groupEnd() }, // No-op for simplicity
   log: (...args: any[]) => write('log', ...args),
   warn: (...args: any[]) => write('warn', ...args),

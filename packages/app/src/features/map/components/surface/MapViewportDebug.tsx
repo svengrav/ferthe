@@ -2,12 +2,15 @@ import { logger } from '@app/shared/utils/logger'
 import { geoUtils } from '@shared/geo'
 import { useEffect, useMemo, useRef } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+import Animated from 'react-native-reanimated'
 import {
   useMapSpots,
+  useMapSurface,
   useMapSurfaceBoundary,
   useMapSurfaceLayout,
   useViewportContext,
   useViewportDimensions,
+  useViewportTranslation,
   useViewportValues
 } from '../../stores/mapStore'
 import { mapUtils } from '../../utils/geoToScreenTransform.'
@@ -74,19 +77,19 @@ const useDebugMetrics = (): DebugMetrics => {
 
     logTimeoutRef.current = setTimeout(() => {
       logger.group('🗺️ Map Debug (Consolidated)')
-      logger.log('📍 Device:', `${deviceLocation.lat.toFixed(5)}, ${deviceLocation.lon.toFixed(5)}`)
-      logger.log('📐 Viewport:', {
+      logger.log('Device:', `${deviceLocation.lat.toFixed(5)}, ${deviceLocation.lon.toFixed(5)}`)
+      logger.log('Viewport:', {
         size: `${viewportSize.width}×${viewportSize.height}px`,
         radius: `${radiusMeters}m`,
         degrees: viewportDims.degrees,
         meters: viewportDims.meters,
       })
-      logger.log('🗺️ Trail:', { degrees: trailDims?.degrees, meters: trailDims?.meters })
-      logger.log('🔍 Transform:', {
+      logger.log('Trail:', { degrees: trailDims?.degrees, meters: trailDims?.meters })
+      logger.log('Transform:', {
         scale: scale.toFixed(2),
         offset: `${translationX.toFixed(0)}, ${translationY.toFixed(0)}`,
       })
-      logger.log('📌 Spots:', {
+      logger.log('Spots:', {
         total: spots.length,
         inViewport: spotsInViewport,
       })
@@ -145,44 +148,50 @@ const useDebugMetrics = (): DebugMetrics => {
  * - Real-time metrics display
  * - Console logging
  */
-export function MapViewportDebug() {
+export function MapViewportDebug({ animatedStyles }: { animatedStyles: any }) {
   const metrics = useDebugMetrics()
   const { boundary: viewportBoundary, radiusMeters, deviceLocation } = useViewportContext()
   const viewportSize = useViewportDimensions()
   const { scale, translationX, translationY } = useViewportValues()
+  const { x, y } = useViewportTranslation()
   const spots = useMapSpots()
-  const trailBoundary = useMapSurfaceBoundary()
+  const surfaceBoundary = useMapSurfaceBoundary()
   const viewRef = useRef<View>(null)
+  const centerX = viewportSize.width / 2
+  const centerY = viewportSize.height / 2
+  const { layout } = useMapSurface()
 
   // Spot screen positions
   const spotPositions = useMemo(() =>
-    spots.map(spot => ({
-      ...spot,
-      screenPos: mapUtils.coordinatesToPosition(spot.location, viewportBoundary, viewportSize)
-    })),
-    [spots, viewportBoundary, viewportSize]
+    spots.map(spot => {
+      const pos = mapUtils.coordinatesToPosition(spot.location, viewportBoundary, viewportSize)
+      return {
+        ...spot,
+        screenPos: pos
+      }
+    }),
+    [spots, viewportBoundary, viewportSize, scale, translationX, translationY]
   )
-
   // Trail boundary box
   const trailBoundaryBox = useMemo(() => {
-    if (!trailBoundary) return null
+    if (!surfaceBoundary) return null
     const topLeft = mapUtils.coordinatesToPosition(
-      { lat: trailBoundary.northEast.lat, lon: trailBoundary.southWest.lon },
+      { lat: surfaceBoundary.northEast.lat, lon: surfaceBoundary.northEast.lon },
       viewportBoundary,
       viewportSize
     )
     const bottomRight = mapUtils.coordinatesToPosition(
-      { lat: trailBoundary.southWest.lat, lon: trailBoundary.northEast.lon },
+      { lat: surfaceBoundary.southWest.lat, lon: surfaceBoundary.southWest.lon },
       viewportBoundary,
       viewportSize
     )
     return {
-      left: topLeft.x,
-      top: topLeft.y,
-      width: bottomRight.x - topLeft.x,
-      height: bottomRight.y - topLeft.y,
+      left: (topLeft.x - centerX) * scale + translationX + centerX,
+      top: (topLeft.y - centerY) * scale + translationY + centerY,
+      width: (bottomRight.x - topLeft.x) * scale,
+      height: (bottomRight.y - topLeft.y) * scale,
     }
-  }, [trailBoundary, viewportBoundary, viewportSize])
+  }, [surfaceBoundary, viewportBoundary, viewportSize, scale, translationX, translationY])
 
   // Styles
   const staticBorderStyle = { width: viewportSize.width, height: viewportSize.height }
@@ -206,24 +215,33 @@ export function MapViewportDebug() {
 
       {/* Transformed area border */}
       <View style={[styles.transformedBorder, transformedBorderStyle]} />
+      <Animated.View style={[{ position: 'absolute', width: viewportSize.width, height: viewportSize.height }, animatedStyles]} pointerEvents="none">
 
-      {/* Trail boundary box */}
-      {trailBoundary && trailBoundaryBox && (
-        <View style={[styles.trailBoundaryBox, trailBoundaryBox]}>
-          <Text style={styles.trailBoundaryLabel}>Trail Boundary</Text>
-        </View>
-      )}
+        {/* Trail boundary box */}
+        {surfaceBoundary && trailBoundaryBox && (
+          <View style={[styles.trailBoundaryBox, {
+            top: layout.top,
+            left: layout.left,
+            width: layout.width,
+            height: layout.height,
 
-      {/* Spot markers */}
-      {spotPositions.map((spot, i) => (
-        <View key={spot.id || i} style={[styles.spotMarker, {
-          left: spot.screenPos.x - 6,
-          top: spot.screenPos.y - 6
-        }]}>
-          <View style={styles.spotDot} />
-        </View>
-      ))}
+          }]}>
+            <Text style={styles.trailBoundaryLabel}>Trail Boundary</Text>
+            {spotPositions.map((spot, i) => (
+              <View id={`spot-${spot.id || i}`} key={spot.id || i} style={[styles.spotMarker, { left: spot.screenPos.x, top: spot.screenPos.y, }]}>
+                <View style={styles.spotDot} />
+              </View>
+            ))}
+          </View>
+        )}
 
+
+
+
+
+        {/* Spot markers */}
+
+      </Animated.View>
       {/* Center crosshair (device) */}
       <View style={styles.centerMarker}>
         <View style={styles.horizontalLine} />
@@ -268,12 +286,12 @@ export function MapViewportDebug() {
       </View>
 
       {/* Map Info Box (bottom-left) */}
-      {trailBoundary && metrics.surface.layout && (
+      {surfaceBoundary && metrics.surface.layout && (
         <View style={styles.mapInfoBox} pointerEvents="none">
           <Text style={styles.infoTitle}>MAP/TRAIL</Text>
           <Text style={styles.infoText}>
-            Center: {((trailBoundary.northEast.lat + trailBoundary.southWest.lat) / 2).toFixed(5)},
-            {((trailBoundary.northEast.lon + trailBoundary.southWest.lon) / 2).toFixed(5)}
+            Center: {((surfaceBoundary.northEast.lat + surfaceBoundary.southWest.lat) / 2).toFixed(5)},
+            {((surfaceBoundary.northEast.lon + surfaceBoundary.southWest.lon) / 2).toFixed(5)}
           </Text>
           <Text style={styles.infoText}>
             Boundary: {metrics.trail.meters?.width.toFixed(0)}m × {metrics.trail.meters?.height.toFixed(0)}m
@@ -346,6 +364,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     pointerEvents: 'none',
+    zIndex: 99999
   },
   spotDot: {
     width: 8,

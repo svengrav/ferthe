@@ -1,4 +1,4 @@
-import { Gesture } from 'react-native-gesture-handler'
+import { ComposedGesture, Gesture } from 'react-native-gesture-handler'
 import { SharedValue, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useMapWheelZoom } from './useMapWheelZoom'
@@ -16,7 +16,7 @@ interface ViewportGestureConfig {
 }
 
 interface ViewportGestureHandlers {
-  gesture: any
+  gesture: ComposedGesture
   animatedStyles: any
   scale: SharedValue<number>
   translationX: SharedValue<number>
@@ -80,14 +80,17 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
         translationY.value = withSpring(0, SPRING_CONFIG)
       }
 
-      // Notify listeners of final values
+      // Notify listeners of final values (target values after spring)
       if (onGestureEnd) {
         scheduleOnRN(() => {
-          onGestureEnd(scale.value, translationX.value, translationY.value)
+          onGestureEnd(
+            scale.value,
+            snapToCenter ? 0 : translationX.value,
+            snapToCenter ? 0 : translationY.value
+          )
         })
       }
     })
-
   // Pinch gesture
   const pinch = Gesture.Pinch()
     .onStart(() => {

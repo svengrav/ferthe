@@ -51,12 +51,11 @@ export function MapViewport({
 
   // Handle gesture end - sync to store
   const handleGestureEnd = (s: number, tx: number, ty: number) => {
-    logger.log('MapViewport Gesture End - Sync to Store')
     actions.setViewportTransform(s, { x: tx, y: ty })
   }
 
   // Setup gesture handlers
-  const { gesture, animatedStyles, scale, translationX, translationY } = useViewportGestures({
+  const { gesture, animatedStyles } = useViewportGestures({
     width: size.width,
     height: size.height,
     elementId: 'device-viewport-content',
@@ -80,7 +79,7 @@ export function MapViewport({
         </GestureDetector>
       </GestureHandlerRootView>
 
-      {debug && <MapViewportDebug />}
+      {debug && <MapViewportDebug animatedStyles={animatedStyles} />}
     </View>
   )
 }
