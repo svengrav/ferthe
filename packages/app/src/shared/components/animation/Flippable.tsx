@@ -29,7 +29,7 @@ export const Flippable = ({ front, back, style, flipped, onTap }: FlippableProps
     lastFlipped.current = flipped
 
     rotation.value = withSpring(flipped ? 180 : 0, {
-      damping: 15,
+      damping: 100,
       stiffness: 100,
     })
   }, [flipped])

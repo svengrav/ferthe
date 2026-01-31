@@ -13,12 +13,11 @@ import { useOverlayStore } from './useOverlayStore'
 // Animation constants
 const FADE_IN_DURATION = 300
 const FADE_OUT_DURATION = 200
-const SPRING_DAMPING = 15
+const SPRING_DAMPING = 0
 const SPRING_STIFFNESS = 150
 const INITIAL_SCALE = 0.9
 const FINAL_SCALE = 1
 const OVERLAY_Z_INDEX = 1000
-const OVERLAY_PADDING = 16
 
 // Content styling constants
 const BORDER_RADIUS = 12
