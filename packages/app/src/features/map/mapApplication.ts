@@ -7,7 +7,7 @@ import { logger } from '@app/shared/utils/logger'
 import { discoveryTrailStore } from '../discovery/stores/discoveryTrailStore'
 import { getMapState, getMapStoreActions } from './stores/mapStore'
 import { MAP_DEFAULT } from './types/map'
-import { mapUtils } from './utils/geoToScreenTransform.'
+import { mapUtils } from './utils/geoToScreenTransform'
 
 export interface MapApplication {
   requestMapState: (viewbox?: { width: number; height: number }) => Promise<void>
@@ -20,8 +20,8 @@ interface MapApplicationOptions {
 
 export function createMapApplication(options: MapApplicationOptions = {}): MapApplication {
   const { discoveryApplication, sensor } = options
-  const { setDevice, setSnap, setState, setSurfaceBoundary, setViewportBoundary, setSurfaceLayout } = getMapStoreActions()
-  const { getCompass, calculateDeviceBoundaryStatus, calculateMapSnap, calculateOptimalScale } = getMapService()
+  const { setDevice, setSnap, setState, setSurface, setViewport } = getMapStoreActions()
+  const { getCompass, calculateMapSnap, calculateOptimalScale } = getMapService()
 
   sensor?.onDeviceUpdate(device => {
     const { trail, snap, spots, lastDiscovery } = getDiscoveryTrailData()
@@ -31,31 +31,17 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
     const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
 
-    // Update viewport boundary based on device location
+    // Update viewport boundary based on device location with current adaptive radius
     const newViewportBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, currentState.viewport.radius)
-
-    // Calculate surface layout within viewport
-    const topLeft = mapUtils.coordinatesToPosition(
-      { lat: currentState.surface.boundary.northEast.lat, lon: currentState.surface.boundary.southWest.lon },
+    const surfaceLayout = mapUtils.calculateSurfaceLayout(
+      currentState.surface.boundary,
       newViewportBoundary,
       currentState.viewport.size
     )
-    const bottomRight = mapUtils.coordinatesToPosition(
-      { lat: currentState.surface.boundary.southWest.lat, lon: currentState.surface.boundary.northEast.lon },
-      newViewportBoundary,
-      currentState.viewport.size
-    )
-    const surfaceLayout = {
-      left: topLeft.x,
-      top: topLeft.y,
-      width: bottomRight.x - topLeft.x,
-      height: bottomRight.y - topLeft.y,
-    }
 
     setSnap(snapState)
-    setSurfaceBoundary(trail?.boundary)
-    setViewportBoundary(newViewportBoundary)
-    setSurfaceLayout(surfaceLayout)
+    setSurface({ boundary: trail?.boundary, layout: surfaceLayout })
+    setViewport({ boundary: newViewportBoundary })
     setDevice({
       location: device.location,
       heading: device.heading,
@@ -83,6 +69,11 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
       return
     }
 
+    // Wait for valid device location (not default 0,0)
+    if (!device?.location || (device.location.lat === 0 && device.location.lon === 0)) {
+      return
+    }
+
     const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
     const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
     const optimalScale = calculateOptimalScale(
@@ -90,37 +81,19 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
       currentViewport.size
     )
 
-    const initialViewportBoundary = mapUtils.calculateDeviceViewportBoundary(
-      device?.location || { lat: 0, lon: 0 },
-      currentViewport.radius
-    )
+    // Calculate adaptive viewport radius based on trail size
+    const adaptiveRadius = mapUtils.calculateAdaptiveViewportRadius(trail.boundary)
 
-    // Calculate initial surface layout
-    const topLeft = mapUtils.coordinatesToPosition(
-      { lat: trail.boundary.northEast.lat, lon: trail.boundary.southWest.lon },
+    const initialViewportBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, adaptiveRadius)
+    const initialSurfaceLayout = mapUtils.calculateSurfaceLayout(
+      trail.boundary,
       initialViewportBoundary,
       currentViewport.size
     )
-    const bottomRight = mapUtils.coordinatesToPosition(
-      { lat: trail.boundary.southWest.lat, lon: trail.boundary.northEast.lon },
-      initialViewportBoundary,
-      currentViewport.size
-    )
-    const initialSurfaceLayout = {
-      left: topLeft.x,
-      top: topLeft.y,
-      width: bottomRight.x - topLeft.x,
-      height: bottomRight.y - topLeft.y,
-    }
 
     setState({
       status: 'ready',
-      trailId: trail?.id || '',
-      scannedClues: scannedClues || [],
-      previewClues: previewClues || [],
-      spots: spots,
       snap: snapState,
-      deviceStatus: calculateDeviceBoundaryStatus(device?.location, trail.boundary),
 
       surface: {
         scale: typeof optimalScale === 'number'
@@ -133,13 +106,14 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
 
       viewport: {
         ...currentViewport,
+        radius: adaptiveRadius,
         boundary: initialViewportBoundary,
       },
 
       device: {
-        location: device?.location || { lat: 0, lon: 0 },
-        heading: device?.heading || 0,
-        direction: getCompass(device?.heading || 0).direction,
+        location: device.location,
+        heading: device.heading ?? 0,
+        direction: getCompass(device.heading ?? 0).direction,
       },
 
       scanner: {

@@ -65,6 +65,9 @@ export const API_ERROR_CODES = {
   STORAGE_CONNECTOR_NOT_CONFIGURED: { code: 'STORAGE_CONNECTOR_NOT_CONFIGURED', message: 'Storage connector is not configured', httpStatus: 500 },
   IMAGE_UPLOAD_ERROR: { code: 'IMAGE_UPLOAD_ERROR', message: 'Failed to upload image', httpStatus: 500 },
   DELETE_CONTENT_ERROR: { code: 'DELETE_CONTENT_ERROR', message: 'Failed to delete discovery content', httpStatus: 500 },
+  DELETE_IMAGE_ERROR: { code: 'DELETE_IMAGE_ERROR', message: 'Failed to delete image', httpStatus: 500 },
+  INVALID_IMAGE_FORMAT: { code: 'INVALID_IMAGE_FORMAT', message: 'Unsupported image format', httpStatus: 400 },
+  REFRESH_IMAGE_URL_ERROR: { code: 'REFRESH_IMAGE_URL_ERROR', message: 'Failed to refresh image URL', httpStatus: 500 },
 
   // Community Management (404-500)
   COMMUNITY_NOT_FOUND: { code: 'COMMUNITY_NOT_FOUND', message: 'Community not found', httpStatus: 404 },
@@ -102,22 +105,3 @@ export function createApiError(code: ApiErrorCode, details?: any): ApiError {
   }
 }
 
-/**
- * Create a DataResult with standardized error
- */
-export function createErrorResult<T>(code: ApiErrorCode, details?: any): { success: false; error: ApiError } {
-  return {
-    success: false,
-    error: createApiError(code, details),
-  }
-}
-
-/**
- * Create a successful DataResult
- */
-export function createSuccessResult<T>(data: T): { success: true; data: T } {
-  return {
-    success: true,
-    data,
-  }
-}

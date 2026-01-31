@@ -6,21 +6,34 @@ import { useApp } from '@app/shared/useApp'
 import { useEffect, useRef } from 'react'
 import { Animated, View } from 'react-native'
 import { SettingsForm } from '../../settings/components/SettingsForm'
-import { useMapStatus, useMapViewport } from '../stores/mapStore'
+import { getMapStoreActions, useMapLayer, useMapStatus } from '../stores/mapStore'
 import { Map } from './Map'
 import MapCompass from './MapCompass'
 import MapDiscoveryCard from './MapDiscoveryCard'
+import MapDistanceWarning from './MapDistanceWarning'
+import MapLayerSwitch from './MapLayerSwitch'
+import MapOverlay from './MapOverlay'
 import { MapTrailSelector } from './MapTrailSelector'
 
 function MapScreen() {
   const { styles, context } = useApp(theme => useStyles(theme))
   const { t } = useLocalizationStore()
   const status = useMapStatus()
-  const viewPort = useMapViewport()
+  const activeLayer = useMapLayer()
   const fadeAnim = useRef(new Animated.Value(0)).current
+  const { setContainer } = getMapStoreActions()
 
   useEffect(() => {
-    context.mapApplication.requestMapState(viewPort.size)
+    if (status !== 'uninitialized') return
+
+    const retryInterval = setInterval(() => {
+      context.mapApplication.requestMapState()
+    }, 2000)
+
+    // Initial call
+    context.mapApplication.requestMapState()
+
+    return () => clearInterval(retryInterval)
   }, [status])
 
   useEffect(() => {
@@ -35,21 +48,24 @@ function MapScreen() {
     }
   }, [status, fadeAnim])
 
-  // const onLayout = (layout: { nativeEvent: { layout: { width: number; height: number } } }) => {
-  //   setViewport(layout.nativeEvent.layout)
-  // }
+  const onLayout = (event: { nativeEvent: { layout: { width: number; height: number } } }) => {
+    const { width, height } = event.nativeEvent.layout
+    setContainer({ size: { width, height } })
+  }
 
   return (
     <Page options={[{ label: t.navigation.settings, onPress: () => setOverlay('settingsForm', <SettingsForm onClose={() => { }} onSubmit={() => { }} />) }]}>
       <View style={styles?.container} >
         <MapDiscoveryCard />
         <MapCompass />
-        <View style={styles?.map} /* onLayout={onLayout} */>
+        <MapLayerSwitch />
+        <MapDistanceWarning />
+        <View style={styles?.map} onLayout={onLayout}>
           {status !== 'ready' ? (
             <LoadingSpinner />
           ) : (
             <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-              <Map />
+              {activeLayer === 'CANVAS' ? <Map /> : <MapOverlay />}
             </Animated.View>
           )}
         </View>
@@ -63,6 +79,7 @@ const useStyles = createThemedStyles(theme => ({
   map: {
     flex: 1,
     justifyContent: 'center',
+    overflow: 'hidden'
   },
   container: {
     position: 'relative' as const,

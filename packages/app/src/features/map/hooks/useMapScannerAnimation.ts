@@ -35,9 +35,10 @@ export const useMapScannerAnimation = ({ point, width, style }: MapScannerAnimat
     }
   })
 
-  // Update boundaries and calculate point and width
+  // Update position and radius when viewport changes
   useEffect(() => {
     animatedPoint.value = point
+    // width is diameter, we need radius for animation
     animatedWidth.value = width / 2
   }, [point, width, animatedPoint, animatedWidth])
 

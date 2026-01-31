@@ -1,38 +1,34 @@
-import { getAppContext } from '@app/appContext'
-import { ENV } from '@app/env.ts'
-import { logger } from '@app/shared/utils/logger'
-import { GeoLocation } from '@shared/geo'
 import { ReactNode } from 'react'
-import { View } from 'react-native'
+import { LayoutChangeEvent, View } from 'react-native'
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
 import Animated from 'react-native-reanimated'
+
+import { getAppContext } from '@app/appContext'
+import { ENV } from '@app/env.ts'
+import { createThemedStyles } from '@app/shared/theme'
+import { useApp } from '@app/shared/useApp'
+import { logger } from '@app/shared/utils/logger'
+
 import { useViewportGestures } from '../../hooks/useViewportGestures'
-import { getViewportActions, useMapSurfaceBoundary, useMapViewport } from '../../stores/mapStore'
-import { mapUtils } from '../../utils/geoToScreenTransform.'
+import { getMapState, getViewportActions, useMapSurfaceBoundary, useMapViewport } from '../../stores/mapStore'
+import { mapUtils } from '../../utils/geoToScreenTransform'
 import { MapViewportDebug } from './MapViewportDebug'
 
-interface DeviceViewportWrapperProps {
-  deviceLocation: GeoLocation
-  radiusMeters?: number
-  viewportSize?: { width: number; height: number }
+interface MapViewportProps {
   children: ReactNode
   onLayout?: (size: { width: number; height: number }) => void
-  debug?: boolean
 }
 
 /**
- * DeviceViewportWrapper
+ * MapViewport
  * 
- * Manages a device-centered viewport with fixed radius (default 1000m)
- * Maps geographic area to pixel canvas (default 1000x1000px)
- * 
- * Independent component - does not know about Map specifics
+ * Manages a device-centered viewport with fixed radius (default 1000m).
+ * Maps geographic area to pixel canvas (default 1000x1000px).
+ * Handles gesture interactions and optional debug teleport feature.
  */
-export function MapViewport({
-  children,
-  onLayout,
-  debug = ENV.isDevelopment,
-}: DeviceViewportWrapperProps) {
+function MapViewport(props: MapViewportProps) {
+  const { children, onLayout } = props
+  const { styles } = useApp(useStyles)
   const { size, boundary } = useMapViewport()
   const surfaceBoundary = useMapSurfaceBoundary()
   const { sensorApplication } = getAppContext()
@@ -42,45 +38,56 @@ export function MapViewport({
   const handleLongPress = (x: number, y: number) => {
     if (!surfaceBoundary) return
 
-    // Convert viewport position to geo coordinates
     const geoPosition = mapUtils.positionToCoordinates({ x, y }, boundary, size)
-
     logger.log('📍 Teleport to:', geoPosition)
     sensorApplication.setDevice({ location: geoPosition, heading: 0 })
   }
 
   // Handle gesture end - sync to store
   const handleGestureEnd = (s: number, tx: number, ty: number) => {
-    actions.setViewportTransform(s, { x: tx, y: ty })
+    const currentScale = getMapState().viewport.scale
+    actions.setViewport({ scale: { ...currentScale, init: s }, offset: { x: tx, y: ty } })
   }
 
-  // Setup gesture handlers
   const { gesture, animatedStyles } = useViewportGestures({
     width: size.width,
     height: size.height,
     elementId: 'device-viewport-content',
     snapToCenter: true,
-    onLongPress: debug ? handleLongPress : undefined,
+    onLongPress: ENV.isDevelopment ? handleLongPress : undefined,
     onGestureEnd: handleGestureEnd,
   })
 
-  const handleLayout = (event: any) => {
+  const handleLayout = (event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout
     onLayout?.({ width, height })
   }
 
   return (
-    <View style={{ flex: 1, position: 'absolute', height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center' }} onLayout={handleLayout} id='device-viewport-content'>
-      <GestureHandlerRootView style={{ ...size }}>
+    <View style={styles?.container} onLayout={handleLayout} id='device-viewport-content'>
+      <GestureHandlerRootView style={size}>
         <GestureDetector gesture={gesture}>
-          <Animated.View style={[{ ...size, }, animatedStyles]}>
+          <Animated.View style={[size, animatedStyles]}>
             {children}
           </Animated.View>
         </GestureDetector>
       </GestureHandlerRootView>
 
-      {debug && <MapViewportDebug animatedStyles={animatedStyles} />}
+      {ENV.enableMapDebug && <MapViewportDebug animatedStyles={animatedStyles} />}
     </View>
   )
 }
+
+const useStyles = createThemedStyles(() => ({
+  container: {
+    flex: 1,
+    position: 'absolute',
+    height: '100%',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+}))
+
+export { MapViewport }
 

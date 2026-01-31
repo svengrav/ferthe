@@ -6,9 +6,19 @@ interface StorageItem {
   url: string
 }
 
+interface StorageConnectorOptions {
+  /**
+   * SAS token expiry time in minutes for read access.
+   * Default: 15 minutes (more secure than long-lived tokens)
+   */
+  sasExpiryMinutes?: number
+}
+
 interface StorageConnector {
   getItemUrl(key: string): Promise<StorageItem>
-  uploadFile(path: string, data: Buffer | string, contentType?: string): Promise<string>
+  uploadFile(path: string, data: Buffer | string, metadata?: Record<string, string>): Promise<string>
+  deleteFile(path: string): Promise<void>
+  getMetadata(path: string): Promise<Record<string, string>>
 }
 
 const parseConnectionString = (connectionString: string): { accountName: string; accountKey: string } => {
@@ -26,10 +36,15 @@ const parseConnectionString = (connectionString: string): { accountName: string;
   }
 }
 
-export const createAzureStorageConnector = (connectionString: string, containerName: string): StorageConnector => {
+export const createAzureStorageConnector = (
+  connectionString: string,
+  containerName: string,
+  options: StorageConnectorOptions = {}
+): StorageConnector => {
   const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
   const connectionParams = parseConnectionString(connectionString)
   const { accountName, accountKey } = connectionParams
+  const sasExpiryMinutes = options.sasExpiryMinutes ?? 15 // Default: 15 minutes
 
   const getItemUrl = async (key: string): Promise<StorageItem> => {
     try {
@@ -47,7 +62,7 @@ export const createAzureStorageConnector = (connectionString: string, containerN
         blobName: key,
         permissions: BlobSASPermissions.parse('r'),
         startsOn: new Date(),
-        expiresOn: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
+        expiresOn: new Date(Date.now() + sasExpiryMinutes * 60 * 1000),
       }
       const sasToken = generateBlobSASQueryParameters(sasOptions, sharedKeyCredential).toString()
       const urlWithSAS = `${blobClient.url}?${sasToken}`
@@ -62,12 +77,19 @@ export const createAzureStorageConnector = (connectionString: string, containerN
     }
   }
 
-  const uploadFile = async (path: string, data: Buffer | string): Promise<string> => {
+  const uploadFile = async (path: string, data: Buffer | string, metadata?: Record<string, string>): Promise<string> => {
     try {
       const containerClient = blobServiceClient.getContainerClient(containerName)
       const blobClient = containerClient.getBlobClient(path)
+      const blockBlobClient = blobClient.getBlockBlobClient()
 
-      await blobClient.getBlockBlobClient().upload(data, Buffer.isBuffer(data) ? data.length : Buffer.byteLength(data))
+      // Upload blob with metadata
+      await blockBlobClient.upload(data, Buffer.isBuffer(data) ? data.length : Buffer.byteLength(data))
+
+      // Set metadata if provided
+      if (metadata) {
+        await blobClient.setMetadata(metadata)
+      }
 
       // Generate SAS URL for the uploaded file
       const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey)
@@ -76,7 +98,7 @@ export const createAzureStorageConnector = (connectionString: string, containerN
         blobName: path,
         permissions: BlobSASPermissions.parse('r'),
         startsOn: new Date(),
-        expiresOn: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+        expiresOn: new Date(Date.now() + sasExpiryMinutes * 60 * 1000),
       }
       const sasToken = generateBlobSASQueryParameters(sasOptions, sharedKeyCredential).toString()
       const urlWithSAS = `${blobClient.url}?${sasToken}`
@@ -88,8 +110,40 @@ export const createAzureStorageConnector = (connectionString: string, containerN
     }
   }
 
+  const deleteFile = async (path: string): Promise<void> => {
+    try {
+      const containerClient = blobServiceClient.getContainerClient(containerName)
+      const blobClient = containerClient.getBlobClient(path)
+
+      const exists = await blobClient.exists()
+      if (!exists) {
+        throw new Error(`Blob not found: ${path}`)
+      }
+
+      await blobClient.delete()
+    } catch (error) {
+      console.error('Error deleting file:', error)
+      throw error
+    }
+  }
+
+  const getMetadata = async (path: string): Promise<Record<string, string>> => {
+    try {
+      const containerClient = blobServiceClient.getContainerClient(containerName)
+      const blobClient = containerClient.getBlobClient(path)
+
+      const properties = await blobClient.getProperties()
+      return properties.metadata || {}
+    } catch (error) {
+      console.error('Error getting metadata:', error)
+      throw error
+    }
+  }
+
   return {
     getItemUrl,
     uploadFile,
+    deleteFile,
+    getMetadata,
   }
 }

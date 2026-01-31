@@ -1,17 +1,21 @@
+import { useDiscoverySpots } from '@app/features/discovery/stores/discoveryTrailStore'
+import { GeoBoundary } from '@shared/geo'
 import { memo, useMemo } from 'react'
-import { useCompensatedScale, useMapSpots, useMapSurfaceBoundary, useMapSurfaceLayout } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
 import { GeoPath } from './MapElements'
 
-function MapTrailPath() {
-  const scale = useCompensatedScale()
-  const spots = useMapSpots()
-  const boundary = useMapSurfaceBoundary()
+interface MapTrailPathProps {
+  boundary: GeoBoundary
+  size: { width: number; height: number }
+  scale: number
+}
+
+function MapTrailPath({ boundary, size, scale }: MapTrailPathProps) {
+  const spots = useDiscoverySpots()
   const points = useMemo(() =>
     spots.map(spot => spot.location),
     [spots]
   )
-  const size = useMapSurfaceLayout()
   const mapTheme = useMapTheme()
 
   const pathStyle = {

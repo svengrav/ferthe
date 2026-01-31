@@ -1,19 +1,19 @@
+import { ENV } from '@app/env'
+import { useDiscoveryPreviewClues, useDiscoveryScannedClues } from '@app/features/discovery/stores/discoveryTrailStore'
 import { Clue } from '@shared/contracts'
+import { GeoBoundary } from '@shared/geo'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import { useCompensatedScale, useMapPreviewClues, useMapScannedClues, useMapSurfaceBoundary, useMapSurfaceLayout } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
-import { mapUtils } from '../../utils/geoToScreenTransform.'
+import { mapUtils } from '../../utils/geoToScreenTransform'
 
 const CLUE_SIZE = 20
-const CLUE_RADIUS = 10
-const CLUE_OFFSET_X = 10
-const CLUE_OFFSET_Y = 10
 const FADE_IN_DURATION = 500
 const SCALE_DURATION = 600
 const FADE_OUT_DURATION = 700
 const INITIAL_SCALE = 0.8
+const DEBUG_RADIUS_CIRCLES = [50, 100, 150]
 
 /**
  * Custom hook to manage animated scan clues visibility and transitions
@@ -58,32 +58,35 @@ const useScanCluesAnimation = (scanClues: Clue[]) => {
   return { visibleClues, animatedStyle }
 }
 
+interface MapCluesProps {
+  boundary: GeoBoundary
+  size: { width: number; height: number }
+  scale: number
+}
+
 /**
  * Component that renders map clues with animation support for scan events
- * Surface-centric: Positions calculated once relative to surface.boundary + surface.layout
+ * Props-based: boundary and size determine positioning
  */
-function MapClues() {
-  const scale = useCompensatedScale()
-  const previewClues = useMapPreviewClues()
-  const scannedClues = useMapScannedClues()
-  const boundary = useMapSurfaceBoundary()
-  const surfaceLayout = useMapSurfaceLayout()
+function MapClues({ boundary, size, scale }: MapCluesProps) {
+  const previewClues = useDiscoveryPreviewClues() ?? []
+  const scannedClues = useDiscoveryScannedClues()
   const mapTheme = useMapTheme()
 
   const { visibleClues, animatedStyle } = useScanCluesAnimation(scannedClues)
 
-  // Pre-calculate all clue positions (surface-centric)
-  // Memoized: only recalc when boundary or layout size changes
+  // Pre-calculate all clue positions
+  // Memoized: only recalc when boundary or size changes
   const previewPositions = useMemo(() => {
     return previewClues.map(clue => ({
       clue,
       position: mapUtils.coordinatesToPosition(
         clue.location,
         boundary,
-        { width: surfaceLayout.width, height: surfaceLayout.height }
+        size
       )
     }))
-  }, [previewClues, boundary, surfaceLayout.width, surfaceLayout.height])
+  }, [previewClues, boundary, size.width, size.height])
 
   const scannedPositions = useMemo(() => {
     return visibleClues.map(clue => ({
@@ -91,31 +94,56 @@ function MapClues() {
       position: mapUtils.coordinatesToPosition(
         clue.location,
         boundary,
-        { width: surfaceLayout.width, height: surfaceLayout.height }
+        size
       )
     }))
-  }, [visibleClues, boundary, surfaceLayout.width, surfaceLayout.height])
+  }, [visibleClues, boundary, size.width, size.height])
+
+  // Render debug radius circles around clue (50m, 100m, 150m)
+  const renderDebugCircles = (clue: Clue) => {
+    if (!ENV.isDevelopment) return null
+
+    return DEBUG_RADIUS_CIRCLES.map(radius => {
+      const circle = mapUtils.calculateCircleDimensions(clue.location, radius, boundary, size)
+      return (
+        <View
+          key={radius}
+          style={{
+            position: 'absolute',
+            ...circle,
+            borderRadius: circle.width / 2,
+            borderWidth: 1 * scale,
+            borderColor: 'rgba(255, 0, 0, 0.3)',
+            borderStyle: 'dashed',
+          }}
+        />
+      )
+    })
+  }
 
   // Render clue marker at pre-calculated position
   const renderClueMarker = ({ clue, position }: { clue: Clue; position: { x: number; y: number } }, index: number) => (
-    <View
-      key={clue.spotId || index}
-      style={[
-        clueMarkerStyle({
-          fill: mapTheme.clue.fill,
-          strokeColor: mapTheme.clue.strokeColor,
-          strokeWidth: mapTheme.clue.strokeWidth
-        }),
-        {
-          position: 'absolute',
-          left: position.x - (CLUE_OFFSET_X * scale),
-          top: position.y - (CLUE_OFFSET_Y * scale),
-          width: CLUE_SIZE * scale,
-          height: CLUE_SIZE * scale,
-          borderRadius: CLUE_RADIUS * scale
-        }
-      ]}
-    />
+    <View key={clue.spotId || index}>
+      {renderDebugCircles(clue)}
+      <View
+        key={clue.spotId || index}
+        style={[
+          clueMarkerStyle({
+            fill: mapTheme.clue.fill,
+            strokeColor: mapTheme.clue.strokeColor,
+            strokeWidth: mapTheme.clue.strokeWidth
+          }),
+          {
+            position: 'absolute',
+            left: position.x - (CLUE_SIZE / 2 * scale),
+            top: position.y - (CLUE_SIZE / 2 * scale),
+            width: CLUE_SIZE * scale,
+            height: CLUE_SIZE * scale,
+            borderRadius: (CLUE_SIZE * scale) / 2,
+          }
+        ]}
+      />
+    </View>
   )
 
   return (

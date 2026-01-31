@@ -37,3 +37,10 @@ export type { SensorApplicationActions } from './features/sensor/sensorApplicati
 // Community feature
 export { createCommunityApplication } from './features/community/communityApplication.ts'
 
+// Image utilities (shared infrastructure)
+export { createImageApplication } from './shared/images/imageApplication.ts'
+export { createImageMetadata, detectExtensionFromDataUri, extractBlobPathFromUrl, generateSecureImagePath, isSupportedExtension } from './shared/images/imageService.ts'
+
+// Storage Connector
+export { createAzureStorageConnector } from './connectors/storageConnector.ts'
+

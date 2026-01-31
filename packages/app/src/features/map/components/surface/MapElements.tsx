@@ -2,7 +2,7 @@ import { GeoBoundary, GeoLocation } from '@shared/geo'
 import { StyleProp, View, ViewStyle } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 import { JSX } from 'react/jsx-runtime'
-import { mapUtils } from '../../utils/geoToScreenTransform.'
+import { mapUtils } from '../../utils/geoToScreenTransform'
 
 const DEFAULT_STROKE_COLOR = '#3498db'
 

@@ -1,7 +1,7 @@
-import { create } from 'zustand'
-import { ScanEvent } from '@shared/contracts'
-import { StoreActions, StoreData } from '@app/shared/stores/types'
 import { DeviceLocation } from '@app/features/sensor/device/types'
+import { StoreActions, StoreData } from '@app/shared/stores/types'
+import { ScanEvent } from '@shared/contracts'
+import { create } from 'zustand'
 
 interface SensorActions extends StoreActions {
   setDevice: (device: DeviceLocation) => void
@@ -37,7 +37,6 @@ export const sensorStore = create<SensorData & SensorActions>(set => ({
   },
 }))
 
-export const useDeviceLocation = () => sensorStore(state => state.device)
 export const useLatestScan = () => sensorStore(state => state.latestScanId)
 export const useSensorStatus = () => sensorStore(state => state.status)
 

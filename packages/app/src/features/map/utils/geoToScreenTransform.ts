@@ -165,6 +165,63 @@ const calculateDeviceViewportBoundary = (deviceLocation: GeoLocation, radiusMete
   return geoUtils.calculateBoundaries(deviceLocation, radiusMeters)
 }
 
+/**
+ * Calculate adaptive viewport radius based on trail size
+ * @param trailBoundary Trail boundary to analyze
+ * @param maxRadius Maximum allowed radius (default 1000m)
+ * @param paddingFactor Extra space around trail (default 1.2 = 20% padding)
+ * @returns Optimal radius between reasonable minimum and maxRadius
+ */
+const calculateAdaptiveViewportRadius = (
+  trailBoundary: GeoBoundary,
+  maxRadius: number = DEVICE_VIEWPORT_RADIUS,
+  paddingFactor: number = 1.2
+): number => {
+  // Calculate trail dimensions using geoUtils
+  const centerLat = (trailBoundary.northEast.lat + trailBoundary.southWest.lat) / 2
+  const trailDimensions = geoUtils.calculateBoundaryDimensions(trailBoundary, centerLat)
+
+  if (!trailDimensions?.meters) {
+    return maxRadius // Fallback to maximum if calculation fails
+  }
+
+  // Take the larger dimension and add padding
+  const trailSize = Math.max(trailDimensions.meters.width, trailDimensions.meters.height)
+  const suggestedRadius = (trailSize / 2) * paddingFactor
+
+  // Ensure minimum usability (200m minimum) and respect maximum limit
+  return Math.min(Math.max(suggestedRadius, 200), maxRadius)
+}
+
+/**
+ * Calculate surface layout position and dimensions within a viewport
+ * @param surfaceBoundary The boundary of the surface/trail
+ * @param viewportBoundary The viewport boundary
+ * @param viewportSize The viewport pixel dimensions
+ */
+const calculateSurfaceLayout = (
+  surfaceBoundary: GeoBoundary,
+  viewportBoundary: GeoBoundary,
+  viewportSize: ScreenSize
+): { left: number; top: number; width: number; height: number } => {
+  const topLeft = coordinatesToPosition(
+    { lat: surfaceBoundary.northEast.lat, lon: surfaceBoundary.southWest.lon },
+    viewportBoundary,
+    viewportSize
+  )
+  const bottomRight = coordinatesToPosition(
+    { lat: surfaceBoundary.southWest.lat, lon: surfaceBoundary.northEast.lon },
+    viewportBoundary,
+    viewportSize
+  )
+  return {
+    left: topLeft.x,
+    top: topLeft.y,
+    width: bottomRight.x - topLeft.x,
+    height: bottomRight.y - topLeft.y,
+  }
+}
+
 export const mapUtils = {
   coordinatesToPosition,
   positionToCoordinates,
@@ -172,4 +229,6 @@ export const mapUtils = {
   calculateScreenDimensions,
   metersToPixels,
   calculateDeviceViewportBoundary,
+  calculateAdaptiveViewportRadius,
+  calculateSurfaceLayout,
 }

@@ -52,6 +52,9 @@ export const discoveryTrailStore = create<DiscoveryTrailData & DiscoveryTrailAct
 export const useDiscoveryTrailStatus = () => discoveryTrailStore(state => state.status)
 export const useDiscoveryTrail = () => discoveryTrailStore(state => state)
 export const useDiscoveryTrailId = () => discoveryTrailStore(state => state.trailId)
+export const useDiscoverySpots = () => discoveryTrailStore(state => state.spots)
+export const useDiscoveryPreviewClues = () => discoveryTrailStore(state => state.previewClues)
+export const useDiscoveryScannedClues = () => discoveryTrailStore(state => state.scannedClues)
 
 export const getDiscoveryTrailId = () => discoveryTrailStore.getState().trailId
 export const getDiscoveryTrailData = () => discoveryTrailStore.getState() as DiscoveryTrailData

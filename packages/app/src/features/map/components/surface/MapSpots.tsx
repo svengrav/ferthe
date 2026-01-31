@@ -1,10 +1,12 @@
+import { useDiscoverySpots } from '@app/features/discovery/stores/discoveryTrailStore'
 import { Text } from '@app/shared/components'
-import { Spot } from '@shared/contracts'
+import { DiscoverySpot } from '@shared/contracts'
+import { GeoBoundary } from '@shared/geo'
 import { memo, useMemo } from 'react'
-import { Image, View } from 'react-native'
-import { useMapSpots, useMapSurfaceBoundary, useMapSurfaceLayout, useViewportScale } from '../../stores/mapStore'
+import { Image, Pressable, View } from 'react-native'
+import { useSetTappedSpot } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
-import { mapUtils } from '../../utils/geoToScreenTransform.'
+import { mapUtils } from '../../utils/geoToScreenTransform'
 
 const DEFAULT_SPOT_SIZE = 15
 const DEFAULT_SPOT_HEIGHT_OFFSET = 7
@@ -14,36 +16,41 @@ const IMAGE_BORDER_RADIUS = 2
 const BORDER_WIDTH = 0.5
 const BACKGROUND_COLOR = '#000000ff'
 const IMAGE_BACKGROUND_COLOR = '#000'
-const OFFSET_X = 7
-const OFFSET_Y = 11
+const OFFSET_X = 10
+const OFFSET_Y = 13.5
 const FIRST_LETTER_INDEX = 0
 const FIRST_LETTER_LENGTH = 1
 
+interface MapSpotsProps {
+  boundary: GeoBoundary
+  size: { width: number; height: number }
+  scale: number
+}
+
 /**
  * Component that renders spot markers on the map with images or initials
- * Surface-centric: Positions calculated once relative to surface.boundary + surface.layout
- * Re-calc only when surface geometry changes, not on every render
+ * Props-based: boundary and size determine positioning
  */
-function MapSpots() {
-  const viewportScale = useViewportScale()
-  const compensatedScale = 1 / viewportScale
+function MapSpots({ boundary, size, scale }: MapSpotsProps) {
   const mapTheme = useMapTheme()
-  const spots = useMapSpots()
-  const surfaceLayout = useMapSurfaceLayout()
-  const boundary = useMapSurfaceBoundary()
+  const spots = useDiscoverySpots()
+  const setTappedSpot = useSetTappedSpot()
 
-  // Pre-calculate all spot positions (surface-centric)
-  // Memoized: only recalc when boundary or layout size changes, not on viewport transform
+  // Use the scale directly (it's already compensated from MapOverlay)
+  const compensatedScale = scale
+
+  // Pre-calculate all spot positions
+  // Memoized: only recalc when boundary or size changes
   const spotPositions = useMemo(() => {
     return spots.map(spot => ({
       spot,
       position: mapUtils.coordinatesToPosition(
         spot.location,
         boundary,
-        { width: surfaceLayout.width, height: surfaceLayout.height }
+        size
       )
     }))
-  }, [spots, boundary, surfaceLayout.width, surfaceLayout.height])
+  }, [spots, boundary, size.width, size.height])
 
   // Helper function to create marker container styles
   const createMarkerContainerStyle = (spotSize: number) => ({
@@ -71,13 +78,14 @@ function MapSpots() {
   })
 
   // Render spot marker at pre-calculated position
-  const renderSpotMarker = ({ spot, position }: { spot: Spot; position: { x: number; y: number } }, index: number) => {
+  const renderSpotMarker = ({ spot, position }: { spot: DiscoverySpot; position: { x: number; y: number } }, index: number) => {
     const spotSize = mapTheme.spot.size || DEFAULT_SPOT_SIZE
     const spotColor = mapTheme.spot.fill || DEFAULT_SPOT_COLOR
     const spotInitial = spot.name.substring(FIRST_LETTER_INDEX, FIRST_LETTER_LENGTH)
 
     return (
-      <View
+      <Pressable
+        onPress={() => setTappedSpot(spot)}
         key={spot.id || index}
         style={{
           position: 'absolute',
@@ -100,7 +108,7 @@ function MapSpots() {
             </View>
           )}
         </View>
-      </View>
+      </Pressable>
     )
   }
 

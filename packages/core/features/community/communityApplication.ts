@@ -1,5 +1,4 @@
-import { AccountContext, Community, CommunityApplicationContract, CommunityMember, Result } from '@shared/contracts'
-import { createErrorResult, createSuccessResult } from '@shared/contracts/errors.ts'
+import { AccountContext, Community, CommunityApplicationContract, CommunityMember, createErrorResult, createSuccessResult, Result } from '@shared/contracts'
 import { CommunityServiceActions, createCommunityService } from './communityService.ts'
 import { CommunityStore } from './communityStore.ts'
 

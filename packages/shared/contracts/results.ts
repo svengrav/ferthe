@@ -41,3 +41,27 @@ export interface ErrorResult {
 //   readonly include?: string[]
 //   readonly exclude?: string[]
 // }
+
+/**
+ * Create a successful result with data
+ */
+export function createSuccessResult<T>(data: T): Result<T> {
+  return {
+    success: true,
+    data,
+  }
+}
+
+/**
+ * Create an error result with code and optional details
+ */
+export function createErrorResult<T = any>(code: string, details?: Record<string, any>): Result<T> {
+  return {
+    success: false,
+    error: {
+      code,
+      message: code, // Can be enhanced with error message mapping
+      details,
+    },
+  }
+}

@@ -1,5 +1,5 @@
 import { GeoBoundary, GeoLocation } from '@shared/geo'
-import { mapUtils } from '../utils/geoToScreenTransform.'
+import { mapUtils } from '../utils/geoToScreenTransform'
 
 interface DeviceViewportConfig {
   deviceLocation: GeoLocation

@@ -37,7 +37,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     backgroundColor: '#12121e',
   },
   ios: {
-    bundleIdentifier: 'de.ferthe.foxhole',
+    bundleIdentifier: 'de.ferthe.app',
     supportsTablet: true,
     entitlements: {
       'aps-environment': 'production',

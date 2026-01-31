@@ -1,32 +1,23 @@
-import { memo } from 'react'
 import { View } from 'react-native'
 
 import { IconButton } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
-import { MapLayer, useMapLayer, useSetMapLayer } from '../stores/mapStore'
-
-interface MapLayerSwitchProps {
-  onLayerChange?: (layer: MapLayer) => void
-}
+import { useMapLayer, useSetActiveLayer } from '../stores/mapStore'
 
 /**
  * Button to switch between Canvas (navigation) and Overview (trail) modes
  */
-function MapLayerSwitch(props: MapLayerSwitchProps) {
-  const { onLayerChange } = props
+function MapLayerSwitch() {
   const { styles } = useApp(useStyles)
-
   const mapLayer = useMapLayer()
-  const setMapLayer = useSetMapLayer()
+  const setMapLayer = useSetActiveLayer()
 
   const isOverview = mapLayer === 'OVERVIEW'
 
   const handlePress = () => {
-    const newLayer: MapLayer = isOverview ? 'CANVAS' : 'OVERVIEW'
-    setMapLayer(newLayer)
-    onLayerChange?.(newLayer)
+    setMapLayer(isOverview ? 'CANVAS' : 'OVERVIEW')
   }
 
   return (
@@ -43,11 +34,11 @@ function MapLayerSwitch(props: MapLayerSwitchProps) {
 const useStyles = createThemedStyles(() => ({
   container: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: 14,
+    right: 10,
     alignItems: 'center',
     zIndex: 50,
   },
 }))
 
-export default memo(MapLayerSwitch)
+export default MapLayerSwitch

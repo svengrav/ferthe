@@ -1,9 +1,9 @@
 import { getAppContext } from '@app/appContext'
+import { useDiscoveryTrailId } from '@app/features/discovery/stores/discoveryTrailStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { View } from 'react-native'
-import { useMapDevice, useMapSurface, useMapSurfaceBoundary, useMapTrailId } from '../stores/mapStore'
+import { useCompensatedScale, useMapSurface, useMapSurfaceBoundary, useMapSurfaceLayout, useViewportDimensions } from '../stores/mapStore'
 import { MapTheme, useMapTheme } from '../stores/mapThemeStore'
-import { mapUtils } from '../utils/geoToScreenTransform.'
 import MapDeviceCords from './MapDeviceCords'
 import { MapScanner, MapScannerControl } from './MapScanner'
 import MapCenterMarker from './surface/MapCenterMarker.tsx'
@@ -17,34 +17,33 @@ import { MapViewport } from './surface/MapViewport.tsx'
 
 
 export function Map() {
-  const { sensorApplication, system } = getAppContext()
+  const { sensorApplication } = getAppContext()
   const surface = useMapSurface()
-  const trailId = useMapTrailId()
-  const trailBoundary = useMapSurfaceBoundary()
+  const boundary = useMapSurfaceBoundary()
+  const surfaceLayout = useMapSurfaceLayout()
+  const viewportSize = useViewportDimensions()
+  const scale = useCompensatedScale()
+  const trailId = useDiscoveryTrailId()
   const mapTheme = useMapTheme()
   const theme = useThemeStore()
-  const device = useMapDevice()
   const styles = createStyles(theme, mapTheme, surface.layout)
-
-  // Calculate device-centered viewport boundary (1000m radius)
-  const deviceViewportBoundary = mapUtils.calculateDeviceViewportBoundary(device.location)
 
   return (
     <>
       <View style={[styles.contentContainer]} id='map-content' >
         <MapDeviceCords />
-        <MapViewport deviceLocation={device.location} >
-          <MapSurface boundary={trailBoundary} deviceViewportBoundary={deviceViewportBoundary} >
-            <MapTrailPath />
-            <MapClues />
-            <MapSnap boundary={trailBoundary} />
+        <MapViewport>
+          <MapSurface>
+            <MapTrailPath boundary={boundary} size={surfaceLayout} scale={scale} />
+            <MapClues boundary={boundary} size={surfaceLayout} scale={scale} />
+            <MapSnap boundary={boundary} size={surfaceLayout} scale={scale} />
             <MapCenterMarker />
-            <MapSpots />
+            <MapSpots boundary={boundary} size={surfaceLayout} scale={scale} />
           </MapSurface>
-          <MapScanner boundary={deviceViewportBoundary} />
-          <MapDeviceMarker />
+          <MapScanner />
+          <MapDeviceMarker mode="canvas" canvasSize={viewportSize} scale={scale} />
         </MapViewport>
-        <MapScannerControl startScan={() => sensorApplication.startScan(trailId)} />
+        <MapScannerControl startScan={() => trailId && sensorApplication.startScan(trailId)} />
       </View>
     </>
   )

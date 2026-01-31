@@ -1,14 +1,18 @@
 import { hexToRgbaWithIntensity } from "@app/shared/utils/colors"
 import { GeoBoundary } from "@shared/geo"
 import { memo } from "react"
-import { useCompensatedScale, useMapSnap, useMapSurfaceLayout } from "../../stores/mapStore"
+import { useMapSnap } from "../../stores/mapStore"
 import { useMapTheme } from "../../stores/mapThemeStore"
 import { GeoPath } from "./MapElements"
 
-function MapSnap({ boundary }: { boundary: GeoBoundary }) {
-  const scale = useCompensatedScale()
+interface MapSnapProps {
+  boundary: GeoBoundary
+  size: { width: number; height: number }
+  scale: number
+}
+
+function MapSnap({ boundary, size, scale }: MapSnapProps) {
   const { startPoint, endPoint, intensity } = useMapSnap()
-  const size = useMapSurfaceLayout()
   const mapTheme = useMapTheme()
 
   // Don't render if intensity is 0 or if start and end points are the same

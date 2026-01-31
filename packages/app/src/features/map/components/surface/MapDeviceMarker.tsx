@@ -1,10 +1,12 @@
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
+import { GeoBoundary } from '@shared/geo'
 import { memo } from 'react'
 import { View } from 'react-native'
 import Svg, { Circle, Polygon } from 'react-native-svg'
-import { useMapDevice, useViewportCompensationScale, useViewportDimensions } from '../../stores/mapStore'
+import { useMapDevice } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
+import { mapUtils } from '../../utils/geoToScreenTransform'
 
 // Arrow SVG constants
 const SVG_VIEWBOX = '0 0 18 18'
@@ -32,17 +34,11 @@ interface ArrowProps {
  */
 function Arrow({ rotation = 0, fill }: ArrowProps) {
   const { styles } = useApp(useArrowStyles)
-  const viewportScale = useViewportCompensationScale() // von viewportStore
 
   if (!styles) return null
 
-  const getArrowTransform = () => ({
-    transformOrigin: 'center',
-    transform: [{ rotate: `${rotation}deg` }],
-  })
-
   return (
-    <View style={[styles.arrow, { transform: [{ rotate: `${rotation}deg` }, { scale: viewportScale }] }]}>
+    <View style={[styles.arrow, { transform: [{ rotate: `${rotation}deg` }] }]}>
       <Svg viewBox={SVG_VIEWBOX}>
         <Circle
           cx={CIRCLE_CENTER}
@@ -58,26 +54,49 @@ function Arrow({ rotation = 0, fill }: ArrowProps) {
   )
 }
 
+interface MapDeviceMarkerProps {
+  mode: 'canvas' | 'overview'
+  canvasSize: { width: number; height: number }
+  boundary?: GeoBoundary
+  scale?: number
+}
+
 /**
  * Map device marker component that displays the user's location and heading on the map
- * Fixed at viewport center - map moves around device
+ * Canvas mode: Fixed at canvas center - map moves around device
+ * Overview mode: Positioned by device location within trail boundary
  */
-function MapDeviceMarker() {
+function MapDeviceMarker({ mode, canvasSize, boundary, scale = 1 }: MapDeviceMarkerProps) {
   const { styles } = useApp(useMarkerStyles)
   const device = useMapDevice()
   const mapTheme = useMapTheme()
-  const layout = useViewportDimensions()
 
   const fillColor = mapTheme.device.fill || DEFAULT_FILL_COLOR
+  // Use the scale directly (already compensated from parent components)
+  const viewportScale = scale
 
-  // Device is always centered in viewport
-  const centerPosition = {
-    left: layout.width / 2,
-    top: layout.height / 2,
+  let position: { left: number; top: number }
+
+  if (mode === 'canvas') {
+    // Canvas mode: Device is always centered
+    position = {
+      left: canvasSize.width / 2,
+      top: canvasSize.height / 2,
+    }
+  } else {
+    // Overview mode: Calculate position from device location
+    if (!boundary) {
+      return null
+    }
+    const screenPos = mapUtils.coordinatesToPosition(device.location, boundary, canvasSize)
+    position = {
+      left: screenPos.x,
+      top: screenPos.y,
+    }
   }
 
   return (
-    <View style={[styles!.marker, centerPosition]}>
+    <View style={[styles!.marker, position, { transform: [{ scale: viewportScale }] }]}>
       <Arrow rotation={device.heading} fill={fillColor} />
     </View>
   )

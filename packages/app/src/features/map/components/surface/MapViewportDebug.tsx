@@ -1,19 +1,18 @@
+import { useDiscoverySpots } from '@app/features/discovery/stores/discoveryTrailStore'
 import { logger } from '@app/shared/utils/logger'
 import { geoUtils } from '@shared/geo'
 import { useEffect, useMemo, useRef } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import {
-  useMapSpots,
   useMapSurface,
   useMapSurfaceBoundary,
   useMapSurfaceLayout,
   useViewportContext,
   useViewportDimensions,
-  useViewportTranslation,
   useViewportValues
 } from '../../stores/mapStore'
-import { mapUtils } from '../../utils/geoToScreenTransform.'
+import { mapUtils } from '../../utils/geoToScreenTransform'
 
 interface DebugMetrics {
   // Viewport metrics
@@ -49,7 +48,7 @@ const useDebugMetrics = (): DebugMetrics => {
   const viewportSize = useViewportDimensions()
   const { scale, translationX, translationY } = useViewportValues()
   const surfaceLayout = useMapSurfaceLayout()
-  const spots = useMapSpots()
+  const spots = useDiscoverySpots()
   const trailBoundary = useMapSurfaceBoundary()
 
   // Calculate dimensions using geoUtils (consolidates degree/meter conversions)
@@ -153,8 +152,7 @@ export function MapViewportDebug({ animatedStyles }: { animatedStyles: any }) {
   const { boundary: viewportBoundary, radiusMeters, deviceLocation } = useViewportContext()
   const viewportSize = useViewportDimensions()
   const { scale, translationX, translationY } = useViewportValues()
-  const { x, y } = useViewportTranslation()
-  const spots = useMapSpots()
+  const spots = useDiscoverySpots()
   const surfaceBoundary = useMapSurfaceBoundary()
   const viewRef = useRef<View>(null)
   const centerX = viewportSize.width / 2
@@ -234,11 +232,6 @@ export function MapViewportDebug({ animatedStyles }: { animatedStyles: any }) {
             ))}
           </View>
         )}
-
-
-
-
-
         {/* Spot markers */}
 
       </Animated.View>

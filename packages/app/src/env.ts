@@ -20,5 +20,5 @@ export const ENV = {
 
   // Debug Features
   enableLogger: !IS_PRODUCTION,
-  enableMapDebug: process.env.EXPO_PUBLIC_MAP_DEBUG === 'true' || !IS_PRODUCTION,
+  enableMapDebug: false  //process.env.EXPO_PUBLIC_MAP_DEBUG === 'true' || !IS_PRODUCTION,
 }

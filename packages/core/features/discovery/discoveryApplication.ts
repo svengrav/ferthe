@@ -15,13 +15,13 @@ import {
   DiscoverySpot,
   DiscoveryStats,
   DiscoveryTrail,
+  ImageApplicationContract,
   LocationWithDirection,
   ReactionSummary,
   Result,
   TrailApplicationContract
 } from '@shared/contracts'
 import { GeoLocation } from '@shared/geo'
-import { Buffer } from "node:buffer"
 import { createDiscoveryService, DiscoveryServiceActions } from './discoveryService.ts'
 
 /**
@@ -37,11 +37,11 @@ interface DiscoveryApplicationOptions {
   reactionStore: Store<DiscoveryReaction>
   sensorApplication: SensorApplicationActions
   trailApplication: TrailApplicationContract
-  storageConnector?: { uploadFile: (path: string, data: Buffer | string) => Promise<string> }
+  imageApplication?: ImageApplicationContract
 }
 
 export function createDiscoveryApplication(options: DiscoveryApplicationOptions): DiscoveryApplicationContract {
-  const { discoveryService = createDiscoveryService(), discoveryStore, profileStore, contentStore, reactionStore, trailApplication, storageConnector } = options
+  const { discoveryService = createDiscoveryService(), discoveryStore, profileStore, contentStore, reactionStore, trailApplication, imageApplication } = options
 
   const getDiscoveryTrail = async (context: AccountContext, trailId: string, userLocation?: GeoLocation): Promise<Result<DiscoveryTrail>> => {
     try {
@@ -371,22 +371,15 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       // Handle image upload if base64 data provided
       let finalImageUrl = content.imageUrl
       if (content.imageUrl && content.imageUrl.startsWith('data:image')) {
-        try {
-          if (!storageConnector) {
-            return createErrorResult('STORAGE_CONNECTOR_NOT_CONFIGURED')
-          }
-
-          // Extract base64 data
-          const base64Data = content.imageUrl.split(',')[1]
-          const buffer = Buffer.from(base64Data, 'base64')
-
-          // Upload to storage
-          const timestamp = Date.now()
-          const uploadPath = `discoveries/${accountId}/${discoveryId}-${timestamp}.jpg`
-          finalImageUrl = await storageConnector.uploadFile(uploadPath, buffer)
-        } catch (uploadError: any) {
-          return createErrorResult('IMAGE_UPLOAD_ERROR', { originalError: uploadError.message })
+        if (!imageApplication) {
+          return createErrorResult('STORAGE_CONNECTOR_NOT_CONFIGURED')
         }
+
+        const uploadResult = await imageApplication.uploadImage(context, 'discovery', discoveryId, content.imageUrl)
+        if (!uploadResult.success || !uploadResult.data) {
+          return createErrorResult('IMAGE_UPLOAD_ERROR')
+        }
+        finalImageUrl = uploadResult.data
       }
 
       const newContent = discoveryService.createDiscoveryContent(accountId, discoveryId, {
@@ -446,22 +439,15 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       // Handle image upload if base64 data provided
       let finalImageUrl = content.imageUrl
       if (content.imageUrl && content.imageUrl.startsWith('data:image')) {
-        try {
-          if (!storageConnector) {
-            return createErrorResult('STORAGE_CONNECTOR_NOT_CONFIGURED')
-          }
-
-          // Extract base64 data
-          const base64Data = content.imageUrl.split(',')[1]
-          const buffer = Buffer.from(base64Data, 'base64')
-
-          // Upload to storage
-          const timestamp = Date.now()
-          const uploadPath = `discoveries/${accountId}/${discoveryId}-${timestamp}.jpg`
-          finalImageUrl = await storageConnector.uploadFile(uploadPath, buffer)
-        } catch (uploadError: any) {
-          return createErrorResult('IMAGE_UPLOAD_ERROR', { originalError: uploadError.message })
+        if (!imageApplication) {
+          return createErrorResult('STORAGE_CONNECTOR_NOT_CONFIGURED')
         }
+
+        const uploadResult = await imageApplication.uploadImage(context, 'discovery', discoveryId, content.imageUrl)
+        if (!uploadResult.success || !uploadResult.data) {
+          return createErrorResult('IMAGE_UPLOAD_ERROR')
+        }
+        finalImageUrl = uploadResult.data
       }
 
       const updated = discoveryService.updateDiscoveryContent(existingResult.data, {
@@ -498,6 +484,15 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       // Verify ownership
       if (existingResult.data.accountId !== accountId) {
         return createErrorResult('NOT_AUTHORIZED')
+      }
+
+      // Delete associated image if exists
+      if (existingResult.data.imageUrl && imageApplication) {
+        const deleteImageResult = await imageApplication.deleteImage(context, existingResult.data.imageUrl)
+        if (!deleteImageResult.success) {
+          // Log error but continue with content deletion
+          console.warn('Failed to delete associated image:', deleteImageResult.error)
+        }
       }
 
       // Delete the content
