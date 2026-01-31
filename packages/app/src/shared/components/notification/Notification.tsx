@@ -18,6 +18,28 @@ export const useNotificationStore = create<NotificationState>()(set => ({
   setNotification: data => set({ notification: data }),
 }))
 
+// Helper: Show connection error notification
+let lastConnectionErrorTime = 0
+const CONNECTION_ERROR_DEBOUNCE = 5000 // 5 seconds
+
+export const showConnectionError = () => {
+  const now = Date.now()
+
+  // Debounce: Don't show multiple notifications within 5 seconds
+  if (now - lastConnectionErrorTime < CONNECTION_ERROR_DEBOUNCE) {
+    return
+  }
+
+  lastConnectionErrorTime = now
+
+  const { setNotification, showNotification } = useNotificationStore.getState()
+  setNotification({
+    title: 'Connection Error',
+    body: 'Unable to reach the server. Please check your internet connection and try again.',
+  })
+  showNotification()
+}
+
 const Notification = () => {
   const theme = useThemeStore()
   const styles = createStyles(theme)
