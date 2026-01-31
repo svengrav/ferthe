@@ -74,6 +74,7 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
       translationY.value = prevTranslationY.value + event.translationY
     })
     .onEnd(() => {
+
       // Snap back to center if enabled
       if (snapToCenter) {
         translationX.value = withSpring(0, SPRING_CONFIG)
@@ -82,13 +83,9 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
 
       // Notify listeners of final values (target values after spring)
       if (onGestureEnd) {
-        scheduleOnRN(() => {
-          onGestureEnd(
-            scale.value,
-            snapToCenter ? 0 : translationX.value,
-            snapToCenter ? 0 : translationY.value
-          )
-        })
+        scheduleOnRN(onGestureEnd, scale.value,
+          snapToCenter ? 0 : translationX.value,
+          snapToCenter ? 0 : translationY.value)
       }
     })
   // Pinch gesture
@@ -115,9 +112,9 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
 
       // Notify listeners of final values
       if (onGestureEnd) {
-        scheduleOnRN(() => {
-          onGestureEnd(scale.value, translationX.value, translationY.value)
-        })
+        scheduleOnRN(onGestureEnd, scale.value,
+          snapToCenter ? 0 : translationX.value,
+          snapToCenter ? 0 : translationY.value)
       }
     })
 
@@ -138,9 +135,7 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
     .minDuration(500)
     .onStart((event) => {
       if (onLongPress) {
-        scheduleOnRN(() =>
-          onLongPress(event.x, event.y)
-        )
+        scheduleOnRN(onLongPress, event.x, event.y)
       }
     })
 

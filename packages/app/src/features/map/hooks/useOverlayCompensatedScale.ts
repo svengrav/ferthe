@@ -41,7 +41,7 @@ export const useOverlayCompensatedScale = (config: CompensatedScaleConfig) => {
 
   // Wrapper for worklet calls
   const onScaleChange = useCallback((newScale: number) => {
-    scheduleOnRN(() => calculateCompensatedScale(newScale))
+    scheduleOnRN(calculateCompensatedScale, newScale)
   }, [calculateCompensatedScale])
 
   return { compensatedScale, onScaleChange }

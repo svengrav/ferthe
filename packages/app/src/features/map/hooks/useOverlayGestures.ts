@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { View } from 'react-native'
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler'
 import { SharedValue, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 
 // Gesture limits
 const MIN_SCALE = 0.8
@@ -121,16 +122,16 @@ export const useOverlayGestures = (config: OverlayGesturesConfig): OverlayGestur
         scale.value = newScale
       }
 
-      onScaleChange?.(scale.value)
+      onScaleChange && scheduleOnRN(onScaleChange, scale.value)
     })
     .onEnd(() => {
       // Snap back to limits
       if (scale.value < MIN_SCALE) {
         scale.value = withSpring(MIN_SCALE)
-        onScaleChange?.(MIN_SCALE)
+        onScaleChange && scheduleOnRN(onScaleChange, MIN_SCALE)
       } else if (scale.value > MAX_SCALE) {
         scale.value = withSpring(MAX_SCALE)
-        onScaleChange?.(MAX_SCALE)
+        onScaleChange && scheduleOnRN(onScaleChange, MAX_SCALE)
       }
 
       // Apply bounds after scale change
@@ -150,7 +151,7 @@ export const useOverlayGestures = (config: OverlayGesturesConfig): OverlayGestur
       const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale.value + delta))
 
       scale.value = withSpring(newScale)
-      onScaleChange?.(newScale)
+      onScaleChange && scheduleOnRN(onScaleChange, newScale)
 
       // Apply bounds after scale change
       const scaledWidth = canvasSize.width * newScale
