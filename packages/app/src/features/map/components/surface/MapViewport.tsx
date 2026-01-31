@@ -67,7 +67,7 @@ function MapViewport(props: MapViewportProps) {
     <View style={styles?.container} onLayout={handleLayout} id='device-viewport-content'>
       <GestureHandlerRootView style={size}>
         <GestureDetector gesture={gesture}>
-          <Animated.View style={[size, animatedStyles]}>
+          <Animated.View style={[size, animatedStyles, { overflow: 'hidden' }]}>
             {children}
           </Animated.View>
         </GestureDetector>
@@ -86,6 +86,7 @@ const useStyles = createThemedStyles(() => ({
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden'
   },
 }))
 

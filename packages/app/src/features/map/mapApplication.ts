@@ -8,6 +8,7 @@ import { discoveryTrailStore } from '../discovery/stores/discoveryTrailStore'
 import { getMapState, getMapStoreActions } from './stores/mapStore'
 import { MAP_DEFAULT } from './types/map'
 import { mapUtils } from './utils/geoToScreenTransform'
+import { calculateScaleForRadius } from './utils/viewportUtils'
 
 export interface MapApplication {
   requestMapState: (viewbox?: { width: number; height: number }) => Promise<void>
@@ -60,7 +61,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
   discoveryApplication?.onNewDiscoveries(d => { })
 
   const newMapState = async () => {
-    const { trail, scannedClues, previewClues, spots, snap, discoveries, lastDiscovery } = getDiscoveryTrailData()
+    const { trail, spots, snap, lastDiscovery } = getDiscoveryTrailData()
     const currentViewport = getMapState().viewport
     const { device } = getSensorData()
 
@@ -77,7 +78,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
     const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
     const optimalScale = calculateOptimalScale(
-      { width: MAP_DEFAULT.mapSize.width, height: MAP_DEFAULT.mapSize.height },
+      { width: MAP_DEFAULT.viewport.width, height: MAP_DEFAULT.viewport.height },
       currentViewport.size
     )
 
@@ -90,6 +91,9 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
       initialViewportBoundary,
       currentViewport.size
     )
+
+    // Calculate initial scale to show comfortable viewing distance
+    const initialScale = calculateScaleForRadius(adaptiveRadius, MAP_DEFAULT.initialViewRadius)
 
     setState({
       status: 'ready',
@@ -108,6 +112,11 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
         ...currentViewport,
         radius: adaptiveRadius,
         boundary: initialViewportBoundary,
+        scale: {
+          init: initialScale,
+          min: MAP_DEFAULT.scale.min,
+          max: MAP_DEFAULT.scale.max,
+        },
       },
 
       device: {

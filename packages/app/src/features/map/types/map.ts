@@ -1,11 +1,12 @@
 
 export const MAP_DEFAULT = {
   radius: 3000,
+  initialViewRadius: 1000,
   boundary: {
     northEast: { lat: 0, lon: 0 },
     southWest: { lat: 0, lon: 0 },
   },
-  mapSize: {
+  viewport: {
     width: 1000,
     height: 1000,
   },

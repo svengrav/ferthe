@@ -64,7 +64,7 @@ export const GeoPath = ({
     pathData += ' Z'
   }
   return (
-    <Svg width='100%' height='100%' style={[{ position: 'absolute' }]}>
+    <Svg width={size.width} height={size.height} style={[{ position: 'absolute', zIndex: 99 }]} id='trail-path'>
       <Path d={pathData} stroke={style.strokeColor} strokeWidth={(style.strokeWidth || 1) * scale} strokeDasharray={style.strokeDash} fill={'none'} />
     </Svg>
   )

@@ -1,6 +1,8 @@
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler'
 import { SharedValue, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
+import { useMapContainerSize } from '../stores/mapStore'
+import { calculateMinScale } from '../utils/viewportUtils'
 import { useMapWheelZoom } from './useMapWheelZoom'
 
 interface ViewportGestureConfig {
@@ -36,7 +38,9 @@ const SPRING_CONFIG = {
  */
 export const useViewportGestures = (config: ViewportGestureConfig): ViewportGestureHandlers => {
   const {
-    minScale = 0.1,
+    width,
+    height,
+    minScale: configMinScale,
     maxScale = 3,
     initialScale = 1,
     elementId = 'viewport-content',
@@ -44,6 +48,14 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
     onLongPress,
     onGestureEnd,
   } = config
+
+  // Calculate dynamic minScale based on container/viewport ratio
+  const containerSize = useMapContainerSize()
+  const calculatedMinScale = calculateMinScale(containerSize, { width, height })
+  const minScale = configMinScale ?? calculatedMinScale
+
+  // Ensure maxScale is always greater than minScale
+  const effectiveMaxScale = Math.max(maxScale, minScale * 1.1)
 
   // Gesture state
   const scale = useSharedValue(initialScale)
@@ -95,13 +107,13 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
     })
     .onUpdate(event => {
       const newScale = baseScale.value * event.scale
-      scale.value = Math.max(minScale, Math.min(maxScale, newScale))
+      scale.value = Math.max(minScale, Math.min(effectiveMaxScale, newScale))
     })
     .onEnd(() => {
       if (scale.value < minScale) {
         scale.value = withSpring(minScale, SPRING_CONFIG)
-      } else if (scale.value > maxScale) {
-        scale.value = withSpring(maxScale, SPRING_CONFIG)
+      } else if (scale.value > effectiveMaxScale) {
+        scale.value = withSpring(effectiveMaxScale, SPRING_CONFIG)
       }
 
       // Reset translation after pinch zoom if snap-to-center enabled
@@ -124,7 +136,7 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
     translationX,
     translationY,
     minScale,
-    maxScale,
+    maxScale: effectiveMaxScale,
     elementId,
     onBoundsUpdate: handleBoundsUpdate,
     onGestureEnd,

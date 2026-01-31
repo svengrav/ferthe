@@ -175,7 +175,7 @@ const calculateDeviceViewportBoundary = (deviceLocation: GeoLocation, radiusMete
 const calculateAdaptiveViewportRadius = (
   trailBoundary: GeoBoundary,
   maxRadius: number = DEVICE_VIEWPORT_RADIUS,
-  paddingFactor: number = 1.2
+  paddingFactor: number = 1.5
 ): number => {
   // Calculate trail dimensions using geoUtils
   const centerLat = (trailBoundary.northEast.lat + trailBoundary.southWest.lat) / 2

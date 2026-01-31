@@ -2,7 +2,7 @@ import { getAppContext } from '@app/appContext'
 import { useDiscoveryTrailId } from '@app/features/discovery/stores/discoveryTrailStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { View } from 'react-native'
-import { useCompensatedScale, useMapSurface, useMapSurfaceBoundary, useMapSurfaceLayout, useViewportDimensions } from '../stores/mapStore'
+import { useCompensatedScale, useMapSurface, useMapSurfaceBoundary, useMapSurfaceLayout, useMapViewport, useViewportDimensions } from '../stores/mapStore'
 import { MapTheme, useMapTheme } from '../stores/mapThemeStore'
 import MapDeviceCords from './MapDeviceCords'
 import { MapScanner, MapScannerControl } from './MapScanner'
@@ -20,6 +20,7 @@ export function Map() {
   const { sensorApplication } = getAppContext()
   const surface = useMapSurface()
   const boundary = useMapSurfaceBoundary()
+  const { size, boundary: viewportBoundary } = useMapViewport()
   const surfaceLayout = useMapSurfaceLayout()
   const viewportSize = useViewportDimensions()
   const scale = useCompensatedScale()
@@ -33,13 +34,12 @@ export function Map() {
       <View style={[styles.contentContainer]} id='map-content' >
         <MapDeviceCords />
         <MapViewport>
-          <MapSurface>
-            <MapTrailPath boundary={boundary} size={surfaceLayout} scale={scale} />
-            <MapClues boundary={boundary} size={surfaceLayout} scale={scale} />
-            <MapSnap boundary={boundary} size={surfaceLayout} scale={scale} />
-            <MapCenterMarker />
-            <MapSpots boundary={boundary} size={surfaceLayout} scale={scale} />
-          </MapSurface>
+          <MapTrailPath boundary={viewportBoundary} size={size} scale={scale} />
+          <MapClues boundary={viewportBoundary} size={size} scale={scale} />
+          <MapSnap boundary={viewportBoundary} size={size} scale={scale} />
+          <MapCenterMarker />
+          <MapSpots boundary={viewportBoundary} size={size} scale={scale} />
+          <MapSurface />
           <MapScanner />
           <MapDeviceMarker mode="canvas" canvasSize={viewportSize} scale={scale} />
         </MapViewport>
