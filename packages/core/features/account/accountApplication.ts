@@ -2,6 +2,7 @@
 import { SMSConnector } from '@core/connectors/smsConnector.ts'
 import { Store } from '@core/store/storeFactory.ts'
 import { createCuid2 } from '@core/utils/idGenerator.ts'
+import { ImageApplicationContract } from '@shared/contracts/images.ts'
 import {
   Account,
   AccountApplicationContract,
@@ -30,10 +31,11 @@ interface AccountApplicationOptions {
   smsConnector?: SMSConnector
   smsService?: SMSService
   jwtService?: JWTService
+  imageApplication?: ImageApplicationContract
 }
 
 export function createAccountApplication(options: AccountApplicationOptions): AccountApplicationActions {
-  const { accountStore, accountSessionStore, twilioVerificationStore, smsConnector, smsService = createSMSService(), jwtService } = options
+  const { accountStore, accountSessionStore, twilioVerificationStore, smsConnector, smsService = createSMSService(), jwtService, imageApplication } = options
   const { createJWT, verifyJWT } = jwtService || createJWTService()
 
   // Helper functions
@@ -442,6 +444,37 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     }
   }
 
+  const uploadAvatar = async (context: AccountContext, base64Data: string): Promise<Result<string>> => {
+    try {
+      if (!imageApplication) {
+        return createErrorResult('IMAGE_APPLICATION_NOT_CONFIGURED')
+      }
+
+      // Upload image using imageApplication
+      const uploadResult = await imageApplication.uploadImage(
+        context,
+        'account-avatar',
+        context.accountId,
+        base64Data
+      )
+
+      if (!uploadResult.data) {
+        return uploadResult
+      }
+
+      // Update account with new avatar URL
+      const updateResult = await updateAccount(context, { avatarUrl: uploadResult.data })
+
+      if (!updateResult.success) {
+        return createErrorResult('AVATAR_UPDATE_FAILED', { originalError: updateResult.error?.message })
+      }
+
+      return createSuccessResult(uploadResult.data)
+    } catch (error: unknown) {
+      return createErrorResult('AVATAR_UPLOAD_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
   return {
     requestSMSCode,
     verifySMSCode,
@@ -452,5 +485,6 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     createLocalAccount,
     upgradeToPhoneAccount,
     getFirebaseConfig,
+    uploadAvatar,
   }
 }

@@ -12,7 +12,7 @@
         "-A",
         "--watch",
         "--inspect-brk",
-        "api/index.ts"
+        "main.ts"
       ],
       "attachSimplePort": 9229,
       "env": {

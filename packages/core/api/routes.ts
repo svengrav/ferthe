@@ -310,6 +310,14 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
+      url: '/account/avatar',
+      handler: asyncRequestHandler<string>(async ({ context, body }) => {
+        return await accountApplication.uploadAvatar(context, body?.base64Data)
+      }),
+    },
+    {
+      method: 'POST',
+      version: 'v1',
       url: '/account/session/validate',
       config: { isPublic: true },
       handler: asyncRequestHandler(async ({ body }) => {

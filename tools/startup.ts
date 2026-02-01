@@ -16,7 +16,7 @@ const cleanAll = (cleanNodeModules?: boolean): void => {
   cleanNodeModules && cleanDirectories.push('node_modules')
 
   console.log('🧹 Cleaning all build artifacts...')
-  
+
   // Clean directories in packages
   const packages = ['packages/app', 'packages/core', 'packages/shared', 'packages/test'];
   packages.forEach(pkg => {
@@ -28,7 +28,7 @@ const cleanAll = (cleanNodeModules?: boolean): void => {
         console.log(`✅ Removed ${dirPath}`)
       }
     })
-    
+
     // Clean build info files
     cleanFiles.forEach(pattern => {
       if (fs.existsSync(pkgPath)) {
@@ -51,7 +51,7 @@ const buildAll = (packages: string[] = ['shared', 'core', 'app', 'test']): void 
     const pkgPath = join(rootDir, 'packages', pkg);
     const pkgJsonPath = join(pkgPath, 'package.json');
     const denoJsonPath = join(pkgPath, 'deno.json');
-    
+
     // Check if it's an npm package
     if (fs.existsSync(pkgJsonPath)) {
       const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'));
@@ -59,7 +59,7 @@ const buildAll = (packages: string[] = ['shared', 'core', 'app', 'test']): void 
         console.log(`⚠️  Skipping ${pkg} (no build script)`)
         return;
       }
-      
+
       console.log(`📦 Building ${pkg} (npm)...`)
       try {
         const result = new Deno.Command('npm', {
@@ -68,7 +68,7 @@ const buildAll = (packages: string[] = ['shared', 'core', 'app', 'test']): void 
           stdout: 'inherit',
           stderr: 'inherit',
         }).outputSync();
-        
+
         if (result.success) {
           console.log(`✅ Built ${pkg}`)
         } else {
@@ -78,7 +78,7 @@ const buildAll = (packages: string[] = ['shared', 'core', 'app', 'test']): void 
         console.error(`❌ Failed to build ${pkg}`, error)
         throw error
       }
-    } 
+    }
     // Check if it's a deno package
     else if (fs.existsSync(denoJsonPath)) {
       console.log(`⚠️  Skipping ${pkg} (deno package, no build needed)`)
@@ -104,30 +104,30 @@ const startWithEnvironment = async (args: string[] = []): Promise<void> => {
   console.log('🚀Ferthe Development Environment...', args)
   const { start, clean, build } = parseArgs(args)
 
-  if(clean) cleanAll();
-  if(build) buildAll();
-  
+  if (clean) cleanAll();
+  if (build) buildAll();
+
   if (start) {
     console.log('🌐 Starting all servers...')
-    
+
     // Start storage server
     const storageServer = new Deno.Command('deno', {
       args: ['run', '--allow-all', './tools/localStorageServer.ts'],
       stdout: 'inherit',
       stderr: 'inherit',
     }).spawn()
-    
+
     // Start API server
     const apiServer = new Deno.Command('deno', {
-      args: ['run', '--allow-all', './packages/core/api/index.ts'],
+      args: ['run', '--allow-all', './packages/core/main.ts'],
       stdout: 'inherit',
       stderr: 'inherit',
     }).spawn()
-    
+
     console.log('✅ Storage Server started (PID: ' + storageServer.pid + ')')
     console.log('✅ API Server started (PID: ' + apiServer.pid + ')')
     console.log('⚠️  Web app needs to be started separately with: cd packages/app && npm run web')
-    
+
     // Wait for both processes
     await Promise.all([
       storageServer.status,

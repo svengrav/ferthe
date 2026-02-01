@@ -185,6 +185,8 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
 
       updateAccount: (_context: AccountContext, data: AccountUpdateData) => API.send<Account>('/account/collections/accounts', 'PUT', data),
 
+      uploadAvatar: (_context: AccountContext, base64Data: string) => API.send<string>('/account/avatar', 'POST', { base64Data }),
+
       validateSession: (sessionToken: string) => API.send<SessionValidationResult>('/account/session/validate', 'POST', { sessionToken }),
 
       revokeSession: (sessionToken: string) => API.send<void>('/account/session/revoke', 'POST', { sessionToken }),

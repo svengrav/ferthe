@@ -16,6 +16,9 @@ export interface AccountApplicationContract {
   updateAccount: (context: AccountContext, data: AccountUpdateData) => Promise<Result<Account>>
   upgradeToPhoneAccount: (context: AccountContext, phoneNumber: string, code: string) => Promise<Result<AccountSession>>
 
+  // Avatar management
+  uploadAvatar: (context: AccountContext, base64Data: string) => Promise<Result<string>>
+
   // Configuration - Require authenticated context
   getFirebaseConfig: (context: AccountContext) => Promise<Result<FirebaseConfig>>
 }

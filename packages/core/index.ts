@@ -1,8 +1,8 @@
 // Main entry point for ferthe-core package
 
 // Core context
-export { createCoreContext, getCoreStoreIdentifiers } from './core.ts'
-export type { CoreConfiguration, CoreContext } from './core.ts'
+export { createCoreContext } from './core.ts'
+export type { CoreConnectors, CoreContext, StorageConnector } from './core.ts'
 
 // Store interfaces and factories
 export { createCosmosStore } from './store/cosmosStore.ts'

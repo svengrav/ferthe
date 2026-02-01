@@ -46,9 +46,21 @@ export const createAzureStorageConnector = (
   const { accountName, accountKey } = connectionParams
   const sasExpiryMinutes = options.sasExpiryMinutes ?? 15 // Default: 15 minutes
 
+  const getContainerClient = async () => {
+    const containerClient = blobServiceClient.getContainerClient(containerName)
+    const exists = await containerClient.exists()
+    !exists && await containerClient.create()
+    return containerClient
+  }
+
+  const getBlobClient = async (key: string) => {
+    const containerClient = await getContainerClient()
+    return containerClient.getBlobClient(key)
+  }
+
   const getItemUrl = async (key: string): Promise<StorageItem> => {
     try {
-      const blobClient = blobServiceClient.getContainerClient(containerName).getBlobClient(key)
+      const blobClient = await getBlobClient(key)
       const exists = await blobClient.exists()
 
       if (!exists) {
@@ -79,8 +91,7 @@ export const createAzureStorageConnector = (
 
   const uploadFile = async (path: string, data: Buffer | string, metadata?: Record<string, string>): Promise<string> => {
     try {
-      const containerClient = blobServiceClient.getContainerClient(containerName)
-      const blobClient = containerClient.getBlobClient(path)
+      const blobClient = await getBlobClient(path)
       const blockBlobClient = blobClient.getBlockBlobClient()
 
       // Upload blob with metadata
@@ -112,8 +123,7 @@ export const createAzureStorageConnector = (
 
   const deleteFile = async (path: string): Promise<void> => {
     try {
-      const containerClient = blobServiceClient.getContainerClient(containerName)
-      const blobClient = containerClient.getBlobClient(path)
+      const blobClient = await getBlobClient(path)
 
       const exists = await blobClient.exists()
       if (!exists) {
@@ -129,8 +139,7 @@ export const createAzureStorageConnector = (
 
   const getMetadata = async (path: string): Promise<Record<string, string>> => {
     try {
-      const containerClient = blobServiceClient.getContainerClient(containerName)
-      const blobClient = containerClient.getBlobClient(path)
+      const blobClient = await getBlobClient(path)
 
       const properties = await blobClient.getProperties()
       return properties.metadata || {}
