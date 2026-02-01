@@ -1,4 +1,4 @@
-import { StoreActions, StoreData } from '@app/shared/index'
+import { Status, StoreActions, StoreData } from '@app/shared/index'
 import { Discovery, DiscoverySpot } from '@shared/contracts'
 import { create } from 'zustand'
 
@@ -8,6 +8,7 @@ interface DiscoveryActions extends StoreActions {
 }
 
 interface DiscoveryData extends StoreData {
+  status: Status
   discoveries: Discovery[]
   spots: DiscoverySpot[]
 }

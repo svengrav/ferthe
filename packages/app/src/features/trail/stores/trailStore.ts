@@ -1,4 +1,4 @@
-import { StoreActions, StoreData } from '@app/shared/index'
+import { Status, StoreActions, StoreData } from '@app/shared/index'
 import { SpotPreview, Trail } from '@shared/contracts'
 import { create } from 'zustand'
 
@@ -8,6 +8,7 @@ interface TrailActions extends StoreActions {
 }
 
 interface TrailData extends StoreData {
+  status: Status
   trails: Trail[]
   spots: SpotPreview[]
 }

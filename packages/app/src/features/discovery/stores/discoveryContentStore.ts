@@ -1,4 +1,4 @@
-import { StoreActions, StoreData } from '@app/shared/index'
+import { Status, StoreActions, StoreData } from '@app/shared/index'
 import { DiscoveryContent } from '@shared/contracts'
 import { create } from 'zustand'
 
@@ -8,6 +8,7 @@ interface DiscoveryContentActions extends StoreActions {
 }
 
 interface DiscoveryContentData extends StoreData {
+  status: Status
   contents: Record<string, DiscoveryContent>
 }
 

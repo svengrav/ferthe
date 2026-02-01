@@ -1,4 +1,4 @@
-import { StoreActions, StoreData } from '@app/shared/index'
+import { Status, StoreActions, StoreData } from '@app/shared/index'
 import { create, StateCreator } from 'zustand'
 
 export interface ReactionSummary {
@@ -13,6 +13,7 @@ interface ReactionStoreActions extends StoreActions {
 }
 
 interface ReactionStoreData extends StoreData {
+  status: Status
   reactions: Record<string, ReactionSummary>
 }
 

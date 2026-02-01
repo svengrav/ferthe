@@ -36,6 +36,8 @@ export interface Account {
   id: string
   phoneHash?: string // Optional for local accounts
   displayName?: string // Optional display name set by user
+  description?: string // Optional profile description
+  avatarUrl?: string // Optional profile avatar image URL
   createdAt: Date
   lastLoginAt?: Date
   updatedAt?: Date
@@ -58,6 +60,8 @@ export interface AccountContext {
  */
 export interface AccountUpdateData {
   displayName?: string
+  description?: string
+  avatarUrl?: string
 }
 
 /**

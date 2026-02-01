@@ -46,14 +46,15 @@ export const createDeviceConnector = (): DeviceConnector => {
   }
 
   // Request location permission from the user
-  const requestLocationPermission = async () => {
+  const requestLocationPermission = async (): Promise<{ granted: boolean }> => {
     const { status } = await Location.requestForegroundPermissionsAsync()
-    if (status !== 'granted') {
+    const granted = status === 'granted'
+    if (!granted) {
       logger.error('Location permission not granted')
-      return
     } else {
       logger.log('Location permission granted')
     }
+    return { granted }
   }
 
   const initializeLocationTracking = async () => {

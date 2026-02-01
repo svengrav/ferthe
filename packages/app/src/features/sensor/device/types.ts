@@ -1,4 +1,4 @@
-import { GeoLocation } from '@shared/geo'
+import { GeoLocation } from '@shared/geo';
 
 export type DeviceLocation = { location: GeoLocation; heading: number }
 
@@ -6,7 +6,7 @@ export type DeviceLocation = { location: GeoLocation; heading: number }
 export interface DeviceConnector {
   onDeviceUpdated: (cb: (e: DeviceLocation) => void) => () => void
   offDeviceUpdated: (cb: (e: DeviceLocation) => void) => void
-  requestLocationPermission: () => Promise<void>
+  requestLocationPermission: () => Promise<{ granted: boolean }>
   initializeLocationTracking: () => Promise<void>
   cleanup: () => void
 }

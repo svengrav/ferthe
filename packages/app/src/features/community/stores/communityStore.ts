@@ -1,4 +1,4 @@
-import { StoreActions, StoreData } from '@app/shared/index'
+import { Status, StoreActions, StoreData } from '@app/shared/index'
 import { Community, CommunityMember } from '@shared/contracts'
 import { create } from 'zustand'
 
@@ -6,6 +6,7 @@ interface CommunityData extends StoreData {
   communities: Community[]
   members: CommunityMember[]
   activeCommunityId?: string
+  status: Status
 }
 
 interface CommunityActions extends StoreActions {

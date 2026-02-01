@@ -1,12 +1,10 @@
 import { getAppContext } from '@app/appContext'
 import { Theme } from '@app/shared'
-import { Text } from '@app/shared/components'
+import { Text, TextInput } from '@app/shared/components'
 import Button from '@app/shared/components/button/Button'
-import type { FormRef } from '@app/shared/components/form/Form'
-import Form from '@app/shared/components/form/Form'
 import { useApp } from '@app/shared/useApp'
-import { useRef, useState } from 'react'
-import { StyleSheet, TextInput, View } from 'react-native'
+import { useState } from 'react'
+import { StyleSheet, View } from 'react-native'
 
 // Constants
 const PHONE_VERIFICATION_NOTICE = "Your number will only be used once and won't be stored."
@@ -88,9 +86,6 @@ const useAccountVerification = () => {
  */
 function AccountVerification() {
 
-  // Form ref for external control
-  const formRef = useRef<FormRef>(null)
-
   // Custom hook for verification logic
   const {
     phoneNumber,
@@ -117,30 +112,17 @@ function AccountVerification() {
         <View style={componentStyles.section}>
           <Text variant="title">{locales.auth.enterPhoneNumber}</Text>
           {error && <Text style={componentStyles.error}>{error}</Text>}
-          <Form
-            ref={formRef}
-            fields={[
-              {
-                name: 'Phone number',
-                placeholder: locales.auth.phoneNumberPlaceholder || 'Your phone number',
-                type: 'number',
-                value: phoneNumber,
-                onChange: setPhoneNumber,
-                required: true,
-                description: PHONE_VERIFICATION_NOTICE,
-                validation: (value) => {
-                  if (!value) return 'Phone number is required'
-                  if (!/^\+?[0-9]\d{1,14}$/.test(value)) return 'Invalid phone number'
-                  return true
-                }
-              }
-            ]}
-            onSubmit={() => handleRequestSmsCode()}
-            showDefaultActions={false}
+          <TextInput
+            label="Phone number"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            placeholder={locales.auth.phoneNumberPlaceholder || 'Your phone number'}
+            keyboardType="phone-pad"
+            helperText={PHONE_VERIFICATION_NOTICE}
           />
           <Button
             label={locales.auth.sendSms || 'Send Code'}
-            style={{ alignSelf: 'center'}}
+            style={{ alignSelf: 'center' }}
             onPress={handleRequestSmsCode}
             variant="primary"
             disabled={isRequestingSmsCode}
@@ -151,11 +133,10 @@ function AccountVerification() {
         <View style={componentStyles.section}>
           <Text style={componentStyles.sectionTitle}>Enter Code</Text>
           <TextInput
-            style={componentStyles.input}
+            label="Verification Code"
             value={verificationCode}
             onChangeText={setVerificationCode}
             placeholder="Your verification code"
-            placeholderTextColor={theme.deriveColor(theme.colors.onSurface, 0.5)}
             keyboardType="phone-pad"
           />
           <Button
@@ -187,21 +168,6 @@ const useStyles = (theme: Theme) =>
       fontWeight: '400',
       marginBottom: 8,
       color: theme.colors.onBackground,
-    },
-    input: {
-      backgroundColor: theme.colors.surface,
-      borderRadius: 8,
-      padding: 12,
-      marginBottom: 12,
-      fontSize: 16,
-      borderWidth: 1,
-      borderColor: theme.deriveColor(theme.colors.onSurface, 0.5),
-      color: theme.colors.onSurface,
-    },
-    notice: {
-      fontSize: 14,
-      color: theme.colors.onSurface,
-      marginBottom: 16,
     },
   })
 

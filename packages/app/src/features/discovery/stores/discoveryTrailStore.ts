@@ -1,4 +1,4 @@
-import { StoreActions, StoreData } from '@app/shared/index'
+import { Status, StoreActions, StoreData } from '@app/shared/index'
 import { Clue, Discovery, DiscoverySpot, Trail } from '@shared/contracts'
 import { create } from 'zustand'
 
@@ -15,6 +15,7 @@ interface DiscoveryTrailActions extends StoreActions {
 }
 
 interface DiscoveryTrailData extends StoreData {
+  status: Status
   trailId: string | undefined
   trail: Trail | undefined
   scannedClues: Clue[]

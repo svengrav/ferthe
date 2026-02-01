@@ -3,6 +3,7 @@ import { useLocalizationStore } from '@app/shared/localization/useLocalizationSt
 import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
+import { logger } from '@app/shared/utils/logger'
 import { useEffect, useRef } from 'react'
 import { Animated, View } from 'react-native'
 import { SettingsForm } from '../../settings/components/SettingsForm'
@@ -24,9 +25,13 @@ function MapScreen() {
   const { setContainer } = getMapStoreActions()
 
   useEffect(() => {
-    if (status !== 'uninitialized') return
+    if (status !== 'uninitialized') {
+      logger.log(`[MapScreen] Map status changed: ${status}`)
+      return
+    }
 
     const retryInterval = setInterval(() => {
+      logger.log('[MapScreen] Requesting map state update...')
       context.mapApplication.requestMapState()
     }, 2000)
 

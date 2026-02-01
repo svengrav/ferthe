@@ -66,12 +66,14 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     const { device } = getSensorData()
 
     if (!trail) {
+      logger.log('No trail loaded, cannot update map state')
       // Trail not loaded yet - silently return and wait for discovery state
       return
     }
 
     // Wait for valid device location (not default 0,0)
     if (!device?.location || (device.location.lat === 0 && device.location.lon === 0)) {
+      logger.log('Device location not available yet, cannot update map state')
       return
     }
 
