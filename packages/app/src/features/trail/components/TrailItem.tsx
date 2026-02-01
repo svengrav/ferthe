@@ -1,12 +1,10 @@
 import { Card, Image, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { Trail } from '@shared/contracts'
 import { useRef, useState } from 'react'
 import { TouchableOpacity, View } from 'react-native'
-import TrailDetails from './TrailDetails'
 
 // Avatar constants
 const AVATAR_SIZE = 50
@@ -22,12 +20,7 @@ const useTrailItem = (trail: Trail) => {
   const cardRef = useRef<View>(null)
   const { t } = useLocalizationStore()
 
-  const handleOpenTrailOverview = () => {
-    setOverlay('trailDetails_' + trail.id, <TrailDetails trail={trail} />, { 
-      title: 'Trail',
-      variant: 'fullscreen'
-    })
-  }
+
 
   const openContextMenu = () => setContextMenu(true)
   const closeContextMenu = () => setContextMenu(false)
@@ -36,7 +29,6 @@ const useTrailItem = (trail: Trail) => {
     contextMenu,
     cardRef,
     t,
-    handleOpenTrailOverview,
     openContextMenu,
     closeContextMenu,
   }
@@ -84,10 +76,9 @@ function TrailItem({ trail, actions, onPress }: TrailCardProps) {
   const {
     cardRef,
     t,
-    handleOpenTrailOverview,
     openContextMenu,
   } = useTrailItem(trail)
-  const itemTap = onPress ?? handleOpenTrailOverview
+  const itemTap = onPress
 
   if (!styles) return null
 
@@ -105,15 +96,15 @@ function TrailItem({ trail, actions, onPress }: TrailCardProps) {
           {trail?.description || t.trails.noDescription}
         </Text>
       </View>
-      <View> 
+      <View>
         {actions}
       </View>
     </View>
   )
 
   return (
-    <View id="trail-item-container" style={styles.container}> 
-      <TouchableOpacity onPress={() => itemTap(trail)} onLongPress={openContextMenu}>
+    <View id="trail-item-container" style={styles.container}>
+      <TouchableOpacity onPress={() => itemTap?.(trail)} onLongPress={openContextMenu}>
         <Card ref={cardRef}>
           {renderCardContent()}
         </Card>
@@ -140,7 +131,7 @@ const useAvatarStyles = createThemedStyles(theme => ({
 
 const useStyles = createThemedStyles(theme => ({
   container: {
-    flex:1, 
+    flex: 1,
     alignItems: 'stretch',
     justifyContent: 'center',
   },

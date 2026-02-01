@@ -5,8 +5,10 @@ import { FertheLogo, IconButton, Page, Text } from '@app/shared/components'
 import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
+import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
 import { FlatList, View } from 'react-native'
+import TrailDetails from './TrailDetails'
 import TrailItem from './TrailItem'
 
 const INTRO_PADDING = 16
@@ -38,14 +40,14 @@ const useTrailScreen = () => {
 
   const openSettings = () => {
     let removeOverlay: (() => void) | undefined
-    
+
     removeOverlay = setOverlay('settingsForm',
-      <SettingsForm 
-        onClose={() => removeOverlay?.()} 
-        onSubmit={() => removeOverlay?.()} 
+      <SettingsForm
+        onClose={() => removeOverlay?.()}
+        onSubmit={() => removeOverlay?.()}
       />,
-      { 
-        variant: 'fullscreen', 
+      {
+        variant: 'fullscreen',
         title: 'Settings'
       })
   }
@@ -76,6 +78,13 @@ function TrailScreen() {
     openSettings,
   } = useTrailScreen()
 
+  const handleOpenTrailOverview = (trail: Trail) => {
+    setOverlay('trailDetails_' + trail.id, <TrailDetails trail={trail} />, {
+      title: 'Trail',
+      variant: 'fullscreen'
+    })
+  }
+
   if (!styles) return null
 
   const pageOptions = [
@@ -94,9 +103,9 @@ function TrailScreen() {
             data={trails}
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => (
-            <TrailItem trail={item} actions={
-                <IconButton name='chevron-right' size={24} variant='primary'/>
-            }/>)}
+              <TrailItem trail={item} actions={
+                <IconButton name='chevron-right' size={24} variant='secondary' onPress={() => handleOpenTrailOverview(item)} />
+              } />)}
             keyExtractor={item => item.id}
             onRefresh={handleRefresh}
             refreshing={isRefreshing}
