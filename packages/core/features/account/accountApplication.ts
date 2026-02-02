@@ -2,6 +2,7 @@
 import { SMSConnector } from '@core/connectors/smsConnector.ts'
 import { Store } from '@core/store/storeFactory.ts'
 import { createCuid2 } from '@core/utils/idGenerator.ts'
+import { API_ERROR_CODES } from '@shared/contracts/errors.ts'
 import { ImageApplicationContract } from '@shared/contracts/images.ts'
 import {
   Account,
@@ -22,10 +23,15 @@ import {
 import { JWTService, createJWTService } from './jwtService.ts'
 import { SMSService, createSMSService } from './smsService.ts'
 
+// Internal account type with storage-specific fields
+interface StoredAccount extends Account {
+  avatarBlobPath?: string
+}
+
 export interface AccountApplicationActions extends AccountApplicationContract { }
 
 interface AccountApplicationOptions {
-  accountStore: Store<Account>
+  accountStore: Store<StoredAccount>
   accountSessionStore: Store<AccountSession>
   twilioVerificationStore: Store<TwilioVerification>
   smsConnector?: SMSConnector
@@ -61,7 +67,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     }
   }
 
-  const findAccountByPhoneHash = async (phoneNumber: string): Promise<Account | null> => {
+  const findAccountByPhoneHash = async (phoneNumber: string): Promise<StoredAccount | null> => {
     try {
       const accountsResult = await accountStore.list()
       if (!accountsResult.success) {
@@ -189,7 +195,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       let account = await findAccountByPhoneHash(phoneNumber)
       if (!account) {
         const phoneHash = await smsService.createPhoneHash(phoneNumber)
-        account = {
+        const newAccount: StoredAccount = {
           id: createCuid2(),
           phoneHash,
           createdAt: new Date(),
@@ -198,7 +204,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
           isPhoneVerified: true,
         }
 
-        const createResult = await accountStore.create(account)
+        const createResult = await accountStore.create(newAccount)
         if (!createResult.success) {
           return createErrorResult('VERIFY_SMS_CODE_ERROR')
         }
@@ -262,16 +268,38 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
   const getAccount = async (context: AccountContext): Promise<Result<Account | null>> => {
     try {
       const accountId = context.accountId
-      if (!accountId) {
-        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      !accountId && createErrorResult('ACCOUNT_ID_REQUIRED')
+
+      const accountResult = await accountStore.get(accountId)
+      if (!accountResult.success || !accountResult.data) {
+        return createSuccessResult(null)
       }
 
-      const accountsResult = await accountStore.list()
-      if (!accountsResult.success) {
-        return createErrorResult('GET_ACCOUNT_ERROR')
+      const accountData = accountResult.data
+
+      // Generate fresh avatar URL from internal blob path
+      let avatarUrl: string | undefined
+      if (accountData.avatarBlobPath && imageApplication) {
+        const urlResult = await imageApplication.refreshImageUrl(context, accountData.avatarBlobPath)
+        if (urlResult.success && urlResult.data) {
+          avatarUrl = urlResult.data
+        }
       }
-      const accounts = accountsResult.data || []
-      const account = accounts.find(account => account.id === accountId) || null
+
+      // Return public Account (without internal avatarBlobPath)
+      const account: Account = {
+        id: accountData.id,
+        phoneHash: accountData.phoneHash,
+        displayName: accountData.displayName,
+        description: accountData.description,
+        avatarUrl,
+        createdAt: accountData.createdAt,
+        lastLoginAt: accountData.lastLoginAt,
+        updatedAt: accountData.updatedAt,
+        accountType: accountData.accountType,
+        isPhoneVerified: accountData.isPhoneVerified,
+      }
+
       return createSuccessResult(account)
     } catch (error: unknown) {
       return createErrorResult('GET_ACCOUNT_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
@@ -318,7 +346,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
   const createLocalAccount = async (): Promise<Result<AccountSession>> => {
     try {
       // Create a local user account without phone verification
-      const account: Account = {
+      const account: StoredAccount = {
         id: createCuid2(),
         // phoneHash is undefined for local accounts
         createdAt: new Date(),
@@ -383,7 +411,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
 
       // Update account with phone verification
       const phoneHash = await smsService.createPhoneHash(phoneNumber)
-      const updatedAccount: Account = {
+      const updatedAccount: StoredAccount = {
         ...localAccount,
         phoneHash,
         accountType: 'sms_verified',
@@ -444,13 +472,13 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     }
   }
 
-  const uploadAvatar = async (context: AccountContext, base64Data: string): Promise<Result<string>> => {
+  const uploadAvatar = async (context: AccountContext, base64Data: string): Promise<Result<Account>> => {
     try {
       if (!imageApplication) {
-        return createErrorResult('IMAGE_APPLICATION_NOT_CONFIGURED')
+        return createErrorResult(API_ERROR_CODES.IMAGE_APPLICATION_NOT_CONFIGURED.code)
       }
 
-      // Upload image using imageApplication
+      // Upload image and get blob path
       const uploadResult = await imageApplication.uploadImage(
         context,
         'account-avatar',
@@ -458,20 +486,50 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         base64Data
       )
 
-      if (!uploadResult.data) {
-        return uploadResult
+      if (!uploadResult.success || !uploadResult.data) {
+        return createErrorResult(API_ERROR_CODES.IMAGE_UPLOAD_FAILED.code)
       }
 
-      // Update account with new avatar URL
-      const updateResult = await updateAccount(context, { avatarUrl: uploadResult.data })
+      const { blobPath } = uploadResult.data
 
-      if (!updateResult.success) {
-        return createErrorResult('AVATAR_UPDATE_FAILED', { originalError: updateResult.error?.message })
+      // Store blob path internally in DB
+      const account = await accountStore.get(context.accountId)
+      if (!account.success || !account.data) {
+        return createErrorResult(API_ERROR_CODES.ACCOUNT_NOT_FOUND.code)
       }
 
-      return createSuccessResult(uploadResult.data)
+      const updatedAccount = {
+        ...account.data,
+        avatarBlobPath: blobPath,
+        updatedAt: new Date(),
+      }
+
+      await accountStore.update(context.accountId, updatedAccount)
+
+      // Generate fresh avatar URL for response
+      let avatarUrl: string | undefined
+      const urlResult = await imageApplication.refreshImageUrl(context, blobPath)
+      if (urlResult.success && urlResult.data) {
+        avatarUrl = urlResult.data
+      }
+
+      // Return public Account with fresh avatar URL
+      const publicAccount: Account = {
+        id: updatedAccount.id,
+        phoneHash: updatedAccount.phoneHash,
+        displayName: updatedAccount.displayName,
+        description: updatedAccount.description,
+        avatarUrl,
+        createdAt: updatedAccount.createdAt,
+        lastLoginAt: updatedAccount.lastLoginAt,
+        updatedAt: updatedAccount.updatedAt,
+        accountType: updatedAccount.accountType,
+        isPhoneVerified: updatedAccount.isPhoneVerified,
+      }
+
+      return createSuccessResult(publicAccount)
     } catch (error: unknown) {
-      return createErrorResult('AVATAR_UPLOAD_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
+      return createErrorResult(API_ERROR_CODES.AVATAR_UPLOAD_ERROR.code, { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 

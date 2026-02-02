@@ -68,6 +68,11 @@ export const API_ERROR_CODES = {
   DELETE_IMAGE_ERROR: { code: 'DELETE_IMAGE_ERROR', message: 'Failed to delete image', httpStatus: 500 },
   INVALID_IMAGE_FORMAT: { code: 'INVALID_IMAGE_FORMAT', message: 'Unsupported image format', httpStatus: 400 },
   REFRESH_IMAGE_URL_ERROR: { code: 'REFRESH_IMAGE_URL_ERROR', message: 'Failed to refresh image URL', httpStatus: 500 },
+  NO_IMAGE_DATA: { code: 'NO_IMAGE_DATA', message: 'No image data provided', httpStatus: 400 },
+  IMAGE_TOO_LARGE: { code: 'IMAGE_TOO_LARGE', message: 'Image size exceeds maximum allowed size', httpStatus: 413 },
+  IMAGE_UPLOAD_FAILED: { code: 'IMAGE_UPLOAD_FAILED', message: 'Image upload failed', httpStatus: 500 },
+  IMAGE_APPLICATION_NOT_CONFIGURED: { code: 'IMAGE_APPLICATION_NOT_CONFIGURED', message: 'Image application is not configured', httpStatus: 500 },
+  AVATAR_UPLOAD_ERROR: { code: 'AVATAR_UPLOAD_ERROR', message: 'Failed to upload avatar', httpStatus: 500 },
 
   // Community Management (404-500)
   COMMUNITY_NOT_FOUND: { code: 'COMMUNITY_NOT_FOUND', message: 'Community not found', httpStatus: 404 },
@@ -90,6 +95,11 @@ export const API_ERROR_CODES = {
   UPDATE_ACCOUNT_ERROR: { code: 'UPDATE_ACCOUNT_ERROR', message: 'Failed to update account', httpStatus: 500 },
   CREATE_LOCAL_ACCOUNT_ERROR: { code: 'CREATE_LOCAL_ACCOUNT_ERROR', message: 'Failed to create local account', httpStatus: 500 },
   UPGRADE_ACCOUNT_ERROR: { code: 'UPGRADE_ACCOUNT_ERROR', message: 'Failed to upgrade account', httpStatus: 500 },
+
+  // Sensor & Scanning (400-500)
+  TRAIL_ID_REQUIRED: { code: 'TRAIL_ID_REQUIRED', message: 'Trail ID is required', httpStatus: 400 },
+  CREATE_SCAN_EVENT_ERROR: { code: 'CREATE_SCAN_EVENT_ERROR', message: 'Failed to create scan event', httpStatus: 500 },
+  LIST_SCAN_EVENTS_ERROR: { code: 'LIST_SCAN_EVENTS_ERROR', message: 'Failed to list scan events', httpStatus: 500 },
 } as const
 
 export type ApiErrorCode = keyof typeof API_ERROR_CODES

@@ -43,7 +43,10 @@ export interface CoreContext {
 export function createCoreContext(config: Config, connectors: CoreConnectors): CoreContext {
   const { storeConnector, smsConnector, storageConnector } = connectors
 
-  const imageApplication = createImageApplication({ storageConnector })
+  const imageApplication = createImageApplication({
+    storageConnector,
+    maxImageSizeBytes: config.constants.images.maxSizeBytes
+  })
 
   const trailApplication = createTrailApplication({
     trailStore: createStore<Trail>(storeConnector, STORE_IDS.TRAILS),

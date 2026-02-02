@@ -1,7 +1,7 @@
 import { Button, IconButton, TextInput } from '@app/shared/components'
 import Text from '@app/shared/components/text/Text'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
-import { useImageUpload } from '@app/shared/hooks/useImageUpload'
+import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { logger } from '@app/shared/utils/logger'
@@ -28,7 +28,7 @@ function DiscoveryContentEditor({
 }: DiscoveryContentEditorProps) {
   const { styles } = useApp(useStyles)
   const { selectedImageUri, pickImage, clearImage, isLoading: isPickingImage } = useImagePicker()
-  const { convertImageToBase64, isConverting } = useImageUpload()
+  const { convertToBase64, isConverting } = useImageToBase64()
 
   const [comment, setComment] = useState(existingContent?.comment ?? '')
   const [hasExistingImage, setHasExistingImage] = useState(!!existingContent?.imageUrl)
@@ -38,8 +38,7 @@ function DiscoveryContentEditor({
       let imageDataToSubmit: string | undefined
 
       if (selectedImageUri) {
-        const base64 = await convertImageToBase64(selectedImageUri)
-        imageDataToSubmit = `data:image/jpeg;base64,${base64}`
+        imageDataToSubmit = await convertToBase64(selectedImageUri)
       } else if (hasExistingImage) {
         imageDataToSubmit = existingContent?.imageUrl
       }

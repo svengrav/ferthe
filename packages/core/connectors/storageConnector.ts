@@ -1,7 +1,7 @@
 import { BlobSASPermissions, BlobServiceClient, generateBlobSASQueryParameters, StorageSharedKeyCredential } from '@azure/storage-blob';
 import { Buffer } from "node:buffer";
 
-interface StorageItem {
+export interface StorageItem {
   id: string
   url: string
 }
@@ -14,7 +14,7 @@ interface StorageConnectorOptions {
   sasExpiryMinutes?: number
 }
 
-interface StorageConnector {
+export interface StorageConnector {
   getItemUrl(key: string): Promise<StorageItem>
   uploadFile(path: string, data: Buffer | string, metadata?: Record<string, string>): Promise<string>
   deleteFile(path: string): Promise<void>

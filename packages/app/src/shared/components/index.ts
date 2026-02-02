@@ -1,3 +1,4 @@
+export { default as Avatar } from './Avatar'
 export { default as OverlayContainer } from '../overlay/Overlay'
 export { LoadingSpinner } from './activityIndicator/ActivityIndicator'
 export { default as PulseAnimation } from './animation/PulseAnimation'

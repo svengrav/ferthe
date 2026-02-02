@@ -17,7 +17,7 @@ export interface AccountApplicationContract {
   upgradeToPhoneAccount: (context: AccountContext, phoneNumber: string, code: string) => Promise<Result<AccountSession>>
 
   // Avatar management
-  uploadAvatar: (context: AccountContext, base64Data: string) => Promise<Result<string>>
+  uploadAvatar: (context: AccountContext, base64Data: string) => Promise<Result<Account>>
 
   // Configuration - Require authenticated context
   getFirebaseConfig: (context: AccountContext) => Promise<Result<FirebaseConfig>>
@@ -40,7 +40,7 @@ export interface Account {
   phoneHash?: string // Optional for local accounts
   displayName?: string // Optional display name set by user
   description?: string // Optional profile description
-  avatarUrl?: string // Optional profile avatar image URL
+  avatarUrl?: string // Avatar URL (generated on-demand from internal blob path)
   createdAt: Date
   lastLoginAt?: Date
   updatedAt?: Date
@@ -64,7 +64,6 @@ export interface AccountContext {
 export interface AccountUpdateData {
   displayName?: string
   description?: string
-  avatarUrl?: string
 }
 
 /**

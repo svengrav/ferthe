@@ -11,7 +11,7 @@ export * from './theme'
 
 // Hooks
 export { useImagePicker } from './hooks/useImagePicker'
-export { useImageUpload } from './hooks/useImageUpload'
+export { useImageToBase64 } from './hooks/useImageToBase64'
 
 // Stores
 export { createReactionStore } from './stores/createReactionStore'

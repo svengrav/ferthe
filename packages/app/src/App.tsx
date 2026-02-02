@@ -4,7 +4,6 @@
 import '@expo/metro-runtime'
 // ---------------------------------------
 import { Notification, SplashView } from '@app/shared/components'
-import { showConnectionError } from '@app/shared/components/notification/Notification'
 import { Navigation } from '@app/shared/navigation/Navigation'
 import { Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter'
 import {
@@ -57,10 +56,6 @@ const useAppInitialization = () => {
           getAccountSession: getSession,
           apiEndpoint: config.apiEndpoint,
           timeout: config.apiTimeout,
-          onConnectionError: (error) => {
-            logger.error('API Connection Error:', error.message)
-            showConnectionError()
-          },
         })
 
         // Backend Health Check - wait until available

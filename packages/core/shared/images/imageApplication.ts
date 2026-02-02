@@ -1,36 +1,40 @@
 import { AccountContext } from '@shared/contracts/accounts.ts'
-import { ImageApplicationContract, ImageType } from '@shared/contracts/images.ts'
+import { ImageApplicationContract, ImageType, ImageUploadResult } from '@shared/contracts/images.ts'
 import { createErrorResult, createSuccessResult, Result } from '@shared/contracts/results.ts'
 import { Buffer } from 'node:buffer'
+import { StorageConnector } from '../../connectors/storageConnector.ts'
 import {
   createImageMetadata,
   detectExtensionFromDataUri,
   extractBlobPathFromUrl,
   generateSecureImagePath,
   isSupportedExtension,
+  validateImageSize,
 } from './imageService.ts'
 
 interface ImageApplicationOptions {
-  storageConnector: {
-    uploadFile: (path: string, data: Buffer, metadata?: Record<string, string>) => Promise<string>
-    deleteFile: (path: string) => Promise<void>
-    getMetadata: (path: string) => Promise<Record<string, string>>
-    getItemUrl: (path: string) => Promise<{ id: string; url: string }>
-  }
+  storageConnector: StorageConnector
+  maxImageSizeBytes: number
 }
 
-export function createImageApplication({ storageConnector }: ImageApplicationOptions): ImageApplicationContract {
+export function createImageApplication({ storageConnector, maxImageSizeBytes }: ImageApplicationOptions): ImageApplicationContract {
   const uploadImage = async (
     context: AccountContext,
     imageType: ImageType,
     entityId: string,
     base64Data: string,
     extension?: string
-  ): Promise<Result<string>> => {
+  ): Promise<Result<ImageUploadResult>> => {
     try {
       const accountId = context.accountId
       if (!accountId) {
         return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      // Validate image size
+      const sizeValidation = validateImageSize(base64Data, maxImageSizeBytes)
+      if (!sizeValidation.success) {
+        return { ...sizeValidation, data: undefined }
       }
 
       // Detect extension from data URI if not provided
@@ -64,9 +68,10 @@ export function createImageApplication({ storageConnector }: ImageApplicationOpt
       }
 
       // Upload to storage with metadata
-      const imageUrl = await storageConnector.uploadFile(blobPath, buffer, blobMetadata)
+      await storageConnector.uploadFile(blobPath, buffer, blobMetadata)
 
-      return createSuccessResult(imageUrl)
+      // Return blob path as object
+      return createSuccessResult({ blobPath })
     } catch (error: any) {
       return createErrorResult('IMAGE_UPLOAD_ERROR', { originalError: error.message })
     }
@@ -99,17 +104,14 @@ export function createImageApplication({ storageConnector }: ImageApplicationOpt
     }
   }
 
-  const refreshImageUrl = async (context: AccountContext, imageUrl: string): Promise<Result<string>> => {
+  const refreshImageUrl = async (context: AccountContext, blobPath: string): Promise<Result<string>> => {
     try {
       const accountId = context.accountId
       if (!accountId) {
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
-      // Extract blob path from URL
-      const blobPath = extractBlobPathFromUrl(imageUrl)
-
-      // Generate new SAS token
+      // Generate new SAS token for blob path
       const item = await storageConnector.getItemUrl(blobPath)
 
       return createSuccessResult(item.url)

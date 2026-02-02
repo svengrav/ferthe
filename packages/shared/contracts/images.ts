@@ -16,12 +16,16 @@ export interface ImageReference {
   url: string // SAS-signed URL for read access
 }
 
+export interface ImageUploadResult {
+  blobPath: string
+}
+
 /**
  * Application contract for managing image uploads and deletions.
  */
 export interface ImageApplicationContract {
   /**
-   * Upload an image and get back a signed URL.
+   * Upload an image and get back blob path.
    * The blob path is a secure hash (CUID2) to prevent enumeration.
    */
   uploadImage: (
@@ -30,7 +34,7 @@ export interface ImageApplicationContract {
     entityId: string,
     base64Data: string,
     extension?: string
-  ) => Promise<Result<string>>
+  ) => Promise<Result<ImageUploadResult>>
 
   /**
    * Delete an image by extracting the blob path from the URL.

@@ -28,7 +28,8 @@ description: This prompt is used to refactor code according to specified guideli
 # Styles
 - Remove not used styles.
 - Place styles outside the component.
-- Use createThemedStyles for styles that depend on the theme.
+- Use `useThemedStyles` hook for themed styles.
+- Define styles in a separate `createStyles` function outside the component.
 - Use inline styles only for dynamic styles that depend on props, state or complex logic.
 
 ## Components 
@@ -65,7 +66,8 @@ When developing React Native components, please adhere to the following guidelin
 - Place styles outside the component.
 - Use function Component over arrow function for components (not hooks).
 - Use arrow functions for hooks and logic
-- Use `useApp` hook to get the theme and styles.
+- Use `useThemedStyles` hook to get themed styles.
+- Use `useApp` hook to get app context, theme, or locales (only when needed).
 - Only use inline styles for dynamic styles that depend on props, state or complex logic.
 - For inline styles try to use const functions.
 - If views are deeply nested or complex, consider extracting them into separate const functions.
@@ -101,8 +103,11 @@ function Component(props: ComponentProps) {
   // Deconstruct props in the function body for clarity and readability
   const { prop1, prop2 } = props
   
-  // Use the app hook to get the theme and styles
-  const { styles, theme, locales } = useApp(useStyles)
+  // Use useThemedStyles for themed styles
+  const { styles } = useThemedStyles(createStyles)
+  
+  // Use useApp for app context, theme, or locales (only when needed)
+  const { locales } = useApp()
 
   const deeplyNestedView = () => {
     // This function can be used to render deeply nested views
@@ -112,9 +117,11 @@ function Component(props: ComponentProps) {
   return (<View>{deeplyNestedView()}</View>)
 }
 
-const useStyles = createThemedStyles(theme => ({
-  ...
-}))
+const createStyles = (theme: Theme) => StyleSheet.create({
+  nestedView: {
+    backgroundColor: theme.colors.surface,
+  }
+})
 
 export default Component
 ```

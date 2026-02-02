@@ -25,7 +25,10 @@ export function createConstants() {
     },
     storage: {
       containerName: 'images',
-      sasExpiryMinutes: 15,
+      sasExpiryMinutes: 60 * 24 * 7,
+    },
+    images: {
+      maxSizeBytes: 3 * 1024 * 1024,
     },
   }
 }

@@ -34,7 +34,7 @@ export interface AccountApplication {
   updateAccount: (data: AccountUpdateData) => Promise<Result<Account>>
   upgradeToPhoneAccount: (phoneNumber: string, code: string) => Promise<Result<AccountSession>>
   getFirebaseConfig: () => Promise<Result<FirebaseConfig>>
-  uploadAvatar: (base64Data: string) => Promise<Result<string>>
+  uploadAvatar: (base64Data: string) => Promise<Result<Account>>
 }
 
 interface AccountApplicationOptions {
@@ -194,10 +194,15 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       return accountAPI.getFirebaseConfig(session)
     },
 
-    uploadAvatar: async function (base64Data: string): Promise<Result<string>> {
+    uploadAvatar: async function (base64Data: string): Promise<Result<Account>> {
       const session = getSession()
       if (!session) return Promise.resolve({ success: false, data: undefined })
-      return accountAPI.uploadAvatar(session, base64Data)
+
+      const result = await accountAPI.uploadAvatar(session, base64Data)
+      if (result.success && result.data) {
+        storeActions.setAccount(result.data)
+      }
+      return result
     },
   }
 }

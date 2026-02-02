@@ -21,6 +21,7 @@ import {
   Result,
   TrailApplicationContract
 } from '@shared/contracts'
+import { API_ERROR_CODES } from '@shared/contracts/errors.ts'
 import { GeoLocation } from '@shared/geo'
 import { createDiscoveryService, DiscoveryServiceActions } from './discoveryService.ts'
 
@@ -372,14 +373,21 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       let finalImageUrl = content.imageUrl
       if (content.imageUrl && content.imageUrl.startsWith('data:image')) {
         if (!imageApplication) {
-          return createErrorResult('STORAGE_CONNECTOR_NOT_CONFIGURED')
+          return createErrorResult(API_ERROR_CODES.STORAGE_CONNECTOR_NOT_CONFIGURED.code)
         }
 
         const uploadResult = await imageApplication.uploadImage(context, 'discovery', discoveryId, content.imageUrl)
         if (!uploadResult.success || !uploadResult.data) {
-          return createErrorResult('IMAGE_UPLOAD_ERROR')
+          return createErrorResult(API_ERROR_CODES.IMAGE_UPLOAD_ERROR.code)
         }
-        finalImageUrl = uploadResult.data
+
+        const { blobPath } = uploadResult.data
+
+        // Generate URL from blob path
+        const urlResult = await imageApplication.refreshImageUrl(context, blobPath)
+        if (urlResult.success && urlResult.data) {
+          finalImageUrl = urlResult.data
+        }
       }
 
       const newContent = discoveryService.createDiscoveryContent(accountId, discoveryId, {
@@ -440,14 +448,21 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       let finalImageUrl = content.imageUrl
       if (content.imageUrl && content.imageUrl.startsWith('data:image')) {
         if (!imageApplication) {
-          return createErrorResult('STORAGE_CONNECTOR_NOT_CONFIGURED')
+          return createErrorResult(API_ERROR_CODES.STORAGE_CONNECTOR_NOT_CONFIGURED.code)
         }
 
         const uploadResult = await imageApplication.uploadImage(context, 'discovery', discoveryId, content.imageUrl)
         if (!uploadResult.success || !uploadResult.data) {
-          return createErrorResult('IMAGE_UPLOAD_ERROR')
+          return createErrorResult(API_ERROR_CODES.IMAGE_UPLOAD_ERROR.code)
         }
-        finalImageUrl = uploadResult.data
+
+        const { blobPath } = uploadResult.data
+
+        // Generate URL from blob path
+        const urlResult = await imageApplication.refreshImageUrl(context, blobPath)
+        if (urlResult.success && urlResult.data) {
+          finalImageUrl = urlResult.data
+        }
       }
 
       const updated = discoveryService.updateDiscoveryContent(existingResult.data, {
