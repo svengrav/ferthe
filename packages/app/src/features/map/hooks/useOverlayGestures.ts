@@ -4,9 +4,7 @@ import { ComposedGesture, Gesture } from 'react-native-gesture-handler'
 import { SharedValue, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 
-// Gesture limits
-const MIN_SCALE = 0.8
-const MAX_SCALE = 1.5
+// Gesture constants
 const SCALE_RESISTANCE = 0.3
 const PAN_RESISTANCE = 0.3
 const EDGE_PADDING = 30
@@ -16,6 +14,7 @@ const ELASTIC_PAN_DISTANCE = 80
 interface OverlayGesturesConfig {
   canvasSize: { width: number; height: number }
   screenSize: { width: number; height: number }
+  zoomLimits: { min: number; max: number }
   onScaleChange?: (scale: number) => void
 }
 
@@ -31,8 +30,10 @@ interface OverlayGesturesResult {
  * Handles elastic boundaries and scale resistance
  */
 export const useOverlayGestures = (config: OverlayGesturesConfig): OverlayGesturesResult => {
-  const { canvasSize, screenSize, onScaleChange } = config
+  const { canvasSize, screenSize, zoomLimits, onScaleChange } = config
   const containerRef = useRef<View>(null)
+  const MIN_SCALE = zoomLimits.min
+  const MAX_SCALE = zoomLimits.max
 
   // Zoom state
   const scale = useSharedValue(1)

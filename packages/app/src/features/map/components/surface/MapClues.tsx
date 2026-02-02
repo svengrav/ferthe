@@ -101,7 +101,7 @@ function MapClues({ boundary, size, scale }: MapCluesProps) {
 
   // Render debug radius circles around clue (50m, 100m, 150m)
   const renderDebugCircles = (clue: Clue) => {
-    if (!ENV.isDevelopment) return null
+    if (!ENV.enableMapDebug) return null
 
     return DEBUG_RADIUS_CIRCLES.map(radius => {
       const circle = mapUtils.calculateCircleDimensions(clue.location, radius, boundary, size)

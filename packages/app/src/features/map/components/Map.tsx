@@ -34,12 +34,12 @@ export function Map() {
       <View style={[styles.contentContainer]} id='map-content' >
         <MapDeviceCords />
         <MapViewport>
+          <MapSurface />
           <MapTrailPath boundary={viewportBoundary} size={size} scale={scale} />
           <MapClues boundary={viewportBoundary} size={size} scale={scale} />
           <MapSnap boundary={viewportBoundary} size={size} scale={scale} />
           <MapCenterMarker />
           <MapSpots boundary={viewportBoundary} size={size} scale={scale} />
-          <MapSurface />
           <MapScanner />
           <MapDeviceMarker mode="canvas" canvasSize={viewportSize} scale={scale} />
         </MapViewport>

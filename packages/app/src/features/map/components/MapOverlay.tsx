@@ -8,6 +8,7 @@ import { GeoBoundary } from '@shared/geo'
 import { useOverlayCompensatedScale } from '../hooks/useOverlayCompensatedScale'
 import { useOverlayGestures } from '../hooks/useOverlayGestures'
 import { useMapContainerSize, useMapSurfaceBoundary } from '../stores/mapStore'
+import { mapUtils } from '../utils/geoToScreenTransform'
 import MapClues from './surface/MapClues'
 import MapDeviceMarker from './surface/MapDeviceMarker'
 import MapSpots from './surface/MapSpots'
@@ -15,7 +16,8 @@ import MapTrailPath from './surface/MapTrailPath'
 
 const DEFAULT_CANVAS_SIZE = 800
 const MAX_CANVAS_DIMENSION = 1000
-const CANVAS_MARGIN = 100
+const CANVAS_MARGIN = 20
+const MAX_ZOOM_METERS = 50
 
 /**
  * Overlay component for Overview mode
@@ -27,6 +29,12 @@ function MapOverlay() {
   const screenSize = useMapContainerSize()
 
   const canvasSize = calculateCanvasSize(trailBoundary, screenSize)
+  const zoomLimits = mapUtils.calculateOverlayZoomLimits(
+    trailBoundary,
+    canvasSize,
+    screenSize,
+    MAX_ZOOM_METERS
+  )
 
   // Setup compensated scale for child elements
   const { compensatedScale, onScaleChange } = useOverlayCompensatedScale({
@@ -34,10 +42,11 @@ function MapOverlay() {
     screenSize,
   })
 
-  // Setup gestures with scale callback
+  // Setup gestures with calculated zoom limits
   const { gesture, animatedStyle, containerRef } = useOverlayGestures({
     canvasSize,
     screenSize,
+    zoomLimits,
     onScaleChange,
   })
 

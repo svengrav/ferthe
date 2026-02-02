@@ -31,7 +31,7 @@ export const createSensorApplication = (options?: SensorApplicationOptions) => {
   const lastScanDate = new Date(0)
   const MINIMUM_SCAN_INTERVAL = 5000 // 5 seconds in milliseconds
   const { deviceConnector, sensorApplication: core, getAccountContext: getAccountSession } = options || {}
-  const { setPermissionGranted, setStatusMessage, setStatus, setPermissionRequestHandler } = getSensorActions()
+  const { setPermissionGranted, setStatusMessage, setStatus, setDeviceStateRequestHandler } = getSensorActions()
 
   // Initialize permission and location tracking
   const initializeDevice = async () => {
@@ -64,8 +64,8 @@ export const createSensorApplication = (options?: SensorApplicationOptions) => {
     }
   }
 
-  // Register permission request handler
-  setPermissionRequestHandler(async () => {
+  // Register device state request handler
+  setDeviceStateRequestHandler(async () => {
     if (!deviceConnector) return
     const permissionResult = await deviceConnector.requestLocationPermission()
     setPermissionGranted(permissionResult.granted)

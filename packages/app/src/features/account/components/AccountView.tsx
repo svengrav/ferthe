@@ -1,11 +1,11 @@
-import { Button, InfoField, Text } from '@app/shared/components'
+import { Avatar, Button, InfoField, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay } from '@app/shared/overlay'
 import { Theme } from '@app/shared/theme'
 import useThemeStore from '@app/shared/theme/themeStore'
 import { logger } from '@app/shared/utils/logger'
 import React from 'react'
-import { Image, StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { useAccountData } from '../stores/accountStore'
 import AccountVerification from './AccountVerification'
 import { AvatarUpload } from './AvatarUpload'
@@ -30,21 +30,22 @@ export const AccountView: React.FC = () => {
       <Text variant="heading">{t.account.myAccount}</Text>
 
       {/* Profile Avatar */}
-      {account?.avatarUrl && (
-        <View style={styles.avatarContainer}>
-          <Image source={{ uri: account.avatarUrl }} style={styles.avatar} />
-        </View>
-      )}
+      <View style={styles.avatarContainer}>
+        <Avatar
+          avatarUrl={account?.avatarUrl}
+          size={100}
+          showEditIcon={true}
+          onPress={() => {
+            const close = setOverlay(
+              'avatarUpload',
+              <AvatarUpload onSubmit={() => close()} />,
+              { title: 'Upload Avatar', closable: true, variant: 'compact' }
+            )
+          }}
+        />
+      </View>
 
       {/* Account Status Section */}
-      {/* Avatar Upload */}
-      <InfoField
-        icon="image"
-        label="Profile Picture"
-        value={account?.avatarUrl ? 'Set' : 'Not set'}
-        onEdit={() => { const close = setOverlay('avatarUpload', <AvatarUpload onSubmit={() => close()} />, { title: 'Upload Avatar', closable: true, variant: 'compact' }) }}
-      />
-
       {/* Display Name Editor */}
       <InfoField
         icon="person-2"
@@ -109,13 +110,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   avatarContainer: {
     alignItems: 'center',
     marginVertical: 16,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
   },
   grid: {
     width: '100%',

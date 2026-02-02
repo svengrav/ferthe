@@ -1,9 +1,10 @@
 import { getAppContext } from '@app/appContext'
 import { Button, Card, Icon, Text } from '@app/shared/components'
+import { useImagePicker } from '@app/shared/hooks/useImagePicker'
+import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
-import * as ImagePicker from 'expo-image-picker'
 import React, { useState } from 'react'
 import { Image, Pressable, StyleSheet, View } from 'react-native'
 import { useAccountData } from '../stores/accountStore'
@@ -17,55 +18,21 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({ onSubmit }) => {
   const { t } = useLocalizationStore()
   const { account } = useAccountData()
   const { accountApplication } = getAppContext()
+  const { selectedImageUri, pickImage, isLoading: isPickingImage } = useImagePicker()
+  const { convertToBase64, isConverting } = useImageToBase64()
   const [isUploading, setIsUploading] = useState(false)
-  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null)
   const styles = createStyles(theme)
-
-  const pickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
-
-    if (!permissionResult.granted) {
-      logger.error('Permission to access camera roll is required')
-      return
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    })
-
-    if (!result.canceled && result.assets[0]) {
-      setSelectedImageUri(result.assets[0].uri)
-    }
-  }
 
   const handleUpload = async () => {
     if (!selectedImageUri) return
 
     setIsUploading(true)
     try {
-      // Read image as base64 using fetch and FileReader
-      const response = await fetch(selectedImageUri)
-      const blob = await response.blob()
-      const base64Data = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onloadend = () => {
-          const result = reader.result as string
-          // Remove data URL prefix to get pure base64
-          const base64 = result.split(',')[1]
-          resolve(base64)
-        }
-        reader.onerror = reject
-        reader.readAsDataURL(blob)
-      })
+      const base64DataUrl = await convertToBase64(selectedImageUri)
+      const uploadResult = await accountApplication.uploadAvatar(base64DataUrl)
 
-      // Upload via accountApplication
-      const uploadResult = await accountApplication.uploadAvatar(`data:image/jpeg;base64,${base64Data}`)
-
-      if (uploadResult.success) {
-        logger.log('Avatar uploaded successfully')
+      if (uploadResult.success && uploadResult.data) {
+        logger.log('Avatar uploaded successfully:', uploadResult.data.avatarUrl)
         onSubmit()
       } else {
         logger.error('Failed to upload avatar:', uploadResult.error)
@@ -77,6 +44,7 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({ onSubmit }) => {
     }
   }
 
+  const isLoading = isPickingImage || isConverting || isUploading
   const currentAvatar = selectedImageUri || account?.avatarUrl
 
   return (
@@ -101,14 +69,14 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({ onSubmit }) => {
             label="Select Image"
             onPress={pickImage}
             variant="outlined"
-            disabled={isUploading}
+            disabled={isLoading}
           />
           {selectedImageUri && (
             <Button
               label="Save"
               onPress={handleUpload}
               variant="primary"
-              disabled={isUploading}
+              disabled={isLoading}
             />
           )}
         </View>

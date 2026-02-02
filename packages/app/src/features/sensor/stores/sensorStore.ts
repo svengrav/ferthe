@@ -10,8 +10,8 @@ interface SensorActions extends Omit<StoreActions, 'setStatus'> {
   addScanRecord: (record: ScanEvent) => void
   setPermissionGranted: (granted: boolean) => void
   setStatusMessage: (message: string | undefined) => void
-  requestPermission: () => Promise<void>
-  setPermissionRequestHandler: (handler: () => Promise<void>) => void
+  requestDeviceState: () => Promise<void>
+  setDeviceStateRequestHandler: (handler: () => Promise<void>) => void
   setStatus: (status: SensorStatus) => void
 }
 
@@ -49,11 +49,11 @@ export const sensorStore = create<SensorData & SensorActions>(set => ({
   },
   setPermissionGranted: granted => set({ permissionGranted: granted }),
   setStatusMessage: message => set({ statusMessage: message }),
-  requestPermission: async () => {
+  requestDeviceState: async () => {
     // Will be overridden by sensorApplication
   },
-  setPermissionRequestHandler: handler => {
-    set({ requestPermission: handler })
+  setDeviceStateRequestHandler: handler => {
+    set({ requestDeviceState: handler })
   },
 }))
 
@@ -68,8 +68,8 @@ export const getSensorActions = () => ({
   setPermissionGranted: sensorStore.getState().setPermissionGranted,
   setStatusMessage: sensorStore.getState().setStatusMessage,
   setStatus: sensorStore.getState().setStatus,
-  requestPermission: sensorStore.getState().requestPermission,
-  setPermissionRequestHandler: sensorStore.getState().setPermissionRequestHandler,
+  requestDeviceState: sensorStore.getState().requestDeviceState,
+  setDeviceStateRequestHandler: sensorStore.getState().setDeviceStateRequestHandler,
 })
 
 export const getSensorDevice = () => sensorStore.getState().device

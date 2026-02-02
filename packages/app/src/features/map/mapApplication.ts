@@ -2,7 +2,7 @@ import { getMapService } from './utils/mapService'
 
 import { DiscoveryApplication, getDiscoveryTrailData } from '@app/features/discovery'
 import { discoveryService } from '@app/features/discovery/logic/discoveryService'
-import { getSensorData, SensorApplication } from '@app/features/sensor'
+import { getSensorActions, getSensorData, SensorApplication } from '@app/features/sensor'
 import { logger } from '@app/shared/utils/logger'
 import { discoveryTrailStore } from '../discovery/stores/discoveryTrailStore'
 import { getMapState, getMapStoreActions } from './stores/mapStore'
@@ -58,12 +58,11 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     logger.log('Discovery Store Updated')
   })
 
-  discoveryApplication?.onNewDiscoveries(d => { })
-
   const newMapState = async () => {
     const { trail, spots, snap, lastDiscovery } = getDiscoveryTrailData()
     const currentViewport = getMapState().viewport
     const { device } = getSensorData()
+    const { requestDeviceState } = getSensorActions()
 
     if (!trail) {
       logger.log('No trail loaded, cannot update map state')
@@ -74,6 +73,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     // Wait for valid device location (not default 0,0)
     if (!device?.location || (device.location.lat === 0 && device.location.lon === 0)) {
       logger.log('Device location not available yet, cannot update map state')
+      requestDeviceState()
       return
     }
 

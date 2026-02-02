@@ -222,6 +222,63 @@ const calculateSurfaceLayout = (
   }
 }
 
+/**
+ * Calculate meters per pixel for a given boundary and canvas size
+ * @param boundary Geographic boundary
+ * @param canvasSize Canvas dimensions in pixels
+ * @returns Meters per pixel
+ */
+const calculateMetersPerPixel = (boundary: GeoBoundary, canvasSize: ScreenSize): number => {
+  const centerLat = (boundary.northEast.lat + boundary.southWest.lat) / 2
+  const dimensions = geoUtils.calculateBoundaryDimensions(boundary, centerLat)
+
+  if (!dimensions?.meters) return 1
+
+  const metersPerPixelWidth = dimensions.meters.width / canvasSize.width
+  const metersPerPixelHeight = dimensions.meters.height / canvasSize.height
+
+  return Math.max(metersPerPixelWidth, metersPerPixelHeight)
+}
+
+/**
+ * Calculate zoom limits for overlay mode based on trail boundary and desired view
+ * @param boundary Trail boundary
+ * @param canvasSize Canvas size in pixels
+ * @param screenSize Screen size in pixels
+ * @param maxZoomMeters Maximum zoom level in meters (default 50m)
+ * @returns Min and max scale values
+ */
+const calculateOverlayZoomLimits = (
+  boundary: GeoBoundary,
+  canvasSize: ScreenSize,
+  screenSize: ScreenSize,
+  maxZoomMeters: number = 50
+): { min: number; max: number } => {
+  const centerLat = (boundary.northEast.lat + boundary.southWest.lat) / 2
+  const trailDimensions = geoUtils.calculateBoundaryDimensions(boundary, centerLat)
+
+  if (!trailDimensions?.meters) {
+    return { min: 0.8, max: 1.5 }
+  }
+
+  const trailMaxDimension = Math.max(trailDimensions.meters.width, trailDimensions.meters.height)
+  const canvasMaxDimension = Math.max(canvasSize.width, canvasSize.height)
+  const screenMinDimension = Math.min(screenSize.width, screenSize.height)
+
+  // MIN_SCALE: Trail fits in screen with padding
+  const paddingFactor = 0.9
+  const minScale = (screenMinDimension * paddingFactor) / canvasMaxDimension
+
+  // MAX_SCALE: Show max 50m of trail
+  const metersPerPixel = trailMaxDimension / canvasMaxDimension
+  const maxScale = trailMaxDimension / maxZoomMeters
+
+  return {
+    min: Math.max(0.5, minScale),
+    max: Math.min(3.0, Math.max(1.0, maxScale))
+  }
+}
+
 export const mapUtils = {
   coordinatesToPosition,
   positionToCoordinates,
@@ -231,4 +288,6 @@ export const mapUtils = {
   calculateDeviceViewportBoundary,
   calculateAdaptiveViewportRadius,
   calculateSurfaceLayout,
+  calculateMetersPerPixel,
+  calculateOverlayZoomLimits,
 }
