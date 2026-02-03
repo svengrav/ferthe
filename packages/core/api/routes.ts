@@ -19,6 +19,7 @@ import {
   SMSCodeRequest,
   SMSVerificationResult,
   ScanEvent,
+  SharedDiscovery,
   Spot,
   SpotPreview,
   Trail,
@@ -363,7 +364,15 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       version: 'v1',
       url: '/community/collections/communities',
       handler: asyncRequestHandler<Community>(async ({ context, body }) => {
-        return await communityApplication.createCommunity(context, body?.name)
+        return await communityApplication.createCommunity(context, { name: body?.name || '', trailIds: body?.trailIds || [] })
+      }),
+    },
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/community/join',
+      handler: asyncRequestHandler<Community>(async ({ context, body }) => {
+        return await communityApplication.joinCommunity(context, body?.inviteCode)
       }),
     },
     {
@@ -396,6 +405,30 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       url: '/community/collections/communities/:communityId/members',
       handler: asyncRequestHandler<CommunityMember[], { communityId: string }>(async ({ context, params }) => {
         return await communityApplication.listCommunityMembers(context, params!.communityId)
+      }),
+    },
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/community/collections/communities/:communityId/discoveries/:discoveryId/share',
+      handler: asyncRequestHandler<SharedDiscovery, { communityId: string; discoveryId: string }>(async ({ context, params }) => {
+        return await communityApplication.shareDiscovery(context, params!.discoveryId, params!.communityId)
+      }),
+    },
+    {
+      method: 'DELETE',
+      version: 'v1',
+      url: '/community/collections/communities/:communityId/discoveries/:discoveryId/share',
+      handler: asyncRequestHandler<void, { communityId: string; discoveryId: string }>(async ({ context, params }) => {
+        return await communityApplication.unshareDiscovery(context, params!.discoveryId, params!.communityId)
+      }),
+    },
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/community/collections/communities/:communityId/discoveries',
+      handler: asyncRequestHandler<Discovery[], { communityId: string }>(async ({ context, params }) => {
+        return await communityApplication.getSharedDiscoveries(context, params!.communityId)
       }),
     },
   ]

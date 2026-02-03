@@ -7,6 +7,7 @@ import { useWindowDimensions, View } from 'react-native'
 import Animated, { interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 import { DiscoveryCardState as Card } from '../logic/types'
 import DiscoveryReactionSection from './DiscoveryReactionSection'
+import DiscoveryShareSection from './DiscoveryShareSection'
 import DiscoveryUserContentSection from './DiscoveryUserContentSection'
 const PAGE_PADDING = 16
 const CARD_ASPECT_RATIO = 3 / 2
@@ -103,7 +104,6 @@ function DiscoveryCardDetails({ card }: DiscoveryCardProps) {
   const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT } = useCardDimensions()
   const { scrollHandler, titleOpacityStyle } = useCardAnimations(IMAGE_HEIGHT)
 
-  // Content state
   const [isLoading, setIsLoading] = useState(false)
 
   // Load content on mount
@@ -166,6 +166,9 @@ function DiscoveryCardDetails({ card }: DiscoveryCardProps) {
               isLoading={isLoading}
             />
           )}
+
+          {/* Share button */}
+          {discoveryId && <DiscoveryShareSection discoveryId={discoveryId} />}
 
           {description && (
             <Text style={styles.description}>{description}</Text>

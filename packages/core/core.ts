@@ -1,4 +1,4 @@
-import { Account, AccountSession, Community, CommunityMember, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryProfile, DiscoveryReaction, ImageApplicationContract, Spot, Trail, TrailApplicationContract, TrailSpot, TwilioVerification } from '@shared/contracts/index.ts'
+import { Account, AccountSession, Community, CommunityMember, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryProfile, DiscoveryReaction, ImageApplicationContract, SharedDiscovery, Spot, Trail, TrailApplicationContract, TrailSpot, TwilioVerification } from '@shared/contracts/index.ts'
 import { Buffer } from "node:buffer"
 import { Config, STORE_IDS } from './config/index.ts'
 import { SMSConnector } from './connectors/smsConnector.ts'
@@ -91,7 +91,10 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
       communities: createStore<Community>(storeConnector, STORE_IDS.COMMUNITIES),
       members: createStore<CommunityMember>(storeConnector, STORE_IDS.COMMUNITY_MEMBERS),
       reactions: createStore<DiscoveryReaction>(storeConnector, STORE_IDS.DISCOVERY_REACTIONS),
+      discoveries: createStore<SharedDiscovery>(storeConnector, STORE_IDS.COMMUNITY_DISCOVERIES),
     },
+    discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
+    trailSpotStore: createStore<TrailSpot>(storeConnector, STORE_IDS.TRAIL_SPOTS),
   })
 
   return {

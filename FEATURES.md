@@ -1,8 +1,16 @@
-## TODO
+
+
+## Discovery
+
+## Trail
+
+## Spots
+
+## Sensor
+
+## Map
 
 ## Community
-
----
 
 ### Community Discovery
 
@@ -17,21 +25,6 @@
 
 - **Share** = User action to share discovery with community
   - Spot must exist in community trail
-  - Discovery can be shared in 1 community initially
-  - Reversible: unshare or leave community makes it private again
+  - Discovery can be shared in 1 community initially 
 
-**TODOs**
-
-- Share button in discovery details
-- Trail selection when creating community
-- Shared discoveries view in community
-- Unshare option
-
----
-
-### Map
-
-**TODOs**
-
-- Trail Background Image
-- Viewport Background Image
+## About

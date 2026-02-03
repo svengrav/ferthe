@@ -1,6 +1,6 @@
 import { IconButton, Text } from '@app/shared/components/'
 import { Theme } from '@app/shared/theme'
-import { useThemedStyles } from '@app/shared/theme/themeStore'
+import { useTheme } from '@app/shared/theme/themeStore'
 import { Modal, StyleSheet, View } from 'react-native'
 import { create } from 'zustand'
 
@@ -35,7 +35,7 @@ export const setNotification = (title: string, body: string) => {
  * Uses Zustand store to manage notification state.
  */
 function Notification() {
-  const { styles } = useThemedStyles(createStyles)
+  const { styles } = useTheme(createStyles)
   const { visible, hideNotification, notification } = useNotificationStore()
 
   // Don't show the modal if there's no notification data

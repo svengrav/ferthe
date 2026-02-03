@@ -1,14 +1,21 @@
 import { getAppContext } from '@app/appContext'
+import { Button, Text } from '@app/shared/components'
+import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { Community } from '@shared/contracts'
-import { Pressable, Text, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { useActiveCommunityId } from '../stores/communityStore'
+import CommunityDiscoveriesScreen from './CommunityDiscoveriesScreen'
 
 interface CommunityCardProps {
   community: Community
 }
 
+/**
+ * Card component displaying community info with active state toggle.
+ * Provides navigation to shared discoveries.
+ */
 function CommunityCard({ community }: CommunityCardProps) {
   const { styles } = useApp(useStyles)
   const activeCommunityId = useActiveCommunityId()
@@ -26,14 +33,35 @@ function CommunityCard({ community }: CommunityCardProps) {
     }
   }
 
+  const handleViewDiscoveries = () => {
+    setOverlay(
+      'communityDiscoveries',
+      <CommunityDiscoveriesScreen
+        communityId={community.id}
+        communityName={community.name}
+        onBack={() => setOverlay('communityDiscoveries', null)}
+      />
+    )
+  }
+
   return (
     <Pressable onPress={handlePress} style={[styles.card, isActive && styles.activeCard]}>
       <View style={styles.header}>
-        <Text>{community.name}</Text>
+        <Text variant="subtitle">{community.name}</Text>
         {isActive && <Text style={styles.activeBadge}>Active</Text>}
       </View>
-      <Text style={styles.inviteCode}>Invite Code: {community.inviteCode}</Text>
-      <Text style={styles.meta}>Created {new Date(community.createdAt).toLocaleDateString()}</Text>
+
+      <Text variant="caption" style={styles.inviteCode}>
+        Invite Code: {community.inviteCode}
+      </Text>
+
+      <Text variant="caption" style={styles.meta}>
+        Created {new Date(community.createdAt).toLocaleDateString()}
+      </Text>
+
+      <View style={styles.actions}>
+        <Button label="View Discoveries" onPress={handleViewDiscoveries} />
+      </View>
     </Pressable>
   )
 }
@@ -62,6 +90,7 @@ const useStyles = createThemedStyles(theme => ({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
+    fontSize: 12,
   },
   inviteCode: {
     color: theme.deriveColor(theme.colors.onSurface, 0.6),
@@ -69,6 +98,10 @@ const useStyles = createThemedStyles(theme => ({
   },
   meta: {
     color: theme.deriveColor(theme.colors.onSurface, 0.6),
+    marginBottom: 12,
+  },
+  actions: {
+    marginTop: 8,
   },
 }))
 

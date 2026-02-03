@@ -2,7 +2,7 @@
 import { SMSConnector } from '@core/connectors/smsConnector.ts'
 import { Store } from '@core/store/storeFactory.ts'
 import { createCuid2 } from '@core/utils/idGenerator.ts'
-import { API_ERROR_CODES } from '@shared/contracts/errors.ts'
+import { ERROR_CODES } from '@shared/contracts/errors.ts'
 import { ImageApplicationContract } from '@shared/contracts/images.ts'
 import {
   Account,
@@ -475,7 +475,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
   const uploadAvatar = async (context: AccountContext, base64Data: string): Promise<Result<Account>> => {
     try {
       if (!imageApplication) {
-        return createErrorResult(API_ERROR_CODES.IMAGE_APPLICATION_NOT_CONFIGURED.code)
+        return createErrorResult(ERROR_CODES.IMAGE_APPLICATION_NOT_CONFIGURED.code)
       }
 
       // Upload image and get blob path
@@ -487,7 +487,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       )
 
       if (!uploadResult.success || !uploadResult.data) {
-        return createErrorResult(API_ERROR_CODES.IMAGE_UPLOAD_FAILED.code)
+        return createErrorResult(ERROR_CODES.IMAGE_UPLOAD_FAILED.code)
       }
 
       const { blobPath } = uploadResult.data
@@ -495,7 +495,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       // Store blob path internally in DB
       const account = await accountStore.get(context.accountId)
       if (!account.success || !account.data) {
-        return createErrorResult(API_ERROR_CODES.ACCOUNT_NOT_FOUND.code)
+        return createErrorResult(ERROR_CODES.ACCOUNT_NOT_FOUND.code)
       }
 
       const updatedAccount = {
@@ -529,7 +529,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
 
       return createSuccessResult(publicAccount)
     } catch (error: unknown) {
-      return createErrorResult(API_ERROR_CODES.AVATAR_UPLOAD_ERROR.code, { originalError: error instanceof Error ? error.message : 'Unknown error' })
+      return createErrorResult(ERROR_CODES.AVATAR_UPLOAD_ERROR.code, { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 

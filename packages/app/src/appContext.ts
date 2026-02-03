@@ -73,12 +73,7 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
   })
 
   const communityApplication = createCommunityApplication({
-    createCommunity: apiContext.communityApplication.createCommunity,
-    joinCommunity: apiContext.communityApplication.joinCommunity,
-    leaveCommunity: apiContext.communityApplication.leaveCommunity,
-    getCommunity: apiContext.communityApplication.getCommunity,
-    listCommunities: apiContext.communityApplication.listCommunities,
-    listCommunityMembers: apiContext.communityApplication.listCommunityMembers,
+    communityAPI: apiContext.communityApplication,
   })
 
   return {

@@ -14,20 +14,20 @@ export interface Target {
  */
 export type DiscoveryServiceActions = {
   getTargets: (accountId: string, trail: Trail, discoveries: Discovery[], spots: Spot[]) => Spot[]
-  createDiscovery: (accountId: string, spotId: string, trailId: string, scanEventId?: string, communityId?: string) => Discovery
+  createDiscovery: (accountId: string, spotId: string, trailId: string, scanEventId?: string) => Discovery
   processScanEvent: (scanEvent: ScanEvent, trail: Trail, discoveries: Discovery[], trailSpotIds: string[]) => Discovery[] | null
   isTrailCompleted: (accountId: string, trailId: string, discoveries: Discovery[], trailSpotIds: string[]) => boolean
   getTrailCompletionPercentage: (accountId: string, trailId: string, discoveries: Discovery[], trailSpotIds: string[]) => number
-  getDiscoveredSpotIds: (accountId: string, discoveries: Discovery[], trailId?: string, communityId?: string) => string[]
-  getDiscoveredSpots: (accountId: string, discoveries: Discovery[], spots: Spot[], trailId?: string, communityId?: string) => DiscoverySpot[]
-  getDiscoveries: (accountId: string, discoveries: Discovery[], trailId?: string, communityId?: string) => Discovery[]
+  getDiscoveredSpotIds: (accountId: string, discoveries: Discovery[], trailId?: string) => string[]
+  getDiscoveredSpots: (accountId: string, discoveries: Discovery[], spots: Spot[], trailId?: string) => DiscoverySpot[]
+  getDiscoveries: (accountId: string, discoveries: Discovery[], trailId?: string) => Discovery[]
   getDiscoverySpot: (id: string, spots: Spot[]) => Spot | undefined
   getCluesBasedOnPreviewMode: (accountId: string, trail: Trail, discoveries: Discovery[], spots: Spot[], trailSpotIds: string[]) => Clue[]
   createClue: (spot: Spot, trailId: string, source: ClueSource) => Clue
-  getNewDiscoveries(accountId: string, position: GeoLocation, spots: Spot[], discoveries: Discovery[], trail: Trail, communityId?: string): Discovery[]
+  getNewDiscoveries(accountId: string, position: GeoLocation, spots: Spot[], discoveries: Discovery[], trail: Trail): Discovery[]
   getDiscoverySnap: (currentLocation: GeoLocation, spots: Spot[], exploredSpotIds: string[], maxRangeInMeters?: number) => DiscoverySnap | undefined
-  processLocationUpdate: (accountId: string, locationWithDirection: LocationWithDirection, discoveries: Discovery[], spots: Spot[], trail: Trail, communityId?: string) => DiscoveryLocationRecord
-  createDiscoveryTrail: (accountId: string, trail: Trail, discoveries: Discovery[], spots: Spot[], trailSpotIds: string[], userLocation?: GeoLocation, communityId?: string) => DiscoveryTrail
+  processLocationUpdate: (accountId: string, locationWithDirection: LocationWithDirection, discoveries: Discovery[], spots: Spot[], trail: Trail) => DiscoveryLocationRecord
+  createDiscoveryTrail: (accountId: string, trail: Trail, discoveries: Discovery[], spots: Spot[], trailSpotIds: string[], userLocation?: GeoLocation) => DiscoveryTrail
   getDiscoveryStats: (discovery: Discovery, allDiscoveriesForSpot: Discovery[], userDiscoveries: Discovery[], trailSpotIds: string[], spots: Spot[]) => DiscoveryStats
   createDiscoveryContent: (accountId: string, discoveryId: string, content: { imageUrl?: string; comment?: string }) => DiscoveryContent
   updateDiscoveryContent: (existing: DiscoveryContent, content: { imageUrl?: string; comment?: string }) => DiscoveryContent
@@ -53,21 +53,19 @@ const calculateDistance = (start: { lat: number; lon: number }, end: { lat: numb
   return R * c
 }
 
-const getDiscoveries = (accountId: string, discoveries: Discovery[], trailId?: string, communityId?: string) => {
+const getDiscoveries = (accountId: string, discoveries: Discovery[], trailId?: string) => {
   return discoveries.filter(discovery => {
     const matchesAccount = discovery.accountId === accountId
     const matchesTrail = !trailId || discovery.trailId === trailId
-    const matchesCommunity = !communityId || discovery.communityId === communityId
-    return matchesAccount && matchesTrail && matchesCommunity
+    return matchesAccount && matchesTrail
   })
 }
 
-const getDiscoveredSpots = (accountId: string, discoveries: Discovery[], spots: Spot[], trailId?: string, communityId?: string): DiscoverySpot[] => {
+const getDiscoveredSpots = (accountId: string, discoveries: Discovery[], spots: Spot[], trailId?: string): DiscoverySpot[] => {
   const relevantDiscoveries = discoveries.filter(discovery => {
     const matchesAccount = discovery.accountId === accountId
     const matchesTrail = !trailId || discovery.trailId === trailId
-    const matchesCommunity = !communityId || discovery.communityId === communityId
-    return matchesAccount && matchesTrail && matchesCommunity
+    return matchesAccount && matchesTrail
   })
 
   // Sort by discoveredAt (oldest first)
@@ -84,7 +82,6 @@ const getDiscoveredSpots = (accountId: string, discoveries: Discovery[], spots: 
       ...spot,
       discoveredAt: discovery.discoveredAt,
       discoveryId: discovery.id,
-      communityId: discovery.communityId,
     }
   })
 }
@@ -115,7 +112,7 @@ const getTargets = (accountId: string, trail: Trail, discoveries: Discovery[], s
 /**
  * Creates a new discovery record when a user discovers a spot
  */
-const createDiscovery = (accountId: string, spotId: string, trailId: string, scanEventId?: string, communityId?: string): Discovery => {
+const createDiscovery = (accountId: string, spotId: string, trailId: string, scanEventId?: string): Discovery => {
   const id = createDiscoveryId(accountId, spotId, trailId)
 
   return {
@@ -123,7 +120,6 @@ const createDiscovery = (accountId: string, spotId: string, trailId: string, sca
     accountId,
     spotId,
     trailId,
-    communityId,
     discoveredAt: new Date(),
     scanEventId: scanEventId,
     createdAt: new Date(),
@@ -131,13 +127,13 @@ const createDiscovery = (accountId: string, spotId: string, trailId: string, sca
   }
 }
 
-const getNewDiscoveries = (accountId: string, position: GeoLocation, spots: Spot[], discoveries: Discovery[], trail: Trail, communityId?: string): Discovery[] => {
+const getNewDiscoveries = (accountId: string, position: GeoLocation, spots: Spot[], discoveries: Discovery[], trail: Trail): Discovery[] => {
   const undiscoveredSpots = spots.filter(spot => !discoveries.some(discovery => discovery.accountId === accountId && discovery.spotId === spot.id))
   const newDiscoveries: Discovery[] = []
   for (const spot of undiscoveredSpots) {
     const distanceToSpot = geoUtils.calculateDistance(position, spot.location)
     if (distanceToSpot <= spot.options.discoveryRadius) {
-      newDiscoveries.push(createDiscovery(accountId, spot.id, trail.id, undefined, communityId))
+      newDiscoveries.push(createDiscovery(accountId, spot.id, trail.id))
     }
   }
 
@@ -314,11 +310,10 @@ const processLocationUpdate = (
   { location, direction }: LocationWithDirection,
   discoveries: Discovery[],
   spots: Spot[],
-  trail: Trail,
-  communityId?: string
+  trail: Trail
 ): DiscoveryLocationRecord => {
   // Orchestration: Process new discoveries
-  const newDiscoveries = getNewDiscoveries(accountId, location, spots, discoveries, trail, communityId)
+  const newDiscoveries = getNewDiscoveries(accountId, location, spots, discoveries, trail)
 
   // Include new discoveries in explored spot IDs
   const exploredSpotIds = [...discoveries.filter(d => d.accountId === accountId).map(d => d.spotId), ...newDiscoveries.map(d => d.spotId)]
@@ -336,9 +331,9 @@ const processLocationUpdate = (
 /**
  * Creates a DiscoveryTrail object with all necessary data, filtering preview clues by map boundaries
  */
-const createDiscoveryTrail = (accountId: string, trail: Trail, discoveries: Discovery[], spots: Spot[], trailSpotIds: string[], userLocation?: GeoLocation, communityId?: string): DiscoveryTrail => {
-  const trailDiscoveries = getDiscoveries(accountId, discoveries, trail.id, communityId)
-  const discoveredSpots = getDiscoveredSpots(accountId, discoveries, spots, trail.id, communityId)
+const createDiscoveryTrail = (accountId: string, trail: Trail, discoveries: Discovery[], spots: Spot[], trailSpotIds: string[], userLocation?: GeoLocation): DiscoveryTrail => {
+  const trailDiscoveries = getDiscoveries(accountId, discoveries, trail.id)
+  const discoveredSpots = getDiscoveredSpots(accountId, discoveries, spots, trail.id)
 
   // Get all preview clues first
   const allClues = getCluesBasedOnPreviewMode(accountId, trail, discoveries, spots, trailSpotIds)

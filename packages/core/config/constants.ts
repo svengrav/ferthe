@@ -33,6 +33,9 @@ export function createConstants() {
   }
 }
 
+/**
+ * Store IDs for different data collections.
+ */
 export const STORE_IDS = {
   TRAILS: 'trail-collection',
   SPOTS: 'spot-collection',
@@ -47,4 +50,5 @@ export const STORE_IDS = {
   SENSOR_SCANS: 'sensor-scans',
   COMMUNITIES: 'community-collection',
   COMMUNITY_MEMBERS: 'community-members',
+  COMMUNITY_DISCOVERIES: 'community-discoveries',
 } as const

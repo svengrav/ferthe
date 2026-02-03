@@ -1,9 +1,12 @@
-import { AccountContext, Community, CommunityApplicationContract, CommunityMember, createErrorResult, createSuccessResult, Result } from '@shared/contracts'
+import { Store } from '@core/store/storeFactory.ts'
+import { AccountContext, Community, CommunityApplicationContract, CommunityMember, createErrorResult, createSuccessResult, Discovery, Result, SharedDiscovery, TrailSpot } from '@shared/contracts'
 import { CommunityServiceActions, createCommunityService } from './communityService.ts'
 import { CommunityStore } from './communityStore.ts'
 
 export interface CommunityApplicationOptions {
   communityStore: CommunityStore
+  discoveryStore: Store<Discovery>
+  trailSpotStore: Store<TrailSpot>
   communityService?: CommunityServiceActions
 }
 
@@ -11,20 +14,45 @@ export interface CommunityApplicationOptions {
  * Creates a community application that handles all community-related operations.
  */
 export function createCommunityApplication(options: CommunityApplicationOptions): CommunityApplicationContract {
-  const { communityStore, communityService = createCommunityService() } = options
+  const { communityStore, discoveryStore, trailSpotStore, communityService = createCommunityService() } = options
 
-  const createCommunity = async (context: AccountContext, name: string): Promise<Result<Community>> => {
+  const createCommunity = async (context: AccountContext, options: { name: string; trailIds: string[] }): Promise<Result<Community>> => {
     try {
       const accountId = context.accountId
       if (!accountId) {
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
+      const { name, trailIds } = options
+
+      // Validate trail IDs limit (max 1 initially)
+      if (trailIds.length === 0) {
+        return createErrorResult('TRAIL_REQUIRED')
+      }
+      if (trailIds.length > 1) {
+        return createErrorResult('TOO_MANY_TRAILS')
+      }
+
+      // Verify trails exist by checking if they have any trail-spot relations
+      const trailSpotsResult = await trailSpotStore.list()
+      if (!trailSpotsResult.success) {
+        return createErrorResult('CREATE_COMMUNITY_ERROR')
+      }
+
+      const existingTrailIds = new Set(
+        (trailSpotsResult.data || []).map(ts => ts.trailId)
+      )
+
+      const invalidTrails = trailIds.filter(trailId => !existingTrailIds.has(trailId))
+      if (invalidTrails.length > 0) {
+        return createErrorResult('TRAIL_NOT_FOUND')
+      }
+
       // Generate unique invite code
       const inviteCode = communityService.generateInviteCode()
 
       // Create community
-      const community = communityService.createCommunity(accountId, name, inviteCode)
+      const community = communityService.createCommunity(accountId, name, trailIds, inviteCode)
       const createResult = await communityStore.communities.create(community)
 
       if (!createResult.success) {
@@ -98,7 +126,19 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
         return createErrorResult('NOT_A_MEMBER')
       }
 
-      const deleteResult = await communityStore.members.delete(`${communityId}_${accountId}`)
+      // Delete all shared discoveries by this user in this community
+      const sharedResult = await communityStore.discoveries.list()
+      if (sharedResult.success && sharedResult.data) {
+        const userSharedDiscoveries = sharedResult.data.filter(
+          sd => sd.communityId === communityId && sd.sharedBy === accountId
+        )
+        await Promise.all(
+          userSharedDiscoveries.map(sd => communityStore.discoveries.delete(sd.id))
+        )
+      }
+
+      // Delete membership
+      const deleteResult = await communityStore.members.delete(`${communityId}-${accountId}`)
       if (!deleteResult.success) {
         return createErrorResult('LEAVE_COMMUNITY_ERROR')
       }
@@ -166,6 +206,158 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     }
   }
 
+  const shareDiscovery = async (context: AccountContext, discoveryId: string, communityId: string): Promise<Result<SharedDiscovery>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      // Get discovery
+      const discoveryResult = await discoveryStore.get(discoveryId)
+      if (!discoveryResult.success || !discoveryResult.data) {
+        return createErrorResult('DISCOVERY_NOT_FOUND')
+      }
+      const discovery = discoveryResult.data
+
+      // Verify ownership
+      if (discovery.accountId !== accountId) {
+        return createErrorResult('UNAUTHORIZED')
+      }
+
+      // Get community
+      const communityResult = await communityStore.communities.get(communityId)
+      if (!communityResult.success || !communityResult.data) {
+        return createErrorResult('COMMUNITY_NOT_FOUND')
+      }
+      const community = communityResult.data
+
+      // Verify user is member
+      const membersResult = await communityStore.members.list()
+      if (!membersResult.success) {
+        return createErrorResult('GET_MEMBERS_ERROR')
+      }
+      const communityMembers = membersResult.data?.filter(m => m.communityId === communityId) || []
+      if (!communityService.isMember(accountId, communityMembers)) {
+        return createErrorResult('NOT_A_MEMBER')
+      }
+
+      // Verify discovery spot is in one of the community trails
+      const trailSpotsResult = await trailSpotStore.list()
+      if (!trailSpotsResult.success) {
+        return createErrorResult('SHARE_DISCOVERY_ERROR')
+      }
+
+      const isSpotInCommunityTrail = (trailSpotsResult.data || []).some(
+        ts => community.trailIds.includes(ts.trailId) && ts.spotId === discovery.spotId
+      )
+
+      if (!isSpotInCommunityTrail) {
+        return createErrorResult('DISCOVERY_SPOT_NOT_IN_COMMUNITY_TRAILS')
+      }
+
+      // Verify discovery is not older than 24 hours
+      const now = new Date()
+      const discoveryAge = now.getTime() - discovery.discoveredAt.getTime()
+      const maxAge = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+      if (discoveryAge > maxAge) {
+        return createErrorResult('DISCOVERY_TOO_OLD')
+      }
+
+      // Check if already shared
+      const existingShareResult = await communityStore.discoveries.get(`${communityId}-${discoveryId}`)
+      if (existingShareResult.success && existingShareResult.data) {
+        return createErrorResult('ALREADY_SHARED')
+      }
+
+      // Create shared discovery
+      const sharedDiscovery = communityService.createSharedDiscovery(discoveryId, communityId, accountId)
+      const createResult = await communityStore.discoveries.create(sharedDiscovery)
+
+      if (!createResult.success) {
+        return createErrorResult('SHARE_DISCOVERY_ERROR')
+      }
+
+      return createSuccessResult(createResult.data!)
+    } catch (error: unknown) {
+      return createErrorResult('SHARE_DISCOVERY_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const unshareDiscovery = async (context: AccountContext, discoveryId: string, communityId: string): Promise<Result<void>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      // Get shared discovery
+      const sharedId = `${communityId}-${discoveryId}`
+      const sharedResult = await communityStore.discoveries.get(sharedId)
+      if (!sharedResult.success || !sharedResult.data) {
+        return createErrorResult('SHARED_DISCOVERY_NOT_FOUND')
+      }
+
+      // Verify ownership
+      if (sharedResult.data.sharedBy !== accountId) {
+        return createErrorResult('UNAUTHORIZED')
+      }
+
+      // Delete shared discovery
+      const deleteResult = await communityStore.discoveries.delete(sharedId)
+      if (!deleteResult.success) {
+        return createErrorResult('UNSHARE_DISCOVERY_ERROR')
+      }
+
+      return createSuccessResult(undefined)
+    } catch (error: unknown) {
+      return createErrorResult('UNSHARE_DISCOVERY_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const getSharedDiscoveries = async (context: AccountContext, communityId: string): Promise<Result<Discovery[]>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      // Verify user is member
+      const membersResult = await communityStore.members.list()
+      if (!membersResult.success) {
+        return createErrorResult('GET_MEMBERS_ERROR')
+      }
+      const communityMembers = membersResult.data?.filter(m => m.communityId === communityId) || []
+      if (!communityService.isMember(accountId, communityMembers)) {
+        return createErrorResult('NOT_A_MEMBER')
+      }
+
+      // Get all shared discoveries for this community
+      const sharedResult = await communityStore.discoveries.list()
+      if (!sharedResult.success) {
+        return createErrorResult('GET_SHARED_DISCOVERIES_ERROR')
+      }
+
+      const sharedDiscoveryIds = (sharedResult.data || [])
+        .filter(sd => sd.communityId === communityId)
+        .map(sd => sd.discoveryId)
+
+      // Get all discoveries
+      const discoveriesResult = await discoveryStore.list()
+      if (!discoveriesResult.success) {
+        return createErrorResult('GET_DISCOVERIES_ERROR')
+      }
+
+      // Filter to shared ones
+      const discoveries = (discoveriesResult.data || [])
+        .filter(d => sharedDiscoveryIds.includes(d.id))
+
+      return createSuccessResult(discoveries)
+    } catch (error: unknown) {
+      return createErrorResult('GET_SHARED_DISCOVERIES_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
   return {
     createCommunity,
     joinCommunity,
@@ -173,5 +365,8 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     getCommunity,
     listCommunities,
     listCommunityMembers,
+    shareDiscovery,
+    unshareDiscovery,
+    getSharedDiscoveries,
   }
 }

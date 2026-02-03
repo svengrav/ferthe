@@ -1,5 +1,5 @@
 import { AccountApplicationActions } from '@core/features/account/accountApplication.ts'
-import { ApiError, Result } from '@shared/contracts/'
+import { ERROR_CODES, Result } from '@shared/contracts/'
 import { Context } from 'oak'
 import { AuthContext, createAuthMiddleware, createPublicContext } from './authMiddleware.ts'
 import type { OakRouteHandler } from './types.ts'
@@ -93,8 +93,11 @@ function sendApiResponse<T>(ctx: Context, result: Result<T>): void {
       timestamp: new Date().toISOString(),
     }
   } else {
-    const error = result.error as ApiError
-    ctx.response.status = error.httpStatus || 500
+    const error = result.error!
+    const errorDef = ERROR_CODES[error.code as keyof typeof ERROR_CODES]
+    const httpStatus = errorDef?.httpStatus || 500
+
+    ctx.response.status = httpStatus
     ctx.response.body = {
       success: false,
       error: {

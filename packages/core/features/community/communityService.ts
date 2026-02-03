@@ -1,4 +1,4 @@
-import { Community, CommunityDiscoveryStats, CommunityMember, Discovery, DiscoveryReaction } from '@shared/contracts'
+import { Community, CommunityDiscoveryStats, CommunityMember, Discovery, DiscoveryReaction, SharedDiscovery } from '@shared/contracts'
 
 /**
  * Type definition for the Community Service functionality.
@@ -8,10 +8,11 @@ export type CommunityServiceActions = {
   isMember: (accountId: string, members: CommunityMember[]) => boolean
   getMemberCommunities: (accountId: string, members: CommunityMember[], communities: Community[]) => Community[]
   getSharedDiscoveries: (communityId: string, discoveries: Discovery[]) => Discovery[]
-  getCommunityDiscoveryStats: (discoveryId: string, communityId: string, discoveries: Discovery[], reactions: DiscoveryReaction[]) => CommunityDiscoveryStats
+  getCommunityDiscoveryStats: (discoveryId: string, communityId: string, discoveries: Discovery[], sharedDiscoveries: SharedDiscovery[], reactions: DiscoveryReaction[]) => CommunityDiscoveryStats
   generateInviteCode: () => string
-  createCommunity: (accountId: string, name: string, inviteCode: string) => Community
+  createCommunity: (accountId: string, name: string, trailIds: string[], inviteCode: string) => Community
   createMember: (communityId: string, accountId: string) => CommunityMember
+  createSharedDiscovery: (discoveryId: string, communityId: string, sharedBy: string) => SharedDiscovery
 }
 
 /**
@@ -31,18 +32,22 @@ const getMemberCommunities = (accountId: string, members: CommunityMember[], com
 
 /**
  * Gets all discoveries shared within a community.
+ * NOTE: This function expects discoveries to be pre-filtered based on sharedDiscoveries.
  */
 const getSharedDiscoveries = (communityId: string, discoveries: Discovery[]): Discovery[] => {
-  return discoveries.filter(d => d.communityId === communityId)
+  // Discoveries are already filtered by the caller based on SharedDiscovery entries
+  return discoveries
 }
 
 /**
  * Gets statistics for a discovery within a community context.
+ * NOTE: Requires sharedDiscoveries parameter to determine community membership.
  */
 const getCommunityDiscoveryStats = (
   discoveryId: string,
   communityId: string,
   discoveries: Discovery[],
+  sharedDiscoveries: SharedDiscovery[],
   reactions: DiscoveryReaction[]
 ): CommunityDiscoveryStats => {
   const discovery = discoveries.find(d => d.id === discoveryId)
@@ -50,8 +55,15 @@ const getCommunityDiscoveryStats = (
     throw new Error(`Discovery ${discoveryId} not found`)
   }
 
-  // Get all discoveries for this spot in this community
-  const spotDiscoveries = discoveries.filter(d => d.spotId === discovery.spotId && d.communityId === communityId)
+  // Get all shared discoveries for this spot in this community
+  const communitySharedDiscoveryIds = sharedDiscoveries
+    .filter(sd => sd.communityId === communityId)
+    .map(sd => sd.discoveryId)
+
+  const spotDiscoveries = discoveries.filter(d =>
+    d.spotId === discovery.spotId &&
+    communitySharedDiscoveryIds.includes(d.id)
+  )
 
   // Sort by discovered date to determine rank
   const sortedDiscoveries = [...spotDiscoveries].sort((a, b) => a.discoveredAt.getTime() - b.discoveredAt.getTime())
@@ -89,11 +101,12 @@ const generateInviteCode = (): string => {
 /**
  * Creates a new community object.
  */
-const createCommunity = (accountId: string, name: string, inviteCode: string): Community => {
+const createCommunity = (accountId: string, name: string, trailIds: string[], inviteCode: string): Community => {
   const now = new Date()
   return {
     id: crypto.randomUUID(),
     name,
+    trailIds,
     createdBy: accountId,
     inviteCode,
     createdAt: now,
@@ -114,6 +127,19 @@ const createMember = (communityId: string, accountId: string): CommunityMember =
 }
 
 /**
+ * Creates a new shared discovery object.
+ */
+const createSharedDiscovery = (discoveryId: string, communityId: string, sharedBy: string): SharedDiscovery => {
+  return {
+    id: `${communityId}-${discoveryId}`,
+    discoveryId,
+    communityId,
+    sharedBy,
+    sharedAt: new Date(),
+  }
+}
+
+/**
  * Community service with pure functions for community logic.
  */
 export const communityService: CommunityServiceActions = {
@@ -124,6 +150,7 @@ export const communityService: CommunityServiceActions = {
   generateInviteCode,
   createCommunity,
   createMember,
+  createSharedDiscovery,
 }
 
 export function createCommunityService(): CommunityServiceActions {

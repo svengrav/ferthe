@@ -40,7 +40,7 @@ export interface Account {
   phoneHash?: string // Optional for local accounts
   displayName?: string // Optional display name set by user
   description?: string // Optional profile description
-  avatarUrl?: string // Avatar URL (generated on-demand from internal blob path)
+  avatarUrl?: string // Avatar URL (generated on-demand)
   createdAt: Date
   lastLoginAt?: Date
   updatedAt?: Date

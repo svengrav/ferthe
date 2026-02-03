@@ -26,7 +26,7 @@ export function setTheme(mode: ColorScheme) {
 }
 
 // React hook to use themed styles in components
-export function useThemedStyles<T extends StyleSheet.NamedStyles<T> | StyleSheet.NamedStyles<any>>(styleFn: ThemedStyle<T>) {
+export function useTheme<T extends StyleSheet.NamedStyles<T> | StyleSheet.NamedStyles<any>>(styleFn: ThemedStyle<T>) {
   const theme = useThemeStore()
   return {
     theme: theme,

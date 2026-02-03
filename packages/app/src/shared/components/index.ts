@@ -1,7 +1,7 @@
-export { default as Avatar } from './Avatar'
 export { default as OverlayContainer } from '../overlay/Overlay'
 export { LoadingSpinner } from './activityIndicator/ActivityIndicator'
 export { default as PulseAnimation } from './animation/PulseAnimation'
+export { default as Avatar } from './Avatar'
 export { BottomSheet, BottomSheetRef } from './bottomSheet/BottomSheet'
 export { default as Button, IconButton } from './button/Button'
 export { default as Card } from './card/Card'

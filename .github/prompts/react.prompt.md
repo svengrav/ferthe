@@ -1,5 +1,5 @@
 ---
-name: refactor
+name: react
 agent: agent
 tools: ['vscode', 'execute', 'read', 'agent', 'edit', 'search', 'web']
 description: This prompt is used to refactor code according to specified guidelines for React Native components and hooks.
@@ -10,7 +10,6 @@ description: This prompt is used to refactor code according to specified guideli
 - First thing to do ist to check, which code (component, hook, service, application) type it is and print it out. 
 - Shortly describe your refactor plan.
 - Then the code should be refactored to follow the guidelines of this type and the general guidelines.
-
 
 # General Guidelines
 - Only use logger for logging, remove console.log statements.
@@ -23,19 +22,19 @@ description: This prompt is used to refactor code according to specified guideli
 - Try to avoid deeply nested code structures.
 - Group Related Functions
 - Comment major functions and logical sections of the code.
-- Try to avoid any
+- Try to avoid any or cast to any!
 
 # Styles
 - Remove not used styles.
 - Place styles outside the component.
-- Use `useThemedStyles` hook for themed styles.
+- Use `useTheme` hook for themed styles.
 - Define styles in a separate `createStyles` function outside the component.
 - Use inline styles only for dynamic styles that depend on props, state or complex logic.
 
 ## Components 
 - Reuse shared components like Text instead of direct React Native components.
 - Make use of variants and themes for these components if possible. 
-- Try to design 
+- Use Icon Component instead of any emojis.
 
 ## Import Organization
 - Group imports: React/React Native → Third-party → Local imports
@@ -103,14 +102,15 @@ function Component(props: ComponentProps) {
   // Deconstruct props in the function body for clarity and readability
   const { prop1, prop2 } = props
   
-  // Use useThemedStyles for themed styles
-  const { styles } = useThemedStyles(createStyles)
+  // Use useTheme for themed styles
+  const { styles } = useTheme(createStyles)
   
   // Use useApp for app context, theme, or locales (only when needed)
   const { locales } = useApp()
 
   const deeplyNestedView = () => {
     // This function can be used to render deeply nested views
+    // Or consider extracting as a separate subcomponent
     return <View style={styles.nestedView}></View>
   }
 

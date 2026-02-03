@@ -1,5 +1,5 @@
 import { createCuid2 } from '@core/utils/idGenerator.ts'
-import { API_ERROR_CODES } from '@shared/contracts/errors.ts'
+import { ERROR_CODES } from '@shared/contracts/errors.ts'
 import { ImageType } from '@shared/contracts/images.ts'
 import { Result, createErrorResult, createSuccessResult } from '@shared/contracts/results.ts'
 
@@ -102,7 +102,7 @@ export const detectExtensionFromDataUri = (dataUri: string): string => {
  */
 export const validateImageSize = (base64Data: string, maxSizeBytes: number): Result<void> => {
   if (!base64Data) {
-    const error = API_ERROR_CODES.NO_IMAGE_DATA
+    const error = ERROR_CODES.NO_IMAGE_DATA
     return createErrorResult(error.code as any)
   }
 
@@ -113,7 +113,7 @@ export const validateImageSize = (base64Data: string, maxSizeBytes: number): Res
   const sizeBytes = (base64String.length * 3) / 4
 
   if (sizeBytes > maxSizeBytes) {
-    const error = API_ERROR_CODES.IMAGE_TOO_LARGE
+    const error = ERROR_CODES.IMAGE_TOO_LARGE
     return createErrorResult(error.code as any, {
       maxSizeMB: maxSizeBytes / (1024 * 1024),
       actualSizeMB: Math.round(sizeBytes / (1024 * 1024) * 10) / 10

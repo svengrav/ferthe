@@ -21,6 +21,7 @@ import {
   ReactionSummary,
   ScanEvent,
   SessionValidationResult,
+  SharedDiscovery,
   SMSCodeRequest,
   SMSVerificationResult,
   Spot,
@@ -204,8 +205,8 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
      * These methods handle community creation, joining, and member management.
      */
     communityApplication: {
-      createCommunity: (_context: AccountContext, name: string) =>
-        API.send<Community>('/community/collections/communities', 'POST', { name }),
+      createCommunity: (_context: AccountContext, input: { name: string; trailIds: string[] }) =>
+        API.send<Community>('/community/collections/communities', 'POST', { name: input.name, trailIds: input.trailIds }),
 
       joinCommunity: (_context: AccountContext, inviteCode: string) =>
         API.send<Community>('/community/join', 'POST', { inviteCode }),
@@ -221,6 +222,15 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
 
       listCommunityMembers: (_context: AccountContext, communityId: string) =>
         API.send<CommunityMember[]>(`/community/collections/communities/${communityId}/members`),
+
+      shareDiscovery: (_context: AccountContext, discoveryId: string, communityId: string) =>
+        API.send<SharedDiscovery>(`/community/collections/communities/${communityId}/discoveries/${discoveryId}/share`, 'POST'),
+
+      unshareDiscovery: (_context: AccountContext, discoveryId: string, communityId: string) =>
+        API.send<void>(`/community/collections/communities/${communityId}/discoveries/${discoveryId}/share`, 'DELETE'),
+
+      getSharedDiscoveries: (_context: AccountContext, communityId: string) =>
+        API.send<Discovery[]>(`/community/collections/communities/${communityId}/discoveries`),
     },
   }
 }

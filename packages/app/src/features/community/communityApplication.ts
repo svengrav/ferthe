@@ -1,34 +1,26 @@
 import { getSession } from '@app/features/account'
 import { logger } from '@app/shared/utils/logger'
-import { Community, CommunityApplicationContract, CommunityMember, Result } from '@shared/contracts'
+import { Community, CommunityApplicationContract, CommunityMember, Discovery, Result, SharedDiscovery } from '@shared/contracts'
 import { getCommunityActions } from './stores/communityStore'
 
 export interface CommunityApplicationOptions {
-  createCommunity: CommunityApplicationContract['createCommunity']
-  joinCommunity: CommunityApplicationContract['joinCommunity']
-  leaveCommunity: CommunityApplicationContract['leaveCommunity']
-  getCommunity: CommunityApplicationContract['getCommunity']
-  listCommunities: CommunityApplicationContract['listCommunities']
-  listCommunityMembers: CommunityApplicationContract['listCommunityMembers']
+  communityAPI: CommunityApplicationContract
 }
 
 export interface CommunityApplication {
   requestCommunities: () => Promise<void>
-  createCommunity: (name: string) => Promise<Result<Community>>
+  createCommunity: (input: { name: string; trailIds: string[] }) => Promise<Result<Community>>
   joinCommunity: (inviteCode: string) => Promise<Result<Community>>
   leaveCommunity: (communityId: string) => Promise<Result<void>>
   setActiveCommunity: (communityId: string | undefined) => void
   getCommunityMembers: (communityId: string) => Promise<Result<CommunityMember[]>>
+  shareDiscovery: (discoveryId: string, communityId: string) => Promise<Result<SharedDiscovery>>
+  unshareDiscovery: (discoveryId: string, communityId: string) => Promise<Result<void>>
+  getSharedDiscoveries: (communityId: string) => Promise<Result<Discovery[]>>
 }
 
 export function createCommunityApplication(options: CommunityApplicationOptions): CommunityApplication {
-  const {
-    createCommunity: createCommunityAPI,
-    joinCommunity: joinCommunityAPI,
-    leaveCommunity: leaveCommunityAPI,
-    listCommunities: listCommunitiesAPI,
-    listCommunityMembers: listCommunityMembersAPI,
-  } = options
+  const { communityAPI } = options
 
   const requestCommunities = async () => {
     const { setCommunities, setStatus } = getCommunityActions()
@@ -40,7 +32,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
         throw new Error('No session found')
       }
 
-      const result = await listCommunitiesAPI(session)
+      const result = await communityAPI.listCommunities(session)
       if (result.success && result.data) {
         setCommunities(result.data)
         logger.log(`Communities loaded: ${result.data.length}`)
@@ -54,7 +46,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     }
   }
 
-  const createCommunity = async (name: string): Promise<Result<Community>> => {
+  const createCommunity = async (input: { name: string; trailIds: string[] }): Promise<Result<Community>> => {
     const { addCommunity } = getCommunityActions()
 
     try {
@@ -63,7 +55,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
         throw new Error('No session found')
       }
 
-      const result = await createCommunityAPI(session, name)
+      const result = await communityAPI.createCommunity(session, input)
       if (result.success && result.data) {
         addCommunity(result.data)
         logger.log(`Community created: ${result.data.name}`)
@@ -85,7 +77,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
         throw new Error('No session found')
       }
 
-      const result = await joinCommunityAPI(session, inviteCode)
+      const result = await communityAPI.joinCommunity(session, inviteCode)
       if (result.success && result.data) {
         addCommunity(result.data)
         logger.log(`Joined community: ${result.data.name}`)
@@ -107,7 +99,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
         throw new Error('No session found')
       }
 
-      const result = await leaveCommunityAPI(session, communityId)
+      const result = await communityAPI.leaveCommunity(session, communityId)
       if (result.success) {
         removeCommunity(communityId)
         logger.log(`Left community: ${communityId}`)
@@ -133,10 +125,60 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
         throw new Error('No session found')
       }
 
-      return await listCommunityMembersAPI(session, communityId)
+      return await communityAPI.listCommunityMembers(session, communityId)
     } catch (error: unknown) {
       logger.error('Error getting community members:', error)
       return { success: false, error: { code: 'GET_MEMBERS_ERROR', message: error instanceof Error ? error.message : 'Unknown error' } }
+    }
+  }
+
+  const shareDiscovery = async (discoveryId: string, communityId: string): Promise<Result<SharedDiscovery>> => {
+    try {
+      const session = getSession()
+      if (!session) {
+        throw new Error('No session found')
+      }
+
+      const result = await communityAPI.shareDiscovery(session, discoveryId, communityId)
+      if (result.success) {
+        logger.log(`Discovery ${discoveryId} shared to community ${communityId}`)
+      }
+      return result
+    } catch (error: unknown) {
+      logger.error('Error sharing discovery:', error)
+      return { success: false, error: { code: 'SHARE_ERROR', message: error instanceof Error ? error.message : 'Unknown error' } }
+    }
+  }
+
+  const unshareDiscovery = async (discoveryId: string, communityId: string): Promise<Result<void>> => {
+    try {
+      const session = getSession()
+      if (!session) {
+        throw new Error('No session found')
+      }
+
+      const result = await communityAPI.unshareDiscovery(session, discoveryId, communityId)
+      if (result.success) {
+        logger.log(`Discovery ${discoveryId} unshared from community ${communityId}`)
+      }
+      return result
+    } catch (error: unknown) {
+      logger.error('Error unsharing discovery:', error)
+      return { success: false, error: { code: 'UNSHARE_ERROR', message: error instanceof Error ? error.message : 'Unknown error' } }
+    }
+  }
+
+  const getSharedDiscoveries = async (communityId: string): Promise<Result<Discovery[]>> => {
+    try {
+      const session = getSession()
+      if (!session) {
+        throw new Error('No session found')
+      }
+
+      return await communityAPI.getSharedDiscoveries(session, communityId)
+    } catch (error: unknown) {
+      logger.error('Error getting shared discoveries:', error)
+      return { success: false, error: { code: 'GET_SHARED_ERROR', message: error instanceof Error ? error.message : 'Unknown error' } }
     }
   }
 
@@ -147,5 +189,8 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     leaveCommunity,
     setActiveCommunity,
     getCommunityMembers,
+    shareDiscovery,
+    unshareDiscovery,
+    getSharedDiscoveries,
   }
 }

@@ -2,7 +2,7 @@
  * It defines the structure for standardized API results and error handling.
  */
 
-import type { ApiErrorCode } from './errors.ts'
+import { ERROR_CODES, type ApiErrorCode } from './errors.ts'
 
 /**
  * Represents the result of an API operation.
@@ -58,11 +58,12 @@ export function createSuccessResult<T>(data: T): Result<T> {
  * Create an error result with code and optional details
  */
 export function createErrorResult<T = any>(code: ApiErrorCode, details?: Record<string, any>): Result<T> {
+  const errorCodes = ERROR_CODES[code]
   return {
     success: false,
     error: {
-      code,
-      message: code, // Can be enhanced with error message mapping
+      code: errorCodes.code,
+      message: errorCodes.message,
       details,
     },
   }

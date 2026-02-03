@@ -1,17 +1,21 @@
-import { AccountContext } from './accounts.ts'
-import { Result } from './results.ts'
+import { AccountContext } from './accounts.ts';
+import { Discovery } from './discoveries.ts';
+import { Result } from './results.ts';
 
 /**
  * Application contract for managing communities.
  * Communities allow users to share discoveries and form groups.
  */
 export interface CommunityApplicationContract {
-  createCommunity: (context: AccountContext, name: string) => Promise<Result<Community>>
+  createCommunity: (context: AccountContext, options: { name: string; trailIds: string[] }) => Promise<Result<Community>>
   joinCommunity: (context: AccountContext, inviteCode: string) => Promise<Result<Community>>
   leaveCommunity: (context: AccountContext, communityId: string) => Promise<Result<void>>
   getCommunity: (context: AccountContext, communityId: string) => Promise<Result<Community | undefined>>
   listCommunities: (context: AccountContext) => Promise<Result<Community[]>>
   listCommunityMembers: (context: AccountContext, communityId: string) => Promise<Result<CommunityMember[]>>
+  shareDiscovery: (context: AccountContext, discoveryId: string, communityId: string) => Promise<Result<SharedDiscovery>>
+  unshareDiscovery: (context: AccountContext, discoveryId: string, communityId: string) => Promise<Result<void>>
+  getSharedDiscoveries: (context: AccountContext, communityId: string) => Promise<Result<Discovery[]>>
 }
 
 /**
@@ -21,6 +25,7 @@ export interface CommunityApplicationContract {
 export interface Community {
   id: string
   name: string
+  trailIds: string[] // Trails that belong to this community (initially max 1)
   createdBy: string
   inviteCode: string
   createdAt: Date
@@ -35,6 +40,18 @@ export interface CommunityMember {
   communityId: string
   accountId: string
   joinedAt: Date
+}
+
+/**
+ * Represents a discovery shared within a community.
+ * Separates private discoveries from community-shared ones.
+ */
+export interface SharedDiscovery {
+  id: string // Composite key: communityId-discoveryId
+  discoveryId: string
+  communityId: string
+  sharedBy: string // accountId who shared it
+  sharedAt: Date
 }
 
 /**

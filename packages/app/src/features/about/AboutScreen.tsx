@@ -19,9 +19,9 @@ export default function AboutScreen() {
           <PulseAnimation>
             <FertheLogo style={styles.logo} fill={theme.colors.onBackground} />
           </PulseAnimation>
-          <Text>{t.about.storyIntro}</Text>
-          <Text>{t.about.aboutText}</Text>
-          <Text>{t.about.followYourTrail}</Text>
+          <Text variant='body'>{t.about.storyIntro}</Text>
+          <Text variant='body'>{t.about.aboutText}</Text>
+          <Text variant='body'>{t.about.followYourTrail}</Text>
           <Button label={'ferthe.eu'} variant='outlined' onPress={handleOpenLink} />
         </View>
       </Card>
@@ -32,9 +32,11 @@ export default function AboutScreen() {
 function createStyles(theme: Theme) {
   return StyleSheet.create({
     container: {
+      paddingHorizontal: 8,
+      flex: 1,
+      gap: 10,
       justifyContent: 'center',
       alignItems: 'center',
-      flex: 1,
       minHeight: '100%',
     },
     logo: {

@@ -1,4 +1,4 @@
-import DevScreen from '@app/dev/components/DevScreen'
+import AboutScreen from '@app/features/about/AboutScreen'
 import CommunitiesScreen from '@app/features/community/components/CommunitiesScreen'
 import DiscoveryScreen from '@app/features/discovery/components/DiscoveryScreen'
 import MapScreen from '@app/features/map/components/MapScreen'
@@ -77,7 +77,7 @@ export function Navigation() {
           name='Map'
           component={MapScreen}
           options={{
-            tabBarIcon: ({ color, size }) => <TreeIcon color={color} />,
+            tabBarIcon: ({ color, size }) => <TreeIcon color={color} size={size} />,
             headerShown: false,
           }}
         />
@@ -90,16 +90,14 @@ export function Navigation() {
             title: t.navigation.socials,
           }}
         />
-        {__DEV__ && (
-          <Tab.Screen
-            name='Dev'
-            component={DevScreen}
-            options={{
-              tabBarIcon: ({ color, size }) => <Icon name='device-hub' color={color} />,
-              headerShown: false,
-            }}
-          />
-        )}
+        <Tab.Screen
+          name='About'
+          component={AboutScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => <Icon name='device-hub' color={color} size={size} />,
+            headerShown: false,
+          }}
+        />
       </Tab.Navigator>
     </NavigationContainer>
   )
