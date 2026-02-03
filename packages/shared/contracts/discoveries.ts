@@ -1,6 +1,7 @@
 import { GeoLocation } from '@shared/geo/index.ts'
 import { AccountContext } from './accounts.ts'
 import { DiscoveryProfile, DiscoveryProfileUpdateData } from './discoveryProfile.ts'
+import { ImageReference } from './images.ts'
 import { Result } from './results.ts'
 import { Spot } from './spots.ts'
 import { Trail } from './trails.ts'
@@ -100,7 +101,7 @@ export interface DiscoveryContent {
   id: string
   discoveryId: string
   accountId: string
-  imageUrl?: string
+  image?: ImageReference
   comment?: string
   createdAt: Date
   updatedAt: Date

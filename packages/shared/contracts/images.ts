@@ -14,6 +14,8 @@ export type ImageType = 'discovery' | 'spot' | 'trail' | 'account-avatar'
 export interface ImageReference {
   id: string // The blob hash (CUID2)
   url: string // SAS-signed URL for read access
+  previewUrl?: string // Optional blurred/compressed preview URL
+  label?: string // Optional label for text fallback (first 2 chars displayed)
 }
 
 export interface ImageUploadResult {

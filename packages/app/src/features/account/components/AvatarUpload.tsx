@@ -32,7 +32,7 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({ onSubmit }) => {
       const uploadResult = await accountApplication.uploadAvatar(base64DataUrl)
 
       if (uploadResult.success && uploadResult.data) {
-        logger.log('Avatar uploaded successfully:', uploadResult.data.avatarUrl)
+        logger.log('Avatar uploaded successfully:', uploadResult.data.avatar?.url)
         onSubmit()
       } else {
         logger.error('Failed to upload avatar:', uploadResult.error)
@@ -45,7 +45,7 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({ onSubmit }) => {
   }
 
   const isLoading = isPickingImage || isConverting || isUploading
-  const currentAvatar = selectedImageUri || account?.avatarUrl
+  const currentAvatar = selectedImageUri || account?.avatar?.url
 
   return (
     <Card style={styles.card}>

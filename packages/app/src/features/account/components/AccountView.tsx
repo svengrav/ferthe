@@ -32,7 +32,8 @@ export const AccountView: React.FC = () => {
       {/* Profile Avatar */}
       <View style={styles.avatarContainer}>
         <Avatar
-          avatarUrl={account?.avatarUrl}
+          avatar={account?.avatar}
+          label={account?.displayName}
           size={100}
           showEditIcon={true}
           onPress={() => {

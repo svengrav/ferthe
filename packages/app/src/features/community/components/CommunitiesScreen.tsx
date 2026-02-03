@@ -136,7 +136,7 @@ function CommunitiesScreen() {
   return (
     <Page action={<IconButton name="person" onPress={() => setOverlay('accountView', <AccountView />)} />} scrollable>
       <View style={styles.avatar}>
-        <Avatar size={80} avatarUrl={account?.avatarUrl || ''} />
+        <Avatar size={80} avatar={account?.avatar} label={account?.displayName} />
         <Text variant='subtitle' style={styles.avatarName}>
           {account?.displayName}
         </Text>

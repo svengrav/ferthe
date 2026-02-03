@@ -277,12 +277,15 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
 
       const accountData = accountResult.data
 
-      // Generate fresh avatar URL from internal blob path
-      let avatarUrl: string | undefined
+      // Generate fresh avatar ImageReference from internal blob path
+      let avatar: { id: string; url: string } | undefined
       if (accountData.avatarBlobPath && imageApplication) {
         const urlResult = await imageApplication.refreshImageUrl(context, accountData.avatarBlobPath)
         if (urlResult.success && urlResult.data) {
-          avatarUrl = urlResult.data
+          avatar = {
+            id: accountData.avatarBlobPath,
+            url: urlResult.data,
+          }
         }
       }
 
@@ -292,7 +295,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         phoneHash: accountData.phoneHash,
         displayName: accountData.displayName,
         description: accountData.description,
-        avatarUrl,
+        avatar,
         createdAt: accountData.createdAt,
         lastLoginAt: accountData.lastLoginAt,
         updatedAt: accountData.updatedAt,
@@ -506,20 +509,20 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
 
       await accountStore.update(context.accountId, updatedAccount)
 
-      // Generate fresh avatar URL for response
-      let avatarUrl: string | undefined
+      // Generate fresh avatar ImageReference for response
       const urlResult = await imageApplication.refreshImageUrl(context, blobPath)
-      if (urlResult.success && urlResult.data) {
-        avatarUrl = urlResult.data
-      }
+      const avatar = urlResult.success && urlResult.data ? {
+        id: blobPath,
+        url: urlResult.data,
+      } : undefined
 
-      // Return public Account with fresh avatar URL
+      // Return public Account with fresh avatar ImageReference
       const publicAccount: Account = {
         id: updatedAccount.id,
         phoneHash: updatedAccount.phoneHash,
         displayName: updatedAccount.displayName,
         description: updatedAccount.description,
-        avatarUrl,
+        avatar,
         createdAt: updatedAccount.createdAt,
         lastLoginAt: updatedAccount.lastLoginAt,
         updatedAt: updatedAccount.updatedAt,

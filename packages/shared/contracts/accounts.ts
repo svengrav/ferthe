@@ -1,4 +1,5 @@
 import { FirebaseConfig } from './config.ts'
+import { ImageReference } from './images.ts'
 import { Result } from './results.ts'
 
 export interface AccountApplicationContract {
@@ -40,7 +41,7 @@ export interface Account {
   phoneHash?: string // Optional for local accounts
   displayName?: string // Optional display name set by user
   description?: string // Optional profile description
-  avatarUrl?: string // Avatar URL (generated on-demand)
+  avatar?: ImageReference // Avatar image (generated on-demand)
   createdAt: Date
   lastLoginAt?: Date
   updatedAt?: Date

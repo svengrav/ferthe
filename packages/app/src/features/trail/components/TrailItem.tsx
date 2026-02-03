@@ -1,4 +1,4 @@
-import { Card, Image, Text } from '@app/shared/components'
+import { Card, SmartImage, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
@@ -42,21 +42,12 @@ export function TrailAvatar({ trail }: { trail: Trail }) {
 
   if (!styles) return null
 
-  const avatarText = trail.name ? trail.name.charAt(0).toUpperCase() : ''
-
-  if (!trail.image?.url) {
-    return (
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{avatarText}</Text>
-      </View>
-    )
-  }
-
   return (
-    <Image
+    <SmartImage
       width={AVATAR_SIZE}
       height={AVATAR_SIZE}
-      source={{ uri: trail.image?.url || '' }}
+      source={trail.image}
+      label={trail.name}
       style={styles.avatar}
     />
   )

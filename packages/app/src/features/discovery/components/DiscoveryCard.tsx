@@ -1,4 +1,4 @@
-import { Image, Text } from '@app/shared/components'
+import { SmartImage, Text } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -145,8 +145,10 @@ function DiscoveryCard({ card, onTap, options }: DiscoveryCardProps) {
           colors={GRADIENT_COLORS}
         />
         <View style={{ padding: showBorder ? 6 : 0, flex: 1 }}>
-          <Image
-            source={{ uri: image.url || '' }}
+          <SmartImage
+            source={image}
+            width={CARD_WIDTH}
+            height={IMAGE_HEIGHT}
             style={[styles.fixedImage, imageDynamicStyles]}
             resizeMode='cover'
           />

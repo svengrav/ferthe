@@ -31,7 +31,7 @@ function DiscoveryContentEditor({
   const { convertToBase64, isConverting } = useImageToBase64()
 
   const [comment, setComment] = useState(existingContent?.comment ?? '')
-  const [hasExistingImage, setHasExistingImage] = useState(!!existingContent?.imageUrl)
+  const [hasExistingImage, setHasExistingImage] = useState(!!existingContent?.image)
 
   const handleSubmit = async () => {
     try {
@@ -40,7 +40,7 @@ function DiscoveryContentEditor({
       if (selectedImageUri) {
         imageDataToSubmit = await convertToBase64(selectedImageUri)
       } else if (hasExistingImage) {
-        imageDataToSubmit = existingContent?.imageUrl
+        imageDataToSubmit = existingContent?.image?.url
       }
 
       onSubmit({
@@ -58,7 +58,7 @@ function DiscoveryContentEditor({
     setHasExistingImage(false)
   }
 
-  const displayImageUrl = selectedImageUri || (hasExistingImage ? existingContent?.imageUrl : undefined)
+  const displayImageUrl = selectedImageUri || (hasExistingImage ? existingContent?.image?.url : undefined)
   const isEditing = !!existingContent
   const commentChanged = comment !== (existingContent?.comment ?? '')
   const imageChanged = selectedImageUri || !hasExistingImage

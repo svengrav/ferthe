@@ -418,11 +418,18 @@ const getDiscoveryStats = (
  */
 const createDiscoveryContent = (accountId: string, discoveryId: string, content: { imageUrl?: string; comment?: string }): DiscoveryContent => {
   const now = new Date()
+
+  // Convert imageUrl to ImageReference if provided
+  const image = content.imageUrl ? {
+    id: '', // Will be set by upload result
+    url: content.imageUrl,
+  } : undefined
+
   return {
     id: createDeterministicId('discovery-content', discoveryId),
     discoveryId,
     accountId,
-    imageUrl: content.imageUrl,
+    image,
     comment: content.comment,
     createdAt: now,
     updatedAt: now,
@@ -433,9 +440,15 @@ const createDiscoveryContent = (accountId: string, discoveryId: string, content:
  * Updates an existing discovery content entry
  */
 const updateDiscoveryContent = (existing: DiscoveryContent, content: { imageUrl?: string; comment?: string }): DiscoveryContent => {
+  // Convert imageUrl to ImageReference if provided, otherwise keep existing
+  const image = content.imageUrl ? {
+    id: '', // Will be set by upload result
+    url: content.imageUrl,
+  } : existing.image
+
   return {
     ...existing,
-    imageUrl: content.imageUrl ?? existing.imageUrl,
+    image,
     comment: content.comment ?? existing.comment,
     updatedAt: new Date(),
   }

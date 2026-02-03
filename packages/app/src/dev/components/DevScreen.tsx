@@ -16,8 +16,9 @@ export default function DevScreen() {
           spotId: 'test-spot-id',
           description: 'This is a test description',
           image: {
+            id: 'test-id',
             url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
-            blurredUrl: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+            previewUrl: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
           },
           title: 'Test Card',
           discoveredAt: new Date(),

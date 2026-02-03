@@ -502,8 +502,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       }
 
       // Delete associated image if exists
-      if (existingResult.data.imageUrl && imageApplication) {
-        const deleteImageResult = await imageApplication.deleteImage(context, existingResult.data.imageUrl)
+      if (existingResult.data.image?.url && imageApplication) {
+        const deleteImageResult = await imageApplication.deleteImage(context, existingResult.data.image.url)
         if (!deleteImageResult.success) {
           // Log error but continue with content deletion
           console.warn('Failed to delete associated image:', deleteImageResult.error)

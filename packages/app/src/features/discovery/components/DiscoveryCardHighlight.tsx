@@ -1,11 +1,11 @@
-import { IconButton } from '@app/shared/components'
+import { IconButton, SmartImage, Text } from '@app/shared/components'
 import { Flippable } from '@app/shared/components/animation/Flippable'
 import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useState } from 'react'
-import { Pressable, Text, useWindowDimensions, View } from 'react-native'
+import { Pressable, useWindowDimensions, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import Animated, {
   useSharedValue,
@@ -166,8 +166,10 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
       <View style={[styles.imageContainer, imageContainerStyles]}>
         {/* Main clear image with title */}
         <View>
-          <Animated.Image
-            source={{ uri: card.image.url || '' }}
+          <SmartImage
+            source={card.image}
+            width={IMAGE_WIDTH}
+            height={IMAGE_HEIGHT}
             style={[styles.image, imageStyles]}
             resizeMode='cover'
           />
@@ -236,7 +238,7 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
       <View style={[styles.cardContainer, cardContainerStyles]}>
         <DiscoveryRevealOverlay
           mode={mode}
-          blurredImageUrl={card.image.blurredUrl || ''}
+          blurredImageUrl={card.image.previewUrl || card.image.url}
           onTriggerReveal={triggerReveal}
         >
           <Flippable

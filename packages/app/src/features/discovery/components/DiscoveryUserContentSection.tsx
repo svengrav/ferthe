@@ -91,9 +91,9 @@ function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
   )
   const renderContent = () => (
     <View style={styles.userContent}>
-      {content.imageUrl && (
+      {content.image?.url && (
         <Animated.Image
-          source={{ uri: content.imageUrl }}
+          source={{ uri: content.image.url }}
           style={styles.userImage}
           resizeMode='cover'
         />

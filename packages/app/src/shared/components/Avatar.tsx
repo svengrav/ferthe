@@ -1,10 +1,14 @@
 import { Theme } from '@app/shared/theme'
 import useThemeStore from '@app/shared/theme/themeStore'
-import { Image, Pressable, StyleSheet, View } from 'react-native'
+import { ImageReference } from '@shared/contracts'
+import { Pressable, StyleSheet, View } from 'react-native'
 import Icon from './icon/Icon'
+import { SmartImage } from './SmartImage'
 
 interface AvatarProps {
   avatarUrl?: string
+  avatar?: ImageReference
+  label?: string
   onPress?: () => void
   size?: number
   showEditIcon?: boolean
@@ -12,23 +16,31 @@ interface AvatarProps {
 
 /**
  * Reusable avatar component with optional edit functionality
- * Displays user avatar or placeholder icon
+ * Displays user avatar with label fallback or placeholder icon
  */
 function Avatar(props: AvatarProps) {
-  const { avatarUrl, onPress, size = 100, showEditIcon = false } = props
+  const { avatarUrl, avatar, label, onPress, size = 100, showEditIcon = false } = props
   const theme = useThemeStore()
   const styles = createStyles(theme, size)
+
+  // Determine source (priority: avatar > avatarUrl)
+  const source = avatar || (avatarUrl ? { uri: avatarUrl } : undefined)
 
   return (
     <View style={styles.container}>
       <Pressable onPress={onPress} disabled={!onPress} style={styles.avatarContainer}>
-        {avatarUrl ? (
-          <Image source={{ uri: avatarUrl }} style={styles.avatar} />
-        ) : (
-          <View style={styles.placeholder}>
-            <Icon name="person" size={size * 0.5} color="#999" />
-          </View>
-        )}
+        <SmartImage
+          source={source}
+          label={label}
+          width={size}
+          height={size}
+          style={styles.avatar}
+          placeholder={
+            <View style={styles.placeholder}>
+              <Icon name="person" size={size * 0.5} color="#999" />
+            </View>
+          }
+        />
       </Pressable>
 
       {showEditIcon && onPress && (
