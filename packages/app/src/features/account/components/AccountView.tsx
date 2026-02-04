@@ -90,7 +90,7 @@ export const AccountView: React.FC = () => {
       {accountType === 'local_unverified' && (
         <View style={{ flex: 1 }}>
           <Button
-            style={{ alignSelf: 'center', marginTop: 20 }}
+            align='center'
             label={'Upgrade now'}
             variant="primary"
             onPress={() => showAccountRegistration()} />

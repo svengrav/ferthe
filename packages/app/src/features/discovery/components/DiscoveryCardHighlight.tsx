@@ -1,4 +1,4 @@
-import { Button, SmartImage, Text } from '@app/shared/components'
+import { Button, Image, Text } from '@app/shared/components'
 import { Flippable } from '@app/shared/components/animation/Flippable'
 import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
@@ -170,7 +170,7 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
       <View style={[styles.imageContainer, imageContainerStyles]}>
         {/* Main clear image with title */}
         <View>
-          <SmartImage
+          <Image
             source={card.image}
             width={IMAGE_WIDTH}
             height={IMAGE_HEIGHT}

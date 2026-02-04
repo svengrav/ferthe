@@ -38,9 +38,9 @@ function TrailDetails({ trail }: TrailDetailsProps) {
     <View>
       <Text variant="heading">{trailName}</Text>
       <Image
-        source={{ uri: trail.image?.url || 'default_image_url' }}
+        source={trail.image}
+        height={150}
         resizeMode='cover'
-        style={{ width: 'auto', height: 150 }}
       />
       <Text variant="section">Description</Text>
       <Text variant="body">{trailDescription}</Text>

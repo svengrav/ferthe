@@ -2,8 +2,8 @@ import { Theme } from '@app/shared/theme'
 import useThemeStore from '@app/shared/theme/themeStore'
 import { ImageReference } from '@shared/contracts'
 import { Pressable, StyleSheet, View } from 'react-native'
-import Icon from './icon/Icon'
-import { SmartImage } from './SmartImage'
+import Icon from '../icon/Icon.tsx'
+import { Image } from '../image/Image'
 
 interface AvatarProps {
   avatarUrl?: string
@@ -29,7 +29,7 @@ function Avatar(props: AvatarProps) {
   return (
     <View style={styles.container}>
       <Pressable onPress={onPress} disabled={!onPress} style={styles.avatarContainer}>
-        <SmartImage
+        <Image
           source={source}
           label={label}
           width={size}
@@ -71,7 +71,6 @@ const createStyles = (theme: Theme, size: number) => {
     placeholder: {
       width: '100%',
       height: '100%',
-      backgroundColor: theme.colors.surface,
       justifyContent: 'center',
       alignItems: 'center',
     },

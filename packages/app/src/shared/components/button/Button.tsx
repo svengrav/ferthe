@@ -1,7 +1,7 @@
 import { Theme, useTheme } from '@app/shared/theme'
 import { useRef, useState } from 'react'
 import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native'
-import DropdownMenu from '../form/DropdownMenu'
+import Dropdown from '../dropdown/Dropdown.tsx'
 import { Icon, IconSymbolName } from '../icon/Icon'
 import { AlignableProps, ComponentSize, ComponentVariant, DisableableProps, Option } from '../types'
 
@@ -78,15 +78,17 @@ function Button(props: ButtonProps) {
     disabled && styles.textDisabled,
   ]
 
-  const iconColor = isIconOnly
-    ? variant === 'primary'
-      ? theme.colors.background
-      : variant === 'secondary'
-        ? theme.colors.primary
-        : theme.colors.onBackground
-    : variant === 'primary'
-      ? theme.colors.onPrimary
-      : theme.colors.primary
+  const iconColor =
+    disabled ? theme.colors.onSurface + '50' :
+      isIconOnly
+        ? variant === 'primary'
+          ? theme.colors.background
+          : variant === 'secondary'
+            ? theme.colors.primary
+            : theme.colors.onBackground
+        : variant === 'primary'
+          ? theme.colors.onPrimary
+          : theme.colors.primary
 
   const iconSize = variant === 'outlined' ? sizeConfig.iconSize + 4 : sizeConfig.iconSize
 
@@ -101,7 +103,7 @@ function Button(props: ButtonProps) {
         {label && <Text style={textStyle}>{label}</Text>}
       </Pressable>
       {options && (
-        <DropdownMenu
+        <Dropdown
           anchorRef={ref}
           isVisible={isMenuVisible}
           onClose={() => setMenuVisible(false)}
@@ -124,7 +126,6 @@ const createStyles = (theme: Theme) =>
       gap: 8,
     },
     disabled: {
-      backgroundColor: theme.deriveColor(theme.colors.primary, 0.6),
     },
 
     // Variant styles

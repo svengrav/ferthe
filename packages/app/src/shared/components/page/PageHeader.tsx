@@ -26,7 +26,7 @@ const PageHeader = ({ label, action, options }: PageHeaderProps) => {
         )}
       </View>
       <View style={styles.rightContainer}>{action && action}
-        {showOptions && <Button variant='outlined' options={options} icon='more-vert' style={styles.iconButton} />}
+        {showOptions && <Button variant='outlined' options={options} icon='more-vert' />}
       </View>
     </View>
   )
@@ -66,9 +66,6 @@ const createStyles = (theme: Theme) =>
       width: 60,
       flexDirection: 'row',
       justifyContent: 'flex-end',
-    },
-    iconButton: {
-      marginRight: 8,
     },
   })
 

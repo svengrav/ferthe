@@ -24,10 +24,10 @@ function MapSurface() {
     }]}>
       {image && (
         <Image
+          source={{ uri: image }}
           width={layout.width}
           height={layout.height}
           style={styles?.image}
-          source={{ uri: image }}
         />
       )}
     </View>

@@ -136,12 +136,13 @@ function OverlayContainer({
             {/* Header with title and close button */}
             {(title || closable) && (
               <View style={styles.compactHeader}>
-                <Text variant='title'>{title}</Text>
+                <Text variant='title' style={{ flex: 1, alignSelf: 'center' }}>{title}</Text>
                 {closable && (
                   <Button
                     icon="close"
                     variant='secondary'
                     onPress={onClose}
+                    dense
                   />
                 )}
               </View>
@@ -280,14 +281,15 @@ const useStyles = createThemedStyles(theme => ({
     alignContent: 'center',
     marginHorizontal: 20,
     borderRadius: BORDER_RADIUS,
-    padding: 8,
+    padding: 12,
     backgroundColor: theme.colors.surface,
   },
   compactHeader: {
     flexDirection: 'row',
     alignContent: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    paddingVertical: 4,
+    marginBottom: theme.tokens.spacing.sm,
   },
   compactContent: {
     backgroundColor: theme.colors.surface,

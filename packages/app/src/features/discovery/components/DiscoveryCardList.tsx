@@ -80,7 +80,7 @@ function DiscoveryImageCard({ width, height, card, onTap }: { width: number; hei
   const styles = createStyles(theme)
   return (<>
 
-    <Pressable onPress={() => onTap && onTap(card) }>
+    <Pressable onPress={() => onTap && onTap(card)}>
       <View style={[styles.placeholder, { width, height }]}>
         <Text style={styles.label}>{card.title}</Text>
         <LinearGradient
@@ -95,12 +95,11 @@ function DiscoveryImageCard({ width, height, card, onTap }: { width: number; hei
           colors={['transparent', 'rgba(0, 0, 0, 0.322)']}
         />
         <Image
-          source={{ uri: card.image.url }}
+          source={card.image}
+          width={width}
+          height={height}
           style={{
-            width: width,
-            height: height,
             borderRadius: 10,
-            backgroundColor: '#000'
           }}
           resizeMode="cover"
         />

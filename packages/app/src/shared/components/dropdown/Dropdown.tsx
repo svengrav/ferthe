@@ -67,7 +67,7 @@ interface DropdownMenuProps {
  * Dropdown menu component that displays a list of options positioned relative to an anchor element.
  * Features automatic positioning to stay within screen bounds and smooth fade animation.
  */
-function DropdownMenu({ isVisible, onClose, options, anchorRef }: DropdownMenuProps) {
+function Dropdown({ isVisible, onClose, options, anchorRef }: DropdownMenuProps) {
   const { styles } = useApp(useStyles)
   const position = useMenuPosition(anchorRef, isVisible, options.length)
 
@@ -143,4 +143,4 @@ const useStyles = createThemedStyles(theme => ({
   },
 }))
 
-export default DropdownMenu
+export default Dropdown

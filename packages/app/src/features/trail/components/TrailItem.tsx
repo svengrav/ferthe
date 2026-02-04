@@ -1,4 +1,4 @@
-import { Card, SmartImage, Text } from '@app/shared/components'
+import { Card, Image, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
@@ -41,7 +41,7 @@ export function TrailAvatar({ trail }: { trail: Trail }) {
   if (!styles) return null
 
   return (
-    <SmartImage
+    <Image
       width={AVATAR_SIZE}
       height={AVATAR_SIZE}
       source={trail.image}

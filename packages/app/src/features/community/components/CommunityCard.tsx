@@ -91,7 +91,6 @@ const useStyles = createThemedStyles(theme => ({
     marginBottom: 4,
   },
   meta: {
-    marginBottom: 12,
   },
   actions: {
     marginTop: 8,

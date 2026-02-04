@@ -91,10 +91,11 @@ export const createTypography = (theme: ThemeBase) => {
     },
     title: {
       fontSize: 15,
-      lineHeight: 15,
+      lineHeight: 18,
       fontWeight: '600' as const,
       fontFamily: 'Inter_600SemiBold',
       color: theme.colors.onBackground,
+      marginBottom: 4,
     },
     section: {
       fontSize: 16,

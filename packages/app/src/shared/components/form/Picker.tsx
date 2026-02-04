@@ -1,8 +1,8 @@
-import React, { useState, useRef } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
-import DropdownMenu from './DropdownMenu'
+import { useRef, useState } from 'react'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import Dropdown from '../dropdown/Dropdown.tsx'
 
 interface CustomPickerProps {
   options: { label: string; value: string }[] // Options for the picker
@@ -30,7 +30,7 @@ const Picker = ({ options, selected: selected, onValueChange }: CustomPickerProp
           {options.find(option => option.value === selected)?.label || t.common.select}
         </Text>
       </TouchableOpacity>
-      <DropdownMenu
+      <Dropdown
         isVisible={isMenuVisible}
         onClose={() => setMenuVisible(false)}
         options={options.map(option => ({

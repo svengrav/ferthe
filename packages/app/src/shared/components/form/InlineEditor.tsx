@@ -57,7 +57,7 @@ export const InlineEditor: React.FC<InlineEditorProps> = ({
   if (!styles) return null
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} id={'inline-editor'}>
       <TextInput
         value={value}
         onChangeText={setValue}
@@ -71,7 +71,8 @@ export const InlineEditor: React.FC<InlineEditorProps> = ({
         icon="check"
         onPress={handleSubmit}
         disabled={!canSubmit}
-        variant="outlined"
+        size='md'
+        variant="secondary"
       />
     </View>
   )

@@ -41,7 +41,7 @@ const InfoField: React.FC<InfoFieldProps> = ({
         {value && <Text variant='body'>{value}</Text>}
       </View>
       {action}
-      {onEdit && <Button icon='edit' variant='outlined' onPress={onEdit} />}
+      {onEdit && <Button icon='edit' variant='secondary' size='sm' onPress={onEdit} />}
     </View>
   )
 }
