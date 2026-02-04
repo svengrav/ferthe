@@ -1,61 +1,51 @@
 import { Image, Text } from '@app/shared/components'
-import { createThemedStyles } from '@app/shared/theme'
+import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
-import { View } from 'react-native'
-import { useTrailPreviewSpots } from '../stores/trailStore'
+import { StyleSheet, View } from 'react-native'
 
-// Spacing constants
-const TITLE_MARGIN_BOTTOM = 8
-const DESCRIPTION_MARGIN_BOTTOM = 16
-const SECTION_TITLE_MARGIN_TOP = 16
-const SECTION_TITLE_MARGIN_BOTTOM = 4
+const IMAGE_HEIGHT = 150
 
 interface TrailDetailsProps {
   trail: Trail
 }
 
 /**
- * Trail details component that displays comprehensive information about a trail
+ * Displays comprehensive information about a trail including name, image, and description.
  */
 function TrailDetails({ trail }: TrailDetailsProps) {
-  const { styles, locales, theme, context } = useApp(useStyles)
-  const previews = useTrailPreviewSpots(trail.id)
+  const { styles } = useTheme(createStyles)
+  const { context } = useApp()
 
-  const trailApplication = context?.trailApplication
+  // Request trail spot previews on mount or trail change
   useEffect(() => {
-    trailApplication.requestTrailSpotPreviews(trail.id)
-  }, [trail.id])
-
-  if (!styles) return null
-
-  // Simple data formatting
-  const trailName = trail.name || 'Unnamed Trail'
-  const trailDescription = trail.description || locales.trails.noDescription
+    context?.trailApplication.requestTrailSpotPreviews(trail.id)
+  }, [trail.id, context])
 
   return (
-    <View>
-      <Text variant="heading">{trailName}</Text>
+    <View style={styles.container}>
+      <Text variant="heading">{trail.name}</Text>
       <Image
+        style={styles.image}
         source={trail.image}
-        height={150}
-        resizeMode='cover'
+        height={IMAGE_HEIGHT}
+        resizeMode="cover"
       />
       <Text variant="section">Description</Text>
-      <Text variant="body">{trailDescription}</Text>
-
-      {/* <SpotCardList cards={previews.map(p => ({
-        image: {
-          url: p.image?.previewUrl || 'default_spot_image_url',
-        }
-      }))} /> */}
+      <Text variant="body">{trail.description}</Text>
     </View>
   )
 }
 
-const useStyles = createThemedStyles(theme => ({
-
-}))
+const createStyles = (theme: Theme) => StyleSheet.create({
+  container: {
+    flex: 1,
+    gap: theme.tokens.spacing.sm,
+  },
+  image: {
+    borderRadius: theme.tokens.borderRadius.md,
+  },
+})
 
 export default TrailDetails

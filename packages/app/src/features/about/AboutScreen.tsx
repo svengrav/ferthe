@@ -1,4 +1,4 @@
-import { Button, Card, FertheLogo, Page, PulseAnimation, Text } from '@app/shared/components'
+import { Button, FertheLogo, Page, PulseAnimation, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { Linking, StyleSheet, View } from 'react-native'
@@ -14,17 +14,16 @@ export default function AboutScreen() {
 
   return (
     <Page scrollable>
-      <Card style={{ flexGrow: 1 }}>
-        <View style={styles.container}>
-          <PulseAnimation>
-            <FertheLogo style={styles.logo} fill={theme.colors.onBackground} />
-          </PulseAnimation>
-          <Text variant='body'>{t.about.storyIntro}</Text>
-          <Text variant='body'>{t.about.aboutText}</Text>
-          <Text variant='body'>{t.about.followYourTrail}</Text>
-          <Button label={'ferthe.eu'} variant='outlined' onPress={handleOpenLink} />
-        </View>
-      </Card>
+      <View style={styles.container}>
+        <Text variant='heading'>Hi!</Text>
+        <PulseAnimation>
+          <FertheLogo style={styles.logo} fill={theme.colors.primary} />
+        </PulseAnimation>
+        <Text variant='title'>{t.about.storyIntro}</Text>
+        <Text variant='body'>{t.about.aboutText}</Text>
+        <Text variant='body'>{t.about.followYourTrail}</Text>
+        <Button label={'ferthe.eu'} variant='primary' align='center' onPress={handleOpenLink} />
+      </View>
     </Page>
   )
 }
@@ -32,17 +31,16 @@ export default function AboutScreen() {
 function createStyles(theme: Theme) {
   return StyleSheet.create({
     container: {
-      paddingHorizontal: 8,
+      marginTop: 24,
+      paddingHorizontal: 12,
       flex: 1,
       gap: 10,
-      justifyContent: 'center',
       alignItems: 'center',
-      minHeight: '100%',
     },
     logo: {
       width: 120,
       height: 120,
-      marginBottom: 20,
+      marginBottom: 60
     },
   })
 }

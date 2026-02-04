@@ -80,7 +80,6 @@ function TrailScreen() {
 
   const handleOpenTrailOverview = (trail: Trail) => {
     setOverlay('trailDetails_' + trail.id, <TrailDetails trail={trail} />, {
-      title: 'Trail',
       variant: 'fullscreen'
     })
   }
