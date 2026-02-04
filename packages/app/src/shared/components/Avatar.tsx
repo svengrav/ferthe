@@ -45,7 +45,7 @@ function Avatar(props: AvatarProps) {
 
       {showEditIcon && onPress && (
         <View style={styles.editBadge}>
-          <Icon name="edit" size={16} color="#fff" />
+          <Icon name="edit" size={16} />
         </View>
       )}
     </View>
@@ -63,8 +63,6 @@ const createStyles = (theme: Theme, size: number) => {
     avatarContainer: {
       ...avatarSize,
       overflow: 'hidden',
-      borderWidth: 2,
-      borderColor: theme.colors.primary,
     },
     avatar: {
       width: '100%',
@@ -87,8 +85,7 @@ const createStyles = (theme: Theme, size: number) => {
       height: 24,
       justifyContent: 'center',
       alignItems: 'center',
-      borderWidth: 2,
-      borderColor: theme.colors.background,
+
     },
   })
 }

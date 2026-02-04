@@ -65,8 +65,8 @@ When developing React Native components, please adhere to the following guidelin
 - Place styles outside the component.
 - Use function Component over arrow function for components (not hooks).
 - Use arrow functions for hooks and logic
-- Use `useThemedStyles` hook to get themed styles.
-- Use `useApp` hook to get app context, theme, or locales (only when needed).
+- Use `useTheme` hook to get themed styles.
+- Use `useApp` hook to get app context,locales (only when needed).
 - Only use inline styles for dynamic styles that depend on props, state or complex logic.
 - For inline styles try to use const functions.
 - If views are deeply nested or complex, consider extracting them into separate const functions.
@@ -105,7 +105,7 @@ function Component(props: ComponentProps) {
   // Use useTheme for themed styles
   const { styles } = useTheme(createStyles)
   
-  // Use useApp for app context, theme, or locales (only when needed)
+  // Use useApp for app context, or locales (only when needed)
   const { locales } = useApp()
 
   const deeplyNestedView = () => {

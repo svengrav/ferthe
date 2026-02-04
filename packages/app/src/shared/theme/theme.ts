@@ -54,7 +54,7 @@ export const PRIMITIVES = {
     xs: 4,
     sm: 8,
     md: 16,
-    lg: 24,
+    lg: 20,
     xl: 32,
   },
   borderRadius: {
@@ -69,10 +69,10 @@ export const PRIMITIVES = {
   },
   fontSize: {
     sm: 12,
-    md: 14,
+    md: 16,
     lg: 18,
   },
-}
+} as const
 
 /**
  * Creates complete typography styles with theme-dependent values (colors, fonts).
@@ -91,7 +91,7 @@ export const createTypography = (theme: ThemeBase) => {
     },
     title: {
       fontSize: 15,
-      lineHeight: 30,
+      lineHeight: 15,
       fontWeight: '600' as const,
       fontFamily: 'Inter_600SemiBold',
       color: theme.colors.onBackground,

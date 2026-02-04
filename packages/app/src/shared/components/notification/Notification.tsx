@@ -1,4 +1,4 @@
-import { IconButton, Text } from '@app/shared/components/'
+import { Button, Text } from '@app/shared/components/'
 import { Theme } from '@app/shared/theme'
 import { useTheme } from '@app/shared/theme/themeStore'
 import { Modal, StyleSheet, View } from 'react-native'
@@ -49,7 +49,7 @@ function Notification() {
         <View style={styles.modalView}>
           <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <Text variant='title'>{notification.title}</Text>
-            <IconButton name='close' variant='outlined' onPress={hideNotification} />
+            <Button icon='close' variant='outlined' onPress={hideNotification} />
           </View>
           <Text variant='body'>{notification.body}</Text>
         </View>

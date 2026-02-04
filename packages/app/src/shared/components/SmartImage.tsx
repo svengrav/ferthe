@@ -1,11 +1,19 @@
+import { useEffect, useState } from 'react'
+import { ActivityIndicator, ImageStyle, Image as RNImage, ImageProps as RNImageProps, StyleProp, View } from 'react-native'
+
 import { ImageReference } from '@shared/contracts'
-import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, ImageStyle, Image as RNImage, ImageProps as RNImageProps, StyleProp, Text, View, ViewStyle } from 'react-native'
-import { useThemeStore } from '../theme'
+
+import { Text } from '@app/shared/components/'
+import { createThemedStyles } from '../theme'
+import { useApp } from '../useApp'
+
+const LABEL_MAX_LENGTH = 2
+const BLUR_RADIUS = 10
+const LABEL_SIZE_RATIO = 0.4
 
 interface SmartImageProps {
   source: ImageReference | { uri: string } | undefined
-  label?: string // Label for text fallback (overrides source.label)
+  label?: string
   style?: StyleProp<ImageStyle>
   width?: number
   height?: number
@@ -20,8 +28,7 @@ interface SmartImageProps {
  * Features:
  * - Shows placeholder while loading
  * - Progressive loading: preview → full image
- * - Automatic retry on SAS token expiry
- * - Graceful error handling
+ * - Graceful error handling with label fallback
  */
 export function SmartImage({
   source,
@@ -33,7 +40,7 @@ export function SmartImage({
   onError,
   resizeMode = 'cover',
 }: SmartImageProps) {
-  const theme = useThemeStore()
+  const { styles } = useApp(useStyles)
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
@@ -43,7 +50,7 @@ export function SmartImage({
   const previewUri = isImageReference ? source.previewUrl : undefined
   const fullUri = isImageReference ? source.url : source?.uri
   const effectiveLabel = label || (isImageReference ? source.label : undefined)
-  const labelText = effectiveLabel ? effectiveLabel.substring(0, 2).toUpperCase() : ''
+  const labelText = effectiveLabel ? effectiveLabel.substring(0, LABEL_MAX_LENGTH).toUpperCase() : ''
 
   useEffect(() => {
     setIsLoading(true)
@@ -62,78 +69,41 @@ export function SmartImage({
     onError?.()
   }
 
-  const containerStyle: StyleProp<ViewStyle> = {
-    width,
-    height,
-    backgroundColor: theme?.colors?.surface || '#f5f5f5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  }
+  if (!styles) return null
 
-  const imageStyle: StyleProp<ImageStyle> = {
-    width: '100%',
-    height: '100%',
-  }
+  const containerStyle = [styles.container, { width, height }, style]
+  const dynamicLabelFontSize = Math.min(width ?? height ?? 50, height ?? width ?? 50) * LABEL_SIZE_RATIO
 
-  // Label fallback component
-  const renderLabelFallback = () => {
-    const size = Math.min(width ?? height ?? 50, height ?? width ?? 50)
-    const fontSize = size * 0.4
+  // Label fallback
+  const renderFallback = () => (
+    <View style={styles.fallbackContainer}>
+      <Text style={[styles.fallbackText, { fontSize: dynamicLabelFontSize }]}>
+        {labelText || placeholder}
+      </Text>
+    </View>
+  )
 
-    return (
-      <View style={{
-        width: '100%',
-        height: '100%',
-        backgroundColor: theme?.colors?.primary || '#6200ee',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-        <Text style={{
-          color: theme?.colors?.onPrimary || '#ffffff',
-          fontSize,
-          fontWeight: '600',
-        }}>
-          {labelText}
-        </Text>
-      </View>
-    )
-  }
-
-  // No source provided
-  if (!source || !fullUri) {
-    return (
-      <View style={[containerStyle, style]}>
-        {labelText ? renderLabelFallback() : placeholder || <ActivityIndicator size="small" color={theme?.colors?.onSurface || '#000'} />}
-      </View>
-    )
-  }
-
-  // Error state
-  if (hasError) {
-    return (
-      <View style={[containerStyle, style]}>
-        {labelText ? renderLabelFallback() : placeholder || <View style={{ backgroundColor: theme?.colors?.surface || '#f5f5f5', width: '100%', height: '100%' }} />}
-      </View>
-    )
+  // No source or error
+  if (!source || !fullUri || hasError) {
+    return <View style={containerStyle}>{renderFallback()}</View>
   }
 
   return (
-    <View style={[containerStyle, style]}>
-      {/* Preview image (blurred/compressed) */}
+    <View style={containerStyle}>
+      {/* Preview image (blurred) */}
       {showPreview && previewUri && (
         <RNImage
           source={{ uri: previewUri }}
-          style={imageStyle}
+          style={styles.image}
           resizeMode={resizeMode}
-          blurRadius={10}
+          blurRadius={BLUR_RADIUS}
         />
       )}
 
       {/* Full image */}
       <RNImage
         source={{ uri: fullUri }}
-        style={imageStyle}
+        style={styles.image}
         resizeMode={resizeMode}
         onLoadEnd={handleLoadEnd}
         onError={handleError}
@@ -141,10 +111,39 @@ export function SmartImage({
 
       {/* Loading indicator */}
       {isLoading && (
-        <View style={{ position: 'absolute', justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="small" color={theme?.colors?.primary || '#6200ee'} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" />
         </View>
       )}
     </View>
   )
 }
+
+const useStyles = createThemedStyles(theme => ({
+  container: {
+    backgroundColor: theme.colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  fallbackContainer: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: theme.colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fallbackText: {
+    color: theme.colors.onPrimary,
+    fontWeight: '600',
+  },
+  loadingContainer: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+}))

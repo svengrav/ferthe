@@ -1,4 +1,4 @@
-import { IconButton, SmartImage, Text } from '@app/shared/components'
+import { Button, SmartImage, Text } from '@app/shared/components'
 import { Flippable } from '@app/shared/components/animation/Flippable'
 import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
@@ -144,20 +144,24 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
     >
       {/* Close and view details buttons */}
       <View style={styles.buttonContainer}>
-        <IconButton
-          name='zoom-out-map'
+        <Button
+          icon='zoom-out-map'
           variant='secondary'
           onPress={onViewDetails}
         />
         {onClose && (
-          <IconButton name='close' variant='secondary' onPress={onClose} />
+          <Button
+            icon='close'
+            variant='secondary'
+            onPress={onClose}
+          />
         )}
       </View>
 
       {/* Swap button bottom right */}
       <View style={styles.swapButtonContainer}>
-        <IconButton
-          name='swap-horiz'
+        <Button
+          icon='swap-horiz'
           variant='secondary'
           onPress={() => setIsFlipped(isFlipped => !isFlipped)}
         />
@@ -199,14 +203,18 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
       {/* Close and view details buttons */}
       <View style={styles.buttonContainer}>
         {card.discoveryId && (
-          <IconButton
-            name='zoom-out-map'
+          <Button
+            icon='zoom-out-map'
             variant='secondary'
             onPress={onViewDetails}
           />
         )}
         {onClose && (
-          <IconButton name='close' variant='secondary' onPress={onClose} />
+          <Button
+            icon='close'
+            variant='secondary'
+            onPress={onClose}
+          />
         )}
       </View>
 
@@ -224,8 +232,8 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
 
       {/* Flip button bottom right */}
       <View style={styles.swapButtonContainer}>
-        <IconButton
-          name='swap-horiz'
+        <Button
+          icon='swap-horiz'
           variant='secondary'
           onPress={() => setIsFlipped(isFlipped => !isFlipped)}
         />

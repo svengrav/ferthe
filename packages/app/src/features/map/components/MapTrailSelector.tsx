@@ -2,7 +2,7 @@ import { getAppContext } from '@app/appContext'
 import { useDiscoveryTrail } from '@app/features/discovery'
 import { useTrailData } from '@app/features/trail'
 import TrailItem from '@app/features/trail/components/TrailItem'
-import { IconButton } from '@app/shared/components'
+import { Button } from '@app/shared/components'
 import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles, useThemeStore } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
@@ -43,7 +43,6 @@ export const MapTrailSelector = () => {
         <TrailItem
           trail={item}
           onPress={() => handleSelectTrail(item, removeOverlay!)}
-          actions={<IconButton name='chevron-right' size={24} variant='primary' />}
         />
       )
     }
@@ -68,7 +67,7 @@ export const MapTrailSelector = () => {
       <View>
         <TouchableOpacity style={styles.selector} onPress={openTrailSelector}>
           {selectedTrail && <TrailItem trail={selectedTrail} onPress={openTrailSelector} actions={
-            <IconButton name='swap-horiz' size={24} onPress={openTrailSelector} variant='outlined' />
+            <Button icon='swap-horiz' onPress={openTrailSelector} variant='outlined' />
           } />}
         </TouchableOpacity>
       </View>

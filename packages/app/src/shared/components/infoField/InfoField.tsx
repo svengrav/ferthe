@@ -1,7 +1,7 @@
 import { Theme, useThemeStore } from '@app/shared/theme'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
-import { IconButton } from '../button/Button'
+import Button from '../button/Button'
 import Icon, { IconSymbolName } from '../icon/Icon'
 import Text from '../text/Text'
 
@@ -15,11 +15,11 @@ interface InfoFieldProps {
   onEdit?: () => void
 }
 
-const InfoField: React.FC<InfoFieldProps> = ({ 
-  icon, 
-  label, 
-  value, 
-  iconColor, 
+const InfoField: React.FC<InfoFieldProps> = ({
+  icon,
+  label,
+  value,
+  iconColor,
   iconSize = 20,
   action,
   onEdit
@@ -30,10 +30,10 @@ const InfoField: React.FC<InfoFieldProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.iconContainer}>
-        <Icon 
-          name={icon} 
-          size={iconSize} 
-          color={iconColor || theme.colors.onSurface} 
+        <Icon
+          name={icon}
+          size={iconSize}
+          color={iconColor || theme.colors.onSurface}
         />
       </View>
       <View style={styles.content}>
@@ -41,7 +41,7 @@ const InfoField: React.FC<InfoFieldProps> = ({
         {value && <Text variant='body'>{value}</Text>}
       </View>
       {action}
-      {onEdit && <IconButton name={'edit'} variant='outlined' size={16} onPress={onEdit}  />}
+      {onEdit && <Button icon='edit' variant='outlined' onPress={onEdit} />}
     </View>
   )
 }

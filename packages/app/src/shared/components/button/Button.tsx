@@ -1,36 +1,105 @@
-import { Theme, useThemeStore } from '@app/shared/theme'
+import { Theme, useTheme } from '@app/shared/theme'
 import { useRef, useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native'
+import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native'
 import DropdownMenu from '../form/DropdownMenu'
-import { Icon, IconProps } from '../icon/Icon'
-import { Option } from '../types'
+import { Icon, IconSymbolName } from '../icon/Icon'
+import { AlignableProps, ComponentSize, ComponentVariant, DisableableProps, Option } from '../types'
 
-type ButtonVariant = 'primary' | 'outlined' | 'secondary'
-
-interface ButtonProps {
-  label: string
+interface ButtonProps extends DisableableProps, AlignableProps {
+  label?: string
+  icon?: IconSymbolName
+  size?: ComponentSize
   onPress?: () => void
-  variant?: ButtonVariant
+  variant?: ComponentVariant
   dense?: boolean
   options?: Option[]
-  disabled?: boolean
-  align?: 'flex-start' | 'center' | 'flex-end' | undefined
-  style?: ViewStyle | undefined
+  style?: ViewStyle
 }
 
-const Button = ({ label, dense, onPress, variant = 'primary', options, disabled, align = undefined, style }: ButtonProps) => {
-  const theme = useThemeStore()
-  const styles = createButtonStyles(theme, variant, dense || false, disabled)
+/**
+ * Unified Button component.
+ * Supports text labels, icons, or both with dropdown menu functionality.
+ */
+function Button(props: ButtonProps) {
+  const {
+    label,
+    icon,
+    size = 'md',
+    onPress,
+    variant = 'primary',
+    dense = false,
+    options,
+    disabled = false,
+    align = 'left',
+    style,
+  } = props
+
+  const { styles, theme } = useTheme(createStyles)
   const [isMenuVisible, setMenuVisible] = useState(false)
   const ref = useRef<View>(null)
 
-  const handlePress = disabled ? undefined : (options ? () => setMenuVisible(true) : onPress)
+  const isIconOnly = !label && icon
+
+  const alignSelf = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center' as const
+
+  // Size mapping from theme tokens
+  const sizeConfig = {
+    sm: { padding: theme.tokens.spacing.xs, iconSize: theme.tokens.spacing.lg, fontSize: theme.tokens.fontSize.md },
+    md: { padding: theme.tokens.spacing.sm, iconSize: theme.tokens.spacing.lg, fontSize: theme.tokens.fontSize.md },
+    lg: { padding: theme.tokens.spacing.sm, iconSize: theme.tokens.spacing.lg, fontSize: theme.tokens.fontSize.md },
+  }[size]
+
+  const handlePress = () => {
+    if (options) {
+      setMenuVisible(true)
+    } else if (onPress) {
+      onPress()
+    }
+  }
+
+  // Dynamic styles based on props
+  const buttonStyle = [
+    isIconOnly ? styles.iconButton : styles.button,
+    variant === 'primary' && (isIconOnly ? styles.iconPrimary : styles.primary),
+    variant === 'secondary' && (isIconOnly ? styles.iconSecondary : styles.secondary),
+    variant === 'outlined' && (isIconOnly ? styles.iconOutlined : styles.outlined),
+    { padding: dense ? sizeConfig.padding / 2 : sizeConfig.padding },
+    disabled && styles.disabled,
+    { alignSelf } satisfies ViewStyle,
+    style,
+  ]
+
+  const textStyle = [
+    styles.buttonText,
+    variant === 'primary' && styles.textPrimary,
+    variant === 'secondary' && styles.textSecondary,
+    variant === 'outlined' && styles.textOutlined,
+    { fontSize: sizeConfig.fontSize },
+    disabled && styles.textDisabled,
+  ]
+
+  const iconColor = isIconOnly
+    ? variant === 'primary'
+      ? theme.colors.background
+      : variant === 'secondary'
+        ? theme.colors.primary
+        : theme.colors.onBackground
+    : variant === 'primary'
+      ? theme.colors.onPrimary
+      : theme.colors.primary
+
+  const iconSize = variant === 'outlined' ? sizeConfig.iconSize + 4 : sizeConfig.iconSize
 
   return (
-    <View style={[styles.button, { alignSelf: align }, style]} ref={ref}>
-      <TouchableOpacity onPress={handlePress} disabled={disabled}>
-        <Text style={styles.buttonText}>{label}</Text>
-      </TouchableOpacity>
+    <View style={{ alignSelf }} ref={ref} id="button-container">
+      <Pressable
+        onPress={handlePress}
+        disabled={disabled}
+        style={buttonStyle}
+        hitSlop={isIconOnly ? { top: 8, bottom: 8, left: 8, right: 8 } : undefined}>
+        {icon && <Icon name={icon} color={iconColor} size={iconSize} />}
+        {label && <Text style={textStyle}>{label}</Text>}
+      </Pressable>
       {options && (
         <DropdownMenu
           anchorRef={ref}
@@ -43,157 +112,67 @@ const Button = ({ label, dense, onPress, variant = 'primary', options, disabled,
   )
 }
 
-const createButtonStyles = (theme: Theme, variant: ButtonVariant, dense: boolean, disabled?: boolean) => {
-  const fontSize = dense ? 12 : 16
-  const padding = dense ? 6 : 8
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    // Base button styles
+    button: {
+      borderRadius: 8,
+      marginVertical: 8,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    disabled: {
+      backgroundColor: theme.deriveColor(theme.colors.primary, 0.6),
+    },
 
-  switch (variant) {
-    case 'primary':
-      return StyleSheet.create({
-        button: {
-          backgroundColor: disabled ? theme.deriveColor(theme.colors.primary, 0.7) : theme.colors.primary,
-          padding: padding,
-          borderRadius: 8,
-          marginVertical: 8,
-          opacity: disabled ? 0.5 : 1,
-        },
-        buttonText: {
-          color: disabled ? theme.deriveColor(theme.colors.primary, 0.2) : theme.colors.onPrimary,
-          fontSize: dense ? 12 : 16,
-          textAlign: 'center',
-        },
-        disabledText: {
-          color: theme.colors.onSurface + '50',
-        },
-      })
+    // Variant styles
+    primary: {
+      backgroundColor: theme.colors.primary,
+    },
+    secondary: {
+      backgroundColor: theme.deriveColor(theme.colors.primary, -20),
+    },
+    outlined: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: theme.colors.divider,
+    },
 
-    case 'secondary':
-      return StyleSheet.create({
-        button: {
-          padding: padding,
-          borderRadius: 8,
-          marginVertical: 8,
-          opacity: disabled ? 0.5 : 1,
-        },
-        buttonText: {
-          color: disabled ? theme.colors.onSurface + '50' : theme.colors.onSurface,
-          fontSize: fontSize,
-          textAlign: 'center',
-        },
-        disabledText: {
-          color: theme.colors.onSurface + '50',
-        },
-      })
+    // Text styles
+    buttonText: {
+      textAlign: 'center',
+    },
+    textPrimary: {
+      color: theme.colors.onPrimary,
+    },
+    textSecondary: {
+      color: theme.colors.onSurface,
+    },
+    textOutlined: {
+      color: theme.colors.primary,
+    },
+    textDisabled: {
+      color: theme.colors.onSurface + '50',
+    },
 
-    case 'outlined':
-      return StyleSheet.create({
-        button: {
-          backgroundColor: 'transparent',
-          borderWidth: 1,
-          borderColor: disabled ? theme.colors.onSurface + '30' : theme.colors.divider,
-          padding: padding,
-          borderRadius: 8,
-          marginVertical: 8,
-          opacity: disabled ? 0.5 : 1,
-        },
-        buttonText: {
-          color: disabled ? theme.colors.onSurface + '50' : theme.colors.primary,
-          fontSize: fontSize,
-          textAlign: 'center',
-        },
-        disabledText: {
-          color: theme.colors.onSurface + '50',
-        },
-      })
-  }
-}
-interface IconButtonProps extends IconProps {
-  disabled?: boolean
-  onPress?: () => void
-  options?: Option[]
-  variant?: ButtonVariant
-}
-
-export const IconButton = ({ onPress, options, variant = 'primary', size, style, disabled, ...props }: IconButtonProps) => {
-  const theme = useThemeStore()
-  const styles = createIconButtonStyles(theme, variant)
-  const [isMenuVisible, setMenuVisible] = useState(false)
-  const ref = useRef<View>(null)
-
-  return (
-    <>
-      <View>
-        <TouchableOpacity
-          disabled={disabled}
-          style={[styles.iconButton, style]}
-          onPress={options ? () => setMenuVisible(true) : onPress}
-          ref={ref}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Icon color={styles.iconButton.color} size={size ?? 20} {...props} />
-        </TouchableOpacity>
-        {options && (
-          <DropdownMenu
-            anchorRef={ref}
-            isVisible={isMenuVisible}
-            onClose={() => setMenuVisible(false)}
-            options={options}
-          />
-        )}
-      </View>
-    </>
-  )
-}
-
-const createIconButtonStyles = (theme: Theme, variant: ButtonVariant) => {
-  switch (variant) {
-    case 'primary':
-      return StyleSheet.create({
-        iconButton: {
-          backgroundColor: theme.colors.primary,
-          color: theme.colors.background,
-          borderRadius: 50,
-          marginVertical: 0,
-          padding: 4,
-          alignItems: 'center',
-          justifyContent: 'center',
-          alignSelf: 'flex-start',
-          minWidth: 0,
-          minHeight: 0,
-        },
-      })
-    case 'secondary':
-      return StyleSheet.create({
-        iconButton: {
-          backgroundColor: theme.colors.background,
-          color: theme.colors.primary,
-          borderRadius: 50,
-          padding: 4,
-          marginVertical: 0,
-          alignItems: 'center',
-          justifyContent: 'center',
-          alignSelf: 'flex-start',
-          minWidth: 0,
-          minHeight: 0,
-        },
-      })
-    case 'outlined':
-      return StyleSheet.create({
-        iconButton: {
-          backgroundColor: 'transparent',
-          color: theme.colors.onBackground,
-          borderRadius: 50,
-          padding: 4,
-          marginVertical: 0,
-          alignItems: 'center',
-          justifyContent: 'center',
-          alignSelf: 'flex-start',
-          minWidth: 0,
-          minHeight: 0,
-        },
-      })
-    default:
-      throw new Error(`Unknown variant: ${variant}`)
-  }
-}
+    // Icon-only button styles
+    iconButton: {
+      borderRadius: 50,
+      padding: 4,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    iconPrimary: {
+      backgroundColor: theme.colors.primary,
+    },
+    iconSecondary: {
+      backgroundColor: theme.colors.background,
+    },
+    iconOutlined: {
+      backgroundColor: 'transparent',
+    },
+  })
 
 export default Button

@@ -1,9 +1,7 @@
-import { View } from 'react-native'
-
-import { IconButton } from '@app/shared/components'
+import { Button } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-
+import { View } from 'react-native'
 import { useMapLayer, useSetActiveLayer } from '../stores/mapStore'
 
 /**
@@ -22,10 +20,9 @@ function MapLayerSwitch() {
 
   return (
     <View style={styles?.container}>
-      <IconButton
-        name={isOverview ? 'navigation' : 'map'}
+      <Button
+        icon={isOverview ? 'navigation' : 'map'}
         onPress={handlePress}
-        size={20}
       />
     </View>
   )

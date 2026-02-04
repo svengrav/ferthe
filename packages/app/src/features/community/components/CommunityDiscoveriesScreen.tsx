@@ -1,5 +1,5 @@
 import { getAppContext } from '@app/appContext'
-import { IconButton, Page, Text } from '@app/shared/components'
+import { Button, Page, Text } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { logger } from '@app/shared/utils/logger'
@@ -94,7 +94,7 @@ function CommunityDiscoveriesScreen({ communityId, communityName, onBack }: Comm
   return (
     <Page
       label={communityName}
-      action={onBack ? <IconButton name="arrow-back" onPress={onBack} /> : undefined}
+      action={onBack ? <Button icon="arrow-back" onPress={onBack} /> : undefined}
       scrollable={false}
     >
       <View style={styles.container}>

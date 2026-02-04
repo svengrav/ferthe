@@ -1,5 +1,5 @@
 import AboutScreen from '@app/features/about/AboutScreen'
-import CommunitiesScreen from '@app/features/community/components/CommunitiesScreen'
+import CommunityScreen from '@app/features/community/components/CommunityScreen'
 import DiscoveryScreen from '@app/features/discovery/components/DiscoveryScreen'
 import MapScreen from '@app/features/map/components/MapScreen'
 import TrailScreen from '@app/features/trail/components/TrailScreen'
@@ -83,7 +83,7 @@ export function Navigation() {
         />
         <Tab.Screen
           name='Socials'
-          component={CommunitiesScreen}
+          component={CommunityScreen}
           options={{
             tabBarIcon: ({ color, size }) => <Icon name='people' color={color} size={size} />,
             headerShown: false,

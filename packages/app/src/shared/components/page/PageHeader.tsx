@@ -1,6 +1,6 @@
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { StyleSheet, View } from 'react-native'
-import { IconButton } from '../button/Button'
+import Button from '../button/Button'
 import { FertheLabel } from '../ferthe/Logo'
 import Text from '../text/Text'
 import { Option } from '../types'
@@ -26,7 +26,7 @@ const PageHeader = ({ label, action, options }: PageHeaderProps) => {
         )}
       </View>
       <View style={styles.rightContainer}>{action && action}
-        {showOptions && <IconButton variant='outlined' options={options} name={'more-vert'} style={styles.iconButton} />}
+        {showOptions && <Button variant='outlined' options={options} icon='more-vert' style={styles.iconButton} />}
       </View>
     </View>
   )

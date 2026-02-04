@@ -1,4 +1,4 @@
-import { Card, IconButton, TextInput } from '@app/shared/components'
+import { Button, TextInput } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import React, { useState } from 'react'
@@ -57,25 +57,23 @@ export const InlineEditor: React.FC<InlineEditorProps> = ({
   if (!styles) return null
 
   return (
-    <Card style={styles.card}>
-      <View style={styles.container}>
-        <TextInput
-          value={value}
-          onChangeText={setValue}
-          placeholder={placeholder}
-          multiline={multiline}
-          maxLength={maxLength}
-          editable={!isSaving && !disabled}
-          style={styles.input}
-        />
-        <IconButton
-          name="check"
-          onPress={handleSubmit}
-          disabled={!canSubmit}
-          variant="outlined"
-        />
-      </View>
-    </Card>
+    <View style={styles.container}>
+      <TextInput
+        value={value}
+        onChangeText={setValue}
+        placeholder={placeholder}
+        multiline={multiline}
+        maxLength={maxLength}
+        editable={!isSaving && !disabled}
+        style={styles.input}
+      />
+      <Button
+        icon="check"
+        onPress={handleSubmit}
+        disabled={!canSubmit}
+        variant="outlined"
+      />
+    </View>
   )
 }
 

@@ -1,4 +1,4 @@
-import { createTypography, DARK_THEME, LIGHT_THEME, UI_DIMENSIONS } from './theme'
+import { createTypography, DARK_THEME, LIGHT_THEME, PRIMITIVES, UI_DIMENSIONS } from './theme'
 import { ColorScheme, Theme, ThemeBase } from './types'
 import { themeUtils } from './utils'
 
@@ -10,6 +10,7 @@ export const createTheme = (mode: ColorScheme): Theme => {
   const baseTheme: ThemeBase = {
     mode,
     colors,
+    tokens: PRIMITIVES,
     dimensions: UI_DIMENSIONS,
     deriveColor: (color: string, value?: number): string => {
       return themeUtils.deriveColor(mode, color, value)

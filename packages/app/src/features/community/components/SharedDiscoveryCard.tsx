@@ -1,12 +1,14 @@
 import { getAppContext } from '@app/appContext'
 import { useAccountData } from '@app/features/account/stores/accountStore'
-import { IconButton, Text } from '@app/shared/components'
+import { Button, Text } from '@app/shared/components'
+import { Dialog } from '@app/shared/components/'
+import { setOverlay, useOverlayStore } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { logger } from '@app/shared/utils/logger'
 import { Discovery } from '@shared/contracts'
 import { useState } from 'react'
-import { Alert, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 
 const IMAGE_HEIGHT = 120
 
@@ -30,32 +32,29 @@ function SharedDiscoveryCard({ discovery, communityId, onUnshared }: SharedDisco
 
   const isOwnDiscovery = discovery.accountId === account?.id
 
-  const handleUnshare = async () => {
-    Alert.alert(
-      'Unshare Discovery',
-      'Remove this discovery from the community?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Unshare',
-          style: 'destructive',
-          onPress: async () => {
-            setIsUnsharing(true)
-            const result = await communityApplication.unshareDiscovery(discovery.id, communityId)
-            setIsUnsharing(false)
+  const handleUnshare = () => {
+    setOverlay(
+      'confirmUnshare',
+      <Dialog
+        title="Unshare Discovery"
+        message="Remove this discovery from the community?"
+        confirmText="Unshare"
+        destructive
+        onConfirm={async () => {
+          useOverlayStore.getState().removeByKey('confirmUnshare')
+          setIsUnsharing(true)
+          const result = await communityApplication.unshareDiscovery(discovery.id, communityId)
+          setIsUnsharing(false)
 
-            if (result.success) {
-              onUnshared?.()
-            } else {
-              Alert.alert('Error', result.error?.message || 'Failed to unshare discovery')
-              logger.error('Unshare discovery failed:', result.error)
-            }
-          },
-        },
-      ]
+          if (result.success) {
+            onUnshared?.()
+          } else {
+            logger.error('Unshare discovery failed:', result.error)
+          }
+        }}
+        onCancel={() => useOverlayStore.getState().removeByKey('confirmUnshare')}
+      />,
+      { variant: 'compact' }
     )
   }
 
@@ -80,8 +79,8 @@ function SharedDiscoveryCard({ discovery, communityId, onUnshared }: SharedDisco
           </View>
 
           {isOwnDiscovery && (
-            <IconButton
-              name="close"
+            <Button
+              icon="close"
               onPress={handleUnshare}
               disabled={isUnsharing}
             />

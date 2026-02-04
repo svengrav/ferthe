@@ -2,13 +2,13 @@ import { useThemeStore } from '@app/shared/theme'
 import { PRIMITIVES } from '@app/shared/theme/theme'
 import { TextTheme } from '@app/shared/theme/types'
 import * as Native from 'react-native'
+import { ComponentSize } from '../types'
 
 type TextVariant = keyof TextTheme
-type TextSize = 'sm' | 'md' | 'lg'
 
 interface TextProps extends Native.TextProps {
   variant?: TextVariant
-  size?: TextSize
+  size?: ComponentSize
 }
 
 const Text = ({ style, children, variant = 'body', size, ...props }: TextProps) => {

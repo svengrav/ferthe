@@ -327,10 +327,17 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         return createErrorResult('ACCOUNT_NOT_FOUND')
       }
 
-      // Update only provided fields
+      // Update only provided fields, preserve all existing fields explicitly
       const updatedAccount: Account = {
-        ...account,
-        ...data,
+        id: account.id,
+        phoneHash: account.phoneHash,
+        displayName: data.displayName ?? account.displayName,
+        description: data.description ?? account.description,
+        avatar: account.avatar,
+        createdAt: account.createdAt,
+        lastLoginAt: account.lastLoginAt,
+        accountType: account.accountType,
+        isPhoneVerified: account.isPhoneVerified,
         updatedAt: new Date(),
       }
 

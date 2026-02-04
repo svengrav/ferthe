@@ -1,11 +1,12 @@
 import { getAppContext } from '@app/appContext'
 import { useCommunityData } from '@app/features/community/stores/communityStore'
-import { Button } from '@app/shared/components'
+import { Button, Text } from '@app/shared/components'
+import { setOverlay, useOverlayStore } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { logger } from '@app/shared/utils/logger'
 import { useState } from 'react'
-import { Alert, View } from 'react-native'
+import { View } from 'react-native'
 
 interface DiscoveryShareSectionProps {
   discoveryId: string
@@ -23,36 +24,48 @@ function DiscoveryShareSection({ discoveryId }: DiscoveryShareSectionProps) {
 
   if (!styles || communities.length === 0) return null
 
-  const handleShare = async () => {
-    Alert.alert(
-      'Share Discovery',
-      'Select a community to share with:',
-      [
-        ...communities.map((community) => ({
-          text: community.name,
-          onPress: async () => {
-            setIsSharing(true)
-            const result = await communityApplication.shareDiscovery(discoveryId, community.id)
-            setIsSharing(false)
+  const handleShare = () => {
+    const handleShareWithCommunity = async (communityId: string) => {
+      useOverlayStore.getState().removeByKey('selectCommunity')
+      setIsSharing(true)
+      const result = await communityApplication.shareDiscovery(discoveryId, communityId)
+      setIsSharing(false)
 
-            if (result.success) {
-              Alert.alert('Success', 'Discovery shared with community')
-            } else {
-              const errorMessage = getErrorMessage(result.error?.code)
-              Alert.alert('Error', result.error?.message || errorMessage)
-              logger.error('Share discovery failed:', result.error)
-            }
-          },
-        })),
-        { text: 'Cancel', style: 'cancel' },
-      ]
+      if (!result.success) {
+        const errorMessage = getErrorMessage(result.error?.code)
+        logger.error('Share discovery failed:', result.error?.message || errorMessage)
+      }
+    }
+
+    setOverlay(
+      'selectCommunity',
+      <View style={{ gap: 12 }}>
+        <Text variant="label">Select a community to share with:</Text>
+        <View style={{ gap: 8 }}>
+          {communities.map(community => (
+            <Button
+              key={community.id}
+              label={community.name}
+              onPress={() => handleShareWithCommunity(community.id)}
+              variant="outlined"
+            />
+          ))}
+          <Button
+            label="Cancel"
+            onPress={() => useOverlayStore.getState().removeByKey('selectCommunity')}
+            variant="secondary"
+          />
+        </View>
+      </View>,
+      { variant: 'compact', title: 'Share Discovery' }
     )
   }
 
   return (
     <View style={styles.shareContainer}>
       <Button
-        label="Share with Community"
+        label="Share"
+        align='right'
         onPress={handleShare}
         disabled={isSharing}
       />
@@ -74,7 +87,6 @@ const getErrorMessage = (code?: string): string => {
 const useStyles = createThemedStyles(theme => ({
   shareContainer: {
     marginVertical: 16,
-    paddingHorizontal: 16,
   },
 }))
 

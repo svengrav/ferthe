@@ -1,5 +1,5 @@
 import { TextStyle } from 'react-native'
-import { createTypography, DARK_THEME, LIGHT_THEME, UI_DIMENSIONS } from './theme'
+import { createTypography, DARK_THEME, LIGHT_THEME, PRIMITIVES, UI_DIMENSIONS } from './theme'
 
 export type ColorScheme = 'light' | 'dark'
 
@@ -18,6 +18,7 @@ export type TextTheme = ReturnType<typeof createTypography>
  * UI dimensions type derived from UI_DIMENSIONS constant.
  */
 export type UiDimensions = typeof UI_DIMENSIONS
+export type Tokens = typeof PRIMITIVES
 
 interface ThemeActions {
   /**
@@ -40,6 +41,7 @@ interface ThemeActions {
  * Base theme interface that includes constant colors, text styles, and constants.
  */
 export interface ThemeBase extends ThemeActions {
+  tokens: Tokens
   mode: ColorScheme
   colors: Colors
   dimensions: UiDimensions

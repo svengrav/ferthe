@@ -1,11 +1,9 @@
 import { getAppContext } from '@app/appContext'
-import { RootParamList } from '@app/shared'
 import { Page, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { RouteProp, useRoute } from '@react-navigation/native'
 import { useEffect } from 'react'
 import { SettingsForm } from '../../settings/components/SettingsForm'
 import { DiscoveryCardState } from '../logic/types'
@@ -52,13 +50,12 @@ const useDiscoveryScreen = () => {
 function DiscoveryScreen() {
   const { styles, theme } = useApp(useStyles)
   const { t } = useLocalizationStore()
-  const route = useRoute<RouteProp<RootParamList, 'Discoveries'>>()
 
   // Helper to open discovery card details
   function openCardDetails(card: DiscoveryCardState) {
     const close = setOverlay('discoveryCardDetails_' + card.discoveryId,
       <DiscoveryCardDetails card={card} onClose={() => close()} />,
-      { variant: 'compact', transparent: true, closable: true }
+      { variant: 'fullscreen', transparent: true, closable: true }
     )
   }
 

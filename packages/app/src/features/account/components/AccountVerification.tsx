@@ -113,7 +113,6 @@ function AccountVerification() {
           <Text variant="title">{locales.auth.enterPhoneNumber}</Text>
           {error && <Text style={componentStyles.error}>{error}</Text>}
           <TextInput
-            label="Phone number"
             value={phoneNumber}
             onChangeText={setPhoneNumber}
             placeholder={locales.auth.phoneNumberPlaceholder || 'Your phone number'}
@@ -154,6 +153,8 @@ function AccountVerification() {
 const useStyles = (theme: Theme) =>
   StyleSheet.create({
     section: {
+      flex: 1,
+      gap: 12,
       marginBottom: 20,
     },
     error: {

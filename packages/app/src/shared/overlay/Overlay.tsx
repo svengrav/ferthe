@@ -1,11 +1,11 @@
-import { IconButton } from '@app/shared/components/button/Button'
+import { Button } from '@app/shared/components/'
 import PageHeader from '@app/shared/components/page/PageHeader'
 import Text from '@app/shared/components/text/Text'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import React, { useEffect } from 'react'
 import { ScrollView, View } from 'react-native'
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Option } from '../components/types'
 import { useOverlayStore } from './useOverlayStore'
@@ -13,9 +13,8 @@ import { useOverlayStore } from './useOverlayStore'
 // Animation constants
 const FADE_IN_DURATION = 300
 const FADE_OUT_DURATION = 200
-const SPRING_DAMPING = 0
-const SPRING_STIFFNESS = 150
-const INITIAL_SCALE = 0.9
+const SCALE_DURATION = 250
+const INITIAL_SCALE = 0.95
 const FINAL_SCALE = 1
 const OVERLAY_Z_INDEX = 1000
 
@@ -38,7 +37,7 @@ const useOverlayAnimation = (visible: boolean) => {
       setShouldRender(true)
       // Fade in and scale up animation
       opacity.value = withTiming(1, { duration: FADE_IN_DURATION })
-      scale.value = withSpring(FINAL_SCALE, { damping: SPRING_DAMPING, stiffness: SPRING_STIFFNESS })
+      scale.value = withTiming(FINAL_SCALE, { duration: SCALE_DURATION })
     } else {
       // Fade out and scale down animation
       opacity.value = withTiming(0, { duration: FADE_OUT_DURATION })
@@ -128,19 +127,20 @@ function OverlayContainer({
 
   // Render content based on variant
   const renderContent = () => {
+
     // Compact variant - centered modal with rounded corners
     if (variant === 'compact') {
       return (
-        <View style={{ backgroundColor: theme.opacity(theme.colors.background, 0.6), paddingTop: 60, flex: 1 }} id='overlay-compact-container'>
+        <View key={title} style={{ backgroundColor: theme.opacity(theme.colors.background, 0.8), justifyContent: 'center', alignContent: 'center', paddingTop: 60, flex: 1 }} id='overlay-compact-container'>
           <View style={[styles.compactContainer,]}>
             {/* Header with title and close button */}
             {(title || closable) && (
               <View style={styles.compactHeader}>
-                <Text style={{ paddingHorizontal: 8, paddingVertical: 8 }} >{title}</Text>
+                <Text variant='title'>{title}</Text>
                 {closable && (
-                  <IconButton
-                    name="close"
-                    variant="outlined"
+                  <Button
+                    icon="close"
+                    variant='secondary'
                     onPress={onClose}
                   />
                 )}
@@ -165,7 +165,7 @@ function OverlayContainer({
           <PageHeader
             label={title}
             options={options}
-            action={<IconButton onPress={onClose} name='arrow-back' variant='outlined' size={24} />}
+            action={<Button onPress={onClose} icon='arrow-back' variant='outlined' size='md' />}
           />
           <ContentContainer {...contentProps} id='overlay-page-content'>
             {children}
@@ -184,11 +184,10 @@ function OverlayContainer({
               {title}
             </Text>
             {closable && (
-              <IconButton
-                name="close"
-                variant="outlined"
+              <Button
+                icon="close"
+                variant='secondary'
                 onPress={onClose}
-                size={20}
                 style={{ marginRight: -8 }}
               />
             )}
@@ -277,24 +276,23 @@ const useStyles = createThemedStyles(theme => ({
 
   // Compact variant - centered modal
   compactContainer: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
+    justifyContent: 'center',
+    alignContent: 'center',
+    marginHorizontal: 20,
+    borderRadius: BORDER_RADIUS,
+    padding: 8,
+    backgroundColor: theme.colors.surface,
   },
   compactHeader: {
     flexDirection: 'row',
+    alignContent: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: theme.colors.surface,
-    padding: 8,
-    borderRadius: 8,
-    gap: 8,
+    paddingVertical: 8,
   },
   compactContent: {
-    flex: 1,
-    gap: 12,
-    padding: 8,
-    borderRadius: 8,
+    backgroundColor: theme.colors.surface,
   },
+
 
   // Page variant - fullscreen with PageHeader
   pageContainer: {

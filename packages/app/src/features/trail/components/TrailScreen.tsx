@@ -1,7 +1,7 @@
 import { getAppContext } from '@app/appContext'
 import { SettingsForm } from '@app/features/settings'
 import { useTrailData, useTrailStatus } from '@app/features/trail/stores/trailStore'
-import { FertheLogo, IconButton, Page, Text } from '@app/shared/components'
+import { Button, FertheLogo, Page, Text } from '@app/shared/components'
 import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
@@ -103,9 +103,11 @@ function TrailScreen() {
             data={trails}
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => (
-              <TrailItem trail={item} actions={
-                <IconButton name='chevron-right' size={24} variant='secondary' onPress={() => handleOpenTrailOverview(item)} />
-              } />)}
+              <TrailItem trail={item}
+                onPress={() => handleOpenTrailOverview(item)}
+                actions={
+                  <Button icon='chevron-right' variant='secondary' onPress={() => handleOpenTrailOverview(item)} />
+                } />)}
             keyExtractor={item => item.id}
             onRefresh={handleRefresh}
             refreshing={isRefreshing}

@@ -20,8 +20,6 @@ const useTrailItem = (trail: Trail) => {
   const cardRef = useRef<View>(null)
   const { t } = useLocalizationStore()
 
-
-
   const openContextMenu = () => setContextMenu(true)
   const closeContextMenu = () => setContextMenu(false)
 

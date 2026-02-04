@@ -1,5 +1,5 @@
 import { getAppContext } from '@app/appContext'
-import { Button, IconButton, Text } from '@app/shared/components'
+import { Button, Text } from '@app/shared/components'
 import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
@@ -87,7 +87,13 @@ function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
 
   // Content rendering
   const renderAddContent = () => (
-    <Button label='Add note' variant='outlined' style={styles.addContentLink} onPress={showEditor} />
+    <Button
+      label='Add note'
+      variant='outlined'
+      style={styles.addContentLink}
+      onPress={showEditor}
+      align='right'
+    />
   )
   const renderContent = () => (
     <View style={styles.userContent}>
@@ -102,17 +108,15 @@ function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
         <Text style={styles.userComment}>{content.comment}</Text>
       )}
       <View style={styles.actionButtons}>
-        <IconButton
-          name="edit"
-          size={18}
+        <Button
+          icon="edit"
           variant="outlined"
           onPress={showEditor}
           disabled={isLoading}
         />
-        <IconButton
-          name="delete"
+        <Button
+          icon="delete"
           variant="outlined"
-          size={18}
           onPress={handleDeleteContent}
           disabled={isLoading}
         />

@@ -20,7 +20,7 @@ export const AccountView: React.FC = () => {
   const styles = createStyles(theme)
 
   const showAccountRegistration = () => {
-    setOverlay('accountVerification', <AccountVerification />, { title: 'Verify your Account', variant: 'fullscreen', closable: true })
+    setOverlay('accountVerification', <AccountVerification />, { title: 'Verify your Account', variant: 'compact', closable: true })
   }
 
   logger.log('[AccountView] Rendering with account:', account, 'accountType:', accountType)

@@ -9,7 +9,7 @@ function MapDeviceCords() {
   const label = formatGeoCoordinates(device.location?.lat || 0, device.location?.lon || 0)
   return (
     <View style={styles}>
-      <Chip size='small' variant='secondary' label={label} />
+      <Chip size='sm' variant='secondary' label={label} />
     </View>
   )
 }

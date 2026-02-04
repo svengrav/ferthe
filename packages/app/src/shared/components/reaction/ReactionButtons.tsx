@@ -1,4 +1,4 @@
-import { IconButton } from '@app/shared/components/button/Button'
+import Button from '@app/shared/components/button/Button'
 import Text from '@app/shared/components/text/Text'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
@@ -29,28 +29,30 @@ function ReactionButtons({
   const isLiked = summary?.userReaction === 'like'
   const isDisliked = summary?.userReaction === 'dislike'
 
+  const isInactive = {
+    opacity: 0.5
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.buttonGroup}>
-        <IconButton
-          name="thumb-up-off-alt"
-          variant="outlined"
+        <Button
+          icon="thumb-up-off-alt"
+          variant="secondary"
           onPress={onLike}
           disabled={disabled}
-          color={isLiked ? theme.colors.primary : theme.colors.secondary}
-          size={18}
+          style={isLiked ? undefined : isInactive}
         />
         <Text style={styles.count}>{summary?.likes ?? 0}</Text>
       </View>
 
       <View style={styles.buttonGroup}>
-        <IconButton
-          name="thumb-down-off-alt"
-          variant="outlined"
+        <Button
+          icon="thumb-down-off-alt"
+          variant="secondary"
           onPress={onDislike}
           disabled={disabled}
-          size={18}
-          color={isDisliked ? theme.colors.primary : theme.colors.secondary}
+          style={isDisliked ? undefined : isInactive}
         />
         <Text style={styles.count}>{summary?.dislikes ?? 0}</Text>
       </View>

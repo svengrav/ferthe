@@ -40,12 +40,12 @@ export const accountStore = create<AccountData & AccountActions>(set => ({
     set({ status }),
 
   setAccount: account =>
-    set({
-      account,
+    set(state => ({
+      account: account ? { ...state.account, ...account } : null,
       accountId: account?.id,
       isPhoneVerified: account?.isPhoneVerified ?? false,
       updatedAt: new Date()
-    }),
+    })),
 
   setAccountId: accountId =>
     set({

@@ -1,21 +1,22 @@
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ComponentSize, ComponentVariant, DisableableProps } from '../types'
 
-interface ChipProps {
+interface ChipProps extends DisableableProps {
   label: string
   onPress?: () => void
-  variant?: 'primary' | 'secondary' | 'outlined'
-  size?: 'small' | 'medium' | 'large'
+  variant?: ComponentVariant
+  size?: ComponentSize
 }
 
-function Chip({ label, onPress, variant = 'primary', size = 'medium' }: ChipProps) {
+function Chip({ label, onPress, variant = 'primary', size = 'md', disabled = false }: ChipProps) {
   const theme = useThemeStore()
   const styles = createStyles(theme, variant, size)
 
   const ChipContainer = onPress ? TouchableOpacity : View
 
   return (
-    <ChipContainer style={styles.chip} onPress={onPress}>
+    <ChipContainer style={styles.chip} onPress={onPress} disabled={disabled}>
       <Text style={styles.chipText}>{label}</Text>
     </ChipContainer>
   )
@@ -25,8 +26,8 @@ export default Chip
 
 const createStyles = (
   theme: Theme,
-  variant: 'primary' | 'secondary' | 'outlined',
-  size: 'small' | 'medium' | 'large'
+  variant: ComponentVariant,
+  size: ComponentSize
 ) => {
   // Variant styles
   let backgroundColor, borderColor, textColor
@@ -52,17 +53,17 @@ const createStyles = (
   // Size styles
   let paddingVertical, paddingHorizontal, fontSize
   switch (size) {
-    case 'small':
+    case 'sm':
       paddingVertical = 2
       paddingHorizontal = 8
       fontSize = 12
       break
-    case 'large':
+    case 'lg':
       paddingVertical = 8
       paddingHorizontal = 20
       fontSize = 18
       break
-    case 'medium':
+    case 'md':
     default:
       paddingVertical = 4
       paddingHorizontal = 12

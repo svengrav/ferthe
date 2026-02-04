@@ -36,6 +36,7 @@ const TextInput = ({ label, helperText, error, style, multiline, ...props }: Tex
 
 const useStyles = createThemedStyles(theme => ({
   container: {
+    flex: 1,
     gap: 6,
   },
   label: {

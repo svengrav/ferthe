@@ -1,4 +1,4 @@
-import { Button, IconButton, TextInput } from '@app/shared/components'
+import { Button, TextInput } from '@app/shared/components'
 import Text from '@app/shared/components/text/Text'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
@@ -76,8 +76,8 @@ function DiscoveryContentEditor({
           resizeMode="cover"
         />
         <View style={styles.imageActions}>
-          <IconButton
-            name="delete"
+          <Button
+            icon="delete"
             variant="outlined"
             onPress={handleDeleteImage}
             disabled={isLoading || isConverting}

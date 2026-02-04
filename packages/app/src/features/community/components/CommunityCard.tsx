@@ -1,11 +1,12 @@
 import { getAppContext } from '@app/appContext'
-import { Button, Text } from '@app/shared/components'
+import { Text } from '@app/shared/components'
 import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { Community } from '@shared/contracts'
 import { Pressable, View } from 'react-native'
 import { useActiveCommunityId } from '../stores/communityStore'
+import { CommunityAvatar } from './CommunityAvatar'
 import CommunityDiscoveriesScreen from './CommunityDiscoveriesScreen'
 
 interface CommunityCardProps {
@@ -23,52 +24,46 @@ function CommunityCard({ community }: CommunityCardProps) {
 
   if (!styles) return null
 
-  const isActive = activeCommunityId === community.id
-
   const handlePress = () => {
-    if (isActive) {
-      communityApplication.setActiveCommunity(undefined)
-    } else {
-      communityApplication.setActiveCommunity(community.id)
-    }
-  }
-
-  const handleViewDiscoveries = () => {
     setOverlay(
       'communityDiscoveries',
       <CommunityDiscoveriesScreen
         communityId={community.id}
         communityName={community.name}
-        onBack={() => setOverlay('communityDiscoveries', null)}
       />
     )
   }
 
   return (
-    <Pressable onPress={handlePress} style={[styles.card, isActive && styles.activeCard]}>
-      <View style={styles.header}>
-        <Text variant="subtitle">{community.name}</Text>
-        {isActive && <Text style={styles.activeBadge}>Active</Text>}
+    <Pressable onPress={handlePress} style={[styles.card]}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <CommunityAvatar />
+        <View>
+          <Text variant="title">{community.name}</Text>
+
+          <Text variant="body" style={styles.inviteCode}>
+            Invite Code: {community.inviteCode}
+          </Text>
+
+          <Text variant="body" style={styles.meta}>
+            Created {new Date(community.createdAt).toLocaleDateString()}
+          </Text>
+        </View>
+
       </View>
 
-      <Text variant="caption" style={styles.inviteCode}>
-        Invite Code: {community.inviteCode}
-      </Text>
 
-      <Text variant="caption" style={styles.meta}>
-        Created {new Date(community.createdAt).toLocaleDateString()}
-      </Text>
 
-      <View style={styles.actions}>
+      {/* <View style={styles.actions}>
         <Button label="View Discoveries" onPress={handleViewDiscoveries} />
-      </View>
+      </View> */}
     </Pressable>
   )
 }
 
 const useStyles = createThemedStyles(theme => ({
   card: {
-    padding: 16,
+    padding: 8,
     borderRadius: 12,
     backgroundColor: theme.colors.surface,
     borderWidth: 2,
@@ -93,11 +88,9 @@ const useStyles = createThemedStyles(theme => ({
     fontSize: 12,
   },
   inviteCode: {
-    color: theme.deriveColor(theme.colors.onSurface, 0.6),
     marginBottom: 4,
   },
   meta: {
-    color: theme.deriveColor(theme.colors.onSurface, 0.6),
     marginBottom: 12,
   },
   actions: {
