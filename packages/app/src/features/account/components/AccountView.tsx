@@ -46,46 +46,47 @@ export const AccountView: React.FC = () => {
         />
       </View>
 
-      {/* Account Status Section */}
-      {/* Display Name Editor */}
-      <InfoField
-        icon="person-2"
-        label={t.account.displayName}
-        value={account?.displayName || 'Not set'}
-        onEdit={() => { const close = setOverlay('displayNameEditor', <DisplayNameEditor onSubmit={() => close()} />, { title: t.account.setDisplayName, closable: true, variant: 'compact' }) }}
-      />
+      <View style={{ flexGrow: 0, gap: 8, marginBottom: 12 }}>
+        {/* Account Status Section */}
+        {/* Display Name Editor */}
+        <InfoField
+          icon="person-2"
+          label={t.account.displayName}
+          value={account?.displayName || 'Not set'}
+          onEdit={() => { const close = setOverlay('displayNameEditor', <DisplayNameEditor onSubmit={() => close()} />, { title: t.account.setDisplayName, closable: true, variant: 'compact' }) }}
+        />
 
-      {/* Description Editor */}
-      <InfoField
-        icon="text-snippet"
-        label="Description"
-        value={account?.description || 'Not set'}
-        onEdit={() => { const close = setOverlay('descriptionEditor', <DescriptionEditor onSubmit={() => close()} />, { title: 'Set Description', closable: true, variant: 'compact' }) }}
-      />
+        {/* Description Editor */}
+        <InfoField
+          icon="text-snippet"
+          label="Description"
+          value={account?.description || 'Not set'}
+          onEdit={() => { const close = setOverlay('descriptionEditor', <DescriptionEditor onSubmit={() => close()} />, { title: 'Set Description', closable: true, variant: 'compact' }) }}
+        />
 
-      <InfoField
-        icon="account-circle"
-        label={t.account.accountStatus}
-        value={accountType === 'sms_verified'
-          ? t.account.phoneAccount
-          : t.account.localAccount}
-      />
-      <InfoField
-        icon="badge"
-        label={t.account.accountId}
-        value={account?.id}
-      />
+        <InfoField
+          icon="account-circle"
+          label={t.account.accountStatus}
+          value={accountType === 'sms_verified'
+            ? t.account.phoneAccount
+            : t.account.localAccount}
+        />
+        <InfoField
+          icon="badge"
+          label={t.account.accountId}
+          value={account?.id}
+        />
 
-      <InfoField
-        icon="sync"
-        label={t.account.featureAccess}
-        value={accountType === 'local_unverified'
-          ? t.account.localAccountDescription
-          : accountType === 'sms_verified'
-            ? t.account.phoneAccountDescription
-            : t.account.loginToSync}
-      />
-
+        <InfoField
+          icon="sync"
+          label={t.account.featureAccess}
+          value={accountType === 'local_unverified'
+            ? t.account.localAccountDescription
+            : accountType === 'sms_verified'
+              ? t.account.phoneAccountDescription
+              : t.account.loginToSync}
+        />
+      </View>
       {/* Upgrade if not verified */}
       {accountType === 'local_unverified' && (
         <View style={{ flex: 1 }}>
