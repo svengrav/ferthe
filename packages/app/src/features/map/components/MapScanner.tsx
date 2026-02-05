@@ -1,10 +1,9 @@
 import { memo, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 
 import { Icon } from '@app/shared/components'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { Theme, useTheme } from '@app/shared/theme'
 
 import { useMapScannerAnimation } from '../hooks/useMapScannerAnimation'
 import { useMapDevice, useMapScanner, useMapViewport } from '../stores/mapStore'
@@ -12,15 +11,9 @@ import { useMapTheme } from '../stores/mapThemeStore'
 import { mapUtils } from '../utils/geoToScreenTransform'
 
 // Animation timing constants
-const BUTTON_PADDING = 8
-const BUTTON_BORDER_RADIUS = 8
-const BUTTON_SCALE_MIN = 0.95
-const BUTTON_SCALE_RANGE = 0.05
 const COOLDOWN_FADE_DURATION = 200
 const COOLDOWN_RECOVERY_DURATION = 5000
 const COOLDOWN_TOTAL_DURATION = 5200
-const CONTROL_BOTTOM_OFFSET = 10
-const CONTROL_Z_INDEX = 100
 
 /**
  * Scanner circle that visualizes the scan radius on the map
@@ -58,7 +51,7 @@ interface MapScannerControlProps {
  */
 function MapScannerControl(props: MapScannerControlProps) {
   const { startScan } = props
-  const { styles, theme, context } = useApp(useStyles)
+  const { styles, theme } = useTheme(createStyles)
   const [isOnCooldown, setIsOnCooldown] = useState(false)
   const colorProgress = useSharedValue(1)
 
@@ -70,9 +63,9 @@ function MapScannerControl(props: MapScannerControlProps) {
 
     return {
       backgroundColor,
-      padding: BUTTON_PADDING,
-      borderRadius: BUTTON_BORDER_RADIUS,
-      transform: [{ scale: BUTTON_SCALE_MIN + colorProgress.value * BUTTON_SCALE_RANGE }],
+      padding: 8,
+      borderRadius: 8,
+      transform: [{ scale: 0.95 + colorProgress.value * 0.05 }],
     }
   })
 
@@ -98,7 +91,7 @@ function MapScannerControl(props: MapScannerControlProps) {
   }
 
   return (
-    <View style={styles?.controlsContainer}>
+    <View style={styles.controlsContainer}>
       <Animated.View style={animatedButtonStyle}>
         <Pressable onPress={handleStartScan} disabled={isOnCooldown}>
           <Icon name="sensors" />
@@ -108,13 +101,13 @@ function MapScannerControl(props: MapScannerControlProps) {
   )
 }
 
-const useStyles = createThemedStyles(() => ({
+const createStyles = (theme: Theme) => StyleSheet.create({
   controlsContainer: {
-    zIndex: CONTROL_Z_INDEX,
+    zIndex: 100,
     position: 'absolute',
-    bottom: CONTROL_BOTTOM_OFFSET,
+    bottom: 20,
   },
-}))
+})
 
 const MemoizedMapScanner = memo(MapScanner)
 export { MemoizedMapScanner as MapScanner, MapScannerControl }

@@ -58,7 +58,7 @@ export const PRIMITIVES = {
     xs: 2,
     sm: 4,
     md: 8,
-    lg: 16,
+    lg: 12,
     xl: 32,
   },
   borderRadius: {
@@ -73,7 +73,7 @@ export const PRIMITIVES = {
   },
   fontSize: {
     sm: 12,
-    md: 16,
+    md: 14,
     lg: 18,
   },
 } as const

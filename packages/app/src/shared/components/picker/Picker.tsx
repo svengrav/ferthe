@@ -38,9 +38,9 @@ function Picker(props: PickerProps) {
   }
 
   const sizeConfig = {
-    sm: { padding: theme.tokens.spacing.xs, fontSize: theme.tokens.fontSize.sm },
-    md: { padding: theme.tokens.spacing.sm, fontSize: theme.tokens.fontSize.md },
-    lg: { padding: theme.tokens.spacing.md, fontSize: theme.tokens.fontSize.md },
+    sm: { padding: theme.tokens.spacing.sm, fontSize: theme.tokens.fontSize.sm },
+    md: { padding: theme.tokens.spacing.lg, fontSize: theme.tokens.fontSize.md },
+    lg: { padding: theme.tokens.spacing.lg, fontSize: theme.tokens.fontSize.md },
   }[size]
 
   const buttonStyle = [
@@ -48,7 +48,7 @@ function Picker(props: PickerProps) {
     variant === 'primary' && styles.pickerPrimary,
     variant === 'secondary' && styles.pickerSecondary,
     variant === 'outlined' && styles.pickerOutlined,
-    { paddingHorizontal: sizeConfig.padding, paddingVertical: sizeConfig.padding / 2 },
+    { padding: sizeConfig.padding, },
   ]
 
   const textStyle = [
@@ -83,10 +83,7 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     pickerButton: {
       flexGrow: 0,
-      paddingHorizontal: 8,
-      paddingVertical: 2,
       borderRadius: 8,
-      minHeight: 28,
       justifyContent: 'center',
       alignItems: 'center',
     },

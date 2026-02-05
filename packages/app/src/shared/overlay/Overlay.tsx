@@ -189,7 +189,6 @@ function OverlayContainer({
                 icon="close"
                 variant='secondary'
                 onPress={onClose}
-                style={{ marginRight: -8 }}
               />
             )}
           </View>
@@ -262,11 +261,11 @@ const useStyles = createThemedStyles(theme => ({
   fullscreenHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignContent: 'center',
     alignItems: 'center',
     height: theme.dimensions.HEADER_HEIGHT,
     paddingHorizontal: CONTENT_PADDING,
     backgroundColor: theme.deriveColor(theme.colors.surface, 0.2),
-    paddingVertical: CONTENT_PADDING / 2,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.onSurface + '20',
   },

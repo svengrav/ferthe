@@ -3,9 +3,9 @@ import { useRef, useState } from 'react'
 import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native'
 import Dropdown from '../dropdown/Dropdown.tsx'
 import { Icon, IconSymbolName } from '../icon/Icon'
-import { AlignableProps, DisableableProps, Option, SizeableProps, VariantableProps } from '../types'
+import { DisableableProps, Option, SizeableProps, VariantableProps } from '../types'
 
-interface ButtonProps extends DisableableProps, AlignableProps, SizeableProps, VariantableProps {
+interface ButtonProps extends DisableableProps, SizeableProps, VariantableProps {
   label?: string
   icon?: IconSymbolName
   onPress?: () => void
@@ -28,7 +28,6 @@ function Button(props: ButtonProps) {
     dense = false,
     options,
     disabled = false,
-    align = 'left',
     style,
   } = props
 
@@ -38,13 +37,11 @@ function Button(props: ButtonProps) {
 
   const isIconOnly = !label && icon
 
-  const alignSelf = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center' as const
-
   // Size mapping from theme tokens
   const sizeConfig = {
-    sm: { padding: theme.tokens.spacing.xs, iconSize: theme.tokens.spacing.lg, fontSize: theme.tokens.fontSize.md },
-    md: { padding: theme.tokens.spacing.sm, iconSize: theme.tokens.spacing.lg, fontSize: theme.tokens.fontSize.md },
-    lg: { padding: theme.tokens.spacing.sm, iconSize: theme.tokens.spacing.lg, fontSize: theme.tokens.fontSize.md },
+    sm: { padding: theme.tokens.spacing.sm, iconSize: theme.tokens.fontSize.md, fontSize: theme.tokens.fontSize.md },
+    md: { padding: theme.tokens.spacing.md, iconSize: theme.tokens.fontSize.lg, fontSize: theme.tokens.fontSize.md },
+    lg: { padding: theme.tokens.spacing.lg, iconSize: theme.tokens.fontSize.lg, fontSize: theme.tokens.fontSize.md },
   }[size]
 
   const handlePress = () => {
@@ -63,7 +60,6 @@ function Button(props: ButtonProps) {
     variant === 'outlined' && (isIconOnly ? styles.iconOutlined : styles.outlined),
     { padding: dense ? sizeConfig.padding / 2 : sizeConfig.padding },
     disabled && styles.disabled,
-    { alignSelf } satisfies ViewStyle,
     style,
   ]
 
@@ -91,7 +87,7 @@ function Button(props: ButtonProps) {
   const iconSize = variant === 'outlined' ? sizeConfig.iconSize + 4 : sizeConfig.iconSize
 
   return (
-    <View style={{ alignSelf }} ref={ref} id="button-container">
+    <View ref={ref} id="button-container">
       <Pressable
         onPress={handlePress}
         disabled={disabled}
