@@ -4,7 +4,7 @@ import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-ha
 import Animated from 'react-native-reanimated'
 
 import { getAppContext } from '@app/appContext'
-import { ENV } from '@app/env.ts'
+import { config } from '@app/config'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { logger } from '@app/shared/utils/logger'
@@ -54,7 +54,7 @@ function MapViewport(props: MapViewportProps) {
     height: size.height,
     elementId: 'device-viewport-content',
     snapToCenter: true,
-    onLongPress: ENV.isDevelopment ? handleLongPress : undefined,
+    onLongPress: config.environment === 'development' ? handleLongPress : undefined,
     onGestureEnd: handleGestureEnd,
   })
 
@@ -73,7 +73,7 @@ function MapViewport(props: MapViewportProps) {
         </GestureDetector>
       </GestureHandlerRootView>
 
-      {ENV.enableMapDebug && <MapViewportDebug animatedStyles={animatedStyles} />}
+      {config.debug.enableMapDebug && <MapViewportDebug animatedStyles={animatedStyles} />}
     </View>
   )
 }

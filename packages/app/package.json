@@ -59,6 +59,7 @@
     "@types/expo": "^33.0.3",
     "@types/react": "~19.1.10",
     "@types/react-dom": "~19.1.7",
-    "typescript": "^5.3.3"
+    "ts-morph": "^27.0.2",
+    "typescript": "^5.9.3"
   }
 }

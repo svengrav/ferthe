@@ -1,6 +1,7 @@
 import { View } from 'react-native'
 
 import { Button, TextInput } from '@app/shared/components'
+import Field from '@app/shared/components/field/Field'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
@@ -26,14 +27,17 @@ export function JoinCommunitySection({
   return (
     <View style={styles.section}>
       <View style={styles.inputRow}>
-        <TextInput
+        <Field
           helperText='Join with Invite Code'
-          style={styles.input}
-          placeholder="Your Code"
-          value={code}
-          onChangeText={text => setCode(text.toUpperCase())}
-          maxLength={maxLength}
-        />
+        >
+          <TextInput
+            style={styles.input}
+            placeholder="Your Code"
+            value={code}
+            onChangeText={text => setCode(text.toUpperCase())}
+            maxLength={maxLength}
+          />
+        </Field>
         <Button
           label="Join"
           onPress={onJoin}

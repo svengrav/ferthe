@@ -6,7 +6,7 @@ import { Theme, useTheme } from '@app/shared/theme'
 
 type Alignment = 'left' | 'center' | 'right' | 'stretch'
 
-interface FormFieldProps {
+interface FieldProps {
   /** Label displayed above the input */
   label?: string
   /** Helper text displayed below the input */
@@ -23,7 +23,7 @@ interface FormFieldProps {
  * Wrapper component for form inputs.
  * Handles label, error, and helper text display consistently.
  */
-function FormField(props: FormFieldProps) {
+function Field(props: FieldProps) {
   const { label, helperText, error, children, align = 'stretch' } = props
   const { styles, theme } = useTheme(createStyles)
 
@@ -59,4 +59,4 @@ const createStyles = (theme: Theme) =>
     },
   })
 
-export default FormField
+export default Field

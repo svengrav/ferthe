@@ -19,7 +19,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { createApiContext } from './api'
 import { configureAppContext } from './appContext'
-import { ENV } from './env'
+import { config } from './config'
 import { getSession } from './features/account/'
 import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
 import { getDeviceConnector } from './features/sensor/device/deviceConnector'
@@ -36,8 +36,6 @@ const useAppInitialization = () => {
   useEffect(() => {
     async function initialize() {
       try {
-        const config = ENV
-
         // Global Configuration
         LogBox.ignoreAllLogs()
 
@@ -54,8 +52,8 @@ const useAppInitialization = () => {
         // Create API Context
         const api = createApiContext({
           getAccountSession: getSession,
-          apiEndpoint: config.apiEndpoint,
-          timeout: config.apiTimeout,
+          apiEndpoint: config.api.endpoint,
+          timeout: config.api.timeout,
         })
 
         // Backend Health Check - wait until available
@@ -68,13 +66,13 @@ const useAppInitialization = () => {
 
         // Configure App Context
         const context = configureAppContext({
-          environment: config.isProduction ? 'production' : 'development',
+          environment: config.environment,
           apiContext: api,
           connectors: {
             deviceConnector: getDeviceConnector(),
             secureStoreConnector: createStoreConnector({
-              json: { baseDirectory: config.jsonStoreUrl },
-              type: config.storeType,
+              json: { baseDirectory: config.storage.jsonStoreUrl },
+              type: config.storage.type,
             }),
           },
         })

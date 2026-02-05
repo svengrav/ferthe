@@ -1,8 +1,8 @@
 import { Controller, useFormContext } from 'react-hook-form'
 import { TextInputProps as RNTextInputProps } from 'react-native'
 
+import Field from '../field/Field'
 import TextInput from '../textInput/TextInput'
-import FormField from './FormField'
 
 interface FormInputProps extends Omit<RNTextInputProps, 'value' | 'onChangeText' | 'onBlur'> {
   name: string
@@ -31,7 +31,7 @@ function FormInput({
       render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => {
 
         return (
-          <FormField
+          <Field
             label={label}
             error={error?.message}
             helperText={!error ? helperText : undefined}>
@@ -42,7 +42,7 @@ function FormInput({
               error={!!error}
               {...textInputProps}
             />
-          </FormField>
+          </Field>
         )
       }}
     />

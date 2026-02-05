@@ -1,8 +1,8 @@
 import { Controller, useFormContext } from 'react-hook-form'
 
+import Field from '../field/Field'
 import Picker from '../picker/Picker'
-import { ComponentVariant } from '../types'
-import FormField from './FormField'
+import { ComponentSize, ComponentVariant } from '../types'
 
 interface FormPickerProps {
   name: string
@@ -10,13 +10,14 @@ interface FormPickerProps {
   label?: string
   helperText?: string
   variant?: ComponentVariant
+  size?: ComponentSize
 }
 
 /**
  * Form picker field using FormProvider context.
  * Supports label, error, and helper text display.
  */
-function FormPicker({ name, options, label, helperText, variant }: FormPickerProps) {
+function FormPicker({ name, options, label, helperText, variant, size }: FormPickerProps) {
   const { control } = useFormContext()
 
   return (
@@ -24,7 +25,7 @@ function FormPicker({ name, options, label, helperText, variant }: FormPickerPro
       control={control}
       name={name}
       render={({ field: { value, onChange }, fieldState: { error } }) => (
-        <FormField
+        <Field
           label={label}
           error={error?.message}
           helperText={!error ? helperText : undefined}>
@@ -33,8 +34,9 @@ function FormPicker({ name, options, label, helperText, variant }: FormPickerPro
             selected={value}
             onValueChange={onChange}
             variant={variant}
+            size={size}
           />
-        </FormField>
+        </Field>
       )}
     />
   )

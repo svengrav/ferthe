@@ -19,10 +19,10 @@ function MapDistanceWarning() {
   const formattedDistance = formatDistance(distanceFromBoundary)
 
   return (
-    <View style={styles!.container}>
+    <View style={styles!.container} id="map-distance-warning">
       <View style={styles!.badge}>
         <View style={styles!.textContainer}>
-          <Text variant='caption'  >Außerhalb des Trails</Text>
+          <Text variant='caption'>Außerhalb des Trails</Text>
           <Text variant='caption'>{formattedDistance} entfernt</Text>
         </View>
       </View>
@@ -66,6 +66,9 @@ const useStyles = createThemedStyles((theme: Theme) => ({
     elevation: 5,
   },
   textContainer: {
+    justifyContent: 'center',
+    alignContent: 'center',
+    textAlign: 'center' as const,
     flexDirection: 'column' as const,
   },
 }))

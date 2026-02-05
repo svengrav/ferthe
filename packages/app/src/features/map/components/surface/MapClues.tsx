@@ -1,4 +1,4 @@
-import { ENV } from '@app/env'
+import { config } from '@app/config'
 import { useDiscoveryPreviewClues, useDiscoveryScannedClues } from '@app/features/discovery/stores/discoveryTrailStore'
 import { Clue } from '@shared/contracts'
 import { GeoBoundary } from '@shared/geo'
@@ -101,7 +101,7 @@ function MapClues({ boundary, size, scale }: MapCluesProps) {
 
   // Render debug radius circles around clue (50m, 100m, 150m)
   const renderDebugCircles = (clue: Clue) => {
-    if (!ENV.enableMapDebug) return null
+    if (!config.debug.enableMapDebug) return null
 
     return DEBUG_RADIUS_CIRCLES.map(radius => {
       const circle = mapUtils.calculateCircleDimensions(clue.location, radius, boundary, size)

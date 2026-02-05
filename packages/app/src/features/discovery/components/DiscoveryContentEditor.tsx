@@ -1,4 +1,5 @@
 import { Button, TextInput } from '@app/shared/components'
+import Field from '@app/shared/components/field/Field'
 import Text from '@app/shared/components/text/Text'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
@@ -102,16 +103,16 @@ function DiscoveryContentEditor({
         disabled={isLoading || isPickingImage}
       />
 
-      <TextInput
-        label="Comment (optional)"
-        value={comment}
-        onChangeText={setComment}
-        placeholder="Share your thoughts about this discovery..."
-        multiline
-        numberOfLines={4}
-        editable={!isLoading && !isConverting}
-      />
-
+      <Field helperText="Share your story">
+        <TextInput
+          value={comment}
+          onChangeText={setComment}
+          placeholder="Share your story..."
+          multiline
+          numberOfLines={4}
+          editable={!isLoading && !isConverting}
+        />
+      </Field>
       <View style={styles.buttonRow}>
         <Button
           label="Cancel"

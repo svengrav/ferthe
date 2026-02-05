@@ -28,7 +28,9 @@ const useCommunitiesScreen = () => {
 
   const [isCreating, setIsCreating] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
+  const [newCommunityName, setNewCommunityName] = useState('')
   const [inviteCode, setInviteCode] = useState('')
+  const [selectedTrailId, setSelectedTrailId] = useState<string>('')
 
   // Initialize communities on mount
   useEffect(() => {
@@ -37,15 +39,19 @@ const useCommunitiesScreen = () => {
     }
   }, [status, communityApplication])
 
-  const handleCreateCommunity = useCallback(async (data: { name: string; trailId: string }) => {
+  const handleCreateCommunity = useCallback(async () => {
+    if (!newCommunityName.trim() || !selectedTrailId) return
+
     setIsCreating(true)
-    const result = await communityApplication.createCommunity({ name: data.name, trailIds: [data.trailId] })
+    const result = await communityApplication.createCommunity({ name: newCommunityName.trim(), trailIds: [selectedTrailId] })
     setIsCreating(false)
 
     if (result.success) {
+      setNewCommunityName('')
+      setSelectedTrailId('')
       useOverlayStore.getState().removeByKey('createCommunity')
     }
-  }, [communityApplication])
+  }, [newCommunityName, selectedTrailId, communityApplication])
 
   const handleJoinCommunity = useCallback(async () => {
     if (!inviteCode.trim()) return
@@ -70,8 +76,12 @@ const useCommunitiesScreen = () => {
     isLoading: status === 'loading',
     isCreating,
     isJoining,
+    newCommunityName,
+    setNewCommunityName,
     inviteCode,
     setInviteCode,
+    selectedTrailId,
+    setSelectedTrailId,
     handleCreateCommunity,
     handleJoinCommunity,
     handleRefresh,
@@ -90,8 +100,12 @@ function CommunitiesScreen() {
     isLoading,
     isCreating,
     isJoining,
+    newCommunityName,
+    setNewCommunityName,
     inviteCode,
     setInviteCode,
+    selectedTrailId,
+    setSelectedTrailId,
     handleCreateCommunity,
     handleJoinCommunity,
     handleRefresh,
@@ -102,7 +116,11 @@ function CommunitiesScreen() {
   const handleOpenCreateOverlay = () => {
     setOverlay(
       'createCommunity',
-      <CommunityCreator trails={trails} onCreate={handleCreateCommunity} disabled={isCreating} />
+      <CommunityCreator
+        trails={trails}
+        onCreate={handleCreateCommunity}
+        disabled={isCreating}
+      />
     )
   }
 

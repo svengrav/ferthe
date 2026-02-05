@@ -14,6 +14,8 @@ interface TextProps extends Native.TextProps {
 const Text = ({ style, children, variant = 'body', size, ...props }: TextProps) => {
   const theme = useThemeStore()
 
+  console.log('Rendering Text with variant:', variant, 'and size:', size);
+
   const sizeOverride = size ? {
     fontSize: PRIMITIVES.fontSize[size],
     lineHeight: PRIMITIVES.fontSize[size] * 1.4,

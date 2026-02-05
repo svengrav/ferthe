@@ -47,6 +47,7 @@ function CommunityCreator(props: CommunityCreatorProps) {
             name="trailId"
             label="Select Trail"
             options={trailOptions}
+            variant='outlined'
           />
           <FormSubmitButton label="Create" />
         </View>
