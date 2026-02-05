@@ -1,35 +1,33 @@
-import { View } from 'react-native'
+import { useState } from 'react'
+import { StyleSheet, View } from 'react-native'
 
-import { Button, TextInput } from '@app/shared/components'
+import { Button, Text, TextInput } from '@app/shared/components'
 import Field from '@app/shared/components/field/Field'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { Theme, useTheme } from '@app/shared/theme'
 
 interface JoinCommunitySectionProps {
-  code: string
-  setCode: (code: string) => void
-  onJoin: () => void
+  onJoin: (code: string) => void
   disabled: boolean
   maxLength: number
 }
 
-export function JoinCommunitySection({
-  code,
-  setCode,
-  onJoin,
-  disabled,
-  maxLength,
-}: JoinCommunitySectionProps) {
-  const { styles } = useApp(useStyles)
+export function JoinCommunitySection(props: JoinCommunitySectionProps) {
+  const { onJoin, disabled, maxLength } = props
+  const { styles } = useTheme(createStyles)
   const { t } = useLocalizationStore()
+  const [code, setCode] = useState('')
 
-  if (!styles) return null
+  const handleJoin = () => {
+    onJoin(code)
+  }
 
   return (
     <View style={styles.section}>
+      <Text variant="heading">Join Community</Text>
       <View style={styles.inputRow}>
         <Field
+          style={{ flex: 1 }}
           helperText={t.community.joinWithInviteCode}
         >
           <TextInput
@@ -42,7 +40,7 @@ export function JoinCommunitySection({
         </Field>
         <Button
           label={t.community.join}
-          onPress={onJoin}
+          onPress={handleJoin}
           disabled={disabled || code.length !== maxLength}
         />
       </View>
@@ -50,12 +48,12 @@ export function JoinCommunitySection({
   )
 }
 
-const useStyles = createThemedStyles(theme => ({
+const createStyles = (theme: Theme) => StyleSheet.create({
   section: {
+    gap: theme.tokens.spacing.lg,
     marginBottom: 24,
   },
   inputRow: {
-    flexDirection: 'row',
     gap: 8,
   },
   input: {
@@ -67,4 +65,4 @@ const useStyles = createThemedStyles(theme => ({
     backgroundColor: theme.colors.surface,
     color: theme.colors.onSurface,
   },
-}))
+})

@@ -43,13 +43,12 @@ function CommunityCreator(props: CommunityCreatorProps) {
             name="name"
             placeholder={t.community.communityName}
             helperText={t.community.yourCommunityName}
-
           />
           <FormPicker
             name="trailId"
-            label={t.community.selectTrail}
             options={trailOptions}
             variant='outlined'
+            helperText={t.community.selectTrail}
           />
           <FormSubmitButton label={t.community.create} />
         </View>
@@ -61,10 +60,11 @@ function CommunityCreator(props: CommunityCreatorProps) {
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     section: {
+      gap: theme.tokens.spacing.lg,
       marginBottom: 24,
     },
     inputColumn: {
-      gap: 12,
+      gap: theme.tokens.spacing.lg
     },
   })
 

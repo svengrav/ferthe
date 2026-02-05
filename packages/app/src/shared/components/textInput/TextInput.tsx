@@ -29,10 +29,9 @@ const useStyles = createThemedStyles(theme => ({
     borderColor: theme.colors.divider,
     backgroundColor: theme.colors.surface,
     color: theme.colors.onSurface,
-    paddingHorizontal: 12,
-    paddingVertical: 16,
-    borderRadius: 8,
-    fontSize: 16,
+    padding: theme.tokens.spacing.lg,
+    borderRadius: theme.tokens.borderRadius.md,
+    fontSize: theme.tokens.fontSize.md,
   },
   multiline: {
     minHeight: 80,

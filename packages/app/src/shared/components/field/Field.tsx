@@ -1,10 +1,8 @@
 import { ReactNode } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, View, ViewStyle } from 'react-native'
 
 import Text from '@app/shared/components/text/Text'
 import { Theme, useTheme } from '@app/shared/theme'
-
-type Alignment = 'left' | 'center' | 'right' | 'stretch'
 
 interface FieldProps {
   /** Label displayed above the input */
@@ -15,8 +13,8 @@ interface FieldProps {
   error?: string | boolean
   /** Input component to render */
   children: ReactNode
-  /** Horizontal alignment */
-  align?: Alignment
+  /** Custom styles */
+  style?: ViewStyle
 }
 
 /**
@@ -24,16 +22,14 @@ interface FieldProps {
  * Handles label, error, and helper text display consistently.
  */
 function Field(props: FieldProps) {
-  const { label, helperText, error, children, align = 'stretch' } = props
+  const { label, helperText, error, children, style } = props
   const { styles, theme } = useTheme(createStyles)
 
   const isError = typeof error === 'string' ? true : !!error
   const helper = typeof error === 'string' ? error : helperText
 
-  const alignSelf = align === 'stretch' ? 'stretch' : align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start'
-
   return (
-    <View style={[styles.container, { alignSelf }]}>
+    <View style={[styles.container, style]} id="field-container">
       {label && <Text variant="label" style={styles.label}>{label}</Text>}
       {children}
       {helper && <Text style={[styles.helper, isError && styles.helperError]}>{helper}</Text>}

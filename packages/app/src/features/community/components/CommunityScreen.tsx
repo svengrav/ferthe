@@ -28,9 +28,6 @@ const useCommunitiesScreen = () => {
 
   const [isCreating, setIsCreating] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
-  const [newCommunityName, setNewCommunityName] = useState('')
-  const [inviteCode, setInviteCode] = useState('')
-  const [selectedTrailId, setSelectedTrailId] = useState<string>('')
 
   // Initialize communities on mount
   useEffect(() => {
@@ -39,32 +36,27 @@ const useCommunitiesScreen = () => {
     }
   }, [status, communityApplication])
 
-  const handleCreateCommunity = useCallback(async () => {
-    if (!newCommunityName.trim() || !selectedTrailId) return
-
+  const handleCreateCommunity = useCallback(async (data: { name: string; trailId: string }) => {
     setIsCreating(true)
-    const result = await communityApplication.createCommunity({ name: newCommunityName.trim(), trailIds: [selectedTrailId] })
+    const result = await communityApplication.createCommunity({ name: data.name.trim(), trailIds: [data.trailId] })
     setIsCreating(false)
 
     if (result.success) {
-      setNewCommunityName('')
-      setSelectedTrailId('')
       useOverlayStore.getState().removeByKey('createCommunity')
     }
-  }, [newCommunityName, selectedTrailId, communityApplication])
+  }, [communityApplication])
 
-  const handleJoinCommunity = useCallback(async () => {
-    if (!inviteCode.trim()) return
+  const handleJoinCommunity = useCallback(async (code: string) => {
+    if (!code.trim()) return
 
     setIsJoining(true)
-    const result = await communityApplication.joinCommunity(inviteCode.trim().toUpperCase())
+    const result = await communityApplication.joinCommunity(code.trim().toUpperCase())
     setIsJoining(false)
 
     if (result.success) {
-      setInviteCode('')
       useOverlayStore.getState().removeByKey('joinCommunity')
     }
-  }, [inviteCode, communityApplication])
+  }, [communityApplication])
 
   const handleRefresh = useCallback(() => {
     communityApplication.requestCommunities()
@@ -76,12 +68,6 @@ const useCommunitiesScreen = () => {
     isLoading: status === 'loading',
     isCreating,
     isJoining,
-    newCommunityName,
-    setNewCommunityName,
-    inviteCode,
-    setInviteCode,
-    selectedTrailId,
-    setSelectedTrailId,
     handleCreateCommunity,
     handleJoinCommunity,
     handleRefresh,
@@ -100,12 +86,6 @@ function CommunitiesScreen() {
     isLoading,
     isCreating,
     isJoining,
-    newCommunityName,
-    setNewCommunityName,
-    inviteCode,
-    setInviteCode,
-    selectedTrailId,
-    setSelectedTrailId,
     handleCreateCommunity,
     handleJoinCommunity,
     handleRefresh,
@@ -120,7 +100,10 @@ function CommunitiesScreen() {
         trails={trails}
         onCreate={handleCreateCommunity}
         disabled={isCreating}
-      />
+      />,
+      {
+        variant: 'compact',
+      }
     )
   }
 
@@ -128,15 +111,12 @@ function CommunitiesScreen() {
     setOverlay(
       'joinCommunity',
       <JoinCommunitySection
-        code={inviteCode}
-        setCode={setInviteCode}
         onJoin={handleJoinCommunity}
         disabled={isJoining}
         maxLength={INVITE_CODE_LENGTH}
       />,
       {
         variant: 'compact',
-        title: 'Join Community',
       }
     )
   }

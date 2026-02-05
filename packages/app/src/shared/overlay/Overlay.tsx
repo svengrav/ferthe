@@ -148,7 +148,7 @@ function OverlayContainer({
               </View>
             )}
             {/* Content area */}
-            <View style={styles.compactContent} id='overlay-compact-content'>{children}</View>
+            <View style={[styles.compactContent, !title && { marginTop: -20 }]} id='overlay-compact-content'>{children}</View>
           </View>
         </View>
       )
@@ -284,6 +284,7 @@ const useStyles = createThemedStyles(theme => ({
     backgroundColor: theme.colors.surface,
   },
   compactHeader: {
+    zIndex: 10,
     flexDirection: 'row',
     alignContent: 'center',
     justifyContent: 'space-between',
