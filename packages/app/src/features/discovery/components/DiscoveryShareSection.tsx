@@ -1,6 +1,7 @@
 import { getAppContext } from '@app/appContext'
 import { useCommunityData } from '@app/features/community/stores/communityStore'
 import { Button, Text } from '@app/shared/components'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay, useOverlayStore } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
@@ -18,6 +19,7 @@ interface DiscoveryShareSectionProps {
  */
 function DiscoveryShareSection({ discoveryId }: DiscoveryShareSectionProps) {
   const { styles } = useApp(useStyles)
+  const { t } = useLocalizationStore()
   const { communityApplication } = getAppContext()
   const { communities } = useCommunityData()
   const [isSharing, setIsSharing] = useState(false)
@@ -51,7 +53,7 @@ function DiscoveryShareSection({ discoveryId }: DiscoveryShareSectionProps) {
             />
           ))}
           <Button
-            label="Cancel"
+            label={t.discovery.cancel}
             onPress={() => useOverlayStore.getState().removeByKey('selectCommunity')}
             variant="secondary"
           />
@@ -64,7 +66,7 @@ function DiscoveryShareSection({ discoveryId }: DiscoveryShareSectionProps) {
   return (
     <View style={styles.shareContainer}>
       <Button
-        label="Share"
+        label={t.discovery.share}
         align='right'
         onPress={handleShare}
         disabled={isSharing}

@@ -22,7 +22,7 @@ export default function AboutScreen() {
         <Text variant='title'>{t.about.storyIntro}</Text>
         <Text variant='body'>{t.about.aboutText}</Text>
         <Text variant='body'>{t.about.followYourTrail}</Text>
-        <Button label={'ferthe.eu'} variant='primary' align='center' onPress={handleOpenLink} />
+        <Button label={t.about.fertheWebsite} variant='primary' align='center' onPress={handleOpenLink} />
       </View>
     </Page>
   )

@@ -1,5 +1,6 @@
 import { getAppContext } from '@app/appContext'
 import { InlineEditor } from '@app/shared/components/form/InlineEditor'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { logger } from '@app/shared/utils/logger'
 import React from 'react'
 import { useAccountData } from '../stores/accountStore'
@@ -11,6 +12,7 @@ interface DescriptionEditorProps {
 export const DescriptionEditor: React.FC<DescriptionEditorProps> = ({ onSubmit }) => {
   const { account } = useAccountData()
   const { accountApplication } = getAppContext()
+  const { t } = useLocalizationStore()
 
   const handleSave = async (value: string) => {
     try {
@@ -30,7 +32,7 @@ export const DescriptionEditor: React.FC<DescriptionEditorProps> = ({ onSubmit }
     <InlineEditor
       value={account?.description || ''}
       onSubmit={handleSave}
-      placeholder="Add a description..."
+      placeholder={t.account.addDescription}
       multiline
       maxLength={200}
     />

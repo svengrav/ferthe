@@ -1,5 +1,6 @@
 import { getAppContext } from '@app/appContext'
 import { Button, Text } from '@app/shared/components'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
@@ -54,6 +55,7 @@ const useContentActions = (id: string) => {
  */
 function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
   const { styles } = useApp(useStyles)
+  const { t } = useLocalizationStore()
   const content = useDiscoveryContent(id)
   const { updateContent, deleteContent } = useContentActions(id)
   const [isLoading, setIsLoading] = useState(false)
@@ -88,7 +90,7 @@ function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
   // Content rendering
   const renderAddContent = () => (
     <Button
-      label='Add note'
+      label={t.discovery.addNote}
       variant='outlined'
       style={styles.addContentLink}
       onPress={showEditor}

@@ -1,6 +1,4 @@
-import { LocalizationSet } from './locales.definition'
-
-const en: LocalizationSet = {
+const en = {
   common: {
     add: 'Add',
     ok: 'OK',
@@ -137,7 +135,50 @@ const en: LocalizationSet = {
     displayNamePlaceholder: 'Enter your name',
     save: 'Save',
     displayNameUpdated: 'Display name updated',
+    skip: 'skip',
+    yourPhoneNumber: 'Your phone number',
+    sendCode: 'Send Code',
+    verificationCode: 'Verification Code',
+    yourVerificationCode: 'Your verification code',
+    verifyCode: 'Verify Code',
+    description: 'Description',
+    upgradeNow: 'Upgrade now',
+    selectImage: 'Select Image',
+    addDescription: 'Add a description...',
+  },
+  community: {
+    communityName: 'Community Name',
+    yourCommunityName: 'Your Community Name',
+    selectTrail: 'Select Trail',
+    create: 'Create',
+    joinWithInviteCode: 'Join with Invite Code',
+    yourCode: 'Your Code',
+    join: 'Join',
+    unshareDiscovery: 'Unshare Discovery',
+    removeDiscoveryConfirm: 'Remove this discovery from the community?',
+    unshare: 'Unshare',
+    placeholder: 'C',
+  },
+  discovery: {
+    editYourDiscovery: 'Edit your discovery',
+    documentYourDiscovery: 'Document your discovery',
+    pickingImage: 'Picking image...',
+    pickImageFromDevice: 'Pick Image from Device',
+    shareYourStory: 'Share your story',
+    shareYourStoryPlaceholder: 'Share your story...',
+    cancel: 'Cancel',
+    processing: 'Processing...',
+    saving: 'Saving...',
+    update: 'Update',
+    save: 'Save',
+    share: 'Share',
+    addNote: 'Add note',
+  },
+  map: {
+    outsideTrail: 'Outside the trail',
+    distanceAway: 'away',
   },
 }
 
+export type LocalizationSet = typeof en
 export default en

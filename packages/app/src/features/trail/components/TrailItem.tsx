@@ -4,7 +4,7 @@ import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { Trail } from '@shared/contracts'
 import { useRef, useState } from 'react'
-import { TouchableOpacity, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 
 // Avatar constants
 const AVATAR_SIZE = 50
@@ -72,7 +72,7 @@ function TrailItem({ trail, actions, onPress }: TrailCardProps) {
   if (!styles) return null
 
   const renderCardContent = () => (
-    <View style={styles.content}>
+    <View style={styles.content} id="trail-card-content">
       <TrailAvatar trail={trail} />
       <View style={styles.textContainer}>
         <Text variant='title' >{trail.name} </Text>
@@ -93,11 +93,11 @@ function TrailItem({ trail, actions, onPress }: TrailCardProps) {
 
   return (
     <View id="trail-item-container" style={styles.container}>
-      <TouchableOpacity onPress={() => itemTap?.(trail)} onLongPress={openContextMenu}>
+      <Pressable onPress={() => itemTap?.(trail)} onLongPress={openContextMenu}>
         <Card ref={cardRef}>
           {renderCardContent()}
         </Card>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   )
 }

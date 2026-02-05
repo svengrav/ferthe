@@ -13,3 +13,11 @@ export interface DisableableProps {
 export interface AlignableProps {
   align?: Alignment
 }
+
+export interface SizeableProps {
+  size?: ComponentSize
+}
+
+export interface VariantableProps {
+  variant?: ComponentVariant
+}

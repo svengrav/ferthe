@@ -7,7 +7,7 @@ import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles, useThemeStore } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
 import React from 'react'
-import { FlatList, TouchableOpacity, View } from 'react-native'
+import { FlatList, View } from 'react-native'
 import { GestureDetector } from 'react-native-gesture-handler'
 import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
 
@@ -64,12 +64,18 @@ export const MapTrailSelector = () => {
 
   return (
     <GestureDetector gesture={swipeGesture}>
-      <View>
-        <TouchableOpacity style={styles.selector} onPress={openTrailSelector}>
-          {selectedTrail && <TrailItem trail={selectedTrail} onPress={openTrailSelector} actions={
-            <Button icon='swap-horiz' onPress={openTrailSelector} variant='outlined' />
-          } />}
-        </TouchableOpacity>
+      <View style={styles.selector}>
+        {selectedTrail && (
+          <TrailItem
+            trail={selectedTrail}
+            onPress={openTrailSelector}
+            actions={
+              <Button
+                icon='swap-horiz'
+                onPress={openTrailSelector}
+                variant='outlined' />
+            } />
+        )}
       </View>
     </GestureDetector>
   )
@@ -77,13 +83,12 @@ export const MapTrailSelector = () => {
 
 const useStyles = createThemedStyles(theme => ({
   selector: {
-    paddingVertical: 8,
     flexDirection: 'row',
-    paddingHorizontal: 8,
     alignItems: 'center',
     borderTopColor: theme.colors.divider,
+    backgroundColor: theme.colors.surface,
     borderTopWidth: 1,
-    gap: 12,
+    padding: 8,
   },
   logoContainer: {
     width: 50,

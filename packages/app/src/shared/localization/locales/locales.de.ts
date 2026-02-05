@@ -1,4 +1,4 @@
-import { LocalizationSet } from './locales.definition'
+import type { LocalizationSet } from './locales.en'
 
 const de: LocalizationSet = {
   common: {
@@ -38,7 +38,7 @@ const de: LocalizationSet = {
     socials: 'Soziales',
   },
   trails: {
-    yourTrails: 'Deine Pfade',
+    yourTrails: 'Pfade',
     startTrail: 'Pfad starten',
     everyJourney: 'Jede Reise beginnt mit einem einzigen Schritt',
     createTrail: 'Pfad erstellen',
@@ -136,6 +136,48 @@ const de: LocalizationSet = {
     displayNamePlaceholder: 'Gib deinen Namen ein',
     save: 'Speichern',
     displayNameUpdated: 'Anzeigename aktualisiert',
+    skip: 'Überspringen',
+    yourPhoneNumber: 'Deine Telefonnummer',
+    sendCode: 'Code senden',
+    verificationCode: 'Verifizierungscode',
+    yourVerificationCode: 'Dein Verifizierungscode',
+    verifyCode: 'Code verifizieren',
+    description: 'Beschreibung',
+    upgradeNow: 'Jetzt erweitern',
+    selectImage: 'Bild auswählen',
+    addDescription: 'Beschreibung hinzufügen...',
+  },
+  community: {
+    communityName: 'Community-Name',
+    yourCommunityName: 'Dein Community-Name',
+    selectTrail: 'Pfad auswählen',
+    create: 'Erstellen',
+    joinWithInviteCode: 'Mit Einladungscode beitreten',
+    yourCode: 'Dein Code',
+    join: 'Beitreten',
+    unshareDiscovery: 'Entdeckung entfernen',
+    removeDiscoveryConfirm: 'Diese Entdeckung aus der Community entfernen?',
+    unshare: 'Entfernen',
+    placeholder: 'C',
+  },
+  discovery: {
+    editYourDiscovery: 'Entdeckung bearbeiten',
+    documentYourDiscovery: 'Entdeckung dokumentieren',
+    pickingImage: 'Bild wird ausgewählt...',
+    pickImageFromDevice: 'Bild vom Gerät auswählen',
+    shareYourStory: 'Teile deine Geschichte',
+    shareYourStoryPlaceholder: 'Teile deine Geschichte...',
+    cancel: 'Abbrechen',
+    processing: 'Verarbeiten...',
+    saving: 'Speichern...',
+    update: 'Aktualisieren',
+    save: 'Speichern',
+    share: 'Teilen',
+    addNote: 'Notiz hinzufügen',
+  },
+  map: {
+    outsideTrail: 'Außerhalb des Trails',
+    distanceAway: 'entfernt',
   },
 }
 

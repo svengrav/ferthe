@@ -2,6 +2,7 @@ import { View } from 'react-native'
 
 import { Button, TextInput } from '@app/shared/components'
 import Field from '@app/shared/components/field/Field'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
@@ -21,6 +22,7 @@ export function JoinCommunitySection({
   maxLength,
 }: JoinCommunitySectionProps) {
   const { styles } = useApp(useStyles)
+  const { t } = useLocalizationStore()
 
   if (!styles) return null
 
@@ -28,18 +30,18 @@ export function JoinCommunitySection({
     <View style={styles.section}>
       <View style={styles.inputRow}>
         <Field
-          helperText='Join with Invite Code'
+          helperText={t.community.joinWithInviteCode}
         >
           <TextInput
             style={styles.input}
-            placeholder="Your Code"
+            placeholder={t.community.yourCode}
             value={code}
             onChangeText={text => setCode(text.toUpperCase())}
             maxLength={maxLength}
           />
         </Field>
         <Button
-          label="Join"
+          label={t.community.join}
           onPress={onJoin}
           disabled={disabled || code.length !== maxLength}
         />

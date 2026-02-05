@@ -55,10 +55,10 @@ export const UI_DIMENSIONS = {
 
 export const PRIMITIVES = {
   spacing: {
-    xs: 4,
-    sm: 8,
-    md: 16,
-    lg: 20,
+    xs: 2,
+    sm: 4,
+    md: 8,
+    lg: 16,
     xl: 32,
   },
   borderRadius: {

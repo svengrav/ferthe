@@ -1,15 +1,26 @@
 import { Text } from '@app/shared/components'
-import { createThemedStyles, Theme } from '@app/shared/theme'
+import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { useDeviceBoundaryStatus } from '../stores/mapStore'
 
 /**
- * Displays a warning badge when user is outside the trail boundary
- * Shows distance to nearest trail edge
+ * Format distance in meters to human readable string
+ */
+const formatDistance = (meters: number): string => {
+  if (meters < 1000) {
+    return `${Math.round(meters)} m`
+  }
+  return `${(meters / 1000).toFixed(1)} km`
+}
+
+/**
+ * Displays a warning badge when user is outside the trail boundary.
+ * Shows distance to nearest trail edge.
  */
 function MapDistanceWarning() {
-  const { styles } = useApp(useStyles)
+  const { styles } = useTheme(createStyles)
+  const { locales } = useApp()
   const { isOutsideBoundary, distanceFromBoundary } = useDeviceBoundaryStatus()
 
   if (!isOutsideBoundary) {
@@ -19,47 +30,35 @@ function MapDistanceWarning() {
   const formattedDistance = formatDistance(distanceFromBoundary)
 
   return (
-    <View style={styles!.container} id="map-distance-warning">
-      <View style={styles!.badge}>
-        <View style={styles!.textContainer}>
-          <Text variant='caption'>Außerhalb des Trails</Text>
-          <Text variant='caption'>{formattedDistance} entfernt</Text>
+    <View style={styles.container} id="map-distance-warning">
+      <View style={styles.badge}>
+        <View style={styles.textContainer}>
+          <Text variant='caption'>{locales.map.outsideTrail}</Text>
+          <Text variant='caption'>{formattedDistance} {locales.map.distanceAway}</Text>
         </View>
       </View>
     </View>
   )
 }
 
-/**
- * Format distance in meters to human readable string
- * @param meters Distance in meters
- * @returns Formatted string (e.g. "150 m" or "2.3 km")
- */
-const formatDistance = (meters: number): string => {
-  if (meters < 1000) {
-    return `${Math.round(meters)} m`
-  }
-  return `${(meters / 1000).toFixed(1)} km`
-}
-
-const useStyles = createThemedStyles((theme: Theme) => ({
+const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
-    position: 'absolute' as const,
+    position: 'absolute',
     top: 80,
     left: 0,
     right: 0,
-    alignItems: 'center' as const,
+    alignItems: 'center',
     zIndex: 200,
-    pointerEvents: 'none' as const,
+    pointerEvents: 'none',
   },
   badge: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: theme.deriveColor(theme.colors.error, 0.95),
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    shadowColor: '#000',
+    shadowColor: theme.colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -67,10 +66,8 @@ const useStyles = createThemedStyles((theme: Theme) => ({
   },
   textContainer: {
     justifyContent: 'center',
-    alignContent: 'center',
-    textAlign: 'center' as const,
-    flexDirection: 'column' as const,
+    alignItems: 'center',
   },
-}))
+})
 
 export default MapDistanceWarning

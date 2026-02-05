@@ -2,6 +2,7 @@ import { getAppContext } from '@app/appContext'
 import { useAccountData } from '@app/features/account/stores/accountStore'
 import { Button, Text } from '@app/shared/components'
 import { Dialog } from '@app/shared/components/'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay, useOverlayStore } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
@@ -26,6 +27,7 @@ function SharedDiscoveryCard({ discovery, communityId, onUnshared }: SharedDisco
   const { styles } = useApp(useStyles)
   const { communityApplication } = getAppContext()
   const { account } = useAccountData()
+  const { t } = useLocalizationStore()
   const [isUnsharing, setIsUnsharing] = useState(false)
 
   if (!styles) return null
@@ -36,9 +38,9 @@ function SharedDiscoveryCard({ discovery, communityId, onUnshared }: SharedDisco
     setOverlay(
       'confirmUnshare',
       <Dialog
-        title="Unshare Discovery"
-        message="Remove this discovery from the community?"
-        confirmText="Unshare"
+        title={t.community.unshareDiscovery}
+        message={t.community.removeDiscoveryConfirm}
+        confirmText={t.community.unshare}
         destructive
         onConfirm={async () => {
           useOverlayStore.getState().removeByKey('confirmUnshare')

@@ -3,14 +3,12 @@ import { useRef, useState } from 'react'
 import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native'
 import Dropdown from '../dropdown/Dropdown.tsx'
 import { Icon, IconSymbolName } from '../icon/Icon'
-import { AlignableProps, ComponentSize, ComponentVariant, DisableableProps, Option } from '../types'
+import { AlignableProps, DisableableProps, Option, SizeableProps, VariantableProps } from '../types'
 
-interface ButtonProps extends DisableableProps, AlignableProps {
+interface ButtonProps extends DisableableProps, AlignableProps, SizeableProps, VariantableProps {
   label?: string
   icon?: IconSymbolName
-  size?: ComponentSize
   onPress?: () => void
-  variant?: ComponentVariant
   dense?: boolean
   options?: Option[]
   style?: ViewStyle

@@ -3,6 +3,7 @@ import Field from '@app/shared/components/field/Field'
 import Text from '@app/shared/components/text/Text'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { logger } from '@app/shared/utils/logger'
@@ -28,6 +29,7 @@ function DiscoveryContentEditor({
   isLoading = false,
 }: DiscoveryContentEditorProps) {
   const { styles } = useApp(useStyles)
+  const { t } = useLocalizationStore()
   const { selectedImageUri, pickImage, clearImage, isLoading: isPickingImage } = useImagePicker()
   const { convertToBase64, isConverting } = useImageToBase64()
 
@@ -91,23 +93,23 @@ function DiscoveryContentEditor({
   return (
     <View style={styles.container}>
       <Text variant="label" style={styles.label}>
-        {isEditing ? 'Edit your discovery' : 'Document your discovery'}
+        {isEditing ? t.discovery.editYourDiscovery : t.discovery.documentYourDiscovery}
       </Text>
 
       {renderImageSection()}
 
       <Button
-        label={isPickingImage ? 'Picking image...' : 'Pick Image from Device'}
+        label={isPickingImage ? t.discovery.pickingImage : t.discovery.pickImageFromDevice}
         variant="outlined"
         onPress={pickImage}
         disabled={isLoading || isPickingImage}
       />
 
-      <Field helperText="Share your story">
+      <Field helperText={t.discovery.shareYourStory}>
         <TextInput
           value={comment}
           onChangeText={setComment}
-          placeholder="Share your story..."
+          placeholder={t.discovery.shareYourStoryPlaceholder}
           multiline
           numberOfLines={4}
           editable={!isLoading && !isConverting}
@@ -115,13 +117,13 @@ function DiscoveryContentEditor({
       </Field>
       <View style={styles.buttonRow}>
         <Button
-          label="Cancel"
+          label={t.discovery.cancel}
           variant="outlined"
           onPress={onCancel}
           disabled={isLoading || isConverting}
         />
         <Button
-          label={isConverting ? 'Processing...' : isLoading ? 'Saving...' : isEditing ? 'Update' : 'Save'}
+          label={isConverting ? t.discovery.processing : isLoading ? t.discovery.saving : isEditing ? t.discovery.update : t.discovery.save}
           variant="primary"
           onPress={handleSubmit}
           disabled={isLoading || isConverting || (!commentChanged && !imageChanged && isEditing)}

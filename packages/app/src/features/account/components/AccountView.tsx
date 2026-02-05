@@ -59,9 +59,9 @@ export const AccountView: React.FC = () => {
         {/* Description Editor */}
         <InfoField
           icon="text-snippet"
-          label="Description"
+          label={t.account.description}
           value={account?.description || 'Not set'}
-          onEdit={() => { const close = setOverlay('descriptionEditor', <DescriptionEditor onSubmit={() => close()} />, { title: 'Set Description', closable: true, variant: 'compact' }) }}
+          onEdit={() => { const close = setOverlay('descriptionEditor', <DescriptionEditor onSubmit={() => close()} />, { title: t.account.description, closable: true, variant: 'compact' }) }}
         />
 
         <InfoField
@@ -92,7 +92,7 @@ export const AccountView: React.FC = () => {
         <View style={{ flex: 1 }}>
           <Button
             align='center'
-            label={'Upgrade now'}
+            label={t.account.upgradeNow}
             variant="primary"
             onPress={() => showAccountRegistration()} />
           <Text variant="hint" style={{ textAlign: 'center', paddingTop: 8 }}>

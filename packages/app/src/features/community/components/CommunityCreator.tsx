@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native'
 import { CreateCommunityInput, createCommunitySchema, Trail } from '@shared/contracts'
 
 import { Form, FormInput, FormPicker, FormSubmitButton, Text } from '@app/shared/components'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useTheme } from '@app/shared/theme'
 
 interface CommunityCreatorProps {
@@ -19,6 +20,7 @@ function CommunityCreator(props: CommunityCreatorProps) {
   const { trails, onCreate, disabled } = props
 
   const { styles } = useTheme(createStyles)
+  const { t } = useLocalizationStore()
 
   const trailOptions = trails.map(trail => ({
     label: trail.name,
@@ -39,17 +41,17 @@ function CommunityCreator(props: CommunityCreatorProps) {
         <View style={styles.inputColumn}>
           <FormInput
             name="name"
-            placeholder="Community Name"
-            helperText="Your Community Name"
+            placeholder={t.community.communityName}
+            helperText={t.community.yourCommunityName}
 
           />
           <FormPicker
             name="trailId"
-            label="Select Trail"
+            label={t.community.selectTrail}
             options={trailOptions}
             variant='outlined'
           />
-          <FormSubmitButton label="Create" />
+          <FormSubmitButton label={t.community.create} />
         </View>
       </Form>
     </View>

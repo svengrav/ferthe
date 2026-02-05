@@ -66,14 +66,14 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({ onSubmit }) => {
 
         <View style={styles.buttonContainer}>
           <Button
-            label="Select Image"
+            label={t.account.selectImage}
             onPress={pickImage}
             variant="outlined"
             disabled={isLoading}
           />
           {selectedImageUri && (
             <Button
-              label="Save"
+              label={t.account.save}
               onPress={handleUpload}
               variant="primary"
               disabled={isLoading}

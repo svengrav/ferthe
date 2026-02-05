@@ -16,7 +16,7 @@ description: This prompt is used to refactor code according to specified guideli
 - Use async/await instead of .then()/.catch() for better readability.
 - Remove unnecessary and boilerplate code. Try to be simple and readable.
 - Try to avoid complex solutions, use simple and readable code.
-- Try to avoid magic strings and numbers, use constants `VALUE_X` instead. (Only for important values)
+- Try to avoid magic strings and numbers, use constants `VALUE_X` instead. (Only for important values in business logic, NOT for style values)
 - Don't use extra config objects or interfaces for constants. Define constants directly.
 - Try to comment logical sections of the code, not every line.
 - Try to avoid deeply nested code structures.
@@ -35,6 +35,20 @@ description: This prompt is used to refactor code according to specified guideli
 - Reuse shared components like Text instead of direct React Native components.
 - Make use of variants and themes for these components if possible. 
 - Use Icon Component instead of any emojis.
+
+## Localization
+- **Never use hardcoded text strings** in components (e.g., `"Save"`, `"Cancel"`, `"Enter your name"`).
+- All user-facing text must be defined in `LocalizationSet` interface.
+- Access localized strings via `useLocalizationStore().t` or `useApp().locales`.
+- Examples:
+  - Bad: `<Button label="Save" />`
+  - Good: `<Button label={t.common.save} />`
+  - Bad: `placeholder="Enter your name"`
+  - Good: `placeholder={t.account.displayNamePlaceholder}`
+- Add new keys to:
+  - `packages/app/src/shared/localization/locales/locales.definition.ts` (TypeScript interface)
+  - `packages/app/src/shared/localization/locales/locales.en.ts` (English translations)
+  - `packages/app/src/shared/localization/locales/locales.de.ts` (German translations)
 
 ## Import Organization
 - Group imports: React/React Native → Third-party → Local imports

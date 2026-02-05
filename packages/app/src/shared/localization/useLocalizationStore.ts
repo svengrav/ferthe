@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import de from './locales/locales.de'
-import { LocalizationSet } from './locales/locales.definition'
-import en from './locales/locales.en'
+import en, { LocalizationSet } from './locales/locales.en'
 
 type Localization = 'de' | 'en'
 

@@ -80,12 +80,12 @@ function AccountVerification() {
           >
             <FormInput
               name="phoneNumber"
-              placeholder={locales.auth.phoneNumberPlaceholder || 'Your phone number'}
+              placeholder={locales.account.yourPhoneNumber}
               keyboardType="phone-pad"
               helperText={PHONE_VERIFICATION_NOTICE}
             />
             <FormSubmitButton
-              label={locales.auth.sendSms || 'Send Code'}
+              label={locales.account.sendCode}
               variant="primary"
             />
           </Form>
@@ -101,12 +101,12 @@ function AccountVerification() {
           >
             <FormInput
               name="verificationCode"
-              label="Verification Code"
-              placeholder="Your verification code"
+              label={locales.account.verificationCode}
+              placeholder={locales.account.yourVerificationCode}
               keyboardType="number-pad"
             />
             <FormSubmitButton
-              label="Verify Code"
+              label={locales.account.verifyCode}
               variant="primary"
             />
           </Form>

@@ -83,7 +83,7 @@ export default function AccountLogin({ onClose }: AccountLoginProps) {
         {/* Local Account Section */}
         <View style={styles.section}>
           <Button
-            label='skip'
+            label={t.account.skip}
             onPress={handleCreateLocalAccount}
             variant="outlined"
             disabled={isCreatingLocal}

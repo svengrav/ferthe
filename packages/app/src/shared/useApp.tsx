@@ -3,7 +3,7 @@ import { AppContext, getAppContext } from '@app/appContext'
 import { useLocalizationStore } from '@app/shared/localization'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { useCallback, useMemo } from 'react'
-import { LocalizationSet } from './localization/locales/locales.definition'
+import { LocalizationSet } from './localization/locales/locales.en'
 
 interface AppCore<T> {
   context: AppContext
