@@ -126,6 +126,7 @@ const createStyles = (theme: Theme) =>
       gap: 8,
     },
     disabled: {
+      backgroundColor: theme.colors.background,
     },
 
     // Variant styles
@@ -155,7 +156,7 @@ const createStyles = (theme: Theme) =>
       color: theme.colors.primary,
     },
     textDisabled: {
-      color: theme.colors.onSurface + '50',
+      color: theme.colors.onSurface + '40',
     },
 
     // Icon-only button styles

@@ -1,6 +1,8 @@
 import { Controller, useFormContext } from 'react-hook-form'
 import { TextInputProps as RNTextInputProps } from 'react-native'
+
 import TextInput from '../textInput/TextInput'
+import FormField from './FormField'
 
 interface FormInputProps extends Omit<RNTextInputProps, 'value' | 'onChangeText' | 'onBlur'> {
   name: string
@@ -26,17 +28,23 @@ function FormInput({
     <Controller
       control={control}
       name={name}
-      render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
-        <TextInput
-          label={label}
-          value={coerceNumber ? String(value ?? '') : value}
-          onChangeText={onChange}
-          onBlur={onBlur}
-          error={error?.message}
-          helperText={!error ? helperText : undefined}
-          {...textInputProps}
-        />
-      )}
+      render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => {
+
+        return (
+          <FormField
+            label={label}
+            error={error?.message}
+            helperText={!error ? helperText : undefined}>
+            <TextInput
+              value={coerceNumber ? String(value ?? '') : value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              error={!!error}
+              {...textInputProps}
+            />
+          </FormField>
+        )
+      }}
     />
   )
 }

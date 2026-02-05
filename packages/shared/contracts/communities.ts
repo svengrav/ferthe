@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { AccountContext } from './accounts.ts';
 import { Discovery } from './discoveries.ts';
 import { Result } from './results.ts';
@@ -66,3 +67,13 @@ export interface CommunityDiscoveryStats {
   likes: number
   dislikes: number
 }
+
+/**
+ * Validation schema for creating a community.
+ */
+export const createCommunitySchema = z.object({
+  name: z.string().min(3, 'Name must be at least 3 characters').max(50, 'Name must be at most 50 characters'),
+  trailId: z.string().min(1, 'Trail selection is required'),
+})
+
+export type CreateCommunityInput = z.infer<typeof createCommunitySchema>

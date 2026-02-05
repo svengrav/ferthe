@@ -35,7 +35,8 @@
     "twilio": "npm:twilio@^5.11.2",
     "oak": "jsr:@oak/oak@^17",
     "path": "npm:path@^0.12.7",
-    "fs": "node:fs/promises"
+    "fs": "node:fs/promises",
+    "zod": "npm:zod@^4.3.6"
   },
   "compilerOptions": {
     "lib": [

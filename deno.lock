@@ -42,6 +42,7 @@
     "npm:twilio@^5.11.2": "5.12.0",
     "npm:typescript@*": "5.9.3",
     "npm:vite-plugin-pwa@^1.2.0": "1.2.0_vite@7.3.1__picomatch@4.0.3_workbox-build@7.4.0__ajv@8.17.1__@babel+core@7.28.6__rollup@2.79.2_workbox-window@7.4.0",
+    "npm:zod@^4.3.6": "4.3.6",
     "npm:zustand@^5.0.1": "5.0.10_@types+react@19.2.9_react@19.2.3"
   },
   "jsr": {
@@ -4677,6 +4678,9 @@
     "yallist@3.1.1": {
       "integrity": "sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g=="
     },
+    "zod@4.3.6": {
+      "integrity": "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="
+    },
     "zustand@5.0.10_@types+react@19.2.9_react@19.2.3": {
       "integrity": "sha512-U1AiltS1O9hSy3rul+Ub82ut2fqIAefiSuwECWt6jlMVUGejvf+5omLcRBSzqbRagSM3hQZbtzdeRc6QVScXTg==",
       "dependencies": [
@@ -4703,7 +4707,8 @@
       "npm:@azure/storage-blob@^12.29.1",
       "npm:dotenv@16",
       "npm:path@~0.12.7",
-      "npm:twilio@^5.11.2"
+      "npm:twilio@^5.11.2",
+      "npm:zod@^4.3.6"
     ],
     "members": {
       "packages/web": {

@@ -1,0 +1,62 @@
+import { ReactNode } from 'react'
+import { StyleSheet, View } from 'react-native'
+
+import Text from '@app/shared/components/text/Text'
+import { Theme, useTheme } from '@app/shared/theme'
+
+type Alignment = 'left' | 'center' | 'right' | 'stretch'
+
+interface FormFieldProps {
+  /** Label displayed above the input */
+  label?: string
+  /** Helper text displayed below the input */
+  helperText?: string
+  /** Error message or boolean flag */
+  error?: string | boolean
+  /** Input component to render */
+  children: ReactNode
+  /** Horizontal alignment */
+  align?: Alignment
+}
+
+/**
+ * Wrapper component for form inputs.
+ * Handles label, error, and helper text display consistently.
+ */
+function FormField(props: FormFieldProps) {
+  const { label, helperText, error, children, align = 'stretch' } = props
+  const { styles, theme } = useTheme(createStyles)
+
+  const isError = typeof error === 'string' ? true : !!error
+  const helper = typeof error === 'string' ? error : helperText
+
+  const alignSelf = align === 'stretch' ? 'stretch' : align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start'
+
+  return (
+    <View style={[styles.container, { alignSelf }]}>
+      {label && <Text variant="label" style={styles.label}>{label}</Text>}
+      {children}
+      {helper && <Text style={[styles.helper, isError && styles.helperError]}>{helper}</Text>}
+    </View>
+  )
+}
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      gap: 6,
+    },
+    label: {
+      color: theme.deriveColor(theme.colors.onBackground, 0.7),
+    },
+    helper: {
+      fontSize: 12,
+      color: theme.deriveColor(theme.colors.onSurface, 0.6),
+    },
+    helperError: {
+      paddingHorizontal: 4,
+      color: theme.colors.error,
+    },
+  })
+
+export default FormField

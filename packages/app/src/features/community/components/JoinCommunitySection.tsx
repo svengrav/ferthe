@@ -1,6 +1,6 @@
-import { TextInput, View } from 'react-native'
+import { View } from 'react-native'
 
-import { Button, Text } from '@app/shared/components'
+import { Button, TextInput } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
@@ -25,9 +25,9 @@ export function JoinCommunitySection({
 
   return (
     <View style={styles.section}>
-      <Text variant="label">Join with Invite Code</Text>
       <View style={styles.inputRow}>
         <TextInput
+          helperText='Join with Invite Code'
           style={styles.input}
           placeholder="Your Code"
           value={code}

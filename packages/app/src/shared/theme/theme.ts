@@ -6,6 +6,8 @@ import { ThemeBase } from './types'
  */
 
 export const DARK_THEME = {
+  white: '#FFFFFF',
+  black: '#000000',
   background: '#12121e',
   onBackground: '#FFFFFF',
   primary: '#ffffff',
@@ -24,6 +26,8 @@ export const DARK_THEME = {
 }
 
 export const LIGHT_THEME = {
+  white: '#FFFFFF',
+  black: '#000000',
   background: '#F5F5F5',
   onBackground: '#121214',
   primary: '#000000',

@@ -1,7 +1,5 @@
-import { Form, FormPicker, Text } from '@app/shared/components'
+import { Form, FormPicker, Text, useFormSubmitWatcher } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { useEffect } from 'react'
-import { useFormContext } from 'react-hook-form'
 import { View } from 'react-native'
 import { z } from 'zod'
 import useSettings from '../hooks/useSettings'
@@ -19,24 +17,45 @@ interface SettingsFormProps {
   onSubmit: (settings: Settings) => void
 }
 
-function AutoSubmitWatcher({ onFormSubmit }: { onFormSubmit: (values: SettingsFormValues) => void }) {
-  const { watch } = useFormContext<SettingsFormValues>()
+function FormContent({ onFormSubmit }: { onFormSubmit: (values: SettingsFormValues) => void }) {
+  const { t } = useLocalizationStore()
 
-  useEffect(() => {
-    const subscription = watch((values) => {
-      if (values.language && values.theme) {
-        onFormSubmit(values as SettingsFormValues)
-      }
-    })
-    return () => subscription.unsubscribe()
-  }, [watch, onFormSubmit])
+  useFormSubmitWatcher(onFormSubmit)
 
-  return null
+  return (
+    <>
+      <Text variant='heading'>{t.settings.yourSettings}</Text>
+      <View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <Text variant='body'>{t.settings.chooseLanguage}</Text>
+          <FormPicker
+            variant='secondary'
+            name="language"
+            options={[
+              { label: 'German', value: LanguageOptions.German },
+              { label: 'English', value: LanguageOptions.English },
+            ]}
+          />
+        </View>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <Text variant='body'>{t.settings.forestIs}</Text>
+          <FormPicker
+            variant='secondary'
+            name="theme"
+            options={[
+              // { label: t.settings.light, value: ThemeMode.Light },
+              { label: t.settings.dark, value: ThemeMode.Dark },
+            ]}
+          />
+        </View>
+      </View>
+    </>
+  )
 }
 
 export const SettingsForm = ({ onClose, onSubmit }: SettingsFormProps) => {
   const { initialValues, handleSubmit: processSettings } = useSettings()
-  const { t } = useLocalizationStore()
 
   const onFormSubmit = (values: SettingsFormValues) => {
     const updatedSettings = processSettings(values)
@@ -49,31 +68,7 @@ export const SettingsForm = ({ onClose, onSubmit }: SettingsFormProps) => {
       defaultValues={initialValues}
       onSubmit={onFormSubmit}
     >
-      <AutoSubmitWatcher onFormSubmit={onFormSubmit} />
-      <Text variant='heading'>{t.settings.yourSettings}</Text>
-      <View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <Text variant='body'>{t.settings.chooseLanguage}</Text>
-          <FormPicker
-            name="language"
-            options={[
-              { label: 'German', value: LanguageOptions.German },
-              { label: 'English', value: LanguageOptions.English },
-            ]}
-          />
-        </View>
-
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <Text variant='body'>{t.settings.forestIs}</Text>
-          <FormPicker
-            name="theme"
-            options={[
-              // { label: t.settings.light, value: ThemeMode.Light },
-              { label: t.settings.dark, value: ThemeMode.Dark },
-            ]}
-          />
-        </View>
-      </View>
+      <FormContent onFormSubmit={onFormSubmit} />
     </Form>
   )
 }

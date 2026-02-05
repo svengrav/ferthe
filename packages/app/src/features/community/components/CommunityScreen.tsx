@@ -10,7 +10,7 @@ import { setOverlay, useOverlayStore } from '@app/shared/overlay'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 
 import { useCommunityData, useCommunityStatus } from '../stores/communityStore'
-import { CommunityCreator } from './CommunityCreator'
+import CommunityCreator from './CommunityCreator'
 import { JoinCommunitySection } from './JoinCommunitySection'
 import { MyCommunitiesSection } from './MyCommunitiesSection'
 
@@ -28,9 +28,7 @@ const useCommunitiesScreen = () => {
 
   const [isCreating, setIsCreating] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
-  const [newCommunityName, setNewCommunityName] = useState('')
   const [inviteCode, setInviteCode] = useState('')
-  const [selectedTrailId, setSelectedTrailId] = useState<string>('')
 
   // Initialize communities on mount
   useEffect(() => {
@@ -39,19 +37,15 @@ const useCommunitiesScreen = () => {
     }
   }, [status, communityApplication])
 
-  const handleCreateCommunity = useCallback(async () => {
-    if (!newCommunityName.trim() || !selectedTrailId) return
-
+  const handleCreateCommunity = useCallback(async (data: { name: string; trailId: string }) => {
     setIsCreating(true)
-    const result = await communityApplication.createCommunity({ name: newCommunityName.trim(), trailIds: [selectedTrailId] })
+    const result = await communityApplication.createCommunity({ name: data.name, trailIds: [data.trailId] })
     setIsCreating(false)
 
     if (result.success) {
-      setNewCommunityName('')
-      setSelectedTrailId('')
       useOverlayStore.getState().removeByKey('createCommunity')
     }
-  }, [newCommunityName, selectedTrailId, communityApplication])
+  }, [communityApplication])
 
   const handleJoinCommunity = useCallback(async () => {
     if (!inviteCode.trim()) return
@@ -76,12 +70,8 @@ const useCommunitiesScreen = () => {
     isLoading: status === 'loading',
     isCreating,
     isJoining,
-    newCommunityName,
-    setNewCommunityName,
     inviteCode,
     setInviteCode,
-    selectedTrailId,
-    setSelectedTrailId,
     handleCreateCommunity,
     handleJoinCommunity,
     handleRefresh,
@@ -100,12 +90,8 @@ function CommunitiesScreen() {
     isLoading,
     isCreating,
     isJoining,
-    newCommunityName,
-    setNewCommunityName,
     inviteCode,
     setInviteCode,
-    selectedTrailId,
-    setSelectedTrailId,
     handleCreateCommunity,
     handleJoinCommunity,
     handleRefresh,
@@ -116,15 +102,7 @@ function CommunitiesScreen() {
   const handleOpenCreateOverlay = () => {
     setOverlay(
       'createCommunity',
-      <CommunityCreator
-        name={newCommunityName}
-        setName={setNewCommunityName}
-        trailId={selectedTrailId}
-        setTrailId={setSelectedTrailId}
-        trails={trails}
-        onCreate={handleCreateCommunity}
-        disabled={isCreating}
-      />
+      <CommunityCreator trails={trails} onCreate={handleCreateCommunity} disabled={isCreating} />
     )
   }
 
