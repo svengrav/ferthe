@@ -2,7 +2,6 @@ import { StyleSheet, View } from 'react-native'
 
 import { getAppContext } from '@app/appContext'
 import { Avatar, Button, InfoField, Stack, Text } from '@app/shared/components'
-import Header from '@app/shared/components/header/Header'
 import Item from '@app/shared/components/item/Item'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay } from '@app/shared/overlay'
@@ -47,7 +46,6 @@ function AccountView() {
 
   return (
     <Stack>
-      <Header title={t.account.myAccount} />
 
       {/* Profile Avatar */}
       <Avatar

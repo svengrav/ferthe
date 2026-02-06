@@ -22,7 +22,7 @@ const PageModal = ({ visible, label, onClose, children, options }: PageModalProp
   return (
     <Modal style={[styles.modal, { paddingTop: insets.top }]} isVisible={visible}>
       <PageHeader
-        label={label}
+        title={label}
         options={options}
         action={<Button onPress={onClose} icon='arrow-back' variant='outlined' size='md' />}
       />

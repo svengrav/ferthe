@@ -4,10 +4,10 @@ import { getAppContext } from '@app/appContext'
 import { Page } from '@app/shared/components'
 import Header from '@app/shared/components/header/Header'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { setOverlay } from '@app/shared/overlay'
+import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { useApp } from '@app/shared/useApp'
 
-import { SettingsForm } from '../../settings/components/SettingsForm'
+import { SettingsPage } from '../../settings/components/SettingsPage'
 import { DiscoveryCardState } from '../logic/types'
 import { useDiscoveryData, useDiscoveryStatus } from '../stores/discoveryStore'
 import DiscoveryCardDetails from './DiscoveryCardDetails'
@@ -72,9 +72,9 @@ function DiscoveryScreen() {
   const openSettings = () => {
     const close = setOverlay(
       'settingsForm',
-      <SettingsForm
-        onClose={() => close()}
-        onSubmit={() => close()}
+      <SettingsPage
+        onClose={() => closeOverlay('settingsForm')}
+        onSubmit={() => closeOverlay('settingsForm')}
       />
     )
   }

@@ -6,26 +6,27 @@ import Text from '../text/Text'
 import { Option } from '../types'
 
 interface PageHeaderProps {
-  label?: string
+  leading?: React.ReactNode
+  title?: string
   options?: Option[]
-  action?: React.ReactNode
+  trailing?: React.ReactNode
 }
 
-const PageHeader = ({ label, action, options }: PageHeaderProps) => {
+const PageHeader = ({ leading, title = "", trailing, options }: PageHeaderProps) => {
   const theme = useThemeStore()
   const styles = createStyles(theme)
   const showOptions = options && options.length > 0
   return (
     <View style={styles.header}>
-      <View style={styles.leftContainer}></View>
-      <View style={styles.labelContainer}>
-        {label ? (
-          <Text style={styles.label}>{label}</Text>
+      <View style={styles.leading}>{leading}</View>
+      <View style={styles.label}>
+        {title ? (
+          <Text style={styles.label}>{title}</Text>
         ) : (
           <FertheLabel style={styles.logo} fill={theme.colors.onBackground} />
         )}
       </View>
-      <View style={styles.rightContainer}>{action && action}
+      <View style={styles.trailing}>{trailing}
         {showOptions && <Button variant='outlined' options={options} icon='more-vert' />}
       </View>
     </View>
@@ -51,17 +52,11 @@ const createStyles = (theme: Theme) =>
       ...theme.typo.heading,
       textAlign: 'center',
     },
-    leftContainer: {
+    leading: {
       padding: 8,
       width: 60,
     },
-    labelContainer: {
-      marginTop: 5,
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    rightContainer: {
+    trailing: {
       padding: 8,
       width: 60,
       flexDirection: 'row',

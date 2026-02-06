@@ -72,3 +72,7 @@ export const setOverlay = (key: string, content: React.ReactNode, options?: Over
     currentStore.remove(id)
   }
 }
+
+export const closeOverlay = (key: string) => {
+  useOverlayStore.getState().removeByKey(key)
+}

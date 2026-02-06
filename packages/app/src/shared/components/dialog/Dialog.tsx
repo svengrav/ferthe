@@ -1,6 +1,8 @@
 import { StyleSheet, View } from 'react-native'
 
 import { Button, Text } from '@app/shared/components'
+import { setOverlay } from '@app/shared/overlay'
+import { closeOverlay } from '@app/shared/overlay/useOverlayStore'
 import { Theme, useTheme } from '@app/shared/theme'
 
 interface ConfirmationDialogProps {
@@ -54,11 +56,23 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     opacity: 0.8,
   },
   actions: {
+    flex: 1,
+    justifyContent: 'center',
     flexDirection: 'row',
-    gap: 8,
-    justifyContent: 'flex-end',
+    gap: 12,
     marginTop: 8,
   },
 })
+
+/**
+ * Hook for opening a confirmation dialog.
+ * Handles overlay management and cleanup automatically.
+ */
+export function useDialog() {
+  return {
+    openDialog: (props: ConfirmationDialogProps) => setOverlay('dialog', <Dialog {...props} />, { variant: 'compact' }),
+    closeDialog: () => closeOverlay('dialog')
+  }
+}
 
 export default Dialog

@@ -1,16 +1,16 @@
 import { getAppContext } from '@app/appContext'
-import { SettingsForm } from '@app/features/settings'
+import { SettingsPage } from '@app/features/settings'
 import { useTrailData, useTrailStatus } from '@app/features/trail/stores/trailStore'
 import { Button, FertheLogo, Page, Stack, Text } from '@app/shared/components'
 import Header from '@app/shared/components/header/Header'
-import { setOverlay } from '@app/shared/overlay/useOverlayStore'
+import { closeOverlay, setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
 import { FlatList, View } from 'react-native'
-import TrailDetails from './TrailDetails'
 import TrailItem from './TrailItem'
+import TrailDetails from './TrailPage'
 
 const INTRO_PADDING = 16
 const INTRO_MAX_WIDTH = 200
@@ -43,7 +43,7 @@ const useTrailScreen = () => {
     let removeOverlay: (() => void) | undefined
 
     removeOverlay = setOverlay('settingsForm',
-      <SettingsForm
+      <SettingsPage
         onClose={() => removeOverlay?.()}
         onSubmit={() => removeOverlay?.()}
       />,
@@ -79,10 +79,10 @@ function TrailScreen() {
     openSettings,
   } = useTrailScreen()
 
+
   const handleOpenTrailOverview = (trail: Trail) => {
-    setOverlay('trailDetails_' + trail.id, <TrailDetails trail={trail} />, {
-      variant: 'fullscreen'
-    })
+    const overlayId = 'trailDetails-' + trail.id
+    setOverlay(overlayId, <TrailDetails trail={trail} onBack={() => closeOverlay(overlayId)} />)
   }
 
   if (!styles) return null

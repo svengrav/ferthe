@@ -1,16 +1,14 @@
 import { Button, Text } from '@app/shared/components'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { Theme, useTheme } from '@app/shared/theme'
 import { Community } from '@shared/contracts/communities'
-import { FlatList, View } from 'react-native'
-
+import { FlatList, StyleSheet, View } from 'react-native'
 import CommunityCard from './CommunityCard'
+import { useCommunityCreateOverlay } from './CommunityCreate'
 
 interface CommunityListProps {
   communities: Community[]
   isLoading: boolean
   onRefresh: () => void
-  onCreatePress: () => void
   onJoinPress: () => void
 }
 
@@ -18,12 +16,9 @@ export function CommunityList({
   communities,
   isLoading,
   onRefresh,
-  onCreatePress,
   onJoinPress,
 }: CommunityListProps) {
-  const { styles } = useApp(useStyles)
-
-  if (!styles) return null
+  const { styles } = useTheme(createStyles)
 
   const renderEmptyState = () => (
     <Text variant="body" style={styles.emptyState}>
@@ -37,7 +32,7 @@ export function CommunityList({
         <Text variant="section">My Communities</Text>
         <View style={styles.actions}>
           <Button icon="person-add" onPress={onJoinPress} />
-          <Button icon="add" onPress={onCreatePress} />
+          <Button icon="add" onPress={useCommunityCreateOverlay().open} />
         </View>
       </View>
 
@@ -57,7 +52,7 @@ export function CommunityList({
   )
 }
 
-const useStyles = createThemedStyles(theme => ({
+const createStyles = (theme: Theme) => StyleSheet.create({
   listSection: {
     flex: 1,
   },
@@ -78,4 +73,4 @@ const useStyles = createThemedStyles(theme => ({
     textAlign: 'center',
     marginTop: 24,
   },
-}))
+})

@@ -1,1 +1,2 @@
-export { SettingsForm } from './components/SettingsForm'
+export { SettingsPage } from './components/SettingsPage';
+

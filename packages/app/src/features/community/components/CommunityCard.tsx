@@ -1,36 +1,73 @@
-import { Avatar, Text } from '@app/shared/components'
-import { setOverlay } from '@app/shared/overlay'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { Avatar, PressableWithActions, Text } from '@app/shared/components'
+import { useDialog } from '@app/shared/components/dialog/Dialog'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { closeOverlay, setOverlay } from '@app/shared/overlay'
+import { Theme, useTheme } from '@app/shared/theme'
+import { logger } from '@app/shared/utils/logger'
 import { Community } from '@shared/contracts'
-import { Pressable, View } from 'react-native'
-import CommunityDiscoveryPage from './CommunityDiscoveryPage.tsx'
+import { StyleSheet, View } from 'react-native'
+import CommunityDiscoveryPage from './CommunityDiscoveryPage'
 
 interface CommunityCardProps {
   community: Community
 }
 
 /**
- * Card component displaying community info with active state toggle.
- * Provides navigation to shared discoveries.
+ * Card component displaying community info.
+ * Provides navigation to shared discoveries and actions via long-press dropdown.
  */
 function CommunityCard({ community }: CommunityCardProps) {
-  const { styles } = useApp(useStyles)
+  const { styles } = useTheme(createStyles)
+  const { t } = useLocalizationStore()
+  const { openDialog, closeDialog } = useDialog()
 
-  if (!styles) return null
+  const handleLeave = async (communityId: string) => {
+    logger.log(`Leave community: ${communityId}`)
+    // TODO: Implement leave functionality when API is ready
+    // await communityApplication.leaveCommunity(communityId)
+  }
+
+  const handleRemove = async (communityId: string) => {
+    logger.log(`Remove community: ${communityId}`)
+    // TODO: Implement remove functionality when API is ready
+    // await communityApplication.removeCommunity(communityId)
+  }
+
+  const confirmRemove = (communityId: string) => {
+    openDialog({
+      title: t.community.remove,
+      message: t.community.confirmRemove,
+      confirmText: t.community.remove,
+      cancelText: t.common.cancel,
+      destructive: true,
+      onConfirm: async () => {
+        await handleRemove(communityId)
+        closeDialog()
+      },
+      onCancel: closeDialog,
+    })
+  }
 
   const handlePress = () => {
     setOverlay(
       'communityDiscoveries',
-      <CommunityDiscoveryPage
-        communityId={community.id}
-        communityName={community.name}
-      />
+      <CommunityDiscoveryPage communityId={community.id} communityName={community.name} onBack={() => closeOverlay('communityDiscoveries')} />,
     )
   }
 
   return (
-    <Pressable onPress={handlePress} style={[styles.card]}>
+    <PressableWithActions
+      style={styles.card}
+      onPress={handlePress}
+      actions={[
+        {
+          label: t.community.leave,
+          onPress: () => handleLeave(community.id),
+        },
+        {
+          label: t.community.remove,
+          onPress: () => confirmRemove(community.id),
+        }]}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Avatar size={60} />
         <View>
@@ -44,19 +81,12 @@ function CommunityCard({ community }: CommunityCardProps) {
             Created {new Date(community.createdAt).toLocaleDateString()}
           </Text>
         </View>
-
       </View>
-
-
-
-      {/* <View style={styles.actions}>
-        <Button label="View Discoveries" onPress={handleViewDiscoveries} />
-      </View> */}
-    </Pressable>
+    </PressableWithActions>
   )
 }
 
-const useStyles = createThemedStyles(theme => ({
+const createStyles = (theme: Theme) => StyleSheet.create({
   card: {
     padding: 8,
     borderRadius: 12,
@@ -87,9 +117,6 @@ const useStyles = createThemedStyles(theme => ({
   },
   meta: {
   },
-  actions: {
-    marginTop: 8,
-  },
-}))
+})
 
 export default CommunityCard

@@ -7,10 +7,11 @@ import { PageHeader } from './PageHeader'
 
 interface PageProps {
   children?: React.ReactNode
-  label?: string
+  title?: string
   style?: StyleProp<ViewStyle>
   options?: Option[]
-  action?: React.ReactNode
+  trailing?: React.ReactNode
+  leading?: React.ReactNode
   scrollable?: boolean
   inset?: Inset
 }
@@ -21,7 +22,7 @@ interface PageProps {
  * Supports configurable horizontal inset for content padding.
  */
 function Page(props: PageProps) {
-  const { children, label, style, options, scrollable = false, action, inset = 'md' } = props
+  const { children, title, style, options, scrollable = false, trailing, leading, inset = 'md' } = props
   const { styles, theme } = useTheme(createStyles)
   const insets = useSafeAreaInsets()
 
@@ -35,9 +36,9 @@ function Page(props: PageProps) {
 
   return (
     <View style={[styles.page, style, { paddingTop: insets.top }]}>
-      <PageHeader label={label} options={options} action={action} />
+      <PageHeader title={title} options={options} trailing={trailing} leading={leading} />
 
-      <ContentContainer style={[styles.container, !scrollable && { paddingHorizontal: insetValue }]} {...contentProps}>
+      <ContentContainer style={[styles.container, { paddingHorizontal: insetValue }]} {...contentProps} id='page-content'>
         {children}
       </ContentContainer>
     </View>

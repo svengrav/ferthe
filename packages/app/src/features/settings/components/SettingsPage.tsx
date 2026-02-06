@@ -1,5 +1,6 @@
-import { Form, FormPicker, Text, useFormSubmitWatcher } from '@app/shared/components'
+import { Button, Form, FormPicker, Page, Text, useFormSubmitWatcher } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { closeOverlay, setOverlay } from '@app/shared/overlay/'
 import { View } from 'react-native'
 import { z } from 'zod'
 import useSettings from '../hooks/useSettings'
@@ -8,6 +9,17 @@ import { LanguageOptions, Settings, ThemeMode } from '../types/types'
 const settingsSchema = z.object({
   language: z.nativeEnum(LanguageOptions),
   theme: z.nativeEnum(ThemeMode),
+})
+
+export const useSettingsPage = () => ({
+  showSettings: () => setOverlay(
+    'settingsForm',
+    <SettingsPage
+      onClose={() => closeOverlay('settingsForm')}
+      onSubmit={() => closeOverlay('settingsForm')}
+    />
+  ),
+  closeSettings: () => closeOverlay('settingsForm'),
 })
 
 type SettingsFormValues = z.infer<typeof settingsSchema>
@@ -54,7 +66,7 @@ function FormContent({ onFormSubmit }: { onFormSubmit: (values: SettingsFormValu
   )
 }
 
-export const SettingsForm = ({ onClose, onSubmit }: SettingsFormProps) => {
+export const SettingsPage = ({ onClose, onSubmit }: SettingsFormProps) => {
   const { initialValues, handleSubmit: processSettings } = useSettings()
 
   const onFormSubmit = (values: SettingsFormValues) => {
@@ -63,12 +75,23 @@ export const SettingsForm = ({ onClose, onSubmit }: SettingsFormProps) => {
   }
 
   return (
-    <Form<SettingsFormValues>
-      schema={settingsSchema}
-      defaultValues={initialValues}
-      onSubmit={onFormSubmit}
+    <Page
+      title={'Settings'}
+      leading={<Button icon="arrow-back" variant='outlined' onPress={onClose} />}
+      trailing={<Button
+        icon="more-vert"
+        variant="outlined"
+        options={[]}
+      />}
     >
-      <FormContent onFormSubmit={onFormSubmit} />
-    </Form>
+
+      <Form<SettingsFormValues>
+        schema={settingsSchema}
+        defaultValues={initialValues}
+        onSubmit={onFormSubmit}
+      >
+        <FormContent onFormSubmit={onFormSubmit} />
+      </Form>
+    </Page>
   )
 }

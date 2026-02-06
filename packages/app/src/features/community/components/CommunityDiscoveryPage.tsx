@@ -1,13 +1,14 @@
 import { getAppContext } from '@app/appContext'
-import { Avatar, Button, Header, PageTab, PageTabs, Text } from '@app/shared/components'
+import { Avatar, Button, Page, PageTab, PageTabs, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 import { Discovery } from '@shared/contracts'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native'
-import { useCommunityCreator } from '../hooks/useCommunityCreator'
 import { useCommunityData } from '../stores/communityStore'
+import { CommunityUpdate } from './CommunityEdit'
 import SharedDiscoveryCard from './SharedDiscoveryCard'
 
 interface CommunityDiscoveriesScreenProps {
@@ -63,11 +64,10 @@ const useSharedDiscoveries = (communityId: string) => {
  * Screen displaying all shared discoveries in a community.
  * Shows community header with edit option and tabbed content.
  */
-function CommunityDiscoveryPage({ communityId, communityName }: CommunityDiscoveriesScreenProps) {
+function CommunityDiscoveryPage({ communityId, communityName, onBack }: CommunityDiscoveriesScreenProps) {
   const { styles } = useTheme(createStyles)
   const { t } = useLocalizationStore()
   const { discoveries, isLoading, isRefreshing, loadDiscoveries } = useSharedDiscoveries(communityId)
-  const { openCommunityForm } = useCommunityCreator()
   const { communities } = useCommunityData()
 
   if (!styles) return null
@@ -79,12 +79,15 @@ function CommunityDiscoveryPage({ communityId, communityName }: CommunityDiscove
   )
 
   // Handle edit button press
-  const handleEdit = useCallback(() => {
+  const handleEdit = () => {
     if (currentCommunity) {
       const trailId = currentCommunity.trailIds[0] || ''
-      openCommunityForm({ communityId, name: communityName, trailId })
+      setOverlay('editCommunity', <CommunityUpdate communityId={communityId} initialData={{
+        name: communityName,
+        trailId
+      }} />, { variant: 'compact' })
     }
-  }, [currentCommunity, communityId, communityName, openCommunityForm])
+  }
 
   // Render empty state when no discoveries exist
   const renderEmptyState = () => (
@@ -119,27 +122,24 @@ function CommunityDiscoveryPage({ communityId, communityName }: CommunityDiscove
   // Show loading indicator on initial load
   if (isLoading) {
     return (
-      <View style={styles.container}>
+      <Page style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" />
         </View>
-      </View>
+      </Page>
     )
   }
 
   return (
-    <View style={styles.container}>
-      {/* Header with edit button */}
-      <Header
-        title={communityName}
-        trailing={
-          <Button
-            icon="more-vert"
-            variant="outlined"
-            options={[{ label: t.common.edit, onPress: handleEdit }]}
-          />
-        }
-      />
+    <Page style={styles.container}
+      title={communityName}
+      leading={<Button icon="arrow-back" variant='outlined' onPress={onBack} />}
+      trailing={<Button
+        icon="more-vert"
+        variant="outlined"
+        options={[{ label: t.common.edit, onPress: handleEdit }]}
+      />}
+    >
 
       {/* Content tabs */}
       <PageTabs variant="chips" defaultTab="overview">
@@ -151,7 +151,7 @@ function CommunityDiscoveryPage({ communityId, communityName }: CommunityDiscove
           <View />
         </PageTab>
       </PageTabs>
-    </View>
+    </Page>
   )
 }
 

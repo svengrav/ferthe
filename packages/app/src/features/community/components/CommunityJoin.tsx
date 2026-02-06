@@ -1,26 +1,56 @@
-import { useState } from 'react'
-import { StyleSheet } from 'react-native'
-
+import { getAppContext } from '@app/appContext'
 import { Button, Stack, Text, TextInput } from '@app/shared/components'
 import Field from '@app/shared/components/field/Field'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useOverlayStore } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
+import { useState } from 'react'
+import { StyleSheet } from 'react-native'
 
-interface CommunityJoinProps {
-  onJoin: (code: string) => void
-  disabled: boolean
-  maxLength: number
+/**
+ * Hook for managing community join operations.
+ * Handles code input state, loading state, and join logic.
+ */
+function useCommunityJoin(maxLength: number) {
+  const { communityApplication } = getAppContext()
+  const [code, setCode] = useState('')
+  const [isJoining, setIsJoining] = useState(false)
+
+  const handleCodeChange = (text: string) => {
+    setCode(text.toUpperCase())
+  }
+
+  const handleJoin = async () => {
+    if (!code.trim() || code.length !== maxLength) return
+
+    setIsJoining(true)
+    const result = await communityApplication.joinCommunity(code.trim())
+    setIsJoining(false)
+
+    if (result.success) {
+      useOverlayStore.getState().removeByKey('joinCommunity')
+      setCode('')
+    }
+  }
+
+  return {
+    code,
+    handleCodeChange,
+    handleJoin,
+    isJoining,
+    isValid: code.length === maxLength,
+  }
 }
 
-export function CommunityJoin(props: CommunityJoinProps) {
-  const { onJoin, disabled, maxLength } = props
+/**
+ * Component for joining a community with invite code.
+ * Manages its own state and business logic via useCommunityJoin hook.
+ */
+export function CommunityJoin() {
+  const maxLength = 6
   const { styles } = useTheme(createStyles)
   const { t } = useLocalizationStore()
-  const [code, setCode] = useState('')
-
-  const handleJoin = () => {
-    onJoin(code)
-  }
+  const { code, handleCodeChange, handleJoin, isJoining, isValid } = useCommunityJoin(maxLength)
 
   return (
     <Stack spacing="lg">
@@ -34,14 +64,14 @@ export function CommunityJoin(props: CommunityJoinProps) {
             style={styles.input}
             placeholder={t.community.yourCode}
             value={code}
-            onChangeText={text => setCode(text.toUpperCase())}
+            onChangeText={handleCodeChange}
             maxLength={maxLength}
           />
         </Field>
         <Button
           label={t.community.join}
           onPress={handleJoin}
-          disabled={disabled || code.length !== maxLength}
+          disabled={isJoining || !isValid}
         />
       </Stack>
     </Stack>
