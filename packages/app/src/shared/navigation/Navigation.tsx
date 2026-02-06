@@ -10,7 +10,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { NavigationContainer } from '@react-navigation/native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useOverlayStore } from '../overlay/useOverlayStore'
-import { CardIcon, TreeIcon } from './NavigationIcons'
+import { CardIcon } from './NavigationIcons'
 import { navigationRef } from './navigationRef'
 
 const Tab = createBottomTabNavigator()
@@ -77,7 +77,7 @@ export function Navigation() {
           name='Map'
           component={MapScreen}
           options={{
-            tabBarIcon: ({ color, size }) => <TreeIcon color={color} size={size} />,
+            tabBarIcon: ({ color, size }) => <Icon name='compass' color={color} size={size} />,
             headerShown: false,
           }}
         />

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 
-import { Button, Text, TextInput } from '@app/shared/components'
+import { Button, Stack, Text, TextInput } from '@app/shared/components'
 import Field from '@app/shared/components/field/Field'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useTheme } from '@app/shared/theme'
@@ -23,9 +23,9 @@ export function JoinCommunitySection(props: JoinCommunitySectionProps) {
   }
 
   return (
-    <View style={styles.section}>
-      <Text variant="heading">Join Community</Text>
-      <View style={styles.inputRow}>
+    <Stack spacing="lg">
+      <Text variant="heading">{t.community.joinCommunity}</Text>
+      <Stack spacing="sm">
         <Field
           style={{ flex: 1 }}
           helperText={t.community.joinWithInviteCode}
@@ -43,19 +43,12 @@ export function JoinCommunitySection(props: JoinCommunitySectionProps) {
           onPress={handleJoin}
           disabled={disabled || code.length !== maxLength}
         />
-      </View>
-    </View>
+      </Stack>
+    </Stack>
   )
 }
 
 const createStyles = (theme: Theme) => StyleSheet.create({
-  section: {
-    gap: theme.tokens.spacing.lg,
-    marginBottom: 24,
-  },
-  inputRow: {
-    gap: 8,
-  },
   input: {
     flex: 1,
     padding: 12,

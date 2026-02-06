@@ -99,7 +99,6 @@ function CommunitiesScreen() {
       <CommunityCreator
         trails={trails}
         onCreate={handleCreateCommunity}
-        disabled={isCreating}
       />,
       {
         variant: 'compact',

@@ -148,6 +148,8 @@ const de: LocalizationSet = {
     addDescription: 'Beschreibung hinzufügen...',
   },
   community: {
+    createNewCommunity: 'Neue Community erstellen',
+    joinCommunity: 'Community beitreten',
     communityName: 'Community-Name',
     yourCommunityName: 'Dein Community-Name',
     selectTrail: 'Pfad auswählen',

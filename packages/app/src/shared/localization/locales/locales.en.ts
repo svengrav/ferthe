@@ -147,6 +147,8 @@ const en = {
     addDescription: 'Add a description...',
   },
   community: {
+    createNewCommunity: 'Create New Community',
+    joinCommunity: 'Join Community',
     communityName: 'Community Name',
     yourCommunityName: 'Your Community Name',
     selectTrail: 'Select Trail',
