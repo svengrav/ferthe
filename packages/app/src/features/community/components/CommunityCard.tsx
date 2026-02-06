@@ -1,11 +1,10 @@
-import { Text } from '@app/shared/components'
+import { Avatar, Text } from '@app/shared/components'
 import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { Community } from '@shared/contracts'
 import { Pressable, View } from 'react-native'
-import { CommunityAvatar } from './CommunityAvatar'
-import CommunityDiscoveriesScreen from './CommunityDiscoveriesScreen'
+import CommunityDiscoveryPage from './CommunityDiscoveryPage.tsx'
 
 interface CommunityCardProps {
   community: Community
@@ -23,7 +22,7 @@ function CommunityCard({ community }: CommunityCardProps) {
   const handlePress = () => {
     setOverlay(
       'communityDiscoveries',
-      <CommunityDiscoveriesScreen
+      <CommunityDiscoveryPage
         communityId={community.id}
         communityName={community.name}
       />
@@ -33,7 +32,7 @@ function CommunityCard({ community }: CommunityCardProps) {
   return (
     <Pressable onPress={handlePress} style={[styles.card]}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <CommunityAvatar />
+        <Avatar size={60} />
         <View>
           <Text variant="title">{community.name}</Text>
 

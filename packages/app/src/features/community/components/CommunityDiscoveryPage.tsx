@@ -63,7 +63,7 @@ const useSharedDiscoveries = (communityId: string) => {
  * Screen displaying all shared discoveries in a community.
  * Shows community header with edit option and tabbed content.
  */
-function CommunityDiscoveriesScreen({ communityId, communityName }: CommunityDiscoveriesScreenProps) {
+function CommunityDiscoveryPage({ communityId, communityName }: CommunityDiscoveriesScreenProps) {
   const { styles } = useTheme(createStyles)
   const { t } = useLocalizationStore()
   const { discoveries, isLoading, isRefreshing, loadDiscoveries } = useSharedDiscoveries(communityId)
@@ -183,4 +183,4 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
 })
 
-export default CommunityDiscoveriesScreen
+export default CommunityDiscoveryPage

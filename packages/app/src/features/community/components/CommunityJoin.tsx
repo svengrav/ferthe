@@ -6,13 +6,13 @@ import Field from '@app/shared/components/field/Field'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useTheme } from '@app/shared/theme'
 
-interface JoinCommunitySectionProps {
+interface CommunityJoinProps {
   onJoin: (code: string) => void
   disabled: boolean
   maxLength: number
 }
 
-export function JoinCommunitySection(props: JoinCommunitySectionProps) {
+export function CommunityJoin(props: CommunityJoinProps) {
   const { onJoin, disabled, maxLength } = props
   const { styles } = useTheme(createStyles)
   const { t } = useLocalizationStore()

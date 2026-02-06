@@ -8,8 +8,8 @@ import { setOverlay, useOverlayStore } from '@app/shared/overlay'
 import { useCallback, useEffect, useState } from 'react'
 import { useCommunityCreator } from '../hooks/useCommunityCreator'
 import { useCommunityData, useCommunityStatus } from '../stores/communityStore'
-import { JoinCommunitySection } from './JoinCommunitySection'
-import { MyCommunitiesSection } from './MyCommunitiesSection'
+import { CommunityJoin } from './CommunityJoin'
+import { CommunityList } from './CommunityList'
 
 const INVITE_CODE_LENGTH = 6
 const AVATAR_SIZE = 80
@@ -75,7 +75,7 @@ function CommunitiesScreen() {
   const handleOpenJoinOverlay = () => {
     setOverlay(
       'joinCommunity',
-      <JoinCommunitySection
+      <CommunityJoin
         onJoin={handleJoinCommunity}
         disabled={isJoining}
         maxLength={INVITE_CODE_LENGTH}
@@ -100,7 +100,7 @@ function CommunitiesScreen() {
         <Header title={greeting} />
         <Avatar size={AVATAR_SIZE} avatar={account?.avatar} label={account?.displayName} />
         <Header title={t.community.communities} />
-        <MyCommunitiesSection
+        <CommunityList
           communities={communities}
           isLoading={isLoading}
           onRefresh={handleRefresh}

@@ -6,7 +6,7 @@ import { FlatList, View } from 'react-native'
 
 import CommunityCard from './CommunityCard'
 
-interface MyCommunitiesSectionProps {
+interface CommunityListProps {
   communities: Community[]
   isLoading: boolean
   onRefresh: () => void
@@ -14,13 +14,13 @@ interface MyCommunitiesSectionProps {
   onJoinPress: () => void
 }
 
-export function MyCommunitiesSection({
+export function CommunityList({
   communities,
   isLoading,
   onRefresh,
   onCreatePress,
   onJoinPress,
-}: MyCommunitiesSectionProps) {
+}: CommunityListProps) {
   const { styles } = useApp(useStyles)
 
   if (!styles) return null

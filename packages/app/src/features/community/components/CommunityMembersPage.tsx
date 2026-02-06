@@ -10,7 +10,7 @@ interface CommunityMembersScreenProps {
   communityId: string
 }
 
-function CommunityMembersScreen({ communityId }: CommunityMembersScreenProps) {
+function CommunityMembersPage({ communityId }: CommunityMembersScreenProps) {
   const { styles, theme } = useApp(useStyles)
   const { communityApplication } = getAppContext()
   const [members, setMembers] = useState<CommunityMember[]>([])
@@ -70,4 +70,4 @@ const useStyles = createThemedStyles(theme => ({
   },
 }))
 
-export default CommunityMembersScreen
+export default CommunityMembersPage
