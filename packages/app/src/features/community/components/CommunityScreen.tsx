@@ -1,14 +1,13 @@
 import { getAppContext } from '@app/appContext'
 import AccountView from '@app/features/account/components/AccountView'
 import { useAccountData } from '@app/features/account/stores/accountStore'
-import { useTrails } from '@app/features/trail/stores/trailStore'
 import { Avatar, Button, Page, Stack } from '@app/shared/components'
 import { Header } from '@app/shared/components/'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay, useOverlayStore } from '@app/shared/overlay'
 import { useCallback, useEffect, useState } from 'react'
+import { useCommunityCreator } from '../hooks/useCommunityCreator'
 import { useCommunityData, useCommunityStatus } from '../stores/communityStore'
-import CommunityCreator from './CommunityCreator'
 import { JoinCommunitySection } from './JoinCommunitySection'
 import { MyCommunitiesSection } from './MyCommunitiesSection'
 
@@ -21,10 +20,8 @@ const AVATAR_SIZE = 80
 const useCommunitiesScreen = () => {
   const { communities } = useCommunityData()
   const status = useCommunityStatus()
-  const trails = useTrails()
   const { communityApplication } = getAppContext()
 
-  const [isCreating, setIsCreating] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
 
   // Initialize communities on mount
@@ -33,16 +30,6 @@ const useCommunitiesScreen = () => {
       communityApplication.requestCommunities()
     }
   }, [status, communityApplication])
-
-  const handleCreateCommunity = useCallback(async (data: { name: string; trailId: string }) => {
-    setIsCreating(true)
-    const result = await communityApplication.createCommunity({ name: data.name.trim(), trailIds: [data.trailId] })
-    setIsCreating(false)
-
-    if (result.success) {
-      useOverlayStore.getState().removeByKey('createCommunity')
-    }
-  }, [communityApplication])
 
   const handleJoinCommunity = useCallback(async (code: string) => {
     if (!code.trim()) return
@@ -62,11 +49,8 @@ const useCommunitiesScreen = () => {
 
   return {
     communities,
-    trails,
     isLoading: status === 'loading',
-    isCreating,
     isJoining,
-    handleCreateCommunity,
     handleJoinCommunity,
     handleRefresh,
   }
@@ -80,27 +64,12 @@ function CommunitiesScreen() {
   const { account } = useAccountData()
   const {
     communities,
-    trails,
     isLoading,
     isJoining,
-    handleCreateCommunity,
     handleJoinCommunity,
     handleRefresh,
   } = useCommunitiesScreen()
-
-  // Open overlay to create a new community
-  const handleOpenCreateOverlay = () => {
-    setOverlay(
-      'createCommunity',
-      <CommunityCreator
-        trails={trails}
-        onCreate={handleCreateCommunity}
-      />,
-      {
-        variant: 'compact',
-      }
-    )
-  }
+  const { openCommunityForm } = useCommunityCreator()
 
   // Open overlay to join an existing community
   const handleOpenJoinOverlay = () => {
@@ -135,7 +104,7 @@ function CommunitiesScreen() {
           communities={communities}
           isLoading={isLoading}
           onRefresh={handleRefresh}
-          onCreatePress={handleOpenCreateOverlay}
+          onCreatePress={openCommunityForm}
           onJoinPress={handleOpenJoinOverlay}
         />
       </Stack>

@@ -1,11 +1,13 @@
 import { getAppContext } from '@app/appContext'
-import { Button, ScreenHeader, Text } from '@app/shared/components'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { Avatar, Button, Header, PageTab, PageTabs, Text } from '@app/shared/components'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { Theme, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 import { Discovery } from '@shared/contracts'
-import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, FlatList, View } from 'react-native'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native'
+import { useCommunityCreator } from '../hooks/useCommunityCreator'
+import { useCommunityData } from '../stores/communityStore'
 import SharedDiscoveryCard from './SharedDiscoveryCard'
 
 interface CommunityDiscoveriesScreenProps {
@@ -20,11 +22,12 @@ interface CommunityDiscoveriesScreenProps {
 const useSharedDiscoveries = (communityId: string) => {
   const { communityApplication } = getAppContext()
   const [discoveries, setDiscoveries] = useState<Discovery[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const loadDiscoveries = useCallback(async (showRefreshing = false) => {
-    if (showRefreshing) {
+  const loadDiscoveries = useCallback(async (isRefresh = false) => {
+    // Set appropriate loading state
+    if (isRefresh) {
       setIsRefreshing(true)
     } else {
       setIsLoading(true)
@@ -43,86 +46,123 @@ const useSharedDiscoveries = (communityId: string) => {
     }
   }, [communityId, communityApplication])
 
+  // Initial load
   useEffect(() => {
     loadDiscoveries()
-  }, [loadDiscoveries])
-
-  const handleRefresh = useCallback(() => {
-    loadDiscoveries(true)
   }, [loadDiscoveries])
 
   return {
     discoveries,
     isLoading,
     isRefreshing,
-    handleRefresh,
-    reloadDiscoveries: () => loadDiscoveries(false),
+    loadDiscoveries,
   }
 }
 
 /**
  * Screen displaying all shared discoveries in a community.
- * Allows members to view and unshare their own discoveries.
+ * Shows community header with edit option and tabbed content.
  */
-function CommunityDiscoveriesScreen({ communityId, communityName, onBack }: CommunityDiscoveriesScreenProps) {
-  const { styles } = useApp(useStyles)
-  const { discoveries, isLoading, isRefreshing, handleRefresh, reloadDiscoveries } = useSharedDiscoveries(communityId)
+function CommunityDiscoveriesScreen({ communityId, communityName }: CommunityDiscoveriesScreenProps) {
+  const { styles } = useTheme(createStyles)
+  const { t } = useLocalizationStore()
+  const { discoveries, isLoading, isRefreshing, loadDiscoveries } = useSharedDiscoveries(communityId)
+  const { openCommunityForm } = useCommunityCreator()
+  const { communities } = useCommunityData()
 
   if (!styles) return null
 
-  const renderEmptyState = () => {
-    if (isLoading) {
-      return (
-        <View style={styles.emptyState}>
+  // Find current community for edit functionality
+  const currentCommunity = useMemo(
+    () => communities.find(c => c.id === communityId),
+    [communities, communityId]
+  )
+
+  // Handle edit button press
+  const handleEdit = useCallback(() => {
+    if (currentCommunity) {
+      const trailId = currentCommunity.trailIds[0] || ''
+      openCommunityForm({ communityId, name: communityName, trailId })
+    }
+  }, [currentCommunity, communityId, communityName, openCommunityForm])
+
+  // Render empty state when no discoveries exist
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <Text variant="body" style={styles.emptyText}>
+        {t.community.noDiscoveriesYet}
+      </Text>
+      <Text variant="caption" style={styles.emptyHint}>
+        {t.community.shareFromProfile}
+      </Text>
+    </View>
+  )
+
+  // Render discovery list
+  const renderDiscoveryList = () => (
+    <FlatList
+      data={discoveries}
+      renderItem={({ item }) => (
+        <SharedDiscoveryCard
+          discovery={item}
+          communityId={communityId}
+          onUnshared={() => loadDiscoveries()}
+        />
+      )}
+      keyExtractor={item => item.id}
+      contentContainerStyle={styles.listContent}
+      refreshing={isRefreshing}
+      onRefresh={() => loadDiscoveries(true)}
+    />
+  )
+
+  // Show loading indicator on initial load
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" />
         </View>
-      )
-    }
-
-    return (
-      <View style={styles.emptyState}>
-        <Text variant="body" style={styles.emptyText}>
-          No discoveries shared yet
-        </Text>
-        <Text variant="caption" style={styles.emptyHint}>
-          Share discoveries from your profile to see them here
-        </Text>
       </View>
     )
   }
 
   return (
     <View style={styles.container}>
-      <ScreenHeader
+      {/* Header with edit button */}
+      <Header
         title={communityName}
-        trailing={<Button icon='more-vert' variant='outlined' options={[]} />}
+        trailing={
+          <Button
+            icon="more-vert"
+            variant="outlined"
+            options={[{ label: t.common.edit, onPress: handleEdit }]}
+          />
+        }
       />
 
-      {discoveries.length === 0 ? (
-        renderEmptyState()
-      ) : (
-        <FlatList
-          data={discoveries}
-          renderItem={({ item }) => (
-            <SharedDiscoveryCard
-              discovery={item}
-              communityId={communityId}
-              onUnshared={reloadDiscoveries}
-            />
-          )}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContent}
-          refreshing={isRefreshing}
-          onRefresh={handleRefresh}
-        />
-      )}
+      {/* Content tabs */}
+      <PageTabs variant="chips" defaultTab="overview">
+        <PageTab id="overview" label={t.community.overview}>
+          <Avatar />
+          {discoveries.length === 0 ? renderEmptyState() : renderDiscoveryList()}
+        </PageTab>
+        <PageTab id="members" label={t.community.members}>
+          <View />
+        </PageTab>
+      </PageTabs>
     </View>
   )
 }
 
-const useStyles = createThemedStyles(theme => ({
+const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   listContent: {
     paddingBottom: 16,
@@ -141,6 +181,6 @@ const useStyles = createThemedStyles(theme => ({
     textAlign: 'center',
     opacity: 0.6,
   },
-}))
+})
 
 export default CommunityDiscoveriesScreen

@@ -166,6 +166,10 @@ const de: LocalizationSet = {
     removeDiscoveryConfirm: 'Diese Entdeckung aus der Community entfernen?',
     unshare: 'Entfernen',
     placeholder: 'C',
+    noDiscoveriesYet: 'Noch keine Entdeckungen geteilt',
+    shareFromProfile: 'Teile Entdeckungen aus deinem Profil, um sie hier zu sehen',
+    overview: 'Übersicht',
+    members: 'Mitglieder',
   },
   discovery: {
     discoveries: 'Entdeckungen',

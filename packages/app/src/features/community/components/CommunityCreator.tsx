@@ -5,15 +5,18 @@ import { useLocalizationStore } from '@app/shared/localization/useLocalizationSt
 
 interface CommunityCreatorProps {
   trails: Trail[]
-  onCreate: (data: { name: string; trailId: string }) => void
+  mode?: 'create' | 'edit'
+  initialData?: { name: string; trailId: string; communityId?: string }
+  onCreate?: (data: { name: string; trailId: string }) => void
+  onUpdate?: (data: { name: string; trailId: string; communityId: string }) => void
 }
 
 /**
- * Form for creating a new community.
+ * Form for creating or editing a community.
  * Uses Form component with Zod validation.
  */
 function CommunityCreator(props: CommunityCreatorProps) {
-  const { trails, onCreate } = props
+  const { trails, mode = 'create', initialData, onCreate, onUpdate } = props
   const { t } = useLocalizationStore()
 
   const trailOptions = trails.map(trail => ({
@@ -22,15 +25,21 @@ function CommunityCreator(props: CommunityCreatorProps) {
   }))
 
   const handleSubmit = (data: CreateCommunityInput) => {
-    onCreate(data)
+    if (mode === 'edit' && onUpdate && initialData?.communityId) {
+      onUpdate({ ...data, communityId: initialData.communityId })
+    } else if (mode === 'create' && onCreate) {
+      onCreate(data)
+    }
   }
 
   return (
     <Stack spacing="lg">
-      <Text variant="heading">{t.community.createNewCommunity}</Text>
+      <Text variant="heading">
+        {mode === 'edit' ? 'Edit Community' : t.community.createNewCommunity}
+      </Text>
       <Form
         schema={createCommunitySchema}
-        defaultValues={{ name: '', trailId: '' }}
+        defaultValues={initialData || { name: '', trailId: '' }}
         onSubmit={handleSubmit}>
         <Stack spacing="lg">
           <FormInput
@@ -44,7 +53,7 @@ function CommunityCreator(props: CommunityCreatorProps) {
             variant='outlined'
             helperText={t.community.selectTrail}
           />
-          <FormSubmitButton label={t.community.create} />
+          <FormSubmitButton label={t.common.save} />
         </Stack>
       </Form>
     </Stack>

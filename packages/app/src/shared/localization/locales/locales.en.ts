@@ -165,6 +165,10 @@ const en = {
     removeDiscoveryConfirm: 'Remove this discovery from the community?',
     unshare: 'Unshare',
     placeholder: 'C',
+    noDiscoveriesYet: 'No discoveries shared yet',
+    shareFromProfile: 'Share discoveries from your profile to see them here',
+    overview: 'Overview',
+    members: 'Members',
   },
   discovery: {
     discoveries: 'Discoveries',

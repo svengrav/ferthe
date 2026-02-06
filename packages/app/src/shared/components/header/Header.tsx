@@ -5,7 +5,7 @@ import Text from '../text/Text'
 
 const SLOT_WIDTH = 40
 
-interface ScreenHeaderProps {
+interface HeaderProps {
   title: string
   leading?: ReactNode
   trailing?: ReactNode
@@ -15,7 +15,7 @@ interface ScreenHeaderProps {
  * Reusable screen header with centered title and optional left/right icon slots.
  * Used for consistent header layout across screens.
  */
-function ScreenHeader(props: ScreenHeaderProps) {
+function Header(props: HeaderProps) {
   const { title, leading, trailing } = props
   const { styles } = useTheme(createStyles)
 
@@ -49,4 +49,4 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
 })
 
-export default ScreenHeader
+export default Header

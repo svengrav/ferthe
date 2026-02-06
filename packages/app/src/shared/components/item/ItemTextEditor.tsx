@@ -1,8 +1,8 @@
-import { Button, TextInput } from '@app/shared/components'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 import { useState } from 'react'
-import { View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
+
+import { Button, TextInput } from '@app/shared/components'
+import { Theme, useTheme } from '@app/shared/theme'
 
 interface ItemTextEditorProps {
   value: string
@@ -16,21 +16,29 @@ interface ItemTextEditorProps {
 
 /**
  * Reusable inline editor component for quick text edits.
- * Displays a TextInput with a submit IconButton in a Card layout.
+ * Displays a TextInput with a submit button for saving changes.
  */
-export const ItemTextEditor = ({
-  value: initialValue,
-  onSubmit,
-  placeholder,
-  multiline = false,
-  maxLength,
-  validator,
-  disabled = false,
-}: ItemTextEditorProps) => {
-  const { styles } = useApp(useStyles)
+function ItemTextEditor(props: ItemTextEditorProps) {
+  const {
+    value: initialValue,
+    onSubmit,
+    placeholder,
+    multiline = false,
+    maxLength,
+    validator,
+    disabled = false,
+  } = props
+
+  const { styles } = useTheme(createStyles)
   const [value, setValue] = useState(initialValue)
   const [isSaving, setIsSaving] = useState(false)
 
+  // Determine if submit is allowed
+  const hasChanged = value !== initialValue
+  const isValid = validator ? validator(value.trim()) : true
+  const canSubmit = hasChanged && isValid && !isSaving && !disabled
+
+  // Submit the edited value
   const handleSubmit = async () => {
     const trimmedValue = value.trim()
 
@@ -50,14 +58,8 @@ export const ItemTextEditor = ({
     }
   }
 
-  const hasChanged = value !== initialValue
-  const isValid = validator ? validator(value.trim()) : true
-  const canSubmit = hasChanged && isValid && !isSaving && !disabled
-
-  if (!styles) return null
-
   return (
-    <View style={styles.container} id={'inline-editor'}>
+    <View style={styles.container}>
       <TextInput
         value={value}
         onChangeText={setValue}
@@ -78,10 +80,7 @@ export const ItemTextEditor = ({
   )
 }
 
-const useStyles = createThemedStyles(() => ({
-  card: {
-    width: '100%',
-  },
+const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -90,4 +89,6 @@ const useStyles = createThemedStyles(() => ({
   input: {
     flex: 1,
   },
-}))
+})
+
+export default ItemTextEditor
