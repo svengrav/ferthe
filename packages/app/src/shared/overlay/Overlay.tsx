@@ -1,13 +1,13 @@
 import { Button } from '@app/shared/components/'
 import PageHeader from '@app/shared/components/page/PageHeader'
 import Text from '@app/shared/components/text/Text'
+import { Inset, Option } from '@app/shared/components/types'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import React, { useEffect } from 'react'
 import { ScrollView, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Option } from '../components/types'
 import { useOverlayStore } from './useOverlayStore'
 
 // Animation constants
@@ -20,7 +20,6 @@ const OVERLAY_Z_INDEX = 1000
 
 // Content styling constants
 const BORDER_RADIUS = 12
-const CONTENT_PADDING = 16
 
 export type OverlayVariant = 'compact' | 'fullscreen' | 'page'
 
@@ -79,6 +78,7 @@ function OverlayProvider() {
           closable={settings.closable}
           options={settings.options}
           scrollable={settings.scrollable}
+          inset={settings.inset}
         >
           {overlayItem.overlay}
         </OverlayContainer>
@@ -100,6 +100,7 @@ interface OverlayContainerProps {
   closable?: boolean
   options?: Option[]
   scrollable?: boolean
+  inset?: Inset
 }
 
 /**
@@ -115,7 +116,8 @@ function OverlayContainer({
   title,
   closable = true,
   options,
-  scrollable = false
+  scrollable = false,
+  inset = 'md'
 }: OverlayContainerProps) {
   const { styles, theme } = useApp(useStyles)
   const { animatedContainerStyle, shouldRender } = useOverlayAnimation(visible ?? true)
@@ -125,6 +127,8 @@ function OverlayContainer({
     return null
   }
 
+  const insetValue = theme.tokens.inset[inset]
+
   // Render content based on variant
   const renderContent = () => {
 
@@ -132,23 +136,22 @@ function OverlayContainer({
     if (variant === 'compact') {
       return (
         <View key={title} style={{ backgroundColor: theme.opacity(theme.colors.background, 0.8), justifyContent: 'center', alignContent: 'center', paddingTop: 60, flex: 1 }} id='overlay-compact-container'>
-          <View style={[styles.compactContainer,]}>
+          <View style={[styles.compactContainer, { marginHorizontal: insetValue }]}>
             {/* Header with title and close button */}
             {(title || closable) && (
               <View style={styles.compactHeader}>
-                <Text variant='title' style={{ flex: 1, alignSelf: 'center' }}>{title}</Text>
+                <Text variant='title' size='sm' style={{ flex: 1, alignSelf: 'center' }}>{title}</Text>
                 {closable && (
                   <Button
                     icon="close"
                     variant='secondary'
                     onPress={onClose}
-                    dense
                   />
                 )}
               </View>
             )}
             {/* Content area */}
-            <View style={[styles.compactContent, !title && { marginTop: -20 }]} id='overlay-compact-content'>{children}</View>
+            <View style={[styles.compactContent]} id='overlay-compact-content'>{children}</View>
           </View>
         </View>
       )
@@ -158,8 +161,8 @@ function OverlayContainer({
     if (variant === 'page') {
       const ContentContainer = scrollable ? ScrollView : View
       const contentProps = scrollable
-        ? { contentContainerStyle: styles.pageScrollContent }
-        : { style: styles.pageContent }
+        ? { contentContainerStyle: [styles.pageScrollContent, { paddingHorizontal: insetValue }] }
+        : { style: [styles.pageContent, { paddingHorizontal: insetValue }] }
 
       return (
         <View style={styles.pageContainer} id='overlay-page-container'>
@@ -195,7 +198,7 @@ function OverlayContainer({
         )}
 
         {/* Content area */}
-        <View style={styles.fullscreenContent} id='overlay-fullscreen-content'>
+        <View style={[styles.fullscreenContent, { paddingHorizontal: insetValue }]} id='overlay-fullscreen-content'>
           {children}
         </View>
       </View>
@@ -264,14 +267,13 @@ const useStyles = createThemedStyles(theme => ({
     alignContent: 'center',
     alignItems: 'center',
     height: theme.dimensions.HEADER_HEIGHT,
-    paddingHorizontal: CONTENT_PADDING,
+    paddingHorizontal: 16,
     backgroundColor: theme.deriveColor(theme.colors.surface, 0.2),
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.onSurface + '20',
   },
   fullscreenContent: {
     flex: 1,
-    paddingHorizontal: 12,
   },
 
   // Compact variant - centered modal
@@ -280,7 +282,7 @@ const useStyles = createThemedStyles(theme => ({
     alignContent: 'center',
     marginHorizontal: 20,
     borderRadius: BORDER_RADIUS,
-    padding: 12,
+    padding: 8,
     backgroundColor: theme.colors.surface,
   },
   compactHeader: {
@@ -306,8 +308,7 @@ const useStyles = createThemedStyles(theme => ({
   },
   pageScrollContent: {
     gap: 12,
-    padding: 12,
-    borderRadius: 8,
+    paddingVertical: 12,
   },
 }))
 

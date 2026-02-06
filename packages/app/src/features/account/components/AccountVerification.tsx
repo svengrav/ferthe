@@ -1,6 +1,7 @@
 import { getAppContext } from '@app/appContext'
-import { Theme } from '@app/shared'
+import { Stack, Theme } from '@app/shared'
 import { Form, FormInput, FormSubmitButton, Text } from '@app/shared/components'
+import Header from '@app/shared/components/header/Header'
 import { useApp } from '@app/shared/useApp'
 import { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
@@ -68,10 +69,12 @@ function AccountVerification() {
   const { styles, locales } = useApp(useStyles)
 
   return (
-    <>
+    <Stack>
+      <Header title={'Verify your account'} />
+
       {!showCodeInput && (
-        <View style={styles!.section}>
-          <Text variant="title">{locales.auth.enterPhoneNumber}</Text>
+        <Stack>
+          <Text variant="body">{locales.auth.enterPhoneNumber}</Text>
           {error && <Text style={styles!.error}>{error}</Text>}
           <Form<PhoneFormData>
             schema={phoneSchema}
@@ -89,7 +92,7 @@ function AccountVerification() {
               variant="primary"
             />
           </Form>
-        </View>
+        </Stack>
       )}
       {showCodeInput && (
         <View style={styles!.section}>
@@ -112,7 +115,8 @@ function AccountVerification() {
           </Form>
         </View>
       )}
-    </>
+    </Stack>
+
   )
 }
 

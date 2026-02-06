@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import React, { createContext, useContext } from 'react'
 import { DefaultValues, FieldValues, FormProvider, useForm } from 'react-hook-form'
-import { View } from 'react-native'
 import { ZodObject } from 'zod'
+import Stack from '../stack/Stack'
 
 interface FormProps<T extends FieldValues> {
   schema?: ZodObject
@@ -46,7 +46,7 @@ function Form<T extends FieldValues>({
   return (
     <FormProvider {...methods}>
       <FormSubmitContext.Provider value={{ onSubmit, onInvalid }}>
-        <View>{children}</View>
+        <Stack>{children}</Stack>
       </FormSubmitContext.Provider>
     </FormProvider>
   )

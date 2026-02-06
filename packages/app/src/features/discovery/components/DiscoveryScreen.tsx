@@ -1,10 +1,12 @@
+import { useEffect } from 'react'
+
 import { getAppContext } from '@app/appContext'
-import { Page, Text } from '@app/shared/components'
+import { Page } from '@app/shared/components'
+import Header from '@app/shared/components/header/Header'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay } from '@app/shared/overlay'
-import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { useEffect } from 'react'
+
 import { SettingsForm } from '../../settings/components/SettingsForm'
 import { DiscoveryCardState } from '../logic/types'
 import { useDiscoveryData, useDiscoveryStatus } from '../stores/discoveryStore'
@@ -48,17 +50,8 @@ const useDiscoveryScreen = () => {
  * Supports deep-linking to specific discovery cards via route parameters.
  */
 function DiscoveryScreen() {
-  const { styles, theme } = useApp(useStyles)
+  const { locales } = useApp()
   const { t } = useLocalizationStore()
-
-  // Helper to open discovery card details
-  function openCardDetails(card: DiscoveryCardState) {
-    const close = setOverlay('discoveryCardDetails_' + card.discoveryId,
-      <DiscoveryCardDetails card={card} onClose={() => close()} />,
-      { variant: 'fullscreen', transparent: true, closable: true }
-    )
-  }
-
 
   const {
     cards,
@@ -66,11 +59,29 @@ function DiscoveryScreen() {
     requestDiscoveryState,
   } = useDiscoveryScreen()
 
-  if (!styles) return null
+  // Open discovery card details in overlay
+  const openCardDetails = (card: DiscoveryCardState) => {
+    const close = setOverlay(
+      'discoveryCardDetails_' + card.discoveryId,
+      <DiscoveryCardDetails card={card} onClose={() => close()} />,
+      { variant: 'fullscreen', transparent: true, closable: true }
+    )
+  }
+
+  // Open settings form in overlay
+  const openSettings = () => {
+    const close = setOverlay(
+      'settingsForm',
+      <SettingsForm
+        onClose={() => close()}
+        onSubmit={() => close()}
+      />
+    )
+  }
 
   return (
-    <Page options={[{ label: t.navigation.settings, onPress: () => setOverlay('settingsForm', <SettingsForm onClose={() => { }} onSubmit={() => { }} />) }]}>
-      <Text variant='heading'>Discoveries</Text>
+    <Page options={[{ label: t.navigation.settings, onPress: openSettings }]}>
+      <Header title={t.discovery.discoveries} />
 
       <DiscoveryCardList
         cards={cards}
@@ -81,9 +92,5 @@ function DiscoveryScreen() {
     </Page>
   )
 }
-
-const useStyles = createThemedStyles(theme => ({
-  // Placeholder styles, replace with actual styles
-}))
 
 export default DiscoveryScreen

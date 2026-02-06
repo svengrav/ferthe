@@ -1,11 +1,9 @@
-import { getAppContext } from '@app/appContext'
 import { Text } from '@app/shared/components'
 import { setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { Community } from '@shared/contracts'
 import { Pressable, View } from 'react-native'
-import { useActiveCommunityId } from '../stores/communityStore'
 import { CommunityAvatar } from './CommunityAvatar'
 import CommunityDiscoveriesScreen from './CommunityDiscoveriesScreen'
 
@@ -19,8 +17,6 @@ interface CommunityCardProps {
  */
 function CommunityCard({ community }: CommunityCardProps) {
   const { styles } = useApp(useStyles)
-  const activeCommunityId = useActiveCommunityId()
-  const { communityApplication } = getAppContext()
 
   if (!styles) return null
 

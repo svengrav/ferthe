@@ -155,6 +155,7 @@ const createStyles = (theme: Theme) =>
 
     // Icon-only button styles
     iconButton: {
+      alignSelf: 'center',
       borderRadius: 50,
       padding: 4,
       alignItems: 'center',

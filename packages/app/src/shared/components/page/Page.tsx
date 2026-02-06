@@ -1,12 +1,9 @@
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { useTheme } from '@app/shared/theme'
 import { StyleProp, View, ViewStyle } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Option } from '../types'
+import { Inset, Option } from '../types'
 import { PageHeader } from './PageHeader'
-
-const CONTAINER_PADDING = 16
 
 interface PageProps {
   children?: React.ReactNode
@@ -15,36 +12,39 @@ interface PageProps {
   options?: Option[]
   action?: React.ReactNode
   scrollable?: boolean
+  inset?: Inset
 }
 
 /**
  * Page wrapper component that provides consistent layout structure
  * with optional header, scrollable content, and safe area handling.
+ * Supports configurable horizontal inset for content padding.
  */
-function Page({ children, label, style, options, scrollable = false, action }: PageProps) {
-  const { styles } = useApp(useStyles)
+function Page(props: PageProps) {
+  const { children, label, style, options, scrollable = false, action, inset = 'md' } = props
+  const { styles, theme } = useTheme(createStyles)
   const insets = useSafeAreaInsets()
 
-  if (!styles) return null
+  const insetValue = theme.tokens.inset[inset]
 
   // Dynamic content container based on scrollable prop
   const ContentContainer = scrollable ? ScrollView : View
-  const contentProps = scrollable ? { contentContainerStyle: { flexGrow: 1 } } : {}
+  const contentProps = scrollable
+    ? { contentContainerStyle: [{ flexGrow: 1, paddingHorizontal: insetValue }] }
+    : {}
 
   return (
-    <View style={[styles.page, style, { paddingTop: insets.top}]} >
-      {/* Page header with optional label and actions */}
+    <View style={[styles.page, style, { paddingTop: insets.top }]}>
       <PageHeader label={label} options={options} action={action} />
 
-      {/* Main content area */}
-      <ContentContainer style={styles.container} {...contentProps}>
+      <ContentContainer style={[styles.container, !scrollable && { paddingHorizontal: insetValue }]} {...contentProps}>
         {children}
       </ContentContainer>
     </View>
   )
 }
 
-const useStyles = createThemedStyles(theme => ({
+const createStyles = (theme: any) => ({
   page: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -53,6 +53,6 @@ const useStyles = createThemedStyles(theme => ({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-}))
+})
 
 export default Page

@@ -7,6 +7,8 @@ import { OpaqueColorValue, StyleProp, TextStyle } from 'react-native';
 export type IconSymbolName = keyof typeof MaterialIcons.glyphMap
 export type IconCommunitySymbolName = keyof typeof MaterialCommunityIcons.glyphMap
 
+export type IconName = IconSymbolName | IconCommunitySymbolName
+
 export interface IconProps {
   name: IconSymbolName | IconCommunitySymbolName
   size?: number

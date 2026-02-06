@@ -146,8 +146,13 @@ const de: LocalizationSet = {
     upgradeNow: 'Jetzt erweitern',
     selectImage: 'Bild auswählen',
     addDescription: 'Beschreibung hinzufügen...',
+    uploadAvatar: 'Avatar hochladen',
+    notSet: 'Nicht gesetzt',
   },
   community: {
+    communities: 'Communities',
+    greeting: 'Hallo',
+    defaultName: 'Fuchs',
     createNewCommunity: 'Neue Community erstellen',
     joinCommunity: 'Community beitreten',
     communityName: 'Community-Name',
@@ -163,6 +168,7 @@ const de: LocalizationSet = {
     placeholder: 'C',
   },
   discovery: {
+    discoveries: 'Entdeckungen',
     editYourDiscovery: 'Entdeckung bearbeiten',
     documentYourDiscovery: 'Entdeckung dokumentieren',
     pickingImage: 'Bild wird ausgewählt...',

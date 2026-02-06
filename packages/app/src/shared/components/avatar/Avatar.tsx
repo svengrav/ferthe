@@ -27,27 +27,28 @@ function Avatar(props: AvatarProps) {
   const source = avatar || (avatarUrl ? { uri: avatarUrl } : undefined)
 
   return (
-    <View style={styles.container}>
-      <Pressable onPress={onPress} disabled={!onPress} style={styles.avatarContainer}>
-        <Image
-          source={source}
-          label={label}
-          width={size}
-          height={size}
-          style={styles.avatar}
-          placeholder={
-            <View style={styles.placeholder}>
-              <Icon name="person" size={size * 0.5} color="#999" />
-            </View>
-          }
-        />
-      </Pressable>
-
-      {showEditIcon && onPress && (
-        <View style={styles.editBadge}>
-          <Icon name="edit" size={16} />
+    <View style={styles.container} id='avatar-container'>
+      <Pressable onPress={onPress} disabled={!onPress} >
+        {showEditIcon && onPress && (
+          <View style={styles.editBadge}>
+            <Icon name="edit" size={16} />
+          </View>
+        )}
+        <View style={styles.avatarContainer}>
+          <Image
+            source={source}
+            label={label}
+            width={size}
+            height={size}
+            style={styles.avatar}
+            placeholder={
+              <View style={styles.placeholder}>
+                <Icon name="person" size={size * 0.5} color="#999" />
+              </View>
+            }
+          />
         </View>
-      )}
+      </Pressable>
     </View>
   )
 }
@@ -84,7 +85,7 @@ const createStyles = (theme: Theme, size: number) => {
       height: 24,
       justifyContent: 'center',
       alignItems: 'center',
-
+      zIndex: 99,
     },
   })
 }

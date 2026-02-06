@@ -1,5 +1,5 @@
 import { getAppContext } from '@app/appContext'
-import { Button, Page, Text } from '@app/shared/components'
+import { Button, ScreenHeader, Text } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { logger } from '@app/shared/utils/logger'
@@ -92,46 +92,37 @@ function CommunityDiscoveriesScreen({ communityId, communityName, onBack }: Comm
   }
 
   return (
-    <Page
-      label={communityName}
-      action={onBack ? <Button icon="arrow-back" onPress={onBack} /> : undefined}
-      scrollable={false}
-    >
-      <View style={styles.container}>
-        <Text variant="section" style={styles.sectionTitle}>
-          Shared Discoveries
-        </Text>
+    <View style={styles.container}>
+      <ScreenHeader
+        title={communityName}
+        trailing={<Button icon='more-vert' variant='outlined' options={[]} />}
+      />
 
-        {discoveries.length === 0 ? (
-          renderEmptyState()
-        ) : (
-          <FlatList
-            data={discoveries}
-            renderItem={({ item }) => (
-              <SharedDiscoveryCard
-                discovery={item}
-                communityId={communityId}
-                onUnshared={reloadDiscoveries}
-              />
-            )}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.listContent}
-            refreshing={isRefreshing}
-            onRefresh={handleRefresh}
-          />
-        )}
-      </View>
-    </Page>
+      {discoveries.length === 0 ? (
+        renderEmptyState()
+      ) : (
+        <FlatList
+          data={discoveries}
+          renderItem={({ item }) => (
+            <SharedDiscoveryCard
+              discovery={item}
+              communityId={communityId}
+              onUnshared={reloadDiscoveries}
+            />
+          )}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.listContent}
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+        />
+      )}
+    </View>
   )
 }
 
 const useStyles = createThemedStyles(theme => ({
   container: {
     flex: 1,
-    paddingHorizontal: 16,
-  },
-  sectionTitle: {
-    marginBottom: 16,
   },
   listContent: {
     paddingBottom: 16,

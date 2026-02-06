@@ -1,28 +1,40 @@
+import { useState } from 'react'
+import { StyleSheet, View } from 'react-native'
+
 import { getAppContext } from '@app/appContext'
-import { Button, Card, Icon, Text } from '@app/shared/components'
+import { Avatar, Button, Card } from '@app/shared/components'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { Theme, useThemeStore } from '@app/shared/theme'
+import { Theme, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
-import React, { useState } from 'react'
-import { Image, Pressable, StyleSheet, View } from 'react-native'
+
 import { useAccountData } from '../stores/accountStore'
 
 interface AvatarUploadProps {
   onSubmit: () => void
 }
 
-export const AvatarUpload: React.FC<AvatarUploadProps> = ({ onSubmit }) => {
-  const theme = useThemeStore()
+/**
+ * Component for uploading and updating user avatar.
+ * Allows user to select an image and upload it as their profile avatar.
+ */
+function AvatarUpload(props: AvatarUploadProps) {
+  const { onSubmit } = props
+
+  const { styles } = useTheme(createStyles)
   const { t } = useLocalizationStore()
   const { account } = useAccountData()
   const { accountApplication } = getAppContext()
   const { selectedImageUri, pickImage, isLoading: isPickingImage } = useImagePicker()
   const { convertToBase64, isConverting } = useImageToBase64()
   const [isUploading, setIsUploading] = useState(false)
-  const styles = createStyles(theme)
 
+  // Determine current avatar to display
+  const currentAvatar = selectedImageUri || account?.avatar?.url
+  const isLoading = isPickingImage || isConverting || isUploading
+
+  // Upload selected avatar image
   const handleUpload = async () => {
     if (!selectedImageUri) return
 
@@ -44,25 +56,14 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({ onSubmit }) => {
     }
   }
 
-  const isLoading = isPickingImage || isConverting || isUploading
-  const currentAvatar = selectedImageUri || account?.avatar?.url
-
   return (
     <Card style={styles.card}>
       <View style={styles.container}>
-        <Pressable onPress={pickImage} style={styles.avatarContainer}>
-          {currentAvatar ? (
-            <Image source={{ uri: currentAvatar }} style={styles.avatar} />
-          ) : (
-            <View style={styles.placeholderAvatar}>
-              <Icon name="person" size={48} color={theme.colors.onSurface} />
-            </View>
-          )}
-        </Pressable>
-
-        <Text variant="hint" style={styles.hint}>
-          Tap to select image
-        </Text>
+        <Avatar
+          avatarUrl={currentAvatar}
+          size={100}
+          onPress={pickImage}
+        />
 
         <View style={styles.buttonContainer}>
           <Button
@@ -94,28 +95,10 @@ const createStyles = (theme: Theme) =>
       alignItems: 'center',
       gap: 16,
     },
-    avatarContainer: {
-      width: 120,
-      height: 120,
-      borderRadius: 60,
-      overflow: 'hidden',
-    },
-    avatar: {
-      width: '100%',
-      height: '100%',
-    },
-    placeholderAvatar: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: theme.colors.surface,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    hint: {
-      textAlign: 'center',
-    },
     buttonContainer: {
       flexDirection: 'row',
       gap: 12,
     },
   })
+
+export default AvatarUpload

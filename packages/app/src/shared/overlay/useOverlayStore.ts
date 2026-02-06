@@ -16,6 +16,7 @@ type OverlayItemSettings = {
   closable?: boolean
   options?: any[]
   scrollable?: boolean
+  inset?: 'none' | 'sm' | 'md' | 'lg'
 }
 
 type OverlayStore = {

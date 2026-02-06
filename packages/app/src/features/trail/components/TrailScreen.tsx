@@ -1,7 +1,8 @@
 import { getAppContext } from '@app/appContext'
 import { SettingsForm } from '@app/features/settings'
 import { useTrailData, useTrailStatus } from '@app/features/trail/stores/trailStore'
-import { Button, FertheLogo, Page, Text } from '@app/shared/components'
+import { Button, FertheLogo, Page, Stack, Text } from '@app/shared/components'
+import Header from '@app/shared/components/header/Header'
 import { setOverlay } from '@app/shared/overlay/useOverlayStore'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
@@ -17,7 +18,7 @@ const INTRO_MARGIN_TOP = 10
 const INTRO_MARGIN_BOTTOM = 25
 const INTRO_LINE_HEIGHT = 30
 const LOGO_MARGIN_BOTTOM = 10
-const LIST_GAP = 0
+const LIST_GAP = 8
 
 /**
  * Hook to manage trail screen state and interactions
@@ -92,11 +93,10 @@ function TrailScreen() {
 
   return (
     <Page options={pageOptions}>
-      {/* Header section */}
-      <Text variant='heading'>{locales.trails.yourTrails}</Text>
-
-      {/* Main content */}
-      <View style={styles.content}>
+      <Stack>
+        {/* Header section */}
+        <Header title={locales.trails.yourTrails} />
+        {/* Main content */}
         {hasTrails ? (
           <FlatList
             data={trails}
@@ -117,7 +117,7 @@ function TrailScreen() {
             <Text style={styles.introText}>{locales.trails.everyJourney}</Text>
           </View>
         )}
-      </View>
+      </Stack>
     </Page>
   )
 }

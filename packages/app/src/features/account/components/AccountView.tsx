@@ -1,140 +1,134 @@
-import { Avatar, Button, InfoField, Text } from '@app/shared/components'
+import { StyleSheet, View } from 'react-native'
+
+import { getAppContext } from '@app/appContext'
+import { Avatar, Button, InfoField, Stack, Text } from '@app/shared/components'
+import Header from '@app/shared/components/header/Header'
+import Item from '@app/shared/components/item/Item'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay } from '@app/shared/overlay'
-import { Theme } from '@app/shared/theme'
-import useThemeStore from '@app/shared/theme/themeStore'
-import { logger } from '@app/shared/utils/logger'
-import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import { Theme, useTheme } from '@app/shared/theme'
+
 import { useAccountData } from '../stores/accountStore'
 import AccountVerification from './AccountVerification'
-import { AvatarUpload } from './AvatarUpload'
-import { DescriptionEditor } from './DescriptionEditor'
-import { DisplayNameEditor } from './DisplayNameEditor'
+import AvatarUpload from './AvatarUpload'
 
-
-export const AccountView: React.FC = () => {
-  const theme = useThemeStore()
+/**
+ * Account view displaying user profile information and settings.
+ * Allows editing of display name, description, avatar and account verification.
+ */
+function AccountView() {
+  const { styles } = useTheme(createStyles)
   const { t } = useLocalizationStore()
   const { account, accountType } = useAccountData()
-  const styles = createStyles(theme)
+  const { accountApplication } = getAppContext()
 
-  const showAccountRegistration = () => {
-    setOverlay('accountVerification', <AccountVerification />, { title: 'Verify your Account', variant: 'compact', closable: true })
+  // Update account field with new value
+  const handleEdit = async (field: string, value: string) => {
+    await accountApplication.updateAccount({ [field]: value })
   }
 
-  logger.log('[AccountView] Rendering with account:', account, 'accountType:', accountType)
+  // Open account verification overlay
+  const showAccountRegistration = () => {
+    setOverlay(
+      'accountVerification',
+      <AccountVerification />,
+      { variant: 'compact', closable: true }
+    )
+  }
+
+  // Open avatar upload overlay
+  const handleAvatarPress = () => {
+    const close = setOverlay(
+      'avatarUpload',
+      <AvatarUpload onSubmit={() => close()} />,
+      { title: t.account.uploadAvatar, closable: true, variant: 'compact' }
+    )
+  }
 
   return (
-    <View style={{ flex: 1, gap: 4 }}>
-      <Text variant="heading">{t.account.myAccount}</Text>
+    <Stack>
+      <Header title={t.account.myAccount} />
 
       {/* Profile Avatar */}
-      <View style={styles.avatarContainer}>
-        <Avatar
-          avatar={account?.avatar}
-          label={account?.displayName}
-          size={100}
-          showEditIcon={true}
-          onPress={() => {
-            const close = setOverlay(
-              'avatarUpload',
-              <AvatarUpload onSubmit={() => close()} />,
-              { title: 'Upload Avatar', closable: true, variant: 'compact' }
-            )
-          }}
-        />
-      </View>
+      <Avatar
+        avatar={account?.avatar}
+        label={account?.displayName}
+        size={100}
+        showEditIcon={true}
+        onPress={handleAvatarPress}
+      />
 
-      <View style={{ flexGrow: 0, gap: 8, marginBottom: 12 }}>
-        {/* Account Status Section */}
-        {/* Display Name Editor */}
-        <InfoField
-          icon="person-2"
-          label={t.account.displayName}
-          value={account?.displayName || 'Not set'}
-          onEdit={() => { const close = setOverlay('displayNameEditor', <DisplayNameEditor onSubmit={() => close()} />, { title: t.account.setDisplayName, closable: true, variant: 'compact' }) }}
-        />
+      {/* Display Name Editor */}
+      <Item
+        icon="person-2"
+        label={t.account.displayName}
+        value={account?.displayName || t.account.notSet}
+        editable
+        onSubmitEdit={(value) => handleEdit('displayName', value)}
+      />
 
-        {/* Description Editor */}
-        <InfoField
-          icon="text-snippet"
-          label={t.account.description}
-          value={account?.description || 'Not set'}
-          onEdit={() => { const close = setOverlay('descriptionEditor', <DescriptionEditor onSubmit={() => close()} />, { title: t.account.description, closable: true, variant: 'compact' }) }}
-        />
+      {/* Description Editor */}
+      <Item
+        icon="text-snippet"
+        label={t.account.description}
+        value={account?.description || t.account.notSet}
+        editable
+        type='multiline'
+        onSubmitEdit={(value) => handleEdit('description', value)}
+      />
 
-        <InfoField
-          icon="account-circle"
-          label={t.account.accountStatus}
-          value={accountType === 'sms_verified'
-            ? t.account.phoneAccount
-            : t.account.localAccount}
-        />
-        <InfoField
-          icon="badge"
-          label={t.account.accountId}
-          value={account?.id}
-        />
+      {/* Account Status */}
+      <Item
+        icon="account-circle"
+        label={t.account.accountStatus}
+        value={accountType === 'sms_verified'
+          ? t.account.phoneAccount
+          : t.account.localAccount}
+      />
 
-        <InfoField
-          icon="sync"
-          label={t.account.featureAccess}
-          value={accountType === 'local_unverified'
-            ? t.account.localAccountDescription
-            : accountType === 'sms_verified'
-              ? t.account.phoneAccountDescription
-              : t.account.loginToSync}
-        />
-      </View>
-      {/* Upgrade if not verified */}
+      {/* Account ID */}
+      <Item
+        icon="badge"
+        label={t.account.accountId}
+        value={account?.id}
+      />
+
+      {/* Feature Access */}
+      <InfoField
+        icon="sync"
+        label={t.account.featureAccess}
+        value={accountType === 'local_unverified'
+          ? t.account.localAccountDescription
+          : accountType === 'sms_verified'
+            ? t.account.phoneAccountDescription
+            : t.account.loginToSync}
+      />
+
+      {/* Upgrade Button for unverified accounts */}
       {accountType === 'local_unverified' && (
-        <View style={{ flex: 1 }}>
+        <View style={styles.upgradeContainer}>
           <Button
-            align='center'
             label={t.account.upgradeNow}
             variant="primary"
-            onPress={() => showAccountRegistration()} />
-          <Text variant="hint" style={{ textAlign: 'center', paddingTop: 8 }}>
+            onPress={showAccountRegistration}
+          />
+          <Text variant="hint" style={styles.upgradeHint}>
             {t.account.upgradeToUnlock}
           </Text>
         </View>
       )}
-    </View>
+    </Stack>
   )
 }
 
 const createStyles = (theme: Theme) => StyleSheet.create({
-  container: {
+  upgradeContainer: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
-  avatarContainer: {
-    alignItems: 'center',
-    marginVertical: 16,
-  },
-  grid: {
-    width: '100%',
-    flexWrap: 'wrap',
-    rowGap: 16,
-    gap: 16,
-  },
-  content: {
-
-  },
-  title: {
-    fontSize: 16,
-    color: theme.colors.onBackground,
+  upgradeHint: {
     textAlign: 'center',
-    marginBottom: 16
-  },
-  card: {
-    width: '100%',
-  },
-  description: {
-    color: theme.colors.onSurface,
-  },
-  actionSection: {
-    gap: 5,
+    paddingTop: 8,
   },
 })
+
+export default AccountView

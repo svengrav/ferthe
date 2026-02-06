@@ -145,8 +145,13 @@ const en = {
     upgradeNow: 'Upgrade now',
     selectImage: 'Select Image',
     addDescription: 'Add a description...',
+    uploadAvatar: 'Upload Avatar',
+    notSet: 'Not set',
   },
   community: {
+    communities: 'Communities',
+    greeting: 'Hi',
+    defaultName: 'Fox',
     createNewCommunity: 'Create New Community',
     joinCommunity: 'Join Community',
     communityName: 'Community Name',
@@ -162,6 +167,7 @@ const en = {
     placeholder: 'C',
   },
   discovery: {
+    discoveries: 'Discoveries',
     editYourDiscovery: 'Edit your discovery',
     documentYourDiscovery: 'Document your discovery',
     pickingImage: 'Picking image...',

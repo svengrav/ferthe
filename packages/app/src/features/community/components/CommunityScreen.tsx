@@ -1,14 +1,12 @@
-import { useCallback, useEffect, useState } from 'react'
-import { View } from 'react-native'
-
 import { getAppContext } from '@app/appContext'
-import { AccountView } from '@app/features/account/components/AccountView'
+import AccountView from '@app/features/account/components/AccountView'
 import { useAccountData } from '@app/features/account/stores/accountStore'
 import { useTrails } from '@app/features/trail/stores/trailStore'
-import { Avatar, Button, Page, Text } from '@app/shared/components'
+import { Avatar, Button, Page, Stack } from '@app/shared/components'
+import { Header } from '@app/shared/components/'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay, useOverlayStore } from '@app/shared/overlay'
-import { createThemedStyles, useTheme } from '@app/shared/theme'
-
+import { useCallback, useEffect, useState } from 'react'
 import { useCommunityData, useCommunityStatus } from '../stores/communityStore'
 import CommunityCreator from './CommunityCreator'
 import { JoinCommunitySection } from './JoinCommunitySection'
@@ -78,21 +76,19 @@ const useCommunitiesScreen = () => {
  * Screen for managing communities: creating new communities, joining with invite codes, and viewing existing communities.
  */
 function CommunitiesScreen() {
-  const { styles } = useTheme(useStyles)
+  const { t } = useLocalizationStore()
   const { account } = useAccountData()
   const {
     communities,
     trails,
     isLoading,
-    isCreating,
     isJoining,
     handleCreateCommunity,
     handleJoinCommunity,
     handleRefresh,
   } = useCommunitiesScreen()
 
-  if (!styles) return null
-
+  // Open overlay to create a new community
   const handleOpenCreateOverlay = () => {
     setOverlay(
       'createCommunity',
@@ -106,6 +102,7 @@ function CommunitiesScreen() {
     )
   }
 
+  // Open overlay to join an existing community
   const handleOpenJoinOverlay = () => {
     setOverlay(
       'joinCommunity',
@@ -120,22 +117,20 @@ function CommunitiesScreen() {
     )
   }
 
+  // Open account view overlay
   const handleOpenAccountOverlay = () => {
     setOverlay('accountView', <AccountView />)
   }
 
+  const displayName = account?.displayName || t.community.defaultName
+  const greeting = `${t.community.greeting}, ${displayName}`
+
   return (
     <Page action={<Button icon="person" onPress={handleOpenAccountOverlay} />} scrollable>
-      <View style={styles.avatar}>
+      <Stack>
+        <Header title={greeting} />
         <Avatar size={AVATAR_SIZE} avatar={account?.avatar} label={account?.displayName} />
-        <Text variant='subtitle' style={styles.avatarName}>
-          {account?.displayName}
-        </Text>
-      </View>
-
-      <Text variant="heading">Communities</Text>
-
-      <View style={styles.content}>
+        <Header title={t.community.communities} />
         <MyCommunitiesSection
           communities={communities}
           isLoading={isLoading}
@@ -143,23 +138,9 @@ function CommunitiesScreen() {
           onCreatePress={handleOpenCreateOverlay}
           onJoinPress={handleOpenJoinOverlay}
         />
-      </View>
+      </Stack>
     </Page>
   )
 }
-
-const useStyles = createThemedStyles(theme => ({
-  avatar: {
-    paddingVertical: 12,
-  },
-  avatarName: {
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 16,
-  },
-}))
 
 export default CommunitiesScreen
