@@ -1,12 +1,14 @@
 import { useThemeStore } from '@app/shared/theme'
 import { PRIMITIVES } from '@app/shared/theme/theme'
-import { TextTheme } from '@app/shared/theme/types'
+import { TextTheme, Tokens } from '@app/shared/theme/types'
 import * as Native from 'react-native'
-import { AlignableProps, SizeableProps } from '../types'
+import { AlignableProps } from '../types'
 
 type TextVariant = keyof TextTheme
+type TextSize = keyof Tokens["fontSize"]
 
-interface TextProps extends Native.TextProps, SizeableProps, AlignableProps {
+interface TextProps extends Native.TextProps, AlignableProps {
+  size?: TextSize
   variant?: TextVariant
 }
 

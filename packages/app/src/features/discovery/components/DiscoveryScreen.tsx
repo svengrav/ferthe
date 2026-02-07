@@ -4,14 +4,11 @@ import { getAppContext } from '@app/appContext'
 import { Page } from '@app/shared/components'
 import Header from '@app/shared/components/header/Header'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { closeOverlay, setOverlay } from '@app/shared/overlay'
-import { useApp } from '@app/shared/useApp'
 
-import { SettingsPage } from '../../settings/components/SettingsPage'
-import { DiscoveryCardState } from '../logic/types'
+import { useSettingsPage } from '../../settings/components/SettingsPage'
 import { useDiscoveryData, useDiscoveryStatus } from '../stores/discoveryStore'
-import DiscoveryCardDetails from './DiscoveryCardDetails'
 import { DiscoveryCardList } from './DiscoveryCardList'
+import { useDiscoveryCardPage } from './DiscoveryCardPage.tsx'
 
 // Status constants
 const STATUS_UNINITIALIZED = 'uninitialized'
@@ -50,8 +47,9 @@ const useDiscoveryScreen = () => {
  * Supports deep-linking to specific discovery cards via route parameters.
  */
 function DiscoveryScreen() {
-  const { locales } = useApp()
   const { t } = useLocalizationStore()
+  const { showSettings } = useSettingsPage()
+  const { showDiscoveryCardDetails } = useDiscoveryCardPage()
 
   const {
     cards,
@@ -59,35 +57,15 @@ function DiscoveryScreen() {
     requestDiscoveryState,
   } = useDiscoveryScreen()
 
-  // Open discovery card details in overlay
-  const openCardDetails = (card: DiscoveryCardState) => {
-    const close = setOverlay(
-      'discoveryCardDetails_' + card.discoveryId,
-      <DiscoveryCardDetails card={card} onClose={() => close()} />,
-      { variant: 'fullscreen', transparent: true, closable: true }
-    )
-  }
-
-  // Open settings form in overlay
-  const openSettings = () => {
-    const close = setOverlay(
-      'settingsForm',
-      <SettingsPage
-        onClose={() => closeOverlay('settingsForm')}
-        onSubmit={() => closeOverlay('settingsForm')}
-      />
-    )
-  }
-
   return (
-    <Page options={[{ label: t.navigation.settings, onPress: openSettings }]}>
+    <Page options={[{ label: t.navigation.settings, onPress: showSettings }]}>
       <Header title={t.discovery.discoveries} />
 
       <DiscoveryCardList
         cards={cards}
         refreshing={isLoading}
         onRefresh={requestDiscoveryState}
-        onTap={openCardDetails}
+        onTap={showDiscoveryCardDetails}
       />
     </Page>
   )

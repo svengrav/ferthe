@@ -39,6 +39,8 @@ description: This prompt is used to refactor code according to specified guideli
 ## Localization
 - **Never use hardcoded text strings** in components (e.g., `"Save"`, `"Cancel"`, `"Enter your name"`).
 - All user-facing text must be defined in `LocalizationSet` interface.
+- Check if there are already existing keys for the text you want to use before adding new ones. 
+- Check if its is a common key like "save" or "cancel" that could be used across the app, or if it is a specific key that is only used in one place.
 - Access localized strings via `useLocalizationStore().t` or `useApp().locales`.
 - Examples:
   - Bad: `<Button label="Save" />`
@@ -49,6 +51,24 @@ description: This prompt is used to refactor code according to specified guideli
   - `packages/app/src/shared/localization/locales/locales.definition.ts` (TypeScript interface)
   - `packages/app/src/shared/localization/locales/locales.en.ts` (English translations)
   - `packages/app/src/shared/localization/locales/locales.de.ts` (German translations)
+ 
+## Patterns
+
+### Pages
+- Components which have Page should use the Page component from shared components. 
+- They should provide a usePage hook that provides a function to show the page. This function should be used in the parent component to show the page.
+```
+export const useSettingsPage = () => ({
+  showSettings: () => setOverlay(
+    'settingsForm',
+    <SettingsPage
+      onClose={() => closeOverlay('settingsForm')}
+      onSubmit={() => closeOverlay('settingsForm')}
+    />
+  ),
+  closeSettings: () => closeOverlay('settingsForm'),
+})
+```
 
 ## Import Organization
 - Group imports: React/React Native → Third-party → Local imports

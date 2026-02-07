@@ -1,10 +1,10 @@
 import { getAppContext } from '@app/appContext'
-import AccountView from '@app/features/account/components/AccountView'
+import AccountPage from '@app/features/account/components/AccountPage'
 import { useAccountData } from '@app/features/account/stores/accountStore'
 import { Avatar, Button, Page, Stack } from '@app/shared/components'
 import { Header } from '@app/shared/components/'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { setOverlay } from '@app/shared/overlay'
+import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { useCallback, useEffect } from 'react'
 import { useCommunityData, useCommunityStatus } from '../stores/communityStore'
 import { CommunityJoin } from './CommunityJoin'
@@ -35,12 +35,12 @@ function CommunitiesScreen() {
 
   // Open overlay to join an existing community
   const handleOpenJoinOverlay = () => {
-    setOverlay('joinCommunity', <CommunityJoin />, { variant: 'compact' })
+    setOverlay('joinCommunity', <CommunityJoin />, { variant: 'compact', closable: true, inset: 'md', title: t.community.joinCommunity })
   }
 
   // Open account view overlay
   const handleOpenAccountOverlay = () => {
-    setOverlay('accountView', <AccountView />, { variant: 'page', title: 'Account' })
+    setOverlay('accountView', <AccountPage onBack={() => closeOverlay('accountView')} />)
   }
 
   const displayName = account?.displayName || t.community.defaultName

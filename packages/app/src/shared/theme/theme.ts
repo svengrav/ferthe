@@ -74,7 +74,8 @@ export const PRIMITIVES = {
   fontSize: {
     sm: 12,
     md: 14,
-    lg: 18,
+    lg: 16,
+    xl: 20,
   },
   inset: {
     none: 0,
@@ -100,7 +101,7 @@ export const createTypography = (theme: ThemeBase) => {
       paddingVertical: 12,
     },
     title: {
-      fontSize: 15,
+      fontSize: 16,
       lineHeight: 18,
       fontWeight: '600' as const,
       fontFamily: 'Inter_600SemiBold',
@@ -123,8 +124,8 @@ export const createTypography = (theme: ThemeBase) => {
       color: theme.colors.onSurface,
     },
     body: {
-      fontSize: 14,
-      lineHeight: 20,
+      fontSize: 15,
+      lineHeight: 22,
       fontWeight: '400' as const,
       fontFamily: 'Inter_400Regular',
       color: theme.colors.onSurface,

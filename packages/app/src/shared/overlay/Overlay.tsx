@@ -40,7 +40,7 @@ function OverlayHeader({ leading, title, trailing }: OverlayHeaderProps) {
     <View style={styles.header}>
       <View style={styles.headerLeading}>{leading}</View>
       <View style={styles.headerTitle}>
-        {title && <Text variant='title' size='md'>{title}</Text>}
+        {title && <Text variant='title' >{title}</Text>}
       </View>
       <View style={styles.headerTrailing}>{trailing}</View>
     </View>
@@ -129,7 +129,6 @@ function OverlayProvider() {
         >
           {showHeader && (
             <OverlayHeader
-              leading={settings.variant === 'fullscreen' ? undefined : <Button onPress={removeOverlay} icon='arrow-back' variant='outlined' size='md' />}
               title={settings.title}
               trailing={settings.closable !== false ? <Button icon="close" variant='secondary' onPress={removeOverlay} /> : undefined}
             />
@@ -232,8 +231,7 @@ const useStyles = createThemedStyles(theme => ({
     alignItems: 'center',
     height: theme.dimensions.HEADER_HEIGHT,
     paddingHorizontal: theme.tokens.inset.md,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.divider,
+
   },
   headerLeading: {
     minWidth: 44,

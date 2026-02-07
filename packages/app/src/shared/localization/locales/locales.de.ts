@@ -63,6 +63,9 @@ const de: LocalizationSet = {
     recurrenceLabel: 'Wiederholung',
     notificationsLabel: 'Benachrichtigungen',
     noDescription: 'Keine Beschreibung verfügbar',
+    overview: 'Übersicht',
+    description: 'Beschreibung',
+    spots: 'Fundstellen',
   },
   recurrence: {
     none: 'Keine',
@@ -174,6 +177,8 @@ const de: LocalizationSet = {
     shareFromProfile: 'Teile Entdeckungen aus deinem Profil, um sie hier zu sehen',
     overview: 'Übersicht',
     members: 'Mitglieder',
+    inviteCode: 'Einladungscode',
+    created: 'Erstellt',
   },
   discovery: {
     discoveries: 'Entdeckungen',
@@ -189,7 +194,7 @@ const de: LocalizationSet = {
     update: 'Aktualisieren',
     save: 'Speichern',
     share: 'Teilen',
-    addNote: 'Notiz hinzufügen',
+    addNote: 'Notiz hinzufügen', discovered: 'Entdeckt',
   },
   map: {
     outsideTrail: 'Außerhalb des Trails',

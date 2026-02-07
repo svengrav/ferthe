@@ -1,12 +1,14 @@
+import { StyleSheet, View } from 'react-native'
+
 import { Avatar, PressableWithActions, Text } from '@app/shared/components'
 import { useDialog } from '@app/shared/components/dialog/Dialog'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
+
 import { Community } from '@shared/contracts'
-import { StyleSheet, View } from 'react-native'
-import CommunityDiscoveryPage from './CommunityDiscoveryPage'
+
+import { useCommunityDiscoveryPage } from './CommunityDiscoveryPage'
 
 interface CommunityCardProps {
   community: Community
@@ -16,10 +18,12 @@ interface CommunityCardProps {
  * Card component displaying community info.
  * Provides navigation to shared discoveries and actions via long-press dropdown.
  */
-function CommunityCard({ community }: CommunityCardProps) {
+function CommunityCard(props: CommunityCardProps) {
+  const { community } = props
   const { styles } = useTheme(createStyles)
   const { t } = useLocalizationStore()
   const { openDialog, closeDialog } = useDialog()
+  const { showCommunityDiscoveries } = useCommunityDiscoveryPage()
 
   const handleLeave = async (communityId: string) => {
     logger.log(`Leave community: ${communityId}`)
@@ -49,10 +53,7 @@ function CommunityCard({ community }: CommunityCardProps) {
   }
 
   const handlePress = () => {
-    setOverlay(
-      'communityDiscoveries',
-      <CommunityDiscoveryPage communityId={community.id} communityName={community.name} onBack={() => closeOverlay('communityDiscoveries')} />,
-    )
+    showCommunityDiscoveries(community.id, community.name)
   }
 
   return (
@@ -68,17 +69,17 @@ function CommunityCard({ community }: CommunityCardProps) {
           label: t.community.remove,
           onPress: () => confirmRemove(community.id),
         }]}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+      <View style={styles.content}>
         <Avatar size={60} />
         <View>
           <Text variant="title">{community.name}</Text>
 
           <Text variant="body" style={styles.inviteCode}>
-            Invite Code: {community.inviteCode}
+            {t.community.inviteCode}: {community.inviteCode}
           </Text>
 
           <Text variant="body" style={styles.meta}>
-            Created {new Date(community.createdAt).toLocaleDateString()}
+            {t.community.created} {new Date(community.createdAt).toLocaleDateString()}
           </Text>
         </View>
       </View>
@@ -94,23 +95,10 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     borderWidth: 2,
     borderColor: 'transparent',
   },
-  activeCard: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.opacity(theme.colors.primary, 10),
-  },
-  header: {
+  content: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
-  },
-  activeBadge: {
-    color: theme.colors.primary,
-    backgroundColor: theme.opacity(theme.colors.primary, 10),
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    fontSize: 12,
+    gap: theme.tokens.spacing.md,
   },
   inviteCode: {
     marginBottom: 4,

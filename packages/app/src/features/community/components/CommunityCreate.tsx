@@ -9,7 +9,7 @@ import CommunityEditor from './CommunityEditor'
 
 export function useCommunityCreateOverlay() {
   return {
-    open: () => setOverlay('dialog', <CommunityCreate />, { variant: 'compact' }),
+    open: () => setOverlay('dialog', <CommunityCreate />, { variant: 'compact', title: 'Create Community', closable: true, inset: 'md' }),
     close: () => closeOverlay('dialog')
   }
 }

@@ -1,13 +1,15 @@
+import { StyleSheet, View } from 'react-native'
+
 import { Button, Image, Page, PageTab, PageTabs, Stack, Text } from '@app/shared/components'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
+
 import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
-import { StyleSheet, View } from 'react-native'
 
 const IMAGE_HEIGHT = 150
 
-interface TrailDetailsProps {
+interface TrailPageProps {
   onBack?: () => void
   trail: Trail
 }
@@ -15,9 +17,10 @@ interface TrailDetailsProps {
 /**
  * Displays comprehensive information about a trail including name, image, and description.
  */
-function TrailDetails({ trail, onBack }: TrailDetailsProps) {
+function TrailPage(props: TrailPageProps) {
+  const { trail, onBack } = props
   const { styles } = useTheme(createStyles)
-  const { context } = useApp()
+  const { context, locales } = useApp()
 
   // Request trail spot previews on mount or trail change
   useEffect(() => {
@@ -25,19 +28,14 @@ function TrailDetails({ trail, onBack }: TrailDetailsProps) {
   }, [trail.id, context])
 
   return (
-    <Page style={styles.container}
+    <Page
+      style={styles.container}
       title={trail.name}
       leading={<Button icon="arrow-back" variant='outlined' onPress={onBack} />}
-      trailing={<Button
-        icon="more-vert"
-        variant="outlined"
-        options={[]}
-      />}
+      trailing={<Button icon="more-vert" variant="outlined" options={[]} />}
     >
-
-      {/* Content tabs */}
       <PageTabs variant="chips" defaultTab="overview">
-        <PageTab id="overview" label={'Overview'}>
+        <PageTab id="overview" label={locales.trails.overview}>
           <Stack spacing='md'>
             <Image
               style={styles.image}
@@ -45,18 +43,16 @@ function TrailDetails({ trail, onBack }: TrailDetailsProps) {
               height={IMAGE_HEIGHT}
               resizeMode="cover"
             />
-            <Text variant="section">Description</Text>
+            <Text variant="section">{locales.trails.description}</Text>
             <Text variant="body">{trail.description}</Text>
             <Text variant="body">{trail.updatedAt.toDateString()}</Text>
-
           </Stack>
         </PageTab>
-        <PageTab id="members" label={'Spots'}>
+        <PageTab id="spots" label={locales.trails.spots}>
           <View />
         </PageTab>
       </PageTabs>
     </Page>
-
   )
 }
 
@@ -70,4 +66,4 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
 })
 
-export default TrailDetails
+export default TrailPage

@@ -1,5 +1,5 @@
 import { getAppContext } from '@app/appContext'
-import { Button, Stack, Text, TextInput } from '@app/shared/components'
+import { Button, Stack, TextInput } from '@app/shared/components'
 import Field from '@app/shared/components/field/Field'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { useOverlayStore } from '@app/shared/overlay'
@@ -54,7 +54,7 @@ export function CommunityJoin() {
 
   return (
     <Stack spacing="lg">
-      <Text variant="heading">{t.community.joinCommunity}</Text>
+      {/* <Text variant="heading">{t.community.joinCommunity}</Text> */}
       <Stack spacing="sm">
         <Field
           style={{ flex: 1 }}

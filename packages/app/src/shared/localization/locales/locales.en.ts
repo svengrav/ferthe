@@ -61,6 +61,9 @@ const en = {
     recurrenceLabel: 'Recurrence',
     notificationsLabel: 'Notifications',
     noDescription: 'No description available',
+    overview: 'Overview',
+    description: 'Description',
+    spots: 'Spots',
   },
   recurrence: {
     none: 'None',
@@ -173,6 +176,8 @@ const en = {
     shareFromProfile: 'Share discoveries from your profile to see them here',
     overview: 'Overview',
     members: 'Members',
+    inviteCode: 'Invite Code',
+    created: 'Created',
   },
   discovery: {
     discoveries: 'Discoveries',
@@ -189,6 +194,7 @@ const en = {
     save: 'Save',
     share: 'Share',
     addNote: 'Add note',
+    discovered: 'Discovered',
   },
   map: {
     outsideTrail: 'Outside the trail',

@@ -19,10 +19,10 @@ export default function AboutScreen() {
         <PulseAnimation>
           <FertheLogo style={styles.logo} fill={theme.colors.primary} />
         </PulseAnimation>
-        <Text variant='title'>{t.about.storyIntro}</Text>
+        <Text variant='body'>{t.about.storyIntro}</Text>
         <Text variant='body'>{t.about.aboutText}</Text>
         <Text variant='body'>{t.about.followYourTrail}</Text>
-        <Button label={t.about.fertheWebsite} variant='primary' align='center' onPress={handleOpenLink} />
+        <Button label={t.about.fertheWebsite} variant='primary' onPress={handleOpenLink} />
       </View>
     </Page>
   )

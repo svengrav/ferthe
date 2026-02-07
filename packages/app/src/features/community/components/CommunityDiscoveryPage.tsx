@@ -1,7 +1,7 @@
 import { getAppContext } from '@app/appContext'
 import { Avatar, Button, Page, PageTab, PageTabs, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { setOverlay } from '@app/shared/overlay'
+import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 import { Discovery } from '@shared/contracts'
@@ -10,6 +10,18 @@ import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native'
 import { useCommunityData } from '../stores/communityStore'
 import { CommunityUpdate } from './CommunityEdit'
 import SharedDiscoveryCard from './SharedDiscoveryCard'
+
+export const useCommunityDiscoveryPage = () => ({
+  showCommunityDiscoveries: (communityId: string, communityName: string) => setOverlay(
+    'communityDiscoveries',
+    <CommunityDiscoveryPage
+      communityId={communityId}
+      communityName={communityName}
+      onBack={() => closeOverlay('communityDiscoveries')}
+    />,
+  ),
+  closeCommunityDiscoveries: () => closeOverlay('communityDiscoveries'),
+})
 
 interface CommunityDiscoveriesScreenProps {
   communityId: string
