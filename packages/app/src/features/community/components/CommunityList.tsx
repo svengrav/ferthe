@@ -3,7 +3,7 @@ import { Theme, useTheme } from '@app/shared/theme'
 import { Community } from '@shared/contracts/communities'
 import { FlatList, StyleSheet, View } from 'react-native'
 import CommunityCard from './CommunityCard'
-import { useCommunityCreateOverlay } from './CommunityCreate'
+import { useCommunityCreatorCard } from './CommunityCreatorCard.tsx'
 
 interface CommunityListProps {
   communities: Community[]
@@ -32,7 +32,7 @@ export function CommunityList({
         <Text variant="section">My Communities</Text>
         <View style={styles.actions}>
           <Button icon="person-add" onPress={onJoinPress} />
-          <Button icon="add" onPress={useCommunityCreateOverlay().open} />
+          <Button icon="add" onPress={useCommunityCreatorCard().showCommunityCreatorCard} />
         </View>
       </View>
 

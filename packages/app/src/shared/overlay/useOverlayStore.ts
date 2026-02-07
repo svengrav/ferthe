@@ -8,15 +8,8 @@ type OverlayItem = {
 }
 
 type OverlayItemSettings = {
+  showBackdrop?: boolean
   closeOnBackdropPress?: boolean
-  transparent?: boolean
-  animationType?: 'slide' | 'fade'
-  title?: string
-  variant?: 'compact' | 'fullscreen' | 'page'
-  closable?: boolean
-  options?: any[]
-  scrollable?: boolean
-  inset?: 'none' | 'sm' | 'md' | 'lg'
 }
 
 type OverlayStore = {

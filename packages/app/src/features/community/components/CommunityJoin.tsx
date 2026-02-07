@@ -1,17 +1,25 @@
 import { getAppContext } from '@app/appContext'
 import { Button, Stack, TextInput } from '@app/shared/components'
 import Field from '@app/shared/components/field/Field'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { useOverlayStore } from '@app/shared/overlay'
-import { Theme, useTheme } from '@app/shared/theme'
+import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
+import { useApp } from '@app/shared/useApp'
 import { useState } from 'react'
-import { StyleSheet } from 'react-native'
+
+const CODE_LENGTH = 6
+
+/**
+ * Hook to open/close the community join overlay.
+ */
+export const useCommunityJoinOverlay = () => ({
+  open: () => setOverlay('communityJoin', <CommunityJoin onClose={() => closeOverlay('communityJoin')} />),
+  close: () => closeOverlay('communityJoin')
+})
 
 /**
  * Hook for managing community join operations.
  * Handles code input state, loading state, and join logic.
  */
-function useCommunityJoin(maxLength: number) {
+const useCommunityJoin = (onClose?: () => void) => {
   const { communityApplication } = getAppContext()
   const [code, setCode] = useState('')
   const [isJoining, setIsJoining] = useState(false)
@@ -21,14 +29,14 @@ function useCommunityJoin(maxLength: number) {
   }
 
   const handleJoin = async () => {
-    if (!code.trim() || code.length !== maxLength) return
+    if (!code.trim() || code.length !== CODE_LENGTH) return
 
     setIsJoining(true)
     const result = await communityApplication.joinCommunity(code.trim())
     setIsJoining(false)
 
     if (result.success) {
-      useOverlayStore.getState().removeByKey('joinCommunity')
+      onClose?.()
       setCode('')
     }
   }
@@ -38,54 +46,45 @@ function useCommunityJoin(maxLength: number) {
     handleCodeChange,
     handleJoin,
     isJoining,
-    isValid: code.length === maxLength,
+    isValid: code.length === CODE_LENGTH,
   }
+}
+
+interface CommunityJoinProps {
+  onClose?: () => void
 }
 
 /**
  * Component for joining a community with invite code.
- * Manages its own state and business logic via useCommunityJoin hook.
+ * Wrapped in OverlayCard for modal presentation.
  */
-export function CommunityJoin() {
-  const maxLength = 6
-  const { styles } = useTheme(createStyles)
-  const { t } = useLocalizationStore()
-  const { code, handleCodeChange, handleJoin, isJoining, isValid } = useCommunityJoin(maxLength)
+function CommunityJoin(props: CommunityJoinProps) {
+  const { onClose } = props
+  const { locales } = useApp()
+  const { code, handleCodeChange, handleJoin, isJoining, isValid } = useCommunityJoin(onClose)
 
   return (
-    <Stack spacing="lg">
-      {/* <Text variant="heading">{t.community.joinCommunity}</Text> */}
-      <Stack spacing="sm">
+    <OverlayCard title={locales.community.joinCommunity} onClose={onClose}>
+      <Stack spacing="lg">
         <Field
           style={{ flex: 1 }}
-          helperText={t.community.joinWithInviteCode}
+          helperText={locales.community.joinWithInviteCode}
         >
           <TextInput
-            style={styles.input}
-            placeholder={t.community.yourCode}
+            placeholder={locales.community.yourCode}
             value={code}
             onChangeText={handleCodeChange}
-            maxLength={maxLength}
+            maxLength={CODE_LENGTH}
           />
         </Field>
         <Button
-          label={t.community.join}
+          label={locales.community.join}
           onPress={handleJoin}
           disabled={isJoining || !isValid}
         />
       </Stack>
-    </Stack>
+    </OverlayCard>
   )
 }
 
-const createStyles = (theme: Theme) => StyleSheet.create({
-  input: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: theme.colors.divider,
-    backgroundColor: theme.colors.surface,
-    color: theme.colors.onSurface,
-  },
-})
+export default CommunityJoin

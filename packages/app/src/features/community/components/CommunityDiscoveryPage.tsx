@@ -8,7 +8,7 @@ import { Discovery } from '@shared/contracts'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native'
 import { useCommunityData } from '../stores/communityStore'
-import { CommunityUpdate } from './CommunityEdit'
+import { useCommunityUpdaterCard } from './CommunityUpdaterCard.tsx'
 import SharedDiscoveryCard from './SharedDiscoveryCard'
 
 export const useCommunityDiscoveryPage = () => ({
@@ -81,6 +81,7 @@ function CommunityDiscoveryPage({ communityId, communityName, onBack }: Communit
   const { t } = useLocalizationStore()
   const { discoveries, isLoading, isRefreshing, loadDiscoveries } = useSharedDiscoveries(communityId)
   const { communities } = useCommunityData()
+  const { open } = useCommunityUpdaterCard()
 
   if (!styles) return null
 
@@ -94,10 +95,7 @@ function CommunityDiscoveryPage({ communityId, communityName, onBack }: Communit
   const handleEdit = () => {
     if (currentCommunity) {
       const trailId = currentCommunity.trailIds[0] || ''
-      setOverlay('editCommunity', <CommunityUpdate communityId={communityId} initialData={{
-        name: communityName,
-        trailId
-      }} />, { variant: 'compact' })
+      open({ communityId: communityId, initialData: { name: currentCommunity.name, trailId } })
     }
   }
 

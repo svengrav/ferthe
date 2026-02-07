@@ -1,10 +1,7 @@
-import Button from '@app/shared/components/button/Button'
-import Text from '@app/shared/components/text/Text'
-import { Inset } from '@app/shared/components/types'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import React, { useEffect } from 'react'
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useOverlayStore } from './useOverlayStore'
@@ -19,59 +16,6 @@ const OVERLAY_Z_INDEX = 1000
 
 // Content styling constants
 const BORDER_RADIUS = 12
-
-export type OverlayVariant = 'compact' | 'fullscreen'
-
-/**
- * OverlayHeader - Unified header component with slot architecture
- */
-interface OverlayHeaderProps {
-  leading?: React.ReactNode
-  title?: string
-  trailing?: React.ReactNode
-}
-
-function OverlayHeader({ leading, title, trailing }: OverlayHeaderProps) {
-  const { styles } = useApp(useStyles)
-
-  if (!styles) return null
-
-  return (
-    <View style={styles.header}>
-      <View style={styles.headerLeading}>{leading}</View>
-      <View style={styles.headerTitle}>
-        {title && <Text variant='title' >{title}</Text>}
-      </View>
-      <View style={styles.headerTrailing}>{trailing}</View>
-    </View>
-  )
-}
-
-/**
- * OverlayContent - Unified content component with centralized padding
- */
-interface OverlayContentProps {
-  children: React.ReactNode
-  inset?: Inset
-  scrollable?: boolean
-  contentInsetY?: 'none' | 'sm' | 'md'
-}
-
-function OverlayContent({ children, inset = 'none', scrollable = false, contentInsetY = 'none' }: OverlayContentProps) {
-  const { styles, theme } = useApp(useStyles)
-
-  if (!styles) return null
-
-  const insetValue = theme.tokens.inset[inset]
-  const verticalInset = contentInsetY !== 'none' ? theme.tokens.spacing[contentInsetY] : 0
-
-  const ContentContainer = scrollable ? ScrollView : View
-  const contentProps = scrollable
-    ? { contentContainerStyle: [styles.scrollContent, { paddingHorizontal: insetValue, paddingVertical: verticalInset }] }
-    : { style: [styles.content, { paddingHorizontal: insetValue, paddingVertical: verticalInset }] }
-
-  return <ContentContainer {...contentProps}>{children}</ContentContainer>
-}
 
 /**
  * Hook to manage overlay animation logic
@@ -117,25 +61,15 @@ function OverlayProvider() {
       const settings = overlayItem.settings || {}
       const removeOverlay = () => overlayStore.remove(overlayItem.id)
 
-      const showHeader = settings.title || settings.closable
-
       return (
         <Overlay
           key={overlayItem.id}
           visible={true}
           onClose={removeOverlay}
-          variant={settings.variant === 'page' ? 'fullscreen' : settings.variant}
+          showBackdrop={settings.showBackdrop}
           closeOnBackdropPress={settings.closeOnBackdropPress}
         >
-          {showHeader && (
-            <OverlayHeader
-              title={settings.title}
-              trailing={settings.closable !== false ? <Button icon="close" variant='secondary' onPress={removeOverlay} /> : undefined}
-            />
-          )}
-          <OverlayContent inset={settings.inset} scrollable={settings.scrollable}>
-            {overlayItem.overlay}
-          </OverlayContent>
+          {overlayItem.overlay}
         </Overlay>
       )
     })
@@ -147,22 +81,17 @@ function OverlayProvider() {
 interface OverlayProps {
   visible?: boolean
   onClose?: () => void
-  variant?: OverlayVariant
+  showBackdrop?: boolean
   closeOnBackdropPress?: boolean
   children?: React.ReactNode
 }
 
 /**
- * Overlay - Backdrop, animation, and layout container with slot architecture
- * Supports compact (centered modal) and fullscreen layouts
+ * Overlay - Backdrop und Animation Shell für Overlay-Inhalte.
+ * Der Content bestimmt selbst seine Größe und Darstellung.
  */
-function Overlay({
-  visible,
-  onClose,
-  variant = 'fullscreen',
-  closeOnBackdropPress = false,
-  children
-}: OverlayProps) {
+function Overlay(props: OverlayProps) {
+  const { visible, onClose, showBackdrop = false, closeOnBackdropPress = false, children } = props
   const { styles } = useApp(useStyles)
   const { animatedContainerStyle, shouldRender } = useOverlayAnimation(visible ?? true)
   const insets = useSafeAreaInsets()
@@ -170,12 +99,6 @@ function Overlay({
   if (!shouldRender || !styles) {
     return null
   }
-
-  const containerStyle = variant === 'compact'
-    ? styles.compactContainer
-    : styles.fullscreenContainer
-
-  const showBackdrop = variant === 'compact'
 
   return (
     <Animated.View
@@ -186,9 +109,9 @@ function Overlay({
     >
       {showBackdrop && (
         closeOnBackdropPress ? (
-          <Pressable style={styles.compactBackdrop} onPress={onClose} />
+          <Pressable style={styles.backdrop} onPress={onClose} />
         ) : (
-          <View pointerEvents="none" style={styles.compactBackdrop} />
+          <View pointerEvents="none" style={styles.backdrop} />
         )
       )}
       <View
@@ -201,9 +124,7 @@ function Overlay({
         ]}
         pointerEvents="auto"
       >
-        <View style={containerStyle}>
-          {children}
-        </View>
+        {children}
       </View>
     </Animated.View>
   )
@@ -223,63 +144,12 @@ const useStyles = createThemedStyles(theme => ({
     width: '100%',
     height: '100%',
   },
-
-  // Header component styles
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    height: theme.dimensions.HEADER_HEIGHT,
-    paddingHorizontal: theme.tokens.inset.md,
-
-  },
-  headerLeading: {
-    minWidth: 44,
-    alignItems: 'flex-start',
-  },
-  headerTitle: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  headerTrailing: {
-    minWidth: 44,
-    alignItems: 'flex-end',
-  },
-
-  // Content component styles
-  content: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-
-  // Fullscreen variant
-  fullscreenContainer: {
-    flex: 1,
-    borderRadius: BORDER_RADIUS,
-    backgroundColor: theme.colors.background,
-    overflow: 'hidden',
-  },
-
-  // Compact variant - centered modal
-  compactBackdrop: {
+  backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: theme.opacity(theme.colors.background, 0.8),
     justifyContent: 'center',
   },
-  compactContainer: {
-    marginHorizontal: theme.tokens.inset.md,
-    borderRadius: BORDER_RADIUS,
-    backgroundColor: theme.colors.surface,
-    alignSelf: 'center',
-    maxWidth: 500,
-    position: 'absolute',
-    top: '20%',
-    left: theme.tokens.inset.md,
-    right: theme.tokens.inset.md,
-  },
 }))
 
-export { OverlayContent, OverlayHeader, OverlayProvider }
+export { OverlayProvider }
 export default Overlay

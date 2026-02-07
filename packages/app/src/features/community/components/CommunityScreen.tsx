@@ -5,9 +5,9 @@ import { Avatar, Button, Page, Stack } from '@app/shared/components'
 import { Header } from '@app/shared/components/'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
-import { useCallback, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useCommunityData, useCommunityStatus } from '../stores/communityStore'
-import { CommunityJoin } from './CommunityJoin'
+import { useCommunityJoinOverlay } from './CommunityJoin'
 import { CommunityList } from './CommunityList'
 
 const AVATAR_SIZE = 80
@@ -21,6 +21,7 @@ function CommunitiesScreen() {
   const { communities } = useCommunityData()
   const status = useCommunityStatus()
   const { communityApplication } = getAppContext()
+  const { open: openJoinOverlay } = useCommunityJoinOverlay()
 
   // Initialize communities on mount
   useEffect(() => {
@@ -29,13 +30,8 @@ function CommunitiesScreen() {
     }
   }, [status, communityApplication])
 
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = () => {
     communityApplication.requestCommunities()
-  }, [communityApplication])
-
-  // Open overlay to join an existing community
-  const handleOpenJoinOverlay = () => {
-    setOverlay('joinCommunity', <CommunityJoin />, { variant: 'compact', closable: true, inset: 'md', title: t.community.joinCommunity })
   }
 
   // Open account view overlay
@@ -56,7 +52,7 @@ function CommunitiesScreen() {
           communities={communities}
           isLoading={status === 'loading'}
           onRefresh={handleRefresh}
-          onJoinPress={handleOpenJoinOverlay}
+          onJoinPress={openJoinOverlay}
         />
       </Stack>
     </Page>

@@ -1,7 +1,7 @@
 import { getAppContext } from '@app/appContext'
 import { Stack, Theme } from '@app/shared'
 import { Form, FormInput, FormSubmitButton, Text } from '@app/shared/components'
-import Header from '@app/shared/components/header/Header'
+import { OverlayCard } from '@app/shared/overlay'
 import { useApp } from '@app/shared/useApp'
 import { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
@@ -64,59 +64,63 @@ const useAccountVerification = () => {
  * Account verification component for phone number and SMS code verification
  * Handles both local account creation and phone-based verification
  */
-function AccountVerification() {
+interface AccountVerificationProps {
+  onClose?: () => void
+}
+
+function AccountVerification({ onClose }: AccountVerificationProps) {
   const { showCodeInput, error, handleRequestSmsCode, handleVerifyCode } = useAccountVerification()
   const { styles, locales } = useApp(useStyles)
 
   return (
-    <Stack>
-      <Header title={'Verify your account'} />
+    <OverlayCard title='Verify your account' onClose={onClose}>
+      <Stack>
 
-      {!showCodeInput && (
-        <Stack>
-          <Text variant="body">{locales.auth.enterPhoneNumber}</Text>
-          {error && <Text style={styles!.error}>{error}</Text>}
-          <Form<PhoneFormData>
-            schema={phoneSchema}
-            defaultValues={{ phoneNumber: '' }}
-            onSubmit={handleRequestSmsCode}
-          >
-            <FormInput
-              name="phoneNumber"
-              placeholder={locales.account.yourPhoneNumber}
-              keyboardType="phone-pad"
-              helperText={PHONE_VERIFICATION_NOTICE}
-            />
-            <FormSubmitButton
-              label={locales.account.sendCode}
-              variant="primary"
-            />
-          </Form>
-        </Stack>
-      )}
-      {showCodeInput && (
-        <View style={styles!.section}>
-          <Text style={styles!.sectionTitle}>Enter Code</Text>
-          <Form<CodeFormData>
-            schema={codeSchema}
-            defaultValues={{ verificationCode: '' }}
-            onSubmit={handleVerifyCode}
-          >
-            <FormInput
-              name="verificationCode"
-              label={locales.account.verificationCode}
-              placeholder={locales.account.yourVerificationCode}
-              keyboardType="number-pad"
-            />
-            <FormSubmitButton
-              label={locales.account.verifyCode}
-              variant="primary"
-            />
-          </Form>
-        </View>
-      )}
-    </Stack>
-
+        {!showCodeInput && (
+          <Stack>
+            <Text variant="body">{locales.auth.enterPhoneNumber}</Text>
+            {error && <Text style={styles!.error}>{error}</Text>}
+            <Form<PhoneFormData>
+              schema={phoneSchema}
+              defaultValues={{ phoneNumber: '' }}
+              onSubmit={handleRequestSmsCode}
+            >
+              <FormInput
+                name="phoneNumber"
+                placeholder={locales.account.yourPhoneNumber}
+                keyboardType="phone-pad"
+                helperText={PHONE_VERIFICATION_NOTICE}
+              />
+              <FormSubmitButton
+                label={locales.account.sendCode}
+                variant="primary"
+              />
+            </Form>
+          </Stack>
+        )}
+        {showCodeInput && (
+          <View style={styles!.section}>
+            <Text style={styles!.sectionTitle}>Enter Code</Text>
+            <Form<CodeFormData>
+              schema={codeSchema}
+              defaultValues={{ verificationCode: '' }}
+              onSubmit={handleVerifyCode}
+            >
+              <FormInput
+                name="verificationCode"
+                label={locales.account.verificationCode}
+                placeholder={locales.account.yourVerificationCode}
+                keyboardType="number-pad"
+              />
+              <FormSubmitButton
+                label={locales.account.verifyCode}
+                variant="primary"
+              />
+            </Form>
+          </View>
+        )}
+      </Stack>
+    </OverlayCard>
   )
 }
 

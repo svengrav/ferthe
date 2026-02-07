@@ -3,13 +3,24 @@ import { StyleSheet, View } from 'react-native'
 import { getAppContext } from '@app/appContext'
 import { Avatar, Button, InfoField, Page, Stack, Text } from '@app/shared/components'
 import Item from '@app/shared/components/item/Item'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { setOverlay } from '@app/shared/overlay'
+import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
+import { useApp } from '@app/shared/useApp'
 
 import { useAccountData } from '../stores/accountStore'
 import AccountVerification from './AccountVerification'
 import AvatarUpload from './AvatarUpload'
+
+/**
+ * Hook to open/close the account page overlay.
+ */
+export const useAccountPageOverlay = () => ({
+  open: () => {
+    const close = setOverlay('accountPage', <AccountPage onBack={() => close()} />)
+    return close
+  },
+  close: () => closeOverlay('accountPage')
+})
 
 interface AccountPageProps {
   onBack?: () => void
@@ -19,9 +30,10 @@ interface AccountPageProps {
  * Account view displaying user profile information and settings.
  * Allows editing of display name, description, avatar and account verification.
  */
-function AccountPage({ onBack }: AccountPageProps) {
+function AccountPage(props: AccountPageProps) {
+  const { onBack } = props
   const { styles, theme } = useTheme(createStyles)
-  const { t } = useLocalizationStore()
+  const { locales } = useApp()
   const { account, accountType } = useAccountData()
   const { accountApplication } = getAppContext()
 
@@ -32,10 +44,9 @@ function AccountPage({ onBack }: AccountPageProps) {
 
   // Open account verification overlay
   const showAccountRegistration = () => {
-    setOverlay(
+    const close = setOverlay(
       'accountVerification',
-      <AccountVerification />,
-      { variant: 'compact', closable: true }
+      <AccountVerification onClose={() => close()} />,
     )
   }
 
@@ -43,14 +54,13 @@ function AccountPage({ onBack }: AccountPageProps) {
   const handleAvatarPress = () => {
     const close = setOverlay(
       'avatarUpload',
-      <AvatarUpload onSubmit={() => close()} />,
-      { title: t.account.uploadAvatar, closable: true, variant: 'compact', inset: 'md' }
+      <AvatarUpload onSubmit={() => close()} onClose={() => close()} />,
     )
   }
 
   return (
     <Page
-      title={t.account.myAccount}
+      title={locales.account.myAccount}
       leading={<Button icon="arrow-back" variant='outlined' onPress={onBack} />}
       trailing={<Button
         icon="more-vert"
@@ -71,8 +81,8 @@ function AccountPage({ onBack }: AccountPageProps) {
         {/* Display Name Editor */}
         <Item
           icon="person-2"
-          label={t.account.displayName}
-          value={account?.displayName || t.account.notSet}
+          label={locales.account.displayName}
+          value={account?.displayName || locales.account.notSet}
           editable
           onSubmitEdit={(value) => handleEdit('displayName', value)}
         />
@@ -80,8 +90,8 @@ function AccountPage({ onBack }: AccountPageProps) {
         {/* Description Editor */}
         <Item
           icon="text-snippet"
-          label={t.account.description}
-          value={account?.description || t.account.notSet}
+          label={locales.account.description}
+          value={account?.description || locales.account.notSet}
           editable
           type='multiline'
           onSubmitEdit={(value) => handleEdit('description', value)}
@@ -90,40 +100,40 @@ function AccountPage({ onBack }: AccountPageProps) {
         {/* Account Status */}
         <Item
           icon="account-circle"
-          label={t.account.accountStatus}
+          label={locales.account.accountStatus}
           value={accountType === 'sms_verified'
-            ? t.account.phoneAccount
-            : t.account.localAccount}
+            ? locales.account.phoneAccount
+            : locales.account.localAccount}
         />
 
         {/* Account ID */}
         <Item
           icon="badge"
-          label={t.account.accountId}
+          label={locales.account.accountId}
           value={account?.id}
         />
 
         {/* Feature Access */}
         <InfoField
           icon="sync"
-          label={t.account.featureAccess}
+          label={locales.account.featureAccess}
           value={accountType === 'local_unverified'
-            ? t.account.localAccountDescription
+            ? locales.account.localAccountDescription
             : accountType === 'sms_verified'
-              ? t.account.phoneAccountDescription
-              : t.account.loginToSync}
+              ? locales.account.phoneAccountDescription
+              : locales.account.loginToSync}
         />
 
         {/* Upgrade Button for unverified accounts */}
         {accountType === 'local_unverified' && (
           <View style={styles.upgradeContainer}>
             <Button
-              label={t.account.upgradeNow}
+              label={locales.account.upgradeNow}
               variant="primary"
               onPress={showAccountRegistration}
             />
             <Text variant="hint" style={styles.upgradeHint}>
-              {t.account.upgradeToUnlock}
+              {locales.account.upgradeToUnlock}
             </Text>
           </View>
         )}

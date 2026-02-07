@@ -1,7 +1,7 @@
 import { getAppContext } from '@app/appContext'
 import { Button, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { setOverlay } from '@app/shared/overlay'
+import { OverlayCard, setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { logger } from '@app/shared/utils/logger'
@@ -66,18 +66,19 @@ function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
   const showEditor = () => {
     let close: () => void
     close = setOverlay('discoveryContentEditor_' + id,
-      <DiscoveryContentEditor
-        existingContent={content}
-        onSubmit={async (data) => {
-          setIsLoading(true)
-          const success = await updateContent(data)
-          if (success) close()
-          setIsLoading(false)
-        }}
-        onCancel={() => close()}
-        isLoading={false}
-      />,
-      { title: content ? 'Edit your note' : 'Add your note', closable: true, variant: 'compact' }
+      <OverlayCard title={content ? 'Edit your note' : 'Add your note'} onClose={() => close()}>
+        <DiscoveryContentEditor
+          existingContent={content}
+          onSubmit={async (data) => {
+            setIsLoading(true)
+            const success = await updateContent(data)
+            if (success) close()
+            setIsLoading(false)
+          }}
+          onCancel={() => close()}
+          isLoading={false}
+        />
+      </OverlayCard>
     )
   }
 
@@ -94,7 +95,6 @@ function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
       variant='outlined'
       style={styles.addContentLink}
       onPress={showEditor}
-      align='right'
     />
   )
   const renderContent = () => (

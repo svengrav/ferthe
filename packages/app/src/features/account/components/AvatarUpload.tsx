@@ -6,6 +6,7 @@ import { Avatar, Button, Card } from '@app/shared/components'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { OverlayCard } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 
@@ -13,6 +14,7 @@ import { useAccountData } from '../stores/accountStore'
 
 interface AvatarUploadProps {
   onSubmit: () => void
+  onClose?: () => void
 }
 
 /**
@@ -20,7 +22,7 @@ interface AvatarUploadProps {
  * Allows user to select an image and upload it as their profile avatar.
  */
 function AvatarUpload(props: AvatarUploadProps) {
-  const { onSubmit } = props
+  const { onSubmit, onClose } = props
 
   const { styles } = useTheme(createStyles)
   const { t } = useLocalizationStore()
@@ -57,32 +59,34 @@ function AvatarUpload(props: AvatarUploadProps) {
   }
 
   return (
-    <Card style={styles.card}>
-      <View style={styles.container}>
-        <Avatar
-          avatarUrl={currentAvatar}
-          size={100}
-          onPress={pickImage}
-        />
-
-        <View style={styles.buttonContainer}>
-          <Button
-            label={t.account.selectImage}
+    <OverlayCard title={t.account.uploadAvatar} onClose={onClose}>
+      <Card style={styles.card}>
+        <View style={styles.container}>
+          <Avatar
+            avatarUrl={currentAvatar}
+            size={100}
             onPress={pickImage}
-            variant="outlined"
-            disabled={isLoading}
           />
-          {selectedImageUri && (
+
+          <View style={styles.buttonContainer}>
             <Button
-              label={t.account.save}
-              onPress={handleUpload}
-              variant="primary"
+              label={t.account.selectImage}
+              onPress={pickImage}
+              variant="outlined"
               disabled={isLoading}
             />
-          )}
+            {selectedImageUri && (
+              <Button
+                label={t.account.save}
+                onPress={handleUpload}
+                variant="primary"
+                disabled={isLoading}
+              />
+            )}
+          </View>
         </View>
-      </View>
-    </Card>
+      </Card>
+    </OverlayCard>
   )
 }
 
