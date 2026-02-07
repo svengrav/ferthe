@@ -1,16 +1,15 @@
 import { getAppContext } from '@app/appContext'
-import { SettingsPage } from '@app/features/settings'
+import { useSettingsPage } from '@app/features/settings'
 import { useTrailData, useTrailStatus } from '@app/features/trail/stores/trailStore'
 import { Button, FertheLogo, Page, Stack, Text } from '@app/shared/components'
 import Header from '@app/shared/components/header/Header'
-import { closeOverlay, setOverlay } from '@app/shared/overlay/useOverlayStore'
-import { createThemedStyles } from '@app/shared/theme'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
 import { FlatList, View } from 'react-native'
 import TrailItem from './TrailItem'
-import TrailDetails from './TrailPage'
+import { useTrailPage } from './TrailPage'
 
 const INTRO_PADDING = 16
 const INTRO_MAX_WIDTH = 200
@@ -27,6 +26,7 @@ const useTrailScreen = () => {
   const { trails } = useTrailData()
   const status = useTrailStatus()
   const { trailApplication } = getAppContext()
+  const { showTrailPage } = useTrailPage()
 
   // Initialize trail data if needed
   useEffect(() => {
@@ -39,18 +39,8 @@ const useTrailScreen = () => {
     trailApplication.requestTrailState()
   }
 
-  const openSettings = () => {
-    let removeOverlay: (() => void) | undefined
-
-    removeOverlay = setOverlay('settingsForm',
-      <SettingsPage
-        onClose={() => removeOverlay?.()}
-        onSubmit={() => removeOverlay?.()}
-      />,
-      {
-        variant: 'fullscreen',
-        title: 'Settings'
-      })
+  const handleOpenTrail = (trail: Trail) => {
+    showTrailPage(trail)
   }
 
   const isRefreshing = status === 'loading'
@@ -61,7 +51,7 @@ const useTrailScreen = () => {
     isRefreshing,
     hasTrails,
     handleRefresh,
-    openSettings,
+    handleOpenTrail,
   }
 }
 
@@ -70,25 +60,21 @@ const useTrailScreen = () => {
  * Shows an intro screen when no trails are available and includes settings access.
  */
 function TrailScreen() {
-  const { styles, locales, theme } = useApp(useStyles)
+  const { styles } = useTheme(useStyles)
+  const { locales } = useApp()
   const {
     trails,
     isRefreshing,
     hasTrails,
     handleRefresh,
-    openSettings,
+    handleOpenTrail,
   } = useTrailScreen()
-
-
-  const handleOpenTrailOverview = (trail: Trail) => {
-    const overlayId = 'trailDetails-' + trail.id
-    setOverlay(overlayId, <TrailDetails trail={trail} onBack={() => closeOverlay(overlayId)} />)
-  }
+  const { showSettings } = useSettingsPage()
 
   if (!styles) return null
 
   const pageOptions = [
-    { label: locales.navigation.settings, onPress: openSettings },
+    { label: locales.navigation.settings, onPress: showSettings },
   ]
 
   return (
@@ -103,9 +89,9 @@ function TrailScreen() {
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => (
               <TrailItem trail={item}
-                onPress={() => handleOpenTrailOverview(item)}
+                onPress={() => handleOpenTrail(item)}
                 actions={
-                  <Button icon='chevron-right' variant='secondary' onPress={() => handleOpenTrailOverview(item)} />
+                  <Button icon='chevron-right' variant='secondary' onPress={() => handleOpenTrail(item)} />
                 } />)}
             keyExtractor={item => item.id}
             onRefresh={handleRefresh}

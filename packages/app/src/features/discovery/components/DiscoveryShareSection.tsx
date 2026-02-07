@@ -59,7 +59,6 @@ function DiscoveryShareSection({ discoveryId }: DiscoveryShareSectionProps) {
           />
         </View>
       </View>,
-      { variant: 'compact', title: 'Share Discovery' }
     )
   }
 
@@ -67,7 +66,6 @@ function DiscoveryShareSection({ discoveryId }: DiscoveryShareSectionProps) {
     <View style={styles.shareContainer}>
       <Button
         label={t.discovery.share}
-        align='right'
         onPress={handleShare}
         disabled={isSharing}
       />

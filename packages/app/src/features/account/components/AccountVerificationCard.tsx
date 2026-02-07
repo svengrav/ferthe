@@ -1,11 +1,21 @@
 import { getAppContext } from '@app/appContext'
 import { Stack, Theme } from '@app/shared'
 import { Form, FormInput, FormSubmitButton, Text } from '@app/shared/components'
-import { OverlayCard } from '@app/shared/overlay'
+import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
 import { useApp } from '@app/shared/useApp'
 import { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { z } from 'zod'
+
+/**
+ * Hook to open/close the account verification card.
+ */
+export function useAccountVerificationCard() {
+  return {
+    showAccountVerificationCard: () => setOverlay('account-verification-card', <AccountVerificationCard onClose={() => closeOverlay('account-verification-card')} />),
+    closeAccountVerificationCard: () => closeOverlay('account-verification-card')
+  }
+}
 
 // Constants
 const PHONE_VERIFICATION_NOTICE = "Your number will only be used once and won't be stored."
@@ -64,11 +74,11 @@ const useAccountVerification = () => {
  * Account verification component for phone number and SMS code verification
  * Handles both local account creation and phone-based verification
  */
-interface AccountVerificationProps {
+interface AccountVerificationCardProps {
   onClose?: () => void
 }
 
-function AccountVerification({ onClose }: AccountVerificationProps) {
+function AccountVerificationCard({ onClose }: AccountVerificationCardProps) {
   const { showCodeInput, error, handleRequestSmsCode, handleVerifyCode } = useAccountVerification()
   const { styles, locales } = useApp(useStyles)
 
@@ -146,4 +156,4 @@ const useStyles = (theme: Theme) =>
     },
   })
 
-export default AccountVerification
+export default AccountVerificationCard

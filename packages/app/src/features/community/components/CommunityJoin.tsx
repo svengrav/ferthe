@@ -8,11 +8,11 @@ import { useState } from 'react'
 const CODE_LENGTH = 6
 
 /**
- * Hook to open/close the community join overlay.
+ * Hook to open/close the community join card.
  */
-export const useCommunityJoinOverlay = () => ({
-  open: () => setOverlay('communityJoin', <CommunityJoin onClose={() => closeOverlay('communityJoin')} />),
-  close: () => closeOverlay('communityJoin')
+export const useCommunityJoinCard = () => ({
+  showCommunityJoinCard: () => setOverlay('community-join-card', <CommunityJoinCard onClose={() => closeOverlay('community-join-card')} />),
+  closeCommunityJoinCard: () => closeOverlay('community-join-card')
 })
 
 /**
@@ -50,7 +50,7 @@ const useCommunityJoin = (onClose?: () => void) => {
   }
 }
 
-interface CommunityJoinProps {
+interface CommunityJoinCardProps {
   onClose?: () => void
 }
 
@@ -58,7 +58,7 @@ interface CommunityJoinProps {
  * Component for joining a community with invite code.
  * Wrapped in OverlayCard for modal presentation.
  */
-function CommunityJoin(props: CommunityJoinProps) {
+function CommunityJoinCard(props: CommunityJoinCardProps) {
   const { onClose } = props
   const { locales } = useApp()
   const { code, handleCodeChange, handleJoin, isJoining, isValid } = useCommunityJoin(onClose)
@@ -87,4 +87,4 @@ function CommunityJoin(props: CommunityJoinProps) {
   )
 }
 
-export default CommunityJoin
+export default CommunityJoinCard

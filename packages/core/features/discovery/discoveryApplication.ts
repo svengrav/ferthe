@@ -345,65 +345,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   // Content methods (image + comment)
-  const addDiscoveryContent = async (
-    context: AccountContext,
-    discoveryId: string,
-    content: { imageUrl?: string; comment?: string }
-  ): Promise<Result<DiscoveryContent>> => {
-    try {
-      const accountId = context.accountId
-      if (!accountId) {
-        return createErrorResult('ACCOUNT_ID_REQUIRED')
-      }
-
-      // Verify discovery exists and belongs to user
-      const discoveryResult = await getDiscovery(context, discoveryId)
-      if (!discoveryResult.data) {
-        return createErrorResult('DISCOVERY_NOT_FOUND')
-      }
-
-      // Check if content already exists
-      const existingResult = await contentStore.list()
-      const existing = existingResult.data?.find(c => c.discoveryId === discoveryId)
-      if (existing) {
-        return createErrorResult('CONTENT_ALREADY_EXISTS')
-      }
-
-      // Handle image upload if base64 data provided
-      let finalImageUrl = content.imageUrl
-      if (content.imageUrl && content.imageUrl.startsWith('data:image')) {
-        if (!imageApplication) {
-          return createErrorResult(ERROR_CODES.STORAGE_CONNECTOR_NOT_CONFIGURED.code)
-        }
-
-        const uploadResult = await imageApplication.uploadImage(context, 'discovery', discoveryId, content.imageUrl)
-        if (!uploadResult.success || !uploadResult.data) {
-          return createErrorResult(ERROR_CODES.IMAGE_UPLOAD_ERROR.code)
-        }
-
-        const { blobPath } = uploadResult.data
-
-        // Generate URL from blob path
-        const urlResult = await imageApplication.refreshImageUrl(context, blobPath)
-        if (urlResult.success && urlResult.data) {
-          finalImageUrl = urlResult.data
-        }
-      }
-
-      const newContent = discoveryService.createDiscoveryContent(accountId, discoveryId, {
-        ...content,
-        imageUrl: finalImageUrl,
-      })
-      const saveResult = await contentStore.create(newContent)
-      if (!saveResult.success) {
-        return createErrorResult('SAVE_CONTENT_ERROR')
-      }
-
-      return createSuccessResult(newContent)
-    } catch (error: any) {
-      return createErrorResult('ADD_CONTENT_ERROR', { originalError: error.message })
-    }
-  }
 
   const getDiscoveryContent = async (
     _context: AccountContext,
@@ -433,14 +374,18 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
-      // Get existing content
-      const existingResult = await getDiscoveryContent(context, discoveryId)
-      if (!existingResult.data) {
-        return createErrorResult('CONTENT_NOT_FOUND')
+      // Verify discovery exists and belongs to user
+      const discoveryResult = await getDiscovery(context, discoveryId)
+      if (!discoveryResult.data) {
+        return createErrorResult('DISCOVERY_NOT_FOUND')
       }
 
-      // Verify ownership
-      if (existingResult.data.accountId !== accountId) {
+      // Get existing content
+      const existingResult = await getDiscoveryContent(context, discoveryId)
+      const existing = existingResult.data
+
+      // Verify ownership if content exists
+      if (existing && existing.accountId !== accountId) {
         return createErrorResult('NOT_AUTHORIZED')
       }
 
@@ -465,16 +410,30 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         }
       }
 
-      const updated = discoveryService.updateDiscoveryContent(existingResult.data, {
-        ...content,
-        imageUrl: finalImageUrl,
-      })
-      const saveResult = await contentStore.update(updated.id, updated)
-      if (!saveResult.success) {
-        return createErrorResult('UPDATE_CONTENT_ERROR')
+      // Upsert: Create or Update
+      if (existing) {
+        // Update existing content
+        const updated = discoveryService.updateDiscoveryContent(existing, {
+          ...content,
+          imageUrl: finalImageUrl,
+        })
+        const saveResult = await contentStore.update(updated.id, updated)
+        if (!saveResult.success) {
+          return createErrorResult('UPDATE_CONTENT_ERROR')
+        }
+        return createSuccessResult(updated)
+      } else {
+        // Create new content
+        const newContent = discoveryService.createDiscoveryContent(accountId, discoveryId, {
+          ...content,
+          imageUrl: finalImageUrl,
+        })
+        const saveResult = await contentStore.create(newContent)
+        if (!saveResult.success) {
+          return createErrorResult('SAVE_CONTENT_ERROR')
+        }
+        return createSuccessResult(newContent)
       }
-
-      return createSuccessResult(updated)
     } catch (error: any) {
       return createErrorResult('UPDATE_CONTENT_ERROR', { originalError: error.message })
     }
@@ -602,7 +561,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     getDiscoveryProfile,
     updateDiscoveryProfile,
     getDiscoveryStats,
-    addDiscoveryContent,
     getDiscoveryContent,
     updateDiscoveryContent,
     deleteDiscoveryContent,

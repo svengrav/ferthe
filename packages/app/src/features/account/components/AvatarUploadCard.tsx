@@ -6,13 +6,23 @@ import { Avatar, Button, Card } from '@app/shared/components'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { OverlayCard } from '@app/shared/overlay'
+import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 
 import { useAccountData } from '../stores/accountStore'
 
-interface AvatarUploadProps {
+/**
+ * Hook to open/close the avatar upload card.
+ */
+export function useAvatarUploadCard() {
+  return {
+    showAvatarUploadCard: (onSubmit: () => void) => setOverlay('avatar-upload-card', <AvatarUploadCard onSubmit={onSubmit} onClose={() => closeOverlay('avatar-upload-card')} />),
+    closeAvatarUploadCard: () => closeOverlay('avatar-upload-card')
+  }
+}
+
+interface AvatarUploadCardProps {
   onSubmit: () => void
   onClose?: () => void
 }
@@ -21,7 +31,7 @@ interface AvatarUploadProps {
  * Component for uploading and updating user avatar.
  * Allows user to select an image and upload it as their profile avatar.
  */
-function AvatarUpload(props: AvatarUploadProps) {
+function AvatarUploadCard(props: AvatarUploadCardProps) {
   const { onSubmit, onClose } = props
 
   const { styles } = useTheme(createStyles)
@@ -105,4 +115,4 @@ const createStyles = (theme: Theme) =>
     },
   })
 
-export default AvatarUpload
+export default AvatarUploadCard

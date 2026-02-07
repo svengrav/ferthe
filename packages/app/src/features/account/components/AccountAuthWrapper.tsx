@@ -22,7 +22,6 @@ const AccountAuthWrapper = ({ children }: AuthenticationWrapperProps) => {
   if (!accountSession) {
     return (
       <Page
-        options={[]}
         style={{
           flex: 1,
           justifyContent: 'center',

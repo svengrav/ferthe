@@ -1,14 +1,13 @@
 import { getAppContext } from '@app/appContext'
 import { Button, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { OverlayCard, setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { logger } from '@app/shared/utils/logger'
 import { useState } from 'react'
 import { Animated, View } from 'react-native'
 import { useDiscoveryContent } from '../index'
-import DiscoveryContentEditor from './DiscoveryContentEditor'
+import { useDiscoveryContentEditorCard } from './DiscoveryContentEditor'
 
 interface DiscoveryUserContentSectionProps {
   id: string
@@ -58,28 +57,19 @@ function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
   const { t } = useLocalizationStore()
   const content = useDiscoveryContent(id)
   const { updateContent, deleteContent } = useContentActions(id)
+  const { showDiscoveryContentEditorCard, closeDiscoveryContentEditorCard } = useDiscoveryContentEditorCard()
   const [isLoading, setIsLoading] = useState(false)
 
   if (!id || !styles) return null
 
   // Editor overlay management
   const showEditor = () => {
-    let close: () => void
-    close = setOverlay('discoveryContentEditor_' + id,
-      <OverlayCard title={content ? 'Edit your note' : 'Add your note'} onClose={() => close()}>
-        <DiscoveryContentEditor
-          existingContent={content}
-          onSubmit={async (data) => {
-            setIsLoading(true)
-            const success = await updateContent(data)
-            if (success) close()
-            setIsLoading(false)
-          }}
-          onCancel={() => close()}
-          isLoading={false}
-        />
-      </OverlayCard>
-    )
+    showDiscoveryContentEditorCard(id, content, async (data) => {
+      setIsLoading(true)
+      const success = await updateContent(data)
+      if (success) closeDiscoveryContentEditorCard(id)
+      setIsLoading(false)
+    })
   }
 
   const handleDeleteContent = async () => {

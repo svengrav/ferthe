@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import { DiscoveryCardState } from '../logic/types'
 import { useDiscoveryCardPage } from './DiscoveryCardPage'
-import { DiscoveryRevealOverlay } from './DiscoveryRevealOverlay'
+import { DiscoveryReveal } from './DiscoveryReveal'
 
 const CARD_WIDTH_RATIO = 0.9
 const MAX_CARD_WIDTH = 400
@@ -237,7 +237,7 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
   return (
     <Animated.View style={[styles.overlay]}>
       <View style={[styles.cardContainer, cardContainerStyles]}>
-        <DiscoveryRevealOverlay
+        <DiscoveryReveal
           mode={mode}
           blurredImageUrl={card.image.previewUrl || card.image.url}
           onTriggerReveal={triggerReveal}
@@ -247,7 +247,7 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
             front={renderFrondend()}
             back={renderBackend()}
           />
-        </DiscoveryRevealOverlay>
+        </DiscoveryReveal>
       </View>
     </Animated.View>
   )

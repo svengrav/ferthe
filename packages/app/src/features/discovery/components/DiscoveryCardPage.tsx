@@ -1,21 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import Animated, { interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 
 import { getAppContext } from '@app/appContext'
 import { Button, Page, Text } from '@app/shared/components'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
-import { Theme } from '@app/shared/theme'
+import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
-import { DiscoveryCardState as Card } from '../logic/types'
-import DiscoveryReactionSection from './DiscoveryReactionSection'
+import { DiscoveryCardState } from '../logic/types'
+import DiscoveryReaction from './DiscoveryReaction'
 import DiscoveryShareSection from './DiscoveryShareSection'
 import DiscoveryUserContentSection from './DiscoveryUserContentSection'
 
 export const useDiscoveryCardPage = () => ({
-  showDiscoveryCardDetails: (card: Card) => {
+  showDiscoveryCardDetails: (card: DiscoveryCardState) => {
     const overlayId = 'discoveryCardDetails-' + card.discoveryId
     setOverlay(
       overlayId,
@@ -106,7 +105,7 @@ const useCardAnimations = (IMAGE_HEIGHT: number) => {
 
 interface DiscoveryCardPageProps {
   onClose?: () => void
-  card: Card
+  card: DiscoveryCardState
 }
 
 /**
@@ -115,20 +114,16 @@ interface DiscoveryCardPageProps {
  */
 function DiscoveryCardPage(props: DiscoveryCardPageProps) {
   const { card, onClose } = props
-  const { styles } = useApp(createStyles)
-  const { t } = useLocalizationStore()
+  const { styles } = useTheme(createStyles)
+  const { locales } = useApp()
   const { discoveryApplication } = getAppContext()
   const { title, image, description, discoveryId } = card
   const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT } = useCardDimensions()
   const { scrollHandler, titleOpacityStyle } = useCardAnimations(IMAGE_HEIGHT)
 
-  const [isLoading, setIsLoading] = useState(false)
-
   // Load content on mount
   useEffect(() => {
-    if (discoveryId) {
-      discoveryApplication.getDiscoveryContent(discoveryId)
-    }
+    discoveryApplication.getDiscoveryContent(discoveryId)
   }, [discoveryId, discoveryApplication])
 
   if (!styles) return null
@@ -140,7 +135,7 @@ function DiscoveryCardPage(props: DiscoveryCardPageProps) {
 
   return (
     <Page
-      title={t.discovery.discoveries}
+      title={locales.discovery.discoveries}
       leading={<Button icon="arrow-back" variant='outlined' onPress={onClose} />}
     >
       {/* Fixed card container with image */}
@@ -182,30 +177,21 @@ function DiscoveryCardPage(props: DiscoveryCardPageProps) {
           <View style={styles.contentHeader} />
           <Text variant="heading">{title}</Text>
           <Text style={styles.discoveredAt}>
-            {t.discovery.discovered}: {card.discoveredAt ? new Date(card.discoveredAt).toLocaleDateString() : ''}
+            {locales.discovery.discovered}: {card.discoveredAt ? new Date(card.discoveredAt).toLocaleDateString() : ''}
           </Text>
 
           {/* Reaction buttons */}
-          {discoveryId && (
-            <DiscoveryReactionSection
-              id={discoveryId}
-              isLoading={isLoading}
-            />
-          )}
+          <DiscoveryReaction id={discoveryId} />
 
           {/* Share button */}
-          {discoveryId && <DiscoveryShareSection discoveryId={discoveryId} />}
+          <DiscoveryShareSection discoveryId={discoveryId} />
 
           {description && (
             <Text style={styles.description}>{description}</Text>
           )}
 
           {/* User content section */}
-          {discoveryId && (
-            <DiscoveryUserContentSection
-              id={discoveryId}
-            />
-          )}
+          <DiscoveryUserContentSection id={discoveryId} />
         </View>
       </Animated.ScrollView>
     </Page>

@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import Animated, {
   useSharedValue,
   withDelay,
@@ -10,7 +10,7 @@ import Animated, {
 import { scheduleOnRN } from 'react-native-worklets'
 
 import { Text } from '@app/shared/components'
-import { createThemedStyles } from '@app/shared/theme'
+import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
 const FADE_IN_DELAY = 2000
@@ -50,7 +50,7 @@ const useRevealAnimations = (onRevealComplete: () => void) => {
   return { fadeOut, tapScale, triggerReveal }
 }
 
-interface DiscoveryRevealOverlayProps {
+interface DiscoveryRevealProps {
   mode: 'reveal' | 'instant'
   blurredImageUrl: string
   onTriggerReveal: () => void
@@ -58,13 +58,14 @@ interface DiscoveryRevealOverlayProps {
 }
 
 /**
- * Reveal overlay wrapper component
- * Wraps children and shows blur-to-clear reveal animation in reveal mode
- * In instant mode, shows children immediately without overlay
+ * Reveal overlay wrapper component.
+ * Wraps children and shows blur-to-clear reveal animation in reveal mode.
+ * In instant mode, shows children immediately without overlay.
  */
-export function DiscoveryRevealOverlay(props: DiscoveryRevealOverlayProps) {
+export function DiscoveryReveal(props: DiscoveryRevealProps) {
   const { mode, blurredImageUrl, onTriggerReveal, children } = props
-  const { styles } = useApp(useStyles)
+  const { styles } = useTheme(createStyles)
+  const { locales } = useApp()
   const [isRevealed, setIsRevealed] = useState(mode === 'instant')
 
   const handleRevealComplete = () => {
@@ -72,8 +73,6 @@ export function DiscoveryRevealOverlay(props: DiscoveryRevealOverlayProps) {
   }
 
   const { fadeOut, tapScale, triggerReveal } = useRevealAnimations(handleRevealComplete)
-
-  if (!styles) return null
 
   // In instant mode or after reveal: render children only
   if (isRevealed) {
@@ -107,7 +106,7 @@ export function DiscoveryRevealOverlay(props: DiscoveryRevealOverlayProps) {
 
           {/* Discovery message below tap icon */}
           <Text variant="body" style={styles.previewText}>
-            You discovered a new spot!
+            {locales.discovery.discovered}
           </Text>
         </Pressable>
 
@@ -121,7 +120,7 @@ export function DiscoveryRevealOverlay(props: DiscoveryRevealOverlayProps) {
   )
 }
 
-const useStyles = createThemedStyles(theme => ({
+const createStyles = (theme: Theme) => StyleSheet.create({
   blurredOverlay: {
     padding: 8,
     position: 'relative',
@@ -168,4 +167,4 @@ const useStyles = createThemedStyles(theme => ({
     borderRadius: 14,
     opacity: 1,
   },
-}))
+})

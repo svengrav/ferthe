@@ -5,18 +5,15 @@ import { useApp } from '@app/shared/useApp'
 import { View } from 'react-native'
 import { useDiscoveryReactionSummary } from '../index'
 
-interface DiscoveryReactionSectionProps {
+interface DiscoveryReactionProps {
   id: string
-  isLoading: boolean
 }
 
 /**
  * Hook to handle reaction actions with loading state
  */
-const useReactionHandlers = (id: string, isLoading: boolean, reactionSummary: any, discoveryApplication: any) => {
+const useReactionHandlers = (id: string, reactionSummary: any, discoveryApplication: any) => {
   const handleReaction = async (reactionType: 'like' | 'dislike') => {
-    if (isLoading) return
-    
     const isCurrentReaction = reactionSummary?.userReaction === reactionType
     if (isCurrentReaction) {
       await discoveryApplication.removeReaction(id)
@@ -35,17 +32,16 @@ const useReactionHandlers = (id: string, isLoading: boolean, reactionSummary: an
  * Renders reaction buttons section with like/dislike actions.
  * Encapsulates reaction logic and state management.
  */
-function DiscoveryReactionSection({
+function DiscoveryReaction({
   id,
-  isLoading,
-}: DiscoveryReactionSectionProps) {
+}: DiscoveryReactionProps) {
   const { styles } = useApp(useStyles)
   const { discoveryApplication } = getAppContext()
   const reactionSummary = useDiscoveryReactionSummary(id)
 
   if (!id || !styles) return null
 
-  const { handleLike, handleDislike } = useReactionHandlers(id, isLoading, reactionSummary, discoveryApplication)
+  const { handleLike, handleDislike } = useReactionHandlers(id, reactionSummary, discoveryApplication)
 
   return (
     <View style={styles.reactionsContainer}>
@@ -53,7 +49,6 @@ function DiscoveryReactionSection({
         summary={reactionSummary}
         onLike={handleLike}
         onDislike={handleDislike}
-        disabled={isLoading}
       />
     </View>
   )
@@ -69,4 +64,4 @@ const useStyles = createThemedStyles(theme => ({
   },
 }))
 
-export default DiscoveryReactionSection
+export default DiscoveryReaction

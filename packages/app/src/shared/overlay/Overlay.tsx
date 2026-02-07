@@ -91,7 +91,7 @@ interface OverlayProps {
  * Der Content bestimmt selbst seine Größe und Darstellung.
  */
 function Overlay(props: OverlayProps) {
-  const { visible, onClose, showBackdrop = false, closeOnBackdropPress = false, children } = props
+  const { visible, onClose, showBackdrop = true, closeOnBackdropPress = false, children } = props
   const { styles } = useApp(useStyles)
   const { animatedContainerStyle, shouldRender } = useOverlayAnimation(visible ?? true)
   const insets = useSafeAreaInsets()

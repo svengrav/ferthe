@@ -56,7 +56,7 @@ function SharedDiscoveryCard({ discovery, communityId, onUnshared }: SharedDisco
         }}
         onCancel={() => useOverlayStore.getState().removeByKey('confirmUnshare')}
       />,
-      { variant: 'compact' }
+
     )
   }
 

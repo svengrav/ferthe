@@ -7,7 +7,7 @@ import { useLocalizationStore } from '@app/shared/localization/useLocalizationSt
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { useEffect } from 'react'
 import { useCommunityData, useCommunityStatus } from '../stores/communityStore'
-import { useCommunityJoinOverlay } from './CommunityJoin'
+import { useCommunityJoinCard } from './CommunityJoin'
 import { CommunityList } from './CommunityList'
 
 const AVATAR_SIZE = 80
@@ -21,7 +21,7 @@ function CommunitiesScreen() {
   const { communities } = useCommunityData()
   const status = useCommunityStatus()
   const { communityApplication } = getAppContext()
-  const { open: openJoinOverlay } = useCommunityJoinOverlay()
+  const { showCommunityJoinCard } = useCommunityJoinCard()
 
   // Initialize communities on mount
   useEffect(() => {
@@ -52,7 +52,7 @@ function CommunitiesScreen() {
           communities={communities}
           isLoading={status === 'loading'}
           onRefresh={handleRefresh}
-          onJoinPress={openJoinOverlay}
+          onJoinPress={showCommunityJoinCard}
         />
       </Stack>
     </Page>

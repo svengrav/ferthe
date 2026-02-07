@@ -1,65 +1,95 @@
+import { FlatList, View } from 'react-native'
+import { GestureDetector } from 'react-native-gesture-handler'
+
 import { getAppContext } from '@app/appContext'
 import { useDiscoveryTrail } from '@app/features/discovery'
 import { useTrailData } from '@app/features/trail'
 import TrailItem from '@app/features/trail/components/TrailItem'
 import { Button } from '@app/shared/components'
-import { setOverlay } from '@app/shared/overlay/useOverlayStore'
-import { createThemedStyles, useThemeStore } from '@app/shared/theme'
+import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
+import { Theme, useTheme } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
-import React from 'react'
-import { FlatList, View } from 'react-native'
-import { GestureDetector } from 'react-native-gesture-handler'
+
 import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
 
-const useMapBottomSheet = () => {
+/**
+ * Hook to open/close the trail list card overlay.
+ */
+export const useMapTrailListCard = () => {
   const { trails } = useTrailData()
-  const activeTrail = useDiscoveryTrail()
   const { discoveryApplication } = getAppContext()
+
   return {
-    trails,
-    activeTrail,
-    setActiveTrail: discoveryApplication.setActiveTrail,
+    showTrailListCard: () => {
+      const cardId = 'map-trail-list-card'
+      return setOverlay(
+        cardId,
+        <MapTrailListCard
+          onClose={() => closeOverlay('map-trail-list-card')}
+          trails={trails}
+          onSelectTrail={(trail) => {
+            discoveryApplication.setActiveTrail(trail.id)
+            closeOverlay(cardId)
+          }}
+        />,
+      )
+    },
+    closeTrailListCard: () => closeOverlay('map-trail-list-card'),
   }
 }
 
-export const MapTrailSelector = () => {
-  const { trails, activeTrail, setActiveTrail } = useMapBottomSheet()
-  const selectedTrail = activeTrail?.trail
-  const theme = useThemeStore()
-  const styles = useStyles(theme)
+interface MapTrailListCardProps {
+  trails: Trail[]
+  onSelectTrail: (trail: Trail) => void
+  onClose: () => void
+}
 
-  const handleSelectTrail = (trail: Trail, closeOverlay: () => void): void => {
-    setActiveTrail(trail.id)
-    closeOverlay()
-  }
+/**
+ * Overlay card displaying a list of available trails for selection.
+ */
+function MapTrailListCard(props: MapTrailListCardProps) {
+  const { trails, onSelectTrail, onClose } = props
+  const { styles } = useTheme(createStyles)
 
-  const openTrailSelector = (): void => {
-    let removeOverlay: (() => void) | undefined
+  const renderTrailItem = ({ item }: { item: Trail }) => (
+    <TrailItem
+      trail={item}
+      onPress={() => onSelectTrail(item)}
+    />
+  )
 
-    const renderTrailItem = ({ item }: { item: Trail }): React.ReactElement => {
-      const isActive = item.id === activeTrail?.trail?.id
-
-      return (
-        <TrailItem
-          trail={item}
-          onPress={() => handleSelectTrail(item, removeOverlay!)}
-        />
-      )
-    }
-
-    removeOverlay = setOverlay('trailSelector',
+  return (
+    <OverlayCard title='Select card' onClose={onClose}>
       <FlatList
         data={trails}
         renderItem={renderTrailItem}
-        contentContainerStyle={{ gap: 12 }}
-        keyExtractor={item => item.id} />,
-      {
-        title: 'Select a Trail',
-        variant: 'compact',
-        closable: true
-      }
-    )
+        contentContainerStyle={styles.listContent}
+        keyExtractor={item => item.id}
+      />
+    </OverlayCard>
+  )
+}
+
+/**
+ * Hook to manage trail selector state and interactions.
+ */
+const useMapTrailSelector = () => {
+  const activeTrail = useDiscoveryTrail()
+  const { showTrailListCard } = useMapTrailListCard()
+
+  return {
+    selectedTrail: activeTrail?.trail,
+    openTrailSelector: showTrailListCard,
   }
+}
+
+/**
+ * Bottom sheet selector for switching between trails on the map.
+ * Displays the currently active trail and allows swipe-up gesture to open trail list.
+ */
+export const MapTrailSelector = () => {
+  const { styles } = useTheme(createStyles)
+  const { selectedTrail, openTrailSelector } = useMapTrailSelector()
   const swipeGesture = useSwipeUpGesture(openTrailSelector)
 
   return (
@@ -73,53 +103,26 @@ export const MapTrailSelector = () => {
               <Button
                 icon='swap-horiz'
                 onPress={openTrailSelector}
-                variant='outlined' />
-            } />
+                variant='outlined'
+              />
+            }
+          />
         )}
       </View>
     </GestureDetector>
   )
 }
 
-const useStyles = createThemedStyles(theme => ({
+const createStyles = (theme: Theme) => ({
   selector: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
     borderTopColor: theme.colors.divider,
     backgroundColor: theme.colors.surface,
     borderTopWidth: 1,
     padding: 8,
   },
-  logoContainer: {
-    width: 50,
-    height: 50,
-  },
-  nameContainer: {
-    flex: 1,
-  },
-  iconContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  selectedTrailName: {
-    fontSize: 14,
-    color: theme.colors.onSurface,
-  },
-  trailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: 8,
+  listContent: {
     gap: 12,
   },
-  trailItemActive: {
-    backgroundColor: theme.colors.surface,
-  },
-  avatarContainer: {
-    width: 50,
-    height: 50,
-  },
-  trailInfo: {
-    flex: 1,
-  },
-}))
+})

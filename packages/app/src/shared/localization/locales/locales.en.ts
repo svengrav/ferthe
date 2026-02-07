@@ -3,6 +3,7 @@ const en = {
     add: 'Add',
     ok: 'OK',
     cancel: 'Cancel',
+    confirm: 'Confirm',
     save: 'Save',
     submit: 'Submit',
     back: 'Back',
@@ -195,6 +196,8 @@ const en = {
     share: 'Share',
     addNote: 'Add note',
     discovered: 'Discovered',
+    deleteImage: 'Delete Image',
+    deleteImageConfirm: 'Are you sure you want to delete this image?',
   },
   map: {
     outsideTrail: 'Outside the trail',

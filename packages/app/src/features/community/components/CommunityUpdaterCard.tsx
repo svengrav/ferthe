@@ -9,8 +9,8 @@ import CommunityEditor from './CommunityEditor'
 
 export function useCommunityUpdaterCard() {
   return {
-    open: (props: CommunityUpdaterCardProps) => setOverlay('community-updater', <CommunityUpdaterCard {...props} onClose={() => closeOverlay('community-updater')} />),
-    close: () => closeOverlay('community-updater')
+    showCommunityUpdaterCard: (props: CommunityUpdaterCardProps) => setOverlay('community-updater-card', <CommunityUpdaterCard {...props} onClose={() => closeOverlay('community-updater-card')} />),
+    closeCommunityUpdaterCard: () => closeOverlay('community-updater-card')
   }
 }
 
@@ -32,7 +32,7 @@ function useCommunityUpdater(communityId: string) {
     //   trailIds: [data.trailId]
     // })
     setIsUpdating(false)
-    useOverlayStore.getState().removeByKey('community-updater')
+    useOverlayStore.getState().removeByKey('community-updater-card')
   }
 
   return {

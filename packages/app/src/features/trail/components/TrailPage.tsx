@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native'
 
 import { Button, Image, Page, PageTab, PageTabs, Stack, Text } from '@app/shared/components'
+import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
@@ -9,8 +10,19 @@ import { useEffect } from 'react'
 
 const IMAGE_HEIGHT = 150
 
+export const useTrailPage = () => ({
+  showTrailPage: (trail: Trail) => {
+    const overlayId = 'trail-page-' + trail.id
+    return setOverlay(
+      overlayId,
+      <TrailPage trail={trail} onClose={() => closeOverlay(overlayId)} />,
+    )
+  },
+  closeTrailPage: (trailId: string) => closeOverlay('trail-page-' + trailId),
+})
+
 interface TrailPageProps {
-  onBack?: () => void
+  onClose?: () => void
   trail: Trail
 }
 
@@ -18,7 +30,7 @@ interface TrailPageProps {
  * Displays comprehensive information about a trail including name, image, and description.
  */
 function TrailPage(props: TrailPageProps) {
-  const { trail, onBack } = props
+  const { trail, onClose } = props
   const { styles } = useTheme(createStyles)
   const { context, locales } = useApp()
 
@@ -31,7 +43,7 @@ function TrailPage(props: TrailPageProps) {
     <Page
       style={styles.container}
       title={trail.name}
-      leading={<Button icon="arrow-back" variant='outlined' onPress={onBack} />}
+      leading={<Button icon="arrow-back" variant='outlined' onPress={onClose} />}
       trailing={<Button icon="more-vert" variant="outlined" options={[]} />}
     >
       <PageTabs variant="chips" defaultTab="overview">

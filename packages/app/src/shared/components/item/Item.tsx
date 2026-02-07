@@ -66,11 +66,7 @@ function Item(props: ItemProps) {
             await onSubmitEdit(newValue)
             close()
           }}
-        />,
-        {
-          title: t.common.edit,
-          variant: 'compact',
-        }
+        />
       )
     }
   }

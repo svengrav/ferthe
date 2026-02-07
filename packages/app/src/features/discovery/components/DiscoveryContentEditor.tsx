@@ -1,9 +1,10 @@
 import { Button, TextInput } from '@app/shared/components'
+import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import Field from '@app/shared/components/field/Field'
-import Text from '@app/shared/components/text/Text'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { logger } from '@app/shared/utils/logger'
@@ -11,23 +12,42 @@ import { DiscoveryContent } from '@shared/contracts'
 import { useState } from 'react'
 import { Image, View } from 'react-native'
 
-interface DiscoveryContentEditorProps {
+/**
+ * Hook to open/close the discovery content editor card.
+ */
+export function useDiscoveryContentEditorCard() {
+  return {
+    showDiscoveryContentEditorCard: (
+      id: string,
+      content: DiscoveryContent | undefined,
+      onSubmit: (data: { imageUrl?: string; comment?: string }) => Promise<void>
+    ) => {
+      const cardId = 'discovery-content-editor-card-' + id
+      return setOverlay(
+        cardId,
+        <DiscoveryContentEditorCard
+          existingContent={content}
+          onSubmit={onSubmit}
+          onClose={() => closeOverlay(cardId)}
+        />,
+      )
+    },
+    closeDiscoveryContentEditorCard: (id: string) => closeOverlay('discovery-content-editor-card-' + id)
+  }
+}
+
+interface DiscoveryContentEditorCardProps {
   existingContent?: DiscoveryContent
-  onSubmit: (data: { imageUrl?: string; comment?: string }) => void
-  onCancel: () => void
-  isLoading?: boolean
+  onSubmit: (data: { imageUrl?: string; comment?: string }) => Promise<void>
+  onClose: () => void
 }
 
 /**
+ * Card wrapper for discovery content editor.
  * Form to add or edit discovery content (device photo + comment) in overlay mode.
- * Only supports image upload from device, not URL input.
  */
-function DiscoveryContentEditor({
-  existingContent,
-  onSubmit,
-  onCancel,
-  isLoading = false,
-}: DiscoveryContentEditorProps) {
+function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
+  const { existingContent, onSubmit, onClose } = props
   const { styles } = useApp(useStyles)
   const { t } = useLocalizationStore()
   const { selectedImageUri, pickImage, clearImage, isLoading: isPickingImage } = useImagePicker()
@@ -35,9 +55,11 @@ function DiscoveryContentEditor({
 
   const [comment, setComment] = useState(existingContent?.comment ?? '')
   const [hasExistingImage, setHasExistingImage] = useState(!!existingContent?.image)
-
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { closeDialog, openDialog } = useRemoveDialog()
   const handleSubmit = async () => {
     try {
+      setIsSubmitting(true)
       let imageDataToSubmit: string | undefined
 
       if (selectedImageUri) {
@@ -46,27 +68,36 @@ function DiscoveryContentEditor({
         imageDataToSubmit = existingContent?.image?.url
       }
 
-      onSubmit({
+      await onSubmit({
         imageUrl: imageDataToSubmit,
         comment: comment.trim() || undefined,
       })
       clearImage()
     } catch (error) {
       logger.error('Error submitting content:', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleDeleteImage = () => {
-    clearImage()
-    setHasExistingImage(false)
+    openDialog({
+      onConfirm: () => {
+        clearImage()
+        setHasExistingImage(false)
+      }
+    })
   }
 
   const displayImageUrl = selectedImageUri || (hasExistingImage ? existingContent?.image?.url : undefined)
   const isEditing = !!existingContent
   const commentChanged = comment !== (existingContent?.comment ?? '')
   const imageChanged = selectedImageUri || !hasExistingImage
+  const isLoading = isSubmitting || isConverting
 
   if (!styles) return null
+
+  const title = isEditing ? t.discovery.editYourDiscovery : t.discovery.documentYourDiscovery
 
   const renderImageSection = () => {
     if (!displayImageUrl) return null
@@ -83,7 +114,7 @@ function DiscoveryContentEditor({
             icon="delete"
             variant="outlined"
             onPress={handleDeleteImage}
-            disabled={isLoading || isConverting}
+            disabled={isLoading}
           />
         </View>
       </View>
@@ -91,55 +122,49 @@ function DiscoveryContentEditor({
   }
 
   return (
-    <View style={styles.container}>
-      <Text variant="label" style={styles.label}>
-        {isEditing ? t.discovery.editYourDiscovery : t.discovery.documentYourDiscovery}
-      </Text>
+    <OverlayCard title={title} onClose={onClose}>
+      <View style={styles.container}>
+        {renderImageSection()}
 
-      {renderImageSection()}
-
-      <Button
-        label={isPickingImage ? t.discovery.pickingImage : t.discovery.pickImageFromDevice}
-        variant="outlined"
-        onPress={pickImage}
-        disabled={isLoading || isPickingImage}
-      />
-
-      <Field helperText={t.discovery.shareYourStory}>
-        <TextInput
-          value={comment}
-          onChangeText={setComment}
-          placeholder={t.discovery.shareYourStoryPlaceholder}
-          multiline
-          numberOfLines={4}
-          editable={!isLoading && !isConverting}
-        />
-      </Field>
-      <View style={styles.buttonRow}>
         <Button
-          label={t.discovery.cancel}
+          label={isPickingImage ? t.discovery.pickingImage : t.discovery.pickImageFromDevice}
           variant="outlined"
-          onPress={onCancel}
-          disabled={isLoading || isConverting}
+          onPress={pickImage}
+          disabled={isLoading || isPickingImage}
         />
-        <Button
-          label={isConverting ? t.discovery.processing : isLoading ? t.discovery.saving : isEditing ? t.discovery.update : t.discovery.save}
-          variant="primary"
-          onPress={handleSubmit}
-          disabled={isLoading || isConverting || (!commentChanged && !imageChanged && isEditing)}
-        />
+
+        <Field helperText={t.discovery.shareYourStory}>
+          <TextInput
+            value={comment}
+            onChangeText={setComment}
+            placeholder={t.discovery.shareYourStoryPlaceholder}
+            multiline
+            numberOfLines={4}
+            editable={!isLoading}
+          />
+        </Field>
+        <View style={styles.buttonRow}>
+          <Button
+            label={t.discovery.cancel}
+            variant="outlined"
+            onPress={onClose}
+            disabled={isLoading}
+          />
+          <Button
+            label={isConverting ? t.discovery.processing : isSubmitting ? t.discovery.saving : isEditing ? t.discovery.update : t.discovery.save}
+            variant="primary"
+            onPress={handleSubmit}
+            disabled={isLoading || (!commentChanged && !imageChanged && isEditing)}
+          />
+        </View>
       </View>
-    </View>
+    </OverlayCard>
   )
 }
 
 const useStyles = createThemedStyles(theme => ({
   container: {
     gap: 12,
-    padding: 16,
-  },
-  label: {
-    marginBottom: 8,
   },
   imagePreviewContainer: {
     gap: 8,
@@ -157,10 +182,10 @@ const useStyles = createThemedStyles(theme => ({
   },
   buttonRow: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     gap: 12,
     marginTop: 8,
   },
 }))
 
-export default DiscoveryContentEditor
+export default DiscoveryContentEditorCard

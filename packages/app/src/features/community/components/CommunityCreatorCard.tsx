@@ -9,8 +9,8 @@ import CommunityEditor from './CommunityEditor'
 
 export function useCommunityCreatorCard() {
   return {
-    showCommunityCreatorCard: () => setOverlay('community-creator', <CommunityCreatorCard onClose={() => closeOverlay('community-creator')} />),
-    closeCommunityCreatorCard: () => closeOverlay('community-creator')
+    showCommunityCreatorCard: () => setOverlay('community-creator-card', <CommunityCreatorCard onClose={() => closeOverlay('community-creator-card')} />),
+    closeCommunityCreatorCard: () => closeOverlay('community-creator-card')
   }
 }
 
@@ -31,7 +31,7 @@ function useCommunityCreator() {
     setIsCreating(false)
 
     if (result.success) {
-      closeOverlay('community-creator')
+      closeOverlay('community-creator-card')
     }
   }
 

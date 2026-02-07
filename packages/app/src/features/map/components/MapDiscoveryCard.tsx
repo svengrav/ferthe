@@ -46,7 +46,7 @@ const useSpotTapHandler = () => {
   // Convert tapped spot to card format
   if (tappedSpot && !isVisible) {
     const spotCard: DiscoveryCardState = {
-      discoveryId: undefined,
+      discoveryId: tappedSpot.discoveryId,
       spotId: tappedSpot.id,
       title: tappedSpot.name,
       description: tappedSpot.description,

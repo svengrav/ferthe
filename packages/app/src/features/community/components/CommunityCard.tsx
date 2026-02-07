@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native'
 
 import { Avatar, PressableWithActions, Text } from '@app/shared/components'
-import { useDialog } from '@app/shared/components/dialog/Dialog'
+import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
@@ -22,7 +22,7 @@ function CommunityCard(props: CommunityCardProps) {
   const { community } = props
   const { styles } = useTheme(createStyles)
   const { t } = useLocalizationStore()
-  const { openDialog, closeDialog } = useDialog()
+  const { openDialog, closeDialog } = useRemoveDialog()
   const { showCommunityDiscoveries } = useCommunityDiscoveryPage()
 
   const handleLeave = async (communityId: string) => {
@@ -39,11 +39,7 @@ function CommunityCard(props: CommunityCardProps) {
 
   const confirmRemove = (communityId: string) => {
     openDialog({
-      title: t.community.remove,
       message: t.community.confirmRemove,
-      confirmText: t.community.remove,
-      cancelText: t.common.cancel,
-      destructive: true,
       onConfirm: async () => {
         await handleRemove(communityId)
         closeDialog()

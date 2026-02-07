@@ -128,7 +128,7 @@ const createStyles = (theme: Theme) =>
       backgroundColor: theme.colors.primary,
     },
     secondary: {
-      backgroundColor: theme.deriveColor(theme.colors.primary, -20),
+      backgroundColor: theme.colors.background,
     },
     outlined: {
       backgroundColor: 'transparent',

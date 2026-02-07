@@ -8,8 +8,8 @@ import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
 import { useAccountData } from '../stores/accountStore'
-import AccountVerification from './AccountVerification'
-import AvatarUpload from './AvatarUpload'
+import AccountVerification from './AccountVerificationCard.tsx'
+import AvatarUpload from './AvatarUploadCard.tsx'
 
 /**
  * Hook to open/close the account page overlay.

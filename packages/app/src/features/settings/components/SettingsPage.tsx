@@ -46,36 +46,6 @@ function SettingsPage(props: SettingsFormProps) {
     onSubmit(updatedSettings)
   }
 
-  const renderFormContent = () => (
-    <>
-      <Text variant='heading'>{t.settings.yourSettings}</Text>
-      <View>
-        <View style={styles.settingRow}>
-          <Text variant='body'>{t.settings.chooseLanguage}</Text>
-          <FormPicker
-            variant='secondary'
-            name="language"
-            options={[
-              { label: 'German', value: LanguageOptions.German },
-              { label: 'English', value: LanguageOptions.English },
-            ]}
-          />
-        </View>
-
-        <View style={styles.settingRow}>
-          <Text variant='body'>{t.settings.forestIs}</Text>
-          <FormPicker
-            variant='secondary'
-            name="theme"
-            options={[
-              { label: t.settings.dark, value: ThemeMode.Dark },
-            ]}
-          />
-        </View>
-      </View>
-    </>
-  )
-
   return (
     <Page
       title={t.navigation.settings}
@@ -86,7 +56,31 @@ function SettingsPage(props: SettingsFormProps) {
         defaultValues={initialValues}
         onSubmit={onFormSubmit}
       >
-        {renderFormContent()}
+        <Text variant='heading'>{t.settings.yourSettings}</Text>
+        <View>
+          <View style={styles.settingRow}>
+            <Text variant='body'>{t.settings.chooseLanguage}</Text>
+            <FormPicker
+              variant='secondary'
+              name="language"
+              options={[
+                { label: 'German', value: LanguageOptions.German },
+                { label: 'English', value: LanguageOptions.English },
+              ]}
+            />
+          </View>
+
+          <View style={styles.settingRow}>
+            <Text variant='body'>{t.settings.forestIs}</Text>
+            <FormPicker
+              variant='secondary'
+              name="theme"
+              options={[
+                { label: t.settings.dark, value: ThemeMode.Dark },
+              ]}
+            />
+          </View>
+        </View>
       </Form>
     </Page>
   )

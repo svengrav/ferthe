@@ -139,14 +139,6 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       }),
     },
     {
-      method: 'POST',
-      version: 'v1',
-      url: '/discoveries/:discoveryId/content',
-      handler: asyncRequestHandler<DiscoveryContent, { discoveryId: string }>(async ({ context: session, params, body }) => {
-        return await discoveryApplication.addDiscoveryContent(session, params!.discoveryId, body)
-      }),
-    },
-    {
       method: 'PUT',
       version: 'v1',
       url: '/discoveries/:discoveryId/content',
