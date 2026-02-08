@@ -5,7 +5,7 @@ export function useMarkdown(markdownContent: string) {
     // Replace template variables
     const currentDate = new Date().toLocaleDateString()
     const currentYear = new Date().getFullYear()
-    
+
     return markdownContent
       .replace('{date}', currentDate)
       .replace('{year}', currentYear.toString())

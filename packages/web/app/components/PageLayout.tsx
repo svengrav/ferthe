@@ -1,14 +1,14 @@
-import { useMarkdown } from '@/hooks/useMarkdown'
-import { Link } from 'react-router-dom'
-import Markdown from './Markdown'
+import { Link } from "react-router-dom";
+import { useMarkdown } from "../hooks/useMarkdown";
+import Markdown from "./Markdown";
 
 interface PageLayoutProps {
-  title: string
-  germanContent: string
-  englishContent: string
-  showBackButton?: boolean
-  backButtonText?: string
-  backButtonPath?: string
+  title: string;
+  germanContent: string;
+  englishContent: string;
+  showBackButton?: boolean;
+  backButtonText?: string;
+  backButtonPath?: string;
 }
 
 export function PageLayout({
@@ -16,11 +16,11 @@ export function PageLayout({
   germanContent,
   englishContent,
   showBackButton = true,
-  backButtonText = '← Back to Home',
-  backButtonPath = '/'
+  backButtonText = "← Back to Home",
+  backButtonPath = "/",
 }: PageLayoutProps) {
-  const processedGermanContent = useMarkdown(germanContent)
-  const processedEnglishContent = useMarkdown(englishContent)
+  const processedGermanContent = useMarkdown(germanContent);
+  const processedEnglishContent = useMarkdown(englishContent);
 
   return (
     <div className="min-h-screen bg-gray-950">
@@ -55,7 +55,9 @@ export function PageLayout({
             {/* English Column */}
             <div className="space-y-6">
               <div className="flex items-center mb-6">
-                <h4 className="text-xl font-semibold text-white opacity-60">English</h4>
+                <h4 className="text-xl font-semibold text-white opacity-60">
+                  English
+                </h4>
               </div>
               <div className="prose prose-lg prose-invert max-w-none opacity-60">
                 <Markdown content={processedEnglishContent} />
@@ -82,5 +84,5 @@ export function PageLayout({
         </div>
       </div>
     </div>
-  )
+  );
 }
