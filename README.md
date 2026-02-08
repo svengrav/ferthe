@@ -13,8 +13,6 @@ This monorepo contains the following packages:
 
 ## Quick Start
 
-
-
 ## Development Environment
 
 ### VS Code Setup

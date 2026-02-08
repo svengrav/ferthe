@@ -17,6 +17,7 @@ interface StorageConnectorOptions {
 export interface StorageConnector {
   getItemUrl(key: string): Promise<StorageItem>
   uploadFile(path: string, data: Buffer | string, metadata?: Record<string, string>): Promise<string>
+  uploadFileWithPreview(path: string, data: Buffer, previewData: Buffer, metadata?: Record<string, string>): Promise<{ url: string; previewUrl: string }>
   deleteFile(path: string): Promise<void>
   getMetadata(path: string): Promise<Record<string, string>>
 }
@@ -137,6 +138,35 @@ export const createAzureStorageConnector = (
     }
   }
 
+  const uploadFileWithPreview = async (
+    path: string,
+    data: Buffer,
+    previewData: Buffer,
+    metadata?: Record<string, string>
+  ): Promise<{ url: string; previewUrl: string }> => {
+    try {
+      // Upload original
+      const originalUrl = await uploadFile(path, data, metadata)
+
+      // Generate preview path
+      const lastDot = path.lastIndexOf('.')
+      const previewPath = lastDot === -1
+        ? `${path}-blurred`
+        : `${path.substring(0, lastDot)}-blurred${path.substring(lastDot)}`
+
+      // Upload preview
+      const previewUrl = await uploadFile(previewPath, previewData, { ...metadata, type: 'preview' })
+
+      return {
+        url: originalUrl,
+        previewUrl,
+      }
+    } catch (error) {
+      console.error('Error uploading file with preview:', error)
+      throw error
+    }
+  }
+
   const getMetadata = async (path: string): Promise<Record<string, string>> => {
     try {
       const blobClient = await getBlobClient(path)
@@ -152,6 +182,7 @@ export const createAzureStorageConnector = (
   return {
     getItemUrl,
     uploadFile,
+    uploadFileWithPreview,
     deleteFile,
     getMetadata,
   }
