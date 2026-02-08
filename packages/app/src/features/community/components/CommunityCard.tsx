@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native'
 
+import { getAppContext } from '@app/appContext'
 import { Avatar, PressableWithActions, Text } from '@app/shared/components'
 import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
@@ -24,17 +25,24 @@ function CommunityCard(props: CommunityCardProps) {
   const { t } = useLocalizationStore()
   const { openDialog, closeDialog } = useRemoveDialog()
   const { showCommunityDiscoveries } = useCommunityDiscoveryPage()
+  const { communityApplication } = getAppContext()
 
   const handleLeave = async (communityId: string) => {
-    logger.log(`Leave community: ${communityId}`)
-    // TODO: Implement leave functionality when API is ready
-    // await communityApplication.leaveCommunity(communityId)
+    const result = await communityApplication.leaveCommunity(communityId)
+    if (result.success) {
+      logger.log(`Left community: ${communityId}`)
+    } else {
+      logger.error('Failed to leave community:', result.error)
+    }
   }
 
   const handleRemove = async (communityId: string) => {
-    logger.log(`Remove community: ${communityId}`)
-    // TODO: Implement remove functionality when API is ready
-    // await communityApplication.removeCommunity(communityId)
+    const result = await communityApplication.removeCommunity(communityId)
+    if (result.success) {
+      logger.log(`Removed community: ${communityId}`)
+    } else {
+      logger.error('Failed to remove community:', result.error)
+    }
   }
 
   const confirmRemove = (communityId: string) => {

@@ -363,7 +363,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     }
   }
 
-  const updateDiscoveryContent = async (
+  const upsertDiscoveryContent = async (
     context: AccountContext,
     discoveryId: string,
     content: { imageUrl?: string; comment?: string }
@@ -562,7 +562,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     updateDiscoveryProfile,
     getDiscoveryStats,
     getDiscoveryContent,
-    updateDiscoveryContent,
+    upsertDiscoveryContent,
     deleteDiscoveryContent,
     reactToDiscovery,
     removeReaction,

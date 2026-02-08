@@ -358,10 +358,63 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     }
   }
 
+  const removeCommunity = async (context: AccountContext, communityId: string): Promise<Result<void>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      // Get community and verify user is the creator
+      const communityResult = await communityStore.communities.get(communityId)
+      if (!communityResult.success) {
+        return createErrorResult('GET_COMMUNITY_ERROR')
+      }
+
+      const community = communityResult.data
+      if (!community) {
+        return createErrorResult('COMMUNITY_NOT_FOUND')
+      }
+
+      if (community.createdBy !== accountId) {
+        return createErrorResult('NOT_CREATOR')
+      }
+
+      // Delete all members
+      const membersResult = await communityStore.members.list()
+      if (membersResult.success && membersResult.data) {
+        const communityMembers = membersResult.data.filter(m => m.communityId === communityId)
+        await Promise.all(
+          communityMembers.map(m => communityStore.members.delete(m.id))
+        )
+      }
+
+      // Delete all shared discoveries
+      const sharedResult = await communityStore.discoveries.list()
+      if (sharedResult.success && sharedResult.data) {
+        const communityDiscoveries = sharedResult.data.filter(sd => sd.communityId === communityId)
+        await Promise.all(
+          communityDiscoveries.map(sd => communityStore.discoveries.delete(sd.id))
+        )
+      }
+
+      // Delete the community
+      const deleteResult = await communityStore.communities.delete(communityId)
+      if (!deleteResult.success) {
+        return createErrorResult('REMOVE_COMMUNITY_ERROR')
+      }
+
+      return createSuccessResult(undefined)
+    } catch (error: unknown) {
+      return createErrorResult('REMOVE_COMMUNITY_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
   return {
     createCommunity,
     joinCommunity,
     leaveCommunity,
+    removeCommunity,
     getCommunity,
     listCommunities,
     listCommunityMembers,

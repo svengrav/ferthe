@@ -41,6 +41,7 @@ function Form<T extends FieldValues>({
     defaultValues,
     mode: 'onSubmit',
     reValidateMode: 'onChange',
+
   })
 
   return (

@@ -11,6 +11,7 @@ export interface CommunityApplicationContract {
   createCommunity: (context: AccountContext, options: { name: string; trailIds: string[] }) => Promise<Result<Community>>
   joinCommunity: (context: AccountContext, inviteCode: string) => Promise<Result<Community>>
   leaveCommunity: (context: AccountContext, communityId: string) => Promise<Result<void>>
+  removeCommunity: (context: AccountContext, communityId: string) => Promise<Result<void>>
   getCommunity: (context: AccountContext, communityId: string) => Promise<Result<Community | undefined>>
   listCommunities: (context: AccountContext) => Promise<Result<Community[]>>
   listCommunityMembers: (context: AccountContext, communityId: string) => Promise<Result<CommunityMember[]>>

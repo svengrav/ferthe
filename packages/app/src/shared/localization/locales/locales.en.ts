@@ -32,6 +32,7 @@ const en = {
     profile: 'Profile',
     trails: 'Trails',
     feed: 'Cards',
+    map: 'Map',
     about: 'About',
     account: 'Account',
     socials: 'Socials',

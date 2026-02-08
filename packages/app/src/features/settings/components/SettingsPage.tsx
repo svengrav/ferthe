@@ -46,6 +46,7 @@ function SettingsPage(props: SettingsFormProps) {
     onSubmit(updatedSettings)
   }
 
+
   return (
     <Page
       title={t.navigation.settings}

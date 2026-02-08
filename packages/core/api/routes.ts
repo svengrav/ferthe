@@ -143,7 +143,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       version: 'v1',
       url: '/discoveries/:discoveryId/content',
       handler: asyncRequestHandler<DiscoveryContent, { discoveryId: string }>(async ({ context: session, params, body }) => {
-        return await discoveryApplication.updateDiscoveryContent(session, params!.discoveryId, body)
+        return await discoveryApplication.upsertDiscoveryContent(session, params!.discoveryId, body)
       }),
     },
     {
@@ -389,6 +389,14 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       url: '/community/collections/communities/:communityId/leave',
       handler: asyncRequestHandler<void, { communityId: string }>(async ({ context, params }) => {
         return await communityApplication.leaveCommunity(context, params!.communityId)
+      }),
+    },
+    {
+      method: 'DELETE',
+      version: 'v1',
+      url: '/community/collections/communities/:communityId',
+      handler: asyncRequestHandler<void, { communityId: string }>(async ({ context, params }) => {
+        return await communityApplication.removeCommunity(context, params!.communityId)
       }),
     },
     {

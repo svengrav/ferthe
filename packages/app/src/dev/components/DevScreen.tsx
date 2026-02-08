@@ -13,6 +13,7 @@ export default function DevScreen() {
       <Text style={{ backgroundColor: 'red' }}>TEST</Text>
       <DiscoveryCard card={
         {
+          discoveryId: 'test-discovery-id',
           spotId: 'test-spot-id',
           description: 'This is a test description',
           image: {

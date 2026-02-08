@@ -18,7 +18,7 @@ export interface DiscoveryApplicationContract {
   getDiscoveryProfile: (context: AccountContext) => Promise<Result<DiscoveryProfile>>
   updateDiscoveryProfile: (context: AccountContext, updateData: DiscoveryProfileUpdateData) => Promise<Result<DiscoveryProfile>>
   getDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
-  updateDiscoveryContent: (context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
+  upsertDiscoveryContent: (context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
   deleteDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<void>>
   reactToDiscovery: (context: AccountContext, discoveryId: string, reaction: 'like' | 'dislike') => Promise<Result<DiscoveryReaction>>
   removeReaction: (context: AccountContext, discoveryId: string) => Promise<Result<void>>

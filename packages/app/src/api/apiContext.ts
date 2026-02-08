@@ -105,10 +105,7 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
       // Content methods
       getDiscoveryContent: (_context: AccountContext, discoveryId: string) => API.send<DiscoveryContent | undefined>(`/discoveries/${discoveryId}/content`),
 
-      addDiscoveryContent: (_context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) =>
-        API.send<DiscoveryContent>(`/discoveries/${discoveryId}/content`, 'POST', content),
-
-      updateDiscoveryContent: (_context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) =>
+      upsertDiscoveryContent: (_context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) =>
         API.send<DiscoveryContent>(`/discoveries/${discoveryId}/content`, 'PUT', content),
 
       deleteDiscoveryContent: (_context: AccountContext, discoveryId: string) =>
@@ -213,6 +210,9 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
 
       leaveCommunity: (_context: AccountContext, communityId: string) =>
         API.send<void>(`/community/collections/communities/${communityId}/leave`, 'POST'),
+
+      removeCommunity: (_context: AccountContext, communityId: string) =>
+        API.send<void>(`/community/collections/communities/${communityId}`, 'DELETE'),
 
       getCommunity: (_context: AccountContext, communityId: string) =>
         API.send<Community | undefined>(`/community/collections/communities/${communityId}`),

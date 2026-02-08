@@ -24,6 +24,17 @@ description: This prompt is used to refactor code according to specified guideli
 - Comment major functions and logical sections of the code.
 - Try to avoid any or cast to any!
 
+# Architecture
+
+Follow this structure: 
+- Stores are responsible for state management of a feature and should only contain state and functions to update the state. They should not contain any business logic or side effects. You can use DX hooks for this.
+- Services are responsible for business logic and side effects of a feature. They should not contain any state. They dont use stores directly. 
+- Applications are responsible for orchestrating the feature, they use services and stores to implement the feature logic. They should not contain any UI code.
+- Components are responsible for rendering the UI and handling user interactions. They should not contain any business logic or side effects. For extensive logic, they should use custom hooks. They can use stores to get the state and update it via functions from the store or the application. They should not use services directly, but can use custom hooks that use the services.
+
+- Check if the component contains statless logic, if yes, check if a feature service is already existing, if not, create a new one and move the logic there.
+- Check if the component contains complex logic for UI, if yes, extract it to a custom hook. 
+
 # Styles
 - Remove not used styles.
 - Place styles outside the component.

@@ -21,6 +21,7 @@ const de: LocalizationSet = {
     run: 'Ausführen',
     more: 'Mehr',
     select: 'Auswählen',
+    confirm: 'Ok'
   },
   errors: {
     generic: 'Ein Fehler ist aufgetreten.',
@@ -33,6 +34,7 @@ const de: LocalizationSet = {
     profile: 'Profil',
     trails: 'Wanderungen',
     feed: 'Cards',
+    map: 'Karte',
     about: 'Über uns',
     account: 'Konto',
     socials: 'Soziales',
@@ -195,6 +197,8 @@ const de: LocalizationSet = {
     save: 'Speichern',
     share: 'Teilen',
     addNote: 'Notiz hinzufügen', discovered: 'Entdeckt',
+    deleteImage: 'Bild entfernen',
+    deleteImageConfirm: 'Bild wird entfernt'
   },
   map: {
     outsideTrail: 'Außerhalb des Trails',

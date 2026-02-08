@@ -12,6 +12,7 @@ export interface CommunityApplication {
   createCommunity: (input: { name: string; trailIds: string[] }) => Promise<Result<Community>>
   joinCommunity: (inviteCode: string) => Promise<Result<Community>>
   leaveCommunity: (communityId: string) => Promise<Result<void>>
+  removeCommunity: (communityId: string) => Promise<Result<void>>
   setActiveCommunity: (communityId: string | undefined) => void
   getCommunityMembers: (communityId: string) => Promise<Result<CommunityMember[]>>
   shareDiscovery: (discoveryId: string, communityId: string) => Promise<Result<SharedDiscovery>>
@@ -91,7 +92,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
   }
 
   const leaveCommunity = async (communityId: string): Promise<Result<void>> => {
-    const { removeCommunity } = getCommunityActions()
+    const { removeCommunity: removeFromStore } = getCommunityActions()
 
     try {
       const session = getSession()
@@ -101,7 +102,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
 
       const result = await communityAPI.leaveCommunity(session, communityId)
       if (result.success) {
-        removeCommunity(communityId)
+        removeFromStore(communityId)
         logger.log(`Left community: ${communityId}`)
       }
 
@@ -109,6 +110,28 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     } catch (error: any) {
       logger.error('Error leaving community:', error)
       return { success: false, error: { code: 'LEAVE_ERROR', message: error.message } }
+    }
+  }
+
+  const removeCommunity = async (communityId: string): Promise<Result<void>> => {
+    const { removeCommunity: removeFromStore } = getCommunityActions()
+
+    try {
+      const session = getSession()
+      if (!session) {
+        throw new Error('No session found')
+      }
+
+      const result = await communityAPI.removeCommunity(session, communityId)
+      if (result.success) {
+        removeFromStore(communityId)
+        logger.log(`Removed community: ${communityId}`)
+      }
+
+      return result
+    } catch (error: any) {
+      logger.error('Error removing community:', error)
+      return { success: false, error: { code: 'REMOVE_ERROR', message: error.message } }
     }
   }
 
@@ -187,6 +210,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     createCommunity,
     joinCommunity,
     leaveCommunity,
+    removeCommunity,
     setActiveCommunity,
     getCommunityMembers,
     shareDiscovery,

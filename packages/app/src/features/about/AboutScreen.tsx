@@ -1,7 +1,7 @@
-import { Button, FertheLogo, Page, PulseAnimation, Text } from '@app/shared/components'
+import { Button, FertheLogo, Page, PulseAnimation, Stack, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
-import { Linking, StyleSheet, View } from 'react-native'
+import { Linking, StyleSheet } from 'react-native'
 
 export default function AboutScreen() {
   const theme = useThemeStore()
@@ -14,7 +14,7 @@ export default function AboutScreen() {
 
   return (
     <Page scrollable>
-      <View style={styles.container}>
+      <Stack style={styles.container}>
         <Text variant='heading'>Hi!</Text>
         <PulseAnimation>
           <FertheLogo style={styles.logo} fill={theme.colors.primary} />
@@ -23,7 +23,7 @@ export default function AboutScreen() {
         <Text variant='body'>{t.about.aboutText}</Text>
         <Text variant='body'>{t.about.followYourTrail}</Text>
         <Button label={t.about.fertheWebsite} variant='primary' onPress={handleOpenLink} />
-      </View>
+      </Stack>
     </Page>
   )
 }

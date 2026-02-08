@@ -18,6 +18,7 @@ const FADE_OUT_DELAY = 1000
 const ANIMATION_DURATION = 1500
 const TAP_CIRCLE_SIZE = 80
 const TAP_ICON_SIZE = 40
+const DISCOVERY_CARD_FRAME_SIZE = 7
 
 /**
  * Hook to handle reveal overlay animations
@@ -122,13 +123,17 @@ export function DiscoveryReveal(props: DiscoveryRevealProps) {
 
 const createStyles = (theme: Theme) => StyleSheet.create({
   blurredOverlay: {
-    padding: 8,
+    padding: DISCOVERY_CARD_FRAME_SIZE,
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
     flex: 1,
   },
   preview: {
+    top: DISCOVERY_CARD_FRAME_SIZE,
+    left: DISCOVERY_CARD_FRAME_SIZE,
+    right: DISCOVERY_CARD_FRAME_SIZE,
+    bottom: DISCOVERY_CARD_FRAME_SIZE,
     position: 'absolute',
     zIndex: 99,
     justifyContent: 'center',
@@ -144,6 +149,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
+
   },
   tapIconInner: {
     width: TAP_ICON_SIZE,
@@ -152,6 +158,8 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.91)',
   },
   previewText: {
+    position: 'absolute',
+    bottom: 10,
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
@@ -166,5 +174,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     height: '100%',
     borderRadius: 14,
     opacity: 1,
+    backgroundColor: theme.colors.black
   },
 })

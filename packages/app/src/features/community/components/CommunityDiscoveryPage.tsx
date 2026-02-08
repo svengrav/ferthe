@@ -81,7 +81,7 @@ function CommunityDiscoveryPage({ communityId, communityName, onBack }: Communit
   const { t } = useLocalizationStore()
   const { discoveries, isLoading, isRefreshing, loadDiscoveries } = useSharedDiscoveries(communityId)
   const { communities } = useCommunityData()
-  const { open } = useCommunityUpdaterCard()
+  const { showCommunityUpdaterCard } = useCommunityUpdaterCard()
 
   if (!styles) return null
 
@@ -95,7 +95,7 @@ function CommunityDiscoveryPage({ communityId, communityName, onBack }: Communit
   const handleEdit = () => {
     if (currentCommunity) {
       const trailId = currentCommunity.trailIds[0] || ''
-      open({ communityId: communityId, initialData: { name: currentCommunity.name, trailId } })
+      showCommunityUpdaterCard({ communityId: communityId, initialData: { name: currentCommunity.name, trailId } })
     }
   }
 

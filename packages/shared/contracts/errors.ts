@@ -77,6 +77,7 @@ export const ERROR_CODES = {
   // Community Management (404-500)
   COMMUNITY_NOT_FOUND: { code: 'COMMUNITY_NOT_FOUND', message: 'Community not found', httpStatus: 404 },
   NOT_A_MEMBER: { code: 'NOT_A_MEMBER', message: 'User is not a member of this community', httpStatus: 403 },
+  NOT_CREATOR: { code: 'NOT_CREATOR', message: 'User is not the creator of this community', httpStatus: 403 },
   ALREADY_MEMBER: { code: 'ALREADY_MEMBER', message: 'User is already a member of this community', httpStatus: 409 },
   UNAUTHORIZED: { code: 'UNAUTHORIZED', message: 'User is not authorized for this action', httpStatus: 403 },
   TRAIL_REQUIRED: { code: 'TRAIL_REQUIRED', message: 'At least one trail ID is required', httpStatus: 400 },
@@ -89,6 +90,7 @@ export const ERROR_CODES = {
   CREATE_COMMUNITY_ERROR: { code: 'CREATE_COMMUNITY_ERROR', message: 'Failed to create community', httpStatus: 500 },
   JOIN_COMMUNITY_ERROR: { code: 'JOIN_COMMUNITY_ERROR', message: 'Failed to join community', httpStatus: 500 },
   LEAVE_COMMUNITY_ERROR: { code: 'LEAVE_COMMUNITY_ERROR', message: 'Failed to leave community', httpStatus: 500 },
+  REMOVE_COMMUNITY_ERROR: { code: 'REMOVE_COMMUNITY_ERROR', message: 'Failed to remove community', httpStatus: 500 },
   GET_COMMUNITY_ERROR: { code: 'GET_COMMUNITY_ERROR', message: 'Failed to retrieve community', httpStatus: 500 },
   GET_COMMUNITIES_ERROR: { code: 'GET_COMMUNITIES_ERROR', message: 'Failed to retrieve communities', httpStatus: 500 },
   GET_MEMBERS_ERROR: { code: 'GET_MEMBERS_ERROR', message: 'Failed to retrieve community members', httpStatus: 500 },

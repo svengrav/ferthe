@@ -21,7 +21,7 @@ const useContentActions = (id: string) => {
 
   const updateContent = async (data: { imageUrl?: string; comment?: string }) => {
     try {
-      const result = await discoveryApplication.updateDiscoveryContent(id, data)
+      const result = await discoveryApplication.upsertDiscoveryContent(id, data)
       if (!result.success) {
         logger.error('Failed to save content:', result)
       }
