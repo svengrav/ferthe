@@ -245,20 +245,21 @@ const createClue = (spot: Spot, trailId: string, source: ClueSource): Clue => {
     trailId: trailId,
     location: spot.location,
     source: source,
+    discoveryRadius: spot.options.discoveryRadius,
   }
 }
 
 /**
- * Returns spots as clues based on the trail's previewMode setting
+ * Returns spots as clues based on the trail's previewMode setting and spot visibility
  */
 const getCluesBasedOnPreviewMode = (accountId: string, trail: Trail, discoveries: Discovery[], spots: Spot[], trailSpotIds: string[]): Clue[] => {
   if (trail.options?.previewMode !== 'preview') return []
   const discoveredSpotIds = getDiscoveredSpotIds(accountId, discoveries, trail.id)
   const previewSpotIds = trailSpotIds.filter(spotId => !discoveredSpotIds.includes(spotId))
-  return previewSpotIds.map(spotId => {
-    const spot = getDiscoverySpot(spotId, spots)
-    return createClue(spot as Spot, trail.id, 'preview')
-  })
+  return previewSpotIds
+    .map(spotId => getDiscoverySpot(spotId, spots))
+    .filter(spot => spot && spot.options.visibility === 'preview')
+    .map(spot => createClue(spot as Spot, trail.id, 'preview'))
 }
 
 const getDiscoverySnap = (currentLocation: GeoLocation, spots: Spot[], exploredSpotIds: string[], maxRangeInMeters?: number): DiscoverySnap | undefined => {

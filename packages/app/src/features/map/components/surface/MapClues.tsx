@@ -99,6 +99,24 @@ function MapClues({ boundary, size, scale }: MapCluesProps) {
     }))
   }, [visibleClues, boundary, size.width, size.height])
 
+  // Render discovery radius circle around clue
+  const renderDiscoveryRadius = (clue: Clue) => {
+    const circle = mapUtils.calculateCircleDimensions(clue.location, clue.discoveryRadius, boundary, size)
+    return (
+      <View
+        key="discovery-radius"
+        style={{
+          position: 'absolute',
+          ...circle,
+          borderRadius: circle.width / 2,
+          backgroundColor: 'rgba(100, 150, 255, 0.15)',
+          borderWidth: 1.5 * scale,
+          borderColor: 'rgba(100, 150, 255, 0.4)',
+        }}
+      />
+    )
+  }
+
   // Render debug radius circles around clue (50m, 100m, 150m)
   const renderDebugCircles = (clue: Clue) => {
     if (!config.debug.enableMapDebug) return null
@@ -124,6 +142,7 @@ function MapClues({ boundary, size, scale }: MapCluesProps) {
   // Render clue marker at pre-calculated position
   const renderClueMarker = ({ clue, position }: { clue: Clue; position: { x: number; y: number } }, index: number) => (
     <View key={clue.spotId || index}>
+      {renderDiscoveryRadius(clue)}
       {renderDebugCircles(clue)}
       <View
         key={clue.spotId || index}

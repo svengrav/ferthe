@@ -8,6 +8,8 @@ export interface SpotApplicationContract {
   createSpot: (spotData: Omit<Spot, 'id'>) => Promise<Result<Spot>>
 }
 
+export type SpotVisibility = 'hidden' | 'preview'
+
 export interface Spot {
   id: string
   slug: string
@@ -22,6 +24,7 @@ export interface Spot {
   options: {
     discoveryRadius: number
     clueRadius: number
+    visibility?: SpotVisibility
   }
   createdAt: Date
   updatedAt: Date

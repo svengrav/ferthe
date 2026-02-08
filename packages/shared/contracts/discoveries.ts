@@ -90,6 +90,7 @@ export interface Clue {
   trailId?: string
   location: GeoLocation
   source: ClueSource
+  discoveryRadius: number
 }
 
 /**
