@@ -44,7 +44,6 @@ function TrailPage(props: TrailPageProps) {
       style={styles.container}
       title={trail.name}
       leading={<Button icon="arrow-back" variant='outlined' onPress={onClose} />}
-      trailing={<Button icon="more-vert" variant="outlined" options={[]} />}
     >
       <PageTabs variant="chips" defaultTab="overview">
         <PageTab id="overview" label={locales.trails.overview}>

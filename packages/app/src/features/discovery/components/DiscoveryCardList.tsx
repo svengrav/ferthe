@@ -113,7 +113,6 @@ const createStyles = (theme: Theme) => {
   return StyleSheet.create({
     // FlatList container with consistent padding
     listContainer: {
-      padding: PADDING,
     },
     // Row wrapper for horizontal gap between cards
     rowStyle: {
