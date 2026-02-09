@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Logo } from "./Logo.tsx";
 
 interface Node {
   x: number;
@@ -131,10 +132,11 @@ export function TrailAnimation() {
   }, []);
 
   return (
-    <div className="overflow-hidden rounded-md">
+    <div className="overflow-hidden rounded-md relative flex justify-center items-center">
+      <Logo className="absolute fill-white w-96" height={200} />
       <canvas
         ref={canvasRef}
-        className="w-full h-96 rounded-md bg-blue-900/10"
+        className="w-full h-96 rounded-md "
       />
     </div>
   );

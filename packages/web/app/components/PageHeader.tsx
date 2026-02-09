@@ -3,13 +3,15 @@ import { Navigation } from "./Navigation.tsx";
 
 export function PageHeader() {
   return (
-    <div className="flex-col items-center justify-center align-middle text-center mb-8 rounded-md border-b border-gray-700">
-      <Logo
-        className="flex justify-center mx-auto fill-white w-3xs"
-        height={100}
-      />
-      <h1 className="font-semibold text-white mb-4 text-lg">ferthe</h1>
-      <div className="flex justify-center w-full ">
+    <div className="flex items-center justify-center text-center mb-8 border-b border-gray-700 py-2">
+      <div className="flex items-center">
+        <Logo
+          className=" fill-white mr-1"
+          height={35}
+        />
+        <h1 className="font-semibold text-white text-xl">ferthe</h1>
+      </div>
+      <div className="flex w-full justify-end">
         <Navigation />
       </div>
     </div>

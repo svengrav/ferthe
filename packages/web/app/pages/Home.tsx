@@ -21,21 +21,24 @@ export function Home() {
       <div>
         <TrailAnimation />
 
-        <div className="mb-16">
-          <h2 className="text-3xl font-semibold mb-6">ferthe</h2>
-          <div className="line-clamp-4 mb-4">
+        <div className="mb-16 flex flex-col items-start gap-2">
+          <h2 className="text-3xl font-semibold mb-6">Über...</h2>
+          <div className="line-clamp-2 mb-4">
             <Markdown content={germanHomeStory} />
           </div>
-          <Link to="/about" className="hover:underline">
-            Read more →
+          <Link
+            to="/about"
+            className="hover:underline "
+          >
+            Mehr →
           </Link>
         </div>
 
         <div className="mt-16">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-semibold">Latest Blog Posts</h2>
+            <h2 className="text-3xl font-semibold ">Neues</h2>
             <Link to="/blog" className="hover:underline">
-              View all →
+              Alle Beiträge →
             </Link>
           </div>
           <BlogListContent posts={posts} limit={3} />
