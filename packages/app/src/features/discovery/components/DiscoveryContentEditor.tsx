@@ -1,4 +1,6 @@
-import { Button, TextInput } from '@app/shared/components'
+sudo systemctl daemon-reload
+sudo systemctl enable cloudflared.service
+sudo systemctl start cloudflared.serviceimport { Button, TextInput } from '@app/shared/components'
 import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import Field from '@app/shared/components/field/Field'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'

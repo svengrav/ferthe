@@ -1,10 +1,12 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import deno from '@deno/vite-plugin'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  base: '/',
+  plugins: [deno(), react(), tailwindcss()],
   server: {
     port: 15173,
     proxy: {
