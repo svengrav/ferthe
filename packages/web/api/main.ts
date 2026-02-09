@@ -6,27 +6,24 @@ import routeStaticFilesFrom from "./static/static.ts";
 export const app = new Application();
 const router = new Router();
 
-// Content Routes - Serve markdown files from content directory
-router.get("/api/content/:language/:contentType", async (context) => {
+// Unified Language-First API Routes
+router.get("/api/:language/content/:page", async (context) => {
   try {
-    const { language, contentType } = context.params;
+    const { language, page } = context.params;
 
-    // Validate language
     if (language !== 'en' && language !== 'de') {
       context.response.status = 400;
       context.response.body = { error: "Invalid language. Use 'en' or 'de'" };
       return;
     }
 
-    // Validate content type
-    if (contentType !== 'home' && contentType !== 'privacy') {
+    if (page !== 'home' && page !== 'privacy') {
       context.response.status = 400;
-      context.response.body = { error: "Invalid content type. Use 'home' or 'privacy'" };
+      context.response.body = { error: "Invalid page. Use 'home' or 'privacy'" };
       return;
     }
 
-    // Construct file path
-    const filePath = `${Deno.cwd()}/content/${language}/${contentType}.md`;
+    const filePath = `${Deno.cwd()}/content/${language}/${page}.md`;
 
     try {
       const content = await Deno.readTextFile(filePath);
@@ -44,9 +41,16 @@ router.get("/api/content/:language/:contentType", async (context) => {
   }
 });
 
-// Blog Routes
-router.get("/api/blog", async (context) => {
+router.get("/api/:language/blog", async (context) => {
   try {
+    const { language } = context.params;
+
+    if (language !== 'en' && language !== 'de') {
+      context.response.status = 400;
+      context.response.body = { error: "Invalid language. Use 'en' or 'de'" };
+      return;
+    }
+
     const blogDir = `${Deno.cwd()}/content/blog`;
     const posts: any[] = [];
 
@@ -54,22 +58,39 @@ router.get("/api/blog", async (context) => {
       if (entry.isFile && entry.name.endsWith('.md')) {
         const filePath = `${blogDir}/${entry.name}`;
         const fileContent = await Deno.readTextFile(filePath);
-        const { data } = matter(fileContent);
+        const { data, content } = matter(fileContent);
 
-        const slug = entry.name.replace('.md', '');
+        // Filter by language
+        if (data.language === language) {
+          const slug = entry.name.replace('.md', '');
 
-        posts.push({
-          slug,
-          title: data.title || 'Untitled',
-          date: data.date || '',
-          language: data.language || 'en',
-          author: data.author,
-          tags: data.tags || []
-        });
+          // Create preview - remove markdown syntax
+          let preview = content
+            .replace(/^#+\s+/gm, '') // Remove headers
+            .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold
+            .replace(/\*([^*]+)\*/g, '$1') // Remove italic
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Remove links, keep text
+            .replace(/`([^`]+)`/g, '$1') // Remove inline code
+            .replace(/^[-*+]\s+/gm, '') // Remove list markers
+            .replace(/^\d+\.\s+/gm, '') // Remove numbered list markers
+            .replace(/\n+/g, ' ') // Replace newlines with spaces
+            .trim();
+
+          preview = preview.slice(0, 200).trim() + (preview.length > 200 ? '...' : '');
+
+          posts.push({
+            slug,
+            title: data.title || 'Untitled',
+            date: data.date || '',
+            language: data.language,
+            author: data.author,
+            tags: data.tags || [],
+            preview
+          });
+        }
       }
     }
 
-    // Sort by date (newest first)
     posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     context.response.body = { posts };
@@ -80,20 +101,34 @@ router.get("/api/blog", async (context) => {
   }
 });
 
-router.get("/api/blog/:slug", async (context) => {
+router.get("/api/:language/blog/:slug", async (context) => {
   try {
-    const { slug } = context.params;
+    const { language, slug } = context.params;
+
+    if (language !== 'en' && language !== 'de') {
+      context.response.status = 400;
+      context.response.body = { error: "Invalid language. Use 'en' or 'de'" };
+      return;
+    }
+
     const filePath = `${Deno.cwd()}/content/blog/${slug}.md`;
 
     try {
       const fileContent = await Deno.readTextFile(filePath);
       const { data, content } = matter(fileContent);
 
+      // Validate language match
+      if (data.language !== language) {
+        context.response.status = 404;
+        context.response.body = { error: "Blog post not found for this language" };
+        return;
+      }
+
       context.response.body = {
         slug,
         title: data.title || 'Untitled',
         date: data.date || '',
-        language: data.language || 'en',
+        language: data.language,
         author: data.author,
         tags: data.tags || [],
         content

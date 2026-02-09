@@ -5,6 +5,7 @@ export interface BlogPostMetadata {
   language: 'en' | 'de'
   author?: string
   tags?: string[]
+  preview?: string
 }
 
 export interface BlogPost extends BlogPostMetadata {
