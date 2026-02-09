@@ -1,2 +1,6 @@
 @import "tailwindcss";
 @plugin "tailwind-scrollbar";
+
+@theme {
+  --color-surface: rgb(13, 17, 23);
+}

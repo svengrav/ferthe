@@ -31,13 +31,13 @@ export function PageLayout({
             {showBackButton && (
               <Link
                 to={backButtonPath}
-                className="text-blue-500 hover:text-blue-300 font-medium mb-4 inline-block"
+                className="text-emerald-500 hover:text-blue-300 font-medium mb-4 inline-block"
               >
                 {backButtonText}
               </Link>
             )}
             <h1 className="text-3xl font-semibold mb-2 text-white">{title}</h1>
-            <div className="w-16 h-1 bg-blue-500 mb-6 mt-6"></div>
+            <div className="w-16 h-1 text-emerald-500 mb-6 mt-6"></div>
           </div>
 
           {/* Two-Column Layout */}
@@ -71,7 +71,7 @@ export function PageLayout({
               {showBackButton && (
                 <Link
                   to={backButtonPath}
-                  className="text-blue-500 hover:text-blue-300 font-medium"
+                  className="text-emerald-500 hover:text-blue-300 font-medium"
                 >
                   {backButtonText}
                 </Link>

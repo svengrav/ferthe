@@ -1,5 +1,7 @@
-import { PageLayout } from "../components/PageLayout";
+import Page from "../components/Page";
+import { TwoColumnContent } from "../components/TwoColumnContent";
 import { useContent } from "../hooks/useContent";
+import { useMarkdown } from "../hooks/useMarkdown";
 
 export function Privacy() {
   const { content: germanContent, loading: loadingGerman } = useContent(
@@ -11,21 +13,20 @@ export function Privacy() {
     "en",
   );
 
-  if (loadingGerman || loadingEnglish) {
-    return (
-      <div className="bg-gray-950 flex flex-grow items-center justify-center p-8">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
-  }
+  const processedGermanContent = useMarkdown(germanContent);
+  const processedEnglishContent = useMarkdown(englishContent);
+  const loading = loadingGerman || loadingEnglish;
 
   return (
-    <PageLayout
+    <Page
       title="Privacy Policy / Datenschutzerklärung"
-      germanContent={germanContent}
-      englishContent={englishContent}
-      backButtonText="← Back to Home"
-      backButtonPath="/"
-    />
+      loading={loading}
+      backButton={{ text: "← Back to Home", path: "/" }}
+    >
+      <TwoColumnContent
+        germanContent={processedGermanContent}
+        englishContent={processedEnglishContent}
+      />
+    </Page>
   );
 }

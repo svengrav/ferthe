@@ -34,6 +34,13 @@
         "webpack:///./*": "${webRoot}/*"
       }
     },
+    {
+      "name": "🟨 Run Web App",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:15173",
+      "webRoot": "${workspaceFolder}/packages/web/app"
+    }
   ],
   "compounds": [
     {

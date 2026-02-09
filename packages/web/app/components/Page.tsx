@@ -1,44 +1,75 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Footer } from "./Footer.tsx";
+import { Logo } from "./Logo.tsx";
+import { PageHeader } from "./PageHeader.tsx";
 
 interface PageProps {
   title?: string;
   children: React.ReactNode;
+  showFooter?: boolean;
+  loading?: boolean;
+  backButton?: {
+    text: string;
+    path: string;
+  };
 }
 
-function Page({ title, children }: PageProps) {
-  return (
-    <div>
-      <div className="min-h-screen bg-gray-950">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="bg-gray-950 rounded-lg p-8 border border-gray-700 shadow-lg text-white">
-            {/* Header */}
-            {title && (
-              <h1 className="text-3xl font-semibold mb-6 text-white">
-                {title}
-              </h1>
-            )}
+function Page({
+  title,
+  children,
+  loading = false,
+  backButton,
+}: PageProps) {
+  const [fadeIn, setFadeIn] = useState(false);
 
-            {/* Content */}
-            <div className="prose prose-lg prose-invert max-w-none">
-              {children}
-            </div>
-          </div>
-          <footer className="mt-8 text-sm text-gray-500 text-center space-x-4">
-            <Link to="/" className="hover:text-gray-300 transition-colors">
-              Home
-            </Link>
-            <span>·</span>
-            <Link to="/blog" className="hover:text-gray-300 transition-colors">
-              Blog
-            </Link>
-            <span>·</span>
+  useEffect(() => {
+    if (!loading) {
+      const timer = setTimeout(() => {
+        setFadeIn(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Logo className="fill-white" width={100} height={100} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex justify-center">
+      <div className="max-w-7xl w-full">
+        <div className="rounded-lg p-8">
+          <PageHeader />
+
+          {backButton && (
             <Link
-              to="/privacy"
-              className="hover:text-gray-300 transition-colors"
+              to={backButton.path}
+              className="font-medium mb-6 inline-block"
             >
-              Privacy
+              {backButton.text}
             </Link>
-          </footer>
+          )}
+
+          {title && (
+            <div className="mb-8">
+              <h1 className="text-3xl font-semibold mb-2">{title}</h1>
+              <div className="w-16 h-1 bg-emerald-500 mb-6 mt-6"></div>
+            </div>
+          )}
+
+          <div
+            className={`opacity-0 transition-opacity duration-1000 ${
+              fadeIn ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            {children}
+          </div>
+          <Footer />
         </div>
       </div>
     </div>
