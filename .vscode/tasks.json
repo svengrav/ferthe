@@ -76,6 +76,25 @@
       }
     },
     {
+      "label": "Start Web Server",
+      "type": "shell",
+      "command": "deno run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/web"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "VITE|starting",
+          "endsPattern": "ready in|Local:|http://localhost"
+        }
+      }
+    },
+    {
       "label": "TypeScript Check: App",
       "type": "shell",
       "command": "npx tsc --noEmit",

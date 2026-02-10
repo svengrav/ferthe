@@ -42,7 +42,7 @@ function Page({
 
   return (
     <div className="flex justify-center">
-      <div className=" w-full max-w-4xl">
+      <div className=" w-full max-w-5xl">
         <div className="rounded-lg p-8">
           <PageHeader />
 

@@ -35,11 +35,12 @@
       }
     },
     {
-      "name": "🟨 Run Web App",
+      "name": "🟨 Run Web",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:15173",
-      "webRoot": "${workspaceFolder}/packages/web/app"
+      "webRoot": "${workspaceFolder}/packages/web/app",
+      "preLaunchTask": "Start Web Server"
     }
   ],
   "compounds": [
