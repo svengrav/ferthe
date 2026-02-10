@@ -26,6 +26,7 @@
     "npm:@tailwindcss/vite@^4.1.17": "4.1.18_vite@5.4.21",
     "npm:@types/react@^19.1.2": "19.2.10",
     "npm:@vitejs/plugin-react@^4.4.1": "4.7.0_vite@5.4.21_@babel+core@7.28.6",
+    "npm:clsx@^2.1.1": "2.1.1",
     "npm:dotenv@16": "16.6.1",
     "npm:gray-matter@^4.0.3": "4.0.3",
     "npm:jimp@0.22.12": "0.22.12_@jimp+custom@0.22.12",
@@ -41,7 +42,8 @@
     "npm:typescript@*": "5.9.3",
     "npm:vite@*": "5.4.21",
     "npm:vite@5.4.21": "5.4.21",
-    "npm:zod@^4.3.6": "4.3.6"
+    "npm:zod@^4.3.6": "4.3.6",
+    "npm:zustand@^5.0.11": "5.0.11_@types+react@19.2.10_react@19.2.3"
   },
   "jsr": {
     "@oak/commons@1.0.1": {
@@ -2707,6 +2709,17 @@
     },
     "zod@4.3.6": {
       "integrity": "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="
+    },
+    "zustand@5.0.11_@types+react@19.2.10_react@19.2.3": {
+      "integrity": "sha512-fdZY+dk7zn/vbWNCYmzZULHRrss0jx5pPFiOuMZ/5HJN6Yv3u+1Wswy/4MpZEkEGhtNH+pwxZB8OKgUBPzYAGg==",
+      "dependencies": [
+        "@types/react",
+        "react"
+      ],
+      "optionalPeers": [
+        "@types/react",
+        "react"
+      ]
     }
   },
   "workspace": {
@@ -2735,6 +2748,7 @@
           "npm:@tailwindcss/vite@^4.1.17",
           "npm:@types/react@^19.1.2",
           "npm:@vitejs/plugin-react@^4.4.1",
+          "npm:clsx@^2.1.1",
           "npm:gray-matter@^4.0.3",
           "npm:react-dom@^19.1.0",
           "npm:react-markdown@^8.0.5",
@@ -2742,7 +2756,8 @@
           "npm:react@^19.1.0",
           "npm:tailwind-scrollbar@^4.0.2",
           "npm:tailwindcss@^4.1.17",
-          "npm:vite@5.4.21"
+          "npm:vite@5.4.21",
+          "npm:zustand@^5.0.11"
         ]
       }
     }

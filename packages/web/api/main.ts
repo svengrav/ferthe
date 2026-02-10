@@ -145,6 +145,47 @@ router.get("/api/:language/blog/:slug", async (context) => {
   }
 });
 
+router.post("/api/feedback", async (context) => {
+  try {
+    const body = await context.request.body.json();
+    const { name, email, type, message } = body;
+
+    if (!message || typeof message !== "string" || !message.trim()) {
+      context.response.status = 400;
+      context.response.body = { error: "Message is required" };
+      return;
+    }
+
+    const feedback = {
+      timestamp: new Date().toISOString(),
+      name: name || "Anonymous",
+      email: email || "Not provided",
+      type: type || "other",
+      message: message.trim(),
+    };
+
+    // Log feedback to console (MVP - can be extended to save to file/DB/email)
+    console.log("\n=== NEW FEEDBACK ===");
+    console.log(JSON.stringify(feedback, null, 2));
+    console.log("===================\n");
+
+    // Optional: Save to file
+    try {
+      const feedbackLog = `${Deno.cwd()}/feedback.jsonl`;
+      await Deno.writeTextFile(feedbackLog, JSON.stringify(feedback) + "\n", { append: true });
+    } catch (error) {
+      console.error("Failed to save feedback to file:", error);
+    }
+
+    context.response.status = 200;
+    context.response.body = { success: true };
+  } catch (error) {
+    console.error("Feedback submission error:", error);
+    context.response.status = 500;
+    context.response.body = { error: "Failed to submit feedback" };
+  }
+});
+
 app.use(oakCors());
 app.use(router.routes());
 app.use(router.allowedMethods());

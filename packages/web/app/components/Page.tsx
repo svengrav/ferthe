@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Footer } from "./Footer.tsx";
+import { Heading } from "./Heading.tsx";
 import { Logo } from "./Logo.tsx";
 import { PageHeader } from "./PageHeader.tsx";
 
@@ -27,7 +28,7 @@ function Page({
     if (!loading) {
       const timer = setTimeout(() => {
         setFadeIn(true);
-      }, 100);
+      }, 0);
       return () => clearTimeout(timer);
     }
   }, [loading]);
@@ -43,9 +44,8 @@ function Page({
   return (
     <div className="flex justify-center">
       <div className=" w-full max-w-5xl">
-        <div className="rounded-lg p-8">
-          <PageHeader />
-
+        <PageHeader />
+        <div className="px-4">
           {backButton && (
             <Link
               to={backButton.path}
@@ -55,12 +55,7 @@ function Page({
             </Link>
           )}
 
-          {title && (
-            <div className="mb-8">
-              <h1 className="text-3xl font-semibold mb-2">{title}</h1>
-              <div className="w-16 h-1 bg-emerald-500 mb-6 mt-6"></div>
-            </div>
-          )}
+          {title && <Heading>{title}</Heading>}
 
           <div
             className={`opacity-0 transition-opacity duration-1000 ${

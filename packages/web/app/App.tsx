@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { FeedbackButton } from "./components/FeedbackButton";
+import { OverlayProvider } from "./components/overlay/Overlay";
 import { About } from "./pages/About";
 import { BlogList } from "./pages/BlogList";
 import { BlogPost } from "./pages/BlogPost";
@@ -17,6 +19,8 @@ function App() {
           <Route path="/blog/:slug" element={<BlogPost />} />
         </Routes>
       </Router>
+      <FeedbackButton />
+      <OverlayProvider />
     </div>
   );
 }

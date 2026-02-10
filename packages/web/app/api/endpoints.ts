@@ -1,4 +1,4 @@
-import type { BlogPost, BlogPostMetadata } from '../types/blog';
+import type { BlogPost } from '../types/blog';
 import { apiClient } from './client';
 
 export const contentApi = {
@@ -8,8 +8,8 @@ export const contentApi = {
 };
 
 export const blogApi = {
-  async list(language: 'en' | 'de'): Promise<BlogPostMetadata[]> {
-    const response = await apiClient.get<{ posts: BlogPostMetadata[] }>(`/api/${language}/blog`);
+  async list(language: 'en' | 'de'): Promise<BlogPost[]> {
+    const response = await apiClient.get<{ posts: BlogPost[] }>(`/api/${language}/blog`);
     return response.posts;
   },
 

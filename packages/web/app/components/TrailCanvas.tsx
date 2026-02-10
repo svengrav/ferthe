@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { useEffect, useRef } from "react";
 import { Logo } from "./Logo.tsx";
 
@@ -9,16 +10,12 @@ interface Node {
   radius: number;
 }
 
-function useWindowEvent(eventName: string, handler: EventListener) {
-  useEffect(() => {
-    globalThis.addEventListener(eventName, handler);
-    return () => globalThis.removeEventListener(eventName, handler);
-  }, [eventName, handler]);
+interface TrailCanvasProps {
+  className?: string;
 }
 
-export function TrailAnimation() {
+export function TrailCanvas({ className }: TrailCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  useWindowEvent("resize", () => console.log("resized"));
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -35,15 +32,15 @@ export function TrailAnimation() {
       maxSpeed: 0.3,
       connectionDistance: 150,
       nodeRadius: 3,
-      nodeColor: "#10b981",
-      lineColor: "#047857",
+      nodeColor: "#000",
+      lineColor: "#000",
     };
 
     const initCanvas = () => {
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      canvas.width = rect.width * globalThis.devicePixelRatio;
+      canvas.height = rect.height * globalThis.devicePixelRatio;
+      ctx.scale(globalThis.devicePixelRatio, globalThis.devicePixelRatio);
       canvas.style.width = `${rect.width}px`;
       canvas.style.height = `${rect.height}px`;
     };
@@ -84,7 +81,7 @@ export function TrailAnimation() {
           if (distance < CONFIG.connectionDistance) {
             const opacity = 1 - distance / CONFIG.connectionDistance;
             ctx.strokeStyle = CONFIG.lineColor;
-            ctx.globalAlpha = opacity * 0.3;
+            ctx.globalAlpha = opacity * 0.4;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(nodeA.x, nodeA.y);
@@ -132,11 +129,16 @@ export function TrailAnimation() {
   }, []);
 
   return (
-    <div className="overflow-hidden rounded-md relative flex justify-center items-center">
-      <Logo className="absolute fill-white w-96" height={200} />
+    <div
+      className={clsx(
+        "overflow-hidden rounded-md relative flex justify-center items-center w-full",
+        className,
+      )}
+    >
+      <Logo className="absolute fill-black w-96" height={200} />
       <canvas
         ref={canvasRef}
-        className="w-full h-96 rounded-md "
+        className="rounded-md w-full"
       />
     </div>
   );

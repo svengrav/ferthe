@@ -1,13 +1,18 @@
 import { Link } from "react-router-dom";
-import type { BlogPostMetadata } from "../types/blog";
+import type { BlogPost } from "../types/blog";
 
 interface BlogListContentProps {
-  posts: BlogPostMetadata[];
+  posts: BlogPost[];
+  startIndex?: number;
   limit?: number;
 }
 
-export function BlogListContent({ posts, limit }: BlogListContentProps) {
-  const displayPosts = limit ? posts.slice(0, limit) : posts;
+export function BlogListContent(
+  { posts, startIndex, limit }: BlogListContentProps,
+) {
+  const displayPosts = limit
+    ? posts.slice(startIndex ?? 0, (startIndex ?? 0) + limit)
+    : posts;
 
   if (displayPosts.length === 0) {
     return <p>Nichts zu sehen.</p>;

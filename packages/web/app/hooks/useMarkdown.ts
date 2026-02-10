@@ -1,7 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo } from 'react';
 
-export function useMarkdown(markdownContent: string) {
+export function useMarkdown(markdownContent: string = '') {
   const processedContent = useMemo(() => {
+    if (!markdownContent) return '';
+
     // Replace template variables
     const currentDate = new Date().toLocaleDateString()
     const currentYear = new Date().getFullYear()

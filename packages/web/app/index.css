@@ -3,4 +3,6 @@
 
 @theme {
   --color-surface: rgb(13, 17, 23);
+  --color-primary: #fff;
+  --color-onprimary: #000;
 }
