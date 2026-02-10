@@ -131,7 +131,7 @@ export function TrailCanvas({ className }: TrailCanvasProps) {
   return (
     <div
       className={clsx(
-        "overflow-hidden rounded-md relative flex justify-center items-center w-full",
+        "overflow-hidden rounded-md relative flex justify-center items-center w-full ",
         className,
       )}
     >

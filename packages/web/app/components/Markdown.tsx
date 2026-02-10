@@ -6,10 +6,10 @@ function Markdown({ content }: { content: string }) {
       <h1 className="text-2xl font-semibold mb-4">{children}</h1>
     ),
     h2: ({ children }: any) => (
-      <h2 className="text-xl font-semibold mb-4 mt-8">{children}</h2>
+      <h2 className="text-xl font-semibold mb-2">{children}</h2>
     ),
     h3: ({ children }: any) => (
-      <h3 className="text-xl font-semibold mb-3 mt-6">{children}</h3>
+      <h3 className="text-xl font-semibold mb-2">{children}</h3>
     ),
     p: ({ children }: any) => <p className="mb-4 ">{children}</p>,
     ul: ({ children }: any) => (

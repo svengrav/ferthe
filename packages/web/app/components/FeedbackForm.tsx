@@ -7,7 +7,7 @@ interface FeedbackFormProps {
 type FeedbackType = "bug" | "feature" | "other";
 
 const INPUT_STYLE =
-  "w-full p-3 rounded-md border border-gray-700 text-white text-sm mt-2 focus:outline-none focus:ring-2 focus:ring-primary/10";
+  "w-full p-3 rounded-md border border-surface-divider text-white text-sm mt-2 focus:outline-none focus:ring-2 focus:ring-primary/10";
 
 export function FeedbackForm({ onClose }: FeedbackFormProps) {
   const [name, setName] = useState("");
@@ -61,7 +61,7 @@ export function FeedbackForm({ onClose }: FeedbackFormProps) {
   };
 
   return (
-    <div className="bg-surface rounded-xl p-6 max-w-125 w-[90vw] mx-auto mt-[10vh] shadow-2xl">
+    <div className="bg-surface rounded-xl p-6 max-w-125 w-[90vw] mx-auto shadow-2xl">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">
           Feedback

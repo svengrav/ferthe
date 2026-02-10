@@ -1,3 +1,4 @@
+// deno-lint-ignore-file
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -12,7 +13,7 @@ export function Navigation() {
   ];
 
   return (
-    <div className="flex justify-end w-full">
+    <div className="flex justify-end">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="md:hidden p-2 text-primary hover:text-blue-300"
@@ -25,7 +26,7 @@ export function Navigation() {
 
       <div className="hidden md:flex gap-4 text-primary items-center">
         {links.map((link, i) => [
-          i > 0 && <span key={`sep-${i}`} className="text-gray-600">·</span>,
+          i > 0 && <span key={`sep-${i}`} className="text-gray-400">·</span>,
           <Link
             key={link.to}
             to={link.to}

@@ -9,7 +9,7 @@ import { Privacy } from "./pages/Privacy";
 
 function App() {
   return (
-    <div className="min-h-screen bg-surface text-gray-100">
+    <div className="min-h-screen flex flex-col">
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -19,7 +19,7 @@ function App() {
           <Route path="/blog/:slug" element={<BlogPost />} />
         </Routes>
       </Router>
-      <FeedbackButton />
+      <FeedbackButton className="fixed bottom-6 right-6" />
       <OverlayProvider />
     </div>
   );

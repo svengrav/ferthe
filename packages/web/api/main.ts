@@ -1,7 +1,14 @@
 import { Application, Router } from "@oak/oak";
+import { load } from "@std/dotenv";
 import { oakCors } from "@tajpouria/cors";
 import matter from "gray-matter";
 import routeStaticFilesFrom from "./static/static.ts";
+
+// Load environment variables
+await load({ export: true });
+
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const FEEDBACK_EMAIL = Deno.env.get("FEEDBACK_EMAIL") || "feedback@ferthe.de";
 
 export const app = new Application();
 const router = new Router();
@@ -164,17 +171,56 @@ router.post("/api/feedback", async (context) => {
       message: message.trim(),
     };
 
-    // Log feedback to console (MVP - can be extended to save to file/DB/email)
+    // Log feedback to console
     console.log("\n=== NEW FEEDBACK ===");
     console.log(JSON.stringify(feedback, null, 2));
     console.log("===================\n");
 
-    // Optional: Save to file
+    // Save to file
     try {
       const feedbackLog = `${Deno.cwd()}/feedback.jsonl`;
       await Deno.writeTextFile(feedbackLog, JSON.stringify(feedback) + "\n", { append: true });
     } catch (error) {
       console.error("Failed to save feedback to file:", error);
+    }
+
+    // Send email via Resend
+    if (RESEND_API_KEY) {
+      try {
+        const emailResponse = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${RESEND_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: "feedback@ferthe.de",
+            to: FEEDBACK_EMAIL,
+            subject: `Feedback: ${feedback.type}`,
+            html: `
+              <h2>Neues Feedback erhalten</h2>
+              <p><strong>Zeit:</strong> ${new Date(feedback.timestamp).toLocaleString('de-DE')}</p>
+              <p><strong>Von:</strong> ${feedback.name}</p>
+              <p><strong>E-Mail:</strong> ${feedback.email}</p>
+              <p><strong>Typ:</strong> ${feedback.type}</p>
+              <hr>
+              <p><strong>Nachricht:</strong></p>
+              <p>${feedback.message.replace(/\n/g, '<br>')}</p>
+            `,
+          }),
+        });
+
+        if (!emailResponse.ok) {
+          const errorText = await emailResponse.text();
+          console.error("Failed to send email via Resend:", errorText);
+        } else {
+          console.log("Feedback email sent successfully");
+        }
+      } catch (error) {
+        console.error("Error sending email:", error);
+      }
+    } else {
+      console.warn("RESEND_API_KEY not configured - email not sent");
     }
 
     context.response.status = 200;

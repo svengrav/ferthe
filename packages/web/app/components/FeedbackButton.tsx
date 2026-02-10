@@ -1,18 +1,25 @@
 import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
 import { useFeedback } from "../hooks/useFeedback";
 
-export function FeedbackButton() {
+interface FeedbackButtonProps {
+  light?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+}
+
+export function FeedbackButton({ className, children }: FeedbackButtonProps) {
   const { showFeedback } = useFeedback();
 
   return (
     <button
       type="button"
       onClick={showFeedback}
-      className="fixed bottom-6 right-6 bg-primary text-onprimary rounded-4xl p-2"
+      className={`flex w-min whitespace-nowrap gap-2 bg-primary text-onprimary font-semibold cursor-pointer hover:bg-primary/90 rounded-4xl p-2 ${className}`}
       aria-label="Feedback senden"
       title="Feedback senden"
     >
       <ChatBubbleLeftIcon className="h-6" />
+      {children}
     </button>
   );
 }
