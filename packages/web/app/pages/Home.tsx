@@ -22,7 +22,7 @@ export function Home() {
 
   return (
     <Page loading={loadingGerman} wide>
-      <div className="flex flex-1 bg-surface text-gray-100 justify-center items-center">
+      <div className="flex flex-1 bg-surface bg-linear-to-t to-surface-divider/30 text-gray-100 justify-center items-center">
         <div className=" flex-row max-w-6xl  py-8">
           <TrailCanvas className="h-80 bg-emerald-600 to-gray-600 bg-linear-to-tl mb-6 " />
 

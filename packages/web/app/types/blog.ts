@@ -6,6 +6,7 @@ export interface BlogPostMetadata {
   author?: string
   tags?: string[]
   preview?: string
+  heroImage?: string
 }
 
 export interface BlogPost extends BlogPostMetadata {

@@ -43,6 +43,14 @@ function Markdown({ content }: { content: string }) {
         {children}
       </code>
     ),
+    img: ({ src, alt }: any) => (
+      <img
+        src={src}
+        alt={alt || ""}
+        className="w-full max-w-3xl rounded-lg my-6"
+        loading="lazy"
+      />
+    ),
   };
 
   return (

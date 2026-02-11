@@ -15,6 +15,13 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
   }
   return (
     <article className="flex-col flex gap-2">
+      {post.heroImage && (
+        <img
+          src={post.heroImage}
+          alt={post.title}
+          className="w-full max-w-4xl rounded-lg mb-6"
+        />
+      )}
       <div className="flex justify-between" id="meta">
         <div className="flex gap-2 text-sm text-gray-500">
           <time dateTime={post.date}>

@@ -92,6 +92,7 @@ router.get("/api/:language/blog", async (context) => {
             language: data.language,
             author: data.author,
             tags: data.tags || [],
+            heroImage: data.heroImage,
             preview
           });
         }
@@ -138,6 +139,7 @@ router.get("/api/:language/blog/:slug", async (context) => {
         language: data.language,
         author: data.author,
         tags: data.tags || [],
+        heroImage: data.heroImage,
         content
       };
     } catch (error) {
