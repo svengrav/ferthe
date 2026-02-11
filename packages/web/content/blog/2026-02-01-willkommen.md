@@ -1,20 +1,17 @@
 ---
-title: "Willkommen beim Ferthe Blog"
+title: "Willkommen bei ferthe"
 date: "2026-02-01"
 language: "de"
-author: "Ferthe Team"
-tags: ["ankündigung", "willkommen"]
+author: "ferthe"
+tags: ["ankündigung"]
 ---
 
-# Willkommen beim Ferthe Blog
+# Willkommen bei ferthe
 
-Wir freuen uns, unseren neuen Blog zu starten! Hier werden wir Updates, Einblicke und Geschichten über Ferthe teilen.
+Wir freuen uns, unseren neuen Blog zu starten! Hier werden wir Updates, Einblicke und Geschichten über ferthe teilen.
 
 ## Was euch erwartet
 
-- Produkt-Updates und Feature-Ankündigungen
-- Tipps und Best Practices
-- Community-Highlights
-- Behind-the-Scenes Content
+- Projekt-Updates und Feature-Ankündigungen
 
 Bleibt dran für weitere Inhalte!

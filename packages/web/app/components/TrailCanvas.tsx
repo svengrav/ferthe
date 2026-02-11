@@ -12,9 +12,24 @@ interface Node {
 interface TrailCanvasProps {
   children?: React.ReactNode;
   className?: string;
+  nodeCount?: number;
+  maxSpeed?: number;
+  connectionDistance?: number;
+  nodeRadius?: number;
+  nodeColor?: string;
+  lineColor?: string;
 }
 
-export function TrailCanvas({ children, className }: TrailCanvasProps) {
+export function TrailCanvas({
+  children,
+  className,
+  nodeCount = 25,
+  maxSpeed = 0.2,
+  connectionDistance = 100,
+  nodeRadius = 3,
+  nodeColor = "#fff",
+  lineColor = "#fff",
+}: TrailCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -31,12 +46,12 @@ export function TrailCanvas({ children, className }: TrailCanvasProps) {
     let canvasHeight = 0;
 
     const CONFIG = {
-      nodeCount: 25,
-      maxSpeed: 0.2,
-      connectionDistance: 100,
-      nodeRadius: 3,
-      nodeColor: "#fff",
-      lineColor: "#fff",
+      nodeCount,
+      maxSpeed,
+      connectionDistance,
+      nodeRadius,
+      nodeColor,
+      lineColor,
     };
 
     const initCanvas = () => {
@@ -83,7 +98,7 @@ export function TrailCanvas({ children, className }: TrailCanvasProps) {
           if (distance < CONFIG.connectionDistance) {
             const opacity = 1 - distance / CONFIG.connectionDistance;
             ctx.strokeStyle = CONFIG.lineColor;
-            ctx.globalAlpha = opacity * 0.4;
+            ctx.globalAlpha = opacity * 0.5;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(nodeA.x, nodeA.y);
@@ -133,20 +148,30 @@ export function TrailCanvas({ children, className }: TrailCanvasProps) {
       cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
     };
-  }, []);
-
+  }, [
+    nodeCount,
+    maxSpeed,
+    connectionDistance,
+    nodeRadius,
+    nodeColor,
+    lineColor,
+  ]);
   return (
     <div
       ref={containerRef}
       className={clsx(
-        "overflow-hidden rounded-md relative flex justify-center items-center w-full  flex-1",
+        "overflow-hidden rounded-md relative flex justify-center items-center w-full flex-1",
         className,
       )}
     >
-      {children}
+      <div className="z-10 flex justify-center items-center">
+        {children}
+      </div>
+
       <canvas
+        id="canvas"
         ref={canvasRef}
-        className="flex w-full flex-1 "
+        className=" w-7xl position: absolute "
       />
     </div>
   );

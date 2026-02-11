@@ -23,8 +23,8 @@ export function Home() {
 
   return (
     <Page loading={loadingGerman} wide>
-      <div className="flex flex-1 bg-surface bg-linear-to-t to-indigo-900/10 text-gray-100 justify-center items-center">
-        <div className=" flex-row max-w-6xl  py-8">
+      <div className="flex flex-1 bg-surface bg-linear-to-t to-indigo-900/10 text-gray-100 justify-center items-center px-4">
+        <div className="flex-row max-w-6xl py-8">
           <TrailCanvas className="h-80 bg-linear-to-tl mb-6 ">
             <Logo
               className="absolute fill-white w-96 hover:animate-pulse cursor-pointer"
@@ -48,8 +48,8 @@ export function Home() {
         </div>
       </div>
 
-      <div className="bg-gray-50 px-4 flex flex-col flex-1 ">
-        <div className=" mx-auto max-w-6xl flex flex-col flex-1">
+      <div className="bg-gray-50 flex flex-col flex-1 px-4">
+        <div className=" mx-auto max-w-6xl flex flex-col flex-1 ">
           <div className="flex justify-center" id="divider">
             <div className="w-10 h-1 bg-surface my-4" />
           </div>
