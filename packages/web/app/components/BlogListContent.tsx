@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import type { BlogPost } from "../types/blog";
+import { dateToLocaleString } from "../utils/date.ts";
 import { Tag } from "./Tag.tsx";
 
 interface BlogListContentProps {
@@ -7,14 +8,6 @@ interface BlogListContentProps {
   startIndex?: number;
   limit?: number;
 }
-
-const formatDate = (date: Date) => {
-  return date.toLocaleDateString("de-DE", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
 
 export function BlogListContent(
   { posts, startIndex, limit }: BlogListContentProps,
@@ -40,7 +33,7 @@ export function BlogListContent(
             </h2>
             <div className="flex gap-2 text-sm mb-3 text-gray-500">
               <time dateTime={post.date}>
-                {formatDate(new Date(post.date))}
+                {dateToLocaleString(new Date(post.date))}
               </time>
               {post.author && <span>von {post.author}</span>}
             </div>

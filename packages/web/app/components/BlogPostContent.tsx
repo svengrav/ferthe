@@ -4,6 +4,7 @@ import {
   resolveBlogImagePaths,
   resolveHeroImagePath,
 } from "../utils/blogImagePaths";
+import { dateToLocaleString } from "../utils/date.ts";
 import Markdown from "./Markdown";
 import { Tag } from "./Tag.tsx";
 
@@ -31,7 +32,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
       <div className="flex justify-between" id="meta">
         <div className="flex gap-2 text-sm text-gray-500">
           <time dateTime={post.date}>
-            {new Date(post.date).toLocaleDateString()}
+            {dateToLocaleString(new Date(post.date))}
           </time>
           {post.author && <span>von {post.author}</span>}
         </div>

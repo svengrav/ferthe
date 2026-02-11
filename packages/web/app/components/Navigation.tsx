@@ -16,7 +16,7 @@ export function Navigation() {
     <div className="flex justify-end">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden p-2 text-primary hover:text-blue-300"
+        className="md:hidden p-2 text-primary hover:text-indigo-500"
         aria-label="Toggle menu"
       >
         {isOpen
@@ -30,7 +30,7 @@ export function Navigation() {
           <Link
             key={link.to}
             to={link.to}
-            className="hover:text-blue-300 font-medium"
+            className="hover:text-indigo-500 font-medium"
           >
             {link.label}
           </Link>,
