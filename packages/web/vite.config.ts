@@ -1,7 +1,7 @@
+import deno from '@deno/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
-import deno from '@deno/vite-plugin'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -11,6 +11,10 @@ export default defineConfig({
     port: 15173,
     proxy: {
       '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/blog/images': {
         target: 'http://localhost:8000',
         changeOrigin: true,
       },

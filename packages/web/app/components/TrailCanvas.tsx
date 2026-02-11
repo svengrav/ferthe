@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
-import { Logo } from "./Logo.tsx";
 
 interface Node {
   x: number;
@@ -11,11 +10,13 @@ interface Node {
 }
 
 interface TrailCanvasProps {
+  children?: React.ReactNode;
   className?: string;
 }
 
-export function TrailCanvas({ className }: TrailCanvasProps) {
+export function TrailCanvas({ children, className }: TrailCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -26,18 +27,22 @@ export function TrailCanvas({ className }: TrailCanvasProps) {
 
     let animationFrameId: number;
     let nodes: Node[] = [];
+    let canvasWidth = 0;
+    let canvasHeight = 0;
 
     const CONFIG = {
       nodeCount: 25,
-      maxSpeed: 0.3,
-      connectionDistance: 150,
+      maxSpeed: 0.2,
+      connectionDistance: 100,
       nodeRadius: 3,
-      nodeColor: "#000",
-      lineColor: "#000",
+      nodeColor: "#fff",
+      lineColor: "#fff",
     };
 
     const initCanvas = () => {
       const rect = canvas.getBoundingClientRect();
+      canvasWidth = rect.width;
+      canvasHeight = rect.height;
       canvas.width = rect.width * globalThis.devicePixelRatio;
       canvas.height = rect.height * globalThis.devicePixelRatio;
       ctx.scale(globalThis.devicePixelRatio, globalThis.devicePixelRatio);
@@ -46,10 +51,9 @@ export function TrailCanvas({ className }: TrailCanvasProps) {
     };
 
     const createNodes = () => {
-      const rect = canvas.getBoundingClientRect();
       nodes = Array.from({ length: CONFIG.nodeCount }, () => ({
-        x: Math.random() * rect.width,
-        y: Math.random() * rect.height,
+        x: Math.random() * canvasWidth,
+        y: Math.random() * canvasHeight,
         vx: (Math.random() - 0.5) * CONFIG.maxSpeed,
         vy: (Math.random() - 0.5) * CONFIG.maxSpeed,
         radius: CONFIG.nodeRadius,
@@ -57,17 +61,15 @@ export function TrailCanvas({ className }: TrailCanvasProps) {
     };
 
     const updateNodes = () => {
-      const rect = canvas.getBoundingClientRect();
-
       nodes.forEach((node) => {
         node.x += node.vx;
         node.y += node.vy;
 
-        if (node.x < 0 || node.x > rect.width) node.vx *= -1;
-        if (node.y < 0 || node.y > rect.height) node.vy *= -1;
+        if (node.x < 0 || node.x > canvasWidth) node.vx *= -1;
+        if (node.y < 0 || node.y > canvasHeight) node.vy *= -1;
 
-        node.x = Math.max(0, Math.min(rect.width, node.x));
-        node.y = Math.max(0, Math.min(rect.height, node.y));
+        node.x = Math.max(0, Math.min(canvasWidth, node.x));
+        node.y = Math.max(0, Math.min(canvasHeight, node.y));
       });
     };
 
@@ -103,8 +105,7 @@ export function TrailCanvas({ className }: TrailCanvasProps) {
     };
 
     const animate = () => {
-      const rect = canvas.getBoundingClientRect();
-      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
       updateNodes();
       drawConnections();
@@ -118,9 +119,15 @@ export function TrailCanvas({ className }: TrailCanvasProps) {
     animate();
 
     const resizeObserver = new ResizeObserver(() => {
+      console.log("Resizing canvas...");
       initCanvas();
+      createNodes();
     });
-    resizeObserver.observe(canvas);
+
+    const container = containerRef.current;
+    if (container) {
+      resizeObserver.observe(container);
+    }
 
     return () => {
       cancelAnimationFrame(animationFrameId);
@@ -130,15 +137,16 @@ export function TrailCanvas({ className }: TrailCanvasProps) {
 
   return (
     <div
+      ref={containerRef}
       className={clsx(
-        "overflow-hidden rounded-md relative flex justify-center items-center w-full ",
+        "overflow-hidden rounded-md relative flex justify-center items-center w-full  flex-1",
         className,
       )}
     >
-      <Logo className="absolute fill-black w-96" height={200} />
+      {children}
       <canvas
         ref={canvasRef}
-        className="rounded-md w-full"
+        className="flex w-full flex-1 "
       />
     </div>
   );

@@ -61,7 +61,7 @@ export function FeedbackForm({ onClose }: FeedbackFormProps) {
   };
 
   return (
-    <div className="bg-surface rounded-xl p-6 max-w-125 w-[90vw] mx-auto shadow-2xl">
+    <div className="bg-surface rounded-xl p-6 max-w-125 w-[90vw] mx-auto shadow-2xl text-white">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">
           Feedback

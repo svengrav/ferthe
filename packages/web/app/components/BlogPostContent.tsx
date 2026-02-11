@@ -1,5 +1,9 @@
 import { useMarkdown } from "../hooks/useMarkdown";
 import type { BlogPost } from "../types/blog";
+import {
+  resolveBlogImagePaths,
+  resolveHeroImagePath,
+} from "../utils/blogImagePaths";
 import Markdown from "./Markdown";
 import { Tag } from "./Tag.tsx";
 
@@ -8,16 +12,18 @@ interface BlogPostContentProps {
 }
 
 export function BlogPostContent({ post }: BlogPostContentProps) {
-  const processedContent = useMarkdown(post.content || "");
+  const contentWithResolvedPaths = resolveBlogImagePaths(post.content || "");
+  const processedContent = useMarkdown(contentWithResolvedPaths);
+  const heroImagePath = resolveHeroImagePath(post.heroImage);
 
   if (!post.content) {
     return null;
   }
   return (
     <article className="flex-col flex gap-2">
-      {post.heroImage && (
+      {heroImagePath && (
         <img
-          src={post.heroImage}
+          src={heroImagePath}
           alt={post.title}
           className="w-full max-w-4xl rounded-lg mb-6"
         />

@@ -3,6 +3,7 @@ import { BlogPostContent } from "../components/BlogPostContent.tsx";
 import { ButtonLink } from "../components/ButtonLink";
 import { FeedbackButton } from "../components/FeedbackButton.tsx";
 import { Heading } from "../components/Heading";
+import { Logo } from "../components/Logo.tsx";
 import Markdown from "../components/Markdown";
 import Page from "../components/Page";
 import { TrailCanvas } from "../components/TrailCanvas.tsx";
@@ -22,9 +23,14 @@ export function Home() {
 
   return (
     <Page loading={loadingGerman} wide>
-      <div className="flex flex-1 bg-surface bg-linear-to-t to-surface-divider/30 text-gray-100 justify-center items-center">
+      <div className="flex flex-1 bg-surface bg-linear-to-t to-indigo-900/10 text-gray-100 justify-center items-center">
         <div className=" flex-row max-w-6xl  py-8">
-          <TrailCanvas className="h-80 bg-emerald-600 to-gray-600 bg-linear-to-tl mb-6 " />
+          <TrailCanvas className="h-80 bg-linear-to-tl mb-6 ">
+            <Logo
+              className="absolute fill-white w-96 hover:animate-pulse cursor-pointer"
+              height={200}
+            />
+          </TrailCanvas>
 
           <div className="flex gap-8">
             <div className="flex flex-1   flex-col items-start  gap-2">

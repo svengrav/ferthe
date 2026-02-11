@@ -154,6 +154,38 @@ router.get("/api/:language/blog/:slug", async (context) => {
   }
 });
 
+router.get("/blog/images/:filename", async (context) => {
+  try {
+    const { filename } = context.params;
+    const filePath = `${Deno.cwd()}/content/blog/images/${filename}`;
+
+    try {
+      const file = await Deno.readFile(filePath);
+      const ext = filename.split('.').pop()?.toLowerCase();
+
+      const contentTypes: Record<string, string> = {
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+        'svg': 'image/svg+xml',
+        'webp': 'image/webp',
+      };
+
+      context.response.headers.set("Content-Type", contentTypes[ext || ''] || 'application/octet-stream');
+      context.response.body = file;
+    } catch (error) {
+      console.error(`Failed to read image: ${filePath}`, error);
+      context.response.status = 404;
+      context.response.body = { error: "Image not found" };
+    }
+  } catch (error) {
+    console.error("Blog image error:", error);
+    context.response.status = 500;
+    context.response.body = { error: error instanceof Error ? error.message : "Failed to load image" };
+  }
+});
+
 router.post("/api/feedback", async (context) => {
   try {
     const body = await context.request.body.json();
