@@ -12,19 +12,17 @@ summary: "Zu jedem Projekt gehört eine gute Geschichte im Herzen Europas, entde
 
 ## Unser Projekt
 
-Zu jedem Projekt gehört eine gute Geschichte. **ferthe** lädt dich ein, die Welt um dich herum neu zu entdecken. 
+Zu jedem Projekt gehört eine gute Geschichte. Hinter **ferthe** steckt die Idee, deine Umgebung neu zu entdecken.
 
-Orte sind nicht einfach nur Koordinaten auf einer Karte. Sie sind Ankerpunkte von Erlebnissen, Gedanken und Momenten. Jeder Ort hat etwas zu erzählen, wenn man genau hinschaut. **ferthe** begleitet dich dabei, diese Geschichten zu finden und zu teilen.
-
-Du sammelst Entdeckungen, erkundest die Verbindungen zwischen Orten und Erfahrungen, und findest deinen eigenen Weg durch die Welt. Mit jeder neuen Entdeckung wirst du Teil einer lebendigen Gemeinschaft, die ihre Erkenntnisse aufeinander aufbaut und voneinander lernt.
+Orte sind mehr als Koordinaten. Sie sind Anker für Erlebnisse, Gedanken und Momente. Wenn du genau hinschaust, hat jeder Ort seine Geschichte. **ferthe** hilft dir, diese Geschichten zu finden und zu teilen. Du sammelst Entdeckungen, erkundest Verbindungen zwischen Orten und Erlebnissen und findest deinen eigenen Weg durch die Welt. 
 
 ## Wie es funktioniert
 
-**ferthe** verbindet dich mit sorgfältig gestalteten Routen und Orten in deiner Umgebung. Du wählst ein Pfad, erfasst deine Entdeckungen und kannst sie mit Fotos, Gedanken und Reaktionen bereichern. Die App merkt sich, wo du warst und wo du noch hin möchtest. So dass du immer genau dort weitermachst, wo deine Geschichte unterbrochen wurde.
+Mit **ferthe** findest du sorgfältig gestaltete Routen und Orte in deiner Nähe. Wähle einen Pfad, halte Entdeckungen fest und ergänze sie mit Fotos, Gedanken und Reaktionen. Die App merkt sich, wo du warst und wohin du willst, damit du genau dort weitermachst, wo deine Geschichte unterbrochen wurde.
 
 ## Entstanden mit Liebe zum Detail
 
-Mit Liebe zum Detail entstanden in Münster in der Mitte Europas. Eine Stadt wo Geschichte, Charakter und Ideen sich begegnen. Als kleines unabhängiges Team haben wir dieses Projekt geschaffen, weil wir daran glauben, dass die alltägliche Umwelt viel spannender wird, wenn man sie bewusst erkundet.
+Entstanden mit Liebe zum Detail in Münster, in der Mitte Europas. Eine Stadt, in der Geschichte, Charakter und Ideen aufeinandertreffen. Wir sind ein kleines, unabhängiges Team und haben dieses Projekt gemacht, weil wir glauben, dass die alltägliche Umgebung spannender wird, wenn du sie bewusst erkundest.
 
 ---
 

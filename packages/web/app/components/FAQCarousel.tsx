@@ -12,7 +12,15 @@ export function FAQCarousel({ language }: FAQCarouselProps) {
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
-    const scrollAmount = 400;
+    const containerWidth = scrollRef.current.offsetWidth;
+    const gap = 16; // gap-4 = 16px
+
+    // Calculate how many cards fit based on container width
+    let cardsToShow = 1;
+    if (containerWidth >= 1024) cardsToShow = 3; // lg breakpoint
+    else if (containerWidth >= 768) cardsToShow = 2; // md breakpoint
+
+    const scrollAmount = containerWidth / cardsToShow;
     scrollRef.current.scrollBy({
       left: direction === "left" ? -scrollAmount : scrollAmount,
       behavior: "smooth",
@@ -38,7 +46,7 @@ export function FAQCarousel({ language }: FAQCarouselProps) {
           {items.map((item, index) => (
             <div
               key={index}
-              className="flex-shrink-0 w-80 p-4 bg-gray-50 rounded-lg border border-gray-200"
+              className="shrink-0 w-full md:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)] min-w-[300px] max-w-[400px] p-4   "
             >
               <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
                 {item.question}
