@@ -19,7 +19,7 @@ export function BlogList() {
       loading={loading}
       backButton={{ text: "← Back to Home", path: "/" }}
     >
-      <BlogListContent posts={posts} />
+      <BlogListContent posts={posts} className="max-w-2xl" />
     </Page>
   );
 }

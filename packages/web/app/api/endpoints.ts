@@ -1,9 +1,10 @@
 import type { BlogPost } from '../types/blog';
+import type { ContentPage } from '../types/content';
 import { apiClient } from './client';
 
 export const contentApi = {
-  get(language: 'en' | 'de', page: 'home' | 'privacy'): Promise<string> {
-    return apiClient.getText(`/api/${language}/content/${page}`);
+  get(language: 'en' | 'de', page: string): Promise<ContentPage> {
+    return apiClient.get<ContentPage>(`/api/${language}/content/${page}`);
   },
 };
 

@@ -9,6 +9,7 @@ export function Navigation() {
   const links = [
     { to: "/", label: "Home" },
     { to: "/blog", label: "Blog" },
+    { to: "/faq", label: "FAQ" },
     { to: "/privacy", label: "Privacy" },
   ];
 

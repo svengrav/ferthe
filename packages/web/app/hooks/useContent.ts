@@ -1,14 +1,27 @@
 import { contentApi } from '../api/endpoints';
+import type { ContentPage } from '../types/content';
 import { useFetch } from './useFetch';
 
 export type Language = 'en' | 'de';
-export type ContentType = 'home' | 'privacy';
 
-export function useContent(contentType: ContentType, language: Language) {
-  const { data: content, loading, error } = useFetch(
+export function useContent(contentType: string, language: Language) {
+  const { data, loading, error } = useFetch<ContentPage>(
     () => contentApi.get(language, contentType),
     [contentType, language]
   );
 
-  return { content: content || '', loading, error };
+  return {
+    content: data?.content || '',
+    metadata: data ? {
+      title: data.title,
+      date: data.date,
+      author: data.author,
+      tags: data.tags || [],
+      summary: data.summary,
+      heroImage: data.heroImage,
+    } : undefined,
+    loading,
+    error,
+  };
 }
+

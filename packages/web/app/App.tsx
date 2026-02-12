@@ -4,6 +4,7 @@ import { OverlayProvider } from "./components/overlay/Overlay";
 import { About } from "./pages/About";
 import { BlogList } from "./pages/BlogList";
 import { BlogPost } from "./pages/BlogPost";
+import { FAQ } from "./pages/FAQ";
 import { Home } from "./pages/Home";
 import { Privacy } from "./pages/Privacy";
 
@@ -14,6 +15,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/faq" element={<FAQ />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/blog" element={<BlogList />} />
           <Route path="/blog/:slug" element={<BlogPost />} />

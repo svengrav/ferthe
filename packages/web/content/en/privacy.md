@@ -1,3 +1,12 @@
+---
+title: "Privacy"
+date: "2026-02-01"
+language: "en"
+author: "ferthe"
+tags: ["privacy", "data-protection"]
+summary: "Complete privacy policy for the ferthe app. Covers data collection, rationale, privacy measures, optional phone number verification, and information about third-party services. Core principle: Minimal data collection, local storage prioritized over cloud sync, and user control over their data."
+---
+
 # Privacy Policy
 
 **Last updated:** {date}

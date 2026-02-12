@@ -11,6 +11,7 @@ interface PageProps {
   showFooter?: boolean;
   wide?: boolean;
   loading?: boolean;
+  className?: string;
   backButton?: {
     text: string;
     path: string;
@@ -23,6 +24,7 @@ function Page({
   children,
   loading = false,
   backButton,
+  className,
 }: PageProps) {
   const [fadeIn, setFadeIn] = useState(false);
 
@@ -49,8 +51,9 @@ function Page({
         <PageHeader />
         <div
           className={clsx(
-            `w-full mx-auto flex flex-col flex-1`,
-            !wide && "max-w-6xl",
+            `w-full mx-auto flex flex-col flex-1 `,
+            !wide && "max-w-6xl p-4",
+            className,
           )}
         >
           {backButton && (

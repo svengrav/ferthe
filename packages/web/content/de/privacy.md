@@ -1,10 +1,19 @@
+---
+title: "Datenschutz"
+date: "2026-02-01"
+language: "de"
+author: "ferthe"
+tags: ["datenschutz", "privatsphäre"]
+summary: "Vollständige Datenschutzerklärung der ferthe App. Behandelt Datenerfassung, Rationale, Datenschutzmaßnahmen, optionale Telefonnummern-Verifizierung und Informationen über Drittanbieter-Dienste. Kernprinzip: Minimale Datenerfassung, lokale Speicherung vor Cloud-Sync und Benutzerkontrolle über ihre Daten."
+---
+
 # Datenschutzerklärung
 
 **Stand:** {date}
 
 ## Wer wir sind
 
-Diese App („Ferthe") wird betrieben von Sven Gravermann. Wir respektieren deine Privatsphäre und verarbeiten deine Daten gemäß geltenden Datenschutzgesetzen, insbesondere der DSGVO.
+Diese App („ferthe") wird betrieben von Sven Gravermann. Wir respektieren deine Privatsphäre und verarbeiten deine Daten gemäß geltenden Datenschutzgesetzen, insbesondere der DSGVO.
 
 ## Welche Daten wir erheben
 

@@ -9,10 +9,11 @@ import Markdown from "./Markdown";
 import { Tag } from "./Tag.tsx";
 
 interface BlogPostContentProps {
+  className?: string;
   post: BlogPost;
 }
 
-export function BlogPostContent({ post }: BlogPostContentProps) {
+export function BlogPostContent({ className, post }: BlogPostContentProps) {
   const contentWithResolvedPaths = resolveBlogImagePaths(post.content || "");
   const processedContent = useMarkdown(contentWithResolvedPaths);
   const heroImagePath = resolveHeroImagePath(post.heroImage);
@@ -21,7 +22,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
     return null;
   }
   return (
-    <article className="flex-col flex gap-2">
+    <article className={`flex-col flex gap-2 ${className || ""}`}>
       {heroImagePath && (
         <img
           src={heroImagePath}

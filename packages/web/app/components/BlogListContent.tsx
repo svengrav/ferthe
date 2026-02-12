@@ -4,13 +4,14 @@ import { dateToLocaleString } from "../utils/date.ts";
 import { Tag } from "./Tag.tsx";
 
 interface BlogListContentProps {
+  className?: string;
   posts: BlogPost[];
   startIndex?: number;
   limit?: number;
 }
 
 export function BlogListContent(
-  { posts, startIndex, limit }: BlogListContentProps,
+  { posts, startIndex, limit, className }: BlogListContentProps,
 ) {
   const displayPosts = limit
     ? posts.slice(startIndex ?? 0, (startIndex ?? 0) + limit)
@@ -21,7 +22,7 @@ export function BlogListContent(
   }
 
   return (
-    <div className="space-y-8">
+    <div className={`space-y-8 ${className || ""}`}>
       {displayPosts.map((post) => (
         <article
           key={post.slug}

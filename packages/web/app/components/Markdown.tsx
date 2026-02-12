@@ -1,6 +1,8 @@
 import ReactMarkdown from "react-markdown";
 
-function Markdown({ content }: { content: string }) {
+function Markdown(
+  { content, className }: { content: string; className?: string },
+) {
   const markdownComponents = {
     h1: ({ children }: any) => (
       <h1 className="text-2xl font-semibold mb-4">{children}</h1>
@@ -27,7 +29,7 @@ function Markdown({ content }: { content: string }) {
       <strong className="font-semibold">{children}</strong>
     ),
     em: ({ children }: any) => <em className="italic">{children}</em>,
-    hr: () => <hr className="my-8 text-gray-700" />,
+    hr: () => <hr className="my-8 text-gray-300" />,
     a: ({ href, children }: any) => (
       <a href={href} className="underline">
         {children}
@@ -54,7 +56,7 @@ function Markdown({ content }: { content: string }) {
   };
 
   return (
-    <ReactMarkdown components={markdownComponents}>
+    <ReactMarkdown components={markdownComponents} className={className}>
       {content}
     </ReactMarkdown>
   );

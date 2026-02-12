@@ -100,9 +100,6 @@ function Overlay(props: OverlayProps) {
     bottom: 0,
     zIndex: OVERLAY_Z_INDEX,
     opacity: isAnimating ? 1 : 0,
-    transform: isAnimating
-      ? `scale(${FINAL_SCALE})`
-      : `scale(${INITIAL_SCALE})`,
     transition: `opacity ${
       isAnimating ? FADE_IN_DURATION : FADE_OUT_DURATION
     }ms ease-out, transform ${

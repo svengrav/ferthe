@@ -1,7 +1,8 @@
 import { Application, Router } from "@oak/oak";
 import { load } from "@std/dotenv";
+import * as path from "@std/path";
 import { oakCors } from "@tajpouria/cors";
-import matter from "gray-matter";
+import { parseMarkdown } from "./services/markdown.ts";
 import routeStaticFilesFrom from "./static/static.ts";
 
 // Load environment variables
@@ -24,18 +25,38 @@ router.get("/api/:language/content/:page", async (context) => {
       return;
     }
 
-    if (page !== 'home' && page !== 'privacy') {
-      context.response.status = 400;
-      context.response.body = { error: "Invalid page. Use 'home' or 'privacy'" };
+    const contentDir = path.resolve(`${Deno.cwd()}/content`);
+    const filePath = path.resolve(`${contentDir}/${language}/${page}.md`);
+
+    // Security: Prevent path traversal attacks
+    if (!filePath.startsWith(contentDir)) {
+      context.response.status = 403;
+      context.response.body = { error: "Access denied" };
       return;
     }
 
-    const filePath = `${Deno.cwd()}/content/${language}/${page}.md`;
-
     try {
-      const content = await Deno.readTextFile(filePath);
-      context.response.headers.set("Content-Type", "text/markdown; charset=utf-8");
-      context.response.body = content;
+      const fileContent = await Deno.readTextFile(filePath);
+      const { metadata, content } = parseMarkdown(fileContent);
+
+      // Validate language match
+      if (metadata.language && metadata.language !== language) {
+        context.response.status = 404;
+        context.response.body = { error: "Content not found for this language" };
+        return;
+      }
+
+      context.response.body = {
+        page,
+        title: metadata.title || 'Untitled',
+        date: metadata.date || '',
+        language: metadata.language || language,
+        author: metadata.author,
+        tags: metadata.tags || [],
+        summary: metadata.summary,
+        heroImage: metadata.heroImage,
+        content,
+      };
     } catch (error) {
       console.error(`Failed to read file: ${filePath}`, error);
       context.response.status = 404;
@@ -65,10 +86,10 @@ router.get("/api/:language/blog", async (context) => {
       if (entry.isFile && entry.name.endsWith('.md')) {
         const filePath = `${blogDir}/${entry.name}`;
         const fileContent = await Deno.readTextFile(filePath);
-        const { data, content } = matter(fileContent);
+        const { metadata, content } = parseMarkdown(fileContent);
 
         // Filter by language
-        if (data.language === language) {
+        if (metadata.language === language) {
           const slug = entry.name.replace('.md', '');
 
           // Create preview - remove markdown syntax
@@ -87,12 +108,12 @@ router.get("/api/:language/blog", async (context) => {
 
           posts.push({
             slug,
-            title: data.title || 'Untitled',
-            date: data.date || '',
-            language: data.language,
-            author: data.author,
-            tags: data.tags || [],
-            heroImage: data.heroImage,
+            title: metadata.title || 'Untitled',
+            date: metadata.date || '',
+            language: metadata.language,
+            author: metadata.author,
+            tags: metadata.tags || [],
+            heroImage: metadata.heroImage,
             preview
           });
         }
@@ -123,10 +144,10 @@ router.get("/api/:language/blog/:slug", async (context) => {
 
     try {
       const fileContent = await Deno.readTextFile(filePath);
-      const { data, content } = matter(fileContent);
+      const { metadata, content } = parseMarkdown(fileContent);
 
       // Validate language match
-      if (data.language !== language) {
+      if (metadata.language !== language) {
         context.response.status = 404;
         context.response.body = { error: "Blog post not found for this language" };
         return;
@@ -134,12 +155,12 @@ router.get("/api/:language/blog/:slug", async (context) => {
 
       context.response.body = {
         slug,
-        title: data.title || 'Untitled',
-        date: data.date || '',
-        language: data.language,
-        author: data.author,
-        tags: data.tags || [],
-        heroImage: data.heroImage,
+        title: metadata.title || 'Untitled',
+        date: metadata.date || '',
+        language: metadata.language,
+        author: metadata.author,
+        tags: metadata.tags || [],
+        heroImage: metadata.heroImage,
         content
       };
     } catch (error) {

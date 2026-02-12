@@ -4,20 +4,21 @@ import { useContent } from "../hooks/useContent";
 import { useMarkdown } from "../hooks/useMarkdown";
 
 export function About() {
-  const { content: germanContent, loading: loadingGerman } = useContent(
+  const { content, loading, metadata } = useContent(
     "home",
     "de",
   );
 
-  const germanHomeStory = useMarkdown(germanContent);
+  const markdownContent = useMarkdown(content);
 
   return (
     <Page
-      title="About Ferthe"
-      loading={loadingGerman}
+      title={metadata?.title}
+      loading={loading}
       backButton={{ text: "← Back to Home", path: "/" }}
+      className="p-4"
     >
-      <Markdown content={germanHomeStory} />
+      <Markdown content={markdownContent} className="max-w-2xl" />
     </Page>
   );
 }
