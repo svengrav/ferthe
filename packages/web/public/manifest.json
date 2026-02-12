@@ -1,0 +1,24 @@
+{
+  "name": "ferthe - Discover Amazing Spots",
+  "short_name": "ferthe",
+  "description": "Explore unique spots, create discoveries, and join a community of explorers.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4ECDC4",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/ferthe.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": [
+    "lifestyle",
+    "travel",
+    "social"
+  ],
+  "lang": "en",
+  "dir": "ltr"
+}
