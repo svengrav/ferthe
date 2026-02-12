@@ -1,5 +1,5 @@
-import { useTheme } from '@app/shared/theme'
-import { StyleProp, View, ViewStyle } from 'react-native'
+import { Theme, useTheme } from '@app/shared/theme'
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Inset, Option } from '../types'
@@ -45,15 +45,18 @@ function Page(props: PageProps) {
   )
 }
 
-const createStyles = (theme: any) => ({
-  page: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-})
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    page: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    container: {
+      flex: 1,
+      width: '100%',
+      backgroundColor: theme.colors.background,
+
+    },
+  })
 
 export default Page

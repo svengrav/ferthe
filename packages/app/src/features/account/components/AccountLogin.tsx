@@ -1,5 +1,5 @@
 import { getAppContext } from '@app/appContext'
-import { Button, Card, Divider, Text } from '@app/shared/components'
+import { Button, Divider, Stack, Text } from '@app/shared/components'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { useState } from 'react'
@@ -41,34 +41,34 @@ function AccountLogin(props: AccountLoginProps) {
   const { handleCreateLocalAccount, isCreatingLocal } = useAccountLogin()
 
   return (
-    <View style={styles.container}>
-      <Card style={styles.card}>
+    <View style={styles.container} id='account-login'>
+      <Stack spacing='lg'>
         <Text variant='heading'>{locales.auth.welcomeToFerthe}</Text>
 
         {/* Phone Verification Section */}
-        <View style={styles.section}>
+        <View>
           <Button
             label={locales.account.upgradeNow}
             onPress={showAccountVerificationCard}
             variant="primary"
           />
-          <Text variant='hint'>{locales.account.upgradeToUnlock}</Text>
+          <Text variant='hint' align='center'>{locales.account.upgradeToUnlock}</Text>
         </View>
 
         {/* Divider */}
         <Divider text={locales.auth.orCreateLocal} />
 
         {/* Local Account Section */}
-        <View style={styles.section}>
+        <View>
           <Button
             label={locales.account.skip}
             onPress={handleCreateLocalAccount}
             variant="outlined"
             disabled={isCreatingLocal}
           />
-          <Text variant='hint'>{locales.auth.localAccountNotice}</Text>
+          <Text variant='hint' align='center'>{locales.auth.localAccountNotice}</Text>
         </View>
-      </Card>
+      </Stack>
     </View>
   )
 }
@@ -77,14 +77,7 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      padding: 0,
       justifyContent: 'center',
-    },
-    card: {
-      padding: 24,
-    },
-    section: {
-      marginBottom: 24,
     },
   })
 

@@ -2,7 +2,6 @@ import Page from '@app/shared/components/page/Page'
 import useThemeStore from '@app/shared/theme/themeStore'
 import React from 'react'
 import { View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
 import { useSession } from '../stores/accountStore'
 import AccountLogin from './AccountLogin'
 
@@ -26,12 +25,10 @@ const AccountAuthWrapper = ({ children }: AuthenticationWrapperProps) => {
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: theme.colors.background
+          backgroundColor: theme.colors.background,
         }}>
-        <View>
-          <ScrollView>
-            <AccountLogin />
-          </ScrollView>
+        <View style={{ marginTop: 20, maxWidth: 300, alignSelf: 'center' }}>
+          <AccountLogin />
         </View>
       </Page>
     )
