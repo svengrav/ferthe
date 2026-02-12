@@ -66,6 +66,11 @@ A Discovery is a unique finding of a user at a specific spot. It is private to y
 - You can switch between available trails
 - Each trail has its own discovery progress
 
+**Images**
+- Trail Avatar Image: Represents the trail in lists and profiles
+- Trail Overview Map Background: Custom image for the map when viewing the overview
+- Trail Navigation Map Background: Custom image for the map when navigating the trail (optional, can be same as overview)
+
 ## Spots
 
 **Definition:**

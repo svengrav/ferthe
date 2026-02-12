@@ -10,6 +10,7 @@ This monorepo contains the following packages:
 - **`packages/core/`** - Core business logic and utilities
 - **`packages/shared/`** - Shared types and components
 - **`packages/test/`** - Testing utilities and configurations
+- **`packages/web/`** - Web application
 
 ## Quick Start
 
