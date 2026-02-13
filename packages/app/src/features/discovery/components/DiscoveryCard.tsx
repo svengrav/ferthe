@@ -1,17 +1,15 @@
 import { Image, Text } from '@app/shared/components'
+import { CARD_BORDER_RADIUS, useCardDimensions } from '@app/shared/hooks/useCardDimensions'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect } from 'react'
-import { Pressable, useWindowDimensions, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
 import { DiscoveryCardState as Card } from '../logic/types'
 
-const PAGE_PADDING = 16
-const CARD_ASPECT_RATIO = 3 / 2
 const ANIMATION_DURATION = 400
 const SPRING_FRICTION = 6
-const CARD_BORDER_RADIUS = 18
 const CLOSE_BUTTON_TOP = 5
 const CLOSE_BUTTON_RIGHT = 5
 const GRADIENT_COLORS = ['#a341fffd', 'rgba(65, 73, 185, 0.767)'] as const
@@ -24,43 +22,6 @@ const Z_INDEX = {
   TITLE_OVERLAY: 4,
   SCROLL_VIEW: 5,
   CLOSE_BUTTON: 10,
-}
-
-/**
- * Hook to calculate responsive card dimensions based on screen width and height
- */
-const useCardDimensions = () => {
-  const { width, height } = useWindowDimensions()
-
-  // Available space considering padding and system UI (status bar, nav bar, etc.)
-  const availableWidth = width - PAGE_PADDING * 2
-  // Reserve more space for system UI and navigation
-  const availableHeight = height - PAGE_PADDING * 2 - 200 // Reserve 200px for UI elements
-
-  // Calculate card dimensions based on aspect ratio, keeping aspect ratio constant
-  const cardWidthFromWidth = Math.min(availableWidth, 400)
-  const cardHeightFromWidth = cardWidthFromWidth * CARD_ASPECT_RATIO
-
-  const cardHeightFromHeight = availableHeight
-  const cardWidthFromHeight = cardHeightFromHeight / CARD_ASPECT_RATIO
-
-  // Choose the limiting factor while maintaining aspect ratio
-  let CARD_WIDTH, CARD_HEIGHT
-
-  if (cardHeightFromWidth <= availableHeight) {
-    // Width is the limiting factor
-    CARD_WIDTH = cardWidthFromWidth
-    CARD_HEIGHT = cardHeightFromWidth
-  } else {
-    // Height is the limiting factor
-    CARD_WIDTH = cardWidthFromHeight
-    CARD_HEIGHT = cardHeightFromHeight
-  }
-
-  // Image height is the same as card height since they should be the same size
-  const IMAGE_HEIGHT = CARD_HEIGHT
-
-  return { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT }
 }
 
 /**
@@ -110,24 +71,24 @@ interface DiscoveryCardProps {
 function DiscoveryCard({ card, onTap, options }: DiscoveryCardProps) {
   const { styles, theme } = useApp(useStyles)
   const { title, image, discoveredBy } = card
-  const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT } = useCardDimensions()
-  const { animatedCardStyle, titleOpacity } = useCardAnimations(IMAGE_HEIGHT)
+  const { cardWidth, cardHeight, imageHeight } = useCardDimensions()
+  const { animatedCardStyle, titleOpacity } = useCardAnimations(imageHeight)
   const { showTitle = true, showBorder = false } = options || {}
 
   // Dynamic styles that depend on dimensions
   const cardDynamicStyles = {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
+    width: cardWidth,
+    height: cardHeight,
   }
 
   const imageDynamicStyles = {
-    width: CARD_WIDTH,
-    height: IMAGE_HEIGHT,
+    width: cardWidth,
+    height: imageHeight,
   }
 
   const titleContainerDynamicStyles = {
-    width: CARD_WIDTH,
-    top: IMAGE_HEIGHT - 70,
+    width: cardWidth,
+    top: imageHeight - 70,
   }
 
   const titleAnimatedStyle = useAnimatedStyle(() => ({
@@ -141,14 +102,14 @@ function DiscoveryCard({ card, onTap, options }: DiscoveryCardProps) {
       <View style={[styles.card, cardDynamicStyles]} id='discovery-card' pointerEvents="box-none">
         {/* Background image */}
         <LinearGradient
-          style={{ position: 'absolute', top: 0, left: 0, width: CARD_WIDTH, height: IMAGE_HEIGHT }}
+          style={{ position: 'absolute', top: 0, left: 0, width: cardWidth, height: imageHeight }}
           colors={GRADIENT_COLORS}
         />
         <View style={{ padding: showBorder ? 6 : 0, flex: 1 }}>
           <Image
             source={image}
-            width={CARD_WIDTH}
-            height={IMAGE_HEIGHT}
+            width={cardWidth}
+            height={imageHeight}
             style={[styles.fixedImage, imageDynamicStyles]}
             resizeMode='cover'
           />

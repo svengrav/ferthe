@@ -1,12 +1,12 @@
 import { useDiscoveryData } from '@app/features/discovery'
 import { Icon, Text } from '@app/shared/components'
+import { CARD_BORDER_RADIUS, useCardDimensions } from '@app/shared/hooks/useCardDimensions'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { Image, View } from 'react-native'
 import { useTrailPreviewSpots } from '../stores/trailStore'
 
 const MAX_PREVIEW_SPOTS = 4
-const CARD_SIZE = 100
 const CARD_SPACING = 12
 
 interface TrailUnknownSpotsProps {
@@ -22,6 +22,7 @@ function TrailUnknownSpots({ trailId }: TrailUnknownSpotsProps) {
   const { locales } = useApp()
   const { discoveries } = useDiscoveryData()
   const spotPreviews = useTrailPreviewSpots(trailId)
+  const { cardWidth, cardHeight } = useCardDimensions({ variant: 'small' })
 
   if (!styles) return null
 
@@ -43,7 +44,7 @@ function TrailUnknownSpots({ trailId }: TrailUnknownSpotsProps) {
 
   return (
     <View style={styles.container}>
-      <Text variant="section" style={styles.heading}>
+      <Text variant="heading">
         {locales.trails.unknownSpots}
       </Text>
       <Text style={styles.description}>
@@ -51,12 +52,12 @@ function TrailUnknownSpots({ trailId }: TrailUnknownSpotsProps) {
       </Text>
       <View style={styles.grid}>
         {unknownSpots.map((spot) => (
-          <View key={spot.id} style={styles.card}>
+          <View key={spot.id} style={[styles.card, { width: cardWidth, height: cardHeight }]}>
             {spot.image?.previewUrl ? (
               <Image
                 source={{ uri: spot.image.previewUrl }}
                 style={styles.image}
-                resizeMode="cover"
+                resizeMode="contain"
               />
             ) : (
               <View style={styles.placeholder} />
@@ -73,7 +74,6 @@ function TrailUnknownSpots({ trailId }: TrailUnknownSpotsProps) {
 
 const useStyles = createThemedStyles(theme => ({
   container: {
-    padding: theme.tokens.inset.md,
   },
   heading: {
     marginBottom: theme.tokens.spacing.sm,
@@ -88,9 +88,7 @@ const useStyles = createThemedStyles(theme => ({
     gap: CARD_SPACING,
   },
   card: {
-    width: CARD_SIZE,
-    height: CARD_SIZE,
-    borderRadius: theme.tokens.borderRadius.md,
+    borderRadius: CARD_BORDER_RADIUS,
     overflow: 'hidden',
     position: 'relative',
     backgroundColor: theme.colors.surface,

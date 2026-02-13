@@ -1,10 +1,11 @@
 import { Button, Image, Text } from '@app/shared/components'
 import { Flippable } from '@app/shared/components/animation/Flippable'
+import { CARD_BORDER_RADIUS, CARD_IMAGE_BORDER_RADIUS, useCardDimensions } from '@app/shared/hooks/useCardDimensions'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useState } from 'react'
-import { Pressable, useWindowDimensions, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import Animated, {
   useSharedValue,
@@ -15,35 +16,14 @@ import { DiscoveryCardState } from '../logic/types'
 import { useDiscoveryCardPage } from './DiscoveryCardPage'
 import { DiscoveryReveal } from './DiscoveryReveal'
 
-const CARD_WIDTH_RATIO = 0.9
-const MAX_CARD_WIDTH = 400
-const CARD_ASPECT_RATIO = 3 / 4
-const IMAGE_ASPECT_RATIO = 3 / 4
-const CARD_PADDING = 16
-const BORDER_RADIUS = 16
-const IMAGE_BORDER_RADIUS = 14
-const CLOSE_BUTTON_TOP = 10
-const CLOSE_BUTTON_RIGHT = 10
-const CLOSE_BUTTON_Z_INDEX = 4
 const GRADIENT_COLORS = ['#3a3fa7fd', 'rgb(46, 46, 112)'] as const
 const GRADIENT_BACKEND_COLORS = ['#3a3fa7fd', 'rgb(46, 46, 112)'] as const
 const FADE_IN_DELAY = 2000
 const ANIMATION_DURATION = 600
 const TITLE_OFFSET = 70
-
-/**
- * Hook to calculate responsive card dimensions based on screen width
- */
-const useCardDimensions = () => {
-  const { width } = useWindowDimensions()
-  // For portrait 3:4, calculate width first, then height
-  const CARD_WIDTH = Math.min(width * CARD_WIDTH_RATIO, MAX_CARD_WIDTH)
-  const CARD_HEIGHT = CARD_WIDTH / CARD_ASPECT_RATIO  // 370 / (3/4) = 370 * 4/3 = 493
-  const IMAGE_WIDTH = CARD_WIDTH - CARD_PADDING       // 370 - 16 = 354
-  const IMAGE_HEIGHT = CARD_HEIGHT - CARD_PADDING     // 493 - 16 = 477
-
-  return { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT, IMAGE_WIDTH }
-}
+const CLOSE_BUTTON_TOP = 10
+const CLOSE_BUTTON_RIGHT = 10
+const CLOSE_BUTTON_Z_INDEX = 4
 
 /**
  * Hook to handle discovery card highlight animations
@@ -82,7 +62,7 @@ interface DiscoveryCardProps {
  */
 function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: DiscoveryCardProps) {
   const { styles } = useApp(useStyles)
-  const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT, IMAGE_WIDTH } = useCardDimensions()
+  const { cardWidth, cardHeight, imageHeight, imageWidth, imageAspectRatio } = useCardDimensions({ withPadding: true })
   const { fadeIn, triggerReveal } = useDiscoveryAnimations(visible, mode)
   const [isFlipped, setIsFlipped] = useState(false)
   const { showDiscoveryCardDetails } = useDiscoveryCardPage()
@@ -91,36 +71,36 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
 
   // Dynamic styles that depend on dimensions
   const cardContainerStyles = {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
+    width: cardWidth,
+    height: cardHeight,
   }
 
   const gradientStyles = {
-    height: CARD_HEIGHT,
-    width: CARD_WIDTH,
+    height: cardHeight,
+    width: cardWidth,
   }
 
   const cardStyles = {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    maxHeight: CARD_HEIGHT,
+    width: cardWidth,
+    height: cardHeight,
+    maxHeight: cardHeight,
   }
 
   const imageContainerStyles = {
-    width: IMAGE_WIDTH,
-    height: IMAGE_HEIGHT,
-    aspectRatio: IMAGE_ASPECT_RATIO,
+    width: imageWidth,
+    height: imageHeight,
+    aspectRatio: imageAspectRatio,
   }
 
   const imageStyles = {
-    width: IMAGE_WIDTH,
-    height: IMAGE_HEIGHT,
-    aspectRatio: IMAGE_ASPECT_RATIO,
+    width: imageWidth,
+    height: imageHeight,
+    aspectRatio: imageAspectRatio,
   }
 
   const titleContainerStyles = {
-    width: IMAGE_WIDTH,
-    top: IMAGE_HEIGHT - TITLE_OFFSET,
+    width: imageWidth,
+    top: imageHeight - TITLE_OFFSET,
   }
 
   const renderFrondend = () => (<View style={[styles.cardContainer, cardContainerStyles]}>
@@ -160,13 +140,13 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
         />
       </View>
 
-      <View style={[styles.imageContainer, imageContainerStyles]}>
+      <View style={[styles.imageContainer, imageContainerStyles]} id="card-image">
         {/* Main clear image with title */}
         <View>
           <Image
             source={card.image}
-            width={IMAGE_WIDTH}
-            height={IMAGE_HEIGHT}
+            width={imageWidth}
+            height={imageHeight}
             style={[styles.image, imageStyles]}
             resizeMode='cover'
           />
@@ -186,7 +166,10 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
   </View>)
 
   const renderBackend = () => (
-    <View style={[styles.backCard, cardContainerStyles]} pointerEvents={isFlipped ? 'auto' : 'none'}>
+    <View style={[styles.backCard, cardContainerStyles]}
+      pointerEvents={isFlipped ? 'auto' : 'none'}
+      id="card-frame"
+    >
       {/* Background gradient */}
       <LinearGradient
         style={[styles.gradient, gradientStyles]}
@@ -266,7 +249,7 @@ const useStyles = createThemedStyles(theme => ({
     zIndex: 100,
   },
   cardContainer: {
-    borderRadius: BORDER_RADIUS,
+    borderRadius: CARD_BORDER_RADIUS,
     overflow: 'hidden',
   },
   gradient: {
@@ -279,7 +262,7 @@ const useStyles = createThemedStyles(theme => ({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: BORDER_RADIUS,
+    borderRadius: CARD_BORDER_RADIUS,
     overflow: 'hidden',
     elevation: 8,
     shadowColor: theme.colors.surface,
@@ -313,7 +296,7 @@ const useStyles = createThemedStyles(theme => ({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: BORDER_RADIUS,
+    borderRadius: CARD_BORDER_RADIUS,
     overflow: 'hidden',
   },
   backScrollView: {
@@ -341,7 +324,7 @@ const useStyles = createThemedStyles(theme => ({
   imageContainer: {
     position: 'relative',
     overflow: 'hidden',
-    borderRadius: IMAGE_BORDER_RADIUS,
+    borderRadius: CARD_IMAGE_BORDER_RADIUS,
   },
   image: {
     opacity: 1,

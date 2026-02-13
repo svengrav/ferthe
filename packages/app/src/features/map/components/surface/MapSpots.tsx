@@ -1,5 +1,6 @@
 import { useDiscoverySpots } from '@app/features/discovery/stores/discoveryTrailStore'
 import { Text } from '@app/shared/components'
+import { CARD_BORDER_RADIUS } from '@app/shared/hooks/useCardDimensions'
 import { DiscoverySpot } from '@shared/contracts'
 import { GeoBoundary } from '@shared/geo'
 import { memo, useMemo } from 'react'
@@ -11,8 +12,9 @@ import { mapUtils } from '../../utils/geoToScreenTransform'
 const DEFAULT_SPOT_SIZE = 15
 const DEFAULT_SPOT_HEIGHT_OFFSET = 7
 const DEFAULT_SPOT_COLOR = '#ffffff'
-const MARKER_BORDER_RADIUS = 4
-const IMAGE_BORDER_RADIUS = 2
+// Border radius scaled proportionally for small map markers
+const MARKER_BORDER_RADIUS = Math.round(CARD_BORDER_RADIUS * 0.22) // ~4px
+const IMAGE_BORDER_RADIUS = Math.round(CARD_BORDER_RADIUS * 0.11) // ~2px
 const BORDER_WIDTH = 0.5
 const BACKGROUND_COLOR = '#000000ff'
 const IMAGE_BACKGROUND_COLOR = '#000'

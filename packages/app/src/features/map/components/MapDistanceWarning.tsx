@@ -48,7 +48,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: 'center',
-    zIndex: 200,
+    zIndex: 50,
     pointerEvents: 'none',
   },
   badge: {

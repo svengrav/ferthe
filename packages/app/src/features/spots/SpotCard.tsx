@@ -1,32 +1,11 @@
+import { CARD_BORDER_RADIUS, CARD_IMAGE_ASPECT_RATIO, CARD_IMAGE_BORDER_RADIUS, useCardDimensions } from '@app/shared/hooks/useCardDimensions'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { LinearGradient } from 'expo-linear-gradient'
-import { useWindowDimensions, View } from 'react-native'
+import { View } from 'react-native'
 import Animated from 'react-native-reanimated'
 
-const CARD_WIDTH_RATIO = 0.9
-const MAX_CARD_WIDTH = 100
-const CARD_ASPECT_RATIO = 3 / 2
-const IMAGE_ASPECT_RATIO = 4 / 3
-const CARD_PADDING = 8
-const BORDER_RADIUS = 4
-const IMAGE_BORDER_RADIUS = 20
-const CLOSE_BUTTON_Z_INDEX = 4
 const GRADIENT_COLORS = ['#a341fffd', 'rgba(65, 73, 185, 0.767)'] as const
-
-/**
- * Hook to calculate responsive card dimensions based on screen width
- */
-const useCardDimensions = (border: boolean) => {
-  const { width } = useWindowDimensions()
-  const CARD_WIDTH = Math.min(width * CARD_WIDTH_RATIO, MAX_CARD_WIDTH)
-  const CARD_HEIGHT = CARD_WIDTH * CARD_ASPECT_RATIO
-
-  const IMAGE_HEIGHT = CARD_HEIGHT - (border ? CARD_PADDING : 0)
-  const IMAGE_WIDTH = CARD_WIDTH - (border ? CARD_PADDING : 0)
-
-  return { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT, IMAGE_WIDTH }
-}
 
 
 interface SpotCardProps {
@@ -46,31 +25,31 @@ interface SpotCardProps {
  */
 function SpotCard({ card, border }: SpotCardProps) {
   const { styles } = useApp(useStyles)
-  const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT, IMAGE_WIDTH } = useCardDimensions(border = false)
+  const { cardWidth, cardHeight, imageHeight, imageWidth } = useCardDimensions({ variant: 'small', withPadding: border })
 
   if (!styles) return null
 
   // Dynamic styles that depend on dimensions
   const cardContainerStyles = {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
+    width: cardWidth,
+    height: cardHeight,
   }
 
   const gradientStyles = {
-    height: CARD_HEIGHT,
-    width: CARD_WIDTH,
+    height: cardHeight,
+    width: cardWidth,
   }
 
   const cardStyles = {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    maxHeight: CARD_HEIGHT,
+    width: cardWidth,
+    height: cardHeight,
+    maxHeight: cardHeight,
   }
 
   const imageStyles = {
-    width: IMAGE_WIDTH,
-    height: IMAGE_HEIGHT,
-    aspectRatio: IMAGE_ASPECT_RATIO,
+    width: imageWidth,
+    height: imageHeight,
+    aspectRatio: CARD_IMAGE_ASPECT_RATIO,
   }
 
 
@@ -108,7 +87,7 @@ const useStyles = createThemedStyles(theme => ({
   cardContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: BORDER_RADIUS,
+    borderRadius: CARD_BORDER_RADIUS,
     overflow: 'hidden',
   },
   gradient: {
@@ -121,7 +100,7 @@ const useStyles = createThemedStyles(theme => ({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: BORDER_RADIUS,
+    borderRadius: CARD_BORDER_RADIUS,
     overflow: 'hidden',
     elevation: 8,
     shadowColor: theme.colors.surface,
@@ -132,7 +111,7 @@ const useStyles = createThemedStyles(theme => ({
   imageContainer: {
     position: 'relative',
     overflow: 'hidden',
-    borderRadius: IMAGE_BORDER_RADIUS,
+    borderRadius: CARD_IMAGE_BORDER_RADIUS,
   },
   image: {
     overflow: 'hidden',

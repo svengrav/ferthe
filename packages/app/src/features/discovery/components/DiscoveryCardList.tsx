@@ -1,4 +1,5 @@
 import { Image, Text } from '@app/shared/components'
+import { CARD_ASPECT_RATIO, CARD_BORDER_RADIUS } from '@app/shared/hooks/useCardDimensions'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useRef, useState } from 'react'
@@ -8,7 +9,6 @@ import { DiscoveryCardState } from '../logic/types'
 // Layout constants for consistent spacing
 const GAP = 12
 const PADDING = 8
-const CARD_ASPECT_RATIO = 1.5
 
 function useDiscoveryCardList() {
   const theme = useThemeStore()
@@ -99,7 +99,7 @@ function DiscoveryImageCard({ width, height, card, onTap }: { width: number; hei
           width={width}
           height={height}
           style={{
-            borderRadius: 10,
+            borderRadius: CARD_BORDER_RADIUS,
           }}
           resizeMode="cover"
         />
@@ -122,7 +122,7 @@ const createStyles = (theme: Theme) => {
     placeholder: {
       overflow: 'hidden',
       backgroundColor: theme.colors.surface,
-      borderRadius: 10,
+      borderRadius: CARD_BORDER_RADIUS,
     },
     // Card title overlay at bottom
     label: {
