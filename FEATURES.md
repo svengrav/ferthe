@@ -1,4 +1,6 @@
+## UX
 
+- UX Feedback like vibrations, sounds, and visual effects are used to enhance the user experience and provide feedback on interactions. For example, when you discover a spot, you might feel a vibration and see a visual effect to celebrate the achievement.
 
 ## Participation and Development Engagement
 - You can give feedback on the app and suggest new features or improvements. This can be done through in-app feedback forms, community forums, or social media channels.

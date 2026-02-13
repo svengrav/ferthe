@@ -50,7 +50,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   const { setDiscoveryTrail, setStatus, resetScannedClues } = getDiscoveryTrailActions()
 
   const thresholdState = {
-    distance: 10,
+    distance: 5,  // Check every 5m for smoother snap updates
     latestLocation: {
       lat: 0,
       lon: 0,
@@ -269,12 +269,12 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       return
     }
 
-    if (geoUtils.calculateDistance(thresholdState.latestLocation, position.location) < thresholdState.distance) {
-      logger.log('Location update ignored, within threshold distance')
+    const distance = geoUtils.calculateDistance(thresholdState.latestLocation, position.location)
+    if (distance < thresholdState.distance) {
       return
     }
 
-    // Update threshold location after passing the check
+    // Update threshold location
     thresholdState.latestLocation = position.location
 
     const locationWithDirection = {
@@ -285,6 +285,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     const locationResult = await processLocation(accountSession.data, locationWithDirection, trailId)
     if (!locationResult.data) return
 
+    // Update snap from backend
     locationResult.data.snap && setSnap(locationResult.data.snap)
 
     const newDiscoveries = locationResult.data.discoveries
