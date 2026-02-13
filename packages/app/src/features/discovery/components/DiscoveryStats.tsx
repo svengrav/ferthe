@@ -1,4 +1,4 @@
-import { Icon, Stack, Text } from '@app/shared/components'
+import { Icon, ProgressBar, Stack, Text } from '@app/shared/components'
 import { LoadingSpinner } from '@app/shared/components/activityIndicator/ActivityIndicator'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
@@ -53,6 +53,10 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
             <Text variant="body">
               #{stats.rank} {locales.discovery.stats.of} {stats.totalDiscoverers}
             </Text>
+            <ProgressBar
+              percentage={(stats.rank / stats.totalDiscoverers) * 100}
+              color={theme.colors.primary}
+            />
           </View>
         </View>
 
@@ -64,6 +68,10 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
             <Text variant="body">
               {stats.trailPosition} / {stats.trailTotal}
             </Text>
+            <ProgressBar
+              percentage={(stats.trailPosition / stats.trailTotal) * 100}
+              color={theme.colors.secondary}
+            />
           </View>
         </View>
 
@@ -121,6 +129,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   statContent: {
     flex: 1,
     gap: theme.tokens.spacing.xs,
+    paddingRight: theme.tokens.spacing.sm,
   },
 })
 

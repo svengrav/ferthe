@@ -1,5 +1,6 @@
 export { default as OverlayContainer } from '../overlay/Overlay'
 export { LoadingSpinner } from './activityIndicator/ActivityIndicator'
+export { default as ProgressBar } from './animation/ProgressBar'
 export { default as PulseAnimation } from './animation/PulseAnimation'
 export { default as Avatar } from './avatar/Avatar.tsx'
 export { BottomSheet, BottomSheetRef } from './bottomSheet/BottomSheet'
