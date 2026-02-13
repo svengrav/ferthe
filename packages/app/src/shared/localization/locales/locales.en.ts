@@ -217,6 +217,7 @@ const en = {
     deleteImage: 'Delete Image',
     deleteImageConfirm: 'Are you sure you want to delete this image?',
     stats: {
+      name: 'Stats',
       rank: 'Discovery Rank',
       of: 'of',
       trailPosition: 'Trail Position',

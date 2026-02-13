@@ -7,6 +7,7 @@ import { useDiscoveryStats } from '../hooks/useDiscoveryStats'
 
 interface DiscoveryStatsProps {
   discoveryId: string
+  animationDelay?: number
 }
 
 /**
@@ -14,7 +15,7 @@ interface DiscoveryStatsProps {
  * Encapsulates data fetching and state management via useDiscoveryStats hook.
  */
 function DiscoveryStats(props: DiscoveryStatsProps) {
-  const { discoveryId } = props
+  const { discoveryId, animationDelay = 0 } = props
   const { locales } = useApp()
   const { styles, theme } = useTheme(createStyles)
   const { stats, loading, error } = useDiscoveryStats(discoveryId)
@@ -45,6 +46,8 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
   return (
     <View style={styles.container}>
       <Stack spacing='lg'>
+        <Text variant="section">{locales.discovery.stats.name}</Text>
+
         {/* Rank */}
         <View style={styles.statRow}>
           <Icon name="trophy" size={20} color={theme.colors.primary} />
@@ -56,6 +59,7 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
             <ProgressBar
               percentage={(stats.rank / stats.totalDiscoverers) * 100}
               color={theme.colors.primary}
+              delay={animationDelay}
             />
           </View>
         </View>
@@ -71,6 +75,7 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
             <ProgressBar
               percentage={(stats.trailPosition / stats.trailTotal) * 100}
               color={theme.colors.secondary}
+              delay={animationDelay}
             />
           </View>
         </View>
@@ -124,7 +129,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   statRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.tokens.spacing.md,
+    gap: theme.tokens.spacing.lg,
   },
   statContent: {
     flex: 1,

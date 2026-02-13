@@ -15,6 +15,7 @@ import Animated, {
 import { DiscoveryCardState } from '../logic/types'
 import { useDiscoveryCardPage } from './DiscoveryCardPage'
 import { DiscoveryReveal } from './DiscoveryReveal'
+import DiscoveryStats from './DiscoveryStats'
 
 const GRADIENT_COLORS = ['#3a3fa7fd', 'rgb(46, 46, 112)'] as const
 const GRADIENT_BACKEND_COLORS = ['#3a3fa7fd', 'rgb(46, 46, 112)'] as const
@@ -204,6 +205,7 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
           <Text style={styles.backTitle}>{card.title}</Text>
           <Text style={styles.backText}>{card.description}</Text>
         </View>
+        {isFlipped && <DiscoveryStats discoveryId={card.discoveryId} animationDelay={400} />}
       </ScrollView>
 
       {/* Flip button bottom right */}

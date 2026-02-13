@@ -109,12 +109,11 @@ export const createTypography = (theme: ThemeBase) => {
       marginBottom: 4,
     },
     section: {
-      fontSize: 16,
-      lineHeight: 22,
+      fontSize: 14,
+      lineHeight: 14,
       fontWeight: '400' as const,
       fontFamily: 'Inter_400Regular',
       color: theme.colors.onBackground,
-      paddingVertical: 8,
     },
     subtitle: {
       fontSize: 16,
