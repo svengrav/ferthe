@@ -1,19 +1,6 @@
-import { setNotification } from '@app/shared/components/notification/Notification';
 import { AccountSession } from '@shared/contracts/accounts.js';
 import { Result } from '@shared/contracts/results.js';
 import { deserializeDates, fetchWithTimeout } from './utils';
-
-// Helper: Show connection error notification
-let lastConnectionErrorTime = 0
-const CONNECTION_ERROR_DEBOUNCE = 5000 // 5 seconds
-
-export const showConnectionError = () => {
-  const now = Date.now()
-  if (now - lastConnectionErrorTime < CONNECTION_ERROR_DEBOUNCE) return
-
-  lastConnectionErrorTime = now
-  setNotification('Connection Error', 'Unable to reach the server. Please check your internet connection and try again.')
-}
 
 // Error types for classification
 export type APIErrorType = 'connection' | 'timeout' | 'http' | 'unknown'
@@ -81,11 +68,6 @@ export const createAPIClient = (
         } else {
           apiError.type = 'unknown'
         }
-      }
-
-      // Notify on connection errors
-      if (apiError.type === 'connection' || apiError.type === 'timeout') {
-        showConnectionError()
       }
 
       return {

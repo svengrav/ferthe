@@ -274,6 +274,9 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       return
     }
 
+    // Update threshold location after passing the check
+    thresholdState.latestLocation = position.location
+
     const locationWithDirection = {
       location: position.location,
       direction: position.heading,
@@ -287,8 +290,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     const newDiscoveries = locationResult.data.discoveries
     if (newDiscoveries.length > 0) {
       await handleNewDiscoveries(newDiscoveries, trailId, accountSession.data, locationResult.data.snap)
-    } else {
-      logger.log('No new discoveries from location update')
     }
   }
 
