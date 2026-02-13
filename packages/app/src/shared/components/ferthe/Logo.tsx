@@ -1,5 +1,5 @@
 import { StyleProp, View, ViewStyle } from 'react-native'
-import { Svg, Path, G } from 'react-native-svg'
+import { G, Path, Svg } from 'react-native-svg'
 
 interface FertheLogoProps {
   style?: StyleProp<ViewStyle>
@@ -26,7 +26,7 @@ interface FertheLabelProps {
 
 export const FertheLabel = ({ fill = '#fff', style }: FertheLabelProps) => {
   return (
-    <View style={[{ width: 120, height: 120, alignItems: 'center', justifyContent: 'center' }, style]}>
+    <View style={[{ transform: [{ translateY: 3 }] }, style]}>
       <Svg viewBox='0 0 118.44 42.15'>
         <G fill={fill}>
           <Path d='M90.49,9.92c-2.47-1.88-8.02-2.2-11.09,1.58l-.44.55V.32h-4.77v31.11h4.78v-1.17c0-1.21,0-2.41,0-3.62,0-2.85-.01-5.8.02-8.7.02-2.54,1.98-4.77,4.46-5.07,2.6-.31,4.54.89,5.2,3.22.23.81.36,1.73.37,2.66.03,2.84.02,5.73.02,8.53v4.15s4.77,0,4.77,0c0-1.44.01-2.88.02-4.32.03-3.59.05-7.3-.08-10.92-.09-2.56-1.21-4.73-3.24-6.27Z' />

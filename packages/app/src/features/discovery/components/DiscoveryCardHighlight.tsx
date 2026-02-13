@@ -63,7 +63,7 @@ interface DiscoveryCardProps {
  */
 function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: DiscoveryCardProps) {
   const { styles } = useApp(useStyles)
-  const { cardWidth, cardHeight, imageHeight, imageWidth, imageAspectRatio } = useCardDimensions({ withPadding: true })
+  const { cardWidth, cardHeight, imageHeight, imageWidth } = useCardDimensions({ withPadding: true })
   const { fadeIn, triggerReveal } = useDiscoveryAnimations(visible, mode)
   const [isFlipped, setIsFlipped] = useState(false)
   const { showDiscoveryCardDetails } = useDiscoveryCardPage()
@@ -81,22 +81,14 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
     width: cardWidth,
   }
 
-  const cardStyles = {
-    width: cardWidth,
-    height: cardHeight,
-    maxHeight: cardHeight,
-  }
-
   const imageContainerStyles = {
     width: imageWidth,
     height: imageHeight,
-    aspectRatio: imageAspectRatio,
   }
 
   const imageStyles = {
     width: imageWidth,
     height: imageHeight,
-    aspectRatio: imageAspectRatio,
   }
 
   const titleContainerStyles = {
@@ -112,7 +104,7 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
     />
 
     <Pressable
-      style={[styles.card, cardStyles]}
+      style={styles.card}
       onPress={mode === 'reveal' ? triggerReveal : undefined}
       disabled={mode === 'instant'}
     >
@@ -203,9 +195,9 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
       >
         <View style={styles.backContent}>
           <Text style={styles.backTitle}>{card.title}</Text>
-          <Text style={styles.backText}>{card.description}</Text>
+          <Text style={styles.backText} numberOfLines={2}>{card.description}</Text>
         </View>
-        {isFlipped && <DiscoveryStats discoveryId={card.discoveryId} animationDelay={400} />}
+        {isFlipped && <DiscoveryStats discoveryId={card.discoveryId} animationDelay={400} style={{ marginTop: 14 }} />}
       </ScrollView>
 
       {/* Flip button bottom right */}

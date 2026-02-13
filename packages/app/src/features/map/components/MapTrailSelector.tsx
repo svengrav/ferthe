@@ -59,11 +59,10 @@ function MapTrailListCard(props: MapTrailListCardProps) {
   )
 
   return (
-    <OverlayCard title='Select card' onClose={onClose}>
+    <OverlayCard title='Select card' onClose={onClose} inset='none'>
       <FlatList
         data={trails}
         renderItem={renderTrailItem}
-        contentContainerStyle={styles.listContent}
         keyExtractor={item => item.id}
       />
     </OverlayCard>
@@ -121,8 +120,5 @@ const createStyles = (theme: Theme) => ({
     backgroundColor: theme.colors.surface,
     borderTopWidth: 1,
     padding: 8,
-  },
-  listContent: {
-    gap: 12,
   },
 })

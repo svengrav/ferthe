@@ -4,7 +4,6 @@ import { Theme, useTheme } from '@app/shared/theme'
 import React from 'react'
 import { ScrollView, StyleSheet, View } from 'react-native'
 
-const BORDER_RADIUS = 12
 
 interface OverlayCardProps {
   children: React.ReactNode
@@ -29,7 +28,7 @@ function OverlayCard(props: OverlayCardProps) {
     : { style: [styles.content, { paddingHorizontal: insetValue }] }
 
   return (
-    <View style={styles.dialog}>
+    <View style={styles.container}>
       {(title || onClose) && (
         <View style={styles.header}>
           <View style={styles.headerLeading} />
@@ -49,9 +48,9 @@ function OverlayCard(props: OverlayCardProps) {
 }
 
 const createStyles = (theme: Theme) => StyleSheet.create({
-  dialog: {
+  container: {
     marginHorizontal: theme.tokens.inset.md,
-    borderRadius: BORDER_RADIUS,
+    borderRadius: theme.tokens.borderRadius.md,
     backgroundColor: theme.colors.surface,
     alignSelf: 'center',
     maxWidth: 500,
@@ -59,12 +58,13 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     top: '20%',
     left: theme.tokens.inset.md,
     right: theme.tokens.inset.md,
+    padding: theme.tokens.inset.sm
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: theme.dimensions.HEADER_HEIGHT,
+    height: theme.dimensions.HEADER_HEIGHT - 10,
     paddingHorizontal: theme.tokens.inset.md,
   },
   headerLeading: {

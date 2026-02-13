@@ -102,14 +102,15 @@ export const createTypography = (theme: ThemeBase) => {
     },
     title: {
       fontSize: 16,
-      lineHeight: 18,
+      lineHeight: 16,
       fontWeight: '600' as const,
       fontFamily: 'Inter_600SemiBold',
       color: theme.colors.onBackground,
-      marginBottom: 4,
+      paddingVertical: 8,
     },
     section: {
       fontSize: 14,
+      paddingVertical: 8,
       lineHeight: 14,
       fontWeight: '400' as const,
       fontFamily: 'Inter_400Regular',
@@ -143,10 +144,10 @@ export const createTypography = (theme: ThemeBase) => {
     },
     label: {
       fontSize: 14,
-      fontWeight: '400' as const,
-      fontFamily: 'Inter_400Regular',
+      fontWeight: '600' as const,
+      fontFamily: 'Inter_600SemiBold',
       color: theme.colors.onSurface,
-      paddingBottom: 8,
+      paddingBottom: 4,
     },
   }
 }

@@ -75,7 +75,7 @@ function TrailItem({ trail, actions, onPress }: TrailCardProps) {
     <View style={styles.content} id="trail-card-content">
       <TrailAvatar trail={trail} />
       <View style={styles.textContainer}>
-        <Text variant='title' >{trail.name} </Text>
+        <Text variant='label'>{trail.name} </Text>
         <Text
           variant='body'
           size='sm'

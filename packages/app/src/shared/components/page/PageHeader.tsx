@@ -21,7 +21,7 @@ const PageHeader = ({ leading, title = "", trailing, options }: PageHeaderProps)
       <View style={styles.leading}>{leading}</View>
       <View style={styles.label}>
         {title ? (
-          <Text style={styles.label}>{title}</Text>
+          <Text variant='title' align='center'>{title}</Text>
         ) : (
           <FertheLabel style={styles.logo} fill={theme.colors.onBackground} />
         )}
@@ -44,20 +44,20 @@ const createStyles = (theme: Theme) =>
       paddingVertical: 8,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.divider,
+      alignContent: 'stretch',
     },
     logo: {
       height: 24,
     },
     label: {
-      ...theme.typo.heading,
-      textAlign: 'center',
+      flex: 1,
+      alignContent: 'center',
+      justifyContent: 'center'
     },
     leading: {
-      padding: 8,
       width: 60,
     },
     trailing: {
-      padding: 8,
       width: 60,
       flexDirection: 'row',
       justifyContent: 'flex-end',

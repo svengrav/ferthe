@@ -2,12 +2,13 @@ import { Icon, ProgressBar, Stack, Text } from '@app/shared/components'
 import { LoadingSpinner } from '@app/shared/components/activityIndicator/ActivityIndicator'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { StyleSheet, View } from 'react-native'
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { useDiscoveryStats } from '../hooks/useDiscoveryStats'
 
 interface DiscoveryStatsProps {
   discoveryId: string
   animationDelay?: number
+  style?: StyleProp<ViewStyle>
 }
 
 /**
@@ -15,14 +16,14 @@ interface DiscoveryStatsProps {
  * Encapsulates data fetching and state management via useDiscoveryStats hook.
  */
 function DiscoveryStats(props: DiscoveryStatsProps) {
-  const { discoveryId, animationDelay = 0 } = props
+  const { discoveryId, animationDelay = 0, style } = props
   const { locales } = useApp()
   const { styles, theme } = useTheme(createStyles)
   const { stats, loading, error } = useDiscoveryStats(discoveryId)
 
   if (loading) {
     return (
-      <View style={styles?.container}>
+      <View style={[styles?.container, style]}>
         <LoadingSpinner />
       </View>
     )
@@ -30,7 +31,7 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
 
   if (error || !styles) {
     return (
-      <View style={styles?.container}>
+      <View style={[styles?.container, style]}>
         <Icon name="warning" size={24} color={theme.colors.error} />
         <Text variant="caption" style={{ color: theme.colors.error }}>
           {error || 'Error loading stats'}
@@ -44,7 +45,7 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       <Stack spacing='lg'>
         <Text variant="section">{locales.discovery.stats.name}</Text>
 
@@ -54,7 +55,7 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
           <View style={styles.statContent}>
             <Text variant="caption">{locales.discovery.stats.rank}</Text>
             <Text variant="body">
-              #{stats.rank} {locales.discovery.stats.of} {stats.totalDiscoverers}
+              {stats.rank} {locales.discovery.stats.of} {stats.totalDiscoverers}
             </Text>
             <ProgressBar
               percentage={(stats.rank / stats.totalDiscoverers) * 100}
@@ -70,7 +71,7 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
           <View style={styles.statContent}>
             <Text variant="caption">{locales.discovery.stats.trailPosition}</Text>
             <Text variant="body">
-              {stats.trailPosition} / {stats.trailTotal}
+              {stats.trailPosition} of {stats.trailTotal}
             </Text>
             <ProgressBar
               percentage={(stats.trailPosition / stats.trailTotal) * 100}

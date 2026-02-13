@@ -37,7 +37,7 @@ interface SettingsFormProps {
  */
 function SettingsPage(props: SettingsFormProps) {
   const { onClose, onSubmit } = props
-  const { styles } = useTheme(createStyles)
+  const { styles, theme } = useTheme(createStyles)
   const { t } = useLocalizationStore()
   const { initialValues, handleSubmit: processSettings } = useSettings()
 
@@ -49,7 +49,7 @@ function SettingsPage(props: SettingsFormProps) {
 
   return (
     <Page
-      title={t.navigation.settings}
+      title={t.settings.yourSettings}
       leading={<Button icon="arrow-back" variant='outlined' onPress={onClose} />}
     >
       <Form<SettingsFormValues>
@@ -57,8 +57,7 @@ function SettingsPage(props: SettingsFormProps) {
         defaultValues={initialValues}
         onSubmit={onFormSubmit}
       >
-        <Text variant='heading'>{t.settings.yourSettings}</Text>
-        <View>
+        <View style={{ marginTop: theme.tokens.spacing.lg }}>
           <View style={styles.settingRow}>
             <Text variant='body'>{t.settings.chooseLanguage}</Text>
             <FormPicker

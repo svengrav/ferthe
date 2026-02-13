@@ -116,15 +116,16 @@ function Overlay(props: OverlayProps) {
       )}
       <View
         style={[
-          styles.contentArea,
-          {
-            paddingTop: insets.top,
-            paddingBottom: insets.bottom
-          }
+          styles.contentArea
         ]}
         pointerEvents="auto"
       >
-        {children}
+        <View style={{
+          flex: 1,
+        }}>
+
+          {children}
+        </View>
       </View>
     </Animated.View>
   )
