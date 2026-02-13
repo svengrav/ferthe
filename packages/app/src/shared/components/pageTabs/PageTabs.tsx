@@ -102,7 +102,9 @@ const createStyles = (theme: Theme, variant: 'tabs' | 'chips') => {
   const isChips = variant === 'chips'
 
   return StyleSheet.create({
-    container: {},
+    container: {
+      flex: 1,
+    },
     scrollView: {
       flexGrow: 0,
       flexShrink: 0,
