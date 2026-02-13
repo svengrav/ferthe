@@ -68,6 +68,10 @@ const de: LocalizationSet = {
     overview: 'Übersicht',
     description: 'Beschreibung',
     spots: 'Fundstellen',
+    unknownSpots: 'Unbekannte Spots',
+    spot: 'Spot',
+    toDiscover: 'noch zu entdecken',
+    allSpotsDiscovered: 'Alle Spots wurden entdeckt!',
     stats: {
       progress: 'Fortschritt',
       status: 'Status',

@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 
 import { Button, Image, Page, PageTab, PageTabs, Stack, Text } from '@app/shared/components'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
@@ -8,6 +8,7 @@ import { useApp } from '@app/shared/useApp'
 import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
 import TrailStats from './TrailStats'
+import TrailUnknownSpots from './TrailUnknownSpots'
 
 const IMAGE_HEIGHT = 150
 
@@ -61,7 +62,7 @@ function TrailPage(props: TrailPageProps) {
           </Stack>
         </PageTab>
         <PageTab id="spots" label={locales.trails.spots}>
-          <View />
+          <TrailUnknownSpots trailId={trail.id} />
         </PageTab>
         <PageTab id="stats" label={locales.trails.stats.name}>
           <TrailStats trailId={trail.id} />

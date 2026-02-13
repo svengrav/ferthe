@@ -66,6 +66,10 @@ const en = {
     overview: 'Overview',
     description: 'Description',
     spots: 'Spots',
+    unknownSpots: 'Unknown Spots',
+    spot: 'spot',
+    toDiscover: 'to discover',
+    allSpotsDiscovered: 'All spots discovered!',
     stats: {
       name: 'Stats',
       progress: 'Progress',
