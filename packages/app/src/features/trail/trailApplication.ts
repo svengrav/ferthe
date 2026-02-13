@@ -1,10 +1,11 @@
 import { logger } from '@app/shared/utils/logger'
-import { AccountContext, Result, TrailApplicationContract } from '@shared/contracts'
+import { AccountContext, Result, TrailApplicationContract, TrailStats } from '@shared/contracts'
 import { getTrailStoreActions } from './stores/trailStore'
 
 export interface TrailApplication {
   requestTrailState: () => Promise<void>
   requestTrailSpotPreviews: (trailId: string) => Promise<void>
+  getTrailStats: (trailId: string) => Promise<Result<TrailStats>>
 }
 
 interface TrailApplicationOptions {
@@ -57,8 +58,17 @@ export function createTrailApplication(options: TrailApplicationOptions) {
     }
   }
 
+  const getTrailStats = async (trailId: string): Promise<Result<TrailStats>> => {
+    const accountSession = await getSession()
+    if (!accountSession.data) {
+      return { success: false, error: 'Account session not found' }
+    }
+    return await trailAPI.getTrailStats(accountSession.data, trailId)
+  }
+
   return {
     requestTrailState,
     requestTrailSpotPreviews,
+    getTrailStats,
   }
 }

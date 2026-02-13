@@ -7,6 +7,7 @@ import { useApp } from '@app/shared/useApp'
 
 import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
+import TrailStats from './TrailStats'
 
 const IMAGE_HEIGHT = 150
 
@@ -61,6 +62,9 @@ function TrailPage(props: TrailPageProps) {
         </PageTab>
         <PageTab id="spots" label={locales.trails.spots}>
           <View />
+        </PageTab>
+        <PageTab id="stats" label={locales.trails.stats.name}>
+          <TrailStats trailId={trail.id} />
         </PageTab>
       </PageTabs>
     </Page>

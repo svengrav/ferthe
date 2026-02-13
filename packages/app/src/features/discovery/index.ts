@@ -17,3 +17,6 @@ export {
   useDiscoveryReactionSummary
 } from './stores/discoveryReactionStore'
 
+export { default as DiscoveryStats } from './components/DiscoveryStats'
+export { useDiscoveryStats } from './hooks/useDiscoveryStats'
+

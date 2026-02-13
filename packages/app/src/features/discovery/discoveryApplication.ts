@@ -1,7 +1,7 @@
 import { getSensorDevice, SensorApplication } from '@app/features/sensor'
 import { getTrailData } from '@app/features/trail'
 import { logger } from '@app/shared/utils/logger'
-import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, ReactionSummary, Result } from '@shared/contracts'
+import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryStats, ReactionSummary, Result } from '@shared/contracts'
 import { Unsubscribe } from '@shared/events/eventHandler'
 import { GeoLocation, geoUtils } from '@shared/geo'
 import { getTrails } from '../trail/stores/trailStore'
@@ -26,6 +26,8 @@ export interface DiscoveryApplication {
   onDiscoveryTrailUpdate: (handler: (state: any) => void) => Unsubscribe
   onNewDiscoveries: (handler: (discoveries: DiscoveryCardState[]) => void) => Unsubscribe
   getDiscoveryCards: () => DiscoveryCardState[]
+  // Stats method
+  getDiscoveryStats: (discoveryId: string) => Promise<Result<DiscoveryStats>>
   // Content methods
   upsertDiscoveryContent: (discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
   deleteDiscoveryContent: (discoveryId: string) => Promise<Result<void>>
@@ -356,7 +358,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
   const getReactionSummary = async (discoveryId: string): Promise<Result<ReactionSummary>> => {
     const session = await getSession()
-    if (!session.data) return { success: false, data: undefined as any }
+    if (!session.data) return { success: false, error: undefined as any }
 
     const result = await discoveryAPI.getReactionSummary(session.data, discoveryId)
     if (result.data) {
@@ -365,12 +367,25 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     return result
   }
 
+  const getDiscoveryStats = async (discoveryId: string): Promise<Result<DiscoveryStats>> => {
+    const session = await getSession()
+    if (!session.data) return {
+      success: false, error: {
+        message: 'Account session not found',
+        code: ''
+      }
+    }
+
+    return await discoveryAPI.getDiscoveryStats(session.data, discoveryId)
+  }
+
   return {
     getDiscoveryCards,
     setActiveTrail,
     requestDiscoveryState,
     onDiscoveryTrailUpdate: onDiscoveryTrailUpdated,
     onNewDiscoveries,
+    getDiscoveryStats,
     upsertDiscoveryContent,
     deleteDiscoveryContent,
     getDiscoveryContent,

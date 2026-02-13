@@ -37,6 +37,7 @@ export const ERROR_CODES = {
   GET_DISCOVERIES_ERROR: { code: 'GET_DISCOVERIES_ERROR', message: 'Failed to retrieve discoveries', httpStatus: 500 },
   GET_DISCOVERY_ERROR: { code: 'GET_DISCOVERY_ERROR', message: 'Failed to retrieve discovery', httpStatus: 500 },
   GET_DISCOVERY_STATS_ERROR: { code: 'GET_DISCOVERY_STATS_ERROR', message: 'Failed to retrieve discovery statistics', httpStatus: 500 },
+  GET_TRAIL_STATS_ERROR: { code: 'GET_TRAIL_STATS_ERROR', message: 'Failed to retrieve trail statistics', httpStatus: 500 },
   GET_SPOT_IDS_ERROR: { code: 'GET_SPOT_IDS_ERROR', message: 'Failed to retrieve discovered spot IDs', httpStatus: 500 },
   GET_SPOTS_ERROR: { code: 'GET_SPOTS_ERROR', message: 'Failed to retrieve discovered spots', httpStatus: 500 },
   GET_CLUES_ERROR: { code: 'GET_CLUES_ERROR', message: 'Failed to retrieve preview clues', httpStatus: 500 },

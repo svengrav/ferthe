@@ -25,6 +25,11 @@ A Discovery is a unique finding of a user at a specific spot. It is private to y
 - When you reopen the app, you resume where you left off
 - Profile syncs across devices when using phone authentication
 
+**TODO**
+- You can remove a discovery if you want to (e.g. if it was a mistake or if you want to hide it again)
+- Pushup if somebody discovers a spot you created or if somebody shares a discovery in a community you are part of
+- Show Discovery stats 
+
 ### Discovery Content
 
 **User-Generated Content:**
@@ -70,6 +75,10 @@ A Discovery is a unique finding of a user at a specific spot. It is private to y
 - Trail Avatar Image: Represents the trail in lists and profiles
 - Trail Overview Map Background: Custom image for the map when viewing the overview
 - Trail Navigation Map Background: Custom image for the map when navigating the trail (optional, can be same as overview)
+
+**TODO**
+- Trail Preview shows 4-5 Spots as blurred preview images.
+- Trail shows stats about how many spots are discovered, how many discoveries you have, and your rank among all discoverers of that trail.
 
 ## Spots
 
@@ -204,3 +213,8 @@ Feature Notes:
 **Image Types:**
 - Preview URL: Blurred/low-res version
 - Full URL: High-res version after discovery
+
+## Accounts
+
+- User Share ID (6-digit code) for sharing own account with others (e.g. to show your discoveries)
+- Account data is stored locally for offline access

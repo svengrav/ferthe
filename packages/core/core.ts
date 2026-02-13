@@ -19,6 +19,7 @@ import { StoreInterface } from './store/storeInterface.ts'
 export interface StorageConnector {
   getItemUrl(key: string): Promise<{ id: string; url: string }>
   uploadFile(path: string, data: Buffer | string, metadata?: Record<string, string>): Promise<string>
+  uploadFileWithPreview(path: string, data: Buffer, previewData: Buffer, metadata?: Record<string, string>): Promise<{ url: string; previewUrl: string }>
   deleteFile(path: string): Promise<void>
   getMetadata(path: string): Promise<Record<string, string>>
 }
@@ -52,6 +53,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     trailStore: createStore<Trail>(storeConnector, STORE_IDS.TRAILS),
     spotStore: createStore<Spot>(storeConnector, STORE_IDS.SPOTS),
     trailSpotStore: createStore<TrailSpot>(storeConnector, STORE_IDS.TRAIL_SPOTS),
+    discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
   })
 
   const spotApplication = createSpotApplication({

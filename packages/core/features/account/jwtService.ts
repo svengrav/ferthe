@@ -30,7 +30,8 @@ export const createJWTService = (options?: { secret?: string }): JWTService => {
       }
 
       // Verify signature first
-      const expectedSignature = createHmac('sha256', secret).update(`${header}.${payload}`).digest('base64url')
+      const expectedSignatureBase64 = createHmac('sha256', secret).update(`${header}.${payload}`).digest('base64')
+      const expectedSignature = base64ToBase64Url(expectedSignatureBase64)
 
       // Constant-time comparison to prevent timing attacks
       if (!constantTimeEquals(signature, expectedSignature)) {
@@ -75,7 +76,8 @@ export const createJWTService = (options?: { secret?: string }): JWTService => {
     const payloadStr = base64UrlEncode(JSON.stringify(payload))
 
     // Create HMAC-SHA256 signature
-    const signature = createHmac('sha256', secret).update(`${header}.${payloadStr}`).digest('base64url')
+    const signatureBase64 = createHmac('sha256', secret).update(`${header}.${payloadStr}`).digest('base64')
+    const signature = base64ToBase64Url(signatureBase64)
 
     return `${header}.${payloadStr}.${signature}`
   }
@@ -92,6 +94,13 @@ export const createJWTService = (options?: { secret?: string }): JWTService => {
  */
 function base64UrlEncode(str: string): string {
   return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+}
+
+/**
+ * Convert standard base64 to base64url
+ */
+function base64ToBase64Url(base64: string): string {
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 }
 
 /**

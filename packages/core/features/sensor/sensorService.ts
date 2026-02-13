@@ -29,6 +29,7 @@ export const createSensorService = (): SensorServiceType => ({
         trailId: trailId,
         location: spot.location,
         source: 'scanEvent' as ClueSource,
+        discoveryRadius: spot.options.discoveryRadius,
       }))
 
     const successful = spotsInRange.length > 0

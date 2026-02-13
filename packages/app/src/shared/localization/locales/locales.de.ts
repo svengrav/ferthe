@@ -68,6 +68,18 @@ const de: LocalizationSet = {
     overview: 'Übersicht',
     description: 'Beschreibung',
     spots: 'Fundstellen',
+    stats: {
+      progress: 'Fortschritt',
+      status: 'Status',
+      rank: 'Rang',
+      of: 'von',
+      averageTime: 'Durchschnittszeit',
+      completionStatus: {
+        not_started: 'Nicht begonnen',
+        in_progress: 'In Bearbeitung',
+        completed: 'Abgeschlossen',
+      },
+    },
   },
   recurrence: {
     none: 'Keine',
@@ -184,6 +196,7 @@ const de: LocalizationSet = {
   },
   discovery: {
     discoveries: 'Entdeckungen',
+    overview: 'Übersicht',
     editYourDiscovery: 'Entdeckung bearbeiten',
     documentYourDiscovery: 'Entdeckung dokumentieren',
     pickingImage: 'Bild wird ausgewählt...',
@@ -198,7 +211,15 @@ const de: LocalizationSet = {
     share: 'Teilen',
     addNote: 'Notiz hinzufügen', discovered: 'Entdeckt',
     deleteImage: 'Bild entfernen',
-    deleteImageConfirm: 'Bild wird entfernt'
+    deleteImageConfirm: 'Bild wird entfernt',
+    stats: {
+      title: 'Statistik',
+      rank: 'Entdeckerrang',
+      of: 'von',
+      trailPosition: 'Trail-Position',
+      timeSinceLast: 'Zeit seit letzter',
+      distanceFromLast: 'Entfernung zur letzten',
+    },
   },
   map: {
     outsideTrail: 'Außerhalb des Trails',

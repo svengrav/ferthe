@@ -44,3 +44,4 @@ export { createImageMetadata, detectExtensionFromDataUri, extractBlobPathFromUrl
 // Storage Connector
 export { createAzureStorageConnector } from './connectors/storageConnector.ts'
 
+export { STORE_IDS } from './config/constants.ts'

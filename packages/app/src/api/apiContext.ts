@@ -27,7 +27,8 @@ import {
   Spot,
   SpotPreview,
   Trail,
-  TrailSpot
+  TrailSpot,
+  TrailStats
 } from '@shared/contracts'
 import { APIError, createAPIClient } from './client'
 import { checkStatus, StatusResult } from './utils'
@@ -144,6 +145,8 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
       },
 
       getTrailSpotIds: (_context: AccountContext, trailId: string) => API.send<string[]>(`/trail/collections/trails/${trailId}/spots`),
+
+      getTrailStats: (_context: AccountContext, trailId: string) => API.send<TrailStats>(`/trails/${trailId}/stats`),
 
       createSpot: (_context: AccountContext, spot: any) => API.send<Spot>('/trail/collections/spots', 'POST', spot),
 

@@ -15,6 +15,7 @@ export interface TrailApplicationContract {
   getSpot: (context: AccountContext, spotId: string) => Promise<Result<Spot | undefined>>
   getTrail: (context: AccountContext, trailId: string) => Promise<Result<Trail | undefined>>
   getTrailSpotIds: (context: AccountContext, trailId: string) => Promise<Result<string[]>>
+  getTrailStats: (context: AccountContext, trailId: string) => Promise<Result<TrailStats>>
   createTrail: (context: AccountContext, trailData: Omit<Trail, 'id'>) => Promise<Result<Trail>>
   createSpot: (context: AccountContext, spotData: Omit<Spot, 'id'>) => Promise<Result<Spot>>
   addSpotToTrail: (context: AccountContext, trailId: string, spotId: string, order?: number) => Promise<Result<TrailSpot>>
@@ -67,4 +68,21 @@ interface Options {
   discoveryMode: DiscoveryMode
   previewMode: PreviewMode
   snapRadius?: number
+}
+
+/**
+ * Statistics for a trail from the user's perspective.
+ */
+export interface TrailStats {
+  trailId: string
+  totalSpots: number
+  discoveredSpots: number
+  discoveriesCount: number
+  progressPercentage: number
+  completionStatus: 'not_started' | 'in_progress' | 'completed'
+  rank: number // User's rank among all trail discoverers (0 if not started)
+  totalDiscoverers: number // Total users who discovered at least one spot
+  firstDiscoveredAt?: Date
+  lastDiscoveredAt?: Date
+  averageTimeBetweenDiscoveries?: number // In seconds
 }

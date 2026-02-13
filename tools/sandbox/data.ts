@@ -1,4 +1,4 @@
-import { getCoreStoreIdentifiers } from '@core/index'
+import { STORE_IDS } from '@core/index.ts'
 import { Account, AccountSession, Discovery, DiscoveryMode, PreviewMode, ScanEvent, Spot, Trail, TrailSpot } from '@shared/contracts'
 
 interface DataSchema<T> {
@@ -17,11 +17,11 @@ interface SandboxDataSet {
 }
 
 // Constants for reuse
-const DEFAULT_USER_ID = 'clx4j9k2n000001mh3g2h4f7p'
+const DEFAULT_USER_ID = 'xxxxdevtestuserxxxxx'
 const NOW = new Date()
 const YESTERDAY = new Date(NOW.getTime() - 24 * 60 * 60 * 1000)
 const LAST_WEEK = new Date(NOW.getTime() - 7 * 24 * 60 * 60 * 1000)
-const STORES = getCoreStoreIdentifiers()
+const STORES = STORE_IDS
 
 export const ACCOUNT_SESSION: AccountSession = {
   id: DEFAULT_USER_ID,
@@ -54,10 +54,13 @@ const sandboxData: SandboxDataSet = {
         name: 'Discovery Trail',
         slug: 'discovery-trail-2025',
         description: 'Free exploration of interesting spots in your area',
-        spots: [],
         map: {
           image:
             'https://stferthecore.blob.core.windows.net/resources/discovery-bg-1.png?sp=r&st=2025-06-15T21:13:41Z&se=2025-07-05T05:13:41Z&spr=https&sv=2024-11-04&sr=b&sig=dOGCg%2B%2Fwm7LxUTRM0BLZMx076CYT8cph6Zh5eNGbw14%3D',
+        },
+        boundary: {
+          northEast: { lat: 51.81, lon: 7.64 },
+          southWest: { lat: 51.77, lon: 7.60 },
         },
         options: {
           scannerRadius: 250,
@@ -80,10 +83,9 @@ const sandboxData: SandboxDataSet = {
           image:
             'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/ascheberg-kirmes-trail-8010-map.png?sp=r&st=2025-06-19T12:01:23Z&se=2030-06-19T20:01:23Z&spr=https&sv=2024-11-04&sr=b&sig=jDXqCynRcQRMKt167h1vKCQjP2ycJcD40%2B4yzM4mB4k%3D',
         },
-        spots: [],
-        region: {
-          center: { lat: 51.788581, lon: 7.619051 },
-          radius: 206,
+        boundary: {
+          northEast: { lat: 51.790431, lon: 7.621401 },
+          southWest: { lat: 51.786731, lon: 7.616701 },
         },
         options: {
           scannerRadius: 40,
@@ -516,6 +518,7 @@ const sandboxData: SandboxDataSet = {
             trailId: 'clx4j9k2n000101mh8d4k9n2q',
             location: { lat: 51.797, lon: 7.627 },
             source: 'scanEvent',
+            discoveryRadius: 10,
           },
         ],
         location: { lat: 51.797, lon: 7.627 },
@@ -535,6 +538,7 @@ const sandboxData: SandboxDataSet = {
             trailId: 'clx4j9k2n000101mh8d4k9n2q',
             location: { lat: 51.797, lon: 7.627 },
             source: 'scanEvent',
+            discoveryRadius: 10,
           },
         ],
         location: { lat: 51.797, lon: 7.627 },
@@ -554,6 +558,7 @@ const sandboxData: SandboxDataSet = {
             trailId: 'clx4j9k2n000201mh7b3m5r8x',
             location: { lat: 51.778, lon: 7.625 },
             source: 'scanEvent',
+            discoveryRadius: 20,
           },
         ],
         location: { lat: 51.778, lon: 7.625 },

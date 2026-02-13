@@ -24,6 +24,7 @@ import {
   SpotPreview,
   Trail,
   TrailSpot,
+  TrailStats,
 } from '@shared/contracts/index.ts'
 import { manifest } from './manifest.ts'
 import { Route } from './oak/types.ts'
@@ -220,6 +221,14 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       url: '/trail/collections/spots/:id',
       handler: asyncRequestHandler<Spot | undefined, { id: string }, never>(async ({ params, context }) => {
         return await trailApplication.getSpot(context, params!.id)
+      }),
+    },
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/trails/:trailId/stats',
+      handler: asyncRequestHandler<TrailStats, { trailId: string }>(async ({ context, params }) => {
+        return await trailApplication.getTrailStats(context, params!.trailId)
       }),
     },
     {

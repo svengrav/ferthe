@@ -66,6 +66,19 @@ const en = {
     overview: 'Overview',
     description: 'Description',
     spots: 'Spots',
+    stats: {
+      name: 'Stats',
+      progress: 'Progress',
+      status: 'Status',
+      rank: 'Rank',
+      of: 'of',
+      averageTime: 'Average Time',
+      completionStatus: {
+        not_started: 'Not Started',
+        in_progress: 'In Progress',
+        completed: 'Completed',
+      },
+    },
   },
   recurrence: {
     none: 'None',
@@ -199,6 +212,13 @@ const en = {
     discovered: 'Discovered',
     deleteImage: 'Delete Image',
     deleteImageConfirm: 'Are you sure you want to delete this image?',
+    stats: {
+      rank: 'Discovery Rank',
+      of: 'of',
+      trailPosition: 'Trail Position',
+      timeSinceLast: 'Time Since Last',
+      distanceFromLast: 'Distance From Last',
+    },
   },
   map: {
     outsideTrail: 'Outside the trail',

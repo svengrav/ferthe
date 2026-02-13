@@ -1,13 +1,25 @@
 import { Store } from '@core/store/storeFactory.ts'
 import { createCuid2 } from '@core/utils/idGenerator.ts'
 import { createSlug } from '@core/utils/slug.ts'
-import { AccountContext, Result, Spot, SpotPreview, Trail, TrailApplicationContract, TrailSpot } from '@shared/contracts/index.ts'
+import {
+  AccountContext,
+  Discovery,
+  Result,
+  Spot,
+  SpotPreview,
+  Trail,
+  TrailApplicationContract,
+  TrailSpot,
+  TrailStats
+} from '@shared/contracts/index.ts'
 import { geoUtils } from '@shared/geo/index.ts'
+import { createTrailService } from './trailService.ts'
 
 interface TrailApplicationOptions {
   trailStore: Store<Trail>
   spotStore: Store<Spot>
   trailSpotStore: Store<TrailSpot>
+  discoveryStore: Store<Discovery>
 }
 
 /**
@@ -62,7 +74,9 @@ async function enrichTrailWithBoundary(
   }
 }
 
-export function createTrailApplication({ trailStore, spotStore, trailSpotStore }: TrailApplicationOptions): TrailApplicationContract {
+export function createTrailApplication({ trailStore, spotStore, trailSpotStore, discoveryStore }: TrailApplicationOptions): TrailApplicationContract {
+  const trailService = createTrailService()
+
   return {
     listSpotPreviews: async (context: AccountContext, trailId?: string): Promise<Result<SpotPreview[]>> => {
       try {
@@ -202,6 +216,51 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore }
         return { success: true, data: spots }
       } catch (error: unknown) {
         return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'LIST_SPOTS_ERROR' } }
+      }
+    },
+
+    getTrailStats: async (context: AccountContext, trailId: string): Promise<Result<TrailStats>> => {
+      try {
+        const accountId = context.accountId
+        if (!accountId) {
+          return { success: false, error: { message: 'Account ID is required', code: 'ACCOUNT_ID_REQUIRED' } }
+        }
+
+        // Verify trail exists
+        const trailResult = await trailStore.get(trailId)
+        if (!trailResult.success || !trailResult.data) {
+          return { success: false, error: { message: 'Trail not found', code: 'TRAIL_NOT_FOUND' } }
+        }
+
+        // Get trail spot IDs
+        const trailSpotsResult = await trailSpotStore.list()
+        if (!trailSpotsResult.success) {
+          return { success: false, error: { message: 'Failed to retrieve trail spots', code: 'GET_TRAIL_SPOTS_ERROR' } }
+        }
+
+        const trailSpotIds = (trailSpotsResult.data || [])
+          .filter(ts => ts.trailId === trailId)
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+          .map(ts => ts.spotId)
+
+        if (trailSpotIds.length === 0) {
+          return { success: false, error: { message: 'Trail has no spots', code: 'TRAIL_HAS_NO_SPOTS' } }
+        }
+
+        // Get all discoveries
+        const discoveriesResult = await discoveryStore.list()
+        if (!discoveriesResult.success) {
+          return { success: false, error: { message: 'Failed to retrieve discoveries', code: 'GET_DISCOVERIES_ERROR' } }
+        }
+
+        const allDiscoveries = discoveriesResult.data || []
+
+        // Calculate stats using service
+        const stats = trailService.getTrailStats(accountId, trailId, allDiscoveries, trailSpotIds)
+
+        return { success: true, data: stats }
+      } catch (error: any) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_TRAIL_STATS_ERROR' } }
       }
     },
 
