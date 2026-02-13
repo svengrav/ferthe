@@ -1,4 +1,4 @@
-import { Theme, useTheme } from '@app/shared/theme'
+import { useTheme } from '@app/shared/theme'
 import { useEffect } from 'react'
 import { StyleSheet, View } from 'react-native'
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
