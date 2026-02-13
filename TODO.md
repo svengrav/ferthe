@@ -35,3 +35,6 @@
 
 - Trail Background Image
 - Viewport Background Image
+
+**Clues**
+- Clues are currently moving while animation. Make them static, just fade in?

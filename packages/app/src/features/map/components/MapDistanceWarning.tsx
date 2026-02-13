@@ -53,16 +53,14 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   badge: {
     flexDirection: 'row',
+    justifyContent: 'center',
+
     alignItems: 'center',
-    backgroundColor: theme.deriveColor(theme.colors.error, 0.95),
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    shadowColor: theme.colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    minWidth: 150,
+    backgroundColor: theme.colors.black,
+    paddingVertical: theme.tokens.inset.sm,
+    paddingHorizontal: theme.tokens.inset.lg,
+    borderRadius: theme.tokens.borderRadius.md,
   },
   textContainer: {
     justifyContent: 'center',
