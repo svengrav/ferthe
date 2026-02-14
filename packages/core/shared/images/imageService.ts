@@ -15,15 +15,16 @@ interface ImageBlobMetadata {
 }
 
 /**
- * Generate a secure, anonymous blob path using CUID2.
+ * Generate a secure, anonymous blob path using CUID2 with versioning.
  * Path contains no identifiable information - all metadata stored separately.
  * 
  * @param extension - File extension (e.g., 'jpg', 'png')
- * @returns Secure blob path like "clz8a9b2c3d4e5f6.jpg"
+ * @param version - Image format version (default: 'v1')
+ * @returns Secure blob path like "v1/images/clz8a9b2c3d4e5f6.jpg"
  */
-export const generateSecureImagePath = (extension: string = 'jpg'): string => {
+export const generateSecureImagePath = (extension: string = 'jpg', version: string = 'v1'): string => {
   const hash = createCuid2()
-  return `${hash}.${extension}`
+  return `${version}/images/${hash}.${extension}`
 }
 
 /**

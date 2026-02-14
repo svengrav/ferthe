@@ -1,6 +1,7 @@
 import { Spot, SpotPreview } from '@shared/contracts/index.ts'
 import { GeoBoundary } from '@shared/geo/index.ts'
 import { AccountContext } from './accounts.ts'
+import { ImageReference } from './images.ts'
 import { Result } from './results.ts'
 import { TrailSpot } from './trailSpots.ts'
 
@@ -23,25 +24,39 @@ export interface TrailApplicationContract {
 }
 
 /**
+ * Trail map configuration with optional background image.
+ */
+export interface TrailMap {
+  image?: ImageReference
+}
+
+/**
  * Represents a trail in the application.
  * A trail consists of multiple spots and has associated metadata such as name, description, and options.
+ * Image URLs are generated at runtime with fresh SAS tokens.
  */
 export interface Trail {
   id: string
   slug: string
   name: string
   description: string
-  map: {
-    image?: string
-  }
-  image?: {
-    id: string
-    url: string
-  }
+  map: TrailMap
+  image?: ImageReference
   boundary: GeoBoundary
   options: Options
   createdAt: Date
   updatedAt: Date
+}
+
+/**
+ * Internal trail entity as stored in database.
+ * Extends Trail with additional blob path fields for image storage.
+ */
+export interface StoredTrail extends Omit<Trail, 'map'> {
+  imageBlobPath?: string
+  map: TrailMap & {
+    imageBlobPath?: string
+  }
 }
 
 /**

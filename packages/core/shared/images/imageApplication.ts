@@ -114,6 +114,10 @@ export function createImageApplication({ storageConnector, maxImageSizeBytes }: 
       // Generate new SAS token for blob path
       const item = await storageConnector.getItemUrl(blobPath)
 
+      if (!item) {
+        return createErrorResult('IMAGE_NOT_FOUND', { blobPath })
+      }
+
       return createSuccessResult(item.url)
     } catch (error: any) {
       return createErrorResult('REFRESH_IMAGE_URL_ERROR', { originalError: error.message })

@@ -106,7 +106,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
           ? { init: optimalScale, min: MAP_DEFAULT.scale.min, max: MAP_DEFAULT.scale.max }
           : optimalScale,
         boundary: trail.boundary,
-        image: trail?.map?.image,
+        image: trail?.map?.image?.url,
         layout: initialSurfaceLayout,
       },
 

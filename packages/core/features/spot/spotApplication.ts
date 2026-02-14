@@ -1,10 +1,10 @@
 import { Store } from '@core/store/storeFactory.ts'
-import { Result, Spot, SpotApplicationContract, SpotPreview } from '@shared/contracts/index.ts'
+import { Result, Spot, SpotApplicationContract, SpotPreview, StoredSpot } from '@shared/contracts/index.ts'
 
-export interface SpotApplicationActions extends SpotApplicationContract {}
+export interface SpotApplicationActions extends SpotApplicationContract { }
 
 export interface SpotApplicationConfig {
-  spotStore: Store<Spot>
+  spotStore: Store<StoredSpot>
 }
 
 export function createSpotApplication(config: SpotApplicationConfig): SpotApplicationActions {

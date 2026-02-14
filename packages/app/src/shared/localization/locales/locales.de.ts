@@ -73,6 +73,7 @@ const de: LocalizationSet = {
     toDiscover: 'noch zu entdecken',
     allSpotsDiscovered: 'Alle Spots wurden entdeckt!',
     stats: {
+      name: 'Statistik',
       progress: 'Fortschritt',
       status: 'Status',
       rank: 'Rang',
@@ -200,7 +201,6 @@ const de: LocalizationSet = {
   },
   discovery: {
     discoveries: 'Entdeckungen',
-    overview: 'Übersicht',
     editYourDiscovery: 'Entdeckung bearbeiten',
     documentYourDiscovery: 'Entdeckung dokumentieren',
     pickingImage: 'Bild wird ausgewählt...',
@@ -217,7 +217,7 @@ const de: LocalizationSet = {
     deleteImage: 'Bild entfernen',
     deleteImageConfirm: 'Bild wird entfernt',
     stats: {
-      title: 'Statistik',
+      name: 'Statistik',
       rank: 'Entdeckerrang',
       of: 'von',
       trailPosition: 'Trail-Position',

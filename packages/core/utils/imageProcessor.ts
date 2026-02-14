@@ -8,16 +8,20 @@ export interface ProcessedImage {
 }
 
 /**
- * Processes an image to create a blurred preview version
+ * Processes an image to create optimized original and blurred preview version
  * @param base64Data Base64 encoded image data
- * @param blurRadius Blur radius (1-100, default: 10)
- * @param previewQuality JPEG quality for preview (default: 60)
+ * @param blurRadius Blur radius (1-100, default: 25)
+ * @param quality JPEG quality for both images (default: 85)
+ * @param maxWidth Maximum width for original image (default: 2048)
+ * @param previewMaxWidth Maximum width for preview (default: 800)
  * @returns Processed image buffers
  */
 export async function processImage(
   base64Data: string,
-  blurRadius: number = 10,
-  previewQuality: number = 60
+  blurRadius: number = 25,
+  quality: number = 85,
+  maxWidth: number = 2048,
+  previewMaxWidth: number = 800
 ): Promise<ProcessedImage> {
   try {
     // Remove data URL prefix if present
@@ -32,20 +36,33 @@ export async function processImage(
     // Load image with Jimp
     const image = await Jimp.read(imageBuffer)
 
-    // Get original buffer
-    const original = await image.getBufferAsync(Jimp.MIME_JPEG)
+    // Resize original if needed (maintain aspect ratio)
+    if (image.getWidth() > maxWidth) {
+      image.resize(maxWidth, Jimp.AUTO)
+    }
 
-    // Create blurred version
-    const blurred = await image
-      .clone()
+    // Get optimized original buffer
+    const original = await image
+      .quality(quality)
+      .getBufferAsync(Jimp.MIME_JPEG)
+
+    // Create blurred preview version
+    const previewImage = image.clone()
+    
+    // Resize preview if needed
+    if (previewImage.getWidth() > previewMaxWidth) {
+      previewImage.resize(previewMaxWidth, Jimp.AUTO)
+    }
+
+    const blurred = await previewImage
       .blur(blurRadius)
-      .quality(previewQuality)
+      .quality(quality)
       .getBufferAsync(Jimp.MIME_JPEG)
 
     return {
       original,
       blurred,
-      extension: extension === 'jpeg' ? 'jpg' : extension,
+      extension: 'jpg', // Always save as JPEG after compression
     }
   } catch (error) {
     throw new Error(`Image processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`)

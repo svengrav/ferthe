@@ -1,4 +1,5 @@
 import { GeoLocation } from '@shared/geo/index.ts'
+import { ImageReference } from './images.ts'
 import { Result } from './results.ts'
 
 export interface SpotApplicationContract {
@@ -10,16 +11,15 @@ export interface SpotApplicationContract {
 
 export type SpotVisibility = 'hidden' | 'preview'
 
+/**
+ * Public spot interface with runtime-generated image URLs.
+ */
 export interface Spot {
   id: string
   slug: string
   name: string
   description: string
-  image?: {
-    id: string
-    url: string
-    previewUrl?: string
-  }
+  image?: ImageReference
   location: GeoLocation
   options: {
     discoveryRadius: number
@@ -30,10 +30,16 @@ export interface Spot {
   updatedAt: Date
 }
 
+/**
+ * Internal spot entity as stored in database.
+ * Extends Spot with additional blob path fields for image storage.
+ */
+export interface StoredSpot extends Spot {
+  imageBlobPath?: string
+  previewImageBlobPath?: string
+}
+
 export interface SpotPreview {
   id: string
-  image?: {
-    id: string
-    previewUrl?: string
-  }
+  image?: ImageReference
 }

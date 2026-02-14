@@ -1,61 +1,238 @@
 import { config } from '@app/config'
 import { useDiscoveryPreviewClues, useDiscoveryScannedClues } from '@app/features/discovery/stores/discoveryTrailStore'
 import { Clue } from '@shared/contracts'
-import { GeoBoundary } from '@shared/geo'
-import { memo, useEffect, useMemo, useState } from 'react'
+import { GeoBoundary, geoUtils } from '@shared/geo'
+import * as Haptics from 'expo-haptics'
+import { memo, useEffect, useState } from 'react'
 import { View } from 'react-native'
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import { useMapTheme } from '../../stores/mapThemeStore'
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated'
+import { useMapDevice } from '../../stores/mapStore'
+import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
 import { mapUtils } from '../../utils/geoToScreenTransform'
 
 const CLUE_SIZE = 20
-const FADE_IN_DURATION = 500
-const SCALE_DURATION = 600
-const FADE_OUT_DURATION = 700
-const INITIAL_SCALE = 0.8
+const FADE_IN_DURATION = 300
+const SCALE_DURATION = 400
+const FADE_OUT_DURATION = 500
+const INITIAL_SCALE = 0.85
+const RIPPLE_DELAY_FACTOR = 15
+const MAX_RIPPLE_DELAY = 1000
 const DEBUG_RADIUS_CIRCLES = [50, 100, 150]
 
 /**
- * Custom hook to manage animated scan clues visibility and transitions
+ * Hook to animate clue with ripple effect
  */
-const useScanCluesAnimation = (scanClues: Clue[]) => {
+const useClueRippleAnimation = (delay: number, isExiting: boolean) => {
   const opacity = useSharedValue(0)
   const scale = useSharedValue(INITIAL_SCALE)
-  const [visibleClues, setVisibleClues] = useState<Clue[]>([])
-  const [isVisible, setIsVisible] = useState(false)
-
-  // Track clue changes based on IDs to trigger proper updates
-  const scanCluesIds = useMemo(() =>
-    scanClues.map(c => c.spotId || c.id).join(','),
-    [scanClues]
-  )
 
   useEffect(() => {
-    if (scanClues.length > 0 && !isVisible) {
-      // New clues appeared - fade in
-      setVisibleClues(scanClues)
-      setIsVisible(true)
-      opacity.value = withTiming(1, { duration: FADE_IN_DURATION, easing: Easing.out(Easing.cubic) })
-      scale.value = withTiming(1, { duration: SCALE_DURATION, easing: Easing.out(Easing.back(1.1)) })
-    } else if (scanClues.length === 0 && isVisible) {
-      // Clues were cleared - fade out
+    if (isExiting) {
       opacity.value = withTiming(0, { duration: FADE_OUT_DURATION, easing: Easing.in(Easing.cubic) })
       scale.value = withTiming(INITIAL_SCALE, { duration: FADE_OUT_DURATION, easing: Easing.in(Easing.cubic) })
-
-      // Clear visible clues after animation completes
-      setTimeout(() => {
-        setVisibleClues([])
-        setIsVisible(false)
-      }, FADE_OUT_DURATION)
+    } else {
+      opacity.value = withDelay(delay, withTiming(1, { duration: FADE_IN_DURATION, easing: Easing.out(Easing.cubic) }))
+      scale.value = withDelay(delay, withTiming(1, { duration: SCALE_DURATION, easing: Easing.out(Easing.cubic) }))
     }
-  }, [scanCluesIds, isVisible])
+  }, [delay, isExiting, opacity, scale])
 
-  const animatedStyle = useAnimatedStyle(() => ({
+  return useAnimatedStyle(() => ({
     opacity: opacity.value,
     transform: [{ scale: scale.value }],
   }))
+}
 
-  return { visibleClues, animatedStyle }
+/**
+ * Create styles for the clue marker
+ */
+const createClueStyles = (theme: MapTheme, clueSize: number, scale: number) => ({
+  animatedContainer: {
+    position: 'absolute' as const,
+    width: clueSize,
+    height: clueSize,
+    marginLeft: -clueSize / 2,
+    marginTop: -clueSize / 2,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+  },
+  clueMarker: {
+    width: clueSize,
+    height: clueSize,
+    borderRadius: clueSize / 2,
+    backgroundColor: theme.clue.fill,
+    borderWidth: theme.clue.strokeWidth * scale,
+    borderColor: theme.clue.strokeColor,
+  },
+})
+
+/**
+ * Create styles for the radius circles
+ */
+const createRadiusStyles = (theme: MapTheme, scale: number) => ({
+  discoveryRadius: {
+    position: 'absolute' as const,
+    borderWidth: theme.radius.strokeWidth * scale,
+    borderColor: theme.radius.strokeColor,
+    backgroundColor: theme.radius.fill,
+  },
+  debugCircle: {
+    position: 'absolute' as const,
+    borderWidth: 1 * scale,
+    borderColor: 'rgba(255, 0, 0, 0.3)',
+    backgroundColor: 'transparent',
+  },
+})
+
+/**
+ * Discovery radius component (memoized)
+ */
+interface ClueRadiusProps {
+  clue: Clue
+  boundary: GeoBoundary
+  size: { width: number; height: number }
+  scale: number
+  theme: MapTheme
+}
+
+const ClueDiscoveryRadius = memo(({ clue, boundary, size, scale, theme }: ClueRadiusProps) => {
+  const circle = mapUtils.calculateCircleDimensions(clue.location, clue.discoveryRadius, boundary, size)
+  const styles = createRadiusStyles(theme, scale)
+
+  return (
+    <View
+      style={[
+        styles.discoveryRadius,
+        {
+          ...circle,
+          borderRadius: circle.width / 2,
+        }
+      ]}
+    />
+  )
+})
+
+/**
+ * Debug circles component (memoized)
+ */
+const ClueDebugCircles = memo(({ clue, boundary, size, scale, theme }: ClueRadiusProps) => {
+  if (!config.debug.enableMapDebug) return null
+
+  const styles = createRadiusStyles(theme, scale)
+
+  return (
+    <>
+      {DEBUG_RADIUS_CIRCLES.map(radius => {
+        const circle = mapUtils.calculateCircleDimensions(clue.location, radius, boundary, size)
+        return (
+          <View
+            key={radius}
+            style={[
+              styles.debugCircle,
+              {
+                ...circle,
+                borderRadius: circle.width / 2,
+              }
+            ]}
+          />
+        )
+      })}
+    </>
+  )
+})
+
+/**
+ * Individual animated clue component with ripple effect
+ */
+interface AnimatedClueProps {
+  clue: Clue
+  delay: number
+  isExiting: boolean
+  boundary: GeoBoundary
+  size: { width: number; height: number }
+  scale: number
+  theme: MapTheme
+}
+
+const AnimatedClue = memo(({ clue, delay, isExiting, boundary, size, scale, theme }: AnimatedClueProps) => {
+  const animatedStyle = useClueRippleAnimation(delay, isExiting)
+  const position = mapUtils.coordinatesToPosition(clue.location, boundary, size)
+  const clueSize = CLUE_SIZE * scale
+  const styles = createClueStyles(theme, clueSize, scale)
+
+  return (
+    <Animated.View
+      style={[
+        animatedStyle,
+        styles.animatedContainer,
+        {
+          left: position.x,
+          top: position.y,
+        }
+      ]}
+    >
+      <ClueDiscoveryRadius clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} />
+      <ClueDebugCircles clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} />
+      <View style={styles.clueMarker} />
+    </Animated.View>
+  )
+})
+
+interface ClueWithState {
+  clue: Clue
+  delay: number
+  isExiting: boolean
+}
+
+/**
+ * Hook to manage clue lifecycle with fade in/out animations
+ * Handles adding new clues with ripple delay and removing old clues with fade out
+ */
+const useScanCluesWithLifecycle = (scanClues: Clue[], deviceLocation: { lat: number; lon: number }): ClueWithState[] => {
+  const [visibleClues, setVisibleClues] = useState<ClueWithState[]>([])
+
+  useEffect(() => {
+    // Extract IDs for comparison
+    const currentIds = scanClues.map(c => c.spotId || c.id)
+    const visibleIds = visibleClues.map(c => c.clue.spotId || c.clue.id)
+
+    // Add new clues
+    const cluesToAdd = scanClues.filter(clue => {
+      const id = clue.spotId || clue.id
+      return !visibleIds.includes(id)
+    })
+
+    if (cluesToAdd.length > 0) {
+      const newClues = cluesToAdd.map(clue => {
+        const distance = geoUtils.calculateDistance(deviceLocation, clue.location)
+        const delay = Math.min(distance * RIPPLE_DELAY_FACTOR, MAX_RIPPLE_DELAY)
+        return { clue, delay, isExiting: false }
+      })
+      setVisibleClues(prev => [...prev, ...newClues])
+
+      // Trigger haptic feedback when new clues appear
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+    }
+
+    // Mark removed clues as exiting
+    const idsToRemove = visibleIds.filter(id => !currentIds.includes(id))
+
+    if (idsToRemove.length > 0) {
+      setVisibleClues(prev => prev.map(item => {
+        const id = item.clue.spotId || item.clue.id
+        return idsToRemove.includes(id) ? { ...item, isExiting: true } : item
+      }))
+
+      // Remove after fade out animation
+      setTimeout(() => {
+        setVisibleClues(prev => prev.filter(item => {
+          const id = item.clue.spotId || item.clue.id
+          return !idsToRemove.includes(id)
+        }))
+      }, FADE_OUT_DURATION)
+    }
+  }, [scanClues, deviceLocation])
+
+  return visibleClues
 }
 
 interface MapCluesProps {
@@ -65,126 +242,57 @@ interface MapCluesProps {
 }
 
 /**
- * Component that renders map clues with animation support for scan events
- * Props-based: boundary and size determine positioning
+ * Component that renders map clues with ripple animation for scan events
  */
 function MapClues({ boundary, size, scale }: MapCluesProps) {
   const previewClues = useDiscoveryPreviewClues() ?? []
   const scannedClues = useDiscoveryScannedClues()
-  const mapTheme = useMapTheme()
+  const device = useMapDevice()
+  const theme = useMapTheme()
 
-  const { visibleClues, animatedStyle } = useScanCluesAnimation(scannedClues)
-
-  // Pre-calculate all clue positions
-  // Memoized: only recalc when boundary or size changes
-  const previewPositions = useMemo(() => {
-    return previewClues.map(clue => ({
-      clue,
-      position: mapUtils.coordinatesToPosition(
-        clue.location,
-        boundary,
-        size
-      )
-    }))
-  }, [previewClues, boundary, size.width, size.height])
-
-  const scannedPositions = useMemo(() => {
-    return visibleClues.map(clue => ({
-      clue,
-      position: mapUtils.coordinatesToPosition(
-        clue.location,
-        boundary,
-        size
-      )
-    }))
-  }, [visibleClues, boundary, size.width, size.height])
-
-  // Render discovery radius circle around clue
-  const renderDiscoveryRadius = (clue: Clue) => {
-    const circle = mapUtils.calculateCircleDimensions(clue.location, clue.discoveryRadius, boundary, size)
-    return (
-      <View
-        key="discovery-radius"
-        style={{
-          position: 'absolute',
-          ...circle,
-          borderRadius: circle.width / 2,
-          backgroundColor: 'rgba(100, 150, 255, 0.15)',
-          borderWidth: 1.5 * scale,
-          borderColor: 'rgba(100, 150, 255, 0.4)',
-        }}
-      />
-    )
-  }
-
-  // Render debug radius circles around clue (50m, 100m, 150m)
-  const renderDebugCircles = (clue: Clue) => {
-    if (!config.debug.enableMapDebug) return null
-
-    return DEBUG_RADIUS_CIRCLES.map(radius => {
-      const circle = mapUtils.calculateCircleDimensions(clue.location, radius, boundary, size)
-      return (
-        <View
-          key={radius}
-          style={{
-            position: 'absolute',
-            ...circle,
-            borderRadius: circle.width / 2,
-            borderWidth: 1 * scale,
-            borderColor: 'rgba(255, 0, 0, 0.3)',
-            borderStyle: 'dashed',
-          }}
-        />
-      )
-    })
-  }
-
-  // Render clue marker at pre-calculated position
-  const renderClueMarker = ({ clue, position }: { clue: Clue; position: { x: number; y: number } }, index: number) => (
-    <View key={clue.spotId || index}>
-      {renderDiscoveryRadius(clue)}
-      {renderDebugCircles(clue)}
-      <View
-        key={clue.spotId || index}
-        style={[
-          clueMarkerStyle({
-            fill: mapTheme.clue.fill,
-            strokeColor: mapTheme.clue.strokeColor,
-            strokeWidth: mapTheme.clue.strokeWidth
-          }),
-          {
-            position: 'absolute',
-            left: position.x - (CLUE_SIZE / 2 * scale),
-            top: position.y - (CLUE_SIZE / 2 * scale),
-            width: CLUE_SIZE * scale,
-            height: CLUE_SIZE * scale,
-            borderRadius: (CLUE_SIZE * scale) / 2,
-          }
-        ]}
-      />
-    </View>
-  )
+  const scannedCluesWithState = useScanCluesWithLifecycle(scannedClues, device.location)
 
   return (
     <>
       {/* Static preview clues */}
-      {previewPositions.map(renderClueMarker)}
+      {previewClues.map((clue, index) => {
+        const position = mapUtils.coordinatesToPosition(clue.location, boundary, size)
+        const clueSize = CLUE_SIZE * scale
+        const styles = createClueStyles(theme, clueSize, scale)
 
-      {/* Animated scan clues */}
-      <Animated.View style={animatedStyle}>
-        {scannedPositions.map(renderClueMarker)}
-      </Animated.View>
+        return (
+          <View
+            key={clue.spotId || index}
+            style={[
+              styles.animatedContainer,
+              {
+                left: position.x,
+                top: position.y,
+              }
+            ]}
+          >
+            <ClueDiscoveryRadius clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} />
+            <ClueDebugCircles clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} />
+            <View style={styles.clueMarker} />
+          </View>
+        )
+      })}
+
+      {/* Animated scan clues with ripple effect */}
+      {scannedCluesWithState.map(({ clue, delay, isExiting }, index) => (
+        <AnimatedClue
+          key={clue.spotId || index}
+          clue={clue}
+          delay={delay}
+          isExiting={isExiting}
+          boundary={boundary}
+          size={size}
+          scale={scale}
+          theme={theme}
+        />
+      ))}
     </>
   )
 }
-
-// Helper function for clue marker styling
-const clueMarkerStyle = (style: { fill: string; strokeColor: string; strokeWidth: number }) => ({
-  backgroundColor: style.fill,
-  borderWidth: style.strokeWidth,
-  borderColor: style.strokeColor,
-  justifyContent: 'center' as const,
-  alignItems: 'center' as const,
-})
 
 export default memo(MapClues)

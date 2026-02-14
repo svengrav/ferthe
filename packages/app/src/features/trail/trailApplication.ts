@@ -61,7 +61,7 @@ export function createTrailApplication(options: TrailApplicationOptions) {
   const getTrailStats = async (trailId: string): Promise<Result<TrailStats>> => {
     const accountSession = await getSession()
     if (!accountSession.data) {
-      return { success: false, error: 'Account session not found' }
+      return { success: false, error: { message: 'Account session not found', code: 'SESSION_NOT_FOUND' } }
     }
     return await trailAPI.getTrailStats(accountSession.data, trailId)
   }

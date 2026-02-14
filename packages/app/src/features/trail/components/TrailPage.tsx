@@ -74,8 +74,6 @@ function TrailPage(props: TrailPageProps) {
 
 const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
-    borderWidth: 1,
-    borderColor: 'yellow',
     flex: 1,
     gap: theme.tokens.spacing.sm,
   },

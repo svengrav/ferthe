@@ -1,4 +1,4 @@
-import { Account, AccountSession, Community, CommunityMember, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryProfile, DiscoveryReaction, ImageApplicationContract, SharedDiscovery, Spot, Trail, TrailApplicationContract, TrailSpot, TwilioVerification } from '@shared/contracts/index.ts'
+import { Account, AccountSession, Community, CommunityMember, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryProfile, DiscoveryReaction, ImageApplicationContract, SharedDiscovery, StoredSpot, StoredTrail, TrailApplicationContract, TrailSpot, TwilioVerification } from '@shared/contracts/index.ts'
 import { Buffer } from "node:buffer"
 import { Config, STORE_IDS } from './config/index.ts'
 import { SMSConnector } from './connectors/smsConnector.ts'
@@ -17,7 +17,7 @@ import { createStore } from './store/storeFactory.ts'
 import { StoreInterface } from './store/storeInterface.ts'
 
 export interface StorageConnector {
-  getItemUrl(key: string): Promise<{ id: string; url: string }>
+  getItemUrl(key: string): Promise<{ id: string; url: string } | null>
   uploadFile(path: string, data: Buffer | string, metadata?: Record<string, string>): Promise<string>
   uploadFileWithPreview(path: string, data: Buffer, previewData: Buffer, metadata?: Record<string, string>): Promise<{ url: string; previewUrl: string }>
   deleteFile(path: string): Promise<void>
@@ -50,14 +50,15 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
   })
 
   const trailApplication = createTrailApplication({
-    trailStore: createStore<Trail>(storeConnector, STORE_IDS.TRAILS),
-    spotStore: createStore<Spot>(storeConnector, STORE_IDS.SPOTS),
+    trailStore: createStore<StoredTrail>(storeConnector, STORE_IDS.TRAILS),
+    spotStore: createStore<StoredSpot>(storeConnector, STORE_IDS.SPOTS),
     trailSpotStore: createStore<TrailSpot>(storeConnector, STORE_IDS.TRAIL_SPOTS),
     discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
+    imageApplication,
   })
 
   const spotApplication = createSpotApplication({
-    spotStore: createStore<Spot>(storeConnector, STORE_IDS.SPOTS),
+    spotStore: createStore<StoredSpot>(storeConnector, STORE_IDS.SPOTS),
   })
 
   const accountApplication = createAccountApplication({

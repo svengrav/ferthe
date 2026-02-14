@@ -1,5 +1,6 @@
 import { BlobSASPermissions, BlobServiceClient, generateBlobSASQueryParameters, StorageSharedKeyCredential } from '@azure/storage-blob';
 import { Buffer } from "node:buffer";
+import { logger } from '@core/shared/logger.ts';
 
 export interface StorageItem {
   id: string
@@ -15,7 +16,7 @@ interface StorageConnectorOptions {
 }
 
 export interface StorageConnector {
-  getItemUrl(key: string): Promise<StorageItem>
+  getItemUrl(key: string): Promise<StorageItem | null>
   uploadFile(path: string, data: Buffer | string, metadata?: Record<string, string>): Promise<string>
   uploadFileWithPreview(path: string, data: Buffer, previewData: Buffer, metadata?: Record<string, string>): Promise<{ url: string; previewUrl: string }>
   deleteFile(path: string): Promise<void>
@@ -59,13 +60,14 @@ export const createAzureStorageConnector = (
     return containerClient.getBlobClient(key)
   }
 
-  const getItemUrl = async (key: string): Promise<StorageItem> => {
+  const getItemUrl = async (key: string): Promise<StorageItem | null> => {
     try {
       const blobClient = await getBlobClient(key)
       const exists = await blobClient.exists()
 
       if (!exists) {
-        throw new Error(`Item with key ${key} not found`)
+        logger.warn(`Storage item not found: ${key}`)
+        return null
       }
 
       // Generate SAS token
@@ -85,7 +87,7 @@ export const createAzureStorageConnector = (
         url: urlWithSAS,
       }
     } catch (error) {
-      console.error('Error getting item:', error)
+      logger.error('Error getting storage item', { key, error })
       throw error
     }
   }
