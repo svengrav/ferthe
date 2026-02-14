@@ -133,21 +133,21 @@ const uploadImage = async (options: UploadOptions) => {
 
   if (shouldGeneratePreview) {
     console.log('🔄 Processing image (resize + compress + blur preview)...')
-    
+
     // Convert buffer to base64 data URL
     const base64 = `data:image/${detectExtension(options.imagePath)};base64,${buffer.toString('base64')}`
-    
+
     // Process image to create optimized original + blurred preview
     const processed = await processImage(base64)
-    
+
     // Generate blob paths (always .jpg after compression, with v1/images/ prefix)
-    blobPath = options.customId 
+    blobPath = options.customId
       ? `v1/images/${options.customId}.${processed.extension}`
       : generateSecureImagePath(processed.extension)
     previewBlobPath = getBlurredPath(blobPath)
-    
+
     console.log(`📦 Compressed: ${(buffer.length / 1024).toFixed(2)} KB → ${(processed.original.length / 1024).toFixed(2)} KB`)
-    
+
     // Upload both original and preview
     await storageConnector.uploadFileWithPreview(
       blobPath,
@@ -155,24 +155,24 @@ const uploadImage = async (options: UploadOptions) => {
       processed.blurred,
       blobMetadata
     )
-    
+
     console.log(`✅ Uploaded original and preview`)
   } else {
     console.log('🔄 Processing image (resize + compress)...')
-    
+
     // Convert buffer to base64 data URL
     const base64 = `data:image/${detectExtension(options.imagePath)};base64,${buffer.toString('base64')}`
-    
+
     // Process image to create optimized version
     const processed = await processImage(base64)
-    
+
     // Generate blob path (always .jpg after compression, with v1/images/ prefix)
-    blobPath = options.customId 
+    blobPath = options.customId
       ? `v1/images/${options.customId}.${processed.extension}`
       : generateSecureImagePath(processed.extension)
-    
+
     console.log(`📦 Compressed: ${(buffer.length / 1024).toFixed(2)} KB → ${(processed.original.length / 1024).toFixed(2)} KB`)
-    
+
     await storageConnector.uploadFile(blobPath, processed.original, blobMetadata)
     console.log(`✅ Uploaded`)
   }

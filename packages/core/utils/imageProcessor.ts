@@ -48,7 +48,7 @@ export async function processImage(
 
     // Create blurred preview version
     const previewImage = image.clone()
-    
+
     // Resize preview if needed
     if (previewImage.getWidth() > previewMaxWidth) {
       previewImage.resize(previewMaxWidth, Jimp.AUTO)
