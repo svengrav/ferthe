@@ -15,7 +15,10 @@ interface OverlayGesturesConfig {
   canvasSize: { width: number; height: number }
   screenSize: { width: number; height: number }
   zoomLimits: { min: number; max: number }
+  initialScale?: number
+  initialOffset?: { x: number; y: number }
   onScaleChange?: (scale: number) => void
+  onGestureEnd?: (scale: number, offsetX: number, offsetY: number) => void
 }
 
 interface OverlayGesturesResult {
@@ -30,20 +33,20 @@ interface OverlayGesturesResult {
  * Handles elastic boundaries and scale resistance
  */
 export const useOverlayGestures = (config: OverlayGesturesConfig): OverlayGesturesResult => {
-  const { canvasSize, screenSize, zoomLimits, onScaleChange } = config
+  const { canvasSize, screenSize, zoomLimits, initialScale = 1, initialOffset = { x: 0, y: 0 }, onScaleChange, onGestureEnd } = config
   const containerRef = useRef<View>(null)
   const MIN_SCALE = zoomLimits.min
   const MAX_SCALE = zoomLimits.max
 
   // Zoom state
-  const scale = useSharedValue(1)
-  const baseScale = useSharedValue(1)
+  const scale = useSharedValue(initialScale)
+  const baseScale = useSharedValue(initialScale)
 
   // Pan state
-  const translationX = useSharedValue(0)
-  const translationY = useSharedValue(0)
-  const prevTranslationX = useSharedValue(0)
-  const prevTranslationY = useSharedValue(0)
+  const translationX = useSharedValue(initialOffset.x)
+  const translationY = useSharedValue(initialOffset.y)
+  const prevTranslationX = useSharedValue(initialOffset.x)
+  const prevTranslationY = useSharedValue(initialOffset.y)
 
   // Calculate translation bounds based on current scale
   const calculateBounds = () => {
@@ -104,6 +107,7 @@ export const useOverlayGestures = (config: OverlayGesturesConfig): OverlayGestur
       const { maxTranslateX, maxTranslateY } = calculateBounds()
       translationX.value = withSpring(applyBounds(translationX.value, maxTranslateX))
       translationY.value = withSpring(applyBounds(translationY.value, maxTranslateY))
+      onGestureEnd && scheduleOnRN(onGestureEnd, scale.value, translationX.value, translationY.value)
     })
 
   // Pinch gesture with scale limits
@@ -139,6 +143,7 @@ export const useOverlayGestures = (config: OverlayGesturesConfig): OverlayGestur
       const { maxTranslateX, maxTranslateY } = calculateBounds()
       translationX.value = withSpring(applyBounds(translationX.value, maxTranslateX))
       translationY.value = withSpring(applyBounds(translationY.value, maxTranslateY))
+      onGestureEnd && scheduleOnRN(onGestureEnd, scale.value, translationX.value, translationY.value)
     })
 
   // Mouse wheel zoom (web)

@@ -9,6 +9,7 @@ export {
   useMapCompass,
   useMapDevice,
   useMapLayer,
+  useMapOverlay,
   useMapScanner,
   useMapSnap,
   useMapSpotTap,

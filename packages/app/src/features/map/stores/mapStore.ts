@@ -26,6 +26,10 @@ export interface MapState {
     offset: { x: number; y: number }
     boundary: GeoBoundary
   }
+  overlay: {
+    scale: { init: number; min: number; max: number }
+    offset: { x: number; y: number }
+  }
   device: { heading: number; location: GeoLocation; direction: string }
   scanner: { radius: number }
   snap: { startPoint: GeoLocation; endPoint: GeoLocation; intensity: number }
@@ -39,6 +43,7 @@ export interface MapActions {
   setContainer: (container: Partial<MapState['container']>) => void
   setSurface: (surface: Partial<MapState['surface']>) => void
   setViewport: (viewport: Partial<MapState['viewport']>) => void
+  setOverlay: (overlay: Partial<MapState['overlay']>) => void
   setDevice: (device: Partial<MapState['device']>) => void
   setScanner: (scanner: MapState['scanner']) => void
   setSnap: (snap: MapState['snap']) => void
@@ -71,6 +76,11 @@ export const useMapStore = create<MapState & MapActions>(set => ({
     boundary: DEFAULT_BOUNDARY,
   },
 
+  overlay: {
+    scale: { init: 1, min: 0.5, max: 3 },
+    offset: { x: 0, y: 0 },
+  },
+
   device: {
     heading: 0,
     location: DEFAULT_LOCATION,
@@ -93,6 +103,7 @@ export const useMapStore = create<MapState & MapActions>(set => ({
   setContainer: container => set(state => ({ container: { ...state.container, ...container } })),
   setSurface: surface => set(state => ({ surface: { ...state.surface, ...surface } })),
   setViewport: viewport => set(state => ({ viewport: { ...state.viewport, ...viewport } })),
+  setOverlay: overlay => set(state => ({ overlay: { ...state.overlay, ...overlay } })),
   setDevice: device => set(state => ({ device: { ...state.device, ...device } })),
   setScanner: scanner => set({ scanner }),
   setSnap: snap => set({ snap }),
@@ -118,6 +129,9 @@ export const useMapSurfaceLayout = () => useMapStore(useShallow(state => state.s
 export const useMapViewport = () => useMapStore(useShallow(state => state.viewport))
 export const useViewportDimensions = () => useMapStore(useShallow(state => state.viewport.size))
 export const useViewportScale = () => useMapStore(state => state.viewport.scale.init)
+
+// Overlay (overview mode zoom/pan)
+export const useMapOverlay = () => useMapStore(useShallow(state => state.overlay))
 
 // Device (location + heading)
 export const useMapDevice = () => useMapStore(useShallow(state => state.device))
@@ -204,6 +218,7 @@ export const getMapStoreActions = () => ({
   setContainer: useMapStore.getState().setContainer,
   setSurface: useMapStore.getState().setSurface,
   setViewport: useMapStore.getState().setViewport,
+  setOverlay: useMapStore.getState().setOverlay,
   setDevice: useMapStore.getState().setDevice,
   setScanner: useMapStore.getState().setScanner,
   setSnap: useMapStore.getState().setSnap,

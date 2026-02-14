@@ -24,6 +24,8 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
   const { setDevice, setSnap, setState, setSurface, setViewport } = getMapStoreActions()
   const { getCompass, calculateMapSnap, calculateOptimalScale } = getMapService()
 
+  let lastTrailId: string | undefined
+
   sensor?.onDeviceUpdate(device => {
     const { trail, snap, spots, lastDiscovery } = getDiscoveryTrailData()
     const currentState = getMapState()
@@ -50,7 +52,9 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     })
   })
 
-  discoveryApplication?.onDiscoveryTrailUpdate(trail => {
+  discoveryApplication?.onDiscoveryTrailUpdate(state => {
+    // Only reinitialize map when trail actually changes (not for clue updates)
+    if (state.trail.id === lastTrailId) return;
     newMapState()
   })
 

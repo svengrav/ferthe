@@ -7,7 +7,7 @@ import { useApp } from '@app/shared/useApp'
 import { GeoBoundary } from '@shared/geo'
 import { useOverlayCompensatedScale } from '../hooks/useOverlayCompensatedScale'
 import { useOverlayGestures } from '../hooks/useOverlayGestures'
-import { useMapContainerSize, useMapSurfaceBoundary } from '../stores/mapStore'
+import { getMapStoreActions, useMapContainerSize, useMapOverlay, useMapSurfaceBoundary } from '../stores/mapStore'
 import { mapUtils } from '../utils/geoToScreenTransform'
 import MapClues from './surface/MapClues'
 import MapDeviceMarker from './surface/MapDeviceMarker'
@@ -27,6 +27,8 @@ function MapOverlay() {
   const { styles } = useApp(useStyles)
   const trailBoundary = useMapSurfaceBoundary()
   const screenSize = useMapContainerSize()
+  const overlay = useMapOverlay()
+  const { setOverlay } = getMapStoreActions()
 
   const canvasSize = calculateCanvasSize(trailBoundary, screenSize)
   const zoomLimits = mapUtils.calculateOverlayZoomLimits(
@@ -36,18 +38,38 @@ function MapOverlay() {
     MAX_ZOOM_METERS
   )
 
+  // Calculate initial scale: 
+  // - Use stored value if user has zoomed (not default 1)
+  // - Otherwise fit entire trail to screen (zoomLimits.min)
+  // - Clamp to valid range in case trail boundaries changed
+  const storedScale = overlay.scale.init
+  const hasUserZoomed = storedScale !== 1
+  const unclamped = hasUserZoomed ? storedScale : zoomLimits.min
+  const initialScale = Math.max(zoomLimits.min, Math.min(zoomLimits.max, unclamped))
+
   // Setup compensated scale for child elements
   const { compensatedScale, onScaleChange } = useOverlayCompensatedScale({
     canvasSize,
     screenSize,
   })
 
+  // Persist zoom/pan state to store
+  const handleGestureEnd = (scale: number, offsetX: number, offsetY: number) => {
+    setOverlay({
+      scale: { ...overlay.scale, init: scale, min: zoomLimits.min, max: zoomLimits.max },
+      offset: { x: offsetX, y: offsetY },
+    })
+  }
+
   // Setup gestures with calculated zoom limits
   const { gesture, animatedStyle, containerRef } = useOverlayGestures({
     canvasSize,
     screenSize,
     zoomLimits,
+    initialScale,
+    initialOffset: overlay.offset,
     onScaleChange,
+    onGestureEnd: handleGestureEnd,
   })
 
   const dynamicSurfaceStyle = {
@@ -89,13 +111,31 @@ const calculateCanvasSize = (boundary: GeoBoundary, screenSize: { width: number;
   const availableWidth = screenSize.width - CANVAS_MARGIN
   const availableHeight = screenSize.height - CANVAS_MARGIN
 
+  // Calculate canvas size that fits within available space while maintaining aspect ratio
+  let canvasWidth: number
+  let canvasHeight: number
+
   if (aspectRatio > 1) {
-    const canvasWidth = Math.min(availableWidth, MAX_CANVAS_DIMENSION)
-    return { width: canvasWidth, height: canvasWidth / aspectRatio }
+    // Trail is wider - fit to width first
+    canvasWidth = Math.min(availableWidth, MAX_CANVAS_DIMENSION)
+    canvasHeight = canvasWidth / aspectRatio
+    // Check if height exceeds available space
+    if (canvasHeight > availableHeight) {
+      canvasHeight = availableHeight
+      canvasWidth = canvasHeight * aspectRatio
+    }
   } else {
-    const canvasHeight = Math.min(availableHeight, MAX_CANVAS_DIMENSION)
-    return { width: canvasHeight * aspectRatio, height: canvasHeight }
+    // Trail is taller - fit to height first
+    canvasHeight = Math.min(availableHeight, MAX_CANVAS_DIMENSION)
+    canvasWidth = canvasHeight * aspectRatio
+    // Check if width exceeds available space
+    if (canvasWidth > availableWidth) {
+      canvasWidth = availableWidth
+      canvasHeight = canvasWidth / aspectRatio
+    }
   }
+
+  return { width: canvasWidth, height: canvasHeight }
 }
 
 const useStyles = createThemedStyles(theme => ({

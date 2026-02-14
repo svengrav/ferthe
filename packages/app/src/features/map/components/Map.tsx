@@ -81,7 +81,7 @@ const createStyles = (theme: Theme, mapTheme: MapTheme, size: { width: number; h
   contentContainer: {
     position: 'relative' as const,
     height: '100%' as const,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.deriveColor(theme.colors.background, 0.4),
     justifyContent: 'center' as const,
     alignItems: 'center' as const,
     flex: 1,

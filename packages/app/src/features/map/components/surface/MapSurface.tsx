@@ -21,7 +21,7 @@ function MapSurface() {
       top: layout.top,
       width: layout.width,
       height: layout.height,
-    }]}>
+    }]} id="map-surface-image">
       {image && (
         <Image
           source={{ uri: image }}
@@ -38,6 +38,7 @@ const useStyles = createThemedStyles(theme => ({
   inner: {
     zIndex: 0,
     position: 'absolute',
+    backgroundColor: theme.colors.background,
   },
   image: {
     opacity: MAP_IMAGE_OPACITY,

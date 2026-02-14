@@ -8,7 +8,6 @@ import { createThemedStyles } from '../../theme'
 import { useApp } from '../../useApp'
 
 const LABEL_MAX_LENGTH = 2
-const BLUR_RADIUS = 10
 const LABEL_SIZE_RATIO = 0.4
 
 interface ImageProps {
@@ -97,7 +96,6 @@ export function Image({
           source={{ uri: previewUri }}
           style={styles.image}
           resizeMode={resizeMode}
-          blurRadius={BLUR_RADIUS}
         />
       )}
 
