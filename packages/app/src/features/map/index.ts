@@ -4,7 +4,6 @@ export { createMapApplication, type MapApplication } from './mapApplication'
 
 // Hooks - State
 export {
-  useCompensatedScale,
   useDeviceBoundaryStatus,
   useMapCompass,
   useMapDevice,
@@ -23,6 +22,9 @@ export {
   useViewportScale,
   useViewportValues
 } from './stores/mapStore'
+
+// Hooks - Derived (from Context)
+export { useCompensatedScale } from './components/MapViewport'
 
 // Hooks - Actions
 export { useSetActiveLayer, useSetTappedSpot } from './stores/mapStore'

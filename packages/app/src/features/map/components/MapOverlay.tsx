@@ -5,7 +5,6 @@ import Animated from 'react-native-reanimated'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { GeoBoundary } from '@shared/geo'
-import { useOverlayCompensatedScale } from '../hooks/useOverlayCompensatedScale'
 import { useOverlayGestures } from '../hooks/useOverlayGestures'
 import { getMapStoreActions, useMapContainerSize, useMapOverlay, useMapSurfaceBoundary } from '../stores/mapStore'
 import { mapUtils } from '../utils/geoToScreenTransform'
@@ -13,6 +12,7 @@ import MapClues from './surface/MapClues'
 import MapDeviceMarker from './surface/MapDeviceMarker'
 import MapSpots from './surface/MapSpots'
 import MapTrailPath from './surface/MapTrailPath'
+import { CompensatedScaleProvider } from './surface/MapViewport'
 
 const DEFAULT_CANVAS_SIZE = 800
 const MAX_CANVAS_DIMENSION = 1000
@@ -47,12 +47,6 @@ function MapOverlay() {
   const unclamped = hasUserZoomed ? storedScale : zoomLimits.min
   const initialScale = Math.max(zoomLimits.min, Math.min(zoomLimits.max, unclamped))
 
-  // Setup compensated scale for child elements
-  const { compensatedScale, onScaleChange } = useOverlayCompensatedScale({
-    canvasSize,
-    screenSize,
-  })
-
   // Persist zoom/pan state to store
   const handleGestureEnd = (scale: number, offsetX: number, offsetY: number) => {
     setOverlay({
@@ -61,14 +55,13 @@ function MapOverlay() {
     })
   }
 
-  // Setup gestures with calculated zoom limits
-  const { gesture, animatedStyle, containerRef } = useOverlayGestures({
+  // Setup gestures with calculated zoom limits and compensated scale
+  const { gesture, animatedStyle, containerRef, compensatedScale } = useOverlayGestures({
     canvasSize,
     screenSize,
     zoomLimits,
     initialScale,
     initialOffset: overlay.offset,
-    onScaleChange,
     onGestureEnd: handleGestureEnd,
   })
 
@@ -82,10 +75,12 @@ function MapOverlay() {
       <GestureHandlerRootView style={styles?.gestureContainer}>
         <GestureDetector gesture={gesture}>
           <Animated.View style={[styles?.mapSurface, dynamicSurfaceStyle, animatedStyle]}>
-            <MapTrailPath boundary={trailBoundary} size={canvasSize} scale={compensatedScale} />
-            <MapClues boundary={trailBoundary} size={canvasSize} scale={compensatedScale} />
-            <MapSpots boundary={trailBoundary} size={canvasSize} scale={compensatedScale} />
-            <MapDeviceMarker mode="overview" canvasSize={canvasSize} boundary={trailBoundary} scale={compensatedScale} />
+            <CompensatedScaleProvider value={compensatedScale}>
+              <MapTrailPath boundary={trailBoundary} size={canvasSize} />
+              <MapClues boundary={trailBoundary} size={canvasSize} />
+              <MapSpots boundary={trailBoundary} size={canvasSize} />
+              <MapDeviceMarker mode="overview" canvasSize={canvasSize} boundary={trailBoundary} />
+            </CompensatedScaleProvider>
           </Animated.View>
         </GestureDetector>
       </GestureHandlerRootView>

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { View } from 'react-native'
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler'
-import { SharedValue, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
+import { SharedValue, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 
 // Gesture constants
@@ -10,6 +10,12 @@ const PAN_RESISTANCE = 0.3
 const EDGE_PADDING = 30
 const WHEEL_ZOOM_SENSITIVITY = 0.002
 const ELASTIC_PAN_DISTANCE = 80
+
+// Compensated scale constants
+const MIN_COMPENSATED = 0.6
+const MAX_COMPENSATED = 1.8
+const COMPENSATION_FACTOR = 1.2
+const DAMPENING = 0.7
 
 interface OverlayGesturesConfig {
   canvasSize: { width: number; height: number }
@@ -26,6 +32,7 @@ interface OverlayGesturesResult {
   animatedStyle: ReturnType<typeof useAnimatedStyle>
   containerRef: React.RefObject<View | null>
   scale: SharedValue<number>
+  compensatedScale: SharedValue<number>
 }
 
 /**
@@ -47,6 +54,13 @@ export const useOverlayGestures = (config: OverlayGesturesConfig): OverlayGestur
   const translationY = useSharedValue(initialOffset.y)
   const prevTranslationX = useSharedValue(initialOffset.x)
   const prevTranslationY = useSharedValue(initialOffset.y)
+
+  // Calculate compensated scale for child elements (synchronized with zoom)
+  const compensatedScale = useDerivedValue(() => {
+    const baseCompensation = (1 / scale.value) * COMPENSATION_FACTOR
+    const compensated = 1 + (baseCompensation - 1) * DAMPENING
+    return Math.max(MIN_COMPENSATED, Math.min(MAX_COMPENSATED, compensated))
+  }, [scale])
 
   // Calculate translation bounds based on current scale
   const calculateBounds = () => {
@@ -183,5 +197,5 @@ export const useOverlayGestures = (config: OverlayGesturesConfig): OverlayGestur
     ],
   }))
 
-  return { gesture, animatedStyle, containerRef, scale }
+  return { gesture, animatedStyle, containerRef, scale, compensatedScale }
 }

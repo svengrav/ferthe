@@ -1,7 +1,7 @@
-import { ReactNode } from 'react'
+import { createContext, ReactNode, useContext } from 'react'
 import { LayoutChangeEvent, View } from 'react-native'
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
-import Animated from 'react-native-reanimated'
+import Animated, { SharedValue } from 'react-native-reanimated'
 
 import { getAppContext } from '@app/appContext'
 import { config } from '@app/config'
@@ -13,6 +13,27 @@ import { useViewportGestures } from '../../hooks/useViewportGestures'
 import { getMapState, getViewportActions, useMapSurfaceBoundary, useMapViewport } from '../../stores/mapStore'
 import { mapUtils } from '../../utils/geoToScreenTransform'
 import { MapViewportDebug } from './MapViewportDebug'
+
+// Context for compensated scale
+const CompensatedScaleContext = createContext<SharedValue<number> | null>(null)
+
+/**
+ * Provider component for compensated scale context
+ * Exported for use in MapOverlay
+ */
+export const CompensatedScaleProvider = CompensatedScaleContext.Provider
+
+/**
+ * Hook to access compensated scale for map elements
+ * Works in both MapViewport and MapOverlay contexts
+ */
+export const useCompensatedScale = (): SharedValue<number> => {
+  const context = useContext(CompensatedScaleContext)
+  if (!context) {
+    throw new Error('useCompensatedScale must be used within CompensatedScaleProvider')
+  }
+  return context
+}
 
 interface MapViewportProps {
   children: ReactNode
@@ -49,7 +70,7 @@ function MapViewport(props: MapViewportProps) {
     actions.setViewport({ scale: { ...currentScale, init: s }, offset: { x: tx, y: ty } })
   }
 
-  const { gesture, animatedStyles } = useViewportGestures({
+  const { gesture, animatedStyles, compensatedScale } = useViewportGestures({
     width: size.width,
     height: size.height,
     elementId: 'device-viewport-content',
@@ -64,17 +85,19 @@ function MapViewport(props: MapViewportProps) {
   }
 
   return (
-    <View style={styles?.container} onLayout={handleLayout} id='device-viewport-content'>
-      <GestureHandlerRootView style={size}>
-        <GestureDetector gesture={gesture}>
-          <Animated.View style={[size, animatedStyles, { overflow: 'hidden' }]}>
-            {children}
-          </Animated.View>
-        </GestureDetector>
-      </GestureHandlerRootView>
+    <CompensatedScaleContext.Provider value={compensatedScale}>
+      <View style={styles?.container} onLayout={handleLayout} id='device-viewport-content'>
+        <GestureHandlerRootView style={size}>
+          <GestureDetector gesture={gesture}>
+            <Animated.View style={[size, animatedStyles, { overflow: 'hidden' }]}>
+              {children}
+            </Animated.View>
+          </GestureDetector>
+        </GestureHandlerRootView>
 
-      {config.debug.enableMapDebug && <MapViewportDebug animatedStyles={animatedStyles} />}
-    </View>
+        {config.debug.enableMapDebug && <MapViewportDebug animatedStyles={animatedStyles} />}
+      </View>
+    </CompensatedScaleContext.Provider>
   )
 }
 

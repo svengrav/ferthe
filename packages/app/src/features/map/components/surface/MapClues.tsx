@@ -5,10 +5,11 @@ import { GeoBoundary, geoUtils } from '@shared/geo'
 import * as Haptics from 'expo-haptics'
 import { memo, useEffect, useState } from 'react'
 import { View } from 'react-native'
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated'
+import Animated, { Easing, runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated'
 import { useMapDevice } from '../../stores/mapStore'
 import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
 import { mapUtils } from '../../utils/geoToScreenTransform'
+import { useCompensatedScale } from './MapViewport'
 
 const CLUE_SIZE = 20
 const FADE_IN_DURATION = 300
@@ -45,7 +46,7 @@ const useClueRippleAnimation = (delay: number, isExiting: boolean) => {
 /**
  * Create styles for the clue marker
  */
-const createClueStyles = (theme: MapTheme, clueSize: number, scale: number) => ({
+const createClueStyles = (theme: MapTheme, clueSize: number, scaleValue: number) => ({
   animatedContainer: {
     position: 'absolute' as const,
     width: clueSize,
@@ -60,7 +61,7 @@ const createClueStyles = (theme: MapTheme, clueSize: number, scale: number) => (
     height: clueSize,
     borderRadius: clueSize / 2,
     backgroundColor: theme.clue.fill,
-    borderWidth: theme.clue.strokeWidth * scale,
+    borderWidth: theme.clue.strokeWidth * scaleValue,
     borderColor: theme.clue.strokeColor,
   },
 })
@@ -68,16 +69,16 @@ const createClueStyles = (theme: MapTheme, clueSize: number, scale: number) => (
 /**
  * Create styles for the radius circles
  */
-const createRadiusStyles = (theme: MapTheme, scale: number) => ({
+const createRadiusStyles = (theme: MapTheme, scaleValue: number) => ({
   discoveryRadius: {
     position: 'absolute' as const,
-    borderWidth: theme.radius.strokeWidth * scale,
+    borderWidth: theme.radius.strokeWidth * scaleValue,
     borderColor: theme.radius.strokeColor,
     backgroundColor: theme.radius.fill,
   },
   debugCircle: {
     position: 'absolute' as const,
-    borderWidth: 1 * scale,
+    borderWidth: 1 * scaleValue,
     borderColor: 'rgba(255, 0, 0, 0.3)',
     backgroundColor: 'transparent',
   },
@@ -235,20 +236,40 @@ const useScanCluesWithLifecycle = (scanClues: Clue[], deviceLocation: { lat: num
   return visibleClues
 }
 
+/**
+ * Hook to sync SharedValue to React state for style calculations
+ */
+const useSharedValueAsNumber = (sharedValue: any): number => {
+  const [value, setValue] = useState(sharedValue.value)
+
+  useAnimatedReaction(
+    () => sharedValue.value,
+    (current) => {
+      runOnJS(setValue)(current)
+    },
+    [sharedValue]
+  )
+
+  return value
+}
+
 interface MapCluesProps {
   boundary: GeoBoundary
   size: { width: number; height: number }
-  scale: number
 }
 
 /**
  * Component that renders map clues with ripple animation for scan events
  */
-function MapClues({ boundary, size, scale }: MapCluesProps) {
+function MapClues({ boundary, size }: MapCluesProps) {
   const previewClues = useDiscoveryPreviewClues() ?? []
   const scannedClues = useDiscoveryScannedClues()
   const device = useMapDevice()
   const theme = useMapTheme()
+  const scale = useCompensatedScale()
+
+  // Sync SharedValue to number for style calculations
+  const scaleValue = useSharedValueAsNumber(scale)
 
   const scannedCluesWithState = useScanCluesWithLifecycle(scannedClues, device.location)
 
@@ -257,8 +278,8 @@ function MapClues({ boundary, size, scale }: MapCluesProps) {
       {/* Static preview clues */}
       {previewClues.map((clue, index) => {
         const position = mapUtils.coordinatesToPosition(clue.location, boundary, size)
-        const clueSize = CLUE_SIZE * scale
-        const styles = createClueStyles(theme, clueSize, scale)
+        const clueSize = CLUE_SIZE * scaleValue
+        const styles = createClueStyles(theme, clueSize, scaleValue)
 
         return (
           <View
@@ -271,8 +292,8 @@ function MapClues({ boundary, size, scale }: MapCluesProps) {
               }
             ]}
           >
-            <ClueDiscoveryRadius clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} />
-            <ClueDebugCircles clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} />
+            <ClueDiscoveryRadius clue={clue} boundary={boundary} size={size} scale={scaleValue} theme={theme} />
+            <ClueDebugCircles clue={clue} boundary={boundary} size={size} scale={scaleValue} theme={theme} />
             <View style={styles.clueMarker} />
           </View>
         )
@@ -287,7 +308,7 @@ function MapClues({ boundary, size, scale }: MapCluesProps) {
           isExiting={isExiting}
           boundary={boundary}
           size={size}
-          scale={scale}
+          scale={scaleValue}
           theme={theme}
         />
       ))}

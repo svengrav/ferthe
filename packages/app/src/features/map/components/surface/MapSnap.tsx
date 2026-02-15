@@ -4,16 +4,17 @@ import { memo } from "react"
 import { useMapSnap } from "../../stores/mapStore"
 import { useMapTheme } from "../../stores/mapThemeStore"
 import { GeoPath } from "./MapElements"
+import { useCompensatedScale } from "./MapViewport"
 
 interface MapSnapProps {
   boundary: GeoBoundary
   size: { width: number; height: number }
-  scale: number
 }
 
-function MapSnap({ boundary, size, scale }: MapSnapProps) {
+function MapSnap({ boundary, size }: MapSnapProps) {
   const { startPoint, endPoint, intensity } = useMapSnap()
   const mapTheme = useMapTheme()
+  const scale = useCompensatedScale()
 
   // Don't render if intensity is 0 or if start and end points are the same
   if (intensity === 0) {

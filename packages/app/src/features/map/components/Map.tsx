@@ -2,7 +2,7 @@ import { getAppContext } from '@app/appContext'
 import { useDiscoveryTrailId } from '@app/features/discovery/stores/discoveryTrailStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { View } from 'react-native'
-import { useCompensatedScale, useMapSurface, useMapSurfaceBoundary, useMapSurfaceLayout, useMapViewport, useViewportDimensions } from '../stores/mapStore'
+import { useMapSurface, useMapSurfaceBoundary, useMapSurfaceLayout, useMapViewport, useViewportDimensions } from '../stores/mapStore'
 import { MapTheme, useMapTheme } from '../stores/mapThemeStore'
 import MapDeviceCords from './MapDeviceCords'
 import { MapScanner, MapScannerControl } from './MapScanner'
@@ -23,7 +23,6 @@ export function Map() {
   const { size, boundary: viewportBoundary } = useMapViewport()
   const surfaceLayout = useMapSurfaceLayout()
   const viewportSize = useViewportDimensions()
-  const scale = useCompensatedScale()
   const trailId = useDiscoveryTrailId()
   const mapTheme = useMapTheme()
   const theme = useThemeStore()
@@ -35,13 +34,13 @@ export function Map() {
         <MapDeviceCords />
         <MapViewport>
           <MapSurface />
-          <MapTrailPath boundary={viewportBoundary} size={size} scale={scale} />
-          <MapClues boundary={viewportBoundary} size={size} scale={scale} />
-          <MapSnap boundary={viewportBoundary} size={size} scale={scale} />
+          <MapTrailPath boundary={viewportBoundary} size={size} />
+          <MapClues boundary={viewportBoundary} size={size} />
+          <MapSnap boundary={viewportBoundary} size={size} />
           <MapCenterMarker />
-          <MapSpots boundary={viewportBoundary} size={size} scale={scale} />
+          <MapSpots boundary={viewportBoundary} size={size} />
           <MapScanner />
-          <MapDeviceMarker mode="canvas" canvasSize={viewportSize} scale={scale} />
+          <MapDeviceMarker mode="canvas" canvasSize={viewportSize} />
         </MapViewport>
         <MapScannerControl startScan={() => trailId && sensorApplication.startScan(trailId)} />
       </View>

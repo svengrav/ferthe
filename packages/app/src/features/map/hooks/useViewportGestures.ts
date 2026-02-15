@@ -1,5 +1,5 @@
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler'
-import { SharedValue, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
+import { SharedValue, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useMapContainerSize } from '../stores/mapStore'
 import { calculateMinScale } from '../utils/viewportUtils'
@@ -21,6 +21,7 @@ interface ViewportGestureHandlers {
   gesture: ComposedGesture
   animatedStyles: any
   scale: SharedValue<number>
+  compensatedScale: SharedValue<number>
   translationX: SharedValue<number>
   translationY: SharedValue<number>
 }
@@ -64,6 +65,14 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
   const translationY = useSharedValue(0)
   const prevTranslationX = useSharedValue(0)
   const prevTranslationY = useSharedValue(0)
+
+  // Compensated scale for child elements (keeps markers stable during zoom)
+  const compensatedScale = useDerivedValue(() => {
+    const baseCompensation = (1 / scale.value) * 2
+    const dampening = 0.7
+    const compensated = 1 + (baseCompensation - 1) * dampening
+    return Math.max(0.6, Math.min(1.8, compensated))
+  }, [scale])
 
   // Dummy bounds update function (no bounds in generic viewport)
   const handleBoundsUpdate = () => {
@@ -170,6 +179,7 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
     gesture,
     animatedStyles,
     scale,
+    compensatedScale,
     translationX,
     translationY,
   }

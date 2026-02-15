@@ -3,15 +3,16 @@ import { GeoBoundary } from '@shared/geo'
 import { memo, useMemo } from 'react'
 import { useMapTheme } from '../../stores/mapThemeStore'
 import { GeoPath } from './MapElements'
+import { useCompensatedScale } from './MapViewport'
 
 interface MapTrailPathProps {
   boundary: GeoBoundary
   size: { width: number; height: number }
-  scale: number
 }
 
-function MapTrailPath({ boundary, size, scale }: MapTrailPathProps) {
+function MapTrailPath({ boundary, size }: MapTrailPathProps) {
   const spots = useDiscoverySpots()
+  const scale = useCompensatedScale()
   const points = useMemo(() =>
     spots.map(spot => spot.location),
     [spots]

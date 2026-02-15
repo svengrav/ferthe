@@ -5,9 +5,11 @@ import { DiscoverySpot } from '@shared/contracts'
 import { GeoBoundary } from '@shared/geo'
 import { memo, useMemo } from 'react'
 import { Image, Pressable, View } from 'react-native'
+import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 import { useSetTappedSpot } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
 import { mapUtils } from '../../utils/geoToScreenTransform'
+import { useCompensatedScale } from './MapViewport'
 
 const DEFAULT_SPOT_SIZE = 15
 const DEFAULT_SPOT_HEIGHT_OFFSET = 7
@@ -26,20 +28,22 @@ const FIRST_LETTER_LENGTH = 1
 interface MapSpotsProps {
   boundary: GeoBoundary
   size: { width: number; height: number }
-  scale: number
 }
 
 /**
  * Component that renders spot markers on the map with images or initials
  * Props-based: boundary and size determine positioning
  */
-function MapSpots({ boundary, size, scale }: MapSpotsProps) {
+function MapSpots({ boundary, size }: MapSpotsProps) {
   const mapTheme = useMapTheme()
   const spots = useDiscoverySpots()
   const setTappedSpot = useSetTappedSpot()
+  const scale = useCompensatedScale()
 
-  // Use the scale directly (it's already compensated from MapOverlay)
-  const compensatedScale = scale
+  // Create animated style for scale transform
+  const scaleStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }]
+  }), [scale])
 
   // Pre-calculate all spot positions
   // Memoized: only recalc when boundary or size changes
@@ -86,31 +90,34 @@ function MapSpots({ boundary, size, scale }: MapSpotsProps) {
     const spotInitial = spot.name.substring(FIRST_LETTER_INDEX, FIRST_LETTER_LENGTH)
 
     return (
-      <Pressable
-        onPress={() => setTappedSpot(spot)}
+      <Animated.View
         key={spot.id || index}
-        style={{
-          position: 'absolute',
-          left: position.x - OFFSET_X,
-          top: position.y - OFFSET_Y,
-          zIndex: 99,
-          transform: [{ scale: compensatedScale || 1 }]
-        }}
+        style={[
+          {
+            position: 'absolute',
+            left: position.x - OFFSET_X,
+            top: position.y - OFFSET_Y,
+            zIndex: 99,
+          },
+          scaleStyle
+        ]}
       >
-        <View style={[createMarkerContainerStyle(spotSize)]}>
-          {spot.image?.url ? (
-            <Image
-              source={{ uri: spot.image.url }}
-              style={createImageStyle()}
-              resizeMode="cover"
-            />
-          ) : (
-            <View style={createFallbackTextStyle(spotColor)}>
-              <Text>{spotInitial}</Text>
-            </View>
-          )}
-        </View>
-      </Pressable>
+        <Pressable onPress={() => setTappedSpot(spot)}>
+          <View style={[createMarkerContainerStyle(spotSize)]}>
+            {spot.image?.url ? (
+              <Image
+                source={{ uri: spot.image.url }}
+                style={createImageStyle()}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={createFallbackTextStyle(spotColor)}>
+                <Text>{spotInitial}</Text>
+              </View>
+            )}
+          </View>
+        </Pressable>
+      </Animated.View>
     )
   }
 

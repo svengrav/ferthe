@@ -150,21 +150,6 @@ export const useMapSpotTap = () => useMapStore(state => state.tappedSpot)
 // Computed Hooks (derived values)
 // =============================================================================
 
-/** Compensated scale for UI elements - keeps markers visually stable during zoom */
-export const useCompensatedScale = () => {
-  const scale = useMapStore(state => state.viewport.scale.init)
-  const baseCompensation = (1 / scale) * 2
-  const dampening = 0.7
-  const compensated = 1 + (baseCompensation - 1) * dampening
-  return Math.max(0.6, Math.min(1.8, compensated))
-}
-
-/** Inverse of viewport scale for counter-scaling elements */
-export const useViewportCompensationScale = () => {
-  const scale = useMapStore(state => state.viewport.scale.init)
-  return 1 / scale
-}
-
 /** Device boundary status - calculated from device location and surface boundary */
 export const useDeviceBoundaryStatus = () => {
   const deviceLocation = useMapStore(state => state.device.location)

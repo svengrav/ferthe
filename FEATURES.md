@@ -58,6 +58,7 @@ A Discovery is a unique finding of a user at a specific spot. It is private to y
 - Scanner radius (how far scan reaches)
 - Snap radius (when directional hints appear)
 - Custom map background image (optional)
+- Trail shows stats about how many spots are discovered, how many discoveries you have, and your rank among all discoverers of that trail.
 
 **Discovery Modes:**
 - **Free**: Discover spots in any order, explore freely
@@ -80,8 +81,8 @@ A Discovery is a unique finding of a user at a specific spot. It is private to y
 
 **TODO**
 - Trail Preview shows 4-5 Spots as blurred preview images.
-- Trail shows stats about how many spots are discovered, how many discoveries you have, and your rank among all discoverers of that trail.
-
+- Trail Completed Animation when you discover the last spot of a trail.
+  
 ## Spots
 
 **Definition:**

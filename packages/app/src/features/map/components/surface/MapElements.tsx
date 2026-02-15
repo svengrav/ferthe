@@ -1,10 +1,14 @@
 import { GeoBoundary, GeoLocation } from '@shared/geo'
 import { StyleProp, View, ViewStyle } from 'react-native'
+import Animated, { SharedValue, useAnimatedProps } from 'react-native-reanimated'
 import Svg, { Path } from 'react-native-svg'
 import { JSX } from 'react/jsx-runtime'
 import { mapUtils } from '../../utils/geoToScreenTransform'
 
 const DEFAULT_STROKE_COLOR = '#3498db'
+
+// Create animated Path component
+const AnimatedPath = Animated.createAnimatedComponent(Path)
 
 /**
  * Generates an SVG path data string from an array of geographic coordinates
@@ -30,7 +34,7 @@ interface GeoPathProps {
   points: GeoLocation[]
   boundary: GeoBoundary
   size: { width: number; height: number }
-  scale?: number
+  scale?: SharedValue<number>
   closed?: boolean
   style?: {
     strokeColor?: string
@@ -48,7 +52,7 @@ export const GeoPath = ({
   points,
   boundary,
   size,
-  scale = 1,
+  scale,
   closed = false,
   style = {
     strokeColor: DEFAULT_STROKE_COLOR,
@@ -63,9 +67,24 @@ export const GeoPath = ({
   if (closed) {
     pathData += ' Z'
   }
+
+  // Use animated props for strokeWidth if scale is provided as SharedValue
+  const animatedProps = useAnimatedProps(() => {
+    if (!scale) return { strokeWidth: style.strokeWidth || 1 }
+    return {
+      strokeWidth: (style.strokeWidth || 1) * scale.value
+    }
+  }, [scale, style.strokeWidth])
+
   return (
     <Svg width={size.width} height={size.height} style={[{ position: 'absolute', zIndex: 99 }]} id='trail-path'>
-      <Path d={pathData} stroke={style.strokeColor} strokeWidth={(style.strokeWidth || 1) * scale} strokeDasharray={style.strokeDash} fill={'none'} />
+      <AnimatedPath
+        d={pathData}
+        stroke={style.strokeColor}
+        animatedProps={animatedProps}
+        strokeDasharray={style.strokeDash}
+        fill={'none'}
+      />
     </Svg>
   )
 }

@@ -3,10 +3,12 @@ import { useApp } from '@app/shared/useApp'
 import { GeoBoundary } from '@shared/geo'
 import { memo } from 'react'
 import { View } from 'react-native'
+import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 import Svg, { Circle, Polygon } from 'react-native-svg'
 import { useMapDevice } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
 import { mapUtils } from '../../utils/geoToScreenTransform'
+import { useCompensatedScale } from './MapViewport'
 
 // Arrow SVG constants
 const SVG_VIEWBOX = '0 0 18 18'
@@ -58,7 +60,6 @@ interface MapDeviceMarkerProps {
   mode: 'canvas' | 'overview'
   canvasSize: { width: number; height: number }
   boundary?: GeoBoundary
-  scale?: number
 }
 
 /**
@@ -66,14 +67,19 @@ interface MapDeviceMarkerProps {
  * Canvas mode: Fixed at canvas center - map moves around device
  * Overview mode: Positioned by device location within trail boundary
  */
-function MapDeviceMarker({ mode, canvasSize, boundary, scale = 1 }: MapDeviceMarkerProps) {
+function MapDeviceMarker({ mode, canvasSize, boundary }: MapDeviceMarkerProps) {
   const { styles } = useApp(useMarkerStyles)
   const device = useMapDevice()
   const mapTheme = useMapTheme()
+  const scale = useCompensatedScale()
 
   const fillColor = mapTheme.device.fill || DEFAULT_FILL_COLOR
-  // Use the scale directly (already compensated from parent components)
-  const viewportScale = scale
+
+  // Create animated style for scale (if provided)
+  const scaleStyle = useAnimatedStyle(() => {
+    if (!scale) return {}
+    return { transform: [{ scale: scale.value }] }
+  }, [scale])
 
   let position: { left: number; top: number }
 
@@ -96,9 +102,9 @@ function MapDeviceMarker({ mode, canvasSize, boundary, scale = 1 }: MapDeviceMar
   }
 
   return (
-    <View style={[styles!.marker, position, { transform: [{ scale: viewportScale }] }]}>
+    <Animated.View style={[styles!.marker, position, scaleStyle]}>
       <Arrow rotation={device.heading} fill={fillColor} />
-    </View>
+    </Animated.View>
   )
 }
 
