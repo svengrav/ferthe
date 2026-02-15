@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import Animated, {
+  useAnimatedStyle,
   useSharedValue,
   withDelay,
   withTiming
@@ -47,7 +48,11 @@ const useDiscoveryAnimations = (visible: boolean, mode: 'reveal' | 'instant') =>
     }
   }
 
-  return { fadeIn, triggerReveal }
+  const titleAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: fadeIn.value,
+  }))
+
+  return { titleAnimatedStyle, triggerReveal }
 }
 
 interface DiscoveryCardProps {
@@ -64,7 +69,7 @@ interface DiscoveryCardProps {
 function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: DiscoveryCardProps) {
   const { styles } = useApp(useStyles)
   const { cardWidth, cardHeight, imageHeight, imageWidth } = useCardDimensions({ withPadding: true })
-  const { fadeIn, triggerReveal } = useDiscoveryAnimations(visible, mode)
+  const { titleAnimatedStyle, triggerReveal } = useDiscoveryAnimations(visible, mode)
   const [isFlipped, setIsFlipped] = useState(false)
   const { showDiscoveryCardDetails } = useDiscoveryCardPage()
 
@@ -147,7 +152,7 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
             style={[
               styles.fixedTitleContainer,
               titleContainerStyles,
-              { opacity: fadeIn }
+              titleAnimatedStyle
             ]}
             pointerEvents='none'
           >

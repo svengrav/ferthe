@@ -2,6 +2,7 @@ import { View } from 'react-native'
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
 import Animated from 'react-native-reanimated'
 
+import { Image } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { GeoBoundary } from '@shared/geo'
@@ -18,6 +19,7 @@ const DEFAULT_CANVAS_SIZE = 800
 const MAX_CANVAS_DIMENSION = 1000
 const CANVAS_MARGIN = 20
 const MAX_ZOOM_METERS = 50
+const OVERVIEW_IMAGE_OPACITY = 0.7
 
 /**
  * Overlay component for Overview mode
@@ -75,6 +77,19 @@ function MapOverlay() {
       <GestureHandlerRootView style={styles?.gestureContainer}>
         <GestureDetector gesture={gesture}>
           <Animated.View style={[styles?.mapSurface, dynamicSurfaceStyle, animatedStyle]}>
+            {/* Trail overview background image */}
+            {overlay.image && (
+              <View style={styles?.backgroundContainer}>
+                <Image
+                  source={{ uri: overlay.image }}
+                  width={canvasSize.width}
+                  height={canvasSize.height}
+                  style={styles?.backgroundImage}
+                  showLoader={false}
+                />
+              </View>
+            )}
+
             <CompensatedScaleProvider value={compensatedScale}>
               <MapTrailPath boundary={trailBoundary} size={canvasSize} />
               <MapClues boundary={trailBoundary} size={canvasSize} />
@@ -153,6 +168,18 @@ const useStyles = createThemedStyles(theme => ({
     backgroundColor: theme.deriveColor(theme.colors.surface, 0.3),
     borderRadius: 12,
     position: 'relative',
+    overflow: 'hidden',
+  },
+  backgroundContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
+  },
+  backgroundImage: {
+    opacity: OVERVIEW_IMAGE_OPACITY,
   },
 }))
 

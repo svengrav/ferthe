@@ -62,6 +62,7 @@ export function createImageApplication({ storageConnector, maxImageSizeBytes }: 
       }
 
       // For spots: process image and upload with blurred variant
+      // Blur processing only for spots (discoveries are shown immediately)
       if (imageType === 'spot') {
         // Process image to create optimized + blurred versions
         const processed = await processImage(base64Data)

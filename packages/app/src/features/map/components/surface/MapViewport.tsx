@@ -5,6 +5,7 @@ import Animated, { SharedValue } from 'react-native-reanimated'
 
 import { getAppContext } from '@app/appContext'
 import { config } from '@app/config'
+import { Image } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { logger } from '@app/shared/utils/logger'
@@ -50,7 +51,7 @@ interface MapViewportProps {
 function MapViewport(props: MapViewportProps) {
   const { children, onLayout } = props
   const { styles } = useApp(useStyles)
-  const { size, boundary } = useMapViewport()
+  const { size, boundary, image } = useMapViewport()
   const surfaceBoundary = useMapSurfaceBoundary()
   const { sensorApplication } = getAppContext()
   const actions = getViewportActions()
@@ -92,6 +93,19 @@ function MapViewport(props: MapViewportProps) {
   return (
     <CompensatedScaleContext.Provider value={compensatedScale}>
       <View style={styles?.container} onLayout={handleLayout} id='device-viewport-content'>
+        {/* Static viewport background image */}
+        {image && (
+          <View style={styles?.backgroundContainer}>
+            <Image
+              source={{ uri: image }}
+              width={size.width}
+              height={size.height}
+              style={styles?.backgroundImage}
+              showLoader={false}
+            />
+          </View>
+        )}
+
         <GestureHandlerRootView style={size}>
           <GestureDetector gesture={gesture}>
             <Animated.View style={[size, animatedStyles, { overflow: 'hidden' }]}>
@@ -115,6 +129,19 @@ const useStyles = createThemedStyles(() => ({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden'
+  },
+  backgroundContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: -1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backgroundImage: {
+    opacity: 0.3,
   },
 }))
 

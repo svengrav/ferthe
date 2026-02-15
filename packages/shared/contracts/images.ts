@@ -4,8 +4,22 @@ import { Result } from './results.ts'
 /**
  * Types of images used in the application.
  * Determines the context and ownership rules for image uploads.
+ * 
+ * Trail images:
+ *  - trail-preview: Trail card/header image
+ *  - trail-surface: Map surface background (moves with trail boundary in Canvas mode)
+ *  - trail-viewport: Viewport background (static, does not move in Canvas mode)
+ *  - trail-overview: Overview mode background (full trail boundary in Overview mode)
  */
-export type ImageType = 'discovery' | 'spot' | 'trail' | 'account-avatar'
+export type ImageType = 
+  | 'discovery' 
+  | 'spot' 
+  | 'trail' 
+  | 'trail-preview'
+  | 'trail-surface' 
+  | 'trail-viewport'
+  | 'trail-overview'
+  | 'account-avatar'
 
 /**
  * Image reference used in domain entities.

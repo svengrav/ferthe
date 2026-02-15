@@ -15,7 +15,6 @@ export default function AboutScreen() {
   return (
     <Page scrollable>
       <Stack style={styles.container}>
-        <Text variant='heading'>Hi!</Text>
         <PulseAnimation>
           <FertheLogo style={styles.logo} fill={theme.colors.primary} />
         </PulseAnimation>
@@ -40,7 +39,7 @@ function createStyles(theme: Theme) {
     logo: {
       width: 120,
       height: 120,
-      marginBottom: 60
+      marginBottom: 20
     },
   })
 }

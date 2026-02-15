@@ -31,6 +31,22 @@ export interface TrailMap {
 }
 
 /**
+ * Viewport configuration with optional background image.
+ * Viewport image is static and does not move with the surface.
+ */
+export interface TrailViewport {
+  image?: ImageReference
+}
+
+/**
+ * Overview configuration with optional background image.
+ * Overview image covers the full trail boundary in overview mode.
+ */
+export interface TrailOverview {
+  image?: ImageReference
+}
+
+/**
  * Represents a trail in the application.
  * A trail consists of multiple spots and has associated metadata such as name, description, and options.
  * Image URLs are generated at runtime with fresh SAS tokens.
@@ -41,6 +57,8 @@ export interface Trail {
   name: string
   description: string
   map: TrailMap
+  viewport?: TrailViewport
+  overview?: TrailOverview
   image?: ImageReference
   boundary: GeoBoundary
   options: Options
@@ -52,9 +70,15 @@ export interface Trail {
  * Internal trail entity as stored in database.
  * Extends Trail with additional blob path fields for image storage.
  */
-export interface StoredTrail extends Omit<Trail, 'map'> {
+export interface StoredTrail extends Omit<Trail, 'map' | 'viewport' | 'overview'> {
   imageBlobPath?: string
   map: TrailMap & {
+    imageBlobPath?: string
+  }
+  viewport?: TrailViewport & {
+    imageBlobPath?: string
+  }
+  overview?: TrailOverview & {
     imageBlobPath?: string
   }
 }

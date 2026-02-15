@@ -23,6 +23,7 @@ interface ImageProps {
   onError?: () => void
   onLoad?: () => void
   resizeMode?: 'cover' | 'contain' | 'stretch' | 'repeat' | 'center'
+  showLoader?: boolean
 }
 
 /**
@@ -44,6 +45,7 @@ export function Image({
   onError,
   onLoad,
   resizeMode = 'cover',
+  showLoader = true,
 }: ImageProps) {
   const { styles } = useApp(useStyles)
   const { theme } = useTheme()
@@ -96,7 +98,7 @@ export function Image({
       />
 
       {/* Loading indicator */}
-      {loadingState === 'loading' && (
+      {showLoader && loadingState === 'loading' && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="small" color={theme.colors.primary} />
         </View>

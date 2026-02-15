@@ -25,10 +25,12 @@ export interface MapState {
     scale: { init: number; min: number; max: number }
     offset: { x: number; y: number }
     boundary: GeoBoundary
+    image?: string
   }
   overlay: {
     scale: { init: number; min: number; max: number }
     offset: { x: number; y: number }
+    image?: string
   }
   device: { heading: number; location: GeoLocation; direction: string }
   scanner: { radius: number }
@@ -74,11 +76,13 @@ export const useMapStore = create<MapState & MapActions>(set => ({
     scale: { init: 1, min: 0.5, max: 2 },
     offset: { x: 0, y: 0 },
     boundary: DEFAULT_BOUNDARY,
+    image: undefined,
   },
 
   overlay: {
     scale: { init: 1, min: 0.5, max: 3 },
     offset: { x: 0, y: 0 },
+    image: undefined,
   },
 
   device: {

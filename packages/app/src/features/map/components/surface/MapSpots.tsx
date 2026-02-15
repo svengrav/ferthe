@@ -92,6 +92,7 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
                 source={{ uri: spot.image.url }}
                 style={imageStyle}
                 resizeMode="cover"
+                showLoader={false}
               />
             ) : (
               <View style={fallbackStyle}>

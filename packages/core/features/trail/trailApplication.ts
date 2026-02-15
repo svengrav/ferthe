@@ -38,6 +38,8 @@ async function enrichTrailWithImages(
 ): Promise<Trail> {
   let image: { id: string; url: string } | undefined
   let mapImage: { id: string; url: string } | undefined
+  let viewportImage: { id: string; url: string } | undefined
+  let overviewImage: { id: string; url: string } | undefined
 
   // Generate fresh URL for trail image
   if (trailEntity.imageBlobPath) {
@@ -61,6 +63,28 @@ async function enrichTrailWithImages(
     }
   }
 
+  // Generate fresh URL for viewport image
+  if (trailEntity.viewport?.imageBlobPath) {
+    const viewportUrlResult = await imageApplication.refreshImageUrl(context, trailEntity.viewport.imageBlobPath)
+    if (viewportUrlResult.success && viewportUrlResult.data) {
+      viewportImage = {
+        id: trailEntity.viewport.imageBlobPath,
+        url: viewportUrlResult.data,
+      }
+    }
+  }
+
+  // Generate fresh URL for overview image
+  if (trailEntity.overview?.imageBlobPath) {
+    const overviewUrlResult = await imageApplication.refreshImageUrl(context, trailEntity.overview.imageBlobPath)
+    if (overviewUrlResult.success && overviewUrlResult.data) {
+      overviewImage = {
+        id: trailEntity.overview.imageBlobPath,
+        url: overviewUrlResult.data,
+      }
+    }
+  }
+
   return {
     id: trailEntity.id,
     slug: trailEntity.slug,
@@ -69,6 +93,12 @@ async function enrichTrailWithImages(
     map: {
       image: mapImage,
     },
+    viewport: viewportImage ? {
+      image: viewportImage,
+    } : undefined,
+    overview: overviewImage ? {
+      image: overviewImage,
+    } : undefined,
     image,
     boundary: trailEntity.boundary || { northEast: { lat: 0, lon: 0 }, southWest: { lat: 0, lon: 0 } },
     options: trailEntity.options,
@@ -445,6 +475,12 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore, 
           map: {
             imageBlobPath: trailData.map.image?.url ? extractBlobPathFromUrl(trailData.map.image.url) : undefined,
           },
+          viewport: trailData.viewport ? {
+            imageBlobPath: trailData.viewport.image?.url ? extractBlobPathFromUrl(trailData.viewport.image.url) : undefined,
+          } : undefined,
+          overview: trailData.overview ? {
+            imageBlobPath: trailData.overview.image?.url ? extractBlobPathFromUrl(trailData.overview.image.url) : undefined,
+          } : undefined,
           imageBlobPath: trailData.image?.url ? extractBlobPathFromUrl(trailData.image.url) : undefined,
           boundary: trailData.boundary,
           options: trailData.options,

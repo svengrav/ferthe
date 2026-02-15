@@ -181,11 +181,11 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
     const promises = [
       getDiscoveries(accountSession.data).then(discoveries => {
-        logger.log('Fetched discoveries:', discoveries.data)
+        logger.log('Fetched discoveries:', discoveries.data?.length)
         discoveries.data && setDiscoveries(discoveries.data)
       }),
       getDiscoveredSpots(accountSession.data).then(spots => {
-        logger.log('Fetched spots:', spots.data)
+        logger.log('Fetched spots:', spots.data?.length)
         spots.data && setSpots(spots.data)
       }),
     ]

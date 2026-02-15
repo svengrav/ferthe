@@ -118,11 +118,18 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
         ...currentViewport,
         radius: adaptiveRadius,
         boundary: initialViewportBoundary,
+        image: trail?.viewport?.image?.url,
         scale: {
           init: initialScale,
           min: MAP_DEFAULT.scale.min,
           max: MAP_DEFAULT.scale.max,
         },
+      },
+
+      overlay: {
+        scale: { init: 1, min: 0.5, max: 3 },
+        offset: { x: 0, y: 0 },
+        image: trail?.overview?.image?.url,
       },
 
       device: {

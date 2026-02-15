@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import Animated, {
+  useAnimatedStyle,
   useSharedValue,
   withDelay,
   withRepeat,
@@ -48,7 +49,15 @@ const useRevealAnimations = (onRevealComplete: () => void) => {
     )
   }
 
-  return { fadeOut, tapScale, triggerReveal }
+  const overlayAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: fadeOut.value,
+  }))
+
+  const tapAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: tapScale.value }],
+  }))
+
+  return { overlayAnimatedStyle, tapAnimatedStyle, triggerReveal }
 }
 
 interface DiscoveryRevealProps {
@@ -73,7 +82,7 @@ export function DiscoveryReveal(props: DiscoveryRevealProps) {
     setIsRevealed(true)
   }
 
-  const { fadeOut, tapScale, triggerReveal } = useRevealAnimations(handleRevealComplete)
+  const { overlayAnimatedStyle, tapAnimatedStyle, triggerReveal } = useRevealAnimations(handleRevealComplete)
 
   // In instant mode or after reveal: render children only
   if (isRevealed) {
@@ -91,9 +100,7 @@ export function DiscoveryReveal(props: DiscoveryRevealProps) {
       <Animated.View
         style={[
           styles.blurredOverlay,
-          {
-            opacity: fadeOut
-          }
+          overlayAnimatedStyle
         ]}
       >
         <Pressable
@@ -101,7 +108,7 @@ export function DiscoveryReveal(props: DiscoveryRevealProps) {
           onPress={handlePress}
         >
           {/* Animated tap icon */}
-          <Animated.View style={[styles.tapCircle, { transform: [{ scale: tapScale }] }]}>
+          <Animated.View style={[styles.tapCircle, tapAnimatedStyle]}>
             <View style={styles.tapIconInner} />
           </Animated.View>
 
