@@ -1,9 +1,9 @@
 import { useDiscoveryData } from '@app/features/discovery'
-import { Icon, Text } from '@app/shared/components'
+import { Icon, Image, Text } from '@app/shared/components'
 import { CARD_BORDER_RADIUS, useCardDimensions } from '@app/shared/hooks/useCardDimensions'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { Image, View } from 'react-native'
+import { View } from 'react-native'
 import { useTrailPreviewSpots } from '../stores/trailStore'
 
 const MAX_PREVIEW_SPOTS = 4
@@ -55,7 +55,7 @@ function TrailUnknownSpots({ trailId }: TrailUnknownSpotsProps) {
           <View key={spot.id} style={[styles.card, { width: cardWidth, height: cardHeight }]}>
             {spot.blurredImage ? (
               <Image
-                source={spot.blurredImage}
+                source={spot.blurredImage!}
                 style={styles.image}
                 resizeMode="contain"
               />

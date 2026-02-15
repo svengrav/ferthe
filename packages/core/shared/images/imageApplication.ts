@@ -137,7 +137,7 @@ export function createImageApplication({ storageConnector, maxImageSizeBytes }: 
       const item = await storageConnector.getItemUrl(blobPath)
 
       if (!item) {
-        return createErrorResult('IMAGE_NOT_FOUND', { blobPath })
+        return createErrorResult('REFRESH_IMAGE_URL_ERROR', { originalError: 'Item not found' })
       }
 
       return createSuccessResult(item.url)

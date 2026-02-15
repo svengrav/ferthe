@@ -24,7 +24,7 @@ export {
 } from './stores/mapStore'
 
 // Hooks - Derived (from Context)
-export { useCompensatedScale } from './components/MapViewport'
+export { useCompensatedScale } from './components/surface/MapViewport'
 
 // Hooks - Actions
 export { useSetActiveLayer, useSetTappedSpot } from './stores/mapStore'

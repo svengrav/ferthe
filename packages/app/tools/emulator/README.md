@@ -1,6 +1,7 @@
 # EXPO Android Emulator Setup 
 
 ## Precheck
+- TypeScript Check All ausführen
 - Prüfen ob Versionen etc. aktuell sind. Am einfachsten ist es mit ` npx expo-doctor `.
 - EAS benötigt ein Token für das Login. Prüfe ob das Token von EXPO noch aktuell ist.
 

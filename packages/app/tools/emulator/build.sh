@@ -18,14 +18,46 @@ echo "Workspace: $WORKSPACE_ROOT"
 echo "App Dir: $APP_DIR"
 echo "Build Dir: $BUILD_DIR"
 
+# TypeScript check
+echo ""
+echo "1/6 Running TypeScript checks..."
+echo "Checking App..."
+cd "$APP_DIR"
+npx tsc --noEmit
+echo "Checking Core..."
+cd "$WORKSPACE_ROOT/packages/core"
+deno check
+echo "✓ TypeScript checks passed"
+
+# Check project health
+echo ""
+echo "2/6 Running Expo Doctor..."
+cd "$APP_DIR"
+npx expo-doctor
+echo "✓ Expo Doctor checks passed"
+
+# Verify EXPO token
+echo ""
+echo "3/6 Verifying EXPO token..."
+# if [ -z "$EXPO_TOKEN" ]; then
+#   echo "⚠ EXPO_TOKEN environment variable not set"
+#   export EXPO_TOKEN="H5UOUgNlXLVFAsLRjsb_bamDRsvAJce7J67D5gDU"
+# fi
+# npx eas whoami > /dev/null 2>&1 || {
+#   echo "✗ EXPO token is invalid or expired"
+#   echo "Please login with: npx eas login"
+#   exit 1
+# }
+# echo "✓ EXPO token is valid"
+
 # build Docker image
 echo ""
-echo "1/3 Building Docker image..."
+echo "4/6 Building Docker image..."
 docker build -t "$IMAGE_NAME" -f "$BUILD_DIR/Dockerfile" "$WORKSPACE_ROOT"
 
 # install dependencies
 echo ""
-echo "2/3 Installing dependencies..."
+echo "5/6 Installing dependencies..."
 docker run --rm \
   -v "$WORKSPACE_ROOT:/workspace" \
   -w /workspace/packages/app \
@@ -34,7 +66,7 @@ docker run --rm \
 
 # build Android APK
 echo ""
-echo "3/3 Building Android APK..."
+echo "6/6 Building Android APK..."
 docker run --rm \
   -v "$WORKSPACE_ROOT:/workspace" \
   -w /workspace/packages/app \

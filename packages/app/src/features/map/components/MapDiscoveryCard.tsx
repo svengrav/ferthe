@@ -2,6 +2,7 @@ import { getAppContext } from '@app/appContext'
 import DiscoveryCardHighlight from '@app/features/discovery/components/DiscoveryCardHighlight'
 import { DiscoveryCardState } from '@app/features/discovery/logic/types'
 import { useEvent } from '@app/shared/events/useEvent'
+import * as Haptics from 'expo-haptics'
 import { useState } from 'react'
 import { useMapSpotTap, useSetTappedSpot } from '../stores/mapStore'
 
@@ -17,6 +18,7 @@ const useNewDiscoveryHandler = () => {
   // Listen for new discoveries and show the first one
   useEvent(discoveryApplication.onNewDiscoveries, (discoveries: DiscoveryCardState[]) => {
     if (discoveries.length > 0) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
       setCurrentDiscovery(discoveries[0])
       setIsVisible(true)
     }
