@@ -13,7 +13,8 @@ const createDiscoveryCards = (discoveries: Discovery[], discoverySpots: Discover
     return {
       discoveryId: discovery.id,
       title: spot?.name || 'Unknown Spot',
-      image: spot?.image || { id: '', url: '', previewUrl: '' },
+      image: spot?.image || { id: '', url: '' },
+      blurredImage: spot?.blurredImage,
       description: spot?.description || 'No description available.',
       discoveredAt: discovery.createdAt,
       spotId: discovery.spotId,

@@ -24,7 +24,7 @@ export function createConstants() {
       verifyServiceId: Deno.env.get('TWILIO_VERIFY_SERVICE_SID') || 'VA0e3f1ea84078e623af55f01e0aa6bf85',
     },
     storage: {
-      containerName: 'images',
+      containerName: 'resources',
       sasExpiryMinutes: 60 * 24 * 7,
     },
     images: {

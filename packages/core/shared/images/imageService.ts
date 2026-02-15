@@ -15,12 +15,20 @@ interface ImageBlobMetadata {
 }
 
 /**
- * Generate a secure, anonymous blob path using CUID2 with versioning.
- * Path contains no identifiable information - all metadata stored separately.
+ * Generate a unique image identifier (filename only).
+ * Uses CUID2 for collision resistance and unpredictability.
+ * Storage structure (v1/images/) is handled by StorageConnector config.
  * 
  * @param extension - File extension (e.g., 'jpg', 'png')
- * @param version - Image format version (default: 'v1')
- * @returns Secure blob path like "v1/images/clz8a9b2c3d4e5f6.jpg"
+ * @returns Image ID like "clz8a9b2c3d4e5f6.jpg"
+ */
+export const generateImageId = (extension: string = 'jpg'): string => {
+  const hash = createCuid2()
+  return `${hash}.${extension}`
+}
+
+/**
+ * @deprecated Use generateImageId() instead. Storage structure is now in StorageConnector config.
  */
 export const generateSecureImagePath = (extension: string = 'jpg', version: string = 'v1'): string => {
   const hash = createCuid2()

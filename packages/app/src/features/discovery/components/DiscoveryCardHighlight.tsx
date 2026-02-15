@@ -216,7 +216,7 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
       <View style={[styles.cardContainer, cardContainerStyles]}>
         <DiscoveryReveal
           mode={mode}
-          blurredImageUrl={card.image.previewUrl || card.image.url}
+          blurredImageUrl={card.blurredImage?.url || card.image.url}
           onTriggerReveal={triggerReveal}
         >
           <Flippable

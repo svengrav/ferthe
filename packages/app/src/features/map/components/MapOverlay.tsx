@@ -39,11 +39,11 @@ function MapOverlay() {
   )
 
   // Calculate initial scale: 
-  // - Use stored value if user has zoomed (not default 1)
+  // - Use stored value if user has zoomed (differs from min scale)
   // - Otherwise fit entire trail to screen (zoomLimits.min)
   // - Clamp to valid range in case trail boundaries changed
   const storedScale = overlay.scale.init
-  const hasUserZoomed = storedScale !== 1
+  const hasUserZoomed = Math.abs(storedScale - zoomLimits.min) > 0.01
   const unclamped = hasUserZoomed ? storedScale : zoomLimits.min
   const initialScale = Math.max(zoomLimits.min, Math.min(zoomLimits.max, unclamped))
 

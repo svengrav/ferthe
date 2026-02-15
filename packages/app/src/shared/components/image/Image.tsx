@@ -1,14 +1,17 @@
-import { useEffect, useState } from 'react'
-import { ActivityIndicator, ImageStyle, Image as RNImage, ImageProps as RNImageProps, StyleProp, View } from 'react-native'
+import { ImageReference } from '@shared/contracts';
+import { Image as ExpoImage, ImageContentFit } from 'expo-image';
+import { useState } from 'react';
+import { ActivityIndicator, ImageStyle, StyleProp, View } from 'react-native';
 
-import { ImageReference } from '@shared/contracts'
-
-import { Text } from '@app/shared/components/'
-import { createThemedStyles } from '../../theme'
-import { useApp } from '../../useApp'
+import { Text } from '@app/shared/components/';
+import React from 'react';
+import { createThemedStyles, useTheme } from '../../theme';
+import { useApp } from '../../useApp';
 
 const LABEL_MAX_LENGTH = 2
 const LABEL_SIZE_RATIO = 0.4
+
+type LoadingState = 'loading' | 'loaded' | 'error'
 
 interface ImageProps {
   source: ImageReference | { uri: string } | undefined
@@ -18,15 +21,16 @@ interface ImageProps {
   height?: number
   placeholder?: React.ReactNode
   onError?: () => void
-  resizeMode?: RNImageProps['resizeMode']
+  onLoad?: () => void
+  resizeMode?: 'cover' | 'contain' | 'stretch' | 'repeat' | 'center'
 }
 
 /**
- * Image component with automatic loading states, preview support, and error handling.
+ * Image component with automatic loading states and error handling.
  * 
  * Features:
  * - Shows placeholder while loading
- * - Progressive loading: preview → full image
+ * - Smooth fade-in transition on load (via expo-image)
  * - Graceful error handling with label fallback
  * - Supports both ImageReference and simple { uri: string } sources
  */
@@ -38,34 +42,26 @@ export function Image({
   height,
   placeholder,
   onError,
+  onLoad,
   resizeMode = 'cover',
 }: ImageProps) {
   const { styles } = useApp(useStyles)
-  const [isLoading, setIsLoading] = useState(true)
-  const [hasError, setHasError] = useState(false)
-  const [showPreview, setShowPreview] = useState(false)
+  const { theme } = useTheme()
+  const [loadingState, setLoadingState] = useState<LoadingState>('loading')
 
-  // Determine URIs and label
+  // Determine URI and label
   const isImageReference = source && 'id' in source
-  const previewUri = isImageReference ? source.previewUrl : undefined
-  const fullUri = isImageReference ? source.url : source?.uri
+  const uri = isImageReference ? source.url : source?.uri
   const effectiveLabel = label || (isImageReference ? source.label : undefined)
   const labelText = effectiveLabel ? effectiveLabel.substring(0, LABEL_MAX_LENGTH).toUpperCase() : ''
 
-  useEffect(() => {
-    setIsLoading(true)
-    setHasError(false)
-    setShowPreview(Boolean(previewUri))
-  }, [fullUri, previewUri])
-
-  const handleLoadEnd = () => {
-    setIsLoading(false)
-    setShowPreview(false)
+  const handleLoad = () => {
+    setLoadingState('loaded')
+    onLoad?.()
   }
 
   const handleError = () => {
-    setIsLoading(false)
-    setHasError(true)
+    setLoadingState('error')
     onError?.()
   }
 
@@ -74,7 +70,7 @@ export function Image({
   const containerStyle = [styles.container, { width, height }, style]
   const dynamicLabelFontSize = Math.min(width ?? height ?? 50, height ?? width ?? 50) * LABEL_SIZE_RATIO
 
-  // Label fallback
+  // Fallback content
   const renderFallback = () => (
     <View style={styles.fallbackContainer}>
       <Text style={[styles.fallbackText, { fontSize: dynamicLabelFontSize }]}>
@@ -83,35 +79,26 @@ export function Image({
     </View>
   )
 
-  // No source or error
-  if (!source || !fullUri || hasError) {
+  // Error or missing source
+  if (!source || !uri || loadingState === 'error') {
     return <View style={containerStyle}>{renderFallback()}</View>
   }
 
   return (
     <View style={containerStyle}>
-      {/* Preview image (blurred) */}
-      {showPreview && previewUri && (
-        <RNImage
-          source={{ uri: previewUri }}
-          style={styles.image}
-          resizeMode={resizeMode}
-        />
-      )}
-
-      {/* Full image */}
-      <RNImage
-        source={{ uri: fullUri }}
+      <ExpoImage
+        source={{ uri }}
         style={styles.image}
-        resizeMode={resizeMode}
-        onLoadEnd={handleLoadEnd}
+        contentFit={resizeMode as ImageContentFit}
+        transition={{ duration: 250 }}
+        onLoad={handleLoad}
         onError={handleError}
       />
 
       {/* Loading indicator */}
-      {isLoading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" />
+      {loadingState === 'loading' && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="small" color={theme.colors.primary} />
         </View>
       )}
     </View>
@@ -140,9 +127,12 @@ const useStyles = createThemedStyles(theme => ({
     color: theme.colors.onPrimary,
     fontWeight: '600',
   },
-  loadingContainer: {
+  loadingOverlay: {
     position: 'absolute',
+    width: '100%',
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
 }))
+

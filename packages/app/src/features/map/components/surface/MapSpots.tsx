@@ -1,29 +1,39 @@
 import { useDiscoverySpots } from '@app/features/discovery/stores/discoveryTrailStore'
-import { Text } from '@app/shared/components'
-import { CARD_BORDER_RADIUS } from '@app/shared/hooks/useCardDimensions'
+import { Image, Text } from '@app/shared/components'
 import { DiscoverySpot } from '@shared/contracts'
 import { GeoBoundary } from '@shared/geo'
 import { memo, useMemo } from 'react'
-import { Image, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 import { useSetTappedSpot } from '../../stores/mapStore'
-import { useMapTheme } from '../../stores/mapThemeStore'
+import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
 import { mapUtils } from '../../utils/geoToScreenTransform'
 import { useCompensatedScale } from './MapViewport'
 
-const DEFAULT_SPOT_SIZE = 15
-const DEFAULT_SPOT_HEIGHT_OFFSET = 7
-const DEFAULT_SPOT_COLOR = '#ffffff'
-// Border radius scaled proportionally for small map markers
-const MARKER_BORDER_RADIUS = Math.round(CARD_BORDER_RADIUS * 0.22) // ~4px
-const IMAGE_BORDER_RADIUS = Math.round(CARD_BORDER_RADIUS * 0.11) // ~2px
-const BORDER_WIDTH = 0.5
-const BACKGROUND_COLOR = '#000000ff'
-const IMAGE_BACKGROUND_COLOR = '#000'
-const OFFSET_X = 10
-const OFFSET_Y = 13.5
-const FIRST_LETTER_INDEX = 0
-const FIRST_LETTER_LENGTH = 1
+// Pre-create style functions outside component for performance
+const createMarkerContainerStyle = (theme: MapTheme) => ({
+  borderRadius: theme.spot.borderRadius,
+  width: theme.spot.size,
+  height: theme.spot.size + theme.spot.heightOffset,
+  borderWidth: theme.spot.borderWidth,
+  backgroundColor: theme.spot.backgroundColor,
+  overflow: 'hidden' as const,
+  justifyContent: 'center' as const,
+  alignItems: 'center' as const,
+})
+
+const createImageStyle = (theme: MapTheme) => ({
+  width: '100%' as const,
+  height: '100%' as const,
+  borderRadius: theme.spot.imageBorderRadius,
+  backgroundColor: theme.spot.imageBackgroundColor,
+})
+
+const createFallbackStyle = (theme: MapTheme) => ({
+  justifyContent: 'center' as const,
+  alignItems: 'center' as const,
+  borderColor: theme.spot.fill,
+})
 
 interface MapSpotsProps {
   boundary: GeoBoundary
@@ -35,7 +45,7 @@ interface MapSpotsProps {
  * Props-based: boundary and size determine positioning
  */
 function MapSpots({ boundary, size }: MapSpotsProps) {
-  const mapTheme = useMapTheme()
+  const theme = useMapTheme()
   const spots = useDiscoverySpots()
   const setTappedSpot = useSetTappedSpot()
   const scale = useCompensatedScale()
@@ -46,48 +56,21 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
   }), [scale])
 
   // Pre-calculate all spot positions
-  // Memoized: only recalc when boundary or size changes
   const spotPositions = useMemo(() => {
     return spots.map(spot => ({
       spot,
-      position: mapUtils.coordinatesToPosition(
-        spot.location,
-        boundary,
-        size
-      )
+      position: mapUtils.coordinatesToPosition(spot.location, boundary, size)
     }))
   }, [spots, boundary, size.width, size.height])
 
-  // Helper function to create marker container styles
-  const createMarkerContainerStyle = (spotSize: number) => ({
-    borderRadius: MARKER_BORDER_RADIUS,
-    width: spotSize,
-    height: spotSize + DEFAULT_SPOT_HEIGHT_OFFSET,
-    borderWidth: BORDER_WIDTH,
-    backgroundColor: BACKGROUND_COLOR,
-    overflow: 'hidden' as const,
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const,
-  })
-
-  // Helper function to create image styles
-  const createImageStyle = () => ({
-    width: '100%' as const,
-    height: '100%' as const,
-    borderRadius: IMAGE_BORDER_RADIUS,
-    backgroundColor: IMAGE_BACKGROUND_COLOR,
-  })
-
-  // Helper function to create fallback text container styles
-  const createFallbackTextStyle = (spotColor: string) => ({
-    borderColor: spotColor,
-  })
+  // Pre-create styles based on theme
+  const markerStyle = useMemo(() => createMarkerContainerStyle(theme), [theme])
+  const imageStyle = useMemo(() => createImageStyle(theme), [theme])
+  const fallbackStyle = useMemo(() => createFallbackStyle(theme), [theme])
 
   // Render spot marker at pre-calculated position
   const renderSpotMarker = ({ spot, position }: { spot: DiscoverySpot; position: { x: number; y: number } }, index: number) => {
-    const spotSize = mapTheme.spot.size || DEFAULT_SPOT_SIZE
-    const spotColor = mapTheme.spot.fill || DEFAULT_SPOT_COLOR
-    const spotInitial = spot.name.substring(FIRST_LETTER_INDEX, FIRST_LETTER_LENGTH)
+    const spotInitial = spot.name[0]
 
     return (
       <Animated.View
@@ -95,23 +78,23 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
         style={[
           {
             position: 'absolute',
-            left: position.x - OFFSET_X,
-            top: position.y - OFFSET_Y,
+            left: position.x - theme.spot.offsetX,
+            top: position.y - theme.spot.offsetY,
             zIndex: 99,
           },
           scaleStyle
         ]}
       >
         <Pressable onPress={() => setTappedSpot(spot)}>
-          <View style={[createMarkerContainerStyle(spotSize)]}>
+          <View style={markerStyle}>
             {spot.image?.url ? (
               <Image
                 source={{ uri: spot.image.url }}
-                style={createImageStyle()}
+                style={imageStyle}
                 resizeMode="cover"
               />
             ) : (
-              <View style={createFallbackTextStyle(spotColor)}>
+              <View style={fallbackStyle}>
                 <Text>{spotInitial}</Text>
               </View>
             )}

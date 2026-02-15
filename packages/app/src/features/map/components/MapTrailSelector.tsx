@@ -1,4 +1,4 @@
-import { FlatList, View } from 'react-native'
+import { FlatList, StyleSheet, View } from 'react-native'
 import { GestureDetector } from 'react-native-gesture-handler'
 
 import { getAppContext } from '@app/appContext'
@@ -93,7 +93,7 @@ export const MapTrailSelector = () => {
 
   return (
     <GestureDetector gesture={swipeGesture}>
-      <View style={styles.selector}>
+      <View style={styles.selector} id="map">
         {selectedTrail && (
           <TrailItem
             trail={selectedTrail}
@@ -112,8 +112,9 @@ export const MapTrailSelector = () => {
   )
 }
 
-const createStyles = (theme: Theme) => ({
+const createStyles = (theme: Theme) => StyleSheet.create({
   selector: {
+    height: 66,
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     borderTopColor: theme.colors.divider,

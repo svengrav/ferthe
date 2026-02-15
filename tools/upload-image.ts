@@ -25,7 +25,7 @@
  */
 
 import { createAzureStorageConnector } from '@core/connectors/storageConnector.ts'
-import { createImageMetadata, generateSecureImagePath } from '@core/shared/images/imageService.ts'
+import { createImageMetadata, generateImageId } from '@core/shared/images/imageService.ts'
 import { createCuid2 } from '@core/utils/idGenerator.ts'
 import { getBlurredPath, processImage } from '@core/utils/imageProcessor.ts'
 import * as dotenv from 'dotenv'
@@ -94,8 +94,12 @@ const uploadImage = async (options: UploadOptions) => {
   console.log('☁️  Connecting to Azure Blob Storage...')
   const storageConnector = createAzureStorageConnector(
     connectionString,
-    'images',
-    { sasExpiryMinutes: 15 }
+    'resources',
+    {
+      sasExpiryMinutes: 15,
+      storageVersion: 'v1',
+      imageFolder: 'images'
+    }
   )
 
   // Read image file
@@ -140,10 +144,10 @@ const uploadImage = async (options: UploadOptions) => {
     // Process image to create optimized original + blurred preview
     const processed = await processImage(base64)
 
-    // Generate blob paths (always .jpg after compression, with v1/images/ prefix)
+    // Generate blob paths (only image ID, StorageConnector adds v1/images/ prefix)
     blobPath = options.customId
-      ? `v1/images/${options.customId}.${processed.extension}`
-      : generateSecureImagePath(processed.extension)
+      ? `${options.customId}.${processed.extension}`
+      : generateImageId(processed.extension)
     previewBlobPath = getBlurredPath(blobPath)
 
     console.log(`📦 Compressed: ${(buffer.length / 1024).toFixed(2)} KB → ${(processed.original.length / 1024).toFixed(2)} KB`)
@@ -166,10 +170,10 @@ const uploadImage = async (options: UploadOptions) => {
     // Process image to create optimized version
     const processed = await processImage(base64)
 
-    // Generate blob path (always .jpg after compression, with v1/images/ prefix)
+    // Generate blob path (only image ID, StorageConnector adds v1/images/ prefix)
     blobPath = options.customId
-      ? `v1/images/${options.customId}.${processed.extension}`
-      : generateSecureImagePath(processed.extension)
+      ? `${options.customId}.${processed.extension}`
+      : generateImageId(processed.extension)
 
     console.log(`📦 Compressed: ${(buffer.length / 1024).toFixed(2)} KB → ${(processed.original.length / 1024).toFixed(2)} KB`)
 

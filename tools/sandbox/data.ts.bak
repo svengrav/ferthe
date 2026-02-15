@@ -17,7 +17,7 @@ interface SandboxDataSet {
 }
 
 // Constants for reuse
-const DEFAULT_USER_ID = '89zse4844tv37tmofcdh'
+const DEFAULT_USER_ID = 'xxxxdevtestuserxxxxx'
 const NOW = new Date()
 const YESTERDAY = new Date(NOW.getTime() - 24 * 60 * 60 * 1000)
 const LAST_WEEK = new Date(NOW.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -54,39 +54,51 @@ const sandboxData: SandboxDataSet = {
         name: 'Discovery Trail',
         slug: 'discovery-trail-2025',
         description: 'Free exploration of interesting spots in your area',
-        map: { image: { id: 'discovery-bg-1.png', url: '' } },
+        map: {
+          image:
+            'https://stferthecore.blob.core.windows.net/resources/discovery-bg-1.png?sp=r&st=2025-06-15T21:13:41Z&se=2025-07-05T05:13:41Z&spr=https&sv=2024-11-04&sr=b&sig=dOGCg%2B%2Fwm7LxUTRM0BLZMx076CYT8cph6Zh5eNGbw14%3D',
+        },
         boundary: {
           northEast: { lat: 51.81, lon: 7.64 },
-          southWest: { lat: 51.77, lon: 7.61 },
+          southWest: { lat: 51.77, lon: 7.60 },
         },
         options: {
           scannerRadius: 250,
           discoveryMode: 'free' as DiscoveryMode,
           previewMode: 'preview' as PreviewMode,
         },
-        image: { id: 'cmc35ne37jbzs2db624de78df.png', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-20T12:04:16.534Z'),
+        image: {
+          id: 'clx4j9k2n000101mh8d4k9n2q',
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: NOW,
       },
       {
         id: 'cmc35a2qc12ome60777f19f2b',
         name: 'Ascheberg Kirmes Trail',
         slug: 'ascheberg-kirmes-trail-8010',
         description: '',
-        map: { image: { id: 'ascheberg-kirmes-trail-8010-map.png', url: '' } },
+        map: {
+          image:
+            'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/ascheberg-kirmes-trail-8010-map.png?sp=r&st=2025-06-19T12:01:23Z&se=2030-06-19T20:01:23Z&spr=https&sv=2024-11-04&sr=b&sig=jDXqCynRcQRMKt167h1vKCQjP2ycJcD40%2B4yzM4mB4k%3D',
+        },
         boundary: {
-          northEast: { lat: 51.792572, lon: 7.624061 },
-          southWest: { lat: 51.786181, lon: 7.616529 },
+          northEast: { lat: 51.790431, lon: 7.621401 },
+          southWest: { lat: 51.786731, lon: 7.616701 },
         },
         options: {
-          scannerRadius: 200,
+          scannerRadius: 40,
           snapRadius: 50,
           discoveryMode: 'free' as DiscoveryMode,
           previewMode: 'preview' as PreviewMode,
         },
-        image: { id: 'cmc35ne37jbzs2db624de78df.png', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-19T12:04:16.534Z'),
+        image: {
+          id: 'clx4j9k2n000201mh7b3m5r8x',
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: YESTERDAY,
       },
     ],
   },
@@ -94,17 +106,24 @@ const sandboxData: SandboxDataSet = {
     id: STORES.SPOTS,
     fileName: jsonFile(STORES.SPOTS),
     data: [
+      // Spots for Discovery Trail
       {
         id: 'clx4j9k2n000301mh9e5p6t4w',
         name: 'Central Park Fountain',
         slug: 'central-park-fountain-8472',
         description: 'A beautiful modern fountain in the heart of the central park.',
         location: { lat: 51.797, lon: 7.627 },
-        options: { discoveryRadius: 10, clueRadius: 150, visibility: 'preview' },
-        image: { id: '3gyfe4842lbxehxlhu4s.jpg', url: '' },
-        blurredImage: { id: '3gyfe4842lbxehxlhu4s-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-19T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 10,
+          clueRadius: 150,
+        },
+        image: {
+          id: 'clx4j9k2n000401mh2f7q8y5z',
+
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: YESTERDAY,
       },
       {
         id: 'clx4j9k2n000401mh2f7q8y5z',
@@ -112,11 +131,17 @@ const sandboxData: SandboxDataSet = {
         slug: 'historic-city-gate-2948',
         description: 'The remaining gate of the old city wall, dating back to the 15th century.',
         location: { lat: 51.794, lon: 7.619 },
-        options: { discoveryRadius: 10, clueRadius: 100 },
-        image: { id: '3i9ue4842z687fq0qlou.jpg', url: '' },
-        blurredImage: { id: '3i9ue4842z687fq0qlou-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-13T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 10,
+          clueRadius: 100,
+        },
+        image: {
+          id: 'clx4j9k2n000501mh3h8r9a6b',
+
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: LAST_WEEK,
       },
       {
         id: 'clx4j9k2n000501mh3h8r9a6b',
@@ -124,11 +149,17 @@ const sandboxData: SandboxDataSet = {
         slug: 'botanical-garden-6138',
         description: 'A small botanical garden featuring local and exotic plants.',
         location: { lat: 51.799, lon: 7.63 },
-        options: { discoveryRadius: 10, clueRadius: 180 },
-        image: { id: 'qk93e4842ph7x76p0tt8.jpg', url: '' },
-        blurredImage: { id: 'qk93e4842ph7x76p0tt8-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-20T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 10,
+          clueRadius: 180,
+        },
+        image: {
+          id: 'clx4j9k2n000501mh3h8r9a6b',
+
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: NOW,
       },
       {
         id: 'clx4j9k2n000601mh4j9s2c7d',
@@ -136,11 +167,17 @@ const sandboxData: SandboxDataSet = {
         slug: 'old-windmill-4657',
         description: 'A preserved windmill from the 18th century that once produced flour for the town.',
         location: { lat: 51.788, lon: 7.622 },
-        options: { discoveryRadius: 10, clueRadius: 120 },
-        image: { id: '3ku3e48424alck28t6on.jpg', url: '' },
-        blurredImage: { id: '3ku3e48424alck28t6on-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-19T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 10,
+          clueRadius: 120,
+        },
+        image: {
+          id: 'clx4j9k2n000601mh4j9s2c7d',
+
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: YESTERDAY,
       },
       {
         id: 'clx4j9k2n000701mh5k1t3e8f',
@@ -148,23 +185,36 @@ const sandboxData: SandboxDataSet = {
         slug: 'lakeside-viewpoint-9321',
         description: 'A peaceful spot by the lake with benches and a beautiful view.',
         location: { lat: 51.802, lon: 7.615 },
-        options: { discoveryRadius: 22, clueRadius: 130 },
-        image: { id: '3m65e48425dohjz2bqyw.jpg', url: '' },
-        blurredImage: { id: '3m65e48425dohjz2bqyw-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-13T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 22,
+          clueRadius: 130,
+        },
+        image: {
+          id: 'clx4j9k2n000701mh5k1t3e8f',
+
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: LAST_WEEK,
       },
+      // Spots for Trail 01
       {
         id: 'clx4j9k2n000801mh6m2u4g9h',
         name: 'Ancient Oak Tree',
         slug: 'ancient-oak-tree-7249',
         description: 'This 300-year-old oak tree stands as a natural landmark in the forest.',
         location: { lat: 51.778, lon: 7.625 },
-        options: { discoveryRadius: 20, clueRadius: 100 },
-        image: { id: '3njue4842rcet5o99xdu.jpg', url: '' },
-        blurredImage: { id: '3njue4842rcet5o99xdu-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-13T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 20,
+          clueRadius: 100,
+        },
+        image: {
+          id: 'clx4j9k2n000901mh7n3v5i1j',
+
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: LAST_WEEK,
       },
       {
         id: 'clx4j9k2n000901mh7n3v5i1j',
@@ -172,11 +222,17 @@ const sandboxData: SandboxDataSet = {
         slug: 'forest-stream-3856',
         description: 'A small stream cutting through the forest, home to various amphibians.',
         location: { lat: 51.781, lon: 7.633 },
-        options: { discoveryRadius: 15, clueRadius: 80 },
-        image: { id: '3ovae4842maog1wm1zt1.jpg', url: '' },
-        blurredImage: { id: '3ovae4842maog1wm1zt1-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-19T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 15,
+          clueRadius: 80,
+        },
+        image: {
+          id: 'clx4j9k2n000901mh7n3v5i1j',
+
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: YESTERDAY,
       },
       {
         id: 'clx4j9k2n001001mh8p4w6k2l',
@@ -184,23 +240,17 @@ const sandboxData: SandboxDataSet = {
         slug: 'wildflower-meadow-5143',
         description: 'An open area filled with native wildflowers and buzzing with pollinators.',
         location: { lat: 51.772, lon: 7.628 },
-        options: { discoveryRadius: 25, clueRadius: 120 },
-        image: { id: '3q7fe4842d0390mzve3h.jpg', url: '' },
-        blurredImage: { id: '3q7fe4842d0390mzve3h-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-19T12:04:16.534Z'),
-      },
-      {
-        id: 'axlx4j9k2n001101mh9q5x7m3n',
-        name: 'China',
-        slug: 'china-viewpoint-9067',
-        description: 'A high point offering panoramic views of the surrounding countryside.',
-        location: { lat: 44.61381, lon: 81.027558 },
-        options: { discoveryRadius: 30, clueRadius: 150 },
-        image: { id: '3rike4842n3buk2eqspa.jpg', url: '' },
-        blurredImage: { id: '3rike4842n3buk2eqspa-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-13T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 25,
+          clueRadius: 120,
+        },
+        image: {
+          id: 'clx4j9k2n001001mh8p4w6k2l',
+
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: YESTERDAY,
       },
       {
         id: 'clx4j9k2n001101mh9q5x7m3n',
@@ -208,23 +258,36 @@ const sandboxData: SandboxDataSet = {
         slug: 'scenic-viewpoint-9067',
         description: 'A high point offering panoramic views of the surrounding countryside.',
         location: { lat: 51.775, lon: 7.618 },
-        options: { discoveryRadius: 30, clueRadius: 150 },
-        image: { id: '3ssbe4842cqaxwskuvbt.jpg', url: '' },
-        blurredImage: { id: '3ssbe4842cqaxwskuvbt-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-13T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 30,
+          clueRadius: 150,
+        },
+        image: {
+          id: 'clx4j9k2n001101mh9q5x7m3n',
+
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: LAST_WEEK,
       },
+      // Spots for Ascheberg Kirmes Trail
       {
         id: 'cmc35ne37jbzs2db624de78df',
         name: 'Startpunkt',
         slug: 'startpunkt-ascheberg',
         description: 'Der Startpunkt des Ascheberg Kirmes Trails.',
         location: { lat: 51.787039, lon: 7.618135 },
-        options: { discoveryRadius: 40, clueRadius: 100 },
-        image: { id: '3u31e4842dzve7e0ywwx.jpg', url: '' },
-        blurredImage: { id: '3u31e4842dzve7e0ywwx-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-19T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 10,
+          clueRadius: 100,
+        },
+        image: {
+          id: 'cmc35ne37jbzs2db624de78df',
+
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: YESTERDAY,
       },
       {
         id: 'cmc35ne37bh0ue0d1ed0cc2ef',
@@ -232,11 +295,17 @@ const sandboxData: SandboxDataSet = {
         slug: 'kirchplatz-ascheberg',
         description: 'Der historische Kirchplatz in Ascheberg.',
         location: { lat: 51.789405, lon: 7.619343 },
-        options: { discoveryRadius: 10, clueRadius: 120 },
-        image: { id: '3vd9e4842nf7um1lp98u.jpg', url: '' },
-        blurredImage: { id: '3vd9e4842nf7um1lp98u-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-19T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 10,
+          clueRadius: 120,
+        },
+        image: {
+          id: 'cmc35ne37bh0ue0d1ed0cc2ef',
+
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: YESTERDAY,
       },
       {
         id: 'cmc35ne37epofcdec5574228c',
@@ -244,11 +313,17 @@ const sandboxData: SandboxDataSet = {
         slug: 'weinlaube-ascheberg',
         description: 'Die gemütliche Weinlaube auf der Kirmes.',
         location: { lat: 51.789189, lon: 7.619713 },
-        options: { discoveryRadius: 10, clueRadius: 80 },
-        image: { id: '3wrde4842xst0v01q3nc.jpg', url: '' },
-        blurredImage: { id: '3wrde4842xst0v01q3nc-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-19T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 10,
+          clueRadius: 80,
+        },
+        image: {
+          id: 'cmc35ne37epofcdec5574228c',
+
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: YESTERDAY,
       },
       {
         id: 'cmc35ne372b0oc4427fc3c857',
@@ -256,11 +331,16 @@ const sandboxData: SandboxDataSet = {
         slug: 'raupe-ascheberg',
         description: 'Das beliebte Raupe-Karussell auf der Kirmes.',
         location: { lat: 51.7879, lon: 7.619027 },
-        options: { discoveryRadius: 10, clueRadius: 100 },
-        image: { id: '3y3te48428668fkk5u5j.jpg', url: '' },
-        blurredImage: { id: '3y3te48428668fkk5u5j-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-19T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 10,
+          clueRadius: 100,
+        },
+        image: {
+          id: 'cmc35ne372b0oc4427fc3c857',
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: YESTERDAY,
       },
       {
         id: 'cmc35ne37bm8k939abb15c837',
@@ -268,11 +348,16 @@ const sandboxData: SandboxDataSet = {
         slug: 'katharinenplatz-ascheberg',
         description: 'Der zentrale Katharinenplatz mit Kirmesständen.',
         location: { lat: 51.78846, lon: 7.619394 },
-        options: { discoveryRadius: 10, clueRadius: 150 },
-        image: { id: '3zdhe4842f742iuwlsp4.jpg', url: '' },
-        blurredImage: { id: '3zdhe4842f742iuwlsp4-blurred.jpg', url: '' },
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-        updatedAt: new Date('2026-01-19T12:04:16.534Z'),
+        options: {
+          discoveryRadius: 10,
+          clueRadius: 150,
+        },
+        image: {
+          id: 'cmc35ne37bm8k939abb15c837',
+          url: 'https://stferthecore.blob.core.windows.net/resources/trails/ascheberg-kirmes-trail-8010/cmc35ne37jbzs2db624de78df.png?sp=r&st=2025-06-20T09:38:55Z&se=2030-06-20T17:38:55Z&spr=https&sv=2024-11-04&sr=b&sig=t64nUkTGdqWbk%2FV3v71I8L%2F2JanwK9jOwixNgnp2ObQ%3D',
+        },
+        createdAt: LAST_WEEK,
+        updatedAt: YESTERDAY,
       },
     ],
   },
@@ -280,82 +365,77 @@ const sandboxData: SandboxDataSet = {
     id: STORES.TRAIL_SPOTS,
     fileName: jsonFile(STORES.TRAIL_SPOTS),
     data: [
+      // Discovery Trail spots
       {
         id: 'clx4j9k2n010101mh1a2b3c4d',
         trailId: 'clx4j9k2n000101mh8d4k9n2q',
         spotId: 'clx4j9k2n000301mh9e5p6t4w',
         order: 0,
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
+        createdAt: LAST_WEEK,
       },
       {
         id: 'clx4j9k2n010102mh2b3c4d5e',
         trailId: 'clx4j9k2n000101mh8d4k9n2q',
         spotId: 'clx4j9k2n000401mh2f7q8y5z',
         order: 1,
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
+        createdAt: LAST_WEEK,
       },
       {
         id: 'clx4j9k2n010103mh3c4d5e6f',
         trailId: 'clx4j9k2n000101mh8d4k9n2q',
         spotId: 'clx4j9k2n000501mh3h8r9a6b',
         order: 2,
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
+        createdAt: LAST_WEEK,
       },
       {
         id: 'clx4j9k2n010104mh4d5e6f7g',
         trailId: 'clx4j9k2n000101mh8d4k9n2q',
         spotId: 'clx4j9k2n000601mh4j9s2c7d',
         order: 3,
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
+        createdAt: LAST_WEEK,
       },
       {
         id: 'clx4j9k2n010105mh5e6f7g8h',
         trailId: 'clx4j9k2n000101mh8d4k9n2q',
         spotId: 'clx4j9k2n000701mh5k1t3e8f',
         order: 4,
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
+        createdAt: LAST_WEEK,
       },
-      {
-        id: 'clx4j9k2n010105mh5e6f7gef',
-        trailId: 'clx4j9k2n000101mh8d4k9n2q',
-        spotId: 'axlx4j9k2n001101mh9q5x7m3n',
-        order: 5,
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
-      },
+      // Ascheberg Trail spots
       {
         id: 'clx4j9k2n010106mh6f7g8h9i',
         trailId: 'cmc35a2qc12ome60777f19f2b',
         spotId: 'cmc35ne37jbzs2db624de78df',
         order: 0,
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
+        createdAt: LAST_WEEK,
       },
       {
         id: 'clx4j9k2n010107mh7g8h9i1j',
         trailId: 'cmc35a2qc12ome60777f19f2b',
         spotId: 'cmc35ne37bh0ue0d1ed0cc2ef',
         order: 1,
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
+        createdAt: LAST_WEEK,
       },
       {
         id: 'clx4j9k2n010108mh8h9i1j2k',
         trailId: 'cmc35a2qc12ome60777f19f2b',
         spotId: 'cmc35ne37epofcdec5574228c',
         order: 2,
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
+        createdAt: LAST_WEEK,
       },
       {
         id: 'clx4j9k2n010109mh9i2j3l4m',
         trailId: 'cmc35a2qc12ome60777f19f2b',
         spotId: 'cmc35ne372b0oc4427fc3c857',
         order: 3,
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
+        createdAt: LAST_WEEK,
       },
       {
         id: 'clx4j9k2n010110mh1j3k4m5n',
         trailId: 'cmc35a2qc12ome60777f19f2b',
         spotId: 'cmc35ne37bm8k939abb15c837',
         order: 4,
-        createdAt: new Date('2026-01-13T12:04:16.534Z'),
+        createdAt: LAST_WEEK,
       },
     ],
   },
@@ -364,22 +444,31 @@ const sandboxData: SandboxDataSet = {
     fileName: jsonFile(STORES.DISCOVERIES),
     data: [
       {
-        id: '27d632f624537304f8dfce55bf9afeaf',
+        id: 'clx4j9k2n001201mh1r6y8o4p',
         accountId: DEFAULT_USER_ID,
-        spotId: 'cmc35ne37jbzs2db624de78df',
-        trailId: 'cmc35a2qc12ome60777f19f2b',
-        discoveredAt: new Date('2026-02-15T14:02:49.537Z'),
-        createdAt: new Date('2026-02-15T14:02:49.537Z'),
-        updatedAt: new Date('2026-02-15T14:02:49.537Z'),
+        spotId: 'clx4j9k2n000301mh9e5p6t4w',
+        trailId: 'clx4j9k2n000101mh8d4k9n2q',
+        discoveredAt: YESTERDAY,
+        createdAt: YESTERDAY,
+        updatedAt: YESTERDAY,
       },
       {
-        id: '3c8b92de84a0af6ced3af45b574d8c29',
+        id: 'clx4j9k2n001301mh2s7z9p5q',
         accountId: DEFAULT_USER_ID,
-        spotId: 'cmc35ne372b0oc4427fc3c857',
-        trailId: 'cmc35a2qc12ome60777f19f2b',
-        discoveredAt: new Date('2026-02-15T14:16:07.082Z'),
-        createdAt: new Date('2026-02-15T14:16:07.082Z'),
-        updatedAt: new Date('2026-02-15T14:16:07.082Z'),
+        spotId: 'clx4j9k2n000801mh6m2u4g9h',
+        trailId: 'clx4j9k2n000201mh7b3m5r8x',
+        discoveredAt: YESTERDAY,
+        createdAt: YESTERDAY,
+        updatedAt: YESTERDAY,
+      },
+      {
+        id: 'clx4j9k2n001401mh3t8a1q6r',
+        accountId: DEFAULT_USER_ID,
+        spotId: 'clx4j9k2n000901mh7n3v5i1j',
+        trailId: 'clx4j9k2n000201mh7b3m5r8x',
+        discoveredAt: YESTERDAY,
+        createdAt: YESTERDAY,
+        updatedAt: YESTERDAY,
       },
     ],
   },

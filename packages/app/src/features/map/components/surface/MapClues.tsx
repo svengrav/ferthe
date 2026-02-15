@@ -93,19 +93,25 @@ interface ClueRadiusProps {
   size: { width: number; height: number }
   scale: number
   theme: MapTheme
+  clueSize: number
 }
 
-const ClueDiscoveryRadius = memo(({ clue, boundary, size, scale, theme }: ClueRadiusProps) => {
+const ClueDiscoveryRadius = memo(({ clue, boundary, size, scale, theme, clueSize }: ClueRadiusProps) => {
   const circle = mapUtils.calculateCircleDimensions(clue.location, clue.discoveryRadius, boundary, size)
   const styles = createRadiusStyles(theme, scale)
 
   return (
     <View
+      id={`clue-radius-${clue.spotId || clue.id}`}
       style={[
         styles.discoveryRadius,
         {
-          ...circle,
+          width: circle.width,
+          height: circle.height,
+          left: (clueSize - circle.width) / 2,
+          top: (clueSize - circle.height) / 2,
           borderRadius: circle.width / 2,
+          backgroundColor: 'gray'
         }
       ]}
     />
@@ -115,7 +121,7 @@ const ClueDiscoveryRadius = memo(({ clue, boundary, size, scale, theme }: ClueRa
 /**
  * Debug circles component (memoized)
  */
-const ClueDebugCircles = memo(({ clue, boundary, size, scale, theme }: ClueRadiusProps) => {
+const ClueDebugCircles = memo(({ clue, boundary, size, scale, theme, clueSize }: ClueRadiusProps) => {
   if (!config.debug.enableMapDebug) return null
 
   const styles = createRadiusStyles(theme, scale)
@@ -130,7 +136,10 @@ const ClueDebugCircles = memo(({ clue, boundary, size, scale, theme }: ClueRadiu
             style={[
               styles.debugCircle,
               {
-                ...circle,
+                width: circle.width,
+                height: circle.height,
+                left: (clueSize - circle.width) / 2,
+                top: (clueSize - circle.height) / 2,
                 borderRadius: circle.width / 2,
               }
             ]}
@@ -159,6 +168,7 @@ const AnimatedClue = memo(({ clue, delay, isExiting, boundary, size, scale, them
   const position = mapUtils.coordinatesToPosition(clue.location, boundary, size)
   const clueSize = CLUE_SIZE * scale
   const styles = createClueStyles(theme, clueSize, scale)
+  const circle = mapUtils.calculateCircleDimensions(clue.location, clue.discoveryRadius, boundary, size)
 
   return (
     <Animated.View
@@ -171,8 +181,8 @@ const AnimatedClue = memo(({ clue, delay, isExiting, boundary, size, scale, them
         }
       ]}
     >
-      <ClueDiscoveryRadius clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} />
-      <ClueDebugCircles clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} />
+      <ClueDiscoveryRadius clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} clueSize={clueSize} />
+      <ClueDebugCircles clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} clueSize={clueSize} />
       <View style={styles.clueMarker} />
     </Animated.View>
   )
@@ -292,8 +302,8 @@ function MapClues({ boundary, size }: MapCluesProps) {
               }
             ]}
           >
-            <ClueDiscoveryRadius clue={clue} boundary={boundary} size={size} scale={scaleValue} theme={theme} />
-            <ClueDebugCircles clue={clue} boundary={boundary} size={size} scale={scaleValue} theme={theme} />
+            <ClueDiscoveryRadius clue={clue} boundary={boundary} size={size} scale={scaleValue} theme={theme} clueSize={clueSize} />
+            <ClueDebugCircles clue={clue} boundary={boundary} size={size} scale={scaleValue} theme={theme} clueSize={clueSize} />
             <View style={styles.clueMarker} />
           </View>
         )

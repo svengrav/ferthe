@@ -39,7 +39,7 @@ export { createCommunityApplication } from './features/community/communityApplic
 
 // Image utilities (shared infrastructure)
 export { createImageApplication } from './shared/images/imageApplication.ts'
-export { createImageMetadata, detectExtensionFromDataUri, extractBlobPathFromUrl, generateSecureImagePath, isSupportedExtension } from './shared/images/imageService.ts'
+export { createImageMetadata, detectExtensionFromDataUri, extractBlobPathFromUrl, generateImageId, generateSecureImagePath, isSupportedExtension } from './shared/images/imageService.ts'
 
 // Storage Connector
 export { createAzureStorageConnector } from './connectors/storageConnector.ts'

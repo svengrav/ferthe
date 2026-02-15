@@ -28,7 +28,11 @@ const run = async () => {
     storageConnector: createAzureStorageConnector(
       secrets.storageConnectionString,
       constants.storage.containerName,
-      { sasExpiryMinutes: constants.storage.sasExpiryMinutes }
+      {
+        sasExpiryMinutes: constants.storage.sasExpiryMinutes,
+        storageVersion: 'v1',
+        imageFolder: 'images'
+      }
     ),
   }
 

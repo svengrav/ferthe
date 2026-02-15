@@ -22,6 +22,14 @@ A Discovery is a unique finding of a user at a specific spot. It is private to y
 - Discoveries have a timestamp and can be used to track your activity and engagement
 - Discovery stats can be aggregated to show popular spots and trails. It also shows your rank among all discoverers of that spot (e.g. 5th out of 100 discoverers)
 
+**Stats**
+- Amount of scans between discoveries
+- Time between discoveries
+- Your rank among all discoverers of that spot (e.g. 5th out of)
+- Total amount of discoveries you have
+- Distance traveled between discoveries
+- Time taken to discover a spot after the previous one
+
 **Discovery Profile:**
 - Automatically saves your last active trail
 - When you reopen the app, you resume where you left off
@@ -148,6 +156,7 @@ A spot is usually a point of interest, but can also be:
 - Discovery radius (visualized as circle)
 - Trail ID
 - Source type
+
 
 ## Sensor
 

@@ -50,7 +50,8 @@ const useSpotTapHandler = () => {
       spotId: tappedSpot.id,
       title: tappedSpot.name,
       description: tappedSpot.description,
-      image: tappedSpot.image || { id: '', url: '', previewUrl: '' },
+      image: tappedSpot.image || { id: '', url: '' },
+      blurredImage: tappedSpot.blurredImage,
       discoveredAt: tappedSpot.createdAt,
     }
     setCurrentSpot(spotCard)

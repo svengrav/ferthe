@@ -70,9 +70,14 @@ function MapViewport(props: MapViewportProps) {
     actions.setViewport({ scale: { ...currentScale, init: s }, offset: { x: tx, y: ty } })
   }
 
+  const viewportScale = getMapState().viewport.scale
+
   const { gesture, animatedStyles, compensatedScale } = useViewportGestures({
     width: size.width,
     height: size.height,
+    initialScale: viewportScale.init,
+    minScale: viewportScale.min,
+    maxScale: viewportScale.max,
     elementId: 'device-viewport-content',
     snapToCenter: true,
     onLongPress: config.environment === 'development' ? handleLongPress : undefined,

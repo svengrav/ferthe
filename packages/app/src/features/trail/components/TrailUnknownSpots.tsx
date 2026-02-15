@@ -53,9 +53,9 @@ function TrailUnknownSpots({ trailId }: TrailUnknownSpotsProps) {
       <View style={styles.grid}>
         {unknownSpots.map((spot) => (
           <View key={spot.id} style={[styles.card, { width: cardWidth, height: cardHeight }]}>
-            {spot.image?.previewUrl ? (
+            {spot.blurredImage ? (
               <Image
-                source={{ uri: spot.image.previewUrl }}
+                source={spot.blurredImage}
                 style={styles.image}
                 resizeMode="contain"
               />

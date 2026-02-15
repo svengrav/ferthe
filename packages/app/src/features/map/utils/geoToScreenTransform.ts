@@ -266,7 +266,7 @@ const calculateOverlayZoomLimits = (
   const screenMinDimension = Math.min(screenSize.width, screenSize.height)
 
   // MIN_SCALE: Trail fits in screen with padding
-  const paddingFactor = 0.9
+  const paddingFactor = 0.95
   const minScale = (screenMinDimension * paddingFactor) / canvasMaxDimension
 
   // MAX_SCALE: Show max 50m of trail

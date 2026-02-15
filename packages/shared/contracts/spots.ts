@@ -20,6 +20,7 @@ export interface Spot {
   name: string
   description: string
   image?: ImageReference
+  blurredImage?: ImageReference // Blurred version for undiscovered spots
   location: GeoLocation
   options: {
     discoveryRadius: number
@@ -36,10 +37,10 @@ export interface Spot {
  */
 export interface StoredSpot extends Spot {
   imageBlobPath?: string
-  previewImageBlobPath?: string
+  blurredImageBlobPath?: string
 }
 
 export interface SpotPreview {
   id: string
-  image?: ImageReference
+  blurredImage?: ImageReference
 }

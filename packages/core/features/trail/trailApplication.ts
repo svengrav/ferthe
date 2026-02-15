@@ -6,6 +6,7 @@ import {
   AccountContext,
   Discovery,
   ImageApplicationContract,
+  ImageReference,
   Result,
   Spot,
   SpotPreview,
@@ -84,7 +85,8 @@ async function enrichSpotWithImages(
   spotEntity: StoredSpot,
   imageApplication: ImageApplicationContract
 ): Promise<Spot> {
-  let image: { id: string; url: string; previewUrl?: string } | undefined
+  let image: ImageReference | undefined
+  let blurredImage: ImageReference | undefined
 
   if (spotEntity.imageBlobPath) {
     const urlResult = await imageApplication.refreshImageUrl(context, spotEntity.imageBlobPath)
@@ -94,13 +96,16 @@ async function enrichSpotWithImages(
         id: spotEntity.imageBlobPath,
         url: urlResult.data,
       }
+    }
+  }
 
-      // Add preview URL if available
-      if (spotEntity.previewImageBlobPath) {
-        const previewResult = await imageApplication.refreshImageUrl(context, spotEntity.previewImageBlobPath)
-        if (previewResult.success && previewResult.data) {
-          image.previewUrl = previewResult.data
-        }
+  // Load blurred image separately (for undiscovered spots)
+  if (spotEntity.blurredImageBlobPath) {
+    const blurredResult = await imageApplication.refreshImageUrl(context, spotEntity.blurredImageBlobPath)
+    if (blurredResult.success && blurredResult.data) {
+      blurredImage = {
+        id: spotEntity.blurredImageBlobPath,
+        url: blurredResult.data,
       }
     }
   }
@@ -111,6 +116,7 @@ async function enrichSpotWithImages(
     name: spotEntity.name,
     description: spotEntity.description,
     image,
+    blurredImage,
     location: spotEntity.location,
     options: spotEntity.options,
     createdAt: spotEntity.createdAt,
@@ -182,18 +188,17 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore, 
             return { success: false, error: { message: 'Failed to list spots', code: 'GET_SPOT_PREVIEWS_ERROR' } }
           }
 
-          // Enrich with preview URLs
+          // Enrich with blurred image URLs
           const enrichedPreviews = await Promise.all(
             (spotsResult.data || []).map(async (spotEntity) => {
               const preview: SpotPreview = { id: spotEntity.id }
 
-              if (spotEntity.previewImageBlobPath) {
-                const previewUrlResult = await imageApplication.refreshImageUrl(context, spotEntity.previewImageBlobPath)
-                if (previewUrlResult.success && previewUrlResult.data) {
-                  preview.image = {
-                    id: spotEntity.previewImageBlobPath,
-                    url: previewUrlResult.data,
-                    previewUrl: previewUrlResult.data,
+              if (spotEntity.blurredImageBlobPath) {
+                const blurredUrlResult = await imageApplication.refreshImageUrl(context, spotEntity.blurredImageBlobPath)
+                if (blurredUrlResult.success && blurredUrlResult.data) {
+                  preview.blurredImage = {
+                    id: spotEntity.blurredImageBlobPath,
+                    url: blurredUrlResult.data,
                   }
                 }
               }
@@ -222,18 +227,17 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore, 
 
         const spotEntities = (spotsResult.data || []).filter(spot => spotIds.includes(spot.id))
 
-        // Enrich with preview URLs
+        // Enrich with blurred image URLs
         const enrichedPreviews = await Promise.all(
           spotEntities.map(async (spotEntity) => {
             const preview: SpotPreview = { id: spotEntity.id }
 
-            if (spotEntity.previewImageBlobPath) {
-              const previewUrlResult = await imageApplication.refreshImageUrl(context, spotEntity.previewImageBlobPath)
-              if (previewUrlResult.success && previewUrlResult.data) {
-                preview.image = {
-                  id: spotEntity.previewImageBlobPath,
-                  url: previewUrlResult.data,
-                  previewUrl: previewUrlResult.data,
+            if (spotEntity.blurredImageBlobPath) {
+              const blurredUrlResult = await imageApplication.refreshImageUrl(context, spotEntity.blurredImageBlobPath)
+              if (blurredUrlResult.success && blurredUrlResult.data) {
+                preview.blurredImage = {
+                  id: spotEntity.blurredImageBlobPath,
+                  url: blurredUrlResult.data,
                 }
               }
             }
@@ -467,14 +471,26 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore, 
         const id = createCuid2()
         const slug = createSlug(spotData.name)
 
-        // Convert Spot input to StoredSpot (extract blob paths from URLs)
+        // Extract blob path from image URL
+        const imageBlobPath = spotData.image?.url ? extractBlobPathFromUrl(spotData.image.url) : undefined
+
+        // Auto-generate blurred path if image exists (by convention: <path>-blurred.<ext>)
+        let blurredImageBlobPath: string | undefined
+        if (imageBlobPath) {
+          const lastDot = imageBlobPath.lastIndexOf('.')
+          blurredImageBlobPath = lastDot === -1
+            ? `${imageBlobPath}-blurred`
+            : `${imageBlobPath.substring(0, lastDot)}-blurred${imageBlobPath.substring(lastDot)}`
+        }
+
+        // Convert Spot input to StoredSpot
         const spotEntity: StoredSpot = {
           id,
           slug,
           name: spotData.name,
           description: spotData.description,
-          imageBlobPath: spotData.image?.url ? extractBlobPathFromUrl(spotData.image.url) : undefined,
-          previewImageBlobPath: spotData.image?.previewUrl ? extractBlobPathFromUrl(spotData.image.previewUrl) : undefined,
+          imageBlobPath,
+          blurredImageBlobPath,
           location: spotData.location,
           options: spotData.options,
           createdAt: spotData.createdAt,

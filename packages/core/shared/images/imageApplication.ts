@@ -3,11 +3,12 @@ import { ImageApplicationContract, ImageType, ImageUploadResult } from '@shared/
 import { createErrorResult, createSuccessResult, Result } from '@shared/contracts/results.ts'
 import { Buffer } from 'node:buffer'
 import { StorageConnector } from '../../connectors/storageConnector.ts'
+import { processImage } from '../../utils/imageProcessor.ts'
 import {
   createImageMetadata,
   detectExtensionFromDataUri,
   extractBlobPathFromUrl,
-  generateSecureImagePath,
+  generateImageId,
   isSupportedExtension,
   validateImageSize,
 } from './imageService.ts'
@@ -49,13 +50,6 @@ export function createImageApplication({ storageConnector, maxImageSizeBytes }: 
         return createErrorResult('INVALID_IMAGE_FORMAT', { extension: ext })
       }
 
-      // Extract base64 data (remove data URI prefix if present)
-      const base64String = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data
-      const buffer = Buffer.from(base64String, 'base64')
-
-      // Generate secure blob path (hash-based, no identifiable info)
-      const blobPath = generateSecureImagePath(ext)
-
       // Create metadata (stored on blob, not visible via public URL)
       const metadata = createImageMetadata(imageType, accountId, entityId)
 
@@ -67,10 +61,38 @@ export function createImageApplication({ storageConnector, maxImageSizeBytes }: 
         uploadedAt: metadata.uploadedAt,
       }
 
-      // Upload to storage with metadata
+      // For spots: process image and upload with blurred variant
+      if (imageType === 'spot') {
+        // Process image to create optimized + blurred versions
+        const processed = await processImage(base64Data)
+
+        // Generate image ID (always .jpg after processing)
+        const blobPath = generateImageId('jpg')
+
+        // Generate blurred path (adds -blurred suffix)
+        const lastDot = blobPath.lastIndexOf('.')
+        const blurredPath = lastDot === -1
+          ? `${blobPath}-blurred`
+          : `${blobPath.substring(0, lastDot)}-blurred${blobPath.substring(lastDot)}`
+
+        // Upload both original and blurred variant
+        await storageConnector.uploadFileWithPreview(
+          blobPath,
+          processed.original,
+          processed.blurred,
+          blobMetadata
+        )
+
+        return createSuccessResult({ blobPath })
+      }
+
+      // For other image types: simple upload
+      const base64String = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data
+      const buffer = Buffer.from(base64String, 'base64')
+      const blobPath = generateImageId(ext)
+
       await storageConnector.uploadFile(blobPath, buffer, blobMetadata)
 
-      // Return blob path as object
       return createSuccessResult({ blobPath })
     } catch (error: any) {
       return createErrorResult('IMAGE_UPLOAD_ERROR', { originalError: error.message })

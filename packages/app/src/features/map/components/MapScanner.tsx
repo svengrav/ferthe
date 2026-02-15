@@ -39,7 +39,7 @@ function MapScanner() {
     },
   })
 
-  return <Animated.View style={animatedStyle} />
+  return <Animated.View style={animatedStyle} id={'map-scan-radius'} />
 }
 
 interface MapScannerControlProps {

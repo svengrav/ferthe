@@ -69,8 +69,8 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     const { requestDeviceState } = getSensorActions()
 
     if (!trail) {
-      logger.log('No trail loaded, cannot update map state')
-      // Trail not loaded yet - silently return and wait for discovery state
+      logger.log('No trail loaded, requesting discovery state')
+      await discoveryApplication?.requestDiscoveryState()
       return
     }
 

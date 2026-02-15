@@ -13,6 +13,16 @@ interface StorageConnectorOptions {
    * Default: 15 minutes (more secure than long-lived tokens)
    */
   sasExpiryMinutes?: number
+  /**
+   * Storage structure version (e.g., 'v1')
+   * Default: 'v1'
+   */
+  storageVersion?: string
+  /**
+   * Image folder name within the version namespace
+   * Default: 'images'
+   */
+  imageFolder?: string
 }
 
 export interface StorageConnector {
@@ -47,6 +57,8 @@ export const createAzureStorageConnector = (
   const connectionParams = parseConnectionString(connectionString)
   const { accountName, accountKey } = connectionParams
   const sasExpiryMinutes = options.sasExpiryMinutes ?? 15 // Default: 15 minutes
+  const storageVersion = options.storageVersion ?? 'v1'
+  const imageFolder = options.imageFolder ?? 'images'
 
   const getContainerClient = async () => {
     const containerClient = blobServiceClient.getContainerClient(containerName)
@@ -55,9 +67,18 @@ export const createAzureStorageConnector = (
     return containerClient
   }
 
+  // Build full blob path from key
+  const buildFullPath = (key: string): string => {
+    // If key already contains version prefix, use as-is (backward compatibility)
+    return key.startsWith(`${storageVersion}/`)
+      ? key
+      : `${storageVersion}/${imageFolder}/${key}`
+  }
+
   const getBlobClient = async (key: string) => {
     const containerClient = await getContainerClient()
-    return containerClient.getBlobClient(key)
+    const fullPath = buildFullPath(key)
+    return containerClient.getBlobClient(fullPath)
   }
 
   const getItemUrl = async (key: string): Promise<StorageItem | null> => {
@@ -72,9 +93,10 @@ export const createAzureStorageConnector = (
 
       // Generate SAS token
       const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey)
+      const fullPath = buildFullPath(key)
       const sasOptions = {
         containerName: containerName,
-        blobName: key,
+        blobName: fullPath,
         permissions: BlobSASPermissions.parse('r'),
         startsOn: new Date(),
         expiresOn: new Date(Date.now() + sasExpiryMinutes * 60 * 1000),
@@ -107,9 +129,10 @@ export const createAzureStorageConnector = (
 
       // Generate SAS URL for the uploaded file
       const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey)
+      const fullPath = buildFullPath(path)
       const sasOptions = {
         containerName: containerName,
-        blobName: path,
+        blobName: fullPath,
         permissions: BlobSASPermissions.parse('r'),
         startsOn: new Date(),
         expiresOn: new Date(Date.now() + sasExpiryMinutes * 60 * 1000),

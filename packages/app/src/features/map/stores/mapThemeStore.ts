@@ -9,7 +9,20 @@ interface MapThemeStore {
 export interface MapTheme {
   radius: { fill: string; strokeColor: string; strokeWidth: number }
   device: { fill: string; strokeColor: string; strokeWidth: number }
-  spot: { fill: string; strokeColor: string; strokeWidth: number; size: number }
+  spot: {
+    fill: string
+    strokeColor: string
+    strokeWidth: number
+    size: number
+    borderRadius: number
+    borderWidth: number
+    backgroundColor: string
+    imageBorderRadius: number
+    imageBackgroundColor: string
+    heightOffset: number
+    offsetX: number
+    offsetY: number
+  }
   discovery: { fill: string; strokeColor: string; strokeWidth: number }
   clue: { fill: string; strokeColor: string; strokeWidth: number }
   trail: { strokeColor: string; strokeWidth: number; strokeDash?: number[] }
@@ -37,7 +50,15 @@ const createMapThemeFromBase = (): MapTheme => {
       strokeColor: baseTheme.colors.primary,
       fill: baseTheme.colors.background,
       strokeWidth: 1.5,
-      size: 20, // Default size for spot markers
+      size: 15,
+      borderRadius: 4,
+      borderWidth: 0.5,
+      backgroundColor: '#000000ff',
+      imageBorderRadius: 2,
+      imageBackgroundColor: '#000',
+      heightOffset: 7,
+      offsetX: 10,
+      offsetY: 13.5,
     },
     discovery: {
       strokeColor: baseTheme.colors.primary,

@@ -7,5 +7,6 @@ export interface DiscoveryCardState {
   discoveredAt: Date
   discoveredBy?: string // accountId of the discoverer (for community discoveries)
   image: ImageReference
+  blurredImage?: ImageReference // For reveal animation
   description: string
 }
