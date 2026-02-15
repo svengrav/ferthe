@@ -1,12 +1,14 @@
-import { Icon, Stack, Text } from '@app/shared/components'
+import { Icon, ProgressBar, Stack, Text } from '@app/shared/components'
 import { LoadingSpinner } from '@app/shared/components/activityIndicator/ActivityIndicator'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { StyleSheet, View } from 'react-native'
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { useTrailStats } from '../hooks/useTrailStats'
 
 interface TrailStatsProps {
   trailId: string
+  animationDelay?: number
+  style?: StyleProp<ViewStyle>
 }
 
 /**
@@ -14,14 +16,14 @@ interface TrailStatsProps {
  * Encapsulates data fetching and state management via useTrailStats hook.
  */
 function TrailStats(props: TrailStatsProps) {
-  const { trailId } = props
-  const { locales } = useApp(createStyles)
+  const { trailId, animationDelay = 0, style } = props
+  const { locales } = useApp()
   const { styles, theme } = useTheme(createStyles)
   const { stats, loading, error } = useTrailStats(trailId)
 
   if (loading) {
     return (
-      <View style={styles?.container}>
+      <View style={[styles?.container, style]}>
         <LoadingSpinner />
       </View>
     )
@@ -29,7 +31,7 @@ function TrailStats(props: TrailStatsProps) {
 
   if (error || !styles) {
     return (
-      <View style={styles?.container}>
+      <View style={[styles?.container, style]}>
         <Icon name="warning" size={24} color={theme.colors.error} />
         <Text variant="caption" style={{ color: theme.colors.error }}>
           {error || 'Error loading stats'}
@@ -65,9 +67,11 @@ function TrailStats(props: TrailStatsProps) {
   }
 
   return (
-    <View style={styles.container}>
-      {/* Progress */}
+    <View style={[styles.container, style]}>
       <Stack spacing='lg'>
+        <Text variant="section">{locales.trails.stats.name}</Text>
+
+        {/* Progress */}
         <View style={styles.statRow}>
           <Icon name="map" size={20} color={theme.colors.primary} />
           <View style={styles.statContent}>
@@ -75,6 +79,11 @@ function TrailStats(props: TrailStatsProps) {
             <Text variant="body">
               {stats.discoveredSpots} / {stats.totalSpots} ({stats.progressPercentage}%)
             </Text>
+            <ProgressBar
+              percentage={stats.progressPercentage}
+              color={theme.colors.primary}
+              delay={animationDelay}
+            />
           </View>
         </View>
 
@@ -90,30 +99,33 @@ function TrailStats(props: TrailStatsProps) {
         </View>
 
         {/* Rank */}
-        {stats.rank > 0 && (
-          <View style={styles.statRow}>
-            <Icon name="trophy" size={20} color={theme.colors.secondary} />
-            <View style={styles.statContent}>
-              <Text variant="caption">{locales.trails.stats.rank}</Text>
-              <Text variant="body">
-                #{stats.rank} {locales.trails.stats.of} {stats.totalDiscoverers}
-              </Text>
-            </View>
+        <View style={styles.statRow}>
+          <Icon name="trophy" size={20} color={theme.colors.secondary} />
+          <View style={styles.statContent}>
+            <Text variant="caption">{locales.trails.stats.rank}</Text>
+            <Text variant="body">
+              {stats.rank > 0 ? `#${stats.rank} ${locales.trails.stats.of} ${stats.totalDiscoverers}` : '-'}
+            </Text>
+            {stats.rank > 0 && stats.totalDiscoverers > 0 && (
+              <ProgressBar
+                percentage={(stats.rank / stats.totalDiscoverers) * 100}
+                color={theme.colors.secondary}
+                delay={animationDelay}
+              />
+            )}
           </View>
-        )}
+        </View>
 
         {/* Time Stats */}
-        {stats.averageTimeBetweenDiscoveries && (
-          <View style={styles.statRow}>
-            <Icon name="timer" size={20} color={theme.colors.onSurface} />
-            <View style={styles.statContent}>
-              <Text variant="caption">{locales.trails.stats.averageTime}</Text>
-              <Text variant="body">
-                {formatDuration(stats.averageTimeBetweenDiscoveries)}
-              </Text>
-            </View>
+        <View style={styles.statRow}>
+          <Icon name="timer" size={20} color={theme.colors.onSurface} />
+          <View style={styles.statContent}>
+            <Text variant="caption">{locales.trails.stats.averageTime}</Text>
+            <Text variant="body">
+              {stats.averageTimeBetweenDiscoveries ? formatDuration(stats.averageTimeBetweenDiscoveries) : '-'}
+            </Text>
           </View>
-        )}
+        </View>
       </Stack>
     </View>
   )
@@ -133,11 +145,12 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   statRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.tokens.spacing.md,
+    gap: theme.tokens.spacing.lg,
   },
   statContent: {
     flex: 1,
     gap: theme.tokens.spacing.xs,
+    paddingRight: theme.tokens.spacing.sm,
   },
 })
 

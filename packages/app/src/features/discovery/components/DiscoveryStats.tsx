@@ -82,30 +82,26 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
         </View>
 
         {/* Time Since Last Discovery */}
-        {stats.timeSinceLastDiscovery !== undefined && (
-          <View style={styles.statRow}>
-            <Icon name="timer" size={20} color={theme.colors.onSurface} />
-            <View style={styles.statContent}>
-              <Text variant="caption">{locales.discovery.stats.timeSinceLast}</Text>
-              <Text variant="body">
-                {formatDuration(stats.timeSinceLastDiscovery)}
-              </Text>
-            </View>
+        <View style={styles.statRow}>
+          <Icon name="timer" size={20} color={theme.colors.onSurface} />
+          <View style={styles.statContent}>
+            <Text variant="caption">{locales.discovery.stats.timeSinceLast}</Text>
+            <Text variant="body">
+              {stats.timeSinceLastDiscovery !== undefined ? formatDuration(stats.timeSinceLastDiscovery) : '-'}
+            </Text>
           </View>
-        )}
+        </View>
 
         {/* Distance From Last Discovery */}
-        {stats.distanceFromLastDiscovery !== undefined && (
-          <View style={styles.statRow}>
-            <Icon name="near-me" size={20} color={theme.colors.onSurface} />
-            <View style={styles.statContent}>
-              <Text variant="caption">{locales.discovery.stats.distanceFromLast}</Text>
-              <Text variant="body">
-                {formatDistance(stats.distanceFromLastDiscovery)}
-              </Text>
-            </View>
+        <View style={styles.statRow}>
+          <Icon name="near-me" size={20} color={theme.colors.onSurface} />
+          <View style={styles.statContent}>
+            <Text variant="caption">{locales.discovery.stats.distanceFromLast}</Text>
+            <Text variant="body">
+              {stats.distanceFromLastDiscovery !== undefined ? formatDistance(stats.distanceFromLastDiscovery) : '-'}
+            </Text>
           </View>
-        )}
+        </View>
       </Stack>
     </View>
   )
