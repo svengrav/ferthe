@@ -1,68 +1,48 @@
 import { getAppContext } from '@app/appContext'
+import { useDiscoveryTrailId } from '@app/features/discovery/stores/discoveryTrailStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { View } from 'react-native'
-import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
-import Animated from 'react-native-reanimated'
-import { useMapGestures } from '../hooks/useMapGestures'
-import { useMapBoundary, useMapCanvas, useMapTrailId, useMapViewport } from '../stores/mapStore'
+import { useMapSurface, useMapSurfaceBoundary, useMapSurfaceLayout, useMapViewport, useViewportDimensions } from '../stores/mapStore'
 import { MapTheme, useMapTheme } from '../stores/mapThemeStore'
-import { mapUtils } from '../utils/geoToScreenTransform.'
 import MapDeviceCords from './MapDeviceCords'
 import { MapScanner, MapScannerControl } from './MapScanner'
-import MapCenterMarker from './surface/MapCenterMarker'
-import MapClues from './surface/MapClues'
+import MapCenterMarker from './surface/MapCenterMarker.tsx'
+import MapClues from './surface/MapClues.tsx'
 import MapDeviceMarker from './surface/MapDeviceMarker'
-import MapRadius from './surface/MapRadius'
-import MapSnap from './surface/MapSnap'
-import MapSpots from './surface/MapSpots'
-import MapSurface from './surface/MapSurface'
-import MapTrailPath from './surface/MapTrailPath'
+import MapSnap from './surface/MapSnap.tsx'
+import MapSpots from './surface/MapSpots.tsx'
+import MapSurface from './surface/MapSurface.tsx'
+import MapTrailPath from './surface/MapTrailPath.tsx'
+import { MapViewport } from './surface/MapViewport.tsx'
 
 
 export function Map() {
-  const { sensorApplication, isDevelopment } = getAppContext()
-  const viewbox = useMapViewport()
-  const canvas = useMapCanvas()
-  const trailId = useMapTrailId()
-  const boundary = useMapBoundary()
+  const { sensorApplication } = getAppContext()
+  const surface = useMapSurface()
+  const boundary = useMapSurfaceBoundary()
+  const { size, boundary: viewportBoundary } = useMapViewport()
+  const surfaceLayout = useMapSurfaceLayout()
+  const viewportSize = useViewportDimensions()
+  const trailId = useDiscoveryTrailId()
   const mapTheme = useMapTheme()
   const theme = useThemeStore()
-  const styles = createStyles(theme, mapTheme, canvas.size)
-
-  const onTap = (position: { x: number, y: number }) => {
-    const geoPosition = mapUtils.positionToCoordinates(position, boundary, canvas.size)
-
-    if (isDevelopment)
-      sensorApplication.setDevice({
-        location: geoPosition,
-        heading: 0,
-      })
-  }
-
-  const { gesture, animatedStyles } = useMapGestures(canvas, viewbox, onTap)
-
+  const styles = createStyles(theme, mapTheme, surface.layout)
 
   return (
     <>
       <View style={[styles.contentContainer]} id='map-content' >
         <MapDeviceCords />
-        <GestureHandlerRootView id='map-gesture-root' style={{ width: canvas.size.width, height: canvas.size.height }}>
-          <GestureDetector gesture={gesture} >
-            {/* container = Visible view of the map for the user */}
-            <Animated.View style={[styles.map, animatedStyles,]} id='map-inner'>
-              <MapSurface />
-              <MapRadius />
-              <MapScanner />
-              <MapTrailPath />
-              <MapClues />
-              <MapSnap />
-              <MapCenterMarker />
-              <MapSpots />
-              <MapDeviceMarker />
-            </Animated.View>
-          </GestureDetector>
-        </GestureHandlerRootView>
-        <MapScannerControl startScan={() => sensorApplication.startScan(trailId)} />
+        <MapViewport>
+          <MapSurface />
+          <MapTrailPath boundary={viewportBoundary} size={size} />
+          <MapClues boundary={viewportBoundary} size={size} />
+          <MapSnap boundary={viewportBoundary} size={size} />
+          <MapCenterMarker />
+          <MapSpots boundary={viewportBoundary} size={size} />
+          <MapScanner />
+          <MapDeviceMarker mode="canvas" canvasSize={viewportSize} />
+        </MapViewport>
+        <MapScannerControl startScan={() => trailId && sensorApplication.startScan(trailId)} />
       </View>
     </>
   )
@@ -77,8 +57,6 @@ const createStyles = (theme: Theme, mapTheme: MapTheme, size: { width: number; h
     justifyContent: 'center' as const,
     top: 0,
     alignItems: 'center' as const,
-    ...theme.text.size.sm,
-    fontFamily: theme.text.primary.regular,
     color: theme.deriveColor(theme.colors.onSurface, 0.4),
   },
   map: {
@@ -102,7 +80,7 @@ const createStyles = (theme: Theme, mapTheme: MapTheme, size: { width: number; h
   contentContainer: {
     position: 'relative' as const,
     height: '100%' as const,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.deriveColor(theme.colors.background, 0.4),
     justifyContent: 'center' as const,
     alignItems: 'center' as const,
     flex: 1,

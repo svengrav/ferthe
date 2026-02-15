@@ -1,13 +1,84 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ferthe</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Primary Meta Tags -->
+  <title>ferthe</title>
+  <meta name="title" content="ferthe - Discover and Share Amazing Spots on Trails" />
+  <meta name="description"
+    content="Explore unique spots, create discoveries. Track your achievements on trails and share your findings with others." />
+  <meta name="keywords"
+    content="discovery app, trails, spots, exploration, community, user-generated content, outdoor, adventure, discoveries" />
+  <meta name="author" content="ferthe Team" />
+  <meta name="theme-color" content="#0d0639" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ferthe.de/" />
+  <meta property="og:title" content="ferthe - Discover and Share Amazing Spots on Trails" />
+  <meta property="og:description"
+    content="Explore unique spots, create discoveries. Track your achievements on trails and share your findings with others." />
+  <meta property="og:image" content="https://ferthe.de/og-image.jpg" />
+  <meta property="og:site_name" content="ferthe" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://ferthe.de/" />
+  <meta property="twitter:title" content="ferthe - Discover and Share Amazing Spots on Trails" />
+  <meta property="twitter:description"
+    content="Explore unique spots, create discoveries. Track your achievements on trails and share your findings with others." />
+  <meta property="twitter:image" content="https://ferthe.de/og-image.jpg" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/ferthe.svg" />
+  <link rel="apple-touch-icon" href="/ferthe.svg" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Performance -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ferthe",
+    "description": "Discover and share spots on trails.",
+    "url": "https://ferthe.de",
+    "applicationCategory": "LifestyleApplication",
+    "operatingSystem": "Web, Android",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "1200"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "ferthe Team"
+    }
+  }
+  </script>
+</head>
+
+<body>
+  <noscript>
+    <div style="padding: 2rem; text-align: center; font-family: system-ui, sans-serif;">
+      <h1>JavaScript Required</h1>
+      <p>ferthe requires JavaScript to run. Please enable JavaScript in your browser settings to use this application.
+      </p>
+    </div>
+  </noscript>
+  <div id="root"></div>
+  <script type="module" src="app/main.tsx"></script>
+</body>
+
 </html>

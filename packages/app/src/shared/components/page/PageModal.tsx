@@ -1,7 +1,8 @@
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { ScrollView, StyleSheet } from 'react-native'
 import Modal from 'react-native-modal'
-import { IconButton } from '../button/Button'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import Button from '../button/Button'
 import { Option } from '../types'
 import { PageHeader } from './PageHeader'
 
@@ -15,17 +16,18 @@ interface PageModalProps {
 
 const PageModal = ({ visible, label, onClose, children, options }: PageModalProps) => {
   const theme = useThemeStore()
+  const insets = useSafeAreaInsets()
   const styles = createStyles(theme)
 
   return (
-    <Modal style={styles.modal} isVisible={visible}>
+    <Modal style={[styles.modal, { paddingTop: insets.top }]} isVisible={visible}>
       <PageHeader
-        label={label}
+        title={label}
         options={options}
-        action={<IconButton onPress={onClose} name='arrow-back' size={24} />}
+        trailing={<Button onPress={onClose} icon='arrow-back' variant='outlined' size='md' />}
       />
       <ScrollView
-        contentContainerStyle={styles.scrolLView}
+        contentContainerStyle={[styles.scrolLView, { paddingBottom: insets.bottom }]}
         keyboardShouldPersistTaps='handled'
         showsVerticalScrollIndicator={true}
         bounces={true}>

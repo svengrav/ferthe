@@ -1,10 +1,19 @@
 /**
- * Store index file to export all stores
- * * This file serves as a central point to import and export all store modules,
- *   allowing for easier management and organization of the application's state.
+ * Shared index file to export reusable components, hooks, and stores
+ * This file serves as a central point for shared functionality across the app
  */
 
-export * from './stores/types'
-export * from './theme'
+export * from './components'
 export * from './localization'
 export * from './navigation/Navigation'
+export * from './stores/types'
+export * from './theme'
+
+// Hooks
+export { useImagePicker } from './hooks/useImagePicker'
+export { useImageToBase64 } from './hooks/useImageToBase64'
+
+// Stores
+export { createReactionStore } from './stores/createReactionStore'
+export type { ReactionSummary } from './stores/createReactionStore'
+

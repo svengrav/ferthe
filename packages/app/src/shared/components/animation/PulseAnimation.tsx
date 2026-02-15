@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react'
-import { Animated, Easing, ViewProps } from 'react-native'
+import React, { useEffect } from 'react'
+import { ViewProps } from 'react-native'
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated'
 
 interface PulseViewProps extends ViewProps {
   children: React.ReactNode
@@ -17,39 +18,33 @@ function PulseAnimation({
   style,
   ...props
 }: PulseViewProps) {
-  const opacityAnim = useRef(new Animated.Value(maxOpacity)).current
+  const opacity = useSharedValue(maxOpacity)
 
   useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacityAnim, {
-          toValue: minOpacity,
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(minOpacity, {
           duration,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
         }),
-        Animated.timing(opacityAnim, {
-          toValue: maxOpacity,
+        withTiming(maxOpacity, {
           duration,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ])
+        })
+      ),
+      -1, // infinite loop
+      false // don't reverse
     )
+  }, [minOpacity, maxOpacity, duration])
 
-    pulse.start()
-
-    return () => {
-      pulse.stop()
-    }
-  }, [opacityAnim, minOpacity, maxOpacity, duration])
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }))
 
   return (
     <Animated.View
       style={[
-        {
-          opacity: opacityAnim,
-        },
+        animatedStyle,
         style,
       ]}
       {...props}>

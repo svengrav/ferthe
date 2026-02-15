@@ -1,131 +1,125 @@
-import { IconButton, Modal, Text } from '@app/shared/components'
-import { createThemedStyles, useThemeStore } from '@app/shared/theme'
+import { FlatList, StyleSheet, View } from 'react-native'
+import { GestureDetector } from 'react-native-gesture-handler'
+
+import { getAppContext } from '@app/appContext'
+import { useDiscoveryTrail } from '@app/features/discovery'
+import { useTrailData } from '@app/features/trail'
+import TrailItem from '@app/features/trail/components/TrailItem'
+import { Button } from '@app/shared/components'
+import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
+import { Theme, useTheme } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
-import React, { useState } from 'react'
-import { FlatList, TouchableOpacity, View } from 'react-native'
 
-interface MapTrailSelectorProps {
+import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
+
+/**
+ * Hook to open/close the trail list card overlay.
+ */
+export const useMapTrailListCard = () => {
+  const { trails } = useTrailData()
+  const { discoveryApplication } = getAppContext()
+
+  return {
+    showTrailListCard: () => {
+      const cardId = 'map-trail-list-card'
+      return setOverlay(
+        cardId,
+        <MapTrailListCard
+          onClose={() => closeOverlay('map-trail-list-card')}
+          trails={trails}
+          onSelectTrail={(trail) => {
+            discoveryApplication.setActiveTrail(trail.id)
+            closeOverlay(cardId)
+          }}
+        />,
+      )
+    },
+    closeTrailListCard: () => closeOverlay('map-trail-list-card'),
+  }
+}
+
+interface MapTrailListCardProps {
   trails: Trail[]
-  selectedTrail?: Trail
   onSelectTrail: (trail: Trail) => void
+  onClose: () => void
 }
 
-export const MapTrailSelector = ({ trails, selectedTrail, onSelectTrail }: MapTrailSelectorProps) => {
-  const theme = useThemeStore()
-  const styles = useStyles(theme)
-  const [isOpen, setIsOpen] = useState<boolean>(false)
+/**
+ * Overlay card displaying a list of available trails for selection.
+ */
+function MapTrailListCard(props: MapTrailListCardProps) {
+  const { trails, onSelectTrail, onClose } = props
+  const { styles } = useTheme(createStyles)
 
-  const toggleSelector = (): void => {
-    setIsOpen(!isOpen)
+  const renderTrailItem = ({ item }: { item: Trail }) => (
+    <TrailItem
+      trail={item}
+      onPress={() => onSelectTrail(item)}
+    />
+  )
+
+  return (
+    <OverlayCard title='Select card' onClose={onClose} inset='none'>
+      <FlatList
+        data={trails}
+        renderItem={renderTrailItem}
+        keyExtractor={item => item.id}
+      />
+    </OverlayCard>
+  )
+}
+
+/**
+ * Hook to manage trail selector state and interactions.
+ */
+const useMapTrailSelector = () => {
+  const activeTrail = useDiscoveryTrail()
+  const { showTrailListCard } = useMapTrailListCard()
+
+  return {
+    selectedTrail: activeTrail?.trail,
+    openTrailSelector: showTrailListCard,
   }
+}
 
-  const handleSelectTrail = (trail: Trail): void => {
-    onSelectTrail(trail)
-    setIsOpen(false)
-  }
+/**
+ * Bottom sheet selector for switching between trails on the map.
+ * Displays the currently active trail and allows swipe-up gesture to open trail list.
+ */
+export const MapTrailSelector = () => {
+  const { styles } = useTheme(createStyles)
+  const { selectedTrail, openTrailSelector } = useMapTrailSelector()
+  const swipeGesture = useSwipeUpGesture(openTrailSelector)
 
-  const renderTrailItem = ({ item }: { item: Trail }): React.ReactElement => (
-    <TouchableOpacity style={styles.trailItem} onPress={() => handleSelectTrail(item)}>
-      <View style={styles.trailInfo}>
-        <Text style={styles.trailName}>{item.name}</Text>
+  return (
+    <GestureDetector gesture={swipeGesture}>
+      <View style={styles.selector} id="map">
+        {selectedTrail && (
+          <TrailItem
+            trail={selectedTrail}
+            onPress={openTrailSelector}
+            actions={
+              <Button
+                icon='swap-horiz'
+                onPress={openTrailSelector}
+                variant='outlined'
+              />
+            }
+          />
+        )}
       </View>
-    </TouchableOpacity>
+    </GestureDetector>
   )
-
-  const renderModal = (): React.ReactElement => (
-    <>
-      <TouchableOpacity style={styles.selector} onPress={toggleSelector}>
-        <View style={styles.selectedTrailDisplay}>
-          <Text style={styles.selectedTrailName}>{selectedTrail ? selectedTrail.name : 'change'}</Text>
-        </View>
-        <IconButton name='expand-more' onPress={toggleSelector} size={16} variant='outlined' />
-      </TouchableOpacity>
-
-      <Modal label='Select a Trail' visible={isOpen} onClose={() => setIsOpen(false)}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <FlatList data={trails} renderItem={renderTrailItem} keyExtractor={item => item.id} />
-          </View>
-        </View>
-      </Modal>
-    </>
-  )
-
-  return renderModal()
 }
 
-const useStyles = createThemedStyles(theme => ({
-  dropdownContainer: {
-    position: 'relative',
-    zIndex: 1000,
-  },
+const createStyles = (theme: Theme) => StyleSheet.create({
   selector: {
-    paddingHorizontal: 4,
-    paddingVertical: 4,
-    flexDirection: 'row',
-    alignItems: 'center',
+    height: 66,
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    borderTopColor: theme.colors.divider,
     backgroundColor: theme.colors.surface,
-    borderRadius: 8,
-    alignSelf: 'center',
+    borderTopWidth: 1,
+    padding: 8,
   },
-  selectedTrailDisplay: {},
-  selectedTrailName: {
-    fontFamily: theme.text.primary.semiBold,
-    fontSize: 12,
-    color: theme.colors.onSurface,
-  },
-  selectedTrailType: {
-    fontFamily: theme.text.primary.regular,
-    fontSize: 12,
-    color: theme.deriveColor(theme.colors.onSurface, 0.7),
-  },
-  dropdownList: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    backgroundColor: theme.colors.surface,
-    borderRadius: 8,
-    marginTop: 4,
-    maxHeight: 300,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: theme.deriveColor(theme.colors.divider, 0.3),
-    elevation: 4,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  trailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-  },
-  trailInfo: {
-    flex: 1,
-  },
-  trailName: {
-    fontFamily: theme.text.primary.semiBold,
-    fontSize: 14,
-    color: theme.colors.onSurface,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-start',
-  },
-  modalContent: {
-    backgroundColor: theme.colors.surface,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-  },
-  modalTitle: {
-    fontFamily: theme.text.primary.semiBold,
-    fontSize: 18,
-    color: theme.colors.onSurface,
-  },
-}))
+})

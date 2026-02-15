@@ -1,53 +1,73 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Animated, StyleSheet, TouchableWithoutFeedback, View, ViewStyle } from 'react-native'
+import React, { useEffect, useRef } from 'react'
+import { StyleSheet, TouchableWithoutFeedback, View, ViewStyle } from 'react-native'
+import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 
 type FlippableProps = {
-  startFlipped?: boolean
-  flipped?: boolean
+  flipped: boolean
   front: React.ReactNode
   back: React.ReactNode
   style?: ViewStyle
+  onTap?: () => void
 }
 
-export const Flippable: React.FC<FlippableProps> = ({ front, back, style, startFlipped }) => {
-  const animatedValue = useRef(new Animated.Value(0)).current
-  const [flipped, setFlipped] = useState(false)
-
-  const frontInterpolate = animatedValue.interpolate({
-    inputRange: [0, 180],
-    outputRange: ['0deg', '180deg'],
-  })
-
-  const backInterpolate = animatedValue.interpolate({
-    inputRange: [0, 180],
-    outputRange: ['180deg', '360deg'],
-  })
-
-  const flip = () => {
-    Animated.delay(1000).start(() => {
-      Animated.spring(animatedValue, {
-        toValue: flipped ? 0 : 180,
-        useNativeDriver: true,
-        friction: 8,
-        tension: 10,
-      }).start()
-      setFlipped(!flipped)
-    })
-  }
+export const Flippable = ({ front, back, style, flipped, onTap }: FlippableProps) => {
+  const rotation = useSharedValue(flipped ? 180 : 0)
+  const didMount = useRef(false)
+  const lastFlipped = useRef(flipped)
 
   useEffect(() => {
-    if (startFlipped) {
-      flip()
+    // Mark mount done
+    if (!didMount.current) {
+      didMount.current = true
+      lastFlipped.current = flipped
+      rotation.value = flipped ? 180 : 0
+      return
     }
-  }, [])
+
+    // Nur animieren, wenn sich flipped wirklich geändert hat
+    if (lastFlipped.current === flipped) return
+    lastFlipped.current = flipped
+
+    rotation.value = withSpring(flipped ? 180 : 0, {
+      damping: 100,
+      stiffness: 100,
+    })
+  }, [flipped])
+
+  const frontAnimatedStyle = useAnimatedStyle(() => {
+    const rotateY = interpolate(rotation.value, [0, 180], [0, 180])
+    return {
+      transform: [
+        { perspective: 1000 },
+        { rotateY: `${rotateY}deg` },
+      ],
+    }
+  })
+
+  const backAnimatedStyle = useAnimatedStyle(() => {
+    const rotateY = interpolate(rotation.value, [0, 180], [180, 360])
+    return {
+      transform: [
+        { perspective: 1000 },
+        { rotateY: `${rotateY}deg` },
+      ],
+    }
+  })
 
   return (
-    <TouchableWithoutFeedback onPress={flip}>
+    <TouchableWithoutFeedback onPress={onTap}>
       <View style={[styles.container, style]}>
-        <Animated.View style={[styles.card, { transform: [{ rotateY: frontInterpolate }] }]}>
+        <Animated.View
+          pointerEvents={flipped ? 'none' : 'auto'}
+          style={[styles.face, frontAnimatedStyle]}
+        >
           {front}
         </Animated.View>
-        <Animated.View style={[styles.card, styles.back, { transform: [{ rotateY: backInterpolate }] }]}>
+
+        <Animated.View
+          pointerEvents={flipped ? 'auto' : 'none'}
+          style={[styles.face, backAnimatedStyle]}
+        >
           {back}
         </Animated.View>
       </View>
@@ -56,17 +76,6 @@ export const Flippable: React.FC<FlippableProps> = ({ front, back, style, startF
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width: 200,
-    height: 300,
-  },
-  card: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    backfaceVisibility: 'hidden',
-  },
-  back: {
-    position: 'absolute',
-  },
+  container: { ...StyleSheet.absoluteFillObject },
+  face: { ...StyleSheet.absoluteFillObject, backfaceVisibility: 'hidden' },
 })

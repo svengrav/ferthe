@@ -6,9 +6,13 @@ const path = require('path');
 // Find the project and workspace directories
 const projectRoot = __dirname;
 // This can be replaced with `find-yarn-workspace-root`
-const monorepoRoot = path.resolve(projectRoot, '../');
+const monorepoRoot = path.resolve(projectRoot, '../../');
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
+
+// Added cause issue with: Cannot use 'import.meta' outside a module
+// https://github.com/expo/expo/issues/36384
+config.resolver.unstable_enablePackageExports = false;
 
 // 1. Watch all files within the monorepo
 config.watchFolders = [monorepoRoot];

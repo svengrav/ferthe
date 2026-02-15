@@ -1,155 +1,84 @@
 import { getAppContext } from '@app/appContext'
-import { Button, Card, Text } from '@app/shared/components'
-import Divider from '@app/shared/components/divider/Divider'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { Theme, useThemeStore } from '@app/shared/theme'
+import { Button, Divider, Stack, Text } from '@app/shared/components'
+import { Theme, useTheme } from '@app/shared/theme'
+import { useApp } from '@app/shared/useApp'
 import { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
-import AccountVerification from './AccountVerification'
+import { useAccountVerificationCard } from './AccountVerificationCard'
 
 interface AccountLoginProps {
-  onAccountCreated?: () => void
-  onClose?: () => void
+  // onClose not needed - AccountAuthWrapper handles automatic dismissal via session check
 }
 
+/**
+ * Hook for managing local account creation.
+ */
 const useAccountLogin = () => {
-
-
-}
-
-export default function AccountLogin({ onClose }: AccountLoginProps) {
-  const [phoneNumber, setPhoneNumber] = useState('')
-  const [verificationCode, setVerificationCode] = useState('')
-  const [isCreatingLocal, setIsCreatingLocal] = useState(false)
-  const [isCreatingWithPhone, setIsCreatingWithPhone] = useState(false)
-  const [codeVerifaction, setCodeVerification] = useState(false)
-  const [isVerification, setIsVerification] = useState(false)
-  const [smsConsent, setSmsConsent] = useState(false)
   const { accountApplication } = getAppContext()
-  const theme = useThemeStore()
-  const styles = createStyles(theme)
-  const { t } = useLocalizationStore()
+  const [isCreatingLocal, setIsCreatingLocal] = useState(false)
 
   const handleCreateLocalAccount = async () => {
     setIsCreatingLocal(true)
     await accountApplication.createLocalAccount()
+    setIsCreatingLocal(false)
   }
 
-  const handleCodeVerification = async (code: string) => {
-    setIsCreatingWithPhone(true)
-    setIsVerification(true)
-
-    const result = await accountApplication.verifySMSCode(phoneNumber, code)
-    if (result.success) {
-      console.log('Code verified successfully')
-    } else {
-      console.error('Code verification failed:', result.error)
-    }
-
-    setIsCreatingWithPhone(false)
-    setIsVerification(false)
+  return {
+    handleCreateLocalAccount,
+    isCreatingLocal,
   }
+}
 
-  const handleSMSConsent = async () => {
-    setSmsConsent(true)
-  }
-
-  const handleCreatePhoneAccount = async () => {
-    setIsCreatingWithPhone(true)
-    const result = await accountApplication.requestSMSCode(phoneNumber.trim())
-    if (result.success) {
-      console.log('Code verified successfully')
-    } else {
-      console.error('Code verification failed:', result.error)
-    }
-    setIsCreatingWithPhone(false)
-  }
+/**
+ * Account login view component.
+ * Provides options for phone verification or local account creation.
+ * Rendered by AccountAuthWrapper when no session exists.
+ */
+function AccountLogin(props: AccountLoginProps) {
+  const { styles } = useTheme(createStyles)
+  const { locales } = useApp()
+  const { showAccountVerificationCard } = useAccountVerificationCard()
+  const { handleCreateLocalAccount, isCreatingLocal } = useAccountLogin()
 
   return (
-    <View style={styles.container}>
-      <Card style={styles.card}>
+    <View style={styles.container} id='account-login'>
+      <Stack spacing='lg'>
+        <Text variant='heading'>{locales.auth.welcomeToFerthe}</Text>
 
-        <Text style={styles.title}>{t.auth.welcomeToFerthe}</Text>
-
-        {/* Phone Number Section */}
-        <AccountVerification />
+        {/* Phone Verification Section */}
+        <View>
+          <Button
+            label={locales.account.upgradeNow}
+            onPress={showAccountVerificationCard}
+            variant="primary"
+          />
+          <Text variant='hint' align='center'>{locales.account.upgradeToUnlock}</Text>
+        </View>
 
         {/* Divider */}
-        <Divider text={t.auth.orCreateLocal} />
+        <Divider text={locales.auth.orCreateLocal} />
 
         {/* Local Account Section */}
-        <View style={styles.section}>
+        <View>
           <Button
-            label='skip'
+            label={locales.account.skip}
             onPress={handleCreateLocalAccount}
             variant="outlined"
             disabled={isCreatingLocal}
           />
-          <Text style={styles.notice}>{t.auth.localAccountNotice}</Text>
+          <Text variant='hint' align='center'>{locales.auth.localAccountNotice}</Text>
         </View>
-      </Card>
+      </Stack>
     </View>
   )
 }
 
-
-const createStyles = (theme: Theme) => {
-  return StyleSheet.create({
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
     container: {
       flex: 1,
-      padding: 0,
       justifyContent: 'center',
     },
-    card: {
-      padding: 24,
-    },
-    title: {
-      ...theme.text.size.lg,
-      fontFamily: theme.text.primary.semiBold,
-      textAlign: 'center',
-      marginBottom: 32,
-      color: theme.colors.onSurface,
-    },
-    section: {
-      marginBottom: 24,
-    },
-    sectionTitle: {
-      ...theme.text.size.md,
-      fontFamily: theme.text.primary.semiBold,
-      marginBottom: 16,
-      color: theme.colors.onSurface,
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: theme.colors.onSurface,
-      borderRadius: 8,
-      padding: 12,
-      marginBottom: 8,
-      fontSize: 16,
-      color: theme.colors.onSurface,
-      backgroundColor: theme.colors.surface,
-    },
-    divider: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginVertical: 24,
-    },
-    dividerLine: {
-      flex: 1,
-      height: 1,
-      backgroundColor: theme.colors.onSurface + '20',
-    },
-    dividerText: {
-      ...theme.text.size.sm,
-      marginHorizontal: 16,
-      color: theme.colors.onSurface + '80',
-    },
-    notice: {
-      ...theme.text.size.xs,
-      textAlign: 'center',
-      marginTop: 0,
-      color: theme.colors.onSurface + '80',
-      lineHeight: 18,
-    },
   })
-}
+
+export default AccountLogin

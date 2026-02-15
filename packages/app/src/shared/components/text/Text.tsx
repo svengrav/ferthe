@@ -1,35 +1,32 @@
-import { Theme, useThemeStore } from '@app/shared/theme'
-import React from 'react'
+import { useThemeStore } from '@app/shared/theme'
+import { PRIMITIVES } from '@app/shared/theme/theme'
+import { TextTheme, Tokens } from '@app/shared/theme/types'
 import * as Native from 'react-native'
+import { AlignableProps } from '../types'
 
-interface TextProps extends Native.TextProps {
-  size?: 'small' | 'medium' | 'large'
-  weight?: 'regular' | 'bold' | 'semibold'
-  color?: string
-  variant?: 'primary' | 'secondary' | 'third'
+type TextVariant = keyof TextTheme
+type TextSize = keyof Tokens["fontSize"]
+
+interface TextProps extends Native.TextProps, AlignableProps {
+  size?: TextSize
+  variant?: TextVariant
 }
 
-const Text = ({ size, weight, color, style, children, variant = 'primary', ...props }: TextProps) => {
-  const theme = useThemeStore() as Theme
-  const variantStyle = createTextVariantStyle(theme, variant, color)
+const Text = ({ style, children, variant = 'body', size, align, ...props }: TextProps) => {
+  const theme = useThemeStore()
+
+  const sizeOverride = size ? {
+    fontSize: PRIMITIVES.fontSize[size],
+    lineHeight: PRIMITIVES.fontSize[size] * 1.4,
+  } : {}
+
+  const alignOverride = align ? { textAlign: align } : {}
 
   return (
-    <Native.Text style={[{ fontFamily: theme.text.primary.regular }, variantStyle, style]} {...props}>
+    <Native.Text style={[theme.typo[variant], sizeOverride, alignOverride, style]} {...props}>
       {children}
     </Native.Text>
   )
-}
-
-const createTextVariantStyle = (theme: Theme, variant: 'primary' | 'secondary' | 'third', color?: string) => {
-  switch (variant) {
-    case 'secondary':
-      return { color: theme.colors.onBackground, opacity: 0.3 }
-    case 'third':
-      return { color: theme.colors.onSurface, opacity: 0.4, ...theme.text.size.sm }
-    case 'primary':
-    default:
-      return { color: color ? color : theme.colors.onSurface }
-  }
 }
 
 export default Text

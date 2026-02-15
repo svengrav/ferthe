@@ -1,6 +1,6 @@
-import { create } from 'zustand'
+import { Status, StoreActions, StoreData } from '@app/shared/stores/types'
 import { Account, AccountSession, AccountType } from '@shared/contracts'
-import { StoreActions, StoreData } from '@app/shared/stores/types'
+import { create } from 'zustand'
 
 interface AccountActions extends StoreActions {
   setAccountId: (accountId: string | undefined) => void
@@ -12,6 +12,7 @@ interface AccountActions extends StoreActions {
 }
 
 interface AccountData extends StoreData {
+  status: Status
   accountId: string | undefined,
   account: Account | null
   session: AccountSession | null
@@ -35,24 +36,24 @@ export const accountStore = create<AccountData & AccountActions>(set => ({
   isPhoneVerified: false,
 
   // Actions
-  setStatus: status => 
+  setStatus: status =>
     set({ status }),
 
-  setAccount: account => 
-    set({
-      account,
+  setAccount: account =>
+    set(state => ({
+      account: account ? { ...state.account, ...account } : null,
       accountId: account?.id,
       isPhoneVerified: account?.isPhoneVerified ?? false,
       updatedAt: new Date()
-    }),
+    })),
 
-  setAccountId: accountId => 
+  setAccountId: accountId =>
     set({
       accountId,
       updatedAt: new Date()
     }),
 
-  setSession: session => 
+  setSession: session =>
     set({
       accountId: session?.accountId,
       session,
@@ -60,13 +61,13 @@ export const accountStore = create<AccountData & AccountActions>(set => ({
       updatedAt: new Date()
     }),
 
-  setAccountType: accountType => 
+  setAccountType: accountType =>
     set({
       accountType,
       updatedAt: new Date()
     }),
 
-  setIsAuthenticated: isAuthenticated => 
+  setIsAuthenticated: isAuthenticated =>
     set({
       isAuthenticated,
       updatedAt: new Date()

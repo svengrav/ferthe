@@ -1,10 +1,14 @@
-import { getAppContext } from '@app/appContext'
-import { Page, Text } from '@app/shared/components'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 import { useEffect } from 'react'
+
+import { getAppContext } from '@app/appContext'
+import { Page } from '@app/shared/components'
+import Header from '@app/shared/components/header/Header'
+import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+
+import { useSettingsPage } from '../../settings/components/SettingsPage'
 import { useDiscoveryData, useDiscoveryStatus } from '../stores/discoveryStore'
-import { DiscoveryImageCardList } from './DiscoveryCardList'
+import { DiscoveryCardList } from './DiscoveryCardList'
+import { useDiscoveryCardPage } from './DiscoveryCardPage.tsx'
 
 // Status constants
 const STATUS_UNINITIALIZED = 'uninitialized'
@@ -39,33 +43,32 @@ const useDiscoveryScreen = () => {
 }
 
 /**
- * Discovery screen component that displays a list of discovery cards with refresh functionality
+ * Discovery screen component that displays a list of discovery cards with refresh functionality.
+ * Supports deep-linking to specific discovery cards via route parameters.
  */
 function DiscoveryScreen() {
-  const { styles, theme } = useApp(useStyles)
+  const { t } = useLocalizationStore()
+  const { showSettings } = useSettingsPage()
+  const { showDiscoveryCardDetails } = useDiscoveryCardPage()
+
   const {
     cards,
     isLoading,
     requestDiscoveryState,
   } = useDiscoveryScreen()
 
-  if (!styles) return null
-
   return (
-    <Page >
-      <Text style={theme.layout.header}>Discoveries</Text>
+    <Page options={[{ label: t.navigation.settings, onPress: showSettings }]}>
+      <Header title={t.discovery.discoveries} />
 
-      <DiscoveryImageCardList
+      <DiscoveryCardList
         cards={cards}
         refreshing={isLoading}
         onRefresh={requestDiscoveryState}
+        onTap={showDiscoveryCardDetails}
       />
     </Page>
   )
 }
-
-const useStyles = createThemedStyles(theme => ({
-  // Placeholder styles, replace with actual styles
-}))
 
 export default DiscoveryScreen

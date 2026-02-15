@@ -1,4 +1,4 @@
-import { Clue, Spot, Trail } from '@shared/contracts'
+import { Clue, DiscoverySpot, Trail } from '@shared/contracts'
 import { createEventSystem } from '@shared/events/eventHandler'
 import { DiscoveryCardState } from '../logic/types'
 
@@ -7,7 +7,7 @@ export interface DiscoveryTrailState {
   trail: Trail | undefined
   scannedClues: Clue[]
   previewClues?: Clue[]
-  spots: Spot[]
+  spots: DiscoverySpot[]
 }
 
 type DiscoveryEvents = {

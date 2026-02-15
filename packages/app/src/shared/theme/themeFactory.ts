@@ -1,5 +1,4 @@
-import { createLayoutTheme } from './layout'
-import { DARK_THEME, LIGHT_THEME, TEXT_THEME, THEME_CONSTANTS } from './theme'
+import { createTypography, DARK_THEME, LIGHT_THEME, PRIMITIVES, UI_DIMENSIONS } from './theme'
 import { ColorScheme, Theme, ThemeBase } from './types'
 import { themeUtils } from './utils'
 
@@ -11,8 +10,8 @@ export const createTheme = (mode: ColorScheme): Theme => {
   const baseTheme: ThemeBase = {
     mode,
     colors,
-    text: TEXT_THEME,
-    constants: THEME_CONSTANTS,
+    tokens: PRIMITIVES,
+    dimensions: UI_DIMENSIONS,
     deriveColor: (color: string, value?: number): string => {
       return themeUtils.deriveColor(mode, color, value)
     },
@@ -21,10 +20,8 @@ export const createTheme = (mode: ColorScheme): Theme => {
     },
   }
 
-  const layouts = createLayoutTheme(baseTheme)
-
   return {
     ...baseTheme,
-    layout: layouts,
+    typo: createTypography(baseTheme),
   }
 }

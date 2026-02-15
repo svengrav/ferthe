@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react'
+import { logger } from '../utils/logger'
 
 // Type alias for a callback function that is called on events
 export type EventCallback<T extends any[]> = (...args: T) => void
@@ -28,7 +29,7 @@ export function useEvent<T extends any[]>(subscribeFunction: SubscribeFunction<T
       // Return cleanup function
       return unsubscribe
     } catch (error) {
-      console.error('Error in event subscription:', error)
+      logger.error('Error in event subscription:', error)
     }
   }, [subscribeFunction, memoizedCallback])
 }

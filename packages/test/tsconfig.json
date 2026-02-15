@@ -17,8 +17,8 @@
     "paths": {
       "@app/*": ["../app/src/*"],
       "@test/*": ["./src/*"],
-      "@core/*": ["../core/src/*"],
-      "@shared/*": ["../shared/src/*"]
+      "@core/*": ["../core/*"],
+      "@shared/*": ["../shared/*"]
     }
   },
   "include": [

@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger'
 import { SecureStoreConnector } from './secureStoreConnector'
 
 interface JsonStoreConnectorOptions {
@@ -36,7 +37,7 @@ export class JsonStoreConnector implements SecureStoreConnector {
 
       return await response.json()
     } catch (error) {
-      console.error(`Storage request failed for ${endpoint}:`, error)
+      logger.error(`Storage request failed for ${endpoint}:`, error)
       throw error
     }
   }
@@ -46,7 +47,7 @@ export class JsonStoreConnector implements SecureStoreConnector {
       const response = await this.makeRequest<{ success: boolean; data: T }>(`/storage/${encodeURIComponent(key)}`)
       return response?.data || null
     } catch (error) {
-      console.error(`Failed to read from JSON store with key: ${key}`, error)
+      logger.error(`Failed to read from JSON store with key: ${key}`, error)
       return null
     }
   }
@@ -58,7 +59,7 @@ export class JsonStoreConnector implements SecureStoreConnector {
         body: JSON.stringify({ value }),
       })
     } catch (error) {
-      console.error(`Failed to write to JSON store with key: ${key}`, error)
+      logger.error(`Failed to write to JSON store with key: ${key}`, error)
       throw error
     }
   }
@@ -73,7 +74,7 @@ export class JsonStoreConnector implements SecureStoreConnector {
         method: 'DELETE',
       })
     } catch (error) {
-      console.error(`Failed to delete from JSON store with key: ${key}`, error)
+      logger.error(`Failed to delete from JSON store with key: ${key}`, error)
       throw error
     }
   }
@@ -83,7 +84,7 @@ export class JsonStoreConnector implements SecureStoreConnector {
       const response = await this.makeRequest<{ success: boolean; exists: boolean }>(`/storage/${encodeURIComponent(key)}/exists`)
       return response?.exists || false
     } catch (error) {
-      console.error(`Failed to check existence in JSON store with key: ${key}`, error)
+      logger.error(`Failed to check existence in JSON store with key: ${key}`, error)
       return false
     }
   }
@@ -100,7 +101,7 @@ export class JsonStoreConnector implements SecureStoreConnector {
         method: 'DELETE',
       })
     } catch (error) {
-      console.error('Failed to clear JSON store:', error)
+      logger.error('Failed to clear JSON store:', error)
       throw error
     }
   }
@@ -113,7 +114,7 @@ export class JsonStoreConnector implements SecureStoreConnector {
       const response = await this.makeRequest<{ success: boolean; keys: string[] }>('/storage')
       return response?.keys || []
     } catch (error) {
-      console.error('Failed to get all keys from JSON store:', error)
+      logger.error('Failed to get all keys from JSON store:', error)
       return []
     }
   }
@@ -126,7 +127,7 @@ export class JsonStoreConnector implements SecureStoreConnector {
       const keys = await this.getAllKeys()
       return keys.length
     } catch (error) {
-      console.error('Failed to get JSON store size:', error)
+      logger.error('Failed to get JSON store size:', error)
       return 0
     }
   }
@@ -141,14 +142,14 @@ export class JsonStoreConnector implements SecureStoreConnector {
   }> {
     try {
       const keys = await this.getAllKeys()
-      
+
       return {
         serverUrl: this.storageServerUrl,
         size: keys.length,
         keys
       }
     } catch (error) {
-      console.error('Failed to get storage info:', error)
+      logger.error('Failed to get storage info:', error)
       return {
         serverUrl: this.storageServerUrl,
         size: 0,

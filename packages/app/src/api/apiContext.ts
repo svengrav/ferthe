@@ -2,29 +2,44 @@ import {
   Account,
   AccountContext,
   AccountSession,
+  AccountUpdateData,
   ApplicationContract,
   Clue,
+  Community,
+  CommunityMember,
   Discovery,
+  DiscoveryContent,
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoveryProfileUpdateData,
+  DiscoveryReaction,
+  DiscoverySpot,
+  DiscoveryStats,
   DiscoveryTrail,
   FirebaseConfig,
   LocationWithDirection,
-  Result,
+  ReactionSummary,
   ScanEvent,
   SessionValidationResult,
+  SharedDiscovery,
   SMSCodeRequest,
   SMSVerificationResult,
   Spot,
   SpotPreview,
   Trail,
+  TrailSpot,
+  TrailStats
 } from '@shared/contracts'
+import { APIError, createAPIClient } from './client'
+import { checkStatus, StatusResult } from './utils'
+
 
 export interface ApiContextOptions {
   apiEndpoint: string
   environment?: 'production' | 'development' | 'test'
   getAccountSession: () => AccountSession | null
+  timeout?: number
+  onConnectionError?: (error: APIError) => void
 }
 
 interface CoreConfiguration {
@@ -33,41 +48,22 @@ interface CoreConfiguration {
 
 export type APIContext = Omit<ApplicationContract, 'spotApplication'> & {
   readonly config: CoreConfiguration
-}
-
-// Base API Client Factory
-const createAPIClient = (apiEndpoint: string, getAccountSession: () => AccountSession | null) => {
-  const send = async <T>(endpoint: string, method: string = 'GET', body?: any): Promise<T> => {
-    const credentials = getAccountSession()
-
-    const headers: HeadersInit = {}
-    if (body) {
-      headers['Content-Type'] = 'application/json' // Set content type for JSON body
-    }
-
-    if (credentials?.sessionToken) {
-      headers['Authorization'] = `Bearer ${credentials.sessionToken}`
-    }
-
-    const response = await fetch(`${apiEndpoint}${endpoint}`, {
-      method: method.toUpperCase(), // Ensure HTTP method is uppercase
-      headers,
-      body: body ? JSON.stringify(body) : null, // Ensure body is always a JSON string
-    })
-
-    return response.json()
+  system: {
+    checkStatus: () => Promise<StatusResult>
   }
-
-  return { send }
 }
 
 // Main API Context Factory
 export const createApiContext = (options: ApiContextOptions): APIContext => {
-  const { apiEndpoint, environment = 'production', getAccountSession: getAccountSession } = options
-  const API = createAPIClient(apiEndpoint, getAccountSession)
+  const { apiEndpoint, environment = 'production', getAccountSession, timeout = 10000 } = options
+  const API = createAPIClient(apiEndpoint, getAccountSession, timeout)
+
 
   return {
     config: { environment },
+    system: {
+      checkStatus: () => checkStatus(`${apiEndpoint}/status`),
+    },
 
     /**
      * Discovery Application API Methods
@@ -77,33 +73,54 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
      */
     discoveryApplication: {
       processLocation: (_context: AccountContext, locationWithDirection: LocationWithDirection, trailId: string) =>
-        API.send<Result<DiscoveryLocationRecord>>('/discoveries/process', 'POST', { locationWithDirection, trailId }),
+        API.send<DiscoveryLocationRecord>('/discoveries/process', 'POST', { locationWithDirection, trailId }),
 
       getDiscoveries: (_context: AccountContext, trailId?: string) => {
         const params = trailId ? `?trailId=${trailId}` : ''
-        return API.send<Result<Discovery[]>>(`/discovery/collections/discoveries${params}`)
+        return API.send<Discovery[]>(`/discovery/collections/discoveries${params}`)
       },
 
-      getDiscovery: (_context: AccountContext, discoveryId: string) => API.send<Result<Discovery>>(`/discovery/collections/discoveries/${discoveryId}`),
+      getDiscovery: (_context: AccountContext, discoveryId: string) => API.send<Discovery>(`/discovery/collections/discoveries/${discoveryId}`),
 
       getDiscoveredSpots: (_context: AccountContext, trailId?: string) => {
         const params = trailId ? `?trailId=${trailId}` : ''
-        return API.send<Result<Spot[]>>(`/discovery/collections/spots${params}`)
+        return API.send<DiscoverySpot[]>(`/discovery/collections/spots${params}`)
       },
 
       getDiscoveredSpotIds: async (_context: AccountContext, trailId?: string) => {
-        const discoveries = await API.send<Result<Discovery[]>>(`/discovery/collections/discoveries${trailId ? `?trailId=${trailId}` : ''}`)
+        const discoveries = await API.send<Discovery[]>(`/discovery/collections/discoveries${trailId ? `?trailId=${trailId}` : ''}`)
         return { data: discoveries.data?.map(d => d.spotId) || [] }
       },
 
-      getDiscoveredPreviewClues: (_context: AccountContext, trailId: string) => API.send<Result<Clue[]>>(`/discovery/collections/trails/${trailId}/clues`),
+      getDiscoveredPreviewClues: (_context: AccountContext, trailId: string) => API.send<Clue[]>(`/discovery/collections/trails/${trailId}/clues`),
 
-      getDiscoveryTrail: (_context: AccountContext, trailId: string) => API.send<Result<DiscoveryTrail>>(`/discovery/collections/trails/${trailId}`),
+      getDiscoveryTrail: (_context: AccountContext, trailId: string) => API.send<DiscoveryTrail>(`/discovery/collections/trails/${trailId}`),
 
       // Profile methods
-      getDiscoveryProfile: (_context: AccountContext) => API.send<Result<DiscoveryProfile>>('/discovery/profile'),
+      getDiscoveryProfile: (_context: AccountContext) => API.send<DiscoveryProfile>('/discovery/profile'),
 
-      updateDiscoveryProfile: (_context: AccountContext, updateData: DiscoveryProfileUpdateData) => API.send<Result<DiscoveryProfile>>('/discovery/profile', 'PUT', updateData),
+      updateDiscoveryProfile: (_context: AccountContext, updateData: DiscoveryProfileUpdateData) => API.send<DiscoveryProfile>('/discovery/profile', 'PUT', updateData),
+
+      getDiscoveryStats: (_context: AccountContext, discoveryId: string) => API.send<DiscoveryStats>(`/discoveries/${discoveryId}/stats`),
+
+      // Content methods
+      getDiscoveryContent: (_context: AccountContext, discoveryId: string) => API.send<DiscoveryContent | undefined>(`/discoveries/${discoveryId}/content`),
+
+      upsertDiscoveryContent: (_context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) =>
+        API.send<DiscoveryContent>(`/discoveries/${discoveryId}/content`, 'PUT', content),
+
+      deleteDiscoveryContent: (_context: AccountContext, discoveryId: string) =>
+        API.send<void>(`/discoveries/${discoveryId}/content`, 'DELETE'),
+
+      // Reaction methods
+      reactToDiscovery: (_context: AccountContext, discoveryId: string, reaction: 'like' | 'dislike') =>
+        API.send<DiscoveryReaction>(`/discoveries/${discoveryId}/reactions`, 'POST', { reaction }),
+
+      removeReaction: (_context: AccountContext, discoveryId: string) =>
+        API.send<void>(`/discoveries/${discoveryId}/reactions`, 'DELETE'),
+
+      getReactionSummary: (_context: AccountContext, discoveryId: string) =>
+        API.send<ReactionSummary>(`/discoveries/${discoveryId}/reactions`),
     },
 
     /**
@@ -112,36 +129,32 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
      * They are designed to be used in the context of trail and spot data management.
      */
     trailApplication: {
-      listTrails: (_context: AccountContext) => API.send<Result<Trail[]>>('/trail/collections/trails'),
+      listTrails: (_context: AccountContext) => API.send<Trail[]>('/trail/collections/trails'),
 
-      getTrail: async (_context: AccountContext, id: string) => {
-        try {
-          return await API.send<Result<Trail | undefined>>(`/trail/collections/trails/${id}`)
-        } catch (error: any) {
-          if (error.message.includes('404')) return { data: undefined }
-          throw error
-        }
-      },
+      getTrail: (_context: AccountContext, id: string) => API.send<Trail | undefined>(`/trail/collections/trails/${id}`),
 
-      createTrail: (_context: AccountContext, trail: any) => API.send<Result<Trail>>('/trail/collections/trails', 'POST', trail),
+      createTrail: (_context: AccountContext, trail: any) => API.send<Trail>('/trail/collections/trails', 'POST', trail),
 
-      listSpots: (_context: AccountContext) => API.send<Result<Spot[]>>('/trail/collections/spots'),
+      listSpots: (_context: AccountContext) => API.send<Spot[]>('/trail/collections/spots'),
 
-      getSpot: async (_context: AccountContext, id: string) => {
-        try {
-          return await API.send<Result<Spot | undefined>>(`/trail/collections/spots/${id}`)
-        } catch (error: any) {
-          if (error.message.includes('404')) return { data: undefined }
-          throw error
-        }
-      },
+      getSpot: (_context: AccountContext, id: string) => API.send<Spot | undefined>(`/trail/collections/spots/${id}`),
 
       listSpotPreviews: (_context: AccountContext, trailId?: string) => {
         const params = trailId ? `?trailId=${trailId}` : ''
-        return API.send<Result<SpotPreview[]>>(`/trail/collections/spot-previews${params}`)
+        return API.send<SpotPreview[]>(`/trail/collections/spot-previews${params}`)
       },
 
-      createSpot: (_context: AccountContext, spot: any) => API.send<Result<Spot>>('/trail/collections/spots', 'POST', spot),
+      getTrailSpotIds: (_context: AccountContext, trailId: string) => API.send<string[]>(`/trail/collections/trails/${trailId}/spots`),
+
+      getTrailStats: (_context: AccountContext, trailId: string) => API.send<TrailStats>(`/trails/${trailId}/stats`),
+
+      createSpot: (_context: AccountContext, spot: any) => API.send<Spot>('/trail/collections/spots', 'POST', spot),
+
+      addSpotToTrail: (_context: AccountContext, trailId: string, spotId: string, order?: number) =>
+        API.send<TrailSpot>(`/trail/${trailId}/spots/${spotId}`, 'POST', { order }),
+
+      removeSpotFromTrail: (_context: AccountContext, trailId: string, spotId: string) =>
+        API.send<void>(`/trail/${trailId}/spots/${spotId}`, 'DELETE'),
     },
 
     /**
@@ -152,11 +165,11 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
     sensorApplication: {
       listScanEvents: (_context: AccountContext, trailId?: string) => {
         const params = trailId ? `?trailId=${trailId}` : ''
-        return API.send<Result<ScanEvent[]>>(`/sensor/collections/scans${params}`)
+        return API.send<ScanEvent[]>(`/sensor/collections/scans${params}`)
       },
 
       createScanEvent: (_context: AccountContext, userPosition: any, trailId?: string) =>
-        API.send<Result<ScanEvent>>('/sensor/collections/scans', 'POST', { userPosition, trailId }),
+        API.send<ScanEvent>('/sensor/collections/scans', 'POST', { userPosition, trailId }),
     },
 
     /**
@@ -165,29 +178,62 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
      * They are designed to be used in the context of user account management.
      */
     accountApplication: {
-      requestSMSCode: (phoneNumber: string) => API.send<Result<SMSCodeRequest>>('/account/sms/request', 'POST', { phoneNumber }),
+      requestSMSCode: (phoneNumber: string) => API.send<SMSCodeRequest>('/account/sms/request', 'POST', { phoneNumber }),
 
-      verifySMSCode: (phoneNumber: string, code: string) => API.send<Result<SMSVerificationResult>>('/account/sms/verify', 'POST', { phoneNumber, code }),
+      verifySMSCode: (phoneNumber: string, code: string) => API.send<SMSVerificationResult>('/account/sms/verify', 'POST', { phoneNumber, code }),
 
-      getAccount: async (_context: AccountContext) => {
-        try {
-          return await API.send<Result<Account | null>>('/account/collections/accounts')
-        } catch (error: any) {
-          if (error.message.includes('404')) return { data: null }
-          throw error
-        }
-      },
+      getAccount: (_context: AccountContext) => API.send<Account | null>('/account/collections/accounts'),
 
-      validateSession: (sessionToken: string) => API.send<Result<SessionValidationResult>>('/account/session/validate', 'POST', { sessionToken }),
+      updateAccount: (_context: AccountContext, data: AccountUpdateData) => API.send<Account>('/account/collections/accounts', 'PUT', data),
 
-      revokeSession: (sessionToken: string) => API.send<Result<void>>('/account/session/revoke', 'POST', { sessionToken }),
+      uploadAvatar: (_context: AccountContext, base64Data: string) => API.send<Account>('/account/avatar', 'POST', { base64Data }),
 
-      createLocalAccount: () => API.send<Result<AccountSession>>('/account/local-account', 'POST'),
+      validateSession: (sessionToken: string) => API.send<SessionValidationResult>('/account/session/validate', 'POST', { sessionToken }),
+
+      revokeSession: (sessionToken: string) => API.send<void>('/account/session/revoke', 'POST', { sessionToken }),
+
+      createLocalAccount: () => API.send<AccountSession>('/account/local-account', 'POST'),
 
       upgradeToPhoneAccount: (_context: AccountContext, phoneNumber: string, code: string) =>
-        API.send<Result<AccountSession>>('/account/upgrade-account', 'POST', { phoneNumber, code }),
+        API.send<AccountSession>('/account/upgrade-account', 'POST', { phoneNumber, code }),
 
-      getFirebaseConfig: (_context: AccountContext) => API.send<Result<FirebaseConfig>>('/account/config/firebase'),
+      getFirebaseConfig: (_context: AccountContext) => API.send<FirebaseConfig>('/account/config/firebase'),
+    },
+
+    /**
+     * Community Application API Methods
+     * These methods handle community creation, joining, and member management.
+     */
+    communityApplication: {
+      createCommunity: (_context: AccountContext, input: { name: string; trailIds: string[] }) =>
+        API.send<Community>('/community/collections/communities', 'POST', { name: input.name, trailIds: input.trailIds }),
+
+      joinCommunity: (_context: AccountContext, inviteCode: string) =>
+        API.send<Community>('/community/join', 'POST', { inviteCode }),
+
+      leaveCommunity: (_context: AccountContext, communityId: string) =>
+        API.send<void>(`/community/collections/communities/${communityId}/leave`, 'POST'),
+
+      removeCommunity: (_context: AccountContext, communityId: string) =>
+        API.send<void>(`/community/collections/communities/${communityId}`, 'DELETE'),
+
+      getCommunity: (_context: AccountContext, communityId: string) =>
+        API.send<Community | undefined>(`/community/collections/communities/${communityId}`),
+
+      listCommunities: (_context: AccountContext) =>
+        API.send<Community[]>('/community/collections/communities'),
+
+      listCommunityMembers: (_context: AccountContext, communityId: string) =>
+        API.send<CommunityMember[]>(`/community/collections/communities/${communityId}/members`),
+
+      shareDiscovery: (_context: AccountContext, discoveryId: string, communityId: string) =>
+        API.send<SharedDiscovery>(`/community/collections/communities/${communityId}/discoveries/${discoveryId}/share`, 'POST'),
+
+      unshareDiscovery: (_context: AccountContext, discoveryId: string, communityId: string) =>
+        API.send<void>(`/community/collections/communities/${communityId}/discoveries/${discoveryId}/share`, 'DELETE'),
+
+      getSharedDiscoveries: (_context: AccountContext, communityId: string) =>
+        API.send<Discovery[]>(`/community/collections/communities/${communityId}/discoveries`),
     },
   }
 }

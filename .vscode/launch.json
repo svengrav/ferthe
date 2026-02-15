@@ -1,48 +1,28 @@
 {
   "version": "0.2.0",
-  "configurations": [
-    // {
-    //   "name": "🔵 API Server",
-    //   "type": "node",
-    //   "request": "launch",
-    //   "program": "${workspaceFolder}/ferthe-api/src/index.ts",
-    //   "cwd": "${workspaceFolder}/ferthe-api",
-    //   "preLaunchTask": "Build All",
-    //   "runtimeExecutable": "npx",
-    //   "runtimeArgs": ["tsx", "watch", "src/index.ts"],
-    //   "env": {
-    //     "NODE_ENV": "development"
-    //   },
-    //   "console": "integratedTerminal",
-    //   "internalConsoleOptions": "neverOpen",
-    //   "skipFiles": ["<node_internals>/**", "node_modules/**"],
-    //   "sourceMaps": true,
-    //   "restart": true,
-    //   "envFile": "${workspaceFolder}/.env",
-    //   "outputCapture": "std"
-    // },   
+  "configurations": [  
     {
-      "name": "🔵 Run API",
-      "type": "node",
+      "name": "🟦 Run API",
       "request": "launch",
-      "program": "${workspaceFolder}/packages/core/src/index.ts",
+      "type": "node",
       "cwd": "${workspaceFolder}/packages/core",
-      "preLaunchTask": "Build Core Watch",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["tsx", "watch", "--inspect=9229", "src/index.ts"],
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "-A",
+        "--watch",
+        "--inspect",
+        "main.ts"
+      ],
+      "attachSimplePort": 9229,
       "env": {
         "NODE_ENV": "development"
       },
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "skipFiles": ["<node_internals>/**", "node_modules/**"],
-      "sourceMaps": true,
-      "restart": true,
-      "envFile": "${workspaceFolder}/.env",
-      "outputCapture": "std"
+      "envFile": "${workspaceFolder}/.env"
     },
     {
-      "name": "🟢 Run App",
+      "name": "🟥 Run App",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:8081",
@@ -54,11 +34,22 @@
         "webpack:///./*": "${webRoot}/*"
       }
     },
+    {
+      "name": "🟨 Run Web",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:15173",
+      "webRoot": "${workspaceFolder}/packages/web/app",
+      "preLaunchTask": "Start Web Server"
+    }
   ],
   "compounds": [
     {
-      "name": "⚪ Run Full",
-      "configurations": ["🟢 Run App", "🔵 Run API"],
+      "name": "🟩 Run All",
+      "configurations": [
+        "🟥 Run App",
+        "🟦 Run API"
+      ],
       "stopAll": true
     }
   ]

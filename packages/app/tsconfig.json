@@ -6,8 +6,9 @@
     "jsx": "react-jsx",
     "strictNullChecks": true,
     "outDir": "dist",
-    "noEmit": false,
+    "noEmit": true,
     "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
     "paths": {
       "@app/*": [
         "./src/*"
@@ -16,7 +17,7 @@
         "./src/shared/*"
       ],
       "@shared/*": [
-        "../shared/src/*"
+        "../shared/*"
       ]
     }
   },

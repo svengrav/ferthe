@@ -3,8 +3,7 @@ import { AppContext, getAppContext } from '@app/appContext'
 import { useLocalizationStore } from '@app/shared/localization'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { useCallback, useMemo } from 'react'
-import { create } from 'zustand'
-import { LocalizationSet } from './localization/locales/locales.definition'
+import { LocalizationSet } from './localization/locales/locales.en'
 
 interface AppCore<T> {
   context: AppContext
@@ -43,18 +42,4 @@ export function useApp<T>(styleFn?: (theme: Theme) => T): AppCore<T> {
 
   return baseReturn
 }
-
-interface AppDimensions {
-  height: number
-  width: number
-  setWidth: (width: number) => void
-  setHeight: (height: number) => void
-}
-
-export const useAppDimensions = create<AppDimensions>(set => ({
-  height: 0,
-  width: 0,
-  setWidth: width => set({ width }),
-  setHeight: height => set({ height }),
-}))
 

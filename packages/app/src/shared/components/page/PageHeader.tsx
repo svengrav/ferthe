@@ -1,34 +1,35 @@
 import { Theme, useThemeStore } from '@app/shared/theme'
-import { SafeAreaView, StyleSheet, View } from 'react-native'
-import { IconButton } from '../button/Button'
+import { StyleSheet, View } from 'react-native'
+import Button from '../button/Button'
 import { FertheLabel } from '../ferthe/Logo'
 import Text from '../text/Text'
 import { Option } from '../types'
 
 interface PageHeaderProps {
-  label?: string
+  leading?: React.ReactNode
+  title?: string
   options?: Option[]
-  action?: React.ReactNode
+  trailing?: React.ReactNode
 }
 
-const PageHeader = ({ label, action, options }: PageHeaderProps) => {
+const PageHeader = ({ leading, title = "", trailing, options }: PageHeaderProps) => {
   const theme = useThemeStore()
   const styles = createStyles(theme)
   const showOptions = options && options.length > 0
   return (
-    <SafeAreaView style={styles.header}>
-      <View style={styles.leftContainer}>{action && action}</View>
-      <View style={styles.labelContainer}>
-        {label ? (
-          <Text style={styles.label}>{label}</Text>
+    <View style={styles.header}>
+      <View style={styles.leading}>{leading}</View>
+      <View style={styles.label}>
+        {title ? (
+          <Text variant='title' align='center'>{title}</Text>
         ) : (
           <FertheLabel style={styles.logo} fill={theme.colors.onBackground} />
         )}
       </View>
-      <View style={styles.rightContainer}>
-        {showOptions && <IconButton variant='outlined' options={options} name={'more-vert'} style={styles.iconButton} />}
+      <View style={styles.trailing}>{trailing}
+        {showOptions && <Button variant='outlined' options={options} icon='more-vert' />}
       </View>
-    </SafeAreaView>
+    </View>
   )
 }
 
@@ -36,42 +37,30 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     header: {
       width: '100%',
-      height: theme.constants.HEADER_HEIGHT,
+      height: theme.dimensions.HEADER_HEIGHT,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      backgroundColor: theme.colors.surface,
       paddingVertical: 8,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.divider,
+      alignContent: 'stretch',
     },
     logo: {
       height: 24,
     },
     label: {
-      ...theme.text.size.lg,
-      fontFamily: theme.text.primary.semiBold,
-      color: theme.colors.onBackground,
-      textAlign: 'center',
+      flex: 1,
+      alignContent: 'center',
+      justifyContent: 'center'
     },
-    leftContainer: {
-      padding: 8,
+    leading: {
       width: 60,
     },
-    labelContainer: {
-      marginTop: 5,
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    rightContainer: {
-      padding: 8,
+    trailing: {
       width: 60,
       flexDirection: 'row',
       justifyContent: 'flex-end',
-    },
-    iconButton: {
-      marginRight: 8,
     },
   })
 

@@ -1,9 +1,10 @@
 import { DeviceConnector, DeviceLocation } from './device/types'
-import { sensorStore } from './stores/sensorStore'
+import { getSensorActions, getSensorDevice, sensorStore } from './stores/sensorStore'
 
 import { Result, ScanEvent } from '@shared/contracts'
 import { createEventSystem, Unsubscribe } from '@shared/events/eventHandler'
 
+import { logger } from '@app/shared/utils/logger'
 import { AccountContext, SensorApplicationContract } from '@shared/contracts'
 
 type SensorEvents = {
@@ -30,18 +31,76 @@ export const createSensorApplication = (options?: SensorApplicationOptions) => {
   const lastScanDate = new Date(0)
   const MINIMUM_SCAN_INTERVAL = 5000 // 5 seconds in milliseconds
   const { deviceConnector, sensorApplication: core, getAccountContext: getAccountSession } = options || {}
+  const { setPermissionGranted, setStatusMessage, setStatus, setDeviceStateRequestHandler } = getSensorActions()
 
-  deviceConnector?.initializeLocationTracking()
-  deviceConnector?.requestLocationPermission()
+  // Initialize permission and location tracking
+  const initializeDevice = async () => {
+    try {
+      if (!deviceConnector) {
+        setStatus('error')
+        setStatusMessage('Device connector not available')
+        return
+      }
+
+      // Request permission
+      const permissionResult = await deviceConnector.requestLocationPermission()
+      setPermissionGranted(permissionResult.granted)
+
+      if (!permissionResult.granted) {
+        setStatus('permission-required')
+        setStatusMessage('Location permission is required to use this feature')
+        return
+      }
+
+      // Initialize location tracking
+
+      await deviceConnector.initializeLocationTracking()
+      setStatusMessage('Waiting for GPS signal...')
+      setStatus('location-unavailable')
+    } catch (error) {
+      logger.error('Failed to initialize location tracking:', error)
+      setStatus('error')
+      setStatusMessage('Failed to start location tracking')
+    }
+  }
+
+  // Register device state request handler
+  setDeviceStateRequestHandler(async () => {
+    if (!deviceConnector) return
+    const permissionResult = await deviceConnector.requestLocationPermission()
+    setPermissionGranted(permissionResult.granted)
+
+    if (permissionResult.granted) {
+      await initializeDevice()
+    } else {
+      setStatus('permission-required')
+      setStatusMessage('Location permission is required to use this feature')
+    }
+  })
+
+  // Start initialization
+  initializeDevice()
+
+  let isFirstValidLocation = true
 
   deviceConnector?.onDeviceUpdated(device => {
     const setSensorState = sensorStore.setState
+    const isValidLocation = device.location.lat !== 0 && device.location.lon !== 0
+
     setSensorState({
       device: {
         location: device.location,
         heading: device.heading,
       },
     })
+
+    // Set status to ready on first valid location
+    if (isValidLocation && isFirstValidLocation) {
+      setStatus('ready')
+      setStatusMessage(undefined)
+      isFirstValidLocation = false
+    }
+
     events.emit('onDeviceUpdated', { location: device.location, heading: device.heading })
   })
 
@@ -57,7 +116,8 @@ export const createSensorApplication = (options?: SensorApplicationOptions) => {
   }
 
   const startScan = async (trailId: string) => {
-    const { device, addScanRecord } = sensorStore.getState()
+    const { addScanRecord } = getSensorActions()
+    const device = getSensorDevice()
 
     if (!core) throw new Error('Sensor application core is not initialized')
     if (!getAccountSession) throw new Error('getAccountSession function is not provided')
@@ -65,13 +125,13 @@ export const createSensorApplication = (options?: SensorApplicationOptions) => {
 
     const accountSession = await getAccountSession()
     if (!accountSession.data) {
-      console.error('Failed to get account session:', accountSession.error)
+      logger.error('Failed to get account session:', accountSession.error)
       return
     }
 
     const scanEvent = await core?.createScanEvent(accountSession.data, device.location, trailId)
     if (!scanEvent.data) {
-      console.error('Failed to create scan event:', scanEvent.error)
+      logger.error('Failed to create scan event:', scanEvent.error)
       return
     }
 

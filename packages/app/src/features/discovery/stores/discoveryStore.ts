@@ -1,15 +1,18 @@
-import { StoreActions, StoreData } from '@app/shared/index'
-import { Discovery, Spot } from '@shared/contracts'
+import { Status, StoreActions, StoreData } from '@app/shared/index'
+import { Discovery, DiscoverySpot, DiscoveryStats } from '@shared/contracts'
 import { create } from 'zustand'
 
 interface DiscoveryActions extends StoreActions {
   setDiscoveries: (discoveries: Discovery[]) => void
-  setSpots: (spots: Spot[]) => void
+  setSpots: (spots: DiscoverySpot[]) => void
+  setDiscoveryStats: (discoveryId: string, stats: DiscoveryStats) => void
 }
 
 interface DiscoveryData extends StoreData {
+  status: Status
   discoveries: Discovery[]
-  spots: Spot[]
+  spots: DiscoverySpot[]
+  discoveryStats: Record<string, DiscoveryStats>
 }
 
 export const discoveryStore = create<DiscoveryData & DiscoveryActions>(set => ({
@@ -20,21 +23,26 @@ export const discoveryStore = create<DiscoveryData & DiscoveryActions>(set => ({
 
   discoveries: [],
   spots: [],
+  discoveryStats: {},
 
   setStatus: status => set({ status }),
   setSpots: spots => set({ spots }),
   setDiscoveries: discoveries => set({ discoveries }),
+  setDiscoveryStats: (discoveryId, stats) => set(state => ({
+    discoveryStats: { ...state.discoveryStats, [discoveryId]: stats },
+  })),
 }))
 
 export const useDiscoveryStatus = () => discoveryStore(state => state.status)
 export const useDiscoveryData = () => discoveryStore(state => state)
-export const useDiscoverySpots = (discoveryIds?: string[]) => discoveryStore(state => state.spots.filter(spot => discoveryIds?.includes(spot.id)))
+export const useDiscoverySpots = (discoveryIds?: string[]) => discoveryStore(state => state.spots.filter(discoverySpot => discoveryIds?.includes(discoverySpot.discoveryId)))
 
-export const getDiscoverySpot = (spotId: string) => discoveryStore.getState().spots.find(spot => spot.id === spotId)
+export const getDiscoverySpot = (spotId: string) => discoveryStore.getState().spots.find(discoverySpot => discoverySpot.id === spotId)
 export const getDiscoverySpots = () => discoveryStore.getState().spots
 export const getDiscoveryData = () => discoveryStore.getState()
 export const getDiscoveryActions = () => ({
   setDiscoveries: discoveryStore.getState().setDiscoveries,
   setSpots: discoveryStore.getState().setSpots,
   setStatus: discoveryStore.getState().setStatus,
+  setDiscoveryStats: discoveryStore.getState().setDiscoveryStats,
 })

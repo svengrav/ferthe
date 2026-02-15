@@ -1,2 +1,3 @@
 export * from './sensorApplication'
-export { getSensorData, getSensorDevice, getSensorActions, useDeviceLocation } from './stores/sensorStore'
+export { getSensorActions, getSensorData, getSensorDevice } from './stores/sensorStore'
+

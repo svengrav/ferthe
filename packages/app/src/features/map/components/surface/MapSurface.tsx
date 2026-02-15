@@ -1,32 +1,48 @@
+import { createThemedStyles } from "@app/shared"
 import { Image } from "@app/shared/components"
-import { memo } from "react"
+import { useApp } from "@app/shared/useApp"
 import { View } from "react-native"
-import { useMapCanvas } from "../../stores/mapStore"
+import { useMapSurface } from "../../stores/mapStore"
 
-// Memoized Map Image Component to prevent unnecessary re-renders
+const MAP_IMAGE_OPACITY = 0.7
+
+/**
+ * MapSurface component renders the map background image with dynamic positioning.
+ * Surface layout is calculated in mapApplication and stored in store.
+ * Layout position updates automatically when device moves.
+ */
 function MapSurface() {
-  const { size, image } = useMapCanvas()
-  const imageStyle = {
-    width: size.width,
-    height: size.height,
-    borderRadius: 8,
-    position: 'absolute' as const
-  }
-  const imageSrc = {
-    uri: image || ''
-  }
+  const { styles } = useApp(useStyles)
+  const { image, layout } = useMapSurface()
 
   return (
-    <View style={imageStyle}>
-      {imageSrc?.uri && <Image
-        width={size.width}
-        height={size.height}
-        style={{ opacity: 0.7 }}
-        source={imageSrc}
-      />}
-
+    <View style={[styles?.inner, {
+      left: layout.left,
+      top: layout.top,
+      width: layout.width,
+      height: layout.height,
+    }]} id="map-surface-image">
+      {image && (
+        <Image
+          source={{ uri: image }}
+          width={layout.width}
+          height={layout.height}
+          style={styles?.image}
+        />
+      )}
     </View>
   )
 }
 
-export default memo(MapSurface)
+const useStyles = createThemedStyles(theme => ({
+  inner: {
+    zIndex: 0,
+    position: 'absolute',
+    backgroundColor: theme.colors.background,
+  },
+  image: {
+    opacity: MAP_IMAGE_OPACITY,
+  },
+}))
+
+export default MapSurface

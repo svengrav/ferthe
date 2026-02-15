@@ -30,7 +30,7 @@ export const Checkbox = ({
       <View style={styles.checkbox}>
         {checked && <Text style={styles.checkmark}>✓</Text>}
       </View>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && <Text>{label}</Text>}
     </TouchableOpacity>
   )
 }
@@ -62,11 +62,5 @@ const createStyles = (theme: Theme, checked: boolean, disabled: boolean, size: '
       fontWeight: 'bold',
       lineHeight: 12,
     },
-    label: {
-      marginLeft: 8,
-      ...theme.text.size.md,
-      color: theme.colors.onSurface,
-      fontFamily: theme.text.primary.regular,
-    }
   })
 

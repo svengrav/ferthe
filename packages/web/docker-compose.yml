@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  # Ferthe Web - Combined API + Frontend
+  ferthe-web-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ferthe-web-app
+    ports:
+      - "${APP_PORT:-8050}:8000"
+    environment:
+      - DENO_ENV=production
+    networks:
+      - app-network
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+
+networks:
+  app-network:
+    driver: bridge

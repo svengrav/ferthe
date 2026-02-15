@@ -1,23 +1,23 @@
 import { getAppContext } from '@app/appContext'
-import { SettingsForm } from '@app/features/settings'
+import { useSettingsPage } from '@app/features/settings'
 import { useTrailData, useTrailStatus } from '@app/features/trail/stores/trailStore'
-import { FertheLogo, Page, Text } from '@app/shared/components'
-import { createThemedStyles } from '@app/shared/theme'
+import { Button, FertheLogo, Page, Stack, Text } from '@app/shared/components'
+import Header from '@app/shared/components/header/Header'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { useEffect, useState } from 'react'
+import { Trail } from '@shared/contracts'
+import { useEffect } from 'react'
 import { FlatList, View } from 'react-native'
-import TrailCard from './TrailCard'
+import TrailItem from './TrailItem'
+import { useTrailPage } from './TrailPage'
 
-const HEADER_PADDING_HORIZONTAL = 4
-const HEADER_PADDING_VERTICAL = 8
-const HEADER_MARGIN_BOTTOM = 8
 const INTRO_PADDING = 16
 const INTRO_MAX_WIDTH = 200
 const INTRO_MARGIN_TOP = 10
 const INTRO_MARGIN_BOTTOM = 25
 const INTRO_LINE_HEIGHT = 30
 const LOGO_MARGIN_BOTTOM = 10
-const LIST_GAP = 16
+const LIST_GAP = 8
 
 /**
  * Hook to manage trail screen state and interactions
@@ -25,8 +25,8 @@ const LIST_GAP = 16
 const useTrailScreen = () => {
   const { trails } = useTrailData()
   const status = useTrailStatus()
-  const [settingsVisible, setSettingsVisible] = useState(false)
   const { trailApplication } = getAppContext()
+  const { showTrailPage } = useTrailPage()
 
   // Initialize trail data if needed
   useEffect(() => {
@@ -39,20 +39,19 @@ const useTrailScreen = () => {
     trailApplication.requestTrailState()
   }
 
-  const openSettings = () => setSettingsVisible(true)
-  const closeSettings = () => setSettingsVisible(false)
+  const handleOpenTrail = (trail: Trail) => {
+    showTrailPage(trail)
+  }
 
   const isRefreshing = status === 'loading'
   const hasTrails = trails.length > 0
 
   return {
     trails,
-    settingsVisible,
     isRefreshing,
     hasTrails,
     handleRefresh,
-    openSettings,
-    closeSettings,
+    handleOpenTrail,
   }
 }
 
@@ -61,41 +60,39 @@ const useTrailScreen = () => {
  * Shows an intro screen when no trails are available and includes settings access.
  */
 function TrailScreen() {
-  const { styles, locales, theme } = useApp(useStyles)
+  const { styles } = useTheme(useStyles)
+  const { locales } = useApp()
   const {
     trails,
-    settingsVisible,
     isRefreshing,
     hasTrails,
     handleRefresh,
-    openSettings,
-    closeSettings,
+    handleOpenTrail,
   } = useTrailScreen()
+  const { showSettings } = useSettingsPage()
 
   if (!styles) return null
 
-  const pageOptions = [{ label: 'Settings', onPress: openSettings }]
-
-  const handleSettingsSubmit = () => {
-    // TODO: Implement settings submission logic
-  }
-
-  const renderTrailItem = ({ item }) => (
-    <TrailCard trail={item} />
-  )
+  const pageOptions = [
+    { label: locales.navigation.settings, onPress: showSettings },
+  ]
 
   return (
     <Page options={pageOptions}>
-      {/* Header section */}
-      <Text style={theme.layout.header}>{locales.trails.yourTrails}</Text>
-
-      {/* Main content */}
-      <View style={styles.content}>
+      <Stack>
+        {/* Header section */}
+        <Header title={locales.trails.yourTrails} />
+        {/* Main content */}
         {hasTrails ? (
           <FlatList
             data={trails}
             contentContainerStyle={styles.listContent}
-            renderItem={renderTrailItem}
+            renderItem={({ item }) => (
+              <TrailItem trail={item}
+                onPress={() => handleOpenTrail(item)}
+                actions={
+                  <Button icon='chevron-right' variant='secondary' onPress={() => handleOpenTrail(item)} />
+                } />)}
             keyExtractor={item => item.id}
             onRefresh={handleRefresh}
             refreshing={isRefreshing}
@@ -106,43 +103,14 @@ function TrailScreen() {
             <Text style={styles.introText}>{locales.trails.everyJourney}</Text>
           </View>
         )}
-      </View>
-
-      {/* Settings modal */}
-      <SettingsForm
-        visible={settingsVisible}
-        onClose={closeSettings}
-        onSubmit={handleSettingsSubmit}
-      />
+      </Stack>
     </Page>
   )
 }
 
 const useStyles = createThemedStyles(theme => ({
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: HEADER_PADDING_HORIZONTAL,
-    paddingVertical: HEADER_PADDING_VERTICAL,
-    marginBottom: HEADER_MARGIN_BOTTOM,
-  },
-  headerContent: {
-    paddingVertical: HEADER_PADDING_VERTICAL,
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    justifyContent: 'flex-end',
-  },
-  title: {
-    ...theme.text.size.lg,
-    fontFamily: theme.text.primary.semiBold,
-    width: '100%',
-    textAlign: 'center',
-    position: 'absolute',
-    color: theme.colors.onBackground,
-  },
   content: {
+    paddingHorizontal: 4,
     flex: 1,
   },
   intro: {
@@ -152,13 +120,11 @@ const useStyles = createThemedStyles(theme => ({
     justifyContent: 'center',
   },
   introText: {
-    ...theme.text.size.md,
     maxWidth: INTRO_MAX_WIDTH,
     textAlign: 'center',
     color: theme.colors.onBackground,
     marginTop: INTRO_MARGIN_TOP,
     marginBottom: INTRO_MARGIN_BOTTOM,
-    fontFamily: theme.text.primary.semiBold,
     lineHeight: INTRO_LINE_HEIGHT,
   },
   logo: {

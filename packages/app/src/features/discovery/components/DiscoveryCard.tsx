@@ -1,16 +1,15 @@
-import { Image } from '@app/shared/components'
+import { Image, Text } from '@app/shared/components'
+import { CARD_BORDER_RADIUS, useCardDimensions } from '@app/shared/hooks/useCardDimensions'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { LinearGradient } from 'expo-linear-gradient'
-import { useEffect, useRef } from 'react'
-import { Animated, Pressable, Text, useWindowDimensions, View } from 'react-native'
+import { useEffect } from 'react'
+import { Pressable, View } from 'react-native'
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
 import { DiscoveryCardState as Card } from '../logic/types'
 
-const PAGE_PADDING = 16
-const CARD_ASPECT_RATIO = 3 / 2
 const ANIMATION_DURATION = 400
 const SPRING_FRICTION = 6
-const CARD_BORDER_RADIUS = 18
 const CLOSE_BUTTON_TOP = 5
 const CLOSE_BUTTON_RIGHT = 5
 const GRADIENT_COLORS = ['#a341fffd', 'rgba(65, 73, 185, 0.767)'] as const
@@ -26,82 +25,30 @@ const Z_INDEX = {
 }
 
 /**
- * Hook to calculate responsive card dimensions based on screen width and height
- */
-const useCardDimensions = () => {
-  const { width, height } = useWindowDimensions()
-
-  // Available space considering padding and system UI (status bar, nav bar, etc.)
-  const availableWidth = width - PAGE_PADDING * 2
-  // Reserve more space for system UI and navigation
-  const availableHeight = height - PAGE_PADDING * 2 - 200 // Reserve 200px for UI elements
-
-  // Calculate card dimensions based on aspect ratio, keeping aspect ratio constant
-  const cardWidthFromWidth = Math.min(availableWidth, 400)
-  const cardHeightFromWidth = cardWidthFromWidth * CARD_ASPECT_RATIO
-
-  const cardHeightFromHeight = availableHeight
-  const cardWidthFromHeight = cardHeightFromHeight / CARD_ASPECT_RATIO
-
-  // Choose the limiting factor while maintaining aspect ratio
-  let CARD_WIDTH, CARD_HEIGHT
-
-  if (cardHeightFromWidth <= availableHeight) {
-    // Width is the limiting factor
-    CARD_WIDTH = cardWidthFromWidth
-    CARD_HEIGHT = cardHeightFromWidth
-  } else {
-    // Height is the limiting factor
-    CARD_WIDTH = cardWidthFromHeight
-    CARD_HEIGHT = cardHeightFromHeight
-  }
-
-  // Image height is the same as card height since they should be the same size
-  const IMAGE_HEIGHT = CARD_HEIGHT
-
-  return { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT }
-}
-
-/**
  * Hook to handle card animation logic including fade in, scale, and scroll animations
  */
 const useCardAnimations = (IMAGE_HEIGHT: number) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current
-  const scaleAnim = useRef(new Animated.Value(0.95)).current
-  const scrollY = useRef(new Animated.Value(0)).current
+  const opacity = useSharedValue(0)
+  const scale = useSharedValue(0.95)
+  const scrollY = useSharedValue(0)
 
   // Start entrance animation on mount
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: ANIMATION_DURATION,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: SPRING_FRICTION,
-        useNativeDriver: true,
-      }),
-    ]).start()
-  }, [fadeAnim, scaleAnim])
+    opacity.value = withTiming(1, { duration: ANIMATION_DURATION })
+    scale.value = withSpring(1, { damping: SPRING_FRICTION })
+  }, [])
 
-  // Calculate scroll-based animations
-  const titleOpacity = scrollY.interpolate({
-    inputRange: [0, IMAGE_HEIGHT * 0.4, IMAGE_HEIGHT * 0.6],
-    outputRange: [1, 1, 0],
-    extrapolate: 'clamp',
-  })
+  const animatedCardStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }))
 
-  const overlayOpacity = scrollY.interpolate({
-    inputRange: [0, IMAGE_HEIGHT],
-    outputRange: [0.2, 0.5],
-    extrapolate: 'clamp',
-  })
+  // Scroll-based animations (not implemented here since no scrolling in this card)
+  const titleOpacity = useSharedValue(1)
+  const overlayOpacity = useSharedValue(0.2)
 
   return {
-    fadeAnim,
-    scaleAnim,
+    animatedCardStyle,
     scrollY,
     titleOpacity,
     overlayOpacity,
@@ -123,26 +70,30 @@ interface DiscoveryCardProps {
  */
 function DiscoveryCard({ card, onTap, options }: DiscoveryCardProps) {
   const { styles, theme } = useApp(useStyles)
-  const { title, image } = card
-  const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT } = useCardDimensions()
-  const { fadeAnim, scaleAnim, scrollY, titleOpacity, overlayOpacity } = useCardAnimations(IMAGE_HEIGHT)
+  const { title, image, discoveredBy } = card
+  const { cardWidth, cardHeight, imageHeight } = useCardDimensions()
+  const { animatedCardStyle, titleOpacity } = useCardAnimations(imageHeight)
   const { showTitle = true, showBorder = false } = options || {}
 
   // Dynamic styles that depend on dimensions
   const cardDynamicStyles = {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
+    width: cardWidth,
+    height: cardHeight,
   }
 
   const imageDynamicStyles = {
-    width: CARD_WIDTH,
-    height: IMAGE_HEIGHT,
+    width: cardWidth,
+    height: imageHeight,
   }
 
   const titleContainerDynamicStyles = {
-    width: CARD_WIDTH,
-    top: IMAGE_HEIGHT - 70,
+    width: cardWidth,
+    top: imageHeight - 70,
   }
+
+  const titleAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: titleOpacity.value,
+  }))
 
   if (!styles) return null
 
@@ -151,23 +102,32 @@ function DiscoveryCard({ card, onTap, options }: DiscoveryCardProps) {
       <View style={[styles.card, cardDynamicStyles]} id='discovery-card' pointerEvents="box-none">
         {/* Background image */}
         <LinearGradient
-          style={{ position: 'absolute', top: 0, left: 0, width: CARD_WIDTH, height: IMAGE_HEIGHT }}
+          style={{ position: 'absolute', top: 0, left: 0, width: cardWidth, height: imageHeight }}
           colors={GRADIENT_COLORS}
         />
         <View style={{ padding: showBorder ? 6 : 0, flex: 1 }}>
           <Image
-            source={{ uri: image.url || '' }}
+            source={image}
+            width={cardWidth}
+            height={imageHeight}
             style={[styles.fixedImage, imageDynamicStyles]}
             resizeMode='cover'
           />
         </View>
+
+        {/* Discovered By Badge (if community discovery) */}
+        {discoveredBy && (
+          <View style={styles.discoveredByBadge}>
+            <Text variant="body">by {discoveredBy}</Text>
+          </View>
+        )}
 
         {/* Fixed title overlay */}
         <Animated.View
           style={[
             styles.fixedTitleContainer,
             titleContainerDynamicStyles,
-            { opacity: titleOpacity }
+            titleAnimatedStyle
           ]}
           pointerEvents='none'
         >
@@ -246,27 +206,15 @@ const useStyles = createThemedStyles(theme => ({
     flexGrow: 1,
     minHeight: 400,
   },
-  contentTitle: {
-    paddingVertical: 8,
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: theme.colors.onSurface,
-    textAlign: 'center',
-    fontFamily: theme.text.primary.bold,
-  },
-  discoveredAt: {
-    fontSize: 14,
-    color: theme.deriveColor(theme.colors.onSurface, 0.4),
-    marginBottom: 16,
-    textAlign: 'center',
-    fontFamily: theme.text.primary.regular,
-  },
-  description: {
-    ...theme.text.size.md,
-    color: theme.colors.onSurface,
-    textAlign: 'left',
-    lineHeight: 24,
-    fontFamily: theme.text.primary.regular,
+  discoveredByBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: theme.colors.background,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    zIndex: Z_INDEX.TITLE_OVERLAY,
   },
 }))
 

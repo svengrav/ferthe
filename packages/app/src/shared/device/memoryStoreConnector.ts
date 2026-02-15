@@ -1,3 +1,4 @@
+import { logger } from '@app/shared/utils/logger'
 import { SecureStoreConnector } from './secureStoreConnector'
 
 /**
@@ -25,7 +26,7 @@ export class MemoryStoreConnector implements SecureStoreConnector {
 
       return null
     } catch (error) {
-      console.error(`Failed to read from memory store with key: ${key}`, error)
+      logger.error(`Failed to read from memory store with key: ${key}`, error)
       return null
     }
   }
@@ -35,7 +36,7 @@ export class MemoryStoreConnector implements SecureStoreConnector {
       const serializedValue = typeof value === 'string' ? value : JSON.stringify(value)
       this.storage.set(key, serializedValue)
     } catch (error) {
-      console.error(`Failed to write to memory store with key: ${key}`, error)
+      logger.error(`Failed to write to memory store with key: ${key}`, error)
       throw error
     }
   }
@@ -48,7 +49,7 @@ export class MemoryStoreConnector implements SecureStoreConnector {
     try {
       this.storage.delete(key)
     } catch (error) {
-      console.error(`Failed to delete from memory store with key: ${key}`, error)
+      logger.error(`Failed to delete from memory store with key: ${key}`, error)
       throw error
     }
   }
@@ -57,7 +58,7 @@ export class MemoryStoreConnector implements SecureStoreConnector {
     try {
       return this.storage.has(key)
     } catch (error) {
-      console.error(`Failed to check existence in memory store with key: ${key}`, error)
+      logger.error(`Failed to check existence in memory store with key: ${key}`, error)
       return false
     }
   }

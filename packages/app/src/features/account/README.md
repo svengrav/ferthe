@@ -43,13 +43,13 @@ const accountManager = new AccountManager({
 // SMS Code anfordern
 const smsResult = await accountManager.requestSMSCode('+1234567890')
 if (smsResult.success) {
-  console.log(`SMS gesendet! Läuft ab in ${smsResult.expiresIn} Minuten`)
+  logger.log(`SMS gesendet! Läuft ab in ${smsResult.expiresIn} Minuten`)
 }
 
 // SMS Code verifizieren (nach Benutzereingabe)
 const loginResult = await accountManager.loginWithSMS('+1234567890', '123456')
 if (loginResult.success) {
-  console.log(`Anmeldung erfolgreich! User ID: ${loginResult.userId}`)
+  logger.log(`Anmeldung erfolgreich! User ID: ${loginResult.userId}`)
 }
 ```
 
@@ -62,14 +62,14 @@ const userId = accountManager.getCurrentUserId()
 
 // Ausführliche Authentifizierungsstatus-Prüfung
 const authStatus = await accountManager.checkAuthenticationStatus()
-console.log('Authentifiziert:', authStatus.isAuthenticated)
-console.log('User ID:', authStatus.userId)
+logger.log('Authentifiziert:', authStatus.isAuthenticated)
+logger.log('User ID:', authStatus.userId)
 
 // Benutzeraccount abrufen
 const userAccount = await accountManager.getCurrentUserAccount()
 if (userAccount) {
-  console.log('Account erstellt:', userAccount.createdAt)
-  console.log('Letzter Login:', userAccount.lastLoginAt)
+  logger.log('Account erstellt:', userAccount.createdAt)
+  logger.log('Letzter Login:', userAccount.lastLoginAt)
 }
 ```
 
@@ -78,7 +78,7 @@ if (userAccount) {
 ```typescript
 // Benutzer abmelden
 await accountManager.logout()
-console.log('Abmeldung erfolgreich')
+logger.log('Abmeldung erfolgreich')
 ```
 
 ## Demo verwenden

@@ -1,4 +1,4 @@
-import useThemeStore from '@app/shared/theme/useThemeStore'
+import useThemeStore from '@app/shared/theme/themeStore'
 import { create } from 'zustand'
 
 interface MapThemeStore {
@@ -9,7 +9,20 @@ interface MapThemeStore {
 export interface MapTheme {
   radius: { fill: string; strokeColor: string; strokeWidth: number }
   device: { fill: string; strokeColor: string; strokeWidth: number }
-  spot: { fill: string; strokeColor: string; strokeWidth: number; size: number }
+  spot: {
+    fill: string
+    strokeColor: string
+    strokeWidth: number
+    size: number
+    borderRadius: number
+    borderWidth: number
+    backgroundColor: string
+    imageBorderRadius: number
+    imageBackgroundColor: string
+    heightOffset: number
+    offsetX: number
+    offsetY: number
+  }
   discovery: { fill: string; strokeColor: string; strokeWidth: number }
   clue: { fill: string; strokeColor: string; strokeWidth: number }
   trail: { strokeColor: string; strokeWidth: number; strokeDash?: number[] }
@@ -29,15 +42,23 @@ const createMapThemeFromBase = (): MapTheme => {
       strokeWidth: 2,
     },
     device: {
-      strokeColor: '#fa1c4c',
-      fill: '#fa1c4c',
+      strokeColor: '#ffffff',
+      fill: '#ffffff',
       strokeWidth: 1.5,
     },
     spot: {
       strokeColor: baseTheme.colors.primary,
       fill: baseTheme.colors.background,
       strokeWidth: 1.5,
-      size: 20, // Default size for spot markers
+      size: 15,
+      borderRadius: 4,
+      borderWidth: 0.5,
+      backgroundColor: '#000000ff',
+      imageBorderRadius: 2,
+      imageBackgroundColor: '#000',
+      heightOffset: 7,
+      offsetX: 10,
+      offsetY: 13.5,
     },
     discovery: {
       strokeColor: baseTheme.colors.primary,
@@ -50,16 +71,16 @@ const createMapThemeFromBase = (): MapTheme => {
       strokeWidth: 1.5,
     },
     trail: {
-      strokeColor: baseTheme.opacity(baseTheme.colors.onSurface, 80),
+      strokeColor: baseTheme.opacity(baseTheme.colors.onSurface, 20),
       strokeWidth: 1.5,
     },
     snap: {
-      strokeColor: '#fa1c4c',
+      strokeColor: '#ffffff',
       strokeWidth: 1.5,
     },
     scanner: {
-      strokeColor: '#fa1c4c',
-      fill: '#fa1c4c59',
+      strokeColor: '#ffffff',
+      fill: '#ffffff3a',
       strokeWidth: 1,
     },
     compass: {

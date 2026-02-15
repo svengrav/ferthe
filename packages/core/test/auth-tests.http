@@ -1,0 +1,111 @@
+### Authentication API Tests
+###
+### This file tests authentication flows (SMS, local account)
+### For general API testing, use devToken (see below)
+###
+### Generate Fresh Dev Token:
+### Run: deno run -A packages/core/test/generate-token.ts
+###
+### Token Info:
+### - Valid for 30 days from generation
+### - Uses test account: xxxxdevtestuserxxxxx
+### - Matches sandbox data in packages/test/src/sandbox/data.ts
+
+@baseUrl = https://foxhole.ferthe.eu/core/api/v1
+# @baseUrl = http://localhost:3000/core/api/v1
+@devToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiJjbHg0ajlrMm4wMDAwMDFtaDNnMmg0ZjdwIiwiYWNjb3VudFR5cGUiOiJzbXNfdmVyaWZpZWQiLCJpYXQiOjE3NzA5ODQ0MTUsImV4cCI6MTc3MzU3NjQxNSwiaXNzIjoiZmVydGhlLWFwaSIsImF1ZCI6ImZlcnRoZS1hcHAifQ.S17O24gvkIr0zXMIpHDUd1Forg3fPx4vmdP7mmpABfw
+@phoneNumber = +49123456789
+@testDeviceId = test-device-automated
+
+@code = {{requestSMS.response.body.data.code}}
+@authToken = {{verifySMS.response.body.data.session.sessionToken}}
+@localAuthToken = {{createLocalAccount.response.body.data.sessionToken}}
+
+### =================================================================
+### SMS AUTHENTICATION FLOW
+### =================================================================
+
+###
+# @name requestSMS
+POST {{baseUrl}}/account/sms/request
+Content-Type: application/json
+
+{
+  "phoneNumber": "{{phoneNumber}}",
+  "deviceInfo": {
+    "deviceId": "{{testDeviceId}}",
+    "platform": "web",
+    "ipAddress": "127.0.0.1"
+  }
+}
+
+###
+# @name verifySMS
+POST {{baseUrl}}/account/sms/verify
+Content-Type: application/json
+
+{
+  "phoneNumber": "{{phoneNumber}}",
+  "code": "{{code}}"
+}
+
+### =================================================================
+### LOCAL ACCOUNT FLOW
+### =================================================================
+
+###
+# @name createLocalAccount
+POST {{baseUrl}}/account/local-account
+Content-Type: application/json
+
+{
+  "deviceInfo": {
+    "deviceId": "{{testDeviceId}}-local",
+    "platform": "web"
+  }
+}
+
+### =================================================================
+### VALIDATION & ACCOUNT ACCESS (Using devToken)
+### =================================================================
+
+###
+# @name getAccountDetails
+GET {{baseUrl}}/account/collections/accounts
+Authorization: Bearer {{devToken}}
+
+###
+# @name validateSession
+POST {{baseUrl}}/account/session/validate
+Content-Type: application/json
+Authorization: Bearer {{devToken}}
+
+{
+  "sessionToken": "{{devToken}}"
+}
+
+### =================================================================
+### ERROR TEST CASES
+### =================================================================
+
+###
+# @name testNoAuth
+GET {{baseUrl}}/account/collections/accounts
+
+###
+# @name testInvalidAuth
+GET {{baseUrl}}/account/collections/accounts
+Authorization: Bearer invalid-token-here
+
+###
+# @name testInvalidPhone
+POST {{baseUrl}}/account/sms/request
+Content-Type: application/json
+
+{
+  "phoneNumber": "invalid-phone",
+  "deviceInfo": {
+    "deviceId": "{{testDeviceId}}",
+    "platform": "web"
+  }
+}

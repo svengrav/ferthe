@@ -1,65 +1,53 @@
 import { createThemedStyles } from '@app/shared/theme'
-import { useApp, useAppDimensions } from '@app/shared/useApp'
-import React, { useEffect, useRef } from 'react'
-import { Animated, TouchableOpacity, View } from 'react-native'
-import { hexToRgbaWithIntensity } from '../utils/colors'
+import { useApp } from '@app/shared/useApp'
+import React, { useEffect } from 'react'
+import { Pressable, StyleSheet, View } from 'react-native'
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useOverlayStore } from './useOverlayStore'
 
 // Animation constants
 const FADE_IN_DURATION = 300
 const FADE_OUT_DURATION = 200
-const SCALE_TENSION = 100
-const SCALE_FRICTION = 8
-const INITIAL_SCALE = 0.9
+const SCALE_DURATION = 250
+const INITIAL_SCALE = 0.95
 const FINAL_SCALE = 1
 const OVERLAY_Z_INDEX = 1000
-const OVERLAY_PADDING = 16
+
+// Content styling constants
+const BORDER_RADIUS = 12
 
 /**
  * Hook to manage overlay animation logic
  */
 const useOverlayAnimation = (visible: boolean) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current
-  const scaleAnim = useRef(new Animated.Value(INITIAL_SCALE)).current
+  const opacity = useSharedValue(0)
+  const scale = useSharedValue(INITIAL_SCALE)
   const [shouldRender, setShouldRender] = React.useState(visible)
 
   useEffect(() => {
     if (visible) {
       setShouldRender(true)
       // Fade in and scale up animation
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: FADE_IN_DURATION,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: FINAL_SCALE,
-          tension: SCALE_TENSION,
-          friction: SCALE_FRICTION,
-          useNativeDriver: true,
-        }),
-      ]).start()
+      opacity.value = withTiming(1, { duration: FADE_IN_DURATION })
+      scale.value = withTiming(FINAL_SCALE, { duration: SCALE_DURATION })
     } else {
       // Fade out and scale down animation
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: FADE_OUT_DURATION,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: INITIAL_SCALE,
-          duration: FADE_OUT_DURATION,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setShouldRender(false)
+      opacity.value = withTiming(0, { duration: FADE_OUT_DURATION })
+      scale.value = withTiming(INITIAL_SCALE, { duration: FADE_OUT_DURATION }, (finished) => {
+        if (finished) {
+          setShouldRender(false)
+        }
       })
     }
-  }, [visible, fadeAnim, scaleAnim])
+  }, [visible])
 
-  return { fadeAnim, scaleAnim, shouldRender }
+  const animatedContainerStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }]
+  }))
+
+  return { animatedContainerStyle, shouldRender }
 }
 
 /**
@@ -69,84 +57,76 @@ function OverlayProvider() {
   const overlayStore = useOverlayStore()
 
   if (overlayStore.overlays?.length > 0) {
-    return overlayStore.overlays.map((overlayItem) => (
-      <OverlayContainer
-        key={overlayItem.id}
-        visible
-        transparent={overlayItem.settings?.transparent}
-        closeOnBackdropPress={overlayItem.settings?.closeOnBackdropPress}
-      >
-        {overlayItem.overlay}
-      </OverlayContainer>
-    ))
+    return overlayStore.overlays.map((overlayItem) => {
+      const settings = overlayItem.settings || {}
+      const removeOverlay = () => overlayStore.remove(overlayItem.id)
+
+      return (
+        <Overlay
+          key={overlayItem.id}
+          visible={true}
+          onClose={removeOverlay}
+          showBackdrop={settings.showBackdrop}
+          closeOnBackdropPress={settings.closeOnBackdropPress}
+        >
+          {overlayItem.overlay}
+        </Overlay>
+      )
+    })
   }
   return null
 }
 
 
-interface OverlayContainerProps {
-  visible: boolean
+interface OverlayProps {
+  visible?: boolean
   onClose?: () => void
-  children: React.ReactNode
-  transparent?: boolean
+  showBackdrop?: boolean
   closeOnBackdropPress?: boolean
+  children?: React.ReactNode
 }
 
 /**
- * Plain overlay container with animation and backdrop - no styling or content wrapper
+ * Overlay - Backdrop und Animation Shell für Overlay-Inhalte.
+ * Der Content bestimmt selbst seine Größe und Darstellung.
  */
-function OverlayContainer({
-  visible,
-  onClose,
-  children,
-  transparent = true,
-  closeOnBackdropPress = true
-}: OverlayContainerProps) {
-  const { styles, theme } = useApp(useStyles)
-  const { fadeAnim, scaleAnim, shouldRender } = useOverlayAnimation(visible)
-  const { height, width } = useAppDimensions()
+function Overlay(props: OverlayProps) {
+  const { visible, onClose, showBackdrop = true, closeOnBackdropPress = false, children } = props
+  const { styles } = useApp(useStyles)
+  const { animatedContainerStyle, shouldRender } = useOverlayAnimation(visible ?? true)
+  const insets = useSafeAreaInsets()
+
   if (!shouldRender || !styles) {
     return null
   }
 
-  const overlayHeight = height - theme.constants.HEADER_HEIGHT - theme.constants.NAV_HEIGHT + 1
-  const overlayTransparency = transparent ? theme.constants.OVERLAY_TRANSPARENCY : 1
-  const backgroundColor = hexToRgbaWithIntensity(theme.colors.background, overlayTransparency)
   return (
     <Animated.View
       style={[
         styles.container,
-        {
-          top: theme.constants.HEADER_HEIGHT,
-          height: overlayHeight,
-          opacity: fadeAnim,
-        }
+        animatedContainerStyle
       ]}
     >
-      <Animated.View
+      {showBackdrop && (
+        closeOnBackdropPress ? (
+          <Pressable style={styles.backdrop} onPress={onClose} />
+        ) : (
+          <View pointerEvents="none" style={styles.backdrop} />
+        )
+      )}
+      <View
         style={[
-          styles.animatedContainer,
-          {
-            transform: [{ scale: scaleAnim }]
-          }
+          styles.contentArea
         ]}
+        pointerEvents="auto"
       >
-        <View
-          style={[styles.overlay, { backgroundColor }]}
-          pointerEvents="box-none"
-        >
-          {closeOnBackdropPress && (
-            <TouchableOpacity
-              style={styles.backdropPress}
-              activeOpacity={1}
-              onPress={onClose}
-            />
-          )}
-          <View style={styles.contentArea} pointerEvents="auto">
-            {children}
-          </View>
+        <View style={{
+          flex: 1,
+        }}>
+
+          {children}
         </View>
-      </Animated.View>
+      </View>
     </Animated.View>
   )
 }
@@ -154,38 +134,23 @@ function OverlayContainer({
 const useStyles = createThemedStyles(theme => ({
   container: {
     position: 'absolute',
-    overflow: 'hidden',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: OVERLAY_Z_INDEX,
-    backgroundColor: theme.colors.background,
-  },
-  animatedContainer: {
-    height: '100%',
-    overflow: 'hidden'
-  },
-  overlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: OVERLAY_PADDING,
-  },
-  backdropPress: {
-    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
+    zIndex: OVERLAY_Z_INDEX,
   },
   contentArea: {
     flex: 1,
     width: '100%',
     height: '100%',
-    borderRadius: 12,
-    overflow: 'hidden',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: theme.opacity(theme.colors.background, 0.8),
+    justifyContent: 'center',
   },
 }))
 
 export { OverlayProvider }
-export default OverlayContainer
+export default Overlay

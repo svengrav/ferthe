@@ -1,11 +1,12 @@
+import { ImageReference } from '@shared/contracts'
+
 export interface DiscoveryCardState {
+  discoveryId: string
   title: string
-  discoveryId?: string
-  spotId?: string
+  spotId: string
   discoveredAt: Date
-  image: {
-    url: string
-    blurredUrl: string
-  }
+  discoveredBy?: string // accountId of the discoverer (for community discoveries)
+  image: ImageReference
+  blurredImage?: ImageReference // For reveal animation
   description: string
 }

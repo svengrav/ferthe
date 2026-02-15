@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@plugin "tailwind-scrollbar";
+
+@theme {
+  --color-surface: rgb(13, 17, 23);
+  --color-surface-divider: rgb(33, 40, 48);
+  --color-primary: #fff;
+  --color-primary-200: #fff;
+  --color-onprimary: #000;
+}

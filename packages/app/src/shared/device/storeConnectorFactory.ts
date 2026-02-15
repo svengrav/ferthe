@@ -1,6 +1,8 @@
-import { SecureStoreConnector, secureStoreConnector } from './secureStoreConnector'
-import { memoryStoreConnector } from './memoryStoreConnector'
+import { config } from "@app/config"
+import { logger } from "@app/shared/utils/logger"
 import { JsonStoreConnector } from './jsonStoreConnector'
+import { memoryStoreConnector } from './memoryStoreConnector'
+import { SecureStoreConnector, secureStoreConnector } from './secureStoreConnector'
 
 export type StoreType = 'secure' | 'memory' | 'json'
 
@@ -14,14 +16,14 @@ interface StoreConnectorConfig {
 /**
  * Factory function to create appropriate store connector based on configuration
  */
-export function createStoreConnector(config: StoreConnectorConfig): SecureStoreConnector {
-  switch (config.type) {
+export function createStoreConnector(options: StoreConnectorConfig): SecureStoreConnector {
+  switch (options.type) {
     case 'memory':
       return memoryStoreConnector
     case 'secure':
       return secureStoreConnector
     case 'json':
-      return new JsonStoreConnector()
+      return new JsonStoreConnector({ storageServerUrl: config.storage.jsonStoreUrl })
     default:
       return secureStoreConnector
   }
@@ -35,11 +37,11 @@ export function getStoreConnector(): SecureStoreConnector {
   // Use memory store for testing or development if needed
   const isDevelopment = __DEV__ || process.env.NODE_ENV === 'development'
   const useMemoryStore = process.env.EXPO_PUBLIC_USE_MEMORY_STORE === 'true'
-  
+
   if (useMemoryStore && isDevelopment) {
-    console.log('Using memory store connector for development/testing')
+    logger.log('Using memory store connector for development/testing')
     return memoryStoreConnector
   }
-  
+
   return secureStoreConnector
 }

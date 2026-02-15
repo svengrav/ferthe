@@ -1,12 +1,14 @@
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { GeoBoundary, GeoLocation } from '@shared/geo/'
+import { GeoBoundary } from '@shared/geo'
 import { memo } from 'react'
 import { View } from 'react-native'
+import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 import Svg, { Circle, Polygon } from 'react-native-svg'
-import { useCompensatedScale, useMapBoundary, useMapCanvas, useMapDevice } from '../../stores/mapStore'
+import { useMapDevice } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
-import { mapUtils } from '../../utils/geoToScreenTransform.'
+import { mapUtils } from '../../utils/geoToScreenTransform'
+import { useCompensatedScale } from './MapViewport'
 
 // Arrow SVG constants
 const SVG_VIEWBOX = '0 0 18 18'
@@ -23,20 +25,6 @@ const MARKER_BORDER_RADIUS = 25
 const DEFAULT_FILL_COLOR = 'rgba(255, 255, 255, 1)'
 const CIRCLE_BACKGROUND = '#4e4e4e48'
 
-/**
- * Hook to calculate marker position and styles
- */
-const useMarkerPosition = (location: GeoLocation, boundary: GeoBoundary, size: { width: number; height: number }) => {
-  const mapPosition = mapUtils.coordinatesToPosition(location, boundary, size)
-
-  const getMarkerPosition = () => ({
-    left: mapPosition.x,
-    top: mapPosition.y,
-  })
-
-  return { getMarkerPosition }
-}
-
 interface ArrowProps {
   rotation?: number
   fill?: string
@@ -51,13 +39,8 @@ function Arrow({ rotation = 0, fill }: ArrowProps) {
 
   if (!styles) return null
 
-  const getArrowTransform = () => ({
-    transformOrigin: 'center',
-    transform: [{ rotate: `${rotation}deg` }],
-  })
-
   return (
-    <View style={[styles.arrow, getArrowTransform()]}>
+    <View style={[styles.arrow, { transform: [{ rotate: `${rotation}deg` }] }]}>
       <Svg viewBox={SVG_VIEWBOX}>
         <Circle
           cx={CIRCLE_CENTER}
@@ -73,29 +56,55 @@ function Arrow({ rotation = 0, fill }: ArrowProps) {
   )
 }
 
+interface MapDeviceMarkerProps {
+  mode: 'canvas' | 'overview'
+  canvasSize: { width: number; height: number }
+  boundary?: GeoBoundary
+}
+
 /**
  * Map device marker component that displays the user's location and heading on the map
+ * Canvas mode: Fixed at canvas center - map moves around device
+ * Overview mode: Positioned by device location within trail boundary
  */
-function MapDeviceMarker() {
+function MapDeviceMarker({ mode, canvasSize, boundary }: MapDeviceMarkerProps) {
   const { styles } = useApp(useMarkerStyles)
   const device = useMapDevice()
-  const scale = useCompensatedScale()
-  const canvas = useMapCanvas()
-  const boundary = useMapBoundary()
-  const { getMarkerPosition } = useMarkerPosition(device.location, boundary, canvas.size)
-  const marker = getMarkerPosition()
   const mapTheme = useMapTheme()
+  const scale = useCompensatedScale()
 
   const fillColor = mapTheme.device.fill || DEFAULT_FILL_COLOR
 
+  // Create animated style for scale (if provided)
+  const scaleStyle = useAnimatedStyle(() => {
+    if (!scale) return {}
+    return { transform: [{ scale: scale.value }] }
+  }, [scale])
+
+  let position: { left: number; top: number }
+
+  if (mode === 'canvas') {
+    // Canvas mode: Device is always centered
+    position = {
+      left: canvasSize.width / 2,
+      top: canvasSize.height / 2,
+    }
+  } else {
+    // Overview mode: Calculate position from device location
+    if (!boundary) {
+      return null
+    }
+    const screenPos = mapUtils.coordinatesToPosition(device.location, boundary, canvasSize)
+    position = {
+      left: screenPos.x,
+      top: screenPos.y,
+    }
+  }
+
   return (
-    <View style={[
-      styles!.marker,
-      marker,
-      { transform: [{ scale: scale }] }
-    ]}>
+    <Animated.View style={[styles!.marker, position, scaleStyle]}>
       <Arrow rotation={device.heading} fill={fillColor} />
-    </View>
+    </Animated.View>
   )
 }
 

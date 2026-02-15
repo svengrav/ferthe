@@ -139,7 +139,7 @@ function useEvent<T>(subscribeFunction, callback, dependencies = []) {
 }
 
 // Usage example
-useEvent(useSensorStore.getState().onDeviceUpdated, device => console.log('Device updated:', device), [])
+useEvent(useSensorStore.getState().onDeviceUpdated, device => logger.log('Device updated:', device), [])
 ```
 
 ## Advanced Patterns
@@ -213,7 +213,7 @@ function useDiscoveryApplication() {
        set({ data, status: 'success' })
      } catch (error) {
        set({ error, status: 'error' })
-       console.error('Failed to fetch data:', error)
+       logger.error('Failed to fetch data:', error)
      }
    }
    ```

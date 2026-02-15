@@ -1,139 +1,140 @@
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
-import { memo, useEffect, useState } from 'react'
-import { Image as RNImage, ImageProps as RNImageProps, View } from 'react-native'
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import { LoadingSpinner } from '../activityIndicator/ActivityIndicator'
+import { ImageReference } from '@shared/contracts';
+import { Image as ExpoImage, ImageContentFit } from 'expo-image';
+import { useState } from 'react';
+import { ActivityIndicator, ImageStyle, StyleProp, View } from 'react-native';
 
-// Constants
-const LOADING_Z_INDEX = 1000
-const FADE_OUT_DURATION = 500
-const DEFAULT_FILL_COLOR = '#000000'
+import { Text } from '@app/shared/components/';
+import React from 'react';
+import { createThemedStyles, useTheme } from '../../theme';
+import { useApp } from '../../useApp';
 
-/**
- * Animated wrapper component for loading indicator with fade-out transition
- */
-const AnimatedLoadingIndicator = (props: { visible: boolean; fill?: string; children: React.ReactNode }) => {
-  const { visible, children, fill = DEFAULT_FILL_COLOR } = props
-  const opacity = useSharedValue(1)
+const LABEL_MAX_LENGTH = 2
+const LABEL_SIZE_RATIO = 0.4
 
-  useEffect(() => {
-    opacity.value = withTiming(visible ? 1 : 0, { duration: FADE_OUT_DURATION })
-  }, [visible, opacity])
+type LoadingState = 'loading' | 'loaded' | 'error'
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: LOADING_Z_INDEX,
-    flex: 1,
-    opacity: opacity.value,
-    backgroundColor: fill
-  }))
-
-  // Don't render if completely faded out
-  if (!visible && opacity.value === 0) return null
-
-  return (
-    <Animated.View style={animatedStyle}>
-      {children}
-    </Animated.View>
-  )
-}
-
-interface ImageProps extends Omit<RNImageProps, 'source'> {
-  source: { uri: string }
+interface ImageProps {
+  source: ImageReference | { uri: string } | undefined
+  label?: string
+  style?: StyleProp<ImageStyle>
   width?: number
   height?: number
-  borderRadius?: number
-  showLoader?: boolean
-  fill?: string
-  onLoadStart?: () => void
-  onLoadEnd?: () => void
+  placeholder?: React.ReactNode
   onError?: () => void
+  onLoad?: () => void
+  resizeMode?: 'cover' | 'contain' | 'stretch' | 'repeat' | 'center'
+  showLoader?: boolean
 }
 
 /**
- * Custom Image component with loading state and additional styling options.
- * Extends React Native's Image with loading indicators and consistent styling.
+ * Image component with automatic loading states and error handling.
+ * 
+ * Features:
+ * - Shows placeholder while loading
+ * - Smooth fade-in transition on load (via expo-image)
+ * - Graceful error handling with label fallback
+ * - Supports both ImageReference and simple { uri: string } sources
  */
-function Image({
+export function Image({
   source,
+  label,
+  style,
   width,
   height,
-  borderRadius,
-  showLoader = false,
-  onLoadStart,
-  onLoadEnd,
-  style,
-  fill = DEFAULT_FILL_COLOR,
-  ...props
+  placeholder,
+  onError,
+  onLoad,
+  resizeMode = 'cover',
+  showLoader = true,
 }: ImageProps) {
   const { styles } = useApp(useStyles)
-  const [isLoading, setIsLoading] = useState(true)
+  const { theme } = useTheme()
+  const [loadingState, setLoadingState] = useState<LoadingState>('loading')
 
-  // Event handlers
-  const handleLoadStart = () => {
-    onLoadStart?.()
+  // Determine URI and label
+  const isImageReference = source && 'id' in source
+  const uri = isImageReference ? source.url : source?.uri
+  const effectiveLabel = label || (isImageReference ? source.label : undefined)
+  const labelText = effectiveLabel ? effectiveLabel.substring(0, LABEL_MAX_LENGTH).toUpperCase() : ''
+
+  const handleLoad = () => {
+    setLoadingState('loaded')
+    onLoad?.()
   }
 
-  const handleLoadEnd = () => {
-    setIsLoading(false)
-    onLoadEnd?.()
+  const handleError = () => {
+    setLoadingState('error')
+    onError?.()
   }
 
-  // Dynamic styles
-  const getImageStyle = () => [
-    styles!.image,
-    {
-      width,
-      height,
-      borderRadius,
-    },
-    style,
-  ]
+  if (!styles) return null
 
-  const getContainerStyle = () => [
-    styles!.container,
-    { width, height, maxHeigth: height, maxWidth: width, minHeight: height, minWidth: width },
-  ]
+  const containerStyle = [styles.container, { width, height }, style]
+  const dynamicLabelFontSize = Math.min(width ?? height ?? 50, height ?? width ?? 50) * LABEL_SIZE_RATIO
+
+  // Fallback content
+  const renderFallback = () => (
+    <View style={styles.fallbackContainer}>
+      <Text style={[styles.fallbackText, { fontSize: dynamicLabelFontSize }]}>
+        {labelText || placeholder}
+      </Text>
+    </View>
+  )
+
+  // Error or missing source
+  if (!source || !uri || loadingState === 'error') {
+    return <View style={containerStyle}>{renderFallback()}</View>
+  }
 
   return (
-    <View style={getContainerStyle()}>
-      <RNImage
-        source={source}
-        style={getImageStyle()}
-        onLoadStart={handleLoadStart}
-        onLoadEnd={handleLoadEnd}
-        {...props}
+    <View style={containerStyle}>
+      <ExpoImage
+        source={{ uri }}
+        style={styles.image}
+        contentFit={resizeMode as ImageContentFit}
+        transition={{ duration: 250 }}
+        onLoad={handleLoad}
+        onError={handleError}
       />
-      <AnimatedLoadingIndicator visible={isLoading} fill={fill}>
-        {showLoader && <LoadingSpinner />}
-      </AnimatedLoadingIndicator>
+
+      {/* Loading indicator */}
+      {showLoader && loadingState === 'loading' && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="small" color={theme.colors.primary} />
+        </View>
+      )}
     </View>
   )
 }
 
 const useStyles = createThemedStyles(theme => ({
   container: {
+    backgroundColor: theme.colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
     overflow: 'hidden',
-    flex: 1,
-    borderRadius: 12,
   },
   image: {
     width: '100%',
     height: '100%',
   },
-  loadingContainer: {
-    position: 'absolute',
-    flex: 1,
-    zIndex: LOADING_Z_INDEX,
-    alignItems: 'center',
+  fallbackContainer: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
-    backgroundColor: theme.colors.surface,
+    alignItems: 'center',
+  },
+  fallbackText: {
+    color: theme.colors.onPrimary,
+    fontWeight: '600',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 }))
 
-export default memo(Image)

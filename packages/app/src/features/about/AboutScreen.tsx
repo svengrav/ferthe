@@ -1,8 +1,7 @@
-import { Button, Page, PulseAnimation, Text } from '@app/shared/components'
-import { Card, FertheLogo } from '@app/shared/components'
-import { View, StyleSheet, Linking } from 'react-native'
+import { Button, FertheLogo, Page, PulseAnimation, Stack, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
+import { Linking, StyleSheet } from 'react-native'
 
 export default function AboutScreen() {
   const theme = useThemeStore()
@@ -15,17 +14,15 @@ export default function AboutScreen() {
 
   return (
     <Page scrollable>
-      <Card style={{ flexGrow: 1 }}>
-        <View style={styles.container}>
-          <PulseAnimation>
-            <FertheLogo style={styles.logo} fill={theme.colors.onBackground} />
-          </PulseAnimation>
-          <Text style={styles.introText}>{t.about.storyIntro}</Text>
-          <Text style={styles.aboutText}>{t.about.aboutText}</Text>
-          <Text style={styles.introText}>{t.about.followYourTrail}</Text>
-          <Button label={'ferthe.eu'} variant='outlined' onPress={handleOpenLink} />
-        </View>
-      </Card>
+      <Stack style={styles.container}>
+        <PulseAnimation>
+          <FertheLogo style={styles.logo} fill={theme.colors.primary} />
+        </PulseAnimation>
+        <Text variant='body'>{t.about.storyIntro}</Text>
+        <Text variant='body'>{t.about.aboutText}</Text>
+        <Text variant='body'>{t.about.followYourTrail}</Text>
+        <Button label={t.about.fertheWebsite} variant='primary' onPress={handleOpenLink} />
+      </Stack>
     </Page>
   )
 }
@@ -33,34 +30,16 @@ export default function AboutScreen() {
 function createStyles(theme: Theme) {
   return StyleSheet.create({
     container: {
-      justifyContent: 'center',
-      alignItems: 'center',
+      marginTop: 24,
+      paddingHorizontal: 12,
       flex: 1,
-      minHeight: '100%',
+      gap: 10,
+      alignItems: 'center',
     },
     logo: {
       width: 120,
       height: 120,
-      marginBottom: 20,
-    },
-    introText: {
-      fontFamily: theme.text.primary.semiBold,
-      ...theme.text.size.md,
-      lineHeight: 28,
-      color: theme.colors.onBackground,
-      textAlign: 'center',
-      marginBottom: 30, // Add spacing between paragraphs
-    },
-    aboutText: {
-      ...theme.text.size.md,
-      color: theme.colors.onBackground,
-      textAlign: 'center',
-      marginBottom: 30, // Add spacing between paragraphs
-    },
-    linkText: {
-      color: theme.colors.primary,
-      fontSize: 16,
-      fontFamily: theme.text.primary.semiBold,
+      marginBottom: 20
     },
   })
 }

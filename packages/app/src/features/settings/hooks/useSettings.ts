@@ -1,7 +1,7 @@
 import { useLocalizationStore } from '@app/shared/localization'
-import { LanguageOptions, ThemeMode } from '../types/types'
+import { setTheme } from '@app/shared/theme/themeStore'
 import settingsStore from '../stores/settingsStore'
-import { setTheme } from '@app/shared/theme/useThemeStore'
+import { LanguageOptions, ThemeMode } from '../types/types'
 
 function useSettings() {
   const { saveSettings, settings } = settingsStore()

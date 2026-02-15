@@ -1,55 +1,63 @@
-import DevScreen from '@app/dev/components/DevScreen'
-import AccountScreen from '@app/features/account/components/AccountScreen'
+import AboutScreen from '@app/features/about/AboutScreen'
+import CommunityScreen from '@app/features/community/components/CommunityScreen'
 import DiscoveryScreen from '@app/features/discovery/components/DiscoveryScreen'
 import MapScreen from '@app/features/map/components/MapScreen'
 import TrailScreen from '@app/features/trail/components/TrailScreen'
 import { Icon } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import useThemeStore from '@app/shared/theme/useThemeStore'
+import { Theme, useTheme } from '@app/shared/theme'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { createNavigationContainerRef, NavigationContainer } from '@react-navigation/native'
+import { NavigationContainer } from '@react-navigation/native'
+import { StyleSheet } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useOverlayStore } from '../overlay/useOverlayStore'
-import { CardIcon, TreeIcon } from './NavigationIcons'
+import { CardIcon, FoxIcon } from './NavigationIcons'
+import { navigationRef } from './navigationRef'
 
 const Tab = createBottomTabNavigator()
-const navigationRef = createNavigationContainerRef<any>()
 
+const TAB_LABEL_FONT_SIZE = 11
 
-export const appNavigator = {
-  toTrails: () => navigationRef.current?.navigate('Trails'),
-  toFindings: () => navigationRef.current?.navigate('Feed'),
-  toAbout: () => navigationRef.current?.navigate('About'),
-  toAccount: () => navigationRef.current?.navigate('Account'),
+export type RootParamList = {
+  Trails: undefined
+  Discoveries: { discoveryId?: string }
+  Map: undefined
+  Socials: undefined
+  Dev: undefined
 }
 
+/**
+ * Main navigation component with bottom tab navigator.
+ * Handles routing between main app screens and clears overlays on navigation.
+ */
 export function Navigation() {
-  const { colors, constants } = useThemeStore()
+  const { styles, theme } = useTheme(createStyles)
   const { t } = useLocalizationStore()
-  const clearAll = useOverlayStore((s) => s.clearAll)
+  const clearAll = useOverlayStore(s => s.clearAll)
+  const insets = useSafeAreaInsets()
+
+  const handleStateChange = () => {
+    clearAll()
+  }
+
+  const tabBarStyle = {
+    ...styles.tabBar,
+    height: theme.dimensions.NAV_HEIGHT + insets.bottom,
+    paddingBottom: insets.bottom,
+  }
 
   return (
-    <NavigationContainer ref={navigationRef} onStateChange={() => {
-      // Clear all overlays when navigating to a new screen
-      clearAll()
-    }}>
+    <NavigationContainer ref={navigationRef} onStateChange={handleStateChange}>
       <Tab.Navigator
         id={undefined}
+        initialRouteName='Map'
         screenOptions={{
-          tabBarStyle: {
-            height: constants.NAV_HEIGHT,
-            backgroundColor: colors.background,
-            elevation: 0,
-            shadowOpacity: 0,
-            borderColor: colors.divider,
-          },
-          tabBarActiveTintColor: colors.primary,
-          tabBarInactiveTintColor: colors.disabled,
+          tabBarStyle,
+          tabBarActiveTintColor: theme.colors.primary,
+          tabBarInactiveTintColor: theme.colors.disabled,
           tabBarShowLabel: true,
           tabBarLabelPosition: 'below-icon',
-          tabBarLabelStyle: {
-            fontSize: 11,
-            fontWeight: '500',
-          },
+          tabBarLabelStyle: styles.tabBarLabel,
         }}>
         <Tab.Screen
           name='Trails'
@@ -73,39 +81,43 @@ export function Navigation() {
           name='Map'
           component={MapScreen}
           options={{
-            tabBarIcon: ({ color, size }) => <TreeIcon color={color} />,
+            tabBarIcon: ({ color, size }) => <Icon name='compass' color={color} size={size} />,
             headerShown: false,
+            title: t.navigation.map,
           }}
         />
         <Tab.Screen
-          name='Account'
-          component={AccountScreen}
+          name='Socials'
+          component={CommunityScreen}
           options={{
-            tabBarIcon: ({ color, size }) => <Icon name='account-circle' color={color} size={size} />,
+            tabBarIcon: ({ color, size }) => <Icon name='people' color={color} size={size} />,
             headerShown: false,
-            title: t.navigation.account,
+            title: t.navigation.socials,
           }}
         />
-        {/* <Tab.Screen
+        <Tab.Screen
           name='About'
           component={AboutScreen}
           options={{
-            tabBarIcon: ({ color, size }) => <FoxIcon color={color} />,
+            tabBarIcon: ({ color, size }) => <FoxIcon color={color} size={size} />,
             headerShown: false,
             title: t.navigation.about,
           }}
-        /> */}
-        {__DEV__ && (
-          <Tab.Screen
-            name='Dev'
-            component={DevScreen}
-            options={{
-              tabBarIcon: ({ color, size }) => <Icon name='device-hub' color={color} />,
-              headerShown: false,
-            }}
-          />
-        )}
+        />
       </Tab.Navigator>
     </NavigationContainer>
   )
 }
+
+const createStyles = (theme: Theme) => StyleSheet.create({
+  tabBar: {
+    backgroundColor: theme.colors.background,
+    elevation: 0,
+    shadowOpacity: 0,
+    borderColor: theme.colors.divider,
+  },
+  tabBarLabel: {
+    fontSize: TAB_LABEL_FONT_SIZE,
+    fontWeight: '500',
+  },
+})

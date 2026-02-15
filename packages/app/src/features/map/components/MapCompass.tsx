@@ -27,9 +27,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   compassBackground: {
+    borderBottomWidth: 2,
+    backgroundColor: 'black',
     paddingVertical: 8,
     gap: 5,
-    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -1,5 +1,6 @@
 import { getAppContext } from '@app/appContext'
 import { getSession } from '@app/features/account/stores/accountStore'
+import { logger } from '@app/shared/utils/logger'
 import { getApps, initializeApp } from '@react-native-firebase/app'
 import { AuthorizationStatus, getMessaging } from '@react-native-firebase/messaging'
 import { FirebaseConfig } from '@shared/contracts'
@@ -13,7 +14,7 @@ async function getFirebaseConfig(): Promise<FirebaseConfig | null> {
   try {
     const session = getSession()
     if (!session?.accountId) {
-      console.error('No account session available for Firebase config')
+      logger.error('No account session available for Firebase config')
       return null
     }
 
@@ -24,11 +25,11 @@ async function getFirebaseConfig(): Promise<FirebaseConfig | null> {
       firebaseConfig = result.data
       return firebaseConfig
     } else {
-      console.error('Failed to fetch Firebase config:', result.error)
+      logger.error('Failed to fetch Firebase config:', result.error)
       return null
     }
   } catch (error) {
-    console.error('Error fetching Firebase config:', error)
+    logger.error('Error fetching Firebase config:', error)
     return null
   }
 }
@@ -40,7 +41,7 @@ export async function getToken() {
     const token = await messagingInstance.getToken()
     return token
   } catch (error) {
-    console.error('Failed to get FCM token:', error)
+    logger.error('Failed to get FCM token:', error)
     return undefined
   }
 }
@@ -54,7 +55,7 @@ export async function registerForPushNotificationsAsync(): Promise<string | unde
     // Get Firebase configuration from API
     const config = await getFirebaseConfig()
     if (!config) {
-      console.error('Cannot initialize Firebase: No configuration available')
+      logger.error('Cannot initialize Firebase: No configuration available')
       return undefined
     }
 
@@ -71,7 +72,7 @@ export async function registerForPushNotificationsAsync(): Promise<string | unde
 
     return await messagingInstance.getToken()
   } catch (error) {
-    console.error('Failed to register for push notifications:', error)
+    logger.error('Failed to register for push notifications:', error)
     return
   }
 }

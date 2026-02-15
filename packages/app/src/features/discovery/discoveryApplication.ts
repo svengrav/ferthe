@@ -1,12 +1,15 @@
 import { getSensorDevice, SensorApplication } from '@app/features/sensor'
 import { getTrailData } from '@app/features/trail'
-import { AccountContext, Discovery, DiscoveryApplicationContract, Result } from '@shared/contracts'
+import { logger } from '@app/shared/utils/logger'
+import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryStats, ReactionSummary, Result } from '@shared/contracts'
 import { Unsubscribe } from '@shared/events/eventHandler'
 import { GeoLocation, geoUtils } from '@shared/geo'
 import { getTrails } from '../trail/stores/trailStore'
 import { emitDiscoveryTrailUpdated, emitNewDiscoveries, onDiscoveryTrailUpdated, onNewDiscoveries } from './events/discoveryEvents'
 import { discoveryService } from './logic/discoveryService'
 import { DiscoveryCardState } from './logic/types'
+import { getDiscoveryContentActions } from './stores/discoveryContentStore'
+import { getDiscoveryReactionActions } from './stores/discoveryReactionStore'
 import { getDiscoveryActions, getDiscoveryData } from './stores/discoveryStore'
 import { getDiscoveryTrailActions, getDiscoveryTrailData, getDiscoveryTrailId } from './stores/discoveryTrailStore'
 
@@ -23,6 +26,16 @@ export interface DiscoveryApplication {
   onDiscoveryTrailUpdate: (handler: (state: any) => void) => Unsubscribe
   onNewDiscoveries: (handler: (discoveries: DiscoveryCardState[]) => void) => Unsubscribe
   getDiscoveryCards: () => DiscoveryCardState[]
+  // Stats method
+  getDiscoveryStats: (discoveryId: string) => Promise<Result<DiscoveryStats>>
+  // Content methods
+  upsertDiscoveryContent: (discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
+  deleteDiscoveryContent: (discoveryId: string) => Promise<Result<void>>
+  getDiscoveryContent: (discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
+  // Reaction methods
+  reactToDiscovery: (discoveryId: string, reaction: 'like' | 'dislike') => Promise<Result<void>>
+  removeReaction: (discoveryId: string) => Promise<Result<void>>
+  getReactionSummary: (discoveryId: string) => Promise<Result<ReactionSummary>>
 }
 
 type DiscoveryApplicationOptions = {
@@ -37,7 +50,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   const { setDiscoveryTrail, setStatus, resetScannedClues } = getDiscoveryTrailActions()
 
   const thresholdState = {
-    distance: 10,
+    distance: 5,  // Check every 5m for smoother snap updates
     latestLocation: {
       lat: 0,
       lon: 0,
@@ -120,9 +133,9 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     // Update profile with new lastActiveTrailId
     try {
       await updateDiscoveryProfile(accountSession.data, { lastActiveTrailId: id })
-      console.log(`Updated profile with lastActiveTrailId: ${id}`)
+      logger.log(`Updated profile with lastActiveTrailId: ${id}`)
     } catch (error) {
-      console.error('Error updating discovery profile:', error)
+      logger.error('Error updating discovery profile:', error)
     }
 
     const result = await getDiscoveryTrail(accountSession.data, id, device.location)
@@ -142,21 +155,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       status: 'ready' as const,
     }
     setDiscoveryTrail(discoveryTrail)
+
     emitDiscoveryTrailUpdated(discoveryTrail)
-  }
-
-  const requestDiscoverySpots = async (accountSession: AccountContext, trailId: string) => {
-    const { setSpots } = getDiscoveryActions()
-    if (!accountSession || !trailId) throw new Error('Account session or Trail ID not provided!')
-    try {
-      const result = await getDiscoveredSpots(accountSession, trailId)
-      if (!result.data) return
-
-      setSpots(result.data)
-      console.log(`Discovery spots for trail ${trailId} requested and set.`)
-    } catch (error) {
-      console.error('Error retrieving discovery spots:', error)
-    }
   }
 
   const loadDiscoveryTrailFromProfile = async (accountSession: AccountContext) => {
@@ -165,11 +165,11 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     if (profileResult.data?.lastActiveTrailId) {
       // Use trail from profile
       await setActiveTrail(profileResult.data.lastActiveTrailId)
-      console.log(`Discovery state requested and set active trail from profile: ${profileResult.data.lastActiveTrailId}`)
+      logger.log(`Discovery state requested and set active trail from profile: ${profileResult.data.lastActiveTrailId}`)
     } else {
       // No trail in profile, use default
       await setDefaultTrail()
-      console.log('Discovery state requested and default trail set.')
+      logger.log('Discovery state requested and default trail set.')
     }
   }
 
@@ -180,11 +180,17 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     const { setDiscoveries, setSpots } = getDiscoveryActions()
 
     const promises = [
-      getDiscoveries(accountSession.data).then(discoveries => discoveries.data && setDiscoveries(discoveries.data)),
-      getDiscoveredSpots(accountSession.data).then(spots => spots.data && setSpots(spots.data)),
+      getDiscoveries(accountSession.data).then(discoveries => {
+        logger.log('Fetched discoveries:', discoveries.data?.length)
+        discoveries.data && setDiscoveries(discoveries.data)
+      }),
+      getDiscoveredSpots(accountSession.data).then(spots => {
+        logger.log('Fetched spots:', spots.data?.length)
+        spots.data && setSpots(spots.data)
+      }),
     ]
 
-    await Promise.all(promises).catch(error => console.error('Error retrieving discovery data:', error))
+    await Promise.all(promises).catch(error => logger.error('Error retrieving discovery data:', error))
 
     // Load profile and set active trail from profile or use default
     try {
@@ -193,14 +199,14 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       if (profileResult.data?.lastActiveTrailId) {
         // Use trail from profile
         await setActiveTrail(profileResult.data.lastActiveTrailId)
-        console.log(`Discovery state requested and set active trail from profile: ${profileResult.data.lastActiveTrailId}`)
+        logger.log(`Discovery state requested and set active trail from profile: ${profileResult.data.lastActiveTrailId}`)
       } else {
         // No trail in profile, use default
         await setDefaultTrail()
-        console.log('Discovery state requested and default trail set.')
+        logger.log('Discovery state requested and default trail set.')
       }
     } catch (error) {
-      console.error('Error loading discovery profile, falling back to default trail:', error)
+      logger.error('Error loading discovery profile, falling back to default trail:', error)
       await setDefaultTrail()
     }
 
@@ -211,35 +217,14 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     return discoveryService.createDiscoveryCards(getDiscoveryData().discoveries, getDiscoveryData().spots)
   }
 
-  const processLocationUpdate = async (position: { location: GeoLocation; heading: number }) => {
-    const accountSession = await getSession()
-    if (!accountSession.data) throw new Error('Account session not found!')
-
-    const { setDiscoveries } = getDiscoveryActions()
-    const { setSnap } = getDiscoveryTrailActions()
-    const trailId = getDiscoveryTrailId()
+  const handleNewDiscoveries = async (
+    newDiscoveries: Discovery[],
+    trailId: string,
+    accountContext: AccountContext,
+    snap?: { distance: number; intensity: number }
+  ) => {
+    const { setDiscoveries, setSpots } = getDiscoveryActions()
     const { discoveries } = getDiscoveryData()
-    if (!trailId) {
-      console.warn('No active discovery trail set, skipping location processing.')
-      await loadDiscoveryTrailFromProfile(accountSession.data)
-      return
-    }
-
-    if (geoUtils.calculateDistance(thresholdState.latestLocation, position.location) < thresholdState.distance) return
-
-    // Create LocationWithDirection from position
-    const locationWithDirection = {
-      location: position.location,
-      direction: position.heading,
-    }
-
-    const locationResult = await processLocation(accountSession.data, locationWithDirection, trailId)
-    if (!locationResult.data) return
-
-    locationResult.data.snap && setSnap(locationResult.data.snap)
-
-    const newDiscoveries = locationResult.data.discoveries
-    if (newDiscoveries.length < 1) return
 
     setDiscoveries([...discoveries, ...newDiscoveries])
 
@@ -253,18 +238,147 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       ...currentTrailData,
       trail: currentTrailData.trail,
       discoveries: [...currentTrailData.discoveries, ...newDiscoveries],
-      snap: locationResult.data.snap,
+      snap: snap,
       trailId: currentTrailData.trailId,
       scannedClues: filteredClues,
       previewClues: filteredPreviewClues,
+      lastDiscovery: newDiscoveries[newDiscoveries.length - 1],
       updatedAt: new Date(),
     })
 
-    setActiveTrail(trailId)
+    await setActiveTrail(trailId)
 
-    await requestDiscoverySpots(accountSession.data, trailId)
-    getDiscoveryCards()
+    const spotsResult = await getDiscoveredSpots(accountContext)
+    if (spotsResult.data) {
+      setSpots(spotsResult.data)
+    }
+
     emitNewDiscoveries(discoveryService.createDiscoveryCards(newDiscoveries, getDiscoveryData().spots))
+  }
+
+  const processLocationUpdate = async (position: { location: GeoLocation; heading: number }) => {
+    const accountSession = await getSession()
+    if (!accountSession.data) throw new Error('Account session not found!')
+
+    const { setSnap } = getDiscoveryTrailActions()
+    const { status } = getDiscoveryTrailData()
+    const trailId = getDiscoveryTrailId()
+
+    if (status === 'loading' || !trailId) {
+      logger.log('Processing skipped due to loading status or missing trail ID')
+      return
+    }
+
+    const distance = geoUtils.calculateDistance(thresholdState.latestLocation, position.location)
+    if (distance < thresholdState.distance) {
+      return
+    }
+
+    // Update threshold location
+    thresholdState.latestLocation = position.location
+
+    const locationWithDirection = {
+      location: position.location,
+      direction: position.heading,
+    }
+
+    const locationResult = await processLocation(accountSession.data, locationWithDirection, trailId)
+    if (!locationResult.data) return
+
+    // Update snap from backend
+    locationResult.data.snap && setSnap(locationResult.data.snap)
+
+    const newDiscoveries = locationResult.data.discoveries
+    if (newDiscoveries.length > 0) {
+      await handleNewDiscoveries(newDiscoveries, trailId, accountSession.data, locationResult.data.snap)
+    }
+  }
+
+  // Content methods
+  const upsertDiscoveryContent = async (discoveryId: string, content: { imageUrl?: string; comment?: string }): Promise<Result<DiscoveryContent>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined as any }
+
+    const result = await discoveryAPI.upsertDiscoveryContent(session.data, discoveryId, content)
+    if (result.data) {
+      getDiscoveryContentActions().setContent(discoveryId, result.data)
+    }
+    return result
+  }
+
+  const getDiscoveryContent = async (discoveryId: string): Promise<Result<DiscoveryContent | undefined>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined }
+
+    const result = await discoveryAPI.getDiscoveryContent(session.data, discoveryId)
+    if (result.data) {
+      getDiscoveryContentActions().setContent(discoveryId, result.data)
+    }
+    return result
+  }
+
+  const deleteDiscoveryContent = async (discoveryId: string): Promise<Result<void>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined }
+
+    const result = await discoveryAPI.deleteDiscoveryContent(session.data, discoveryId)
+    if (result.success) {
+      getDiscoveryContentActions().clearContent(discoveryId)
+    }
+    return result
+  }
+
+  // Reaction methods
+  const reactToDiscovery = async (discoveryId: string, reaction: 'like' | 'dislike'): Promise<Result<void>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined }
+
+    const result = await discoveryAPI.reactToDiscovery(session.data, discoveryId, reaction)
+    if (result.success) {
+      // Refresh reaction summary
+      const summaryResult = await discoveryAPI.getReactionSummary(session.data, discoveryId)
+      if (summaryResult.data) {
+        getDiscoveryReactionActions().setReactionSummary(discoveryId, summaryResult.data)
+      }
+    }
+    return { success: result.success, data: undefined }
+  }
+
+  const removeReaction = async (discoveryId: string): Promise<Result<void>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined }
+
+    const result = await discoveryAPI.removeReaction(session.data, discoveryId)
+    if (result.success) {
+      const summaryResult = await discoveryAPI.getReactionSummary(session.data, discoveryId)
+      if (summaryResult.data) {
+        getDiscoveryReactionActions().setReactionSummary(discoveryId, summaryResult.data)
+      }
+    }
+    return result
+  }
+
+  const getReactionSummary = async (discoveryId: string): Promise<Result<ReactionSummary>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, error: undefined as any }
+
+    const result = await discoveryAPI.getReactionSummary(session.data, discoveryId)
+    if (result.data) {
+      getDiscoveryReactionActions().setReactionSummary(discoveryId, result.data)
+    }
+    return result
+  }
+
+  const getDiscoveryStats = async (discoveryId: string): Promise<Result<DiscoveryStats>> => {
+    const session = await getSession()
+    if (!session.data) return {
+      success: false, error: {
+        message: 'Account session not found',
+        code: ''
+      }
+    }
+
+    return await discoveryAPI.getDiscoveryStats(session.data, discoveryId)
   }
 
   return {
@@ -273,5 +387,12 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     requestDiscoveryState,
     onDiscoveryTrailUpdate: onDiscoveryTrailUpdated,
     onNewDiscoveries,
+    getDiscoveryStats,
+    upsertDiscoveryContent,
+    deleteDiscoveryContent,
+    getDiscoveryContent,
+    reactToDiscovery,
+    removeReaction,
+    getReactionSummary,
   }
 }

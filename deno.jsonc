@@ -1,0 +1,67 @@
+{
+  "tasks": {
+    "start:core": "deno run -A --watch=packages/core/ packages/core/main.ts",    
+    "start:web": "deno run -A --watch=static/,routes/,packages/web/ dev.ts",
+    "start:expo": "cd packages/app/ && npx expo start --dev-client",
+    "build:web": "deno run -A build.ts",
+    "lint": "deno lint",
+    "test": "deno test --allow-net --allow-env --allow-read",
+    "api:export": "deno run -A packages/test/src/sandbox/export.ts"
+  },
+  "workspace": [
+    "packages/web",
+    "packages/core"
+  ],
+  "exclude": [
+    "packages/app/**",
+    "packages/test/**",
+    "scripts/**",
+    "docs/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.expo/**"
+  ],
+  "nodeModulesDir": "auto",
+  "imports": {
+    "@shared/": "./packages/shared/",
+    "@core/": "./packages/core/",
+    "@azure/storage-blob": "npm:@azure/storage-blob@^12.29.1",
+    "@azure/cosmos": "npm:@azure/cosmos@^4",
+    "@azure/identity": "npm:@azure/identity@^4",
+    "@azure/keyvault-secrets": "npm:@azure/keyvault-secrets@^4",
+    "@std/path": "jsr:@std/path@^1.1.4",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225",
+    "dotenv": "npm:dotenv@^16",
+    "twilio": "npm:twilio@^5.11.2",
+    "oak": "jsr:@oak/oak@^17",
+    "path": "npm:path@^0.12.7",
+    "fs": "node:fs/promises",
+    "zod": "npm:zod@^4.3.6",
+    "jimp": "npm:jimp@0.22.12"
+  },
+  "compilerOptions": {
+    "lib": [
+      "deno.ns",
+      "deno.unstable",
+      "esnext",
+      "dom"
+    ],
+    "strict": true,
+    "noImplicitAny": false,
+    "module": "esnext",
+    "checkJs": false,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "types": [
+      "vite/client"
+    ]
+  },
+  "lint": {
+    "rules": {
+      "exclude": [
+        "no-sloppy-imports",
+        "no-explicit-any"
+      ]
+    }
+  }
+}

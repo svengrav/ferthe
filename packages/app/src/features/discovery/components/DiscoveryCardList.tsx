@@ -1,11 +1,14 @@
 import { Image, Text } from '@app/shared/components'
-import { setOverlay } from '@app/shared/overlay/useOverlayStore'
+import { CARD_ASPECT_RATIO, CARD_BORDER_RADIUS } from '@app/shared/hooks/useCardDimensions'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useRef, useState } from 'react'
 import { FlatList, Pressable, StyleSheet, View } from 'react-native'
 import { DiscoveryCardState } from '../logic/types'
-import DiscoveryCardDetails from './DiscoveryCardDetails'
+
+// Layout constants for consistent spacing
+const GAP = 12
+const PADDING = 8
 
 function useDiscoveryCardList() {
   const theme = useThemeStore()
@@ -16,8 +19,10 @@ function useDiscoveryCardList() {
 
   useEffect(() => {
     containerRef.current?.measure((x, y, width) => {
-      const cardWidth = width / numberOfColumns - 10
-      const cardHeight = (width / numberOfColumns - 10) * 1.5
+      // Calculate card width: (containerWidth - padding*2 - gap) / columns
+      const availableWidth = width - PADDING * 2 - GAP
+      const cardWidth = availableWidth / numberOfColumns
+      const cardHeight = cardWidth * CARD_ASPECT_RATIO
       setCardSize({ width: cardWidth, height: cardHeight })
     })
   }, [containerRef.current])
@@ -30,26 +35,31 @@ function useDiscoveryCardList() {
   }
 }
 
-export function DiscoveryImageCardList({
+export function DiscoveryCardList({
+  onTap,
   cards,
   refreshing,
   onRefresh,
 }: {
+  onTap?: (card: DiscoveryCardState) => void
   cards: DiscoveryCardState[]
   refreshing?: boolean
   onRefresh?: () => void
 }) {
   const { numberOfColumns, cardSize, styles, containerRef } = useDiscoveryCardList()
+  const flatListRef = useRef<FlatList>(null)
 
   return (
     <View ref={containerRef} style={{ flex: 1 }}>
       <FlatList
+        ref={flatListRef}
         data={cards}
         renderItem={(list) => (
           <DiscoveryImageCard
             width={cardSize.width}
             height={cardSize.height}
             card={list.item}
+            onTap={onTap}
           />
         )}
         keyExtractor={(_, index) => index.toString()}
@@ -59,19 +69,18 @@ export function DiscoveryImageCardList({
         scrollEnabled={true}
         columnWrapperStyle={styles.rowStyle}
         contentContainerStyle={styles.listContainer}
+        ItemSeparatorComponent={() => <View style={{ height: GAP }} />}
       />
     </View>
   )
 }
 
-function DiscoveryImageCard({ width, height, card }: { width: number; height: number; card: DiscoveryCardState }) {
+function DiscoveryImageCard({ width, height, card, onTap }: { width: number; height: number; card: DiscoveryCardState; onTap?: (card: DiscoveryCardState) => void }) {
   const theme = useThemeStore()
   const styles = createStyles(theme)
   return (<>
 
-    <Pressable onPress={() => {
-      const close = setOverlay(<DiscoveryCardDetails card={card} onClose={() => close()} />)
-    }}>
+    <Pressable onPress={() => onTap && onTap(card)}>
       <View style={[styles.placeholder, { width, height }]}>
         <Text style={styles.label}>{card.title}</Text>
         <LinearGradient
@@ -86,12 +95,11 @@ function DiscoveryImageCard({ width, height, card }: { width: number; height: nu
           colors={['transparent', 'rgba(0, 0, 0, 0.322)']}
         />
         <Image
-          source={{ uri: card.image.url }}
+          source={card.image}
+          width={width}
+          height={height}
           style={{
-            width: width,
-            height: height,
-            borderRadius: 2,
-            backgroundColor: '#000'
+            borderRadius: CARD_BORDER_RADIUS,
           }}
           resizeMode="cover"
         />
@@ -103,6 +111,20 @@ function DiscoveryImageCard({ width, height, card }: { width: number; height: nu
 
 const createStyles = (theme: Theme) => {
   return StyleSheet.create({
+    // FlatList container with consistent padding
+    listContainer: {
+    },
+    // Row wrapper for horizontal gap between cards
+    rowStyle: {
+      gap: GAP,
+    },
+    // Card placeholder with rounded corners
+    placeholder: {
+      overflow: 'hidden',
+      backgroundColor: theme.colors.surface,
+      borderRadius: CARD_BORDER_RADIUS,
+    },
+    // Card title overlay at bottom
     label: {
       fontSize: 18,
       fontWeight: 'semibold',
@@ -116,17 +138,7 @@ const createStyles = (theme: Theme) => {
       position: 'absolute',
       bottom: 5,
     },
-    listContainer: {},
-    rowStyle: {
-      justifyContent: 'space-between',
-      paddingVertical: 8,
-    },
-    cardContainer: {},
-    placeholder: {
-      overflow: 'hidden',
-      backgroundColor: theme.colors.surface,
-      borderRadius: 10,
-    },
+    // Detail view styles
     top: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -137,20 +149,15 @@ const createStyles = (theme: Theme) => {
     },
     slug: {
       color: theme.deriveColor(theme.colors.onBackground),
-      ...theme.text.size.xs,
     },
     date: {
       color: theme.deriveColor(theme.colors.onBackground),
-      ...theme.text.size.xs,
     },
     title: {
-      ...theme.text.size.lg,
-      fontFamily: theme.text.primary.bold,
       color: theme.colors.onBackground,
       paddingVertical: 12,
     },
     content: {
-      ...theme.text.size.md,
       color: theme.colors.onSurface,
     },
     bottom: {
