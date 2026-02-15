@@ -11,12 +11,12 @@ import { Result } from './results.ts'
  *  - trail-viewport: Viewport background (static, does not move in Canvas mode)
  *  - trail-overview: Overview mode background (full trail boundary in Overview mode)
  */
-export type ImageType = 
-  | 'discovery' 
-  | 'spot' 
-  | 'trail' 
+export type ImageType =
+  | 'discovery'
+  | 'spot'
+  | 'trail'
   | 'trail-preview'
-  | 'trail-surface' 
+  | 'trail-surface'
   | 'trail-viewport'
   | 'trail-overview'
   | 'account-avatar'
