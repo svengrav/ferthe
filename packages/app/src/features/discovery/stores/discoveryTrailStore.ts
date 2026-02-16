@@ -1,4 +1,4 @@
-import { Status, StoreActions, StoreData } from '@app/shared/index'
+import { Status, StoreActions, StoreState } from '@app/shared/index'
 import { Clue, Discovery, DiscoverySpot, Trail } from '@shared/contracts'
 import { create } from 'zustand'
 
@@ -10,11 +10,11 @@ interface DiscoverySnap {
 interface DiscoveryTrailActions extends StoreActions {
   setScannedClues: (clues: Clue[]) => void
   resetScannedClues: () => void
-  setDiscoveryTrail: (discoveryTrail: Partial<DiscoveryTrailData>) => void
+  setDiscoveryTrail: (discoveryTrail: Partial<DiscoveryTrailState>) => void
   setSnap: (snap: DiscoverySnap) => void
 }
 
-interface DiscoveryTrailData extends StoreData {
+interface DiscoveryTrailState extends StoreState {
   status: Status
   trailId: string | undefined
   trail: Trail | undefined
@@ -26,7 +26,7 @@ interface DiscoveryTrailData extends StoreData {
   lastDiscovery?: Discovery
 }
 
-export const discoveryTrailStore = create<DiscoveryTrailData & DiscoveryTrailActions>(set => ({
+export const discoveryTrailStore = create<DiscoveryTrailState & DiscoveryTrailActions>(set => ({
   // Metadata
   updatedAt: new Date(0),
   status: 'uninitialized',
@@ -58,7 +58,7 @@ export const useDiscoveryPreviewClues = () => discoveryTrailStore(state => state
 export const useDiscoveryScannedClues = () => discoveryTrailStore(state => state.scannedClues)
 
 export const getDiscoveryTrailId = () => discoveryTrailStore.getState().trailId
-export const getDiscoveryTrailData = () => discoveryTrailStore.getState() as DiscoveryTrailData
+export const getDiscoveryTrailData = () => discoveryTrailStore.getState() as DiscoveryTrailState
 export const getDiscoveryTrailActions = () => ({
   setScannedClues: discoveryTrailStore.getState().setScannedClues,
   resetScannedClues: discoveryTrailStore.getState().resetScannedClues,

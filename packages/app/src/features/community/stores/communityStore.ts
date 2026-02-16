@@ -1,8 +1,8 @@
-import { Status, StoreActions, StoreData } from '@app/shared/index'
+import { Status, StoreActions, StoreState } from '@app/shared/index'
 import { Community, CommunityMember } from '@shared/contracts'
 import { create } from 'zustand'
 
-interface CommunityData extends StoreData {
+interface CommunityState extends StoreState {
   communities: Community[]
   members: CommunityMember[]
   activeCommunityId?: string
@@ -17,7 +17,7 @@ interface CommunityActions extends StoreActions {
   removeCommunity: (communityId: string) => void
 }
 
-export const communityStore = create<CommunityData & CommunityActions>(set => ({
+export const communityStore = create<CommunityState & CommunityActions>(set => ({
   // Metadata
   updatedAt: new Date(0),
   status: 'uninitialized',

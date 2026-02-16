@@ -1,4 +1,4 @@
-import { Status, StoreActions, StoreData } from '@app/shared/index'
+import { Status, StoreActions, StoreState } from '@app/shared/index'
 import { create, StateCreator } from 'zustand'
 
 export interface ReactionSummary {
@@ -12,7 +12,7 @@ interface ReactionStoreActions extends StoreActions {
   clearReaction: (entityId: string) => void
 }
 
-interface ReactionStoreData extends StoreData {
+interface ReactionStoreState extends StoreState {
   status: Status
   reactions: Record<string, ReactionSummary>
 }
@@ -26,7 +26,7 @@ interface ReactionStoreData extends StoreData {
  * const useSportReactions = createReactionStore()
  */
 export const createReactionStore = () => {
-  const storeCreator: StateCreator<ReactionStoreData & ReactionStoreActions> = set => ({
+  const storeCreator: StateCreator<ReactionStoreState & ReactionStoreActions> = set => ({
     // Metadata
     updatedAt: new Date(0),
     status: 'uninitialized',
@@ -46,7 +46,7 @@ export const createReactionStore = () => {
       }),
   })
 
-  const store = create<ReactionStoreData & ReactionStoreActions>(storeCreator)
+  const store = create<ReactionStoreState & ReactionStoreActions>(storeCreator)
 
   return {
     // Store instance

@@ -1,4 +1,4 @@
-import { Status, StoreActions, StoreData } from '@app/shared/index'
+import { Status, StoreActions, StoreState } from '@app/shared/index'
 import { DiscoveryContent } from '@shared/contracts'
 import { create } from 'zustand'
 
@@ -7,12 +7,12 @@ interface DiscoveryContentActions extends StoreActions {
   clearContent: (discoveryId: string) => void
 }
 
-interface DiscoveryContentData extends StoreData {
+interface DiscoveryContentState extends StoreState {
   status: Status
   contents: Record<string, DiscoveryContent>
 }
 
-export const discoveryContentStore = create<DiscoveryContentData & DiscoveryContentActions>(set => ({
+export const discoveryContentStore = create<DiscoveryContentState & DiscoveryContentActions>(set => ({
   // Metadata
   updatedAt: new Date(0),
   status: 'uninitialized',

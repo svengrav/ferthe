@@ -1,6 +1,6 @@
 export type Status = 'loading' | 'ready' | 'uninitialized' | 'error'
 
-export interface StoreData {
+export interface StoreState {
   updatedAt?: Date
   error?: string
 }

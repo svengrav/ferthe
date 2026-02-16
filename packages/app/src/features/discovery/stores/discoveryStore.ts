@@ -1,4 +1,4 @@
-import { Status, StoreActions, StoreData } from '@app/shared/index'
+import { Status, StoreActions, StoreState } from '@app/shared/index'
 import { Discovery, DiscoverySpot, DiscoveryStats } from '@shared/contracts'
 import { create } from 'zustand'
 import { DiscoveryEventState } from '../logic/types'
@@ -10,7 +10,7 @@ interface DiscoveryActions extends StoreActions {
   setDiscoveryEvent: (discovery: DiscoveryEventState) => void
 }
 
-interface DiscoveryData extends StoreData {
+interface DiscoveryState extends StoreState {
   status: Status
   discoveries: Discovery[]
   spots: DiscoverySpot[]
@@ -18,7 +18,7 @@ interface DiscoveryData extends StoreData {
   discoveryEvent?: DiscoveryEventState
 }
 
-export const discoveryStore = create<DiscoveryData & DiscoveryActions>(set => ({
+export const discoveryStore = create<DiscoveryState & DiscoveryActions>(set => ({
   // Metadata
   updatedAt: new Date(0),
   status: 'uninitialized',
