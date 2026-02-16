@@ -495,7 +495,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
       // Validate rating
       if (rating < 1 || rating > 5) {
-        return createErrorResult('INVALID_RATING', { originalError: 'Rating must be between 1 and 5' })
+        return createErrorResult(ERROR_CODES.INVALID_RATING.code)
       }
 
       // Remove existing reaction if any

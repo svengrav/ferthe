@@ -14,7 +14,59 @@
 - You can use a local account without any auth to access the app. It's stored locally then but you lose your data if you uninstall the app or switch devices. This is the default option to make it as easy as possible to get started.
 - You can sync your account with auth by phone. Phone no. is not saved, it's only used for authentication and then discarded. This allows you to keep your data when switching devices or uninstalling the app.
 
+
+## Spots
+
+**Definition:**
+- **Spot** = Location with discovery potential
+- **Discovery** = You finding a spot
+- A spot can be part of one or more trails
+
+**Properties**
+- Name, description, photos
+- Location (lat/lng)
+- Discovery radius (meters)
+- Clue radius (meters) 
+- Rarity (common, rare, epic, legendary)
+- Visibility (hidden, preview, visible)
+- If a spot is previewed it has a blurred image
+
+**Interactions**
+- You can report a spot if you think it's dangerous / illegitimate. Reported spots are hidden until reviewed by the team.
+- You can create a new spot and submit it for review. If approved, it becomes part of the trail and discoverable by others.
+
+**Types:**
+A spot is usually a point of interest, but can also be:
+- A segment (e.g. a climb or descent)
+- An area (e.g. a viewpoint)
+
+**Visibility Modes:**
+- **Hidden** (default): Not visible on the map until discovered
+- **Preview**: Shows a clue on the map that you must reach to reveal the spot
+- Visibility is set per spot, independent of the trail
+
+**Discovery Mechanics:**
+- Hidden spots can be scanned based on scan radius and your location
+- Once discovered, spots can be shared within the community
+- Discovered spots become visible on the map for others
+- Spots can have additional information: photos, descriptions, reviews
+
+**Time-Based Spots:**
+- Spots can be time-based, only discoverable during specific time windows
+- Use cases: events, seasonal spots
+
+**Future Notes:**
+- Clue offset: A clue is not right on the spot but reaching the clue reveals the true spot location (encourages exploration)
+- A spot can have a one time secret like a discount code
+- Probably Advisory: Spots should not be placed in private areas or places that could cause safety issues. Clear guidelines and moderation are needed to ensure responsible spot placement.
+- Maybe it's possible to destroy a spot if enough people don't like it (e.g. if it's in a dangerous location or if it's fake). This would require a reporting and review system.
+  
+
 ## Discovery
+
+- Discoveries are a subpart of Spots. They represent your personal finding of a spot.
+- A Discovery cant exist without a Spot, but a Spot can exist without a Discovery (e.g. if nobody found it yet or if you haven't found it yet).
+- Discovery always extends the Spot data with user-specific information like timestamp, photos, comments, and whether it's shared with the community or not.
 
 A Discovery is a unique finding of a user at a specific spot. It is private to you until you choose to share it with the community. Discoveries are the core of the app's social features, as they represent your achievements and contributions to the community.
 - You get a discovery when you find a spot for the first time
@@ -91,51 +143,6 @@ A Discovery is a unique finding of a user at a specific spot. It is private to y
 - Trail Preview shows 4-5 Spots as blurred preview images.
 - Trail Completed Animation when you discover the last spot of a trail.
   
-## Spots
-
-**Definition:**
-- **Spot** = Location with discovery potential
-- **Discovery** = You finding a spot
-- A spot can be part of one or more trails
-
-**Properties**
-- Name, description, photos
-- Location (lat/lng)
-- Discovery radius (meters)
-- Clue radius (meters) 
-- Rarity (common, rare, epic, legendary)
-- Visibility (hidden, preview, visible)
-- If a spot is previewed it has a blurred image
-
-**Interactions**
-- You can report a spot if you think it's dangerous / illegitimate. Reported spots are hidden until reviewed by the team.
-- You can create a new spot and submit it for review. If approved, it becomes part of the trail and discoverable by others.
-
-**Types:**
-A spot is usually a point of interest, but can also be:
-- A segment (e.g. a climb or descent)
-- An area (e.g. a viewpoint)
-
-**Visibility Modes:**
-- **Hidden** (default): Not visible on the map until discovered
-- **Preview**: Shows a clue on the map that you must reach to reveal the spot
-- Visibility is set per spot, independent of the trail
-
-**Discovery Mechanics:**
-- Hidden spots can be scanned based on scan radius and your location
-- Once discovered, spots can be shared within the community
-- Discovered spots become visible on the map for others
-- Spots can have additional information: photos, descriptions, reviews
-
-**Time-Based Spots:**
-- Spots can be time-based, only discoverable during specific time windows
-- Use cases: events, seasonal spots
-
-**Future Notes:**
-- Clue offset: A clue is not right on the spot but reaching the clue reveals the true spot location (encourages exploration)
-- A spot can have a one time secret like a discount code
-- Probably Advisory: Spots should not be placed in private areas or places that could cause safety issues. Clear guidelines and moderation are needed to ensure responsible spot placement.
-- Maybe it's possible to destroy a spot if enough people don't like it (e.g. if it's in a dangerous location or if it's fake). This would require a reporting and review system.
 
 ## Clue
 

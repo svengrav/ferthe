@@ -39,7 +39,6 @@ function DiscoveryCardPage(props: DiscoveryCardPageProps) {
       <PageTabs variant="chips" defaultTab="overview">
         <PageTab id="overview" label={locales.trails.overview}>
           <DiscoveryCardContent card={card} />
-
         </PageTab>
         <PageTab id="stats" label={locales.trails.stats.name}>
           <DiscoveryStats discoveryId={card.discoveryId} />

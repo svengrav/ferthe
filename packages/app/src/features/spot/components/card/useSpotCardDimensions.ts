@@ -3,27 +3,27 @@ import { useWindowDimensions } from 'react-native'
 /**
  * Standard aspect ratio for spot cards (portrait orientation)
  */
-export const SPOT_ASPECT_RATIO = 3 / 2
+const SPOT_ASPECT_RATIO = 3 / 2
 
 /**
  * Image aspect ratio within spot cards
  */
-export const SPOT_IMAGE_ASPECT_RATIO = 4 / 3
+const SPOT_IMAGE_ASPECT_RATIO = 4 / 3
 
 /**
  * Border radius for spot containers
  */
-export const SPOT_BORDER_RADIUS = 18
+const SPOT_BORDER_RADIUS = 18
 
 /**
  * Border radius for images within spot containers
  */
-export const SPOT_IMAGE_BORDER_RADIUS = 16
+const SPOT_IMAGE_BORDER_RADIUS = 16
 
 /**
  * Padding inside spot container frame
  */
-export const SPOT_PADDING = 8
+const SPOT_PADDING = 8
 
 export type SpotVariant = 'marker' | 'grid' | 'card' | 'responsive'
 
@@ -34,21 +34,11 @@ interface UseSpotDimensionsOptions {
   customHeight?: number
 }
 
-interface SpotDimensions {
-  width: number
-  height: number
-  imageWidth: number
-  imageHeight: number
-  borderRadius: number
-  imageBorderRadius: number
-  padding: number
-}
-
 /**
  * Hook to calculate consistent spot dimensions based on variant.
  * Ensures all spot components maintain the same aspect ratio.
  */
-export function useSpotDimensions(options: UseSpotDimensionsOptions = {}): SpotDimensions {
+export function useSpotCardDimensions(options: UseSpotDimensionsOptions = {}) {
   const { variant = 'responsive', withPadding = false, customWidth, customHeight } = options
   const { width: screenWidth } = useWindowDimensions()
 
@@ -88,5 +78,6 @@ export function useSpotDimensions(options: UseSpotDimensionsOptions = {}): SpotD
     borderRadius: SPOT_BORDER_RADIUS,
     imageBorderRadius: SPOT_IMAGE_BORDER_RADIUS,
     padding,
+    cardRatio: SPOT_ASPECT_RATIO
   }
 }

@@ -58,6 +58,7 @@ export const ERROR_CODES = {
   UPDATE_CONTENT_ERROR: { code: 'UPDATE_CONTENT_ERROR', message: 'Failed to update discovery content', httpStatus: 500 },
   SAVE_CONTENT_ERROR: { code: 'SAVE_CONTENT_ERROR', message: 'Failed to save discovery content', httpStatus: 500 },
   NOT_AUTHORIZED: { code: 'NOT_AUTHORIZED', message: 'User is not authorized for this action', httpStatus: 403 },
+  INVALID_RATING: { code: 'INVALID_RATING', message: 'Rating must be between 1 and 5', httpStatus: 400 },
   REACT_ERROR: { code: 'REACT_ERROR', message: 'Failed to react to discovery', httpStatus: 500 },
   SAVE_REACTION_ERROR: { code: 'SAVE_REACTION_ERROR', message: 'Failed to save reaction', httpStatus: 500 },
   REMOVE_REACTION_ERROR: { code: 'REMOVE_REACTION_ERROR', message: 'Failed to remove reaction', httpStatus: 500 },

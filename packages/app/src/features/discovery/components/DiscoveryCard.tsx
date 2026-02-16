@@ -1,58 +1,31 @@
-import { Image, Text } from '@app/shared/components'
-import { CARD_BORDER_RADIUS, useCardDimensions } from '@app/shared/hooks/useCardDimensions'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
-import { LinearGradient } from 'expo-linear-gradient'
+import { SpotBadge, SpotContainer, SpotGradientFrame, SpotImage, SpotTitle, useSpotCardDimensions } from '@app/features/spot/components'
 import { useEffect } from 'react'
-import { Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
 import { DiscoveryCardState as Card } from '../logic/types'
 
 const ANIMATION_DURATION = 400
 const SPRING_FRICTION = 6
-const CLOSE_BUTTON_TOP = 5
-const CLOSE_BUTTON_RIGHT = 5
 const GRADIENT_COLORS = ['#a341fffd', 'rgba(65, 73, 185, 0.767)'] as const
 
-// Z-Index hierarchy (from bottom to top)
-const Z_INDEX = {
-  CARD_BACKGROUND: 1,
-  CARD_IMAGE: 2,
-  IMAGE_OVERLAY: 3,
-  TITLE_OVERLAY: 4,
-  SCROLL_VIEW: 5,
-  CLOSE_BUTTON: 10,
-}
-
 /**
- * Hook to handle card animation logic including fade in, scale, and scroll animations
+ * Hook to handle card entrance animation
  */
-const useCardAnimations = (IMAGE_HEIGHT: number) => {
+const useCardAnimations = () => {
   const opacity = useSharedValue(0)
   const scale = useSharedValue(0.95)
-  const scrollY = useSharedValue(0)
 
   // Start entrance animation on mount
   useEffect(() => {
     opacity.value = withTiming(1, { duration: ANIMATION_DURATION })
     scale.value = withSpring(1, { damping: SPRING_FRICTION })
-  }, [])
+  }, [opacity, scale])
 
   const animatedCardStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
     transform: [{ scale: scale.value }],
   }))
 
-  // Scroll-based animations (not implemented here since no scrolling in this card)
-  const titleOpacity = useSharedValue(1)
-  const overlayOpacity = useSharedValue(0.2)
-
-  return {
-    animatedCardStyle,
-    scrollY,
-    titleOpacity,
-    overlayOpacity,
-  }
+  return { animatedCardStyle }
 }
 
 interface DiscoveryCardProps {
@@ -66,156 +39,38 @@ interface DiscoveryCardProps {
 
 /**
  * Discovery card component that displays a discovered spot with image, title, and description.
- * Features smooth animations and scroll-based parallax effects.
+ * Features smooth entrance animation.
  */
 function DiscoveryCard({ card, onTap, options }: DiscoveryCardProps) {
-  const { styles, theme } = useApp(useStyles)
   const { title, image, discoveredBy } = card
-  const { cardWidth, cardHeight, imageHeight } = useCardDimensions()
-  const { animatedCardStyle, titleOpacity } = useCardAnimations(imageHeight)
+  const { width, height } = useSpotCardDimensions({ variant: 'card' })
+  const { animatedCardStyle } = useCardAnimations()
   const { showTitle = true, showBorder = false } = options || {}
 
-  // Dynamic styles that depend on dimensions
-  const cardDynamicStyles = {
-    width: cardWidth,
-    height: cardHeight,
-  }
-
-  const imageDynamicStyles = {
-    width: cardWidth,
-    height: imageHeight,
-  }
-
-  const titleContainerDynamicStyles = {
-    width: cardWidth,
-    top: imageHeight - 70,
-  }
-
-  const titleAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: titleOpacity.value,
-  }))
-
-  if (!styles) return null
-
   return (
-    <Pressable onPress={onTap}>
-      <View style={[styles.card, cardDynamicStyles]} id='discovery-card' pointerEvents="box-none">
-        {/* Background image */}
-        <LinearGradient
-          style={{ position: 'absolute', top: 0, left: 0, width: cardWidth, height: imageHeight }}
-          colors={GRADIENT_COLORS}
-        />
-        <View style={{ padding: showBorder ? 6 : 0, flex: 1 }}>
-          <Image
-            source={image}
-            width={cardWidth}
-            height={imageHeight}
-            style={[styles.fixedImage, imageDynamicStyles]}
-            resizeMode='cover'
-          />
-        </View>
-
-        {/* Discovered By Badge (if community discovery) */}
-        {discoveredBy && (
-          <View style={styles.discoveredByBadge}>
-            <Text variant="body">by {discoveredBy}</Text>
-          </View>
+    <Animated.View style={animatedCardStyle}>
+      <SpotContainer
+        width={width}
+        height={height}
+        withShadow={false}
+        onPress={onTap}
+      >
+        {showBorder ? (
+          <SpotGradientFrame colors={GRADIENT_COLORS} padding={6}>
+            <SpotImage source={image} />
+            {showTitle && <SpotTitle title={title} position="bottom" />}
+            {discoveredBy && <SpotBadge text={`by ${discoveredBy}`} position="top-left" />}
+          </SpotGradientFrame>
+        ) : (
+          <>
+            <SpotImage source={image} />
+            {showTitle && <SpotTitle title={title} position="bottom" />}
+            {discoveredBy && <SpotBadge text={`by ${discoveredBy}`} position="top-left" />}
+          </>
         )}
-
-        {/* Fixed title overlay */}
-        <Animated.View
-          style={[
-            styles.fixedTitleContainer,
-            titleContainerDynamicStyles,
-            titleAnimatedStyle
-          ]}
-          pointerEvents='none'
-        >
-          {showTitle && <Text style={styles.fixedTitle}>{title}</Text>}
-        </Animated.View>
-      </View>
-    </Pressable>
+      </SpotContainer>
+    </Animated.View>
   )
 }
-
-const useStyles = createThemedStyles(theme => ({
-  overlay: {
-    position: 'absolute',
-    backgroundColor: theme.colors.background,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    overflow: 'hidden',
-    alignItems: 'center',
-    zIndex: 1,
-    flex: 1,
-  },
-  closeButtonContainer: {
-    position: 'absolute',
-    backgroundColor: theme.colors.background,
-    borderRadius: 20,
-    top: CLOSE_BUTTON_TOP,
-    right: CLOSE_BUTTON_RIGHT,
-    zIndex: Z_INDEX.CLOSE_BUTTON,
-  },
-  card: {
-    borderRadius: CARD_BORDER_RADIUS,
-    overflow: 'hidden',
-  },
-  fixedImage: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    borderTopLeftRadius: CARD_BORDER_RADIUS,
-    borderTopRightRadius: CARD_BORDER_RADIUS,
-    zIndex: Z_INDEX.CARD_IMAGE,
-  },
-  fixedTitleContainer: {
-    position: 'absolute',
-    zIndex: Z_INDEX.TITLE_OVERLAY,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  fixedTitle: {
-    fontSize: 28,
-    fontWeight: 'semibold',
-    color: 'white',
-    textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.7)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  scrollView: {
-    width: '100%',
-    flexGrow: 1,
-    flex: 1,
-    zIndex: Z_INDEX.SCROLL_VIEW,
-    backgroundColor: 'transparent',
-  },
-  scrollContent: {
-    width: '100%',
-    flexGrow: 1,
-    paddingTop: 16,
-  },
-  contentContainer: {
-    borderRadius: CARD_BORDER_RADIUS,
-    backgroundColor: theme.colors.surface,
-    width: '100%',
-    paddingHorizontal: 8,
-    flexGrow: 1,
-    minHeight: 400,
-  },
-  discoveredByBadge: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    backgroundColor: theme.colors.background,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    zIndex: Z_INDEX.TITLE_OVERLAY,
-  },
-}))
 
 export default DiscoveryCard

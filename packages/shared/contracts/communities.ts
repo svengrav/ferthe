@@ -65,8 +65,8 @@ export interface CommunityDiscoveryStats {
   discoveredBy: string // accountId
   rank: number // Which user number discovered this spot in the community
   totalDiscoverers: number // Total number of community members who discovered this
-  likes: number
-  dislikes: number
+  averageRating: number // Average rating (0-5, 0 if no ratings)
+  ratingCount: number // Total number of ratings
 }
 
 /**

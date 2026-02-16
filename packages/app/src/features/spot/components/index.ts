@@ -13,9 +13,11 @@ export { default as SpotContainer } from './card/SpotContainer.tsx'
 
 // Composed components
 export { default as SpotCard } from './card/SpotCard.tsx'
-export { default as SpotPreviewCard } from './card/SpotPreviewCard.tsx'
+
+// List components
+export { default as SpotCardList } from './SpotCardList.tsx'
 
 // Hooks
-export { SPOT_ASPECT_RATIO, SPOT_BORDER_RADIUS, SPOT_IMAGE_ASPECT_RATIO, SPOT_IMAGE_BORDER_RADIUS, SPOT_PADDING, useSpotDimensions } from './card/useSpotDimensions.ts'
-export type { SpotVariant } from './card/useSpotDimensions.ts'
+export { useSpotCardDimensions } from './card/useSpotCardDimensions.ts'
+export type { SpotVariant } from './card/useSpotCardDimensions.ts'
 

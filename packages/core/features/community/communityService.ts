@@ -34,7 +34,7 @@ const getMemberCommunities = (accountId: string, members: CommunityMember[], com
  * Gets all discoveries shared within a community.
  * NOTE: This function expects discoveries to be pre-filtered based on sharedDiscoveries.
  */
-const getSharedDiscoveries = (communityId: string, discoveries: Discovery[]): Discovery[] => {
+const getSharedDiscoveries = (_communityId: string, discoveries: Discovery[]): Discovery[] => {
   // Discoveries are already filtered by the caller based on SharedDiscovery entries
   return discoveries
 }
@@ -70,10 +70,12 @@ const getCommunityDiscoveryStats = (
   const rank = sortedDiscoveries.findIndex(d => d.id === discoveryId) + 1
   const totalDiscoverers = spotDiscoveries.length
 
-  // Count reactions
+  // Calculate rating statistics
   const discoveryReactions = reactions.filter(r => r.discoveryId === discoveryId)
-  const likes = discoveryReactions.filter(r => r.reaction === 'like').length
-  const dislikes = discoveryReactions.filter(r => r.reaction === 'dislike').length
+  const ratingCount = discoveryReactions.length
+  const averageRating = ratingCount > 0
+    ? discoveryReactions.reduce((sum, r) => sum + r.rating, 0) / ratingCount
+    : 0
 
   return {
     discoveryId,
@@ -81,8 +83,8 @@ const getCommunityDiscoveryStats = (
     discoveredBy: discovery.accountId,
     rank,
     totalDiscoverers,
-    likes,
-    dislikes,
+    averageRating,
+    ratingCount,
   }
 }
 

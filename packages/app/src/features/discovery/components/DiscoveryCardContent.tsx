@@ -3,18 +3,17 @@ import { useWindowDimensions, View } from 'react-native'
 import Animated, { interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 
 import { getAppContext } from '@app/appContext'
+import { SpotCard, useSpotCardDimensions } from '@app/features/spot/components'
 import { Text } from '@app/shared/components'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
 import { DiscoveryCardState } from '../logic/types'
-import DiscoveryReaction from './DiscoveryReaction'
+import DiscoveryRating from './DiscoveryReaction'
 import DiscoveryShareSection from './DiscoveryShareSection'
 import DiscoveryUserContentSection from './DiscoveryUserContentSection'
 
 const PAGE_PADDING = 16
-const CARD_ASPECT_RATIO = 3 / 2
-const CARD_BORDER_RADIUS = 18
 const RESERVED_UI_SPACE = 200
 
 // Z-Index hierarchy (from bottom to top)
@@ -32,6 +31,7 @@ const Z_INDEX = {
  */
 const useCardDimensions = () => {
   const { width, height } = useWindowDimensions()
+  const { cardRatio, borderRadius } = useSpotCardDimensions({ variant: 'card' })
 
   // Available space considering padding and system UI (status bar, nav bar, etc.)
   const availableWidth = width - PAGE_PADDING * 2
@@ -39,10 +39,10 @@ const useCardDimensions = () => {
 
   // Calculate card dimensions based on aspect ratio, keeping aspect ratio constant
   const cardWidthFromWidth = Math.min(availableWidth, 400)
-  const cardHeightFromWidth = cardWidthFromWidth * CARD_ASPECT_RATIO
+  const cardHeightFromWidth = cardWidthFromWidth * cardRatio
 
   const cardHeightFromHeight = availableHeight
-  const cardWidthFromHeight = cardHeightFromHeight / CARD_ASPECT_RATIO
+  const cardWidthFromHeight = cardHeightFromHeight / cardRatio
 
   // Choose the limiting factor while maintaining aspect ratio
   let CARD_WIDTH, CARD_HEIGHT
@@ -59,7 +59,12 @@ const useCardDimensions = () => {
 
   const IMAGE_HEIGHT = CARD_HEIGHT
 
-  return { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT }
+  return {
+    CARD_WIDTH,
+    CARD_HEIGHT,
+    IMAGE_HEIGHT,
+    BORDER_RADIUS: borderRadius,
+  }
 }
 
 /**
@@ -103,8 +108,8 @@ function DiscoveryCardContent(props: DiscoveryCardContentProps) {
   const { locales } = useApp()
   const { discoveryApplication } = getAppContext()
   const { title, image, description, discoveryId } = card
-  const { CARD_WIDTH, CARD_HEIGHT, IMAGE_HEIGHT } = useCardDimensions()
-  const { scrollHandler, titleOpacityStyle } = useCardAnimations(IMAGE_HEIGHT)
+  const { width, height, borderRadius } = useSpotCardDimensions()
+  const { scrollHandler, titleOpacityStyle } = useCardAnimations(height)
 
   // Load content on mount
   useEffect(() => {
@@ -113,34 +118,20 @@ function DiscoveryCardContent(props: DiscoveryCardContentProps) {
 
   if (!styles) return null
 
-  const cardStyle = { width: CARD_WIDTH, height: CARD_HEIGHT }
-  const imageStyle = { width: CARD_WIDTH, height: IMAGE_HEIGHT }
-  const titleContainerStyle = { width: CARD_WIDTH, top: IMAGE_HEIGHT - 70 }
-  const imageSpacerStyle = { height: IMAGE_HEIGHT }
+  const cardStyle = { width, height }
+  const imageStyle = { width, height }
+  const titleContainerStyle = { width, top: height - 70 }
+  const imageSpacerStyle = { height }
 
   return (
     <View style={styles.wrapper} id='discovery-wrapper'>
       {/* Fixed card container with image */}
-      <View style={[styles.card, cardStyle]} pointerEvents="box-none">
-        {/* Background image */}
-        <Animated.Image
-          source={{ uri: image.url || '' }}
-          style={[styles.fixedImage, imageStyle]}
-          resizeMode='cover'
-        />
-
-        {/* Fixed title overlay */}
-        <Animated.View
-          style={[
-            styles.fixedTitleContainer,
-            titleContainerStyle,
-            titleOpacityStyle
-          ]}
-          pointerEvents='none'
-        >
-          <Text style={styles.fixedTitle}>{title}</Text>
-        </Animated.View>
-      </View>
+      <SpotCard
+        width={width}
+        height={height}
+        image={image}
+        title={title} discovered={true}
+      />
 
       {/* Scrollable content that overlays the image */}
       <Animated.ScrollView
@@ -152,7 +143,6 @@ function DiscoveryCardContent(props: DiscoveryCardContentProps) {
         onScroll={scrollHandler}
       >
         {/* Empty space to allow scrolling past the image */}
-        <View style={imageSpacerStyle} />
 
         {/* Content area */}
         <View style={styles.contentContainer}>
@@ -163,7 +153,7 @@ function DiscoveryCardContent(props: DiscoveryCardContentProps) {
           </Text>
 
           {/* Reaction buttons */}
-          <DiscoveryReaction id={discoveryId} />
+          <DiscoveryRating id={discoveryId} />
 
           {/* Share button */}
           <DiscoveryShareSection discoveryId={discoveryId} />
@@ -182,6 +172,7 @@ function DiscoveryCardContent(props: DiscoveryCardContentProps) {
 
 const createStyles = (theme: Theme) => ({
   wrapper: {
+
     flex: 1,
     position: 'relative' as const,
   },
@@ -190,15 +181,15 @@ const createStyles = (theme: Theme) => ({
     position: 'absolute' as const,
     top: 0,
     zIndex: Z_INDEX.CARD_BACKGROUND,
-    borderRadius: CARD_BORDER_RADIUS,
+    borderRadius: 18,
     overflow: 'hidden' as const,
   },
   fixedImage: {
     position: 'absolute' as const,
     top: 0,
     left: 0,
-    borderTopLeftRadius: CARD_BORDER_RADIUS,
-    borderTopRightRadius: CARD_BORDER_RADIUS,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
     zIndex: Z_INDEX.CARD_IMAGE,
   },
   fixedTitleContainer: {

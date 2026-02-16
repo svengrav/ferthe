@@ -33,7 +33,7 @@ const useRatingHandler = (id: string, reactionSummary: any, discoveryApplication
  * Renders star rating section for discoveries.
  * Encapsulates rating logic and state management.
  */
-function DiscoveryReaction({
+function DiscoveryRating({
   id,
 }: DiscoveryReactionProps) {
   const { styles } = useApp(useStyles)
@@ -64,4 +64,4 @@ const useStyles = createThemedStyles(theme => ({
   },
 }))
 
-export default DiscoveryReaction
+export default DiscoveryRating

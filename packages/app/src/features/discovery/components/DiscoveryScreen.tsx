@@ -5,9 +5,9 @@ import { Page } from '@app/shared/components'
 import Header from '@app/shared/components/header/Header'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 
+import { SpotCardList } from '@app/features/spot/components/index.ts'
 import { useSettingsPage } from '../../settings/components/SettingsPage'
 import { useDiscoveryData, useDiscoveryStatus } from '../stores/discoveryStore'
-import { DiscoveryCardList } from './DiscoveryCardList'
 import { useDiscoveryCardPage } from './DiscoveryCardPage.tsx'
 
 // Status constants
@@ -61,11 +61,19 @@ function DiscoveryScreen() {
     <Page options={[{ label: t.navigation.settings, onPress: showSettings }]}>
       <Header title={t.discovery.discoveries} />
 
-      <DiscoveryCardList
-        cards={cards}
+      <SpotCardList
+        items={cards.map(c => ({
+          id: c.spotId,
+          image: c.image,
+          title: c.title,
+          discovered: true,
+        }))}
+        onPress={(item) => {
+          const card = cards.find(c => c.spotId === item.id)
+          if (card) showDiscoveryCardDetails(card)
+        }}
         refreshing={isLoading}
         onRefresh={requestDiscoveryState}
-        onTap={showDiscoveryCardDetails}
       />
     </Page>
   )

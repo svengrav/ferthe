@@ -1,15 +1,13 @@
 import { useDiscoveryData } from '@app/features/discovery'
-import { SpotCard } from '@app/features/spot/components'
+import { useDiscoveryCardPage } from '@app/features/discovery/components/DiscoveryCardPage'
+import { SpotCardList } from '@app/features/spot/components'
 import { Text } from '@app/shared/components'
-import { CARD_ASPECT_RATIO } from '@app/shared/hooks/useCardDimensions'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { useWindowDimensions, View } from 'react-native'
+import { useMemo } from 'react'
+import { View } from 'react-native'
 import { useTrailStats } from '../hooks/useTrailStats'
 import { useTrailPreviewSpots } from '../stores/trailStore'
-
-const CARD_SPACING = 12
-const CARDS_PER_ROW = 2
 
 interface TrailUnknownSpotsProps {
   trailId: string
@@ -21,11 +19,11 @@ interface TrailUnknownSpotsProps {
  */
 function TrailSpots({ trailId }: TrailUnknownSpotsProps) {
   const { styles } = useTheme(useStyles)
-  const { locales, theme } = useApp()
+  const { locales } = useApp()
   const { discoveries, spots } = useDiscoveryData()
   const spotPreviews = useTrailPreviewSpots(trailId)
   const { stats } = useTrailStats(trailId)
-  const { width: screenWidth } = useWindowDimensions()
+  const { showDiscoveryCardDetails } = useDiscoveryCardPage()
 
   if (!styles) return null
 
@@ -44,11 +42,24 @@ function TrailSpots({ trailId }: TrailUnknownSpotsProps) {
   const discoveredCount = stats?.discoveredSpots || 0
   const undiscoveredCount = totalSpots - discoveredCount
 
-  // Calculate card dimensions - Page already has horizontal padding (theme.tokens.inset.md)
-  const pageInset = theme.tokens.inset.md
-  const availableWidth = screenWidth - (pageInset * 2)
-  const cardWidth = (availableWidth - CARD_SPACING) / CARDS_PER_ROW
-  const cardHeight = cardWidth * CARD_ASPECT_RATIO
+  // Combine discovered + undiscovered spots for SpotCardList
+  const allSpots = useMemo(() => {
+    const discovered = discoveredTrailSpots.slice(0, discoveredCount).map(spot => ({
+      id: spot.id,
+      image: spot.image,
+      title: spot.name,
+      blurredImage: undefined,
+      discovered: true,
+    }))
+    const undiscovered = undiscoveredPreviews.slice(0, undiscoveredCount).map(preview => ({
+      id: preview.id,
+      image: undefined,
+      title: undefined,
+      blurredImage: preview.blurredImage,
+      discovered: false,
+    }))
+    return [...discovered, ...undiscovered]
+  }, [discoveredTrailSpots, undiscoveredPreviews, discoveredCount, undiscoveredCount])
 
   if (totalSpots === 0) {
     return (
@@ -66,29 +77,9 @@ function TrailSpots({ trailId }: TrailUnknownSpotsProps) {
       <Text style={styles.description}>
         {discoveredCount} / {totalSpots} {locales.trails.spots} {locales.discovery.discovered.toLowerCase()}
       </Text>
-      <View style={styles.grid}>
-        {/* Discovered spots - limit to actual discovered count */}
-        {discoveredTrailSpots.slice(0, discoveredCount).map((spot) => (
-          <SpotCard
-            title={spot.name}
-            key={spot.id}
-            image={spot.image}
-            discovered={true}
-            width={cardWidth}
-            height={cardHeight}
-          />
-        ))}
-        {/* Undiscovered spots - limit to actual undiscovered count */}
-        {undiscoveredPreviews.slice(0, undiscoveredCount).map((preview) => (
-          <SpotCard
-            key={preview.id}
-            blurredImage={preview.blurredImage}
-            discovered={false}
-            width={cardWidth}
-            height={cardHeight}
-          />
-        ))}
-      </View>
+      <SpotCardList
+        items={allSpots}
+      />
     </View>
   )
 }
@@ -102,11 +93,6 @@ const useStyles = createThemedStyles(theme => ({
   description: {
     marginBottom: theme.tokens.spacing.md,
     color: theme.deriveColor(theme.colors.onSurface, 0.6),
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: CARD_SPACING,
   },
   emptyContainer: {
     padding: theme.tokens.inset.lg,

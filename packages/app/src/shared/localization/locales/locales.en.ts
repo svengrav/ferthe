@@ -31,7 +31,7 @@ const en = {
     settings: 'Settings',
     profile: 'Profile',
     trails: 'Trails',
-    feed: 'Cards',
+    feed: 'Spots',
     map: 'Map',
     about: 'About',
     account: 'Account',
