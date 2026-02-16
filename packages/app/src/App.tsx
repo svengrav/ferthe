@@ -22,6 +22,7 @@ import { configureAppContext } from './appContext'
 import { config } from './config'
 import { getSession } from './features/account/'
 import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
+import { useDiscoveryEventCard } from './features/discovery/hooks/useDiscovery'
 import { getDeviceConnector } from './features/sensor/device/deviceConnector'
 import { useSettingsSync } from './features/settings/hooks/useSettingsSync'
 import { createStoreConnector } from './shared/device'
@@ -34,6 +35,7 @@ const useAppInitialization = () => {
   const [isReady, setIsReady] = useState(false)
   logger.log('App initialization started')
   useSettingsSync()
+  useDiscoveryEventCard()
 
   useEffect(() => {
     async function initialize() {

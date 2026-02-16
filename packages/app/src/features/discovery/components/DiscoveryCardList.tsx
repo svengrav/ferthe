@@ -1,18 +1,20 @@
 import { SpotCardList } from '@app/features/spot/components'
-import { DiscoveryCardState } from '../logic/types'
+import { DiscoveryEventState } from '../logic/types'
+
+interface DiscoveryCardListProps {
+  onPress?: (card: DiscoveryEventState) => void
+  cards: DiscoveryEventState[]
+  refreshing?: boolean
+  onRefresh?: () => void
+}
 
 export function DiscoveryCardList({
-  onTap,
+  onPress,
   cards,
   refreshing,
   onRefresh,
-}: {
-  onTap?: (card: DiscoveryCardState) => void
-  cards: DiscoveryCardState[]
-  refreshing?: boolean
-  onRefresh?: () => void
-}) {
-  // Map DiscoveryCardState to SpotCardListItem
+}: DiscoveryCardListProps) {
+  // Map DiscoveryEventState to SpotCardListItem
   const items = cards.map(card => ({
     id: card.spotId,
     image: card.image,
@@ -25,7 +27,7 @@ export function DiscoveryCardList({
       items={items}
       onPress={(item) => {
         const card = cards.find(c => c.spotId === item.id)
-        if (card && onTap) onTap(card)
+        if (card && onPress) onPress(card)
       }}
       refreshing={refreshing}
       onRefresh={onRefresh}

@@ -1,44 +1,26 @@
-import { ReactNode, useEffect, useState } from 'react'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { ReactNode, useState } from 'react'
+import { Pressable, StyleSheet } from 'react-native'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withRepeat,
-  withSequence,
   withTiming
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 
-import { Text } from '@app/shared/components'
+import { PulsingTapIndicator } from '@app/shared/components/animation/PulsingTapIndicator'
 import { Theme, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { ImageReference } from '@shared/contracts'
 
-const FADE_IN_DELAY = 2000
 const FADE_OUT_DELAY = 1000
 const ANIMATION_DURATION = 1500
-const TAP_CIRCLE_SIZE = 80
-const TAP_ICON_SIZE = 40
-const DISCOVERY_CARD_FRAME_SIZE = 7
+export type RevealMode = 'reveal' | 'instant'
 
 /**
  * Hook to handle reveal overlay animations
  */
 const useRevealAnimations = (onRevealComplete: () => void) => {
   const fadeOut = useSharedValue(1)
-  const tapScale = useSharedValue(1)
-
-  useEffect(() => {
-    // Start continuous pulsing animation for tap icon
-    tapScale.value = withRepeat(
-      withSequence(
-        withTiming(1.3, { duration: 1200 }),
-        withTiming(1, { duration: 1200 })
-      ),
-      -1, // infinite loop
-      false // don't reverse
-    )
-  }, [tapScale])
 
   const triggerReveal = () => {
     fadeOut.value = withDelay(
@@ -53,134 +35,90 @@ const useRevealAnimations = (onRevealComplete: () => void) => {
     opacity: fadeOut.value,
   }))
 
-  const tapAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: tapScale.value }],
-  }))
-
-  return { overlayAnimatedStyle, tapAnimatedStyle, triggerReveal }
+  return { overlayAnimatedStyle, triggerReveal }
 }
 
 interface DiscoveryRevealProps {
-  mode: 'reveal' | 'instant'
-  blurredImageUrl: string
-  onTriggerReveal: () => void
+  mode: RevealMode
+  blurredImage: ImageReference
+  onReveal: () => void
   children: ReactNode
+  padding?: number
 }
 
 /**
- * Reveal overlay wrapper component.
- * Wraps children and shows blur-to-clear reveal animation in reveal mode.
- * In instant mode, shows children immediately without overlay.
+ * Wrapper component that adds reveal overlay with blur-to-clear animation.
+ * In reveal mode: Shows blurred overlay with tap indicator, fades out on tap.
+ * In instant mode: Shows children immediately without overlay.
  */
 export function DiscoveryReveal(props: DiscoveryRevealProps) {
-  const { mode, blurredImageUrl, onTriggerReveal, children } = props
-  const { styles } = useTheme(createStyles)
-  const { locales } = useApp()
+  const { mode, blurredImage, onReveal, children, padding = 0 } = props
+  const { styles: themedStyles } = useTheme((theme) => createThemedStyles(theme, padding))
   const [isRevealed, setIsRevealed] = useState(mode === 'instant')
 
   const handleRevealComplete = () => {
     setIsRevealed(true)
   }
 
-  const { overlayAnimatedStyle, tapAnimatedStyle, triggerReveal } = useRevealAnimations(handleRevealComplete)
-
-  // In instant mode or after reveal: render children only
-  if (isRevealed) {
-    return <>{children}</>
-  }
+  const { overlayAnimatedStyle, triggerReveal } = useRevealAnimations(handleRevealComplete)
 
   const handlePress = () => {
     triggerReveal()
-    onTriggerReveal()
+    onReveal()
   }
 
   return (
     <>
       {children}
-      <Animated.View
-        style={[
-          styles.blurredOverlay,
-          overlayAnimatedStyle
-        ]}
-      >
-        <Pressable
-          style={[styles.preview, { flex: 1 }]}
-          onPress={handlePress}
-        >
-          {/* Animated tap icon */}
-          <Animated.View style={[styles.tapCircle, tapAnimatedStyle]}>
-            <View style={styles.tapIconInner} />
-          </Animated.View>
-
-          {/* Discovery message below tap icon */}
-          <Text variant="body" style={styles.previewText}>
-            {locales.discovery.discovered}
-          </Text>
-        </Pressable>
-
+      <Animated.View style={[themedStyles.blurredOverlay, overlayAnimatedStyle, { display: isRevealed ? 'none' : 'flex' }]}>
+        <DiscoveryRevealButton onPress={handlePress} />
         <Animated.Image
-          source={{ uri: blurredImageUrl }}
-          style={[styles.image]}
+          source={{ uri: blurredImage.url }}
+          style={themedStyles.image}
           resizeMode='cover'
         />
-      </Animated.View>
+      </Animated.View >
     </>
   )
 }
 
-const createStyles = (theme: Theme) => StyleSheet.create({
+const createThemedStyles = (theme: Theme, padding: number) => StyleSheet.create({
   blurredOverlay: {
-    padding: DISCOVERY_CARD_FRAME_SIZE,
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
+    padding,
   },
+  image: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 14,
+    backgroundColor: theme.colors.black,
+  },
+})
+
+
+interface DiscoveryRevealButtonProps {
+  onPress: () => void
+}
+
+/**
+ * Pressable reveal button with pulsing tap indicator.
+ */
+function DiscoveryRevealButton({ onPress }: DiscoveryRevealButtonProps) {
+  return (
+    <Pressable style={buttonStyles.preview} onPress={onPress}>
+      <PulsingTapIndicator style={buttonStyles.tapIndicator} />
+    </Pressable>
+  )
+}
+
+const buttonStyles = StyleSheet.create({
   preview: {
-    top: DISCOVERY_CARD_FRAME_SIZE,
-    left: DISCOVERY_CARD_FRAME_SIZE,
-    right: DISCOVERY_CARD_FRAME_SIZE,
-    bottom: DISCOVERY_CARD_FRAME_SIZE,
-    position: 'absolute',
+    ...StyleSheet.absoluteFillObject,
     zIndex: 99,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  tapCircle: {
-    width: TAP_CIRCLE_SIZE,
-    height: TAP_CIRCLE_SIZE,
-    borderRadius: TAP_CIRCLE_SIZE / 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
+  tapIndicator: {
     marginBottom: 16,
-
-  },
-  tapIconInner: {
-    width: TAP_ICON_SIZE,
-    height: TAP_ICON_SIZE,
-    borderRadius: TAP_ICON_SIZE / 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.91)',
-  },
-  previewText: {
-    position: 'absolute',
-    bottom: 10,
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.8)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 1,
-  },
-  image: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-    borderRadius: 14,
-    opacity: 1,
-    backgroundColor: theme.colors.black
   },
 })

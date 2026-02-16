@@ -1,6 +1,6 @@
 import { ImageReference } from '@shared/contracts'
 
-export interface DiscoveryCardState {
+export interface DiscoveryEventState {
   discoveryId: string
   title: string
   spotId: string

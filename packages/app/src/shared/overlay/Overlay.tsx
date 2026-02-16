@@ -79,6 +79,7 @@ function OverlayProvider() {
 
 
 interface OverlayProps {
+  style?: React.ComponentProps<typeof Animated.View>['style']
   visible?: boolean
   onClose?: () => void
   showBackdrop?: boolean
@@ -91,7 +92,7 @@ interface OverlayProps {
  * Der Content bestimmt selbst seine Größe und Darstellung.
  */
 function Overlay(props: OverlayProps) {
-  const { visible, onClose, showBackdrop = true, closeOnBackdropPress = false, children } = props
+  const { visible, onClose, showBackdrop = true, closeOnBackdropPress = false, children, style } = props
   const { styles } = useApp(useStyles)
   const { animatedContainerStyle, shouldRender } = useOverlayAnimation(visible ?? true)
   const insets = useSafeAreaInsets()
@@ -104,7 +105,8 @@ function Overlay(props: OverlayProps) {
     <Animated.View
       style={[
         styles.container,
-        animatedContainerStyle
+        animatedContainerStyle,
+        style
       ]}
     >
       {showBackdrop && (
@@ -133,6 +135,7 @@ function Overlay(props: OverlayProps) {
 
 const useStyles = createThemedStyles(theme => ({
   container: {
+    flex: 1,
     position: 'absolute',
     top: 0,
     left: 0,

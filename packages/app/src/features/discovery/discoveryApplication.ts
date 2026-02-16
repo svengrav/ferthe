@@ -7,14 +7,13 @@ import { GeoLocation, geoUtils } from '@shared/geo'
 import { getTrails } from '../trail/stores/trailStore'
 import { emitDiscoveryTrailUpdated, emitNewDiscoveries, onDiscoveryTrailUpdated, onNewDiscoveries } from './events/discoveryEvents'
 import { discoveryService } from './logic/discoveryService'
-import { DiscoveryCardState } from './logic/types'
+import { DiscoveryEventState } from './logic/types'
 import { getDiscoveryContentActions } from './stores/discoveryContentStore'
 import { getDiscoveryReactionActions } from './stores/discoveryReactionStore'
 import { getDiscoveryActions, getDiscoveryData } from './stores/discoveryStore'
 import { getDiscoveryTrailActions, getDiscoveryTrailData, getDiscoveryTrailId } from './stores/discoveryTrailStore'
 
 /**
- * ⚠️ Work in progress ⚠️
  * Default discovery trail slug used when no specific trail is set.
  * This is used to initialize the discovery application with a default trail.
  */
@@ -24,8 +23,8 @@ export interface DiscoveryApplication {
   setActiveTrail: (id: string) => void
   requestDiscoveryState: () => Promise<void>
   onDiscoveryTrailUpdate: (handler: (state: any) => void) => Unsubscribe
-  onNewDiscoveries: (handler: (discoveries: DiscoveryCardState[]) => void) => Unsubscribe
-  getDiscoveryCards: () => DiscoveryCardState[]
+  onNewDiscoveries: (handler: (discoveries: DiscoveryEventState[]) => void) => Unsubscribe
+  getDiscoveryCards: () => DiscoveryEventState[]
   // Stats method
   getDiscoveryStats: (discoveryId: string) => Promise<Result<DiscoveryStats>>
   // Content methods
@@ -223,7 +222,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     accountContext: AccountContext,
     snap?: { distance: number; intensity: number }
   ) => {
-    const { setDiscoveries, setSpots } = getDiscoveryActions()
+    const { setDiscoveries, setSpots, setDiscoveryEvent } = getDiscoveryActions()
     const { discoveries } = getDiscoveryData()
 
     setDiscoveries([...discoveries, ...newDiscoveries])
@@ -252,8 +251,9 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     if (spotsResult.data) {
       setSpots(spotsResult.data)
     }
-
-    emitNewDiscoveries(discoveryService.createDiscoveryCards(newDiscoveries, getDiscoveryData().spots))
+    const discoveryStates = discoveryService.createDiscoveryCards(newDiscoveries, getDiscoveryData().spots)
+    setDiscoveryEvent(discoveryStates[discoveryStates.length - 1])
+    emitNewDiscoveries(discoveryStates)
   }
 
   const processLocationUpdate = async (position: { location: GeoLocation; heading: number }) => {

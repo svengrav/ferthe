@@ -1,6 +1,6 @@
 import { Icon } from '@app/shared/components'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
-import { StyleSheet, View } from 'react-native'
+import { View } from 'react-native'
 
 /**
  * Lock icon overlay for undiscovered spots.
@@ -19,7 +19,7 @@ function SpotLockIcon() {
 const useStyles = createThemedStyles(theme => ({
   lockIconContainer: {
     position: 'absolute',
-    bottom: 4,
+    bottom: 10,
     alignSelf: 'center',
     justifyContent: 'center',
     alignItems: 'center',

@@ -1,6 +1,6 @@
 import { Clue, DiscoverySpot, Trail } from '@shared/contracts'
 import { createEventSystem } from '@shared/events/eventHandler'
-import { DiscoveryCardState } from '../logic/types'
+import { DiscoveryEventState } from '../logic/types'
 
 export interface DiscoveryTrailState {
   createdAt?: Date
@@ -16,7 +16,7 @@ type DiscoveryEvents = {
    * @param discoveryTrailUpdated The updated discovery trail state.
    */
   discoveryTrailUpdated: DiscoveryTrailState
-  newDiscoveries: DiscoveryCardState[]
+  newDiscoveries: DiscoveryEventState[]
 }
 
 // Singleton instance of the discovery events system
@@ -42,7 +42,7 @@ export const onDiscoveryTrailUpdated = (handler: (state: DiscoveryTrailState) =>
  * @param handler Function that handles the new discoveries event
  * @returns Unsubscribe function
  */
-export const onNewDiscoveries = (handler: (discoveries: DiscoveryCardState[]) => void): (() => void) => {
+export const onNewDiscoveries = (handler: (discoveries: DiscoveryEventState[]) => void): (() => void) => {
   return eventsInstance.on('newDiscoveries', handler)
 }
 
@@ -59,7 +59,7 @@ export const emitDiscoveryTrailUpdated = (state: DiscoveryTrailState): void => {
  * Emit a new discoveries event
  * @param discoveries The newly discovered items
  */
-export const emitNewDiscoveries = (discoveries: DiscoveryCardState[]): void => {
+export const emitNewDiscoveries = (discoveries: DiscoveryEventState[]): void => {
   eventsInstance.emit('newDiscoveries', discoveries)
 }
 

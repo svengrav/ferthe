@@ -39,7 +39,7 @@ interface UseSpotDimensionsOptions {
  * Ensures all spot components maintain the same aspect ratio.
  */
 export function useSpotCardDimensions(options: UseSpotDimensionsOptions = {}) {
-  const { variant = 'responsive', withPadding = false, customWidth, customHeight } = options
+  const { variant = 'responsive', withPadding = true, customWidth, customHeight } = options
   const { width: screenWidth } = useWindowDimensions()
 
   let width: number

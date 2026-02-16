@@ -1,6 +1,7 @@
-import { SpotBlurredImage, SpotContainer, SpotGradientFrame, SpotTitle, useSpotCardDimensions } from '@app/features/spot/components'
+import { SpotContainer, SpotGradientFrame, SpotImage, SpotTitle, useSpotCardDimensions } from '@app/features/spot/components'
 import { Button, Text } from '@app/shared/components'
 import { Flippable } from '@app/shared/components/animation/Flippable'
+import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { useEffect, useState } from 'react'
@@ -12,33 +13,45 @@ import Animated, {
   withDelay,
   withTiming
 } from 'react-native-reanimated'
-import { DiscoveryCardState } from '../logic/types'
+import { DiscoveryEventState } from '../logic/types'
 import { useDiscoveryCardPage } from './DiscoveryCardPage'
+import { DiscoveryReveal, RevealMode } from './DiscoveryReveal'
 import DiscoveryStats from './DiscoveryStats'
 
-const GRADIENT_COLORS = ['#3a3fa7fd', 'rgb(46, 46, 112)'] as const
-const GRADIENT_BACKEND_COLORS = ['#3a3fa7fd', 'rgb(46, 46, 112)'] as const
 const FADE_IN_DELAY = 2000
 const ANIMATION_DURATION = 600
-const TITLE_OFFSET = 70
 const CLOSE_BUTTON_TOP = 10
 const CLOSE_BUTTON_RIGHT = 10
 const CLOSE_BUTTON_Z_INDEX = 4
 
+export const useDiscoveryEventCardOverlay = () => ({
+  showDiscoveryEventCard: (card: DiscoveryEventState, options?: { mode: RevealMode }) => {
+    const overlayId = 'discoveryEventCard-' + card.discoveryId
+    setOverlay(
+      overlayId,
+      <View id={overlayId} key={overlayId} style={{ zIndex: 100, alignItems: 'center', height: '100%', justifyContent: 'center', flex: 1, flexDirection: 'column' }} >
+        <DiscoveryEventCard card={card} onClose={() => closeOverlay(overlayId)} mode={options?.mode} />
+      </View>
+      ,
+    )
+  },
+  closeDiscoveryEventCard: (discoveryId: string) => closeOverlay('discoveryEventCard-' + discoveryId),
+})
+
 /**
- * Hook to handle discovery card highlight animations
+ * Hook to handle discovery event card animations
  * Manages the title fadeIn animation based on reveal mode
  */
-const useDiscoveryAnimations = (visible: boolean, mode: 'reveal' | 'instant') => {
+const useDiscoveryAnimations = (mode: RevealMode) => {
   const fadeIn = useSharedValue(mode === 'instant' ? 1 : 0)
 
   useEffect(() => {
-    if (visible && mode === 'instant') {
+    if (mode === 'instant') {
       fadeIn.value = 1
-    } else if (visible && mode === 'reveal') {
+    } else if (mode === 'reveal') {
       fadeIn.value = 0
     }
-  }, [visible, mode, fadeIn])
+  }, [mode, fadeIn])
 
   const triggerReveal = () => {
     if (mode === 'reveal') {
@@ -53,25 +66,24 @@ const useDiscoveryAnimations = (visible: boolean, mode: 'reveal' | 'instant') =>
   return { titleAnimatedStyle, triggerReveal }
 }
 
-interface DiscoveryCardProps {
-  card: DiscoveryCardState
-  visible: boolean
-  mode?: 'reveal' | 'instant'
+interface DiscoveryEventCardProps {
+  card: DiscoveryEventState
+  mode?: RevealMode
   onClose?: () => void
 }
 
 /**
- * Discovery card highlight component that shows a blur-to-clear reveal animation
+ * Discovery event card component that shows a blur-to-clear reveal animation
  * when a new spot is discovered. Features gradient background and smooth transitions.
  */
-function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: DiscoveryCardProps) {
+function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCardProps) {
   const { styles } = useApp(useStyles)
-  const { width, height } = useSpotCardDimensions({ variant: 'card' })
-  const { titleAnimatedStyle, triggerReveal } = useDiscoveryAnimations(visible, mode)
+  const { width, height, padding } = useSpotCardDimensions({ variant: 'card' })
+  const { titleAnimatedStyle, triggerReveal } = useDiscoveryAnimations(mode)
   const [isFlipped, setIsFlipped] = useState(false)
   const { showDiscoveryCardDetails } = useDiscoveryCardPage()
 
-  if (!visible || !styles) return null
+  if (!styles) return null
 
   // Dynamic styles that depend on dimensions
   const cardContainerStyles = {
@@ -79,11 +91,17 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
     height,
   }
 
+  const handleOnReveal = () => {
+    if (mode === 'reveal') {
+      triggerReveal()
+    }
+  }
+
   const renderFrondend = () => (
     <View style={[styles.cardContainer, cardContainerStyles]}>
       <Pressable
         style={styles.card}
-        onPress={mode === 'reveal' ? triggerReveal : undefined}
+        onPress={mode === 'reveal' ? handleOnReveal : undefined}
         disabled={mode === 'instant'}
       >
         {/* Close and view details buttons */}
@@ -112,16 +130,15 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
         </View>
 
         <SpotContainer width={width} height={height} withShadow={true}>
-          <SpotGradientFrame colors={GRADIENT_COLORS} padding={6}>
-            <SpotBlurredImage
-              source={card.image}
-              blurredSource={card.blurredImage}
-              revealed={mode === 'instant'}
-              onReveal={mode === 'reveal' ? triggerReveal : undefined}
-            />
-            <Animated.View style={titleAnimatedStyle}>
-              <SpotTitle title={card.title} position="bottom" />
-            </Animated.View>
+          <SpotGradientFrame padding={padding}>
+            <DiscoveryReveal mode={mode} blurredImage={card.blurredImage!} onReveal={handleOnReveal} padding={padding}>
+              <SpotImage
+                source={card.image}
+              />
+              <Animated.View style={titleAnimatedStyle}>
+                <SpotTitle title={card.title} position="bottom" />
+              </Animated.View>
+            </DiscoveryReveal>
           </SpotGradientFrame>
         </SpotContainer>
       </Pressable>
@@ -134,7 +151,7 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
       id="card-frame"
     >
       <SpotContainer width={width} height={height} withShadow={true}>
-        <SpotGradientFrame colors={GRADIENT_BACKEND_COLORS} padding={6}>
+        <SpotGradientFrame padding={6}>
           {/* Close and view details buttons */}
           <View style={styles.buttonContainer}>
             {card.discoveryId && (
@@ -180,28 +197,17 @@ function DiscoveryCardHighlight({ card, visible, mode = 'reveal', onClose }: Dis
   )
 
   return (
-    <Animated.View style={[styles.overlay]}>
-      <Flippable
-        flipped={isFlipped}
-        front={renderFrondend()}
-        back={renderBackend()}
-      />
-    </Animated.View>
+    <Flippable
+      width={width}
+      height={height}
+      flipped={isFlipped}
+      front={renderFrondend()}
+      back={renderBackend()}
+    />
   )
 }
 
 const useStyles = createThemedStyles(theme => ({
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: theme.opacity(theme.colors.background, 0.8),
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 100,
-  },
   cardContainer: {
     overflow: 'hidden',
   },
@@ -249,4 +255,4 @@ const useStyles = createThemedStyles(theme => ({
   },
 }))
 
-export default DiscoveryCardHighlight
+export default DiscoveryEventCard

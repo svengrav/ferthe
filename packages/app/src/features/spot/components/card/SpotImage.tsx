@@ -12,7 +12,7 @@ interface SpotImageProps {
  * No overlay, no animations - just the image.
  * Always fills container (width/height: 100%).
  */
-function SpotImage({ source, borderRadius = 0 }: SpotImageProps) {
+function SpotImage({ source, borderRadius = 10 }: SpotImageProps) {
   const imageStyle = {
     width: '100%' as const,
     height: '100%' as const,

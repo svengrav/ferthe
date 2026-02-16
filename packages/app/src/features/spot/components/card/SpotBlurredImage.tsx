@@ -1,7 +1,7 @@
 import { Image } from '@app/shared/components'
 import { ImageReference } from '@shared/contracts'
 import { useEffect } from 'react'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { Pressable, StyleSheet } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated'
 
 const FADE_IN_DELAY = 2000
@@ -46,32 +46,31 @@ function SpotBlurredImage({
   }
 
   return (
-    <Pressable onPress={onReveal} disabled={!onReveal || revealed}>
-      <View style={[styles.container, imageStyle]}>
-        {/* Clear image (base layer) */}
-        <Image
-          source={source}
-          style={[styles.image, imageStyle]}
-          resizeMode="cover"
-        />
+    <Pressable onPress={onReveal} disabled={!onReveal || revealed} style={[styles.container, imageStyle]}>
+      {/* Clear image (base layer) */}
+      <Image
+        source={source}
+        style={[styles.image, imageStyle]}
+        resizeMode="cover"
+      />
 
-        {/* Blurred overlay (fades out on reveal) */}
-        {blurredSource && (
-          <Animated.View style={[styles.blurredOverlay, imageStyle, blurredStyle]}>
-            <Image
-              source={blurredSource}
-              style={imageStyle}
-              resizeMode="cover"
-            />
-          </Animated.View>
-        )}
-      </View>
+      {/* Blurred overlay (fades out on reveal) */}
+      {blurredSource && (
+        <Animated.View style={[styles.blurredOverlay, imageStyle, blurredStyle]}>
+          <Image
+            source={blurredSource}
+            style={imageStyle}
+            resizeMode="cover"
+          />
+        </Animated.View>
+      )}
     </Pressable>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     position: 'relative',
     overflow: 'hidden',
   },

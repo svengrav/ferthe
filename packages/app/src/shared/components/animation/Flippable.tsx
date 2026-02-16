@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from 'react'
-import { StyleSheet, TouchableWithoutFeedback, View, ViewStyle } from 'react-native'
+import { StyleSheet, View, ViewStyle } from 'react-native'
 import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 
 type FlippableProps = {
+  width: number
+  height: number
   flipped: boolean
   front: React.ReactNode
   back: React.ReactNode
@@ -10,7 +12,7 @@ type FlippableProps = {
   onTap?: () => void
 }
 
-export const Flippable = ({ front, back, style, flipped, onTap }: FlippableProps) => {
+export const Flippable = ({ width, height, front, back, style, flipped, onTap }: FlippableProps) => {
   const rotation = useSharedValue(flipped ? 180 : 0)
   const didMount = useRef(false)
   const lastFlipped = useRef(flipped)
@@ -55,27 +57,24 @@ export const Flippable = ({ front, back, style, flipped, onTap }: FlippableProps
   })
 
   return (
-    <TouchableWithoutFeedback onPress={onTap}>
-      <View style={[styles.container, style]}>
-        <Animated.View
-          pointerEvents={flipped ? 'none' : 'auto'}
-          style={[styles.face, frontAnimatedStyle]}
-        >
-          {front}
-        </Animated.View>
+    <View style={[{ width, height }, style]}>
+      <Animated.View
+        pointerEvents={flipped ? 'none' : 'auto'}
+        style={[styles.face, frontAnimatedStyle]}
+      >
+        {front}
+      </Animated.View>
 
-        <Animated.View
-          pointerEvents={flipped ? 'auto' : 'none'}
-          style={[styles.face, backAnimatedStyle]}
-        >
-          {back}
-        </Animated.View>
-      </View>
-    </TouchableWithoutFeedback>
+      <Animated.View
+        pointerEvents={flipped ? 'auto' : 'none'}
+        style={[styles.face, backAnimatedStyle]}
+      >
+        {back}
+      </Animated.View>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { ...StyleSheet.absoluteFillObject },
   face: { ...StyleSheet.absoluteFillObject, backfaceVisibility: 'hidden' },
 })

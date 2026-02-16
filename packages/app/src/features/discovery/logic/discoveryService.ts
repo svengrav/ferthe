@@ -1,13 +1,13 @@
 import { Discovery, DiscoverySpot } from '@shared/contracts/discoveries'
 import { GeoLocation } from '@shared/geo'
-import { DiscoveryCardState } from './types'
+import { DiscoveryEventState } from './types'
 
 const getLastDiscoverySpotLocation = (discovery: Discovery | undefined, discoverySpots: DiscoverySpot[]): GeoLocation | undefined => {
   if (!discovery) return undefined
   return discoverySpots.find(ds => ds.id === discovery.spotId)?.location
 }
 
-const createDiscoveryCards = (discoveries: Discovery[], discoverySpots: DiscoverySpot[]): DiscoveryCardState[] => {
+const createDiscoveryCards = (discoveries: Discovery[], discoverySpots: DiscoverySpot[]): DiscoveryEventState[] => {
   return discoveries.map(discovery => {
     const spot = discoverySpots.find(ds => ds.id === discovery.spotId)
     return {

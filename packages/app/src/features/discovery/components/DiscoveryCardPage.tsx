@@ -2,12 +2,12 @@ import { Button, Page, PageTab, PageTabs } from '@app/shared/components'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { useApp } from '@app/shared/useApp'
 
-import { DiscoveryCardState } from '../logic/types'
+import { DiscoveryEventState } from '../logic/types'
 import DiscoveryCardContent from './DiscoveryCardContent'
 import DiscoveryStats from './DiscoveryStats'
 
 export const useDiscoveryCardPage = () => ({
-  showDiscoveryCardDetails: (card: DiscoveryCardState) => {
+  showDiscoveryCardDetails: (card: DiscoveryEventState) => {
     const overlayId = 'discoveryCardDetails-' + card.discoveryId
     setOverlay(
       overlayId,
@@ -20,7 +20,7 @@ export const useDiscoveryCardPage = () => ({
 
 interface DiscoveryCardPageProps {
   onClose?: () => void
-  card: DiscoveryCardState
+  card: DiscoveryEventState
 }
 
 /**

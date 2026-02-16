@@ -9,7 +9,6 @@ import { useSettingsPage } from '../../settings/components/SettingsPage'
 import { getMapStoreActions, useMapLayer, useMapStatus } from '../stores/mapStore'
 import { Map } from './Map'
 import MapCompass from './MapCompass'
-import MapDiscoveryCard from './MapDiscoveryCard'
 import MapDistanceWarning from './MapDistanceWarning'
 import MapLayerSwitch from './MapLayerSwitch'
 import MapOverlay from './MapOverlay'
@@ -62,7 +61,6 @@ function MapScreen() {
   return (
     <Page inset='none' options={[{ label: t.navigation.settings, onPress: () => showSettings() }]}>
       <View style={styles?.container} >
-        <MapDiscoveryCard />
         <MapCompass />
         <MapLayerSwitch />
         <MapDistanceWarning />

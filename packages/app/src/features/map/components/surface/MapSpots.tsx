@@ -1,3 +1,4 @@
+import { useDiscoveryEventCardOverlay } from '@app/features/discovery/components/DiscoveryEventCard'
 import { useDiscoverySpots } from '@app/features/discovery/stores/discoveryTrailStore'
 import { Image, Text } from '@app/shared/components'
 import { DiscoverySpot } from '@shared/contracts'
@@ -5,7 +6,6 @@ import { GeoBoundary } from '@shared/geo'
 import { memo, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle } from 'react-native-reanimated'
-import { useSetTappedSpot } from '../../stores/mapStore'
 import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
 import { mapUtils } from '../../utils/geoToScreenTransform'
 import { useCompensatedScale } from './MapViewport'
@@ -47,8 +47,8 @@ interface MapSpotsProps {
 function MapSpots({ boundary, size }: MapSpotsProps) {
   const theme = useMapTheme()
   const spots = useDiscoverySpots()
-  const setTappedSpot = useSetTappedSpot()
   const scale = useCompensatedScale()
+  const { showDiscoveryEventCard } = useDiscoveryEventCardOverlay()
 
   // Create animated style for scale transform
   const scaleStyle = useAnimatedStyle(() => ({
@@ -85,7 +85,15 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
           scaleStyle
         ]}
       >
-        <Pressable onPress={() => setTappedSpot(spot)}>
+        <Pressable onPress={() => showDiscoveryEventCard({
+          discoveryId: spot.discoveryId,
+          title: spot.name,
+          image: spot.image!,
+          description: spot.description,
+          discoveredAt: spot.createdAt,
+          spotId: spot.id,
+          blurredImage: spot.blurredImage,
+        }, { mode: 'instant' })} >
           <View style={markerStyle}>
             {spot.image?.url ? (
               <Image

@@ -8,7 +8,7 @@ import { Text } from '@app/shared/components'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
-import { DiscoveryCardState } from '../logic/types'
+import { DiscoveryEventState } from '../logic/types'
 import DiscoveryRating from './DiscoveryReaction'
 import DiscoveryShareSection from './DiscoveryShareSection'
 import DiscoveryUserContentSection from './DiscoveryUserContentSection'
@@ -99,7 +99,7 @@ const useCardAnimations = (IMAGE_HEIGHT: number) => {
  * Discovery card content with parallax scroll effects
  */
 interface DiscoveryCardContentProps {
-  card: DiscoveryCardState
+  card: DiscoveryEventState
 }
 
 function DiscoveryCardContent(props: DiscoveryCardContentProps) {
