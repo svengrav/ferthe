@@ -7,8 +7,8 @@ import { useApp } from '@app/shared/useApp'
 
 import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
+import TrailSpots from './TrailSpots'
 import TrailStats from './TrailStats'
-import TrailUnknownSpots from './TrailUnknownSpots'
 
 export const useTrailPage = () => ({
   showTrailPage: (trail: Trail) => {
@@ -66,7 +66,7 @@ function TrailPage(props: TrailPageProps) {
           </Stack>
         </PageTab>
         <PageTab id="spots" label={locales.trails.spots}>
-          <TrailUnknownSpots trailId={trail.id} />
+          <TrailSpots trailId={trail.id} />
         </PageTab>
         <PageTab id="stats" label={locales.trails.stats.name}>
           <TrailStats trailId={trail.id} />

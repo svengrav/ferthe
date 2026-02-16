@@ -1,6 +1,7 @@
 import { useDiscoveryData } from '@app/features/discovery'
-import { Icon, Image, Text } from '@app/shared/components'
-import { CARD_ASPECT_RATIO, CARD_BORDER_RADIUS } from '@app/shared/hooks/useCardDimensions'
+import { SpotCard } from '@app/features/spot/components'
+import { Text } from '@app/shared/components'
+import { CARD_ASPECT_RATIO } from '@app/shared/hooks/useCardDimensions'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { useWindowDimensions, View } from 'react-native'
@@ -18,7 +19,7 @@ interface TrailUnknownSpotsProps {
  * Displays all spots in a trail with discovered and undiscovered status.
  * Discovered spots show the full image, undiscovered spots show blurred image with lock icon.
  */
-function TrailUnknownSpots({ trailId }: TrailUnknownSpotsProps) {
+function TrailSpots({ trailId }: TrailUnknownSpotsProps) {
   const { styles } = useTheme(useStyles)
   const { locales, theme } = useApp()
   const { discoveries, spots } = useDiscoveryData()
@@ -66,36 +67,26 @@ function TrailUnknownSpots({ trailId }: TrailUnknownSpotsProps) {
         {discoveredCount} / {totalSpots} {locales.trails.spots} {locales.discovery.discovered.toLowerCase()}
       </Text>
       <View style={styles.grid}>
-        {/* Discovered spots with full image - limit to actual discovered count */}
+        {/* Discovered spots - limit to actual discovered count */}
         {discoveredTrailSpots.slice(0, discoveredCount).map((spot) => (
-          <View key={spot.id} style={[styles.card, { width: cardWidth, height: cardHeight }]}>
-            {spot.image ? (
-              <Image
-                source={spot.image}
-                style={styles.image}
-                resizeMode="cover"
-              />
-            ) : (
-              <View style={styles.placeholder} />
-            )}
-          </View>
+          <SpotCard
+            title={spot.name}
+            key={spot.id}
+            image={spot.image}
+            discovered={true}
+            width={cardWidth}
+            height={cardHeight}
+          />
         ))}
-        {/* Undiscovered spots with blurred image and lock - limit to actual undiscovered count */}
+        {/* Undiscovered spots - limit to actual undiscovered count */}
         {undiscoveredPreviews.slice(0, undiscoveredCount).map((preview) => (
-          <View key={preview.id} style={[styles.card, { width: cardWidth, height: cardHeight }]}>
-            {preview.blurredImage ? (
-              <Image
-                source={preview.blurredImage}
-                style={styles.image}
-                resizeMode="cover"
-              />
-            ) : (
-              <View style={styles.placeholder} />
-            )}
-            <View style={styles.lockIconContainer}>
-              <Icon name="lock" size={20} color="white" />
-            </View>
-          </View>
+          <SpotCard
+            key={preview.id}
+            blurredImage={preview.blurredImage}
+            discovered={false}
+            width={cardWidth}
+            height={cardHeight}
+          />
         ))}
       </View>
     </View>
@@ -117,36 +108,6 @@ const useStyles = createThemedStyles(theme => ({
     flexWrap: 'wrap',
     gap: CARD_SPACING,
   },
-  card: {
-    borderRadius: CARD_BORDER_RADIUS,
-    overflow: 'hidden',
-    position: 'relative',
-    backgroundColor: theme.colors.surface,
-    elevation: 2,
-    shadowColor: theme.colors.onSurface,
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-  placeholder: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: theme.deriveColor(theme.colors.surface, 0.3),
-  },
-  lockIconContainer: {
-    position: 'absolute',
-    backgroundColor: theme.colors.background,
-    bottom: 4,
-    alignSelf: 'center',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 4,
-    borderRadius: 16,
-  },
   emptyContainer: {
     padding: theme.tokens.inset.lg,
     alignItems: 'center',
@@ -156,4 +117,4 @@ const useStyles = createThemedStyles(theme => ({
   },
 }))
 
-export default TrailUnknownSpots
+export default TrailSpots
