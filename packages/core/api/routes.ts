@@ -170,7 +170,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       version: 'v1',
       url: '/discoveries/:discoveryId/reactions',
       handler: asyncRequestHandler<DiscoveryReaction, { discoveryId: string }>(async ({ context: session, params, body }) => {
-        return await discoveryApplication.reactToDiscovery(session, params!.discoveryId, body.reaction)
+        return await discoveryApplication.reactToDiscovery(session, params!.discoveryId, body.rating)
       }),
     },
     {

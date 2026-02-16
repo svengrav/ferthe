@@ -485,12 +485,17 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   const reactToDiscovery = async (
     context: AccountContext,
     discoveryId: string,
-    reaction: 'like' | 'dislike'
+    rating: number
   ): Promise<Result<DiscoveryReaction>> => {
     try {
       const accountId = context.accountId
       if (!accountId) {
         return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      // Validate rating
+      if (rating < 1 || rating > 5) {
+        return createErrorResult('INVALID_RATING', { originalError: 'Rating must be between 1 and 5' })
       }
 
       // Remove existing reaction if any
@@ -500,7 +505,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         await reactionStore.delete(existing.id)
       }
 
-      const newReaction = discoveryService.createReaction(accountId, discoveryId, reaction)
+      const newReaction = discoveryService.createReaction(accountId, discoveryId, rating)
       const saveResult = await reactionStore.create(newReaction)
       if (!saveResult.success) {
         return createErrorResult('SAVE_REACTION_ERROR')

@@ -224,6 +224,11 @@ const en = {
       timeSinceLast: 'Time Since Last',
       distanceFromLast: 'Distance From Last',
     },
+    rating: {
+      rateDiscovery: 'Rate this discovery',
+      averageRating: 'Average rating',
+      yourRating: 'Your rating',
+    },
   },
   map: {
     outsideTrail: 'Outside the trail',

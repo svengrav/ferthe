@@ -1,40 +1,9 @@
-## TODO
+# TODO & BUGS
 
-## Community
+## Bugs
 
----
-
-### Community Discovery
-
-- **Discovery** = Private user finding
-  - Shareable within 24h after creation
-  - Stays private until explicitly shared
-
-- **Community** = Social space with trail focus
-  - Has 1 trail (initially, multiple later)
-  - Can only share discoveries where spot belongs to community trail
-  - Stats based on shared discoveries only
-
-- **Share** = User action to share discovery with community
-  - Spot must exist in community trail
-  - Discovery can be shared in 1 community initially
-  - Reversible: unshare or leave community makes it private again
-
-**TODOs**
-
-- Share button in discovery details
-- Trail selection when creating community
-- Shared discoveries view in community
-- Unshare option
-
----
-
-### Map
-
-**TODOs**
-
-- Trail Background Image
-- Viewport Background Image
-
-**Clues**
-- Clues are currently moving while animation. Make them static, just fade in?
+~~- **Spots → Title "Unknown Spots"**: Discovered spots are still displayed as blurred and marked as unknown. Additionally, too many spots are shown at the same time. There are 5 spots available to discover, but only 4 are displayed as locked.~~
+~~- **Trail Position in "Discovery Stats"**: The trail position always shows "x of X", which is unclear and confusing.~~
+~~- **Trail Image on Trail Screen**: The trail image is not displayed in a square format.~~
+~~- **Trail Rating** The trail rating is missing.~~
+~~- **Settings → Choose Your Language**: Changing the language (German or English) has no effect. The app remains in English.~~

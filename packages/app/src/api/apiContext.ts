@@ -113,8 +113,8 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
         API.send<void>(`/discoveries/${discoveryId}/content`, 'DELETE'),
 
       // Reaction methods
-      reactToDiscovery: (_context: AccountContext, discoveryId: string, reaction: 'like' | 'dislike') =>
-        API.send<DiscoveryReaction>(`/discoveries/${discoveryId}/reactions`, 'POST', { reaction }),
+      reactToDiscovery: (_context: AccountContext, discoveryId: string, rating: number) =>
+        API.send<DiscoveryReaction>(`/discoveries/${discoveryId}/reactions`, 'POST', { rating }),
 
       removeReaction: (_context: AccountContext, discoveryId: string) =>
         API.send<void>(`/discoveries/${discoveryId}/reactions`, 'DELETE'),

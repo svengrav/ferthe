@@ -71,7 +71,7 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
           <View style={styles.statContent}>
             <Text variant="caption">{locales.discovery.stats.trailPosition}</Text>
             <Text variant="body">
-              {stats.trailPosition} of {stats.trailTotal}
+              {stats.trailPosition} / {stats.trailTotal}
             </Text>
             <ProgressBar
               percentage={(stats.trailPosition / stats.trailTotal) * 100}

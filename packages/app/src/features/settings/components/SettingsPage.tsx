@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native'
 import { z } from 'zod'
 
-import { Button, Form, FormPicker, Page, Text } from '@app/shared/components'
+import { Button, Form, FormPicker, Page, Text, useFormSubmitWatcher } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { closeOverlay, setOverlay } from '@app/shared/overlay/'
 import { Theme, useTheme } from '@app/shared/theme'
@@ -21,7 +21,7 @@ export const useSettingsPage = () => ({
     'settingsForm',
     <SettingsPage
       onClose={() => closeOverlay('settingsForm')}
-      onSubmit={() => closeOverlay('settingsForm')}
+      onSubmit={() => { }} // Auto-save via useFormSubmitWatcher, don't close
     />
   ),
   closeSettings: () => closeOverlay('settingsForm'),
@@ -46,6 +46,11 @@ function SettingsPage(props: SettingsFormProps) {
     onSubmit(updatedSettings)
   }
 
+  // Internal component to use useFormSubmitWatcher hook inside Form context
+  function AutoSaveSettings() {
+    useFormSubmitWatcher<SettingsFormValues>(onFormSubmit)
+    return null
+  }
 
   return (
     <Page
@@ -57,6 +62,7 @@ function SettingsPage(props: SettingsFormProps) {
         defaultValues={initialValues}
         onSubmit={onFormSubmit}
       >
+        <AutoSaveSettings />
         <View style={{ marginTop: theme.tokens.spacing.lg }}>
           <View style={styles.settingRow}>
             <Text variant='body'>{t.settings.chooseLanguage}</Text>

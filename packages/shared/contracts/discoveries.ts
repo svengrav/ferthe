@@ -20,7 +20,7 @@ export interface DiscoveryApplicationContract {
   getDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
   upsertDiscoveryContent: (context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
   deleteDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<void>>
-  reactToDiscovery: (context: AccountContext, discoveryId: string, reaction: 'like' | 'dislike') => Promise<Result<DiscoveryReaction>>
+  reactToDiscovery: (context: AccountContext, discoveryId: string, rating: number) => Promise<Result<DiscoveryReaction>>
   removeReaction: (context: AccountContext, discoveryId: string) => Promise<Result<void>>
   getReactionSummary: (context: AccountContext, discoveryId: string) => Promise<Result<ReactionSummary>>
 }
@@ -108,21 +108,21 @@ export interface DiscoveryContent {
 }
 
 /**
- * User reaction (like/dislike) for a discovery.
+ * User rating (1-5 stars) for a discovery.
  */
 export interface DiscoveryReaction {
   id: string
   discoveryId: string
   accountId: string
-  reaction: 'like' | 'dislike'
+  rating: number // 1-5 stars
   createdAt: Date
 }
 
 /**
- * Aggregated reaction counts for a discovery.
+ * Aggregated rating summary for a discovery.
  */
 export interface ReactionSummary {
-  likes: number
-  dislikes: number
-  userReaction?: 'like' | 'dislike' // Current user's reaction, if any
+  average: number // Average rating (0-5, 0 if no ratings)
+  count: number // Total number of ratings
+  userRating?: number // Current user's rating (1-5), if any
 }

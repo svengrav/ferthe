@@ -1,7 +1,8 @@
 import { getAppContext } from '@app/appContext'
-import ReactionButtons from '@app/shared/components/reaction/ReactionButtons'
+import StarRating from '@app/shared/components/reaction/StarRating'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
+import { logger } from '@app/shared/utils/logger'
 import { View } from 'react-native'
 import { useDiscoveryReactionSummary } from '../index'
 
@@ -10,27 +11,27 @@ interface DiscoveryReactionProps {
 }
 
 /**
- * Hook to handle reaction actions with loading state
+ * Hook to handle rating actions
  */
-const useReactionHandlers = (id: string, reactionSummary: any, discoveryApplication: any) => {
-  const handleReaction = async (reactionType: 'like' | 'dislike') => {
-    const isCurrentReaction = reactionSummary?.userReaction === reactionType
-    if (isCurrentReaction) {
+const useRatingHandler = (id: string, reactionSummary: any, discoveryApplication: any) => {
+  const handleRate = async (rating: number) => {
+    logger.log('DiscoveryReaction: Rating', { discoveryId: id, rating, currentSummary: reactionSummary })
+    const isSameRating = reactionSummary?.userRating === rating
+    if (isSameRating) {
+      logger.log('DiscoveryReaction: Removing rating (same as current)')
       await discoveryApplication.removeReaction(id)
     } else {
-      await discoveryApplication.reactToDiscovery(id, reactionType)
+      logger.log('DiscoveryReaction: Submitting new rating')
+      await discoveryApplication.reactToDiscovery(id, rating)
     }
   }
 
-  return {
-    handleLike: () => handleReaction('like'),
-    handleDislike: () => handleReaction('dislike'),
-  }
+  return { handleRate }
 }
 
 /**
- * Renders reaction buttons section with like/dislike actions.
- * Encapsulates reaction logic and state management.
+ * Renders star rating section for discoveries.
+ * Encapsulates rating logic and state management.
  */
 function DiscoveryReaction({
   id,
@@ -41,14 +42,13 @@ function DiscoveryReaction({
 
   if (!id || !styles) return null
 
-  const { handleLike, handleDislike } = useReactionHandlers(id, reactionSummary, discoveryApplication)
+  const { handleRate } = useRatingHandler(id, reactionSummary, discoveryApplication)
 
   return (
     <View style={styles.reactionsContainer}>
-      <ReactionButtons
+      <StarRating
         summary={reactionSummary}
-        onLike={handleLike}
-        onDislike={handleDislike}
+        onRate={handleRate}
       />
     </View>
   )

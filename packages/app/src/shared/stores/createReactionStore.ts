@@ -2,9 +2,9 @@ import { Status, StoreActions, StoreData } from '@app/shared/index'
 import { create, StateCreator } from 'zustand'
 
 export interface ReactionSummary {
-  likes: number
-  dislikes: number
-  userReaction?: 'like' | 'dislike'
+  average: number
+  count: number
+  userRating?: number
 }
 
 interface ReactionStoreActions extends StoreActions {

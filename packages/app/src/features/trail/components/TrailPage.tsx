@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet, useWindowDimensions } from 'react-native'
 
 import { Button, Image, Page, PageTab, PageTabs, Stack, Text } from '@app/shared/components'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
@@ -9,8 +9,6 @@ import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
 import TrailStats from './TrailStats'
 import TrailUnknownSpots from './TrailUnknownSpots'
-
-const IMAGE_HEIGHT = 150
 
 export const useTrailPage = () => ({
   showTrailPage: (trail: Trail) => {
@@ -34,7 +32,12 @@ interface TrailPageProps {
 function TrailPage(props: TrailPageProps) {
   const { trail, onClose } = props
   const { styles } = useTheme(createStyles)
-  const { context, locales } = useApp()
+  const { context, locales, theme } = useApp()
+  const { width: screenWidth } = useWindowDimensions()
+
+  // Calculate image size - square format that fills screen width minus page padding
+  const pageInset = theme.tokens.inset.md
+  const imageSize = screenWidth - (pageInset * 2)
 
   // Request trail spot previews on mount or trail change
   useEffect(() => {
@@ -53,7 +56,8 @@ function TrailPage(props: TrailPageProps) {
             <Image
               style={styles.image}
               source={trail.image}
-              height={IMAGE_HEIGHT}
+              height={imageSize}
+              width={imageSize}
               resizeMode="cover"
             />
             <Text variant="section">{locales.trails.description}</Text>

@@ -23,6 +23,7 @@ import { config } from './config'
 import { getSession } from './features/account/'
 import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
 import { getDeviceConnector } from './features/sensor/device/deviceConnector'
+import { useSettingsSync } from './features/settings/hooks/useSettingsSync'
 import { createStoreConnector } from './shared/device'
 import { OverlayProvider } from './shared/overlay'
 import { logger } from './shared/utils/logger'
@@ -32,6 +33,7 @@ SplashScreen.preventAutoHideAsync()
 const useAppInitialization = () => {
   const [isReady, setIsReady] = useState(false)
   logger.log('App initialization started')
+  useSettingsSync()
 
   useEffect(() => {
     async function initialize() {

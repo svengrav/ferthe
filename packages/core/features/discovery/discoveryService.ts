@@ -31,7 +31,7 @@ export type DiscoveryServiceActions = {
   getDiscoveryStats: (discovery: Discovery, allDiscoveriesForSpot: Discovery[], userDiscoveries: Discovery[], trailSpotIds: string[], spots: Spot[]) => DiscoveryStats
   createDiscoveryContent: (accountId: string, discoveryId: string, content: { imageUrl?: string; comment?: string }) => DiscoveryContent
   updateDiscoveryContent: (existing: DiscoveryContent, content: { imageUrl?: string; comment?: string }) => DiscoveryContent
-  createReaction: (accountId: string, discoveryId: string, reaction: 'like' | 'dislike') => DiscoveryReaction
+  createReaction: (accountId: string, discoveryId: string, rating: number) => DiscoveryReaction
   getReactionSummary: (discoveryId: string, reactions: DiscoveryReaction[], accountId: string) => ReactionSummary
 }
 
@@ -456,29 +456,37 @@ const updateDiscoveryContent = (existing: DiscoveryContent, content: { imageUrl?
 }
 
 /**
- * Creates a reaction (like/dislike) for a discovery
+ * Creates a rating (1-5 stars) for a discovery
  */
-const createReaction = (accountId: string, discoveryId: string, reaction: 'like' | 'dislike'): DiscoveryReaction => {
+const createReaction = (accountId: string, discoveryId: string, rating: number): DiscoveryReaction => {
+  // Validate rating is between 1-5
+  const validRating = Math.max(1, Math.min(5, Math.round(rating)))
+  
   return {
     id: createDeterministicId('discovery-reaction', discoveryId, accountId),
     discoveryId,
     accountId,
-    reaction,
+    rating: validRating,
     createdAt: new Date(),
   }
 }
 
 /**
- * Aggregates reactions into a summary with current user's reaction
+ * Aggregates ratings into a summary with average and current user's rating
  */
 const getReactionSummary = (discoveryId: string, reactions: DiscoveryReaction[], accountId: string): ReactionSummary => {
   const discoveryReactions = reactions.filter(r => r.discoveryId === discoveryId)
-  const userReaction = discoveryReactions.find(r => r.accountId === accountId)?.reaction
+  const userRating = discoveryReactions.find(r => r.accountId === accountId)?.rating
+  
+  const count = discoveryReactions.length
+  const average = count > 0 
+    ? discoveryReactions.reduce((sum, r) => sum + r.rating, 0) / count
+    : 0
 
   return {
-    likes: discoveryReactions.filter(r => r.reaction === 'like').length,
-    dislikes: discoveryReactions.filter(r => r.reaction === 'dislike').length,
-    userReaction,
+    average: Math.round(average * 10) / 10, // Round to 1 decimal
+    count,
+    userRating,
   }
 }
 

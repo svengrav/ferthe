@@ -33,7 +33,7 @@ export interface DiscoveryApplication {
   deleteDiscoveryContent: (discoveryId: string) => Promise<Result<void>>
   getDiscoveryContent: (discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
   // Reaction methods
-  reactToDiscovery: (discoveryId: string, reaction: 'like' | 'dislike') => Promise<Result<void>>
+  reactToDiscovery: (discoveryId: string, rating: number) => Promise<Result<void>>
   removeReaction: (discoveryId: string) => Promise<Result<void>>
   getReactionSummary: (discoveryId: string) => Promise<Result<ReactionSummary>>
 }
@@ -329,17 +329,22 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   // Reaction methods
-  const reactToDiscovery = async (discoveryId: string, reaction: 'like' | 'dislike'): Promise<Result<void>> => {
+  const reactToDiscovery = async (discoveryId: string, rating: number): Promise<Result<void>> => {
     const session = await getSession()
     if (!session.data) return { success: false, data: undefined }
 
-    const result = await discoveryAPI.reactToDiscovery(session.data, discoveryId, reaction)
+    logger.log('DiscoveryApplication: Rating discovery', { discoveryId, rating })
+    const result = await discoveryAPI.reactToDiscovery(session.data, discoveryId, rating)
     if (result.success) {
+      logger.log('DiscoveryApplication: Rating successful, refreshing summary')
       // Refresh reaction summary
       const summaryResult = await discoveryAPI.getReactionSummary(session.data, discoveryId)
       if (summaryResult.data) {
+        logger.log('DiscoveryApplication: Updated summary', summaryResult.data)
         getDiscoveryReactionActions().setReactionSummary(discoveryId, summaryResult.data)
       }
+    } else {
+      logger.error('DiscoveryApplication: Rating failed', result.error)
     }
     return { success: result.success, data: undefined }
   }
