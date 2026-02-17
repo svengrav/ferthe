@@ -10,6 +10,7 @@ import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { logger } from '@app/shared/utils/logger'
 
+import { getMapThemeDefaults } from '../../config/mapThemeDefaults.ts'
 import { useViewportGestures } from '../../hooks/useViewportGestures.ts'
 import { getMapCanvasActions, getMapState, useMapCanvas, useMapSurfaceBoundary } from '../../stores/mapStore.ts'
 import { mapUtils } from '../../utils/geoToScreenTransform.ts'
@@ -100,6 +101,7 @@ function MapCanvasViewport(props: MapCanvasViewportProps) {
   )
 }
 
+const { canvas } = getMapThemeDefaults()
 const useStyles = createThemedStyles(() => ({
   container: {
     flex: 1,
@@ -121,7 +123,7 @@ const useStyles = createThemedStyles(() => ({
     alignItems: 'center',
   },
   backgroundImage: {
-    opacity: 0.3,
+    opacity: canvas.imageOpacity,
   },
 }))
 

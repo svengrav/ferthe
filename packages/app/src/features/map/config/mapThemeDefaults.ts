@@ -57,6 +57,12 @@ const MAP_THEME_DEFAULT = {
     fill: '#ffffff3a',
     strokeWidth: 1,
   },
+  canvas: {
+    imageOpacity: 1
+  },
+  surface: {
+    imageOpacity: 1
+  },
   compass: {
     color: '#ffffff',
     fontSize: 24,
