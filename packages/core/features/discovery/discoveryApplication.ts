@@ -396,7 +396,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
           return createErrorResult(ERROR_CODES.STORAGE_CONNECTOR_NOT_CONFIGURED.code)
         }
 
-        const uploadResult = await imageApplication.uploadImage(context, 'discovery', discoveryId, content.imageUrl)
+        const uploadResult = await imageApplication.processAndStore(context, 'discovery', discoveryId, content.imageUrl, { processImage: true, blur: false })
         if (!uploadResult.success || !uploadResult.data) {
           return createErrorResult(ERROR_CODES.IMAGE_UPLOAD_ERROR.code)
         }

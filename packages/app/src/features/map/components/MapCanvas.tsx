@@ -2,27 +2,24 @@ import { getAppContext } from '@app/appContext'
 import { useDiscoveryTrailId } from '@app/features/discovery/stores/discoveryTrailStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { View } from 'react-native'
-import { useMapSurface, useMapSurfaceBoundary, useMapSurfaceLayout, useMapViewport, useViewportDimensions } from '../stores/mapStore'
-import { MapTheme, useMapTheme } from '../stores/mapThemeStore'
-import MapDeviceCords from './MapDeviceCords'
-import { MapScanner, MapScannerControl } from './MapScanner'
+import { useMapCanvas, useMapSurface } from '../stores/mapStore.ts'
+import { MapTheme, useMapTheme } from '../stores/mapThemeStore.ts'
+import MapDeviceCords from './MapDeviceCords.tsx'
+import { MapScanner, MapScannerControl } from './MapScanner.tsx'
+import { MapCanvasViewport } from './surface/MapCanvasViewport.tsx'
 import MapCenterMarker from './surface/MapCenterMarker.tsx'
 import MapClues from './surface/MapClues.tsx'
-import MapDeviceMarker from './surface/MapDeviceMarker'
+import MapDeviceMarker from './surface/MapDeviceMarker.tsx'
 import MapSnap from './surface/MapSnap.tsx'
 import MapSpots from './surface/MapSpots.tsx'
 import MapSurface from './surface/MapSurface.tsx'
 import MapTrailPath from './surface/MapTrailPath.tsx'
-import { MapViewport } from './surface/MapViewport.tsx'
 
 
-export function Map() {
+export function MapCanvas() {
   const { sensorApplication } = getAppContext()
   const surface = useMapSurface()
-  const boundary = useMapSurfaceBoundary()
-  const { size, boundary: viewportBoundary } = useMapViewport()
-  const surfaceLayout = useMapSurfaceLayout()
-  const viewportSize = useViewportDimensions()
+  const { size, boundary } = useMapCanvas()
   const trailId = useDiscoveryTrailId()
   const mapTheme = useMapTheme()
   const theme = useThemeStore()
@@ -32,16 +29,16 @@ export function Map() {
     <>
       <View style={[styles.contentContainer]} id='map-content' >
         <MapDeviceCords />
-        <MapViewport>
+        <MapCanvasViewport>
           <MapSurface />
-          <MapTrailPath boundary={viewportBoundary} size={size} />
-          <MapClues boundary={viewportBoundary} size={size} />
-          <MapSnap boundary={viewportBoundary} size={size} />
+          <MapTrailPath boundary={boundary} size={size} />
+          <MapClues boundary={boundary} size={size} />
+          <MapSnap boundary={boundary} size={size} />
           <MapCenterMarker />
-          <MapSpots boundary={viewportBoundary} size={size} />
+          <MapSpots boundary={boundary} size={size} />
           <MapScanner />
-          <MapDeviceMarker mode="canvas" canvasSize={viewportSize} />
-        </MapViewport>
+          <MapDeviceMarker mode="canvas" canvasSize={size} />
+        </MapCanvasViewport>
         <MapScannerControl startScan={() => trailId && sensorApplication.startScan(trailId)} />
       </View>
     </>

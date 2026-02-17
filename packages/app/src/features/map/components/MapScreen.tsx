@@ -7,11 +7,12 @@ import { useEffect, useRef } from 'react'
 import { Animated, View } from 'react-native'
 import { useSettingsPage } from '../../settings/components/SettingsPage'
 import { getMapStoreActions, useMapLayer, useMapStatus } from '../stores/mapStore'
-import { Map } from './Map'
+import { MapCanvas } from './MapCanvas.tsx'
 import MapCompass from './MapCompass'
 import MapDistanceWarning from './MapDistanceWarning'
 import MapLayerSwitch from './MapLayerSwitch'
-import MapOverlay from './MapOverlay'
+import MapOverview from './MapOverview'
+import MapToolbar from './MapToolbar'
 import { MapTrailSelector } from './MapTrailSelector'
 
 function MapScreen() {
@@ -61,15 +62,14 @@ function MapScreen() {
   return (
     <Page inset='none' options={[{ label: t.navigation.settings, onPress: () => showSettings() }]}>
       <View style={styles?.container} >
-        <MapCompass />
-        <MapLayerSwitch />
+        <MapToolbar center={<MapCompass />} trailing={<MapLayerSwitch />} />
         <MapDistanceWarning />
         <View style={styles?.map} onLayout={onLayout}>
           {status !== 'ready' ? (
             <LoadingSpinner />
           ) : (
             <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-              {activeLayer === 'CANVAS' ? <Map /> : <MapOverlay />}
+              {activeLayer === 'CANVAS' ? <MapCanvas /> : <MapOverview />}
             </Animated.View>
           )}
         </View>

@@ -489,18 +489,19 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       }
 
       // Upload image and get blob path
-      const uploadResult = await imageApplication.uploadImage(
+      const imageResult = await imageApplication.processAndStore(
         context,
         'account-avatar',
         context.accountId,
-        base64Data
+        base64Data,
+        { processImage: true, blur: false }
       )
 
-      if (!uploadResult.success || !uploadResult.data) {
+      if (!imageResult.success || !imageResult.data) {
         return createErrorResult(ERROR_CODES.IMAGE_UPLOAD_FAILED.code)
       }
 
-      const { blobPath } = uploadResult.data
+      const { blobPath } = imageResult.data
 
       // Store blob path internally in DB
       const account = await accountStore.get(context.accountId)

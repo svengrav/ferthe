@@ -2,7 +2,6 @@ import { StyleSheet, Text, View } from 'react-native'
 import { useMapCompass } from '../stores/mapStore'
 import { useMapTheme } from '../stores/mapThemeStore'
 
-const DEFAULT_FONT_SIZE = 24
 
 /**
  * A simple compass component that displays the exact heading in degrees
@@ -10,12 +9,12 @@ const DEFAULT_FONT_SIZE = 24
  */
 function MapCompass() {
   const { heading, direction } = useMapCompass()
-  const mapTheme = useMapTheme()
+  const { compass } = useMapTheme()
 
   return (
     <View style={styles.compassBackground}>
-      <Text style={[styles.headingText, { color: mapTheme.compass.color, fontSize: DEFAULT_FONT_SIZE }]}>{heading}°</Text>
-      <Text style={[styles.directionText, { color: mapTheme.compass.color, fontSize: DEFAULT_FONT_SIZE / 1.5 }]}>{direction}</Text>
+      <Text style={[styles.headingText, { color: compass.color, fontSize: compass.fontSize }]}>{heading}°</Text>
+      <Text style={[styles.directionText, { color: compass.color, fontSize: compass.fontSize / 1.5 }]}>{direction}</Text>
     </View>
   )
 }
@@ -28,7 +27,6 @@ const styles = StyleSheet.create({
   },
   compassBackground: {
     borderBottomWidth: 2,
-    backgroundColor: 'black',
     paddingVertical: 8,
     gap: 5,
     justifyContent: 'center',

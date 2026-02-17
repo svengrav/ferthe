@@ -1,8 +1,10 @@
 import { GeoBoundary, GeoLocation, geoUtils } from '@shared/geo'
+import { getMapDefaults } from '../config/mapDefaults'
 
 // Default map content dimensions
 const METERS_PER_DEGREE_LATITUDE = 111000
 const DEVICE_VIEWPORT_RADIUS = 1000 // meters
+const defaults = getMapDefaults()
 
 interface ScreenSize {
   width: number
@@ -241,18 +243,19 @@ const calculateMetersPerPixel = (boundary: GeoBoundary, canvasSize: ScreenSize):
 }
 
 /**
- * Calculate zoom limits for overlay mode based on trail boundary and desired view
- * @param boundary Trail boundary
+ * Calculate zoom limits based on boundary and canvas size
+ * Used by both overlay (overview mode) and viewport (canvas mode)
+ * @param boundary Geographic boundary (trail or viewport-centered)
  * @param canvasSize Canvas size in pixels
  * @param screenSize Screen size in pixels
- * @param maxZoomMeters Maximum zoom level in meters (default 50m)
+ * @param maxZoomMeters Maximum zoom detail level in meters
  * @returns Min and max scale values
  */
-const calculateOverlayZoomLimits = (
+const calculateZoomLimits = (
   boundary: GeoBoundary,
   canvasSize: ScreenSize,
   screenSize: ScreenSize,
-  maxZoomMeters: number = 50
+  maxZoomMeters: number = defaults.zoom.maxMeters
 ): { min: number; max: number } => {
   const centerLat = (boundary.northEast.lat + boundary.southWest.lat) / 2
   const trailDimensions = geoUtils.calculateBoundaryDimensions(boundary, centerLat)
@@ -274,7 +277,7 @@ const calculateOverlayZoomLimits = (
   const maxScale = trailMaxDimension / maxZoomMeters
 
   return {
-    min: Math.max(0.5, minScale),
+    min: Math.max(0.2, minScale),  // Allow more zoom-out for navigation
     max: Math.min(3.0, Math.max(1.0, maxScale))
   }
 }
@@ -289,5 +292,5 @@ export const mapUtils = {
   calculateAdaptiveViewportRadius,
   calculateSurfaceLayout,
   calculateMetersPerPixel,
-  calculateOverlayZoomLimits,
+  calculateZoomLimits,
 }

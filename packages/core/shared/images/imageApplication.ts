@@ -1,9 +1,9 @@
 import { AccountContext } from '@shared/contracts/accounts.ts'
-import { ImageApplicationContract, ImageType, ImageUploadResult } from '@shared/contracts/images.ts'
+import { ImageApplicationContract, ImageProcessOptions, ImageType, ImageUploadResult } from '@shared/contracts/images.ts'
 import { createErrorResult, createSuccessResult, Result } from '@shared/contracts/results.ts'
 import { Buffer } from 'node:buffer'
 import { StorageConnector } from '../../connectors/storageConnector.ts'
-import { processImage } from '../../utils/imageProcessor.ts'
+import { getBlurredPath, processImage } from '../../utils/imageProcessor.ts'
 import {
   createImageMetadata,
   detectExtensionFromDataUri,
@@ -19,12 +19,12 @@ interface ImageApplicationOptions {
 }
 
 export function createImageApplication({ storageConnector, maxImageSizeBytes }: ImageApplicationOptions): ImageApplicationContract {
-  const uploadImage = async (
+  const processAndStore = async (
     context: AccountContext,
     imageType: ImageType,
     entityId: string,
     base64Data: string,
-    extension?: string
+    options: (ImageProcessOptions & { extension?: string }) = {}
   ): Promise<Result<ImageUploadResult>> => {
     try {
       const accountId = context.accountId
@@ -38,8 +38,10 @@ export function createImageApplication({ storageConnector, maxImageSizeBytes }: 
         return { ...sizeValidation, data: undefined }
       }
 
+      const { processImage: shouldProcess = true, blur = false, extension: optionExt } = options
+
       // Detect extension from data URI if not provided
-      let ext = extension
+      let ext = optionExt
       if (!ext && base64Data.startsWith('data:image')) {
         ext = detectExtensionFromDataUri(base64Data)
       }
@@ -61,33 +63,27 @@ export function createImageApplication({ storageConnector, maxImageSizeBytes }: 
         uploadedAt: metadata.uploadedAt,
       }
 
-      // For spots: process image and upload with blurred variant
-      // Blur processing only for spots (discoveries are shown immediately)
-      if (imageType === 'spot') {
-        // Process image to create optimized + blurred versions
-        const processed = await processImage(base64Data)
+      if (shouldProcess) {
+        // Process image (resize, compress, optional blur)
+        const processed = await processImage(base64Data, { blur })
 
-        // Generate image ID (always .jpg after processing)
-        const blobPath = generateImageId('jpg')
+        // Generate image ID with processed extension (webp after processing)
+        const blobPath = generateImageId(processed.extension)
 
-        // Generate blurred path (adds -blurred suffix)
-        const lastDot = blobPath.lastIndexOf('.')
-        const blurredPath = lastDot === -1
-          ? `${blobPath}-blurred`
-          : `${blobPath.substring(0, lastDot)}-blurred${blobPath.substring(lastDot)}`
+        // Store optimized original
+        await storageConnector.uploadFile(blobPath, processed.original, blobMetadata)
 
-        // Upload both original and blurred variant
-        await storageConnector.uploadFileWithPreview(
-          blobPath,
-          processed.original,
-          processed.blurred,
-          blobMetadata
-        )
+        // Store blurred variant if present
+        if (processed.blurred) {
+          const blurredPath = getBlurredPath(blobPath)
+          const previewMetadata = { ...blobMetadata, type: 'preview' }
+          await storageConnector.uploadFile(blurredPath, processed.blurred, previewMetadata)
+        }
 
         return createSuccessResult({ blobPath })
       }
 
-      // For other image types: simple upload
+      // Store original without processing
       const base64String = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data
       const buffer = Buffer.from(base64String, 'base64')
       const blobPath = generateImageId(ext)
@@ -148,7 +144,7 @@ export function createImageApplication({ storageConnector, maxImageSizeBytes }: 
   }
 
   return {
-    uploadImage,
+    processAndStore,
     deleteImage,
     refreshImageUrl,
   }

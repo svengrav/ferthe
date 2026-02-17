@@ -6,7 +6,7 @@ import { Icon } from '@app/shared/components'
 import { Theme, useTheme } from '@app/shared/theme'
 
 import { useMapScannerAnimation } from '../hooks/useMapScannerAnimation'
-import { useMapDevice, useMapScanner, useMapViewport } from '../stores/mapStore'
+import { useMapCanvas, useMapDevice, useMapScanner } from '../stores/mapStore'
 import { useMapTheme } from '../stores/mapThemeStore'
 import { mapUtils } from '../utils/geoToScreenTransform'
 
@@ -21,7 +21,7 @@ const COOLDOWN_TOTAL_DURATION = 5200
  */
 function MapScanner() {
   const device = useMapDevice()
-  const viewport = useMapViewport()
+  const viewport = useMapCanvas()
   const { radius } = useMapScanner()
   const mapTheme = useMapTheme()
 

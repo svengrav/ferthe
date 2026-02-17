@@ -5,12 +5,12 @@ import { useEffect, useMemo, useRef } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import {
+  useMapCanvasContext,
+  useMapCanvasDimensions,
+  useMapCanvasValues,
   useMapSurface,
   useMapSurfaceBoundary,
-  useMapSurfaceLayout,
-  useViewportContext,
-  useViewportDimensions,
-  useViewportValues
+  useMapSurfaceLayout
 } from '../../stores/mapStore'
 import { mapUtils } from '../../utils/geoToScreenTransform'
 
@@ -44,9 +44,9 @@ interface DebugMetrics {
  * Aggregates all viewport, trail, spot and surface metrics in one structured object
  */
 const useDebugMetrics = (): DebugMetrics => {
-  const { boundary: viewportBoundary, radiusMeters, deviceLocation } = useViewportContext()
-  const viewportSize = useViewportDimensions()
-  const { scale, translationX, translationY } = useViewportValues()
+  const { boundary: viewportBoundary, radiusMeters, deviceLocation } = useMapCanvasContext()
+  const viewportSize = useMapCanvasDimensions()
+  const { scale, translationX, translationY } = useMapCanvasValues()
   const surfaceLayout = useMapSurfaceLayout()
   const spots = useDiscoverySpots()
   const trailBoundary = useMapSurfaceBoundary()
@@ -147,11 +147,11 @@ const useDebugMetrics = (): DebugMetrics => {
  * - Real-time metrics display
  * - Console logging
  */
-export function MapViewportDebug({ animatedStyles }: { animatedStyles: any }) {
+export function MapCanvasDebug({ animatedStyles }: { animatedStyles: any }) {
   const metrics = useDebugMetrics()
-  const { boundary: viewportBoundary, radiusMeters, deviceLocation } = useViewportContext()
-  const viewportSize = useViewportDimensions()
-  const { scale, translationX, translationY } = useViewportValues()
+  const { boundary: viewportBoundary, radiusMeters, deviceLocation } = useMapCanvasContext()
+  const viewportSize = useMapCanvasDimensions()
+  const { scale, translationX, translationY } = useMapCanvasValues()
   const spots = useDiscoverySpots()
   const surfaceBoundary = useMapSurfaceBoundary()
   const viewRef = useRef<View>(null)

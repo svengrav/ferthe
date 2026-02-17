@@ -8,7 +8,7 @@ import { Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
 import { mapUtils } from '../../utils/geoToScreenTransform'
-import { useCompensatedScale } from './MapViewport'
+import { useMapCompensatedScale } from './MapCompensatedScale'
 
 // Pre-create style functions outside component for performance
 const createMarkerContainerStyle = (theme: MapTheme) => ({
@@ -47,7 +47,7 @@ interface MapSpotsProps {
 function MapSpots({ boundary, size }: MapSpotsProps) {
   const theme = useMapTheme()
   const spots = useDiscoverySpots()
-  const scale = useCompensatedScale()
+  const scale = useMapCompensatedScale()
   const { showDiscoveryEventCard } = useDiscoveryEventCardOverlay()
 
   // Create animated style for scale transform

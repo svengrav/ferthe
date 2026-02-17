@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler'
 import { SharedValue, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
@@ -73,6 +74,16 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
     const compensated = 1 + (baseCompensation - 1) * dampening
     return Math.max(0.6, Math.min(1.8, compensated))
   }, [scale])
+
+  // Update scale constraints when minScale or maxScale change
+  useEffect(() => {
+    // Clamp current scale to new limits
+    if (scale.value < minScale) {
+      scale.value = withSpring(minScale, SPRING_CONFIG)
+    } else if (scale.value > effectiveMaxScale) {
+      scale.value = withSpring(effectiveMaxScale, SPRING_CONFIG)
+    }
+  }, [minScale, effectiveMaxScale])
 
   // Dummy bounds update function (no bounds in generic viewport)
   const handleBoundsUpdate = () => {

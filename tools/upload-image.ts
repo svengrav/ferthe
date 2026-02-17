@@ -21,7 +21,7 @@
  *   deno run --allow-all tools/upload-image.ts ./photo.jpg --id spot_xyz789 --type spot
  *   deno run --allow-all tools/upload-image.ts ./avatar.png --type account-avatar
  * 
- * Note: Spots automatically generate blurred preview variants
+ * Note: Processing options (blur, etc.) are determined by image type configured in the tool
  */
 
 import { createAzureStorageConnector } from '@core/connectors/storageConnector.ts'
@@ -142,7 +142,7 @@ const uploadImage = async (options: UploadOptions) => {
     const base64 = `data:image/${detectExtension(options.imagePath)};base64,${buffer.toString('base64')}`
 
     // Process image to create optimized original + blurred preview
-    const processed = await processImage(base64)
+    const processed = await processImage(base64, { blur: true })
 
     // Generate blob paths (only image ID, StorageConnector adds v1/images/ prefix)
     blobPath = options.customId
@@ -152,13 +152,13 @@ const uploadImage = async (options: UploadOptions) => {
 
     console.log(`📦 Compressed: ${(buffer.length / 1024).toFixed(2)} KB → ${(processed.original.length / 1024).toFixed(2)} KB`)
 
-    // Upload both original and preview
-    await storageConnector.uploadFileWithPreview(
-      blobPath,
-      processed.original,
-      processed.blurred,
-      blobMetadata
-    )
+    // Upload original and preview separately
+    await storageConnector.uploadFile(blobPath, processed.original, blobMetadata)
+
+    if (processed.blurred) {
+      const previewMetadata = { ...blobMetadata, type: 'preview' }
+      await storageConnector.uploadFile(previewBlobPath, processed.blurred, previewMetadata)
+    }
 
     console.log(`✅ Uploaded original and preview`)
   } else {

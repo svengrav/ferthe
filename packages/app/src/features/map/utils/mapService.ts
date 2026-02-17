@@ -16,15 +16,6 @@ export const mapService = {
     }
   },
 
-  calculateOptimalScale: (mapSize: { width: number; height: number }, containerSize: { width: number; height: number }) => {
-    const scaleToFit = Math.min(containerSize.width / mapSize.width, containerSize.height / mapSize.height)
-    return {
-      init: scaleToFit,
-      min: scaleToFit * 0.9, // 50% vom Fit-Scale
-      max: scaleToFit * 4, // 400% vom Fit-Scale
-    }
-  },
-
   calculateMapSnap: (spots: Spot[], deviceLocation: GeoLocation | undefined, snapIntensity?: number, lastDiscoverySpotLocation?: GeoLocation) => {
     return {
       startPoint: lastDiscoverySpotLocation ?? spots.at(-1)?.location ?? deviceLocation ?? { lat: 0, lon: 0 },

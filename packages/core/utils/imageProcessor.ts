@@ -1,28 +1,37 @@
-import Jimp from 'jimp'
 import { Buffer } from 'node:buffer'
+import sharp from 'sharp'
 
 export interface ProcessedImage {
   original: Buffer
-  blurred: Buffer
+  blurred?: Buffer
   extension: string
 }
 
+export interface ImageProcessingOptions {
+  quality?: number
+  maxWidth?: number
+  previewMaxWidth?: number
+  blurRadius?: number
+  blur?: boolean
+}
+
 /**
- * Processes an image to create optimized original and blurred preview version
+ * Processes an image to create optimized original and optional blurred preview version
  * @param base64Data Base64 encoded image data
- * @param blurRadius Blur radius (1-100, default: 25)
- * @param quality JPEG quality for both images (default: 85)
- * @param maxWidth Maximum width for original image (default: 2048)
- * @param previewMaxWidth Maximum width for preview (default: 800)
- * @returns Processed image buffers
+ * @param options Processing options with quality, dimensions, blur radius, and createBlur flag
+ * @returns Processed image buffers (WebP format)
  */
 export async function processImage(
   base64Data: string,
-  blurRadius: number = 25,
-  quality: number = 85,
-  maxWidth: number = 2048,
-  previewMaxWidth: number = 800
+  options: ImageProcessingOptions = {}
 ): Promise<ProcessedImage> {
+  const {
+    quality = 85,
+    maxWidth = 2048,
+    previewMaxWidth = 800,
+    blurRadius = 25,
+    blur = false,
+  } = options
   try {
     // Remove data URL prefix if present
     const base64Clean = base64Data.replace(/^data:image\/\w+;base64,/, '')
@@ -30,39 +39,37 @@ export async function processImage(
     // Decode base64 to buffer
     const imageBuffer = Buffer.from(base64Clean, 'base64')
 
-    // Determine extension from original data or default to jpg
-    const extension = base64Data.match(/^data:image\/(\w+);base64,/)?.[1] || 'jpg'
-
-    // Load image with Jimp
-    const image = await Jimp.read(imageBuffer)
+    // Load image with Sharp and get metadata
+    const image = sharp(imageBuffer)
+    const metadata = await image.metadata()
 
     // Resize original if needed (maintain aspect ratio)
-    if (image.getWidth() > maxWidth) {
-      image.resize(maxWidth, Jimp.AUTO)
+    const originalResized = metadata.width && metadata.width > maxWidth
+      ? image.resize(maxWidth, undefined, { withoutEnlargement: true })
+      : image
+
+    // Get optimized original buffer (WebP format)
+    const original = await originalResized
+      .webp({ quality })
+      .toBuffer()
+
+    // Create blurred preview version if requested
+    let blurred: Buffer | undefined
+    if (blur) {
+      const previewResized = metadata.width && metadata.width > previewMaxWidth
+        ? sharp(imageBuffer).resize(previewMaxWidth, undefined, { withoutEnlargement: true })
+        : sharp(imageBuffer)
+
+      blurred = await previewResized
+        .blur(blurRadius)
+        .webp({ quality })
+        .toBuffer()
     }
-
-    // Get optimized original buffer
-    const original = await image
-      .quality(quality)
-      .getBufferAsync(Jimp.MIME_JPEG)
-
-    // Create blurred preview version
-    const previewImage = image.clone()
-
-    // Resize preview if needed
-    if (previewImage.getWidth() > previewMaxWidth) {
-      previewImage.resize(previewMaxWidth, Jimp.AUTO)
-    }
-
-    const blurred = await previewImage
-      .blur(blurRadius)
-      .quality(quality)
-      .getBufferAsync(Jimp.MIME_JPEG)
 
     return {
       original,
       blurred,
-      extension: 'jpg', // Always save as JPEG after compression
+      extension: 'webp',
     }
   } catch (error) {
     throw new Error(`Image processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`)

@@ -38,17 +38,33 @@ export interface ImageUploadResult {
 /**
  * Application contract for managing image uploads and deletions.
  */
+export interface ImageProcessOptions {
+  /**
+   * Process the image through sharp (resize, compress to WebP).
+   * If false, stores original format as-is.
+   * Default: true
+   */
+  processImage?: boolean
+  /**
+   * Create a blurred preview variant for sensitive/spoiler content.
+   * Ignored if processImage is false.
+   * Default: false
+   */
+  blur?: boolean
+}
+
 export interface ImageApplicationContract {
   /**
-   * Upload an image and get back blob path.
+   * Process and store an image, get back blob path.
    * The blob path is a secure hash (CUID2) to prevent enumeration.
+   * Actual processing (resize, compression, blur) is determined by options.
    */
-  uploadImage: (
+  processAndStore: (
     context: AccountContext,
     imageType: ImageType,
     entityId: string,
     base64Data: string,
-    extension?: string
+    options?: ImageProcessOptions & { extension?: string }
   ) => Promise<Result<ImageUploadResult>>
 
   /**
