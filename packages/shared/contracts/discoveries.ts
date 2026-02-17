@@ -20,9 +20,9 @@ export interface DiscoveryApplicationContract {
   getDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
   upsertDiscoveryContent: (context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
   deleteDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<void>>
-  reactToDiscovery: (context: AccountContext, discoveryId: string, rating: number) => Promise<Result<DiscoveryReaction>>
-  removeReaction: (context: AccountContext, discoveryId: string) => Promise<Result<void>>
-  getReactionSummary: (context: AccountContext, discoveryId: string) => Promise<Result<ReactionSummary>>
+  rateSpot: (context: AccountContext, spotId: string, rating: number) => Promise<Result<SpotRating>>
+  removeSpotRating: (context: AccountContext, spotId: string) => Promise<Result<void>>
+  getSpotRatingSummary: (context: AccountContext, spotId: string) => Promise<Result<RatingSummary>>
 }
 
 export interface LocationWithDirection {
@@ -108,20 +108,20 @@ export interface DiscoveryContent {
 }
 
 /**
- * User rating (1-5 stars) for a discovery.
+ * User rating (1-5 stars) for a spot.
  */
-export interface DiscoveryReaction {
+export interface SpotRating {
   id: string
-  discoveryId: string
+  spotId: string
   accountId: string
   rating: number // 1-5 stars
   createdAt: Date
 }
 
 /**
- * Aggregated rating summary for a discovery.
+ * Aggregated rating summary for a spot.
  */
-export interface ReactionSummary {
+export interface RatingSummary {
   average: number // Average rating (0-5, 0 if no ratings)
   count: number // Total number of ratings
   userRating?: number // Current user's rating (1-5), if any

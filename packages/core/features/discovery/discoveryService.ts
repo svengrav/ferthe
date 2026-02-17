@@ -1,5 +1,5 @@
 import { createDeterministicId } from '@core/utils/idGenerator'
-import { Clue, ClueSource, Discovery, DiscoveryContent, DiscoveryLocationRecord, DiscoveryReaction, DiscoverySnap, DiscoverySpot, DiscoveryStats, DiscoveryTrail, LocationWithDirection, ReactionSummary, ScanEvent, Spot, Trail } from '@shared/contracts'
+import { Clue, ClueSource, Discovery, DiscoveryContent, DiscoveryLocationRecord, DiscoverySnap, DiscoverySpot, DiscoveryStats, DiscoveryTrail, LocationWithDirection, RatingSummary, ScanEvent, Spot, SpotRating, Trail } from '@shared/contracts'
 import { GeoLocation, geoUtils } from '@shared/geo'
 
 export interface Target {
@@ -31,8 +31,8 @@ export type DiscoveryServiceActions = {
   getDiscoveryStats: (discovery: Discovery, allDiscoveriesForSpot: Discovery[], userDiscoveries: Discovery[], trailSpotIds: string[], spots: Spot[]) => DiscoveryStats
   createDiscoveryContent: (accountId: string, discoveryId: string, content: { imageUrl?: string; comment?: string }) => DiscoveryContent
   updateDiscoveryContent: (existing: DiscoveryContent, content: { imageUrl?: string; comment?: string }) => DiscoveryContent
-  createReaction: (accountId: string, discoveryId: string, rating: number) => DiscoveryReaction
-  getReactionSummary: (discoveryId: string, reactions: DiscoveryReaction[], accountId: string) => ReactionSummary
+  createSpotRating: (accountId: string, spotId: string, rating: number) => SpotRating
+  getSpotRatingSummary: (spotId: string, ratings: SpotRating[], accountId: string) => RatingSummary
 }
 
 /**
@@ -456,15 +456,15 @@ const updateDiscoveryContent = (existing: DiscoveryContent, content: { imageUrl?
 }
 
 /**
- * Creates a rating (1-5 stars) for a discovery
+ * Creates a rating (1-5 stars) for a spot
  */
-const createReaction = (accountId: string, discoveryId: string, rating: number): DiscoveryReaction => {
+const createSpotRating = (accountId: string, spotId: string, rating: number): SpotRating => {
   // Validate rating is between 1-5
   const validRating = Math.max(1, Math.min(5, Math.round(rating)))
-  
+
   return {
-    id: createDeterministicId('discovery-reaction', discoveryId, accountId),
-    discoveryId,
+    id: createDeterministicId('spot-rating', spotId, accountId),
+    spotId,
     accountId,
     rating: validRating,
     createdAt: new Date(),
@@ -474,13 +474,13 @@ const createReaction = (accountId: string, discoveryId: string, rating: number):
 /**
  * Aggregates ratings into a summary with average and current user's rating
  */
-const getReactionSummary = (discoveryId: string, reactions: DiscoveryReaction[], accountId: string): ReactionSummary => {
-  const discoveryReactions = reactions.filter(r => r.discoveryId === discoveryId)
-  const userRating = discoveryReactions.find(r => r.accountId === accountId)?.rating
-  
-  const count = discoveryReactions.length
-  const average = count > 0 
-    ? discoveryReactions.reduce((sum, r) => sum + r.rating, 0) / count
+const getSpotRatingSummary = (spotId: string, ratings: SpotRating[], accountId: string): RatingSummary => {
+  const spotRatings = ratings.filter(r => r.spotId === spotId)
+  const userRating = spotRatings.find(r => r.accountId === accountId)?.rating
+
+  const count = spotRatings.length
+  const average = count > 0
+    ? spotRatings.reduce((sum, r) => sum + r.rating, 0) / count
     : 0
 
   return {
@@ -509,6 +509,6 @@ export const createDiscoveryService = (): DiscoveryServiceActions => ({
   getDiscoveryStats,
   createDiscoveryContent,
   updateDiscoveryContent,
-  createReaction,
-  getReactionSummary,
+  createSpotRating,
+  getSpotRatingSummary,
 })

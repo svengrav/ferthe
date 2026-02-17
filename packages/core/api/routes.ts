@@ -10,19 +10,20 @@ import {
   DiscoveryContent,
   DiscoveryLocationRecord,
   DiscoveryProfile,
-  DiscoveryReaction,
   DiscoverySpot,
   DiscoveryStats,
   DiscoveryTrail,
   FirebaseConfig,
-  ReactionSummary,
+  RatingSummary,
   SMSCodeRequest,
   SMSVerificationResult,
   ScanEvent,
   SharedDiscovery,
   Spot,
   SpotPreview,
+  SpotRating,
   Trail,
+  TrailRating,
   TrailSpot,
   TrailStats,
 } from '@shared/contracts/index.ts'
@@ -156,29 +157,55 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       }),
     },
 
-    // Discovery Reaction Routes
+    // Spot Rating Routes
     {
       method: 'GET',
       version: 'v1',
-      url: '/discoveries/:discoveryId/reactions',
-      handler: asyncRequestHandler<ReactionSummary, { discoveryId: string }>(async ({ context: session, params }) => {
-        return await discoveryApplication.getReactionSummary(session, params!.discoveryId)
+      url: '/spots/:spotId/ratings',
+      handler: asyncRequestHandler<RatingSummary, { spotId: string }>(async ({ context: session, params }) => {
+        return await discoveryApplication.getSpotRatingSummary(session, params!.spotId)
       }),
     },
     {
       method: 'POST',
       version: 'v1',
-      url: '/discoveries/:discoveryId/reactions',
-      handler: asyncRequestHandler<DiscoveryReaction, { discoveryId: string }>(async ({ context: session, params, body }) => {
-        return await discoveryApplication.reactToDiscovery(session, params!.discoveryId, body.rating)
+      url: '/spots/:spotId/ratings',
+      handler: asyncRequestHandler<SpotRating, { spotId: string }>(async ({ context: session, params, body }) => {
+        return await discoveryApplication.rateSpot(session, params!.spotId, body.rating)
       }),
     },
     {
       method: 'DELETE',
       version: 'v1',
-      url: '/discoveries/:discoveryId/reactions',
-      handler: asyncRequestHandler<void, { discoveryId: string }>(async ({ context: session, params }) => {
-        return await discoveryApplication.removeReaction(session, params!.discoveryId)
+      url: '/spots/:spotId/ratings',
+      handler: asyncRequestHandler<void, { spotId: string }>(async ({ context: session, params }) => {
+        return await discoveryApplication.removeSpotRating(session, params!.spotId)
+      }),
+    },
+
+    // Trail Rating Routes
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/trails/:trailId/ratings',
+      handler: asyncRequestHandler<RatingSummary, { trailId: string }>(async ({ context: session, params }) => {
+        return await trailApplication.getTrailRatingSummary(session, params!.trailId)
+      }),
+    },
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/trails/:trailId/ratings',
+      handler: asyncRequestHandler<TrailRating, { trailId: string }>(async ({ context: session, params, body }) => {
+        return await trailApplication.rateTrail(session, params!.trailId, body.rating)
+      }),
+    },
+    {
+      method: 'DELETE',
+      version: 'v1',
+      url: '/trails/:trailId/ratings',
+      handler: asyncRequestHandler<void, { trailId: string }>(async ({ context: session, params }) => {
+        return await trailApplication.removeTrailRating(session, params!.trailId)
       }),
     },
 

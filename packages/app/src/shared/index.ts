@@ -14,6 +14,6 @@ export { useImagePicker } from './hooks/useImagePicker'
 export { useImageToBase64 } from './hooks/useImageToBase64'
 
 // Stores
-export { createReactionStore } from './stores/createReactionStore'
-export type { ReactionSummary } from './stores/createReactionStore'
+export { createRatingStore } from './stores/createRatingStore'
+export type { RatingSummary } from './stores/createRatingStore'
 

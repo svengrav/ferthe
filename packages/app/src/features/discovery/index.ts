@@ -12,10 +12,10 @@ export {
 } from './stores/discoveryContentStore'
 
 export {
-  getDiscoveryReactionActions,
-  getDiscoveryReactionSummary,
-  useDiscoveryReactionSummary
-} from './stores/discoveryReactionStore'
+  getSpotRatingActions,
+  getSpotRatingSummary,
+  useSpotRatingSummary
+} from './stores/spotRatingStore'
 
 export { default as DiscoveryStats } from './components/DiscoveryStats'
 export { useDiscoveryStats } from './hooks/useDiscoveryStats'

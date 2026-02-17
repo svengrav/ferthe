@@ -1,7 +1,7 @@
 import { getSensorDevice, SensorApplication } from '@app/features/sensor'
 import { getTrailData } from '@app/features/trail'
 import { logger } from '@app/shared/utils/logger'
-import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryStats, ReactionSummary, Result } from '@shared/contracts'
+import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryStats, RatingSummary, Result } from '@shared/contracts'
 import { Unsubscribe } from '@shared/events/eventHandler'
 import { GeoLocation, geoUtils } from '@shared/geo'
 import { getTrails } from '../trail/stores/trailStore'
@@ -9,9 +9,9 @@ import { emitDiscoveryTrailUpdated, emitNewDiscoveries, onDiscoveryTrailUpdated,
 import { discoveryService } from './logic/discoveryService'
 import { DiscoveryEventState } from './logic/types'
 import { getDiscoveryContentActions } from './stores/discoveryContentStore'
-import { getDiscoveryReactionActions } from './stores/discoveryReactionStore'
 import { getDiscoveryActions, getDiscoveryData } from './stores/discoveryStore'
 import { getDiscoveryTrailActions, getDiscoveryTrailData, getDiscoveryTrailId } from './stores/discoveryTrailStore'
+import { getSpotRatingActions } from './stores/spotRatingStore'
 
 /**
  * Default discovery trail slug used when no specific trail is set.
@@ -31,10 +31,10 @@ export interface DiscoveryApplication {
   upsertDiscoveryContent: (discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
   deleteDiscoveryContent: (discoveryId: string) => Promise<Result<void>>
   getDiscoveryContent: (discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
-  // Reaction methods
-  reactToDiscovery: (discoveryId: string, rating: number) => Promise<Result<void>>
-  removeReaction: (discoveryId: string) => Promise<Result<void>>
-  getReactionSummary: (discoveryId: string) => Promise<Result<ReactionSummary>>
+  // Rating methods
+  rateSpot: (spotId: string, rating: number) => Promise<Result<void>>
+  removeSpotRating: (spotId: string) => Promise<Result<void>>
+  getSpotRatingSummary: (spotId: string) => Promise<Result<RatingSummary>>
 }
 
 type DiscoveryApplicationOptions = {
@@ -328,20 +328,20 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     return result
   }
 
-  // Reaction methods
-  const reactToDiscovery = async (discoveryId: string, rating: number): Promise<Result<void>> => {
+  // Rating methods
+  const rateSpot = async (spotId: string, rating: number): Promise<Result<void>> => {
     const session = await getSession()
     if (!session.data) return { success: false, data: undefined }
 
-    logger.log('DiscoveryApplication: Rating discovery', { discoveryId, rating })
-    const result = await discoveryAPI.reactToDiscovery(session.data, discoveryId, rating)
+    logger.log('DiscoveryApplication: Rating spot', { spotId, rating })
+    const result = await discoveryAPI.rateSpot(session.data, spotId, rating)
     if (result.success) {
       logger.log('DiscoveryApplication: Rating successful, refreshing summary')
-      // Refresh reaction summary
-      const summaryResult = await discoveryAPI.getReactionSummary(session.data, discoveryId)
+      // Refresh rating summary
+      const summaryResult = await discoveryAPI.getSpotRatingSummary(session.data, spotId)
       if (summaryResult.data) {
         logger.log('DiscoveryApplication: Updated summary', summaryResult.data)
-        getDiscoveryReactionActions().setReactionSummary(discoveryId, summaryResult.data)
+        getSpotRatingActions().setRatingSummary(spotId, summaryResult.data)
       }
     } else {
       logger.error('DiscoveryApplication: Rating failed', result.error)
@@ -349,27 +349,27 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     return { success: result.success, data: undefined }
   }
 
-  const removeReaction = async (discoveryId: string): Promise<Result<void>> => {
+  const removeSpotRating = async (spotId: string): Promise<Result<void>> => {
     const session = await getSession()
     if (!session.data) return { success: false, data: undefined }
 
-    const result = await discoveryAPI.removeReaction(session.data, discoveryId)
+    const result = await discoveryAPI.removeSpotRating(session.data, spotId)
     if (result.success) {
-      const summaryResult = await discoveryAPI.getReactionSummary(session.data, discoveryId)
+      const summaryResult = await discoveryAPI.getSpotRatingSummary(session.data, spotId)
       if (summaryResult.data) {
-        getDiscoveryReactionActions().setReactionSummary(discoveryId, summaryResult.data)
+        getSpotRatingActions().setRatingSummary(spotId, summaryResult.data)
       }
     }
     return result
   }
 
-  const getReactionSummary = async (discoveryId: string): Promise<Result<ReactionSummary>> => {
+  const getSpotRatingSummary = async (spotId: string): Promise<Result<RatingSummary>> => {
     const session = await getSession()
     if (!session.data) return { success: false, error: undefined as any }
 
-    const result = await discoveryAPI.getReactionSummary(session.data, discoveryId)
+    const result = await discoveryAPI.getSpotRatingSummary(session.data, spotId)
     if (result.data) {
-      getDiscoveryReactionActions().setReactionSummary(discoveryId, result.data)
+      getSpotRatingActions().setRatingSummary(spotId, result.data)
     }
     return result
   }
@@ -396,8 +396,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     upsertDiscoveryContent,
     deleteDiscoveryContent,
     getDiscoveryContent,
-    reactToDiscovery,
-    removeReaction,
-    getReactionSummary,
+    rateSpot,
+    removeSpotRating,
+    getSpotRatingSummary,
   }
 }
