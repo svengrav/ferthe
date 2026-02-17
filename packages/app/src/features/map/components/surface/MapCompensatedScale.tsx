@@ -2,25 +2,43 @@ import { createContext, useContext } from 'react'
 import { SharedValue } from 'react-native-reanimated'
 
 /**
- * Context for scale compensation in map gestures
- * Allows map elements to maintain constant visual size during zoom
+ * Context for scale values in map gestures
+ * - scale: Raw zoom scale (1 = no zoom, 2 = 2x zoom, etc.)
+ * - compensatedScale: Dampened inverse scale for keeping UI elements stable
  */
-export const MapCompensatedScaleContext = createContext<SharedValue<number> | null>(null)
+interface MapScaleContext {
+  scale: SharedValue<number>
+  compensatedScale: SharedValue<number>
+}
+
+export const MapScaleContext = createContext<MapScaleContext | null>(null)
 
 /**
- * Provider component for compensated scale context
+ * Provider component for scale context
  * Exported for use in MapCanvas and MapOverview
  */
-export const MapCompensatedScaleProvider = MapCompensatedScaleContext.Provider
+export const MapScaleProvider = MapScaleContext.Provider
 
 /**
- * Hook to access compensated scale for map elements
+ * Hook to access compensated scale for map elements (markers, labels)
  * Works in both MapCanvas and MapOverview contexts
  */
 export const useMapCompensatedScale = (): SharedValue<number> => {
-  const context = useContext(MapCompensatedScaleContext)
+  const context = useContext(MapScaleContext)
   if (!context) {
-    throw new Error('useMapCompensatedScale must be used within MapCompensatedScaleProvider')
+    throw new Error('useMapCompensatedScale must be used within MapScaleProvider')
   }
-  return context
+  return context.compensatedScale
+}
+
+/**
+ * Hook to access raw scale value for inverse transformations
+ * Works in both MapCanvas and MapOverview contexts
+ */
+export const useMapRawScale = (): SharedValue<number> => {
+  const context = useContext(MapScaleContext)
+  if (!context) {
+    throw new Error('useMapRawScale must be used within MapScaleProvider')
+  }
+  return context.scale
 }

@@ -4,6 +4,7 @@ import { useApp } from "@app/shared/useApp"
 import { View } from "react-native"
 import { getMapThemeDefaults } from "../../config/mapThemeDefaults"
 import { useMapSurface } from "../../stores/mapStore"
+import MapGrain from "../grain/MapGrain.tsx"
 
 /**
  * MapSurface component renders the map background image with dynamic positioning.
@@ -21,6 +22,7 @@ function MapSurface() {
       width: layout.width,
       height: layout.height,
     }]} id="map-surface-image">
+
       {image && (
         <Image
           source={{ uri: image }}
@@ -29,6 +31,7 @@ function MapSurface() {
           style={styles?.image}
         />
       )}
+      <MapGrain />
     </View>
   )
 }
@@ -39,6 +42,7 @@ const useStyles = createThemedStyles(theme => ({
     zIndex: 0,
     position: 'absolute',
     backgroundColor: theme.colors.background,
+    overflow: 'hidden'
   },
   image: {
     opacity: surface.imageOpacity,

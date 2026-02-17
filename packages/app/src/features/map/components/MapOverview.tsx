@@ -10,8 +10,9 @@ import { getMapDefaults } from '../config/mapDefaults'
 import { useOverlayGestures } from '../hooks/useOverlayGestures'
 import { getMapStoreActions, useMapContainerSize, useMapOverview, useMapSurfaceBoundary } from '../stores/mapStore'
 import { mapUtils } from '../utils/geoToScreenTransform'
+import MapGrain from './grain/MapGrain'
 import MapClues from './surface/MapClues'
-import { MapCompensatedScaleProvider } from './surface/MapCompensatedScale'
+import { MapScaleProvider } from './surface/MapCompensatedScale'
 import MapDeviceMarker from './surface/MapDeviceMarker'
 import MapSpots from './surface/MapSpots'
 import MapTrailPath from './surface/MapTrailPath'
@@ -56,7 +57,7 @@ function MapOverview() {
   }
 
   // Setup gestures with calculated zoom limits and compensated scale
-  const { gesture, animatedStyle, containerRef, compensatedScale } = useOverlayGestures({
+  const { gesture, animatedStyle, containerRef, scale, compensatedScale } = useOverlayGestures({
     canvasSize,
     screenSize,
     zoomLimits,
@@ -88,12 +89,13 @@ function MapOverview() {
               </View>
             )}
 
-            <MapCompensatedScaleProvider value={compensatedScale}>
+            <MapScaleProvider value={{ scale, compensatedScale }}>
               <MapTrailPath boundary={trailBoundary} size={canvasSize} />
               <MapClues boundary={trailBoundary} size={canvasSize} />
               <MapSpots boundary={trailBoundary} size={canvasSize} />
               <MapDeviceMarker mode="overview" canvasSize={canvasSize} boundary={trailBoundary} />
-            </MapCompensatedScaleProvider>
+              <MapGrain />
+            </MapScaleProvider>
           </Animated.View>
         </GestureDetector>
       </GestureHandlerRootView>

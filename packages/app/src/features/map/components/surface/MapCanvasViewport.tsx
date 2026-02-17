@@ -15,7 +15,7 @@ import { useViewportGestures } from '../../hooks/useViewportGestures.ts'
 import { getMapCanvasActions, getMapState, useMapCanvas, useMapSurfaceBoundary } from '../../stores/mapStore.ts'
 import { mapUtils } from '../../utils/geoToScreenTransform.ts'
 import { MapCanvasDebug } from './MapCanvasDebug.tsx'
-import { MapCompensatedScaleContext } from './MapCompensatedScale.tsx'
+import { MapScaleProvider } from './MapCompensatedScale.tsx'
 
 interface MapCanvasViewportProps {
   children: ReactNode
@@ -54,7 +54,7 @@ function MapCanvasViewport(props: MapCanvasViewportProps) {
 
   const { scale: viewportScale } = useMapCanvas()  // Reactive hook for scale updates
 
-  const { gesture, animatedStyles, compensatedScale } = useViewportGestures({
+  const { gesture, animatedStyles, scale, compensatedScale } = useViewportGestures({
     width: size.width,
     height: size.height,
     initialScale: viewportScale.init,
@@ -72,7 +72,7 @@ function MapCanvasViewport(props: MapCanvasViewportProps) {
   }
 
   return (
-    <MapCompensatedScaleContext.Provider value={compensatedScale}>
+    <MapScaleProvider value={{ scale, compensatedScale }}>
       <View style={styles?.container} onLayout={handleLayout} id='device-viewport-content'>
         {/* Static viewport background image */}
         {image && (
@@ -97,7 +97,7 @@ function MapCanvasViewport(props: MapCanvasViewportProps) {
 
         {config.debug.enableMapDebug && <MapCanvasDebug animatedStyles={animatedStyles} />}
       </View>
-    </MapCompensatedScaleContext.Provider>
+    </MapScaleProvider>
   )
 }
 
