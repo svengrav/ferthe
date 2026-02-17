@@ -2,12 +2,12 @@ import Icon from '@app/shared/components/icon/Icon'
 import Text from '@app/shared/components/text/Text'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { ReactionSummary } from '@shared/contracts'
+import { RatingSummary } from '@shared/contracts'
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 
 interface StarRatingProps {
-  summary?: ReactionSummary
+  summary?: RatingSummary
   onRate: (rating: number) => void
   disabled?: boolean
   size?: number

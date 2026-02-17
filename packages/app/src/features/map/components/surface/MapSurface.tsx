@@ -2,9 +2,8 @@ import { createThemedStyles } from "@app/shared"
 import { Image } from "@app/shared/components"
 import { useApp } from "@app/shared/useApp"
 import { View } from "react-native"
+import { getMapThemeDefaults } from "../../config/mapThemeDefaults"
 import { useMapSurface } from "../../stores/mapStore"
-
-const MAP_IMAGE_OPACITY = 0.7
 
 /**
  * MapSurface component renders the map background image with dynamic positioning.
@@ -34,6 +33,7 @@ function MapSurface() {
   )
 }
 
+const { surface } = getMapThemeDefaults()
 const useStyles = createThemedStyles(theme => ({
   inner: {
     zIndex: 0,
@@ -41,7 +41,7 @@ const useStyles = createThemedStyles(theme => ({
     backgroundColor: theme.colors.background,
   },
   image: {
-    opacity: MAP_IMAGE_OPACITY,
+    opacity: surface.imageOpacity,
   },
 }))
 

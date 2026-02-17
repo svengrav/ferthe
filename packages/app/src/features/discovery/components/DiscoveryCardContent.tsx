@@ -9,9 +9,9 @@ import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
 import { DiscoveryEventState } from '../logic/types'
-import DiscoveryRating from './DiscoveryReaction'
 import DiscoveryShareSection from './DiscoveryShareSection'
 import DiscoveryUserContentSection from './DiscoveryUserContentSection'
+import SpotRating from './SpotRating'
 
 const PAGE_PADDING = 16
 const RESERVED_UI_SPACE = 200
@@ -153,7 +153,7 @@ function DiscoveryCardContent(props: DiscoveryCardContentProps) {
           </Text>
 
           {/* Reaction buttons */}
-          <DiscoveryRating id={discoveryId} />
+          <SpotRating spotId={card.spotId} />
 
           {/* Share button */}
           <DiscoveryShareSection discoveryId={discoveryId} />

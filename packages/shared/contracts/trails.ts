@@ -1,6 +1,7 @@
 import { Spot, SpotPreview } from '@shared/contracts/index.ts'
 import { GeoBoundary } from '@shared/geo/index.ts'
 import { AccountContext } from './accounts.ts'
+import { RatingSummary } from './discoveries.ts'
 import { ImageReference } from './images.ts'
 import { Result } from './results.ts'
 import { TrailSpot } from './trailSpots.ts'
@@ -21,6 +22,9 @@ export interface TrailApplicationContract {
   createSpot: (context: AccountContext, spotData: Omit<Spot, 'id'>) => Promise<Result<Spot>>
   addSpotToTrail: (context: AccountContext, trailId: string, spotId: string, order?: number) => Promise<Result<TrailSpot>>
   removeSpotFromTrail: (context: AccountContext, trailId: string, spotId: string) => Promise<Result<void>>
+  rateTrail: (context: AccountContext, trailId: string, rating: number) => Promise<Result<TrailRating>>
+  removeTrailRating: (context: AccountContext, trailId: string) => Promise<Result<void>>
+  getTrailRatingSummary: (context: AccountContext, trailId: string) => Promise<Result<RatingSummary>>
 }
 
 /**
@@ -98,6 +102,16 @@ export type DiscoveryMode = 'free' | 'sequence'
  */
 export type PreviewMode = 'hidden' | 'preview' | 'discovered'
 
+/**
+ * User rating (1-5 stars) for a trail.
+ */
+export interface TrailRating {
+  id: string
+  trailId: string
+  accountId: string
+  rating: number // 1-5 stars
+  createdAt: Date
+}
 
 /**
  * Defines the options for a trail.

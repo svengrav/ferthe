@@ -11,14 +11,14 @@ import {
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoveryProfileUpdateData,
-  DiscoveryReaction,
   DiscoverySpot,
   DiscoveryStats,
   DiscoveryTrail,
   ImageApplicationContract,
   LocationWithDirection,
-  ReactionSummary,
+  RatingSummary,
   Result,
+  SpotRating,
   TrailApplicationContract
 } from '@shared/contracts'
 import { ERROR_CODES } from '@shared/contracts/errors.ts'
@@ -35,14 +35,14 @@ interface DiscoveryApplicationOptions {
   discoveryStore: Store<Discovery>
   profileStore: Store<DiscoveryProfile>
   contentStore: Store<DiscoveryContent>
-  reactionStore: Store<DiscoveryReaction>
+  ratingStore: Store<SpotRating>
   sensorApplication: SensorApplicationActions
   trailApplication: TrailApplicationContract
   imageApplication?: ImageApplicationContract
 }
 
 export function createDiscoveryApplication(options: DiscoveryApplicationOptions): DiscoveryApplicationContract {
-  const { discoveryService = createDiscoveryService(), discoveryStore, profileStore, contentStore, reactionStore, trailApplication, imageApplication } = options
+  const { discoveryService = createDiscoveryService(), discoveryStore, profileStore, contentStore, ratingStore, trailApplication, imageApplication } = options
 
   const getDiscoveryTrail = async (context: AccountContext, trailId: string, userLocation?: GeoLocation): Promise<Result<DiscoveryTrail>> => {
     try {
@@ -396,7 +396,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
           return createErrorResult(ERROR_CODES.STORAGE_CONNECTOR_NOT_CONFIGURED.code)
         }
 
-        const uploadResult = await imageApplication.uploadImage(context, 'discovery', discoveryId, content.imageUrl)
+        const uploadResult = await imageApplication.processAndStore(context, 'discovery', discoveryId, content.imageUrl, { processImage: true, blur: false })
         if (!uploadResult.success || !uploadResult.data) {
           return createErrorResult(ERROR_CODES.IMAGE_UPLOAD_ERROR.code)
         }
@@ -481,12 +481,12 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     }
   }
 
-  // Reaction methods (like/dislike)
-  const reactToDiscovery = async (
+  // Rating methods
+  const rateSpot = async (
     context: AccountContext,
-    discoveryId: string,
+    spotId: string,
     rating: number
-  ): Promise<Result<DiscoveryReaction>> => {
+  ): Promise<Result<SpotRating>> => {
     try {
       const accountId = context.accountId
       if (!accountId) {
@@ -498,60 +498,60 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         return createErrorResult(ERROR_CODES.INVALID_RATING.code)
       }
 
-      // Remove existing reaction if any
-      const existingResult = await reactionStore.list()
-      const existing = existingResult.data?.find(r => r.discoveryId === discoveryId && r.accountId === accountId)
+      // Remove existing rating if any
+      const existingResult = await ratingStore.list()
+      const existing = existingResult.data?.find(r => r.spotId === spotId && r.accountId === accountId)
       if (existing) {
-        await reactionStore.delete(existing.id)
+        await ratingStore.delete(existing.id)
       }
 
-      const newReaction = discoveryService.createReaction(accountId, discoveryId, rating)
-      const saveResult = await reactionStore.create(newReaction)
+      const newRating = discoveryService.createSpotRating(accountId, spotId, rating)
+      const saveResult = await ratingStore.create(newRating)
       if (!saveResult.success) {
-        return createErrorResult('SAVE_REACTION_ERROR')
+        return createErrorResult('SAVE_RATING_ERROR')
       }
 
-      return createSuccessResult(newReaction)
+      return createSuccessResult(newRating)
     } catch (error: any) {
-      return createErrorResult('REACT_ERROR', { originalError: error.message })
+      return createErrorResult('RATE_ERROR', { originalError: error.message })
     }
   }
 
-  const removeReaction = async (context: AccountContext, discoveryId: string): Promise<Result<void>> => {
+  const removeSpotRating = async (context: AccountContext, spotId: string): Promise<Result<void>> => {
     try {
       const accountId = context.accountId
       if (!accountId) {
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
-      const existingResult = await reactionStore.list()
-      const existing = existingResult.data?.find(r => r.discoveryId === discoveryId && r.accountId === accountId)
+      const existingResult = await ratingStore.list()
+      const existing = existingResult.data?.find(r => r.spotId === spotId && r.accountId === accountId)
       if (existing) {
-        await reactionStore.delete(existing.id)
+        await ratingStore.delete(existing.id)
       }
 
       return createSuccessResult(undefined)
     } catch (error: any) {
-      return createErrorResult('REMOVE_REACTION_ERROR', { originalError: error.message })
+      return createErrorResult('REMOVE_RATING_ERROR', { originalError: error.message })
     }
   }
 
-  const getReactionSummary = async (context: AccountContext, discoveryId: string): Promise<Result<ReactionSummary>> => {
+  const getSpotRatingSummary = async (context: AccountContext, spotId: string): Promise<Result<RatingSummary>> => {
     try {
       const accountId = context.accountId
       if (!accountId) {
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
-      const reactionsResult = await reactionStore.list()
-      if (!reactionsResult.success) {
-        return createErrorResult('GET_REACTIONS_ERROR')
+      const ratingsResult = await ratingStore.list()
+      if (!ratingsResult.success) {
+        return createErrorResult('GET_RATINGS_ERROR')
       }
 
-      const summary = discoveryService.getReactionSummary(discoveryId, reactionsResult.data || [], accountId)
+      const summary = discoveryService.getSpotRatingSummary(spotId, ratingsResult.data || [], accountId)
       return createSuccessResult(summary)
     } catch (error: any) {
-      return createErrorResult('GET_REACTION_SUMMARY_ERROR', { originalError: error.message })
+      return createErrorResult('GET_RATING_SUMMARY_ERROR', { originalError: error.message })
     }
   }
 
@@ -569,8 +569,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     getDiscoveryContent,
     upsertDiscoveryContent,
     deleteDiscoveryContent,
-    reactToDiscovery,
-    removeReaction,
-    getReactionSummary,
+    rateSpot,
+    removeSpotRating,
+    getSpotRatingSummary,
   }
 }

@@ -1,25 +1,26 @@
-import { DiscoverySpot } from '@shared/contracts'
 import { GeoBoundary, GeoLocation, geoUtils } from '@shared/geo'
 import { create } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
+import { getMapDefaults } from '../config/mapDefaults'
+
 export type MapLayer = 'CANVAS' | 'OVERVIEW'
+
+const defaults = getMapDefaults()
 
 // State type - the source of truth
 export interface MapState {
   status: 'uninitialized' | 'loading' | 'ready' | 'error'
   activeLayer: MapLayer
-  tappedSpot: DiscoverySpot | undefined
   container: {
     size: { width: number; height: number }
   }
   surface: {
-    scale: { init: number; min: number; max: number }
     boundary: GeoBoundary
     image?: string
     layout: { left: number; top: number; width: number; height: number }
   }
-  viewport: {
+  canvas: {
     size: { width: number; height: number }
     radius: number
     scale: { init: number; min: number; max: number }
@@ -27,7 +28,7 @@ export interface MapState {
     boundary: GeoBoundary
     image?: string
   }
-  overlay: {
+  overview: {
     scale: { init: number; min: number; max: number }
     offset: { x: number; y: number }
     image?: string
@@ -41,11 +42,10 @@ export interface MapActions {
   setState: (state: Partial<MapState>) => void
   setStatus: (status: MapState['status']) => void
   setActiveLayer: (layer: MapLayer) => void
-  setTappedSpot: (spot: DiscoverySpot | undefined) => void
   setContainer: (container: Partial<MapState['container']>) => void
   setSurface: (surface: Partial<MapState['surface']>) => void
-  setViewport: (viewport: Partial<MapState['viewport']>) => void
-  setOverlay: (overlay: Partial<MapState['overlay']>) => void
+  setCanvas: (canvas: Partial<MapState['canvas']>) => void
+  setOverview: (overview: Partial<MapState['overview']>) => void
   setDevice: (device: Partial<MapState['device']>) => void
   setScanner: (scanner: MapState['scanner']) => void
   setSnap: (snap: MapState['snap']) => void
@@ -57,30 +57,28 @@ const DEFAULT_LOCATION: GeoLocation = { lat: 0, lon: 0 }
 export const useMapStore = create<MapState & MapActions>(set => ({
   status: 'uninitialized',
   activeLayer: 'CANVAS',
-  tappedSpot: undefined,
 
   container: {
-    size: { width: 1000, height: 1000 },
+    size: { width: defaults.canvas.width, height: defaults.canvas.height },
   },
 
   surface: {
-    scale: { init: 1, min: 0.5, max: 2 },
     boundary: DEFAULT_BOUNDARY,
     image: undefined,
     layout: { left: 0, top: 0, width: 550, height: 550 },
   },
 
-  viewport: {
-    size: { width: 1000, height: 1000 },
-    radius: 1000,
-    scale: { init: 1, min: 0.5, max: 2 },
+  canvas: {
+    size: { width: defaults.canvas.width, height: defaults.canvas.height },
+    radius: defaults.canvas.radiusMeters,
+    scale: { ...defaults.canvas.scale },  // Will be dynamically calculated on trail load
     offset: { x: 0, y: 0 },
     boundary: DEFAULT_BOUNDARY,
     image: undefined,
   },
 
-  overlay: {
-    scale: { init: 1, min: 0.5, max: 3 },
+  overview: {
+    scale: { ...defaults.overview.scale },
     offset: { x: 0, y: 0 },
     image: undefined,
   },
@@ -91,7 +89,7 @@ export const useMapStore = create<MapState & MapActions>(set => ({
     direction: 'N',
   },
 
-  scanner: { radius: 1000 },
+  scanner: { radius: defaults.radius },
 
   snap: {
     startPoint: DEFAULT_LOCATION,
@@ -103,11 +101,10 @@ export const useMapStore = create<MapState & MapActions>(set => ({
   setState: state => set(prev => ({ ...prev, ...state })),
   setStatus: status => set(state => (state.status !== status ? { status } : state)),
   setActiveLayer: activeLayer => set(state => (state.activeLayer !== activeLayer ? { activeLayer } : state)),
-  setTappedSpot: tappedSpot => set({ tappedSpot }),
   setContainer: container => set(state => ({ container: { ...state.container, ...container } })),
   setSurface: surface => set(state => ({ surface: { ...state.surface, ...surface } })),
-  setViewport: viewport => set(state => ({ viewport: { ...state.viewport, ...viewport } })),
-  setOverlay: overlay => set(state => ({ overlay: { ...state.overlay, ...overlay } })),
+  setCanvas: canvas => set(state => ({ canvas: { ...state.canvas, ...canvas } })),
+  setOverview: overview => set(state => ({ overview: { ...state.overview, ...overview } })),
   setDevice: device => set(state => ({ device: { ...state.device, ...device } })),
   setScanner: scanner => set({ scanner }),
   setSnap: snap => set({ snap }),
@@ -129,13 +126,13 @@ export const useMapSurface = () => useMapStore(useShallow(state => state.surface
 export const useMapSurfaceBoundary = () => useMapStore(useShallow(state => state.surface.boundary))
 export const useMapSurfaceLayout = () => useMapStore(useShallow(state => state.surface.layout))
 
-// Viewport (visible area + gestures)
-export const useMapViewport = () => useMapStore(useShallow(state => state.viewport))
-export const useViewportDimensions = () => useMapStore(useShallow(state => state.viewport.size))
-export const useViewportScale = () => useMapStore(state => state.viewport.scale.init)
+// Canvas (device-centered canvas mode)
+export const useMapCanvas = () => useMapStore(useShallow(state => state.canvas))
+export const useMapCanvasDimensions = () => useMapStore(useShallow(state => state.canvas.size))
+export const useMapCanvasScale = () => useMapStore(state => state.canvas.scale.init)
 
-// Overlay (overview mode zoom/pan)
-export const useMapOverlay = () => useMapStore(useShallow(state => state.overlay))
+// Overview (full trail overview mode)
+export const useMapOverview = () => useMapStore(useShallow(state => state.overview))
 
 // Device (location + heading)
 export const useMapDevice = () => useMapStore(useShallow(state => state.device))
@@ -146,9 +143,6 @@ export const useMapScanner = () => useMapStore(useShallow(state => state.scanner
 
 // Snap
 export const useMapSnap = () => useMapStore(useShallow(state => state.snap))
-
-// Interaction
-export const useMapSpotTap = () => useMapStore(state => state.tappedSpot)
 
 // =============================================================================
 // Computed Hooks (derived values)
@@ -172,18 +166,18 @@ export const useDeviceBoundaryStatus = () => {
   return { isOutsideBoundary: true, distanceFromBoundary: distance, closestBoundaryPoint: closestPoint }
 }
 
-/** Combined viewport values for gestures */
-export const useViewportValues = () => useMapStore(useShallow(state => ({
-  scale: state.viewport.scale.init,
-  translationX: state.viewport.offset.x,
-  translationY: state.viewport.offset.y,
+/** Combined canvas values for gestures */
+export const useMapCanvasValues = () => useMapStore(useShallow(state => ({
+  scale: state.canvas.scale.init,
+  translationX: state.canvas.offset.x,
+  translationY: state.canvas.offset.y,
 })))
 
-/** Viewport context for geo calculations */
-export const useViewportContext = () => useMapStore(useShallow(state => ({
+/** Canvas context for geo calculations */
+export const useMapCanvasContext = () => useMapStore(useShallow(state => ({
   deviceLocation: state.device.location,
-  radiusMeters: state.viewport.radius,
-  boundary: state.viewport.boundary,
+  radiusMeters: state.canvas.radius,
+  boundary: state.canvas.boundary,
 })))
 
 // =============================================================================
@@ -191,7 +185,6 @@ export const useViewportContext = () => useMapStore(useShallow(state => ({
 // =============================================================================
 
 export const useSetActiveLayer = () => useMapStore(state => state.setActiveLayer)
-export const useSetTappedSpot = () => useMapStore(state => state.setTappedSpot)
 
 // =============================================================================
 // Non-React Access (for application layer)
@@ -203,37 +196,36 @@ export const getMapStoreActions = () => ({
   setState: useMapStore.getState().setState,
   setStatus: useMapStore.getState().setStatus,
   setActiveLayer: useMapStore.getState().setActiveLayer,
-  setTappedSpot: useMapStore.getState().setTappedSpot,
   setContainer: useMapStore.getState().setContainer,
   setSurface: useMapStore.getState().setSurface,
-  setViewport: useMapStore.getState().setViewport,
-  setOverlay: useMapStore.getState().setOverlay,
+  setCanvas: useMapStore.getState().setCanvas,
+  setOverview: useMapStore.getState().setOverview,
   setDevice: useMapStore.getState().setDevice,
   setScanner: useMapStore.getState().setScanner,
   setSnap: useMapStore.getState().setSnap,
 })
 
-export const getViewportActions = () => ({
+export const getMapCanvasActions = () => ({
   setStatus: useMapStore.getState().setStatus,
-  setViewport: useMapStore.getState().setViewport,
+  setCanvas: useMapStore.getState().setCanvas,
   setDevice: useMapStore.getState().setDevice,
 })
 
-export const getViewportValues = () => {
+export const getMapCanvasValues = () => {
   const state = useMapStore.getState()
   return {
-    scale: state.viewport.scale.init,
-    translationX: state.viewport.offset.x,
-    translationY: state.viewport.offset.y,
+    scale: state.canvas.scale.init,
+    translationX: state.canvas.offset.x,
+    translationY: state.canvas.offset.y,
   }
 }
 
-export const getViewportContext = () => {
+export const getMapCanvasContext = () => {
   const state = useMapStore.getState()
   return {
     deviceLocation: state.device.location,
-    radiusMeters: state.viewport.radius,
-    boundary: state.viewport.boundary,
+    radiusMeters: state.canvas.radius,
+    boundary: state.canvas.boundary,
   }
 }
 

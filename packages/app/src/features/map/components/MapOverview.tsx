@@ -6,53 +6,51 @@ import { Image } from '@app/shared/components'
 import { createThemedStyles } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { GeoBoundary } from '@shared/geo'
+import { getMapDefaults } from '../config/mapDefaults'
 import { useOverlayGestures } from '../hooks/useOverlayGestures'
-import { getMapStoreActions, useMapContainerSize, useMapOverlay, useMapSurfaceBoundary } from '../stores/mapStore'
+import { getMapStoreActions, useMapContainerSize, useMapOverview, useMapSurfaceBoundary } from '../stores/mapStore'
 import { mapUtils } from '../utils/geoToScreenTransform'
 import MapClues from './surface/MapClues'
+import { MapCompensatedScaleProvider } from './surface/MapCompensatedScale'
 import MapDeviceMarker from './surface/MapDeviceMarker'
 import MapSpots from './surface/MapSpots'
 import MapTrailPath from './surface/MapTrailPath'
-import { CompensatedScaleProvider } from './surface/MapViewport'
 
-const DEFAULT_CANVAS_SIZE = 800
-const MAX_CANVAS_DIMENSION = 1000
-const CANVAS_MARGIN = 20
-const MAX_ZOOM_METERS = 50
 const OVERVIEW_IMAGE_OPACITY = 0.7
 
 /**
  * Overlay component for Overview mode
  * Displays full trail with zoom/pan gestures
  */
-function MapOverlay() {
+function MapOverview() {
   const { styles } = useApp(useStyles)
   const trailBoundary = useMapSurfaceBoundary()
   const screenSize = useMapContainerSize()
-  const overlay = useMapOverlay()
-  const { setOverlay } = getMapStoreActions()
+  const overview = useMapOverview()
+  const { setOverview } = getMapStoreActions()
+  const defaults = getMapDefaults()
 
   const canvasSize = calculateCanvasSize(trailBoundary, screenSize)
-  const zoomLimits = mapUtils.calculateOverlayZoomLimits(
+  const zoomLimits = mapUtils.calculateZoomLimits(
     trailBoundary,
     canvasSize,
     screenSize,
-    MAX_ZOOM_METERS
+    defaults.zoom.maxMeters
   )
 
   // Calculate initial scale: 
   // - Use stored value if user has zoomed (differs from min scale)
   // - Otherwise fit entire trail to screen (zoomLimits.min)
   // - Clamp to valid range in case trail boundaries changed
-  const storedScale = overlay.scale.init
+  const storedScale = overview.scale.init
   const hasUserZoomed = Math.abs(storedScale - zoomLimits.min) > 0.01
   const unclamped = hasUserZoomed ? storedScale : zoomLimits.min
   const initialScale = Math.max(zoomLimits.min, Math.min(zoomLimits.max, unclamped))
 
   // Persist zoom/pan state to store
   const handleGestureEnd = (scale: number, offsetX: number, offsetY: number) => {
-    setOverlay({
-      scale: { ...overlay.scale, init: scale, min: zoomLimits.min, max: zoomLimits.max },
+    setOverview({
+      scale: { ...overview.scale, init: scale, min: zoomLimits.min, max: zoomLimits.max },
       offset: { x: offsetX, y: offsetY },
     })
   }
@@ -63,7 +61,7 @@ function MapOverlay() {
     screenSize,
     zoomLimits,
     initialScale,
-    initialOffset: overlay.offset,
+    initialOffset: overview.offset,
     onGestureEnd: handleGestureEnd,
   })
 
@@ -78,10 +76,10 @@ function MapOverlay() {
         <GestureDetector gesture={gesture}>
           <Animated.View style={[styles?.mapSurface, dynamicSurfaceStyle, animatedStyle]}>
             {/* Trail overview background image */}
-            {overlay.image && (
+            {overview.image && (
               <View style={styles?.backgroundContainer}>
                 <Image
-                  source={{ uri: overlay.image }}
+                  source={{ uri: overview.image }}
                   width={canvasSize.width}
                   height={canvasSize.height}
                   style={styles?.backgroundImage}
@@ -90,12 +88,12 @@ function MapOverlay() {
               </View>
             )}
 
-            <CompensatedScaleProvider value={compensatedScale}>
+            <MapCompensatedScaleProvider value={compensatedScale}>
               <MapTrailPath boundary={trailBoundary} size={canvasSize} />
               <MapClues boundary={trailBoundary} size={canvasSize} />
               <MapSpots boundary={trailBoundary} size={canvasSize} />
               <MapDeviceMarker mode="overview" canvasSize={canvasSize} boundary={trailBoundary} />
-            </CompensatedScaleProvider>
+            </MapCompensatedScaleProvider>
           </Animated.View>
         </GestureDetector>
       </GestureHandlerRootView>
@@ -105,11 +103,12 @@ function MapOverlay() {
 
 // Calculate canvas size from trail boundary with Mercator projection correction
 const calculateCanvasSize = (boundary: GeoBoundary, screenSize: { width: number; height: number }) => {
+  const defaults = getMapDefaults()
   const latSpan = Math.abs(boundary.northEast.lat - boundary.southWest.lat)
   const lonSpan = Math.abs(boundary.northEast.lon - boundary.southWest.lon)
 
   if (latSpan === 0 || lonSpan === 0) {
-    return { width: DEFAULT_CANVAS_SIZE, height: DEFAULT_CANVAS_SIZE }
+    return { width: defaults.overview.defaultSize, height: defaults.overview.defaultSize }
   }
 
   // Mercator projection correction
@@ -118,8 +117,8 @@ const calculateCanvasSize = (boundary: GeoBoundary, screenSize: { width: number;
   const correctedLonSpan = lonSpan * Math.cos(latRadians)
 
   const aspectRatio = correctedLonSpan / latSpan
-  const availableWidth = screenSize.width - CANVAS_MARGIN
-  const availableHeight = screenSize.height - CANVAS_MARGIN
+  const availableWidth = screenSize.width - defaults.overview.margin
+  const availableHeight = screenSize.height - defaults.overview.margin
 
   // Calculate canvas size that fits within available space while maintaining aspect ratio
   let canvasWidth: number
@@ -127,7 +126,7 @@ const calculateCanvasSize = (boundary: GeoBoundary, screenSize: { width: number;
 
   if (aspectRatio > 1) {
     // Trail is wider - fit to width first
-    canvasWidth = Math.min(availableWidth, MAX_CANVAS_DIMENSION)
+    canvasWidth = Math.min(availableWidth, defaults.overview.maxDimension)
     canvasHeight = canvasWidth / aspectRatio
     // Check if height exceeds available space
     if (canvasHeight > availableHeight) {
@@ -136,7 +135,7 @@ const calculateCanvasSize = (boundary: GeoBoundary, screenSize: { width: number;
     }
   } else {
     // Trail is taller - fit to height first
-    canvasHeight = Math.min(availableHeight, MAX_CANVAS_DIMENSION)
+    canvasHeight = Math.min(availableHeight, defaults.overview.maxDimension)
     canvasWidth = canvasHeight * aspectRatio
     // Check if width exceeds available space
     if (canvasWidth > availableWidth) {
@@ -183,4 +182,4 @@ const useStyles = createThemedStyles(theme => ({
   },
 }))
 
-export default MapOverlay
+export default MapOverview

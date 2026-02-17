@@ -1,4 +1,4 @@
-import { Community, CommunityDiscoveryStats, CommunityMember, Discovery, DiscoveryReaction, SharedDiscovery } from '@shared/contracts'
+import { Community, CommunityDiscoveryStats, CommunityMember, Discovery, SharedDiscovery, SpotRating } from '@shared/contracts'
 
 /**
  * Type definition for the Community Service functionality.
@@ -8,7 +8,7 @@ export type CommunityServiceActions = {
   isMember: (accountId: string, members: CommunityMember[]) => boolean
   getMemberCommunities: (accountId: string, members: CommunityMember[], communities: Community[]) => Community[]
   getSharedDiscoveries: (communityId: string, discoveries: Discovery[]) => Discovery[]
-  getCommunityDiscoveryStats: (discoveryId: string, communityId: string, discoveries: Discovery[], sharedDiscoveries: SharedDiscovery[], reactions: DiscoveryReaction[]) => CommunityDiscoveryStats
+  getCommunityDiscoveryStats: (discoveryId: string, communityId: string, discoveries: Discovery[], sharedDiscoveries: SharedDiscovery[], ratings: SpotRating[]) => CommunityDiscoveryStats
   generateInviteCode: () => string
   createCommunity: (accountId: string, name: string, trailIds: string[], inviteCode: string) => Community
   createMember: (communityId: string, accountId: string) => CommunityMember
@@ -48,7 +48,7 @@ const getCommunityDiscoveryStats = (
   communityId: string,
   discoveries: Discovery[],
   sharedDiscoveries: SharedDiscovery[],
-  reactions: DiscoveryReaction[]
+  ratings: SpotRating[]
 ): CommunityDiscoveryStats => {
   const discovery = discoveries.find(d => d.id === discoveryId)
   if (!discovery) {
@@ -70,11 +70,11 @@ const getCommunityDiscoveryStats = (
   const rank = sortedDiscoveries.findIndex(d => d.id === discoveryId) + 1
   const totalDiscoverers = spotDiscoveries.length
 
-  // Calculate rating statistics
-  const discoveryReactions = reactions.filter(r => r.discoveryId === discoveryId)
-  const ratingCount = discoveryReactions.length
+  // Calculate rating statistics for the spot
+  const spotRatings = ratings.filter(r => r.spotId === discovery.spotId)
+  const ratingCount = spotRatings.length
   const averageRating = ratingCount > 0
-    ? discoveryReactions.reduce((sum, r) => sum + r.rating, 0) / ratingCount
+    ? spotRatings.reduce((sum, r) => sum + r.rating, 0) / ratingCount
     : 0
 
   return {

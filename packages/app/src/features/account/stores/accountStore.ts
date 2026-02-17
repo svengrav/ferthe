@@ -1,4 +1,4 @@
-import { Status, StoreActions, StoreData } from '@app/shared/stores/types'
+import { Status, StoreActions, StoreState } from '@app/shared/stores/types'
 import { Account, AccountSession, AccountType } from '@shared/contracts'
 import { create } from 'zustand'
 
@@ -11,7 +11,7 @@ interface AccountActions extends StoreActions {
   clearAccount: () => void
 }
 
-interface AccountData extends StoreData {
+interface AccountState extends StoreState {
   status: Status
   accountId: string | undefined,
   account: Account | null
@@ -21,7 +21,7 @@ interface AccountData extends StoreData {
   isPhoneVerified: boolean
 }
 
-export const accountStore = create<AccountData & AccountActions>(set => ({
+export const accountStore = create<AccountState & AccountActions>(set => ({
   // Metadata
   updatedAt: new Date(0),
   status: 'uninitialized',

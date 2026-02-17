@@ -6,7 +6,6 @@ import { ActivityIndicator, ImageStyle, StyleProp, View } from 'react-native';
 import { Text } from '@app/shared/components/';
 import React from 'react';
 import { createThemedStyles, useTheme } from '../../theme';
-import { useApp } from '../../useApp';
 
 const LABEL_MAX_LENGTH = 2
 const LABEL_SIZE_RATIO = 0.4
@@ -47,7 +46,7 @@ export function Image({
   resizeMode = 'cover',
   showLoader = true,
 }: ImageProps) {
-  const { styles } = useApp(useStyles)
+  const { styles } = useTheme(useStyles)
   const { theme } = useTheme()
   const [loadingState, setLoadingState] = useState<LoadingState>('loading')
 
@@ -67,23 +66,18 @@ export function Image({
     onError?.()
   }
 
-  if (!styles) return null
-
   const containerStyle = [styles.container, { width, height }, style]
   const dynamicLabelFontSize = Math.min(width ?? height ?? 50, height ?? width ?? 50) * LABEL_SIZE_RATIO
 
-  // Fallback content
-  const renderFallback = () => (
-    <View style={styles.fallbackContainer}>
-      <Text style={[styles.fallbackText, { fontSize: dynamicLabelFontSize }]}>
-        {labelText || placeholder}
-      </Text>
-    </View>
-  )
-
   // Error or missing source
   if (!source || !uri || loadingState === 'error') {
-    return <View style={containerStyle}>{renderFallback()}</View>
+    return <View style={containerStyle}>
+      <View style={styles.fallbackContainer}>
+        <Text style={[styles.fallbackText, { fontSize: dynamicLabelFontSize }]}>
+          {labelText || placeholder}
+        </Text>
+      </View>
+    </View>
   }
 
   return (

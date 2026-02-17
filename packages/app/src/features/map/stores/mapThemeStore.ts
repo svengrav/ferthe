@@ -1,103 +1,19 @@
 import useThemeStore from '@app/shared/theme/themeStore'
 import { create } from 'zustand'
+import { type MapTheme, getMapThemeDefaults } from '../config/mapThemeDefaults'
 
 interface MapThemeStore {
   mapTheme: MapTheme
   updateFromBaseTheme: () => void
 }
 
-export interface MapTheme {
-  radius: { fill: string; strokeColor: string; strokeWidth: number }
-  device: { fill: string; strokeColor: string; strokeWidth: number }
-  spot: {
-    fill: string
-    strokeColor: string
-    strokeWidth: number
-    size: number
-    borderRadius: number
-    borderWidth: number
-    backgroundColor: string
-    imageBorderRadius: number
-    imageBackgroundColor: string
-    heightOffset: number
-    offsetX: number
-    offsetY: number
-  }
-  discovery: { fill: string; strokeColor: string; strokeWidth: number }
-  clue: { fill: string; strokeColor: string; strokeWidth: number }
-  trail: { strokeColor: string; strokeWidth: number; strokeDash?: number[] }
-  snap: { strokeColor: string; strokeWidth: number; strokeDash?: number[] }
-  scanner: { strokeColor: string; fill: string; strokeWidth: number }
-  compass: { color: string; fontSize: number }
-  center: { fill: string }
-}
-
-const createMapThemeFromBase = (): MapTheme => {
-  const baseTheme = useThemeStore.getState()
-
-  return {
-    radius: {
-      strokeColor: '#000',
-      fill: 'rgba(0, 0, 0, 0.2)', // Semi-transparent white
-      strokeWidth: 2,
-    },
-    device: {
-      strokeColor: '#ffffff',
-      fill: '#ffffff',
-      strokeWidth: 1.5,
-    },
-    spot: {
-      strokeColor: baseTheme.colors.primary,
-      fill: baseTheme.colors.background,
-      strokeWidth: 1.5,
-      size: 15,
-      borderRadius: 4,
-      borderWidth: 0.5,
-      backgroundColor: '#000000ff',
-      imageBorderRadius: 2,
-      imageBackgroundColor: '#000',
-      heightOffset: 7,
-      offsetX: 10,
-      offsetY: 13.5,
-    },
-    discovery: {
-      strokeColor: baseTheme.colors.primary,
-      fill: baseTheme.colors.background,
-      strokeWidth: 1.5,
-    },
-    clue: {
-      strokeColor: baseTheme.colors.primary,
-      fill: baseTheme.colors.background,
-      strokeWidth: 1.5,
-    },
-    trail: {
-      strokeColor: baseTheme.opacity(baseTheme.colors.onSurface, 20),
-      strokeWidth: 1.5,
-    },
-    snap: {
-      strokeColor: '#ffffff',
-      strokeWidth: 1.5,
-    },
-    scanner: {
-      strokeColor: '#ffffff',
-      fill: '#ffffff3a',
-      strokeWidth: 1,
-    },
-    compass: {
-      color: baseTheme.colors.onSurface,
-      fontSize: 24,
-    },
-    center: {
-      fill: '#a5a5a58c',
-    },
-  }
-}
+export type { MapTheme }
 
 export const useMapThemeStore = create<MapThemeStore>(set => ({
-  mapTheme: createMapThemeFromBase(),
+  mapTheme: getMapThemeDefaults(),
 
   updateFromBaseTheme: () => {
-    set({ mapTheme: createMapThemeFromBase() })
+    set({ mapTheme: getMapThemeDefaults() })
   },
 }))
 

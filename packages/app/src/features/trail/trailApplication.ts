@@ -1,11 +1,15 @@
 import { logger } from '@app/shared/utils/logger'
-import { AccountContext, Result, TrailApplicationContract, TrailStats } from '@shared/contracts'
+import { AccountContext, RatingSummary, Result, TrailApplicationContract, TrailStats } from '@shared/contracts'
+import { getTrailRatingActions } from './stores/trailRatingStore'
 import { getTrailStoreActions } from './stores/trailStore'
 
 export interface TrailApplication {
   requestTrailState: () => Promise<void>
   requestTrailSpotPreviews: (trailId: string) => Promise<void>
   getTrailStats: (trailId: string) => Promise<Result<TrailStats>>
+  rateTrail: (trailId: string, rating: number) => Promise<Result<void>>
+  removeTrailRating: (trailId: string) => Promise<Result<void>>
+  getTrailRatingSummary: (trailId: string) => Promise<Result<RatingSummary>>
 }
 
 interface TrailApplicationOptions {
@@ -66,9 +70,57 @@ export function createTrailApplication(options: TrailApplicationOptions) {
     return await trailAPI.getTrailStats(accountSession.data, trailId)
   }
 
+  const rateTrail = async (trailId: string, rating: number): Promise<Result<void>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined }
+
+    logger.log('TrailApplication: Rating trail', { trailId, rating })
+    const result = await trailAPI.rateTrail(session.data, trailId, rating)
+    if (result.success) {
+      logger.log('TrailApplication: Rating successful, refreshing summary')
+      // Refresh rating summary
+      const summaryResult = await trailAPI.getTrailRatingSummary(session.data, trailId)
+      if (summaryResult.data) {
+        logger.log('TrailApplication: Updated summary', summaryResult.data)
+        getTrailRatingActions().setRatingSummary(trailId, summaryResult.data)
+      }
+    } else {
+      logger.error('TrailApplication: Rating failed', result.error)
+    }
+    return { success: result.success, data: undefined }
+  }
+
+  const removeTrailRating = async (trailId: string): Promise<Result<void>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, data: undefined }
+
+    const result = await trailAPI.removeTrailRating(session.data, trailId)
+    if (result.success) {
+      const summaryResult = await trailAPI.getTrailRatingSummary(session.data, trailId)
+      if (summaryResult.data) {
+        getTrailRatingActions().setRatingSummary(trailId, summaryResult.data)
+      }
+    }
+    return result
+  }
+
+  const getTrailRatingSummary = async (trailId: string): Promise<Result<RatingSummary>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, error: undefined as any }
+
+    const result = await trailAPI.getTrailRatingSummary(session.data, trailId)
+    if (result.data) {
+      getTrailRatingActions().setRatingSummary(trailId, result.data)
+    }
+    return result
+  }
+
   return {
     requestTrailState,
     requestTrailSpotPreviews,
     getTrailStats,
+    rateTrail,
+    removeTrailRating,
+    getTrailRatingSummary,
   }
 }

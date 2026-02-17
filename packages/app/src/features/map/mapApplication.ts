@@ -5,8 +5,8 @@ import { discoveryService } from '@app/features/discovery/logic/discoveryService
 import { getSensorActions, getSensorData, SensorApplication } from '@app/features/sensor'
 import { logger } from '@app/shared/utils/logger'
 import { discoveryTrailStore } from '../discovery/stores/discoveryTrailStore'
+import { getMapDefaults } from './config/mapDefaults'
 import { getMapState, getMapStoreActions } from './stores/mapStore'
-import { MAP_DEFAULT } from './types/map'
 import { mapUtils } from './utils/geoToScreenTransform'
 import { calculateScaleForRadius } from './utils/viewportUtils'
 
@@ -21,9 +21,9 @@ interface MapApplicationOptions {
 
 export function createMapApplication(options: MapApplicationOptions = {}): MapApplication {
   const { discoveryApplication, sensor } = options
-  const { setDevice, setSnap, setState, setSurface, setViewport } = getMapStoreActions()
-  const { getCompass, calculateMapSnap, calculateOptimalScale } = getMapService()
-
+  const { setDevice, setSnap, setState, setSurface, setCanvas } = getMapStoreActions()
+  const { getCompass, calculateMapSnap } = getMapService()
+  const defaults = getMapDefaults()
   let lastTrailId: string | undefined
 
   sensor?.onDeviceUpdate(device => {
@@ -34,17 +34,17 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
     const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
 
-    // Update viewport boundary based on device location with current adaptive radius
-    const newViewportBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, currentState.viewport.radius)
+    // Update canvas boundary based on device location with current adaptive radius
+    const newCanvasBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, currentState.canvas.radius)
     const surfaceLayout = mapUtils.calculateSurfaceLayout(
       currentState.surface.boundary,
-      newViewportBoundary,
-      currentState.viewport.size
+      newCanvasBoundary,
+      currentState.canvas.size
     )
 
     setSnap(snapState)
     setSurface({ boundary: trail?.boundary, layout: surfaceLayout })
-    setViewport({ boundary: newViewportBoundary })
+    setCanvas({ boundary: newCanvasBoundary })
     setDevice({
       location: device.location,
       heading: device.heading,
@@ -64,7 +64,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
 
   const newMapState = async () => {
     const { trail, spots, snap, lastDiscovery } = getDiscoveryTrailData()
-    const currentViewport = getMapState().viewport
+    const currentCanvas = getMapState().canvas
     const { device } = getSensorData()
     const { requestDeviceState } = getSensorActions()
 
@@ -83,51 +83,52 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
 
     const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
     const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
-    const optimalScale = calculateOptimalScale(
-      { width: MAP_DEFAULT.viewport.width, height: MAP_DEFAULT.viewport.height },
-      currentViewport.size
-    )
 
-    // Calculate adaptive viewport radius based on trail size
+    // Calculate adaptive canvas radius based on trail size
     const adaptiveRadius = mapUtils.calculateAdaptiveViewportRadius(trail.boundary)
 
-    const initialViewportBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, adaptiveRadius)
+    const initialCanvasBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, adaptiveRadius)
     const initialSurfaceLayout = mapUtils.calculateSurfaceLayout(
       trail.boundary,
-      initialViewportBoundary,
-      currentViewport.size
+      initialCanvasBoundary,
+      currentCanvas.size
     )
 
     // Calculate initial scale to show comfortable viewing distance
-    const initialScale = calculateScaleForRadius(adaptiveRadius, MAP_DEFAULT.initialViewRadius)
+    const initialScale = calculateScaleForRadius(adaptiveRadius, defaults.initialViewRadius)
+
+    // Calculate dynamic zoom limits for canvas based on adaptive radius and max zoom meters
+    const canvasZoomLimits = mapUtils.calculateZoomLimits(
+      initialCanvasBoundary,
+      { width: defaults.canvas.width, height: defaults.canvas.height },
+      currentCanvas.size,
+      defaults.zoom.maxMeters
+    )
 
     setState({
       status: 'ready',
       snap: snapState,
 
       surface: {
-        scale: typeof optimalScale === 'number'
-          ? { init: optimalScale, min: MAP_DEFAULT.scale.min, max: MAP_DEFAULT.scale.max }
-          : optimalScale,
         boundary: trail.boundary,
         image: trail?.map?.image?.url,
         layout: initialSurfaceLayout,
       },
 
-      viewport: {
-        ...currentViewport,
+      canvas: {
+        ...currentCanvas,
         radius: adaptiveRadius,
-        boundary: initialViewportBoundary,
+        boundary: initialCanvasBoundary,
         image: trail?.viewport?.image?.url,
         scale: {
           init: initialScale,
-          min: MAP_DEFAULT.scale.min,
-          max: MAP_DEFAULT.scale.max,
+          min: canvasZoomLimits.min,
+          max: canvasZoomLimits.max,
         },
       },
 
-      overlay: {
-        scale: { init: 1, min: 0.5, max: 3 },
+      overview: {
+        scale: { init: 1, min: defaults.overview.scale.min, max: defaults.overview.scale.max },
         offset: { x: 0, y: 0 },
         image: trail?.overview?.image?.url,
       },
@@ -139,7 +140,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
       },
 
       scanner: {
-        radius: trail?.options?.scannerRadius || MAP_DEFAULT.radius,
+        radius: trail?.options?.scannerRadius || defaults.radius,
       },
     })
   }

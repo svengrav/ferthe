@@ -2,6 +2,10 @@
 
 - UX Feedback like vibrations, sounds, and visual effects are used to enhance the user experience and provide feedback on interactions. For example, when you discover a spot, you might feel a vibration and see a visual effect to celebrate the achievement.
 
+## Welcome and Onboarding
+- When you open the app for the first time, you are greeted with a welcome screen that introduces the concept of the app and its core features. This screen sets the tone for the adventure and encourages you to start exploring.
+- You discover your first spot, this spot is dynamically generated based on your location and is meant to be easily discoverable to give you a quick win and show you how the discovery process works. This helps you understand the core mechanics of the app right away and motivates you to continue exploring.
+
 ## Participation and Development Engagement
 - You can give feedback on the app and suggest new features or improvements. This can be done through in-app feedback forms, community forums, or social media channels.
 - You can participate in beta testing new features and provide feedback to the development team.
@@ -60,7 +64,6 @@ A spot is usually a point of interest, but can also be:
 - A spot can have a one time secret like a discount code
 - Probably Advisory: Spots should not be placed in private areas or places that could cause safety issues. Clear guidelines and moderation are needed to ensure responsible spot placement.
 - Maybe it's possible to destroy a spot if enough people don't like it (e.g. if it's in a dangerous location or if it's fake). This would require a reporting and review system.
-  
 
 ## Discovery
 
@@ -163,7 +166,6 @@ A Discovery is a unique finding of a user at a specific spot. It is private to y
 - Discovery radius (visualized as circle)
 - Trail ID
 - Source type
-
 
 ## Sensor
 

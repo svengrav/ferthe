@@ -1,4 +1,4 @@
-import { Account, AccountSession, Community, CommunityMember, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryProfile, DiscoveryReaction, ImageApplicationContract, SharedDiscovery, StoredSpot, StoredTrail, TrailApplicationContract, TrailSpot, TwilioVerification } from '@shared/contracts/index.ts'
+import { Account, AccountSession, Community, CommunityMember, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryProfile, ImageApplicationContract, SharedDiscovery, SpotRating, StoredSpot, StoredTrail, TrailApplicationContract, TrailRating, TrailSpot, TwilioVerification } from '@shared/contracts/index.ts'
 import { Buffer } from "node:buffer"
 import { Config, STORE_IDS } from './config/index.ts'
 import { SMSConnector } from './connectors/smsConnector.ts'
@@ -19,7 +19,6 @@ import { StoreInterface } from './store/storeInterface.ts'
 export interface StorageConnector {
   getItemUrl(key: string): Promise<{ id: string; url: string } | null>
   uploadFile(path: string, data: Buffer | string, metadata?: Record<string, string>): Promise<string>
-  uploadFileWithPreview(path: string, data: Buffer, previewData: Buffer, metadata?: Record<string, string>): Promise<{ url: string; previewUrl: string }>
   deleteFile(path: string): Promise<void>
   getMetadata(path: string): Promise<Record<string, string>>
 }
@@ -54,6 +53,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     spotStore: createStore<StoredSpot>(storeConnector, STORE_IDS.SPOTS),
     trailSpotStore: createStore<TrailSpot>(storeConnector, STORE_IDS.TRAIL_SPOTS),
     discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
+    trailRatingStore: createStore<TrailRating>(storeConnector, STORE_IDS.TRAIL_RATINGS),
     imageApplication,
   })
 
@@ -85,7 +85,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
     profileStore: createStore<DiscoveryProfile>(storeConnector, STORE_IDS.DISCOVERY_PROFILES),
     contentStore: createStore<DiscoveryContent>(storeConnector, STORE_IDS.DISCOVERY_CONTENTS),
-    reactionStore: createStore<DiscoveryReaction>(storeConnector, STORE_IDS.DISCOVERY_REACTIONS),
+    ratingStore: createStore<SpotRating>(storeConnector, STORE_IDS.SPOT_RATINGS),
     imageApplication: imageApplication
   })
 
@@ -93,7 +93,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     communityStore: {
       communities: createStore<Community>(storeConnector, STORE_IDS.COMMUNITIES),
       members: createStore<CommunityMember>(storeConnector, STORE_IDS.COMMUNITY_MEMBERS),
-      reactions: createStore<DiscoveryReaction>(storeConnector, STORE_IDS.DISCOVERY_REACTIONS),
+      ratings: createStore<SpotRating>(storeConnector, STORE_IDS.SPOT_RATINGS),
       discoveries: createStore<SharedDiscovery>(storeConnector, STORE_IDS.COMMUNITY_DISCOVERIES),
     },
     discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),

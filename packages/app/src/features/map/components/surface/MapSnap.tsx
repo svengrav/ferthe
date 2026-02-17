@@ -3,8 +3,8 @@ import { GeoBoundary } from "@shared/geo"
 import { memo } from "react"
 import { useMapSnap } from "../../stores/mapStore"
 import { useMapTheme } from "../../stores/mapThemeStore"
+import { useMapCompensatedScale } from "./MapCompensatedScale"
 import { GeoPath } from "./MapElements"
-import { useCompensatedScale } from "./MapViewport"
 
 interface MapSnapProps {
   boundary: GeoBoundary
@@ -14,16 +14,16 @@ interface MapSnapProps {
 function MapSnap({ boundary, size }: MapSnapProps) {
   const { startPoint, endPoint, intensity } = useMapSnap()
   const mapTheme = useMapTheme()
-  const scale = useCompensatedScale()
+  const scale = useMapCompensatedScale()
 
   // Don't render if intensity is 0 or if start and end points are the same
   if (intensity === 0) {
     return null
   }
 
-  const color = hexToRgbaWithIntensity(mapTheme.snap.strokeColor || '#ffffff', intensity)
+  const color = hexToRgbaWithIntensity(mapTheme.snap.strokeColor, intensity)
   return <GeoPath
-    key={'map-snap-line'}
+    key='map-snap-line'
     boundary={boundary}
     size={size}
     points={[startPoint, endPoint]}

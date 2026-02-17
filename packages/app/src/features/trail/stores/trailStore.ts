@@ -1,4 +1,4 @@
-import { Status, StoreActions, StoreData } from '@app/shared/index'
+import { Status, StoreActions, StoreState } from '@app/shared/index'
 import { SpotPreview, Trail, TrailStats } from '@shared/contracts'
 import { create } from 'zustand'
 
@@ -8,14 +8,14 @@ interface TrailActions extends StoreActions {
   setTrailStats: (trailId: string, stats: TrailStats) => void
 }
 
-interface TrailData extends StoreData {
+interface TrailState extends StoreState {
   status: Status
   trails: Trail[]
   spots: SpotPreview[]
   trailStats: Record<string, TrailStats>
 }
 
-export const trailStore = create<TrailData & TrailActions>(set => ({
+export const trailStore = create<TrailState & TrailActions>(set => ({
   // Metadata
   updatedAt: new Date(0),
   status: 'uninitialized',

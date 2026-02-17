@@ -12,13 +12,12 @@ import {
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoveryProfileUpdateData,
-  DiscoveryReaction,
   DiscoverySpot,
   DiscoveryStats,
   DiscoveryTrail,
   FirebaseConfig,
   LocationWithDirection,
-  ReactionSummary,
+  RatingSummary,
   ScanEvent,
   SessionValidationResult,
   SharedDiscovery,
@@ -26,7 +25,9 @@ import {
   SMSVerificationResult,
   Spot,
   SpotPreview,
+  SpotRating,
   Trail,
+  TrailRating,
   TrailSpot,
   TrailStats
 } from '@shared/contracts'
@@ -112,15 +113,15 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
       deleteDiscoveryContent: (_context: AccountContext, discoveryId: string) =>
         API.send<void>(`/discoveries/${discoveryId}/content`, 'DELETE'),
 
-      // Reaction methods
-      reactToDiscovery: (_context: AccountContext, discoveryId: string, rating: number) =>
-        API.send<DiscoveryReaction>(`/discoveries/${discoveryId}/reactions`, 'POST', { rating }),
+      // Rating methods
+      rateSpot: (_context: AccountContext, spotId: string, rating: number) =>
+        API.send<SpotRating>(`/spots/${spotId}/ratings`, 'POST', { rating }),
 
-      removeReaction: (_context: AccountContext, discoveryId: string) =>
-        API.send<void>(`/discoveries/${discoveryId}/reactions`, 'DELETE'),
+      removeSpotRating: (_context: AccountContext, spotId: string) =>
+        API.send<void>(`/spots/${spotId}/ratings`, 'DELETE'),
 
-      getReactionSummary: (_context: AccountContext, discoveryId: string) =>
-        API.send<ReactionSummary>(`/discoveries/${discoveryId}/reactions`),
+      getSpotRatingSummary: (_context: AccountContext, spotId: string) =>
+        API.send<RatingSummary>(`/spots/${spotId}/ratings`),
     },
 
     /**
@@ -155,6 +156,15 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
 
       removeSpotFromTrail: (_context: AccountContext, trailId: string, spotId: string) =>
         API.send<void>(`/trail/${trailId}/spots/${spotId}`, 'DELETE'),
+
+      rateTrail: (_context: AccountContext, trailId: string, rating: number) =>
+        API.send<TrailRating>(`/trails/${trailId}/ratings`, 'POST', { rating }),
+
+      removeTrailRating: (_context: AccountContext, trailId: string) =>
+        API.send<void>(`/trails/${trailId}/ratings`, 'DELETE'),
+
+      getTrailRatingSummary: (_context: AccountContext, trailId: string) =>
+        API.send<RatingSummary>(`/trails/${trailId}/ratings`),
     },
 
     /**

@@ -1,5 +1,5 @@
 import { DeviceLocation } from '@app/features/sensor/device/types'
-import { StoreActions, StoreData } from '@app/shared/stores/types'
+import { StoreActions, StoreState } from '@app/shared/stores/types'
 import { ScanEvent } from '@shared/contracts'
 import { create } from 'zustand'
 
@@ -15,7 +15,7 @@ interface SensorActions extends Omit<StoreActions, 'setStatus'> {
   setStatus: (status: SensorStatus) => void
 }
 
-interface SensorData extends Omit<StoreData, 'status'> {
+interface SensorState extends Omit<StoreState, 'status'> {
   status: SensorStatus
   device: DeviceLocation
   scanRecords: ScanEvent[]
@@ -25,7 +25,7 @@ interface SensorData extends Omit<StoreData, 'status'> {
   statusMessage: string | undefined
 }
 
-export const sensorStore = create<SensorData & SensorActions>(set => ({
+export const sensorStore = create<SensorState & SensorActions>(set => ({
   // Metadata
   updatedAt: new Date(0),
   status: 'uninitialized',

@@ -7,6 +7,7 @@ import {
   Discovery,
   ImageApplicationContract,
   ImageReference,
+  RatingSummary,
   Result,
   Spot,
   SpotPreview,
@@ -14,6 +15,7 @@ import {
   StoredTrail,
   Trail,
   TrailApplicationContract,
+  TrailRating,
   TrailSpot,
   TrailStats
 } from '@shared/contracts/index.ts'
@@ -25,6 +27,7 @@ interface TrailApplicationOptions {
   spotStore: Store<StoredSpot>
   trailSpotStore: Store<TrailSpot>
   discoveryStore: Store<Discovery>
+  trailRatingStore: Store<TrailRating>
   imageApplication: ImageApplicationContract
 }
 
@@ -206,7 +209,7 @@ async function enrichTrailWithBoundary(
   }
 }
 
-export function createTrailApplication({ trailStore, spotStore, trailSpotStore, discoveryStore, imageApplication }: TrailApplicationOptions): TrailApplicationContract {
+export function createTrailApplication({ trailStore, spotStore, trailSpotStore, discoveryStore, trailRatingStore, imageApplication }: TrailApplicationOptions): TrailApplicationContract {
   const trailService = createTrailService()
 
   return {
@@ -596,6 +599,95 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore, 
         return { success: true, data: undefined }
       } catch (error: unknown) {
         return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'REMOVE_SPOT_FROM_TRAIL_ERROR' } }
+      }
+    },
+
+    rateTrail: async (context: AccountContext, trailId: string, rating: number): Promise<Result<TrailRating>> => {
+      try {
+        const accountId = context.accountId
+        if (!accountId) {
+          return { success: false, error: { message: 'Account ID required', code: 'ACCOUNT_ID_REQUIRED' } }
+        }
+
+        // Validate rating
+        if (rating < 1 || rating > 5) {
+          return { success: false, error: { message: 'Rating must be between 1 and 5', code: 'INVALID_RATING' } }
+        }
+
+        // Remove existing rating if any
+        const existingResult = await trailRatingStore.list()
+        const existing = existingResult.data?.find(r => r.trailId === trailId && r.accountId === accountId)
+        if (existing) {
+          await trailRatingStore.delete(existing.id)
+        }
+
+        const newRating: TrailRating = {
+          id: createCuid2(),
+          trailId,
+          accountId,
+          rating,
+          createdAt: new Date(),
+        }
+
+        const saveResult = await trailRatingStore.create(newRating)
+        if (!saveResult.success) {
+          return { success: false, error: { message: 'Failed to save rating', code: 'SAVE_RATING_ERROR' } }
+        }
+
+        return { success: true, data: newRating }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'RATE_TRAIL_ERROR' } }
+      }
+    },
+
+    removeTrailRating: async (context: AccountContext, trailId: string): Promise<Result<void>> => {
+      try {
+        const accountId = context.accountId
+        if (!accountId) {
+          return { success: false, error: { message: 'Account ID required', code: 'ACCOUNT_ID_REQUIRED' } }
+        }
+
+        const existingResult = await trailRatingStore.list()
+        const existing = existingResult.data?.find(r => r.trailId === trailId && r.accountId === accountId)
+        if (existing) {
+          await trailRatingStore.delete(existing.id)
+        }
+
+        return { success: true, data: undefined }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'REMOVE_RATING_ERROR' } }
+      }
+    },
+
+    getTrailRatingSummary: async (context: AccountContext, trailId: string): Promise<Result<RatingSummary>> => {
+      try {
+        const accountId = context.accountId
+        if (!accountId) {
+          return { success: false, error: { message: 'Account ID required', code: 'ACCOUNT_ID_REQUIRED' } }
+        }
+
+        const ratingsResult = await trailRatingStore.list()
+        if (!ratingsResult.success) {
+          return { success: false, error: { message: 'Failed to get ratings', code: 'GET_RATINGS_ERROR' } }
+        }
+
+        const trailRatings = (ratingsResult.data || []).filter(r => r.trailId === trailId)
+        const userRating = trailRatings.find(r => r.accountId === accountId)?.rating
+
+        const count = trailRatings.length
+        const average = count > 0
+          ? trailRatings.reduce((sum, r) => sum + r.rating, 0) / count
+          : 0
+
+        const summary: RatingSummary = {
+          average: Math.round(average * 10) / 10, // Round to 1 decimal
+          count,
+          userRating,
+        }
+
+        return { success: true, data: summary }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_RATING_SUMMARY_ERROR' } }
       }
     },
   }

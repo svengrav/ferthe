@@ -9,7 +9,7 @@ import Animated, { Easing, runOnJS, useAnimatedReaction, useAnimatedStyle, useSh
 import { useMapDevice } from '../../stores/mapStore'
 import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
 import { mapUtils } from '../../utils/geoToScreenTransform'
-import { useCompensatedScale } from './MapViewport'
+import { useMapCompensatedScale } from './MapCompensatedScale'
 
 const CLUE_SIZE = 20
 const FADE_IN_DURATION = 300
@@ -276,7 +276,7 @@ function MapClues({ boundary, size }: MapCluesProps) {
   const scannedClues = useDiscoveryScannedClues()
   const device = useMapDevice()
   const theme = useMapTheme()
-  const scale = useCompensatedScale()
+  const scale = useMapCompensatedScale()
 
   // Sync SharedValue to number for style calculations
   const scaleValue = useSharedValueAsNumber(scale)
