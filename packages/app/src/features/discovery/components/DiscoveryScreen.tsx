@@ -19,7 +19,7 @@ const STATUS_LOADING = 'loading'
  * Hook to manage discovery screen state and data fetching
  */
 const useDiscoveryScreen = () => {
-  const { discoveries, spots } = useDiscoveryData()
+  const { discoveries } = useDiscoveryData()
   const discoveryStatus = useDiscoveryStatus()
   const { requestDiscoveryState, getDiscoveryCards } = getAppContext().discoveryApplication
 
@@ -35,7 +35,6 @@ const useDiscoveryScreen = () => {
 
   return {
     discoveries,
-    spots,
     cards,
     isLoading,
     requestDiscoveryState,

@@ -59,6 +59,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
 
   const spotApplication = createSpotApplication({
     spotStore: createStore<StoredSpot>(storeConnector, STORE_IDS.SPOTS),
+    discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
   })
 
   const accountApplication = createAccountApplication({

@@ -7,6 +7,7 @@ import { createDiscoveryApplication, DiscoveryApplication } from './features/dis
 import { createMapApplication, MapApplication } from './features/map/mapApplication'
 import { DeviceConnector } from './features/sensor/device/types'
 import { createSensorApplication, SensorApplication } from './features/sensor/sensorApplication'
+import { createSpotApplication, SpotApplication } from './features/spot/spotApplication'
 import { createTrailApplication, TrailApplication } from './features/trail/trailApplication'
 import { SecureStoreConnector } from './shared/device/secureStoreConnector'
 import { logger } from './shared/utils/logger'
@@ -20,6 +21,7 @@ export interface AppContext {
   discoveryApplication: DiscoveryApplication
   trailApplication: TrailApplication
   sensorApplication: SensorApplication
+  spotApplication: SpotApplication
   mapApplication: MapApplication
   accountApplication: AccountApplication
   communityApplication: CommunityApplication
@@ -66,6 +68,12 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
     trailAPI: apiContext.trailApplication,
   })
 
+  const spotApplication = createSpotApplication({
+    getAccountContext: accountApplication.getAccountContext,
+    spotAPI: apiContext.spotApplication,
+    trailAPI: apiContext.trailApplication,
+  })
+
   const mapApplication = createMapApplication({
     sensor: sensorApplication,
     discoveryApplication,
@@ -86,6 +94,7 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
     discoveryApplication,
     trailApplication,
     sensorApplication,
+    spotApplication,
     mapApplication,
     accountApplication,
     communityApplication,

@@ -47,7 +47,7 @@ interface CoreConfiguration {
   environment?: 'production' | 'development' | 'test'
 }
 
-export type APIContext = Omit<ApplicationContract, 'spotApplication'> & {
+export type APIContext = Omit<ApplicationContract, 'none'> & {
   readonly config: CoreConfiguration
   system: {
     checkStatus: () => Promise<StatusResult>
@@ -125,6 +125,20 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
     },
 
     /**
+     * Spot Application API Methods
+     * These methods handle spot retrieval and management.
+     */
+    spotApplication: {
+      getSpot: (_context: AccountContext, id: string) => API.send<Spot | undefined>(`/spots/${id}`),
+
+      getSpots: (_context?: AccountContext) => API.send<Spot[]>('/spots'),
+
+      getSpotPreviews: () => API.send<SpotPreview[]>('/spots/previews'),
+
+      createSpot: (spotData: Omit<Spot, 'id'>) => API.send<Spot>('/spots', 'POST', spotData),
+    },
+
+    /**
      * Trail Application API Methods
      * These methods handle trail and spot management.
      * They are designed to be used in the context of trail and spot data management.
@@ -137,8 +151,6 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
       createTrail: (_context: AccountContext, trail: any) => API.send<Trail>('/trail/collections/trails', 'POST', trail),
 
       listSpots: (_context: AccountContext) => API.send<Spot[]>('/trail/collections/spots'),
-
-      getSpot: (_context: AccountContext, id: string) => API.send<Spot | undefined>(`/trail/collections/spots/${id}`),
 
       listSpotPreviews: (_context: AccountContext, trailId?: string) => {
         const params = trailId ? `?trailId=${trailId}` : ''

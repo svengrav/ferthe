@@ -1,6 +1,7 @@
-import { useDiscoveryData } from '@app/features/discovery'
+import { useDiscoveries } from '@app/features/discovery'
 import { DiscoveryHorizontalList } from '@app/features/discovery/components/DiscoveryHorizontalList'
 import { useDiscoveryTrailId } from '@app/features/discovery/stores/discoveryTrailStore'
+import { useSpots } from '@app/features/spot'
 import { Page, Text } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useThemeStore } from '@app/shared/theme'
@@ -8,6 +9,9 @@ import { Discovery, Spot } from '@shared/contracts'
 import { useState } from 'react'
 import { Image, Pressable, StyleSheet, View } from 'react-native'
 
+/**
+ * Enriches discoveries with spot data by joining arrays.
+ */
 function enrichDiscoveriesWithSpots(discoveries: Discovery[], spots: Spot[]) {
   const spotMap = new Map(spots.map(s => [s.id, s]))
   return discoveries.map(discovery => ({
@@ -24,10 +28,12 @@ export default function DevScreen() {
   const [isDiscoveryVisible, setDiscoveryVisible] = useState(false)
 
   const trailId = useDiscoveryTrailId()
-  const discoveries = useDiscoveryData()
-  const filteredDiscoveries = discoveries.discoveries.filter(d => d.trailId === trailId)
-  const spots = discoveries.spots.filter(s => filteredDiscoveries.flatMap(d => d.spotId).includes(s.id))
-  const enrichedDiscoveries = enrichDiscoveriesWithSpots(filteredDiscoveries, spots)
+  const discoveries = useDiscoveries()
+  const spots = useSpots()
+
+  const filteredDiscoveries = discoveries.filter(d => d.trailId === trailId)
+  const filteredSpots = spots.filter(s => filteredDiscoveries.some(d => d.spotId === s.id))
+  const enrichedDiscoveries = enrichDiscoveriesWithSpots(filteredDiscoveries, filteredSpots)
   const discoveryCards = [
     ...enrichedDiscoveries.map(d => ({
       ...d,

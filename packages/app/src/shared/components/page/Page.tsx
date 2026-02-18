@@ -1,5 +1,5 @@
 import { Theme, useTheme } from '@app/shared/theme'
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
+import { ActivityIndicator, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Inset, Option } from '../types'
@@ -14,15 +14,17 @@ interface PageProps {
   leading?: React.ReactNode
   scrollable?: boolean
   inset?: Inset
+  loading?: boolean
 }
 
 /**
  * Page wrapper component that provides consistent layout structure
  * with optional header, scrollable content, and safe area handling.
  * Supports configurable horizontal inset for content padding.
+ * Shows loading indicator when loading=true.
  */
 function Page(props: PageProps) {
-  const { children, title, style, options, scrollable = false, trailing, leading, inset = 'md' } = props
+  const { children, title, style, options, scrollable = false, trailing, leading, inset = 'md', loading = false } = props
   const { styles, theme } = useTheme(createStyles)
   const insets = useSafeAreaInsets()
 
@@ -39,7 +41,13 @@ function Page(props: PageProps) {
       <PageHeader title={title} options={options} trailing={trailing} leading={leading} />
 
       <ContentContainer style={[styles.container, { paddingHorizontal: insetValue }]} {...contentProps}>
-        {children}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
+        ) : (
+          children
+        )}
       </ContentContainer>
     </View>
   )
@@ -55,7 +63,11 @@ const createStyles = (theme: Theme) =>
       flex: 1,
       width: '100%',
       backgroundColor: theme.colors.background,
-
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   })
 

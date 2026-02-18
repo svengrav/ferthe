@@ -20,6 +20,7 @@ import {
   TrailStats
 } from '@shared/contracts/index.ts'
 import { geoUtils } from '@shared/geo/index.ts'
+import { createSpotService, SpotServiceActions } from '../spot/spotService.ts'
 import { createTrailService } from './trailService.ts'
 
 interface TrailApplicationOptions {
@@ -29,6 +30,7 @@ interface TrailApplicationOptions {
   discoveryStore: Store<Discovery>
   trailRatingStore: Store<TrailRating>
   imageApplication: ImageApplicationContract
+  spotService?: SpotServiceActions
 }
 
 /**
@@ -209,7 +211,7 @@ async function enrichTrailWithBoundary(
   }
 }
 
-export function createTrailApplication({ trailStore, spotStore, trailSpotStore, discoveryStore, trailRatingStore, imageApplication }: TrailApplicationOptions): TrailApplicationContract {
+export function createTrailApplication({ trailStore, spotStore, trailSpotStore, discoveryStore, trailRatingStore, imageApplication, spotService = createSpotService() }: TrailApplicationOptions): TrailApplicationContract {
   const trailService = createTrailService()
 
   return {
@@ -282,25 +284,6 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore, 
         return { success: true, data: enrichedPreviews }
       } catch (error: unknown) {
         return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_SPOT_PREVIEWS_ERROR' } }
-      }
-    },
-
-    getSpot: async (context: AccountContext, spotId: string): Promise<Result<Spot | undefined>> => {
-      try {
-        const spotResult = await spotStore.get(spotId)
-        if (!spotResult.success) {
-          return { success: false, error: { message: 'Failed to get spot', code: 'GET_SPOT_ERROR' } }
-        }
-
-        if (!spotResult.data) {
-          return { success: true, data: undefined }
-        }
-
-        // Enrich with fresh image URLs
-        const enrichedSpot = await enrichSpotWithImages(context, spotResult.data, imageApplication)
-        return { success: true, data: enrichedSpot }
-      } catch (error: unknown) {
-        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_SPOT_ERROR' } }
       }
     },
 
@@ -384,11 +367,24 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore, 
           }
 
           // Enrich all spots with fresh image URLs
-          const enrichedSpots = await Promise.all(
+          let enrichedSpots = await Promise.all(
             (spotsResult.data || []).map(spotEntity => enrichSpotWithImages(context, spotEntity, imageApplication))
           )
 
-          return { success: true, data: enrichedSpots }
+          // Enrich with userStatus if accountId is available
+          if (context.accountId) {
+            const discoveriesResult = await discoveryStore.list()
+            if (discoveriesResult.success && discoveriesResult.data) {
+              enrichedSpots = spotService.enrichSpotsWithUserStatus(enrichedSpots, context.accountId, discoveriesResult.data)
+            }
+          }
+
+          // Filter spots based on user status
+          const filteredSpots = enrichedSpots
+            .map(spot => spotService.filterSpotByUserStatus(spot))
+            .filter((spot): spot is Spot => spot !== undefined)
+
+          return { success: true, data: filteredSpots }
         }
 
         // Get trail-spot relationships
@@ -409,11 +405,24 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore, 
         const spotEntities = (spotsResult.data || []).filter(spot => spotIds.includes(spot.id))
 
         // Enrich with fresh image URLs
-        const enrichedSpots = await Promise.all(
+        let enrichedSpots = await Promise.all(
           spotEntities.map(spotEntity => enrichSpotWithImages(context, spotEntity, imageApplication))
         )
 
-        return { success: true, data: enrichedSpots }
+        // Enrich with userStatus if accountId is available
+        if (context.accountId) {
+          const discoveriesResult = await discoveryStore.list()
+          if (discoveriesResult.success && discoveriesResult.data) {
+            enrichedSpots = spotService.enrichSpotsWithUserStatus(enrichedSpots, context.accountId, discoveriesResult.data)
+          }
+        }
+
+        // Filter spots based on user status
+        const filteredSpots = enrichedSpots
+          .map(spot => spotService.filterSpotByUserStatus(spot))
+          .filter((spot): spot is Spot => spot !== undefined)
+
+        return { success: true, data: filteredSpots }
       } catch (error: unknown) {
         return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'LIST_SPOTS_ERROR' } }
       }

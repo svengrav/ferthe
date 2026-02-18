@@ -20,6 +20,8 @@ const en = {
     run: 'Run',
     more: 'More',
     select: 'Select',
+    status: 'Status',
+    created: 'Created',
   },
   errors: {
     generic: 'An error has occurred.',

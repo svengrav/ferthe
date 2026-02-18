@@ -14,7 +14,6 @@ export interface TrailApplicationContract {
   listTrails: (context: AccountContext) => Promise<Result<Trail[]>>
   listSpots: (context: AccountContext, trailId?: string) => Promise<Result<Spot[]>>
   listSpotPreviews: (context: AccountContext, trailId?: string) => Promise<Result<SpotPreview[]>>
-  getSpot: (context: AccountContext, spotId: string) => Promise<Result<Spot | undefined>>
   getTrail: (context: AccountContext, trailId: string) => Promise<Result<Trail | undefined>>
   getTrailSpotIds: (context: AccountContext, trailId: string) => Promise<Result<string[]>>
   getTrailStats: (context: AccountContext, trailId: string) => Promise<Result<TrailStats>>

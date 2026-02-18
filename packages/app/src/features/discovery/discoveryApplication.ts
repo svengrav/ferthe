@@ -1,4 +1,5 @@
 import { getSensorDevice, SensorApplication } from '@app/features/sensor'
+import { getSpotActions, getSpots } from '@app/features/spot'
 import { getTrailData } from '@app/features/trail'
 import { logger } from '@app/shared/utils/logger'
 import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryStats, RatingSummary, Result } from '@shared/contracts'
@@ -176,16 +177,21 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     const accountSession = await getSession()
     if (!accountSession.data) throw new Error('Account session not found!')
 
-    const { setDiscoveries, setSpots } = getDiscoveryActions()
+    const { setDiscoveries } = getDiscoveryActions()
+    const { setSpots } = getSpotActions()
 
     const promises = [
       getDiscoveries(accountSession.data).then(discoveries => {
         logger.log('Fetched discoveries:', discoveries.data?.length)
         discoveries.data && setDiscoveries(discoveries.data)
       }),
-      getDiscoveredSpots(accountSession.data).then(spots => {
-        logger.log('Fetched spots:', spots.data?.length)
-        spots.data && setSpots(spots.data)
+      getDiscoveredSpots(accountSession.data).then(discoverySpots => {
+        logger.log('Fetched discovery spots:', discoverySpots.data?.length)
+        if (discoverySpots.data) {
+          // Extract Spot data from DiscoverySpot and store in spotStore
+          const spots = discoverySpots.data.map(({ discoveryId, discoveredAt, ...spot }) => spot)
+          setSpots(spots)
+        }
       }),
     ]
 
@@ -213,7 +219,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   const getDiscoveryCards = () => {
-    return discoveryService.createDiscoveryCards(getDiscoveryData().discoveries, getDiscoveryData().spots)
+    return discoveryService.createDiscoveryCards(getDiscoveryData().discoveries, getSpots())
   }
 
   const handleNewDiscoveries = async (
@@ -222,7 +228,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     accountContext: AccountContext,
     snap?: { distance: number; intensity: number }
   ) => {
-    const { setDiscoveries, setSpots, setDiscoveryEvent } = getDiscoveryActions()
+    const { setDiscoveries, setDiscoveryEvent } = getDiscoveryActions()
+    const { setSpots } = getSpotActions()
     const { discoveries } = getDiscoveryData()
 
     setDiscoveries([...discoveries, ...newDiscoveries])
@@ -247,11 +254,14 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
     await setActiveTrail(trailId)
 
-    const spotsResult = await getDiscoveredSpots(accountContext)
-    if (spotsResult.data) {
-      setSpots(spotsResult.data)
+    const discoverySpots = await getDiscoveredSpots(accountContext)
+    if (discoverySpots.data) {
+      // Extract Spot data from DiscoverySpot and store in spotStore
+      const spots = discoverySpots.data.map(({ discoveryId, discoveredAt, ...spot }) => spot)
+      setSpots(spots)
     }
-    const discoveryStates = discoveryService.createDiscoveryCards(newDiscoveries, getDiscoveryData().spots)
+
+    const discoveryStates = discoveryService.createDiscoveryCards(newDiscoveries, getSpots())
     setDiscoveryEvent(discoveryStates[discoveryStates.length - 1])
     emitNewDiscoveries(discoveryStates)
   }

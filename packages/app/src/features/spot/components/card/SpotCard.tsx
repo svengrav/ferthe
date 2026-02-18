@@ -10,7 +10,6 @@ interface SpotCardProps {
   title?: string,
   image?: ImageReference
   blurredImage?: ImageReference
-  discovered: boolean
   width: number
   height: number
   borderRadius?: number
@@ -25,7 +24,6 @@ function SpotCard({
   title,
   image,
   blurredImage,
-  discovered,
   width,
   height,
   borderRadius = 10,
@@ -41,7 +39,7 @@ function SpotCard({
     >
       <SpotGradientFrame colors={['#a341fffd', 'rgba(65, 73, 185, 0.767)']} padding={4}>
         <SpotTitle title={title} />
-        {discovered && image ? (
+        {image ? (
           <SpotImage source={image} borderRadius={borderRadius} />
         ) : blurredImage ? (
           <>

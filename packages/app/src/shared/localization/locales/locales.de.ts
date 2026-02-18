@@ -21,7 +21,9 @@ const de: LocalizationSet = {
     run: 'Ausführen',
     more: 'Mehr',
     select: 'Auswählen',
-    confirm: 'Ok'
+    confirm: 'Ok',
+    status: 'Status',
+    created: 'Erstellt',
   },
   errors: {
     generic: 'Ein Fehler ist aufgetreten.',

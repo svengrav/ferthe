@@ -31,7 +31,7 @@ import { manifest } from './manifest.ts'
 import { Route } from './oak/types.ts'
 
 const createRoutes = (ctx: ApplicationContract): Route[] => {
-  const { discoveryApplication, sensorApplication, trailApplication, accountApplication, communityApplication } = ctx
+  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication } = ctx
 
   // Create the request handler with account application access
   const asyncRequestHandler = createAsyncRequestHandler(accountApplication)
@@ -245,9 +245,9 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/trail/collections/spots/:id',
+      url: '/spots/:id',
       handler: asyncRequestHandler<Spot | undefined, { id: string }, never>(async ({ params, context }) => {
-        return await trailApplication.getSpot(context, params!.id)
+        return await spotApplication.getSpot(context, params!.id)
       }),
     },
     {

@@ -1,15 +1,25 @@
 import { GeoLocation } from '@shared/geo/index.ts'
+import { AccountContext } from './accounts.ts'
 import { ImageReference } from './images.ts'
 import { Result } from './results.ts'
 
 export interface SpotApplicationContract {
   getSpotPreviews: () => Promise<Result<SpotPreview[]>>
-  getSpots: () => Promise<Result<Spot[]>>
-  getSpot: (id: string) => Promise<Result<Spot | undefined>>
+  getSpots: (context?: AccountContext) => Promise<Result<Spot[]>>
+  getSpot: (context: AccountContext, id: string) => Promise<Result<Spot | undefined>>
   createSpot: (spotData: Omit<Spot, 'id'>) => Promise<Result<Spot>>
 }
 
 export type SpotVisibility = 'hidden' | 'preview'
+
+/**
+ * User-specific status of a spot from the perspective of the current user.
+ * - 'discovered': User has discovered this spot
+ * - 'preview': User has seen clues/preview but not discovered yet
+ * - 'creator': User created this spot
+ * - 'unknown': User has no interaction with this spot
+ */
+export type SpotUserStatus = 'discovered' | 'preview' | 'creator' | 'unknown'
 
 /**
  * Public spot interface with runtime-generated image URLs.
@@ -29,6 +39,8 @@ export interface Spot {
   }
   createdAt: Date
   updatedAt: Date
+  createdBy?: string // Account ID of creator
+  userStatus?: SpotUserStatus // User-specific status (only present when fetched with user context)
 }
 
 /**

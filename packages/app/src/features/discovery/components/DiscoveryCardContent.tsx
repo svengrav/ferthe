@@ -130,7 +130,7 @@ function DiscoveryCardContent(props: DiscoveryCardContentProps) {
         width={width}
         height={height}
         image={image}
-        title={title} discovered={true}
+        title={title}
       />
 
       {/* Scrollable content that overlays the image */}

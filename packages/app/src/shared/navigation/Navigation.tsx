@@ -1,7 +1,7 @@
 import AboutScreen from '@app/features/about/AboutScreen'
 import CommunityScreen from '@app/features/community/components/CommunityScreen'
-import DiscoveryScreen from '@app/features/discovery/components/DiscoveryScreen'
 import MapScreen from '@app/features/map/components/MapScreen'
+import SpotScreen from '@app/features/spot/components/SpotScreen'
 import TrailScreen from '@app/features/trail/components/TrailScreen'
 import { Icon } from '@app/shared/components'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
@@ -20,7 +20,7 @@ const TAB_LABEL_FONT_SIZE = 11
 
 export type RootParamList = {
   Trails: undefined
-  Discoveries: { discoveryId?: string }
+  Spots: undefined
   Map: undefined
   Socials: undefined
   Dev: undefined
@@ -69,8 +69,8 @@ export function Navigation() {
           }}
         />
         <Tab.Screen
-          name='Discoveries'
-          component={DiscoveryScreen}
+          name='Spots'
+          component={SpotScreen}
           options={{
             tabBarIcon: ({ color, size }) => <CardIcon color={color} size={size} />,
             headerShown: false,

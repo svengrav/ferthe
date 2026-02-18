@@ -1,5 +1,5 @@
-import { useDiscoveryData } from '@app/features/discovery'
 import { useDiscoveryCardPage } from '@app/features/discovery/components/DiscoveryCardPage'
+import { useSpots } from '@app/features/spot'
 import { SpotCardList } from '@app/features/spot/components'
 import { Text } from '@app/shared/components'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
@@ -16,26 +16,24 @@ interface TrailUnknownSpotsProps {
 /**
  * Displays all spots in a trail with discovered and undiscovered status.
  * Discovered spots show the full image, undiscovered spots show blurred image with lock icon.
+ * Uses userStatus from API to determine discovery state.
  */
 function TrailSpots({ trailId }: TrailUnknownSpotsProps) {
   const { styles } = useTheme(useStyles)
   const { locales } = useApp()
-  const { discoveries, spots } = useDiscoveryData()
+  const spots = useSpots()
   const spotPreviews = useTrailPreviewSpots(trailId)
   const { stats } = useTrailStats(trailId)
   const { showDiscoveryCardDetails } = useDiscoveryCardPage()
 
   if (!styles) return null
 
-  // Get discovered spot IDs for THIS trail only
-  const trailDiscoveries = discoveries.filter(d => d.trailId === trailId)
-  const discoveredSpotIds = new Set(trailDiscoveries.map(d => d.spotId))
+  // Filter discovered spots using userStatus (set by API)
+  const discoveredTrailSpots = spots.filter(s => s.userStatus === 'discovered')
 
-  // Get discovered spots for THIS trail only (filter by trail discoveries)
-  const discoveredTrailSpots = spots.filter(s => discoveredSpotIds.has(s.id))
-
-  // Get undiscovered spots from previews for THIS trail
-  const undiscoveredPreviews = spotPreviews.filter(p => !discoveredSpotIds.has(p.id))
+  // Get preview spot IDs that are discovered
+  const discoveredPreviewSpotIds = new Set(discoveredTrailSpots.map(s => s.id))
+  const undiscoveredPreviews = spotPreviews.filter(p => !discoveredPreviewSpotIds.has(p.id))
 
   // Use stats for accurate counts - this is the source of truth
   const totalSpots = stats?.totalSpots || 0

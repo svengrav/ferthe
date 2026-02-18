@@ -82,6 +82,7 @@ const getDiscoveredSpots = (accountId: string, discoveries: Discovery[], spots: 
       ...spot,
       discoveredAt: discovery.discoveredAt,
       discoveryId: discovery.id,
+      userStatus: spot.createdBy === accountId ? 'creator' : 'discovered', // All discovered spots have userStatus
     }
   })
 }

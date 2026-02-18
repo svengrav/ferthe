@@ -2,6 +2,7 @@ import { useSpotCardDimensions } from '@app/features/spot/components'
 import { ReactElement, useEffect, useRef, useState } from 'react'
 import { FlatList, StyleSheet, View } from 'react-native'
 import SpotCard from './card/SpotCard'
+import { useSpotPage } from './SpotPage'
 
 /**
  * Generic grid list for spot cards.
@@ -25,6 +26,8 @@ import SpotCard from './card/SpotCard'
  *   )}
  * />
  */
+
+
 
 // Layout constants
 const DEFAULT_GAP = 12
@@ -61,6 +64,7 @@ function SpotCardList<T extends SpotCardListItem>({
   const containerRef = useRef<View>(null)
   const [cardSize, setCardSize] = useState({ width: 0, height: 0 })
   const { cardRatio } = useSpotCardDimensions({ variant: 'card' })
+  const { showSpotPage } = useSpotPage()
 
   // Measure container and calculate card dimensions
   useEffect(() => {
@@ -81,8 +85,13 @@ function SpotCardList<T extends SpotCardListItem>({
       image={item.image}
       blurredImage={item.blurredImage}
       title={item.title}
-      discovered={item.discovered}
-      onPress={() => onPress?.(item)}
+      onPress={() => {
+        if (onPress) {
+          onPress(item)
+        } else {
+          showSpotPage(item.id)
+        }
+      }}
     />
   )
 

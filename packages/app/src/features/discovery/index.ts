@@ -1,5 +1,5 @@
 export * from './discoveryApplication'
-export { getDiscoveryData, useDiscoveryData, useDiscoverySpots, useDiscoveryStatus } from './stores/discoveryStore'
+export { getDiscoveryData, useDiscoveries, useDiscoveryData, useDiscoveryStatus } from './stores/discoveryStore'
 
 export {
   getDiscoveryTrailActions,
@@ -20,3 +20,4 @@ export {
 export { default as DiscoveryStats } from './components/DiscoveryStats'
 export { useDiscoveryStats } from './hooks/useDiscoveryStats'
 
+export { default as DiscoveryUserContentSection } from './components/DiscoveryUserContentSection'
