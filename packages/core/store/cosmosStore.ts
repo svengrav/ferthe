@@ -1,4 +1,6 @@
 import { createCosmosConnector } from '@core/connectors/cosmos/cosmosConnector.ts'
+import { QueryOptions } from '@shared/contracts/index.ts'
+import { buildCosmosQuery } from './queryUtils.ts'
 import { StoreInterface, StoreItem } from './storeInterface.ts'
 
 interface CosmosStoreOptions {
@@ -37,8 +39,9 @@ export function createCosmosStore(options?: CosmosStoreOptions): StoreInterface 
       }
     },
 
-    async list<T extends StoreItem>(container: string, query = 'SELECT * FROM c', parameters = []): Promise<T[]> {
+    async list<T extends StoreItem>(container: string, options?: QueryOptions): Promise<T[]> {
       try {
+        const { query, parameters } = buildCosmosQuery(options)
         return await connector.queryItems<T>(container, query, parameters)
       } catch (error) {
         console.error(`Error listing items from ${container}:`, error)

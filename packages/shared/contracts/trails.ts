@@ -1,9 +1,8 @@
-import { Spot, SpotPreview } from '@shared/contracts/index.ts'
 import { GeoBoundary } from '@shared/geo/index.ts'
 import { AccountContext } from './accounts.ts'
-import { RatingSummary } from './discoveries.ts'
 import { ImageReference } from './images.ts'
-import { Result } from './results.ts'
+import { QueryOptions, Result } from './results.ts'
+import { RatingSummary, Spot } from './spots.ts'
 import { TrailSpot } from './trailSpots.ts'
 
 /**
@@ -11,14 +10,11 @@ import { TrailSpot } from './trailSpots.ts'
  * Provides methods to list, create, and retrieve trails and spots.
  */
 export interface TrailApplicationContract {
-  listTrails: (context: AccountContext) => Promise<Result<Trail[]>>
-  listSpots: (context: AccountContext, trailId?: string) => Promise<Result<Spot[]>>
-  listSpotPreviews: (context: AccountContext, trailId?: string) => Promise<Result<SpotPreview[]>>
+  listTrails: (context: AccountContext, options?: QueryOptions) => Promise<Result<Trail[]>>
   getTrail: (context: AccountContext, trailId: string) => Promise<Result<Trail | undefined>>
   getTrailSpotIds: (context: AccountContext, trailId: string) => Promise<Result<string[]>>
-  getTrailStats: (context: AccountContext, trailId: string) => Promise<Result<TrailStats>>
+  listTrailSpots: (context: AccountContext, trailId: string) => Promise<Result<Spot[]>>
   createTrail: (context: AccountContext, trailData: Omit<Trail, 'id'>) => Promise<Result<Trail>>
-  createSpot: (context: AccountContext, spotData: Omit<Spot, 'id'>) => Promise<Result<Spot>>
   addSpotToTrail: (context: AccountContext, trailId: string, spotId: string, order?: number) => Promise<Result<TrailSpot>>
   removeSpotFromTrail: (context: AccountContext, trailId: string, spotId: string) => Promise<Result<void>>
   rateTrail: (context: AccountContext, trailId: string, rating: number) => Promise<Result<TrailRating>>

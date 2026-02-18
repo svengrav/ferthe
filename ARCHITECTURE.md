@@ -29,3 +29,49 @@ The app is organized into features, which are self-contained modules that encaps
 - Components should receive props from their parent components. Try to avoid using stores, but instead should receive the data they need as props. This allows for better separation of concerns and makes it easier to manage the state of the component.
 - They should be reusable and composable.
 - They usually work with callback functions as props to communicate with their parent components.
+
+## Core
+
+### API Concept
+
+- Feature based API 
+- Trail has 1:n spots so there should be a specific Endpoint for trails/id/spots to avoid fetching all spots when fetching trails.
+  - Which informations are needed here? This is the spot list based on trail view.
+~~- For the same reason, there should be a specific Endpoint for trails/id/spotPreviews to avoid fetching all spot data when fetching trails.~~
+- Discovery has a spotId and a trailId, so there should be a specific Endpoint for discoveries/id/ 
+- Discovery includes Spot Data.
+
+### Domain Data Ownership
+
+**Each domain owns and transforms its own data representations:**
+- **Spot Domain** manages both full (`Spot`) and reduced (`SpotPreview`) representations
+- **Trail Domain** returns only spot IDs via `getTrailSpotIds()`, not spot data
+- **Discovery Domain** orchestrates by fetching IDs from Trail and data from Spot, then enriching with user context
+
+**Preview Pattern:**
+- Previews (reduced data) belong to their source domain (e.g., `SpotPreview` in Spot domain)
+- Consumers request previews via domain's application contract (e.g., `spotApplication.getSpotPreviewsByIds()`)
+- Transformation (full → preview) happens within the owning domain, not in consumers
+- This maintains encapsulation and prevents coupling to internal data structures
+- Enrichment is automatic: SpotPreview includes RatingSummary (batch-loaded to avoid N+1 queries)
+
+**Example:** When Discovery needs spot previews for a trail, it calls `trailApplication.getTrailSpotIds()` then `spotApplication.getSpotPreviewsByIds(ids)` to get spots with ratings.
+
+### Access Control & Security
+
+**Spot Data Access:**
+- Spots contain sensitive information (exact locations, full images, descriptions)
+- Direct spot access via `GET /spots/:id` is currently **blocked** for security
+- Future implementation will require access rights verification:
+  - **Creator**: User who created the spot (`spot.createdBy === accountId`)
+  - **Admin/Moderator**: Future role-based permissions
+  - **Discoverer**: User who has discovered the spot (via Discovery domain)
+
+**Recommended Access Patterns:**
+- Users should access spots through Discovery domain endpoints
+- `GET /discovery/collections/spots` - returns only discovered spots with proper filtering
+- `GET /discovery/collections/trails/:trailId` - returns spots in trail context with user status enrichment
+- Discovery domain applies `filterSpotByUserStatus()` to enforce data visibility rules
+
+## Rules
+- Avoid using stores of an other feature. Always ask the specific feature appliaction for the data you need. 

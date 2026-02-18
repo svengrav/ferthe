@@ -1,7 +1,9 @@
 // JSON file store implementation for local development and testing
 import { createCuid2 } from '@core/utils/idGenerator.ts'
+import { QueryOptions } from '@shared/contracts/index.ts'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
+import { applyQueryOptions } from './queryUtils.ts'
 import { StoreInterface } from './storeInterface.ts'
 
 interface JsonStoreOptions {
@@ -76,9 +78,10 @@ export function createJsonStore(options: JsonStoreOptions = {}): StoreInterface 
       }
     },
 
-    async list<T extends UniqueItem>(container: string): Promise<T[]> {
+    async list<T extends UniqueItem>(container: string, options?: QueryOptions): Promise<T[]> {
       try {
-        return await readData(container)
+        const data = await readData<T>(container)
+        return applyQueryOptions(data, options)
       } catch (error) {
         throw new Error(`Failed to list items: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }

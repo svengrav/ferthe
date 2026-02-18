@@ -1,5 +1,5 @@
 import { Store } from '@core/store/storeFactory.ts'
-import { AccountContext, createErrorResult, createSuccessResult, Discovery, Result, ScanEvent, SensorApplicationContract, TrailApplicationContract } from '@shared/contracts'
+import { AccountContext, createErrorResult, createSuccessResult, Discovery, Result, ScanEvent, SensorApplicationContract, SpotApplicationContract, TrailApplicationContract } from '@shared/contracts'
 import { GeoLocation } from '@shared/geo'
 import { createSensorService, SensorServiceType } from './sensorService.ts'
 
@@ -7,12 +7,13 @@ interface SensorApplicationOptions {
   sensorService: SensorServiceType
   scanStore: Store<ScanEvent>
   trailApplication: TrailApplicationContract
+  spotApplication: SpotApplicationContract
   discoveryStore: Store<Discovery>
 }
 
 export interface SensorApplicationActions extends SensorApplicationContract { }
 
-export function createSensorApplication({ sensorService = createSensorService(), scanStore, trailApplication, discoveryStore }: SensorApplicationOptions): SensorApplicationActions {
+export function createSensorApplication({ sensorService = createSensorService(), scanStore, trailApplication, spotApplication, discoveryStore }: SensorApplicationOptions): SensorApplicationActions {
   const createScanEvent = async (context: AccountContext, location: GeoLocation, trailId?: string): Promise<Result<ScanEvent>> => {
     try {
       const userId = context.accountId
@@ -29,7 +30,13 @@ export function createSensorApplication({ sensorService = createSensorService(),
         return createErrorResult('TRAIL_NOT_FOUND')
       }
 
-      const spotsResult = await trailApplication.listSpots(context, trailId)
+      // Get trail spot IDs and fetch spots
+      const trailSpotIdsResult = await trailApplication.getTrailSpotIds(context, trailId)
+      if (!trailSpotIdsResult.success || !trailSpotIdsResult.data) {
+        return createErrorResult('TRAIL_NOT_FOUND')
+      }
+
+      const spotsResult = await spotApplication.getSpotsByIds(context, trailSpotIdsResult.data)
       if (!spotsResult.success) {
         return createErrorResult('GET_SPOTS_ERROR')
       }

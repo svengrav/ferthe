@@ -1,23 +1,23 @@
-import { Discovery, Spot, SpotUserStatus } from '@shared/contracts'
+import { Discovery, Spot, SpotSource } from '@shared/contracts'
 
 export interface SpotServiceActions {
-  enrichSpotWithUserStatus: (spot: Spot, userId: string, discoveries: Discovery[]) => Spot
-  enrichSpotsWithUserStatus: (spots: Spot[], userId: string, discoveries: Discovery[]) => Spot[]
-  filterSpotByUserStatus: (spot: Spot) => Spot | undefined
+  enrichSpotWithSource: (spot: Spot, userId: string, discoveries: Discovery[]) => Spot
+  enrichSpotsWithSource: (spots: Spot[], userId: string, discoveries: Discovery[]) => Spot[]
+  filterSpotBySource: (spot: Spot) => Spot | undefined
 }
 
 /**
- * Determines the user-specific status of a spot.
+ * Determines the source/origin of a spot.
  * 
  * @param spot The spot to enrich
  * @param userId The current user's account ID
  * @param discoveries All discoveries (will be filtered for user)
- * @returns User-specific status
+ * @returns Spot source
  */
-const determineUserStatus = (spot: Spot, userId: string, discoveries: Discovery[]): SpotUserStatus => {
+const determineSpotSource = (spot: Spot, userId: string, discoveries: Discovery[]): SpotSource => {
   // Check if user created this spot
   if (spot.createdBy === userId) {
-    return 'creator'
+    return 'created'
   }
 
   // Check if user discovered this spot
@@ -25,59 +25,54 @@ const determineUserStatus = (spot: Spot, userId: string, discoveries: Discovery[
     d => d.accountId === userId && d.spotId === spot.id
   )
   if (hasDiscovered) {
-    return 'discovered'
+    return 'discovery'
   }
 
-  // Check if spot is in preview mode (visible but not discovered)
-  if (spot.options.visibility === 'preview') {
-    return 'preview'
-  }
-
-  return 'unknown'
+  // Spot is in preview mode
+  return 'preview'
 }
 
 /**
- * Enriches a single spot with user-specific status.
+ * Enriches a single spot with source information.
  */
-const enrichSpotWithUserStatus = (spot: Spot, userId: string, discoveries: Discovery[]): Spot => {
-  const userStatus = determineUserStatus(spot, userId, discoveries)
+const enrichSpotWithSource = (spot: Spot, userId: string, discoveries: Discovery[]): Spot => {
+  const source = determineSpotSource(spot, userId, discoveries)
   return {
     ...spot,
-    userStatus,
+    source,
   }
 }
 
 /**
- * Enriches multiple spots with user-specific status.
+ * Enriches multiple spots with source information.
  * Optimized for batch processing.
  */
-const enrichSpotsWithUserStatus = (spots: Spot[], userId: string, discoveries: Discovery[]): Spot[] => {
+const enrichSpotsWithSource = (spots: Spot[], userId: string, discoveries: Discovery[]): Spot[] => {
   // Pre-filter discoveries for this user for better performance
   const userDiscoveries = discoveries.filter(d => d.accountId === userId)
 
-  return spots.map(spot => enrichSpotWithUserStatus(spot, userId, userDiscoveries))
+  return spots.map(spot => enrichSpotWithSource(spot, userId, userDiscoveries))
 }
 
 /**
- * Filters spot data based on user status.
- * Returns appropriate data level for each status:
- * - 'discovered'/'creator': Full spot data
+ * Filters spot data based on source.
+ * Returns appropriate data level for each source:
+ * - 'discovery'/'created': Full spot data
  * - 'preview': Limited data (blurred image, no exact location, no description)
- * - 'unknown': Undefined (spot should not be visible)
  * 
- * @param spot Spot with userStatus already enriched
+ * @param spot Spot with source already enriched
  * @returns Filtered spot or undefined
  */
-const filterSpotByUserStatus = (spot: Spot): Spot | undefined => {
-  const { userStatus } = spot
+const filterSpotBySource = (spot: Spot): Spot | undefined => {
+  const { source } = spot
 
   // Full access for discovered spots and creators
-  if (userStatus === 'discovered' || userStatus === 'creator') {
+  if (source === 'discovery' || source === 'created') {
     return spot
   }
 
   // Preview mode: Limited information
-  if (userStatus === 'preview') {
+  if (source === 'preview') {
     return {
       ...spot,
       // Remove sensitive data
@@ -86,19 +81,19 @@ const filterSpotByUserStatus = (spot: Spot): Spot | undefined => {
       location: {
         // Obfuscate exact location (could be randomized in future)
         lat: Math.round(spot.location.lat * 100) / 100, // Round to ~1km precision
-        lng: Math.round(spot.location.lng * 100) / 100,
+        lon: Math.round(spot.location.lon * 100) / 100,
       },
     }
   }
 
-  // Unknown status: No access
+  // No source set: Should not be visible
   return undefined
 }
 
 export function createSpotService(): SpotServiceActions {
   return {
-    enrichSpotWithUserStatus,
-    enrichSpotsWithUserStatus,
-    filterSpotByUserStatus,
+    enrichSpotWithSource,
+    enrichSpotsWithSource,
+    filterSpotBySource,
   }
 }

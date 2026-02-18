@@ -23,10 +23,10 @@ function SpotScreen() {
   const status = useDiscoveryStatus()
   const { discoveryApplication } = getAppContext()
 
-  // Filter and map discovered spots (userStatus already set by API)
+  // Filter and map discovered spots
   const spotItems = useMemo(() => {
     return spots
-      .filter(spot => spot.userStatus === 'discovered')
+      .filter(spot => spot.source === 'discovery' || (spot.source === undefined && spot.image))
       .map(spot => ({
         id: spot.id,
         image: spot.image,

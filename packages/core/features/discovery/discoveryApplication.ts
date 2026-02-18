@@ -16,10 +16,13 @@ import {
   DiscoveryTrail,
   ImageApplicationContract,
   LocationWithDirection,
+  QueryOptions,
   RatingSummary,
   Result,
+  SpotApplicationContract,
   SpotRating,
-  TrailApplicationContract
+  TrailApplicationContract,
+  TrailStats
 } from '@shared/contracts'
 import { ERROR_CODES } from '@shared/contracts/errors.ts'
 import { GeoLocation } from '@shared/geo'
@@ -35,14 +38,14 @@ interface DiscoveryApplicationOptions {
   discoveryStore: Store<Discovery>
   profileStore: Store<DiscoveryProfile>
   contentStore: Store<DiscoveryContent>
-  ratingStore: Store<SpotRating>
   sensorApplication: SensorApplicationActions
   trailApplication: TrailApplicationContract
+  spotApplication: SpotApplicationContract
   imageApplication?: ImageApplicationContract
 }
 
 export function createDiscoveryApplication(options: DiscoveryApplicationOptions): DiscoveryApplicationContract {
-  const { discoveryService = createDiscoveryService(), discoveryStore, profileStore, contentStore, ratingStore, trailApplication, imageApplication } = options
+  const { discoveryService = createDiscoveryService(), discoveryStore, profileStore, contentStore, trailApplication, spotApplication, imageApplication } = options
 
   const getDiscoveryTrail = async (context: AccountContext, trailId: string, userLocation?: GeoLocation): Promise<Result<DiscoveryTrail>> => {
     try {
@@ -63,17 +66,17 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       }
       const discoveries = discoveriesResult.data || []
 
-      const allSpotsResult = await trailApplication.listSpots(context, trailId)
-      const allSpots = allSpotsResult.data || []
-
-      // Get trail spot IDs in order
-      const trailSpotIdsResult = await trailApplication.getTrailSpotIds(context, trailId)
-      if (!trailSpotIdsResult.success) {
+      // Get trail spot IDs and fetch spots
+      const spotIdsResult = await trailApplication.getTrailSpotIds(context, trailId)
+      if (!spotIdsResult.success || !spotIdsResult.data) {
         return createErrorResult('TRAIL_NOT_FOUND')
       }
 
+      const allSpotsResult = await spotApplication.getSpotsByIds(context, spotIdsResult.data, { exclude: ['images'] })
+      const allSpots = allSpotsResult.data || []
+
       // Pure calculation moved to service, with map boundary filtering
-      const discoveryTrail = discoveryService.createDiscoveryTrail(accountId, trailResult.data, discoveries, allSpots, trailSpotIdsResult.data || [], userLocation)
+      const discoveryTrail = discoveryService.createDiscoveryTrail(accountId, trailResult.data, discoveries, allSpots, spotIdsResult.data || [], userLocation)
 
       return createSuccessResult(discoveryTrail)
     } catch (error: any) {
@@ -81,20 +84,28 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     }
   }
 
-  const getDiscoveries = async (context: AccountContext, trailId?: string): Promise<Result<Discovery[]>> => {
+  const getDiscoveries = async (context: AccountContext, trailId?: string, options?: QueryOptions): Promise<Result<Discovery[]>> => {
     try {
       const accountId = context.accountId
       if (!accountId) {
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
-      const discoveriesResult = await discoveryStore.list()
+      const queryOptions = {
+        ...options,
+        filters: { ...options?.filters, accountId },
+      }
+
+      const discoveriesResult = await discoveryStore.list(queryOptions)
       if (!discoveriesResult.success) {
         return createErrorResult('GET_DISCOVERIES_ERROR')
       }
       const discoveries = discoveriesResult.data || []
 
-      const result = discoveryService.getDiscoveries(accountId, discoveries, trailId)
+      const result = trailId
+        ? discoveries.filter(d => d.trailId === trailId)
+        : discoveries
+
       return createSuccessResult(result)
     } catch (error: any) {
       return createErrorResult('GET_DISCOVERIES_ERROR', { originalError: error.message })
@@ -141,20 +152,36 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     }
   }
 
-  const getDiscoveredSpots = async (context: AccountContext, trailId?: string): Promise<Result<DiscoverySpot[]>> => {
+  const getDiscoveredSpots = async (context: AccountContext, trailId?: string, options?: QueryOptions): Promise<Result<DiscoverySpot[]>> => {
     try {
       const accountId = context.accountId
       if (!accountId) {
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
-      const discoveriesResult = await discoveryStore.list()
+      const queryOptions = {
+        ...options,
+        filters: { ...options?.filters, accountId },
+      }
+
+      const discoveriesResult = await discoveryStore.list(queryOptions)
       if (!discoveriesResult.success) {
         return createErrorResult('GET_SPOTS_ERROR')
       }
       const discoveries = discoveriesResult.data || []
 
-      const spotsResult = await trailApplication.listSpots(context, trailId)
+      // Fetch spots: use trail spot IDs if trailId provided, otherwise all spots
+      let spotsResult
+      if (trailId) {
+        const trailSpotIdsResult = await trailApplication.getTrailSpotIds(context, trailId)
+        if (!trailSpotIdsResult.success || !trailSpotIdsResult.data) {
+          return createErrorResult('TRAIL_NOT_FOUND')
+        }
+        spotsResult = await spotApplication.getSpotsByIds(context, trailSpotIdsResult.data, options)
+      } else {
+        spotsResult = await spotApplication.getSpots(context, options)
+      }
+
       const result = discoveryService.getDiscoveredSpots(accountId, discoveries, spotsResult.data || [], trailId)
       return createSuccessResult(result)
     } catch (error: any) {
@@ -174,20 +201,20 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         return createErrorResult('TRAIL_NOT_FOUND')
       }
 
-      const spotsResult = await trailApplication.listSpots(context, trailId)
+      // Get trail spot IDs and fetch spots
+      const spotIdsResult = await trailApplication.getTrailSpotIds(context, trailId)
+      if (!spotIdsResult.success || !spotIdsResult.data) {
+        return createErrorResult('TRAIL_NOT_FOUND')
+      }
+
+      const spotsResult = await spotApplication.getSpotsByIds(context, spotIdsResult.data)
       const discoveriesResult = await discoveryStore.list()
       if (!discoveriesResult.success) {
         return createErrorResult('GET_CLUES_ERROR')
       }
       const discoveries = discoveriesResult.data || []
 
-      // Get trail spot IDs in order
-      const trailSpotIdsResult = await trailApplication.getTrailSpotIds(context, trailId)
-      if (!trailSpotIdsResult.success || !trailSpotIdsResult.data) {
-        return createErrorResult('TRAIL_NOT_FOUND')
-      }
-
-      const result = discoveryService.getCluesBasedOnPreviewMode(accountId, trailResult.data, discoveries, spotsResult.data || [], trailSpotIdsResult.data)
+      const result = discoveryService.getCluesBasedOnPreviewMode(accountId, trailResult.data, discoveries, spotsResult.data || [], spotIdsResult.data)
       return createSuccessResult(result)
     } catch (error: any) {
       return createErrorResult('GET_CLUES_ERROR', { originalError: error.message })
@@ -213,7 +240,13 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       }
       const discoveryHistory = discoveryHistoryResult.data || []
 
-      const spotsResult = await trailApplication.listSpots(context, trailId)
+      // Get trail spot IDs and fetch spots
+      const trailSpotIdsResult = await trailApplication.getTrailSpotIds(context, trailId)
+      if (!trailSpotIdsResult.success || !trailSpotIdsResult.data) {
+        return createErrorResult('TRAIL_NOT_FOUND')
+      }
+
+      const spotsResult = await spotApplication.getSpotsByIds(context, trailSpotIdsResult.data)
       const allSpots = spotsResult.data || []
 
       // Orchestration: Process new discoveries
@@ -326,7 +359,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       }
 
       // Get all spots for distance calculation
-      const spotsResult = await trailApplication.listSpots(context)
+      const spotsResult = await spotApplication.getSpotsByIds(context, trailSpotIdsResult.data)
       const spots = spotsResult.data || []
 
       // Calculate stats using service
@@ -481,7 +514,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     }
   }
 
-  // Rating methods
+  // Rating methods (delegated to SpotApplication with access control)
   const rateSpot = async (
     context: AccountContext,
     spotId: string,
@@ -493,25 +526,22 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
-      // Validate rating
-      if (rating < 1 || rating > 5) {
-        return createErrorResult(ERROR_CODES.INVALID_RATING.code)
+      // Access control - verify user has discovered this spot
+      const discoveriesResult = await discoveryStore.list()
+      if (!discoveriesResult.success) {
+        return createErrorResult('GET_DISCOVERIES_ERROR')
       }
 
-      // Remove existing rating if any
-      const existingResult = await ratingStore.list()
-      const existing = existingResult.data?.find(r => r.spotId === spotId && r.accountId === accountId)
-      if (existing) {
-        await ratingStore.delete(existing.id)
+      const hasDiscovered = discoveriesResult.data?.some(
+        d => d.accountId === accountId && d.spotId === spotId
+      )
+
+      if (!hasDiscovered) {
+        return createErrorResult('SPOT_NOT_DISCOVERED')
       }
 
-      const newRating = discoveryService.createSpotRating(accountId, spotId, rating)
-      const saveResult = await ratingStore.create(newRating)
-      if (!saveResult.success) {
-        return createErrorResult('SAVE_RATING_ERROR')
-      }
-
-      return createSuccessResult(newRating)
+      // Delegate to SpotApplication
+      return await spotApplication.rateSpot(context, spotId, rating)
     } catch (error: any) {
       return createErrorResult('RATE_ERROR', { originalError: error.message })
     }
@@ -524,13 +554,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
-      const existingResult = await ratingStore.list()
-      const existing = existingResult.data?.find(r => r.spotId === spotId && r.accountId === accountId)
-      if (existing) {
-        await ratingStore.delete(existing.id)
-      }
-
-      return createSuccessResult(undefined)
+      // Delegate to SpotApplication (no access control needed for removal)
+      return await spotApplication.removeSpotRating(context, spotId)
     } catch (error: any) {
       return createErrorResult('REMOVE_RATING_ERROR', { originalError: error.message })
     }
@@ -543,15 +568,46 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
-      const ratingsResult = await ratingStore.list()
-      if (!ratingsResult.success) {
-        return createErrorResult('GET_RATINGS_ERROR')
-      }
-
-      const summary = discoveryService.getSpotRatingSummary(spotId, ratingsResult.data || [], accountId)
-      return createSuccessResult(summary)
+      // Public access - ratings can be viewed in preview mode
+      return await spotApplication.getSpotRatingSummary(context, spotId)
     } catch (error: any) {
       return createErrorResult('GET_RATING_SUMMARY_ERROR', { originalError: error.message })
+    }
+  }
+
+  const getDiscoveryTrailStats = async (context: AccountContext, trailId: string): Promise<Result<TrailStats>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
+
+      // Get trail spot IDs
+      const trailSpotIdsResult = await trailApplication.getTrailSpotIds(context, trailId)
+      if (!trailSpotIdsResult.success || !trailSpotIdsResult.data) {
+        return createErrorResult('TRAIL_NOT_FOUND')
+      }
+
+      const trailSpotIds = trailSpotIdsResult.data
+
+      if (trailSpotIds.length === 0) {
+        return createErrorResult('TRAIL_HAS_NO_SPOTS')
+      }
+
+      // Get all discoveries
+      const discoveriesResult = await discoveryStore.list()
+      if (!discoveriesResult.success) {
+        return createErrorResult('GET_DISCOVERIES_ERROR')
+      }
+
+      const allDiscoveries = discoveriesResult.data || []
+
+      // Calculate stats using service
+      const stats = discoveryService.getTrailStats(accountId, trailId, allDiscoveries, trailSpotIds)
+
+      return createSuccessResult(stats)
+    } catch (error: any) {
+      return createErrorResult('GET_TRAIL_STATS_ERROR', { originalError: error.message })
     }
   }
 
@@ -566,6 +622,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     getDiscoveryProfile,
     updateDiscoveryProfile,
     getDiscoveryStats,
+    getDiscoveryTrailStats,
     getDiscoveryContent,
     upsertDiscoveryContent,
     deleteDiscoveryContent,

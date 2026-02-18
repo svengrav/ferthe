@@ -1,8 +1,8 @@
 import { createAppContext } from '@app/appContext'
 import { getMemoryStoreConnector } from '@app/shared/device/memoryStoreConnector'
 import { createCoreContext, getCoreStoreIdentifiers } from '@core/core'
-import { AccountSession, Discovery, Spot, Trail } from '@shared/contracts'
 import { createMemoryStore } from '@core/index'
+import { AccountSession, Discovery, Spot, Trail } from '@shared/contracts'
 import { getSandboxData } from './sandbox/data'
 
 interface TestContextState {
@@ -55,7 +55,7 @@ export const createTestContext = () => {
     })
 
     sandboxData.spots.data.forEach(async spot => {
-      await coreContext.trailApplication.createSpot(session, spot)
+      await coreContext.spotApplication.createSpot(session, spot)
     })
 
     sandboxData.discoveries.data.forEach(async discovery => {

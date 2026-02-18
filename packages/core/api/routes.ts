@@ -20,12 +20,11 @@ import {
   ScanEvent,
   SharedDiscovery,
   Spot,
-  SpotPreview,
   SpotRating,
   Trail,
   TrailRating,
   TrailSpot,
-  TrailStats,
+  TrailStats
 } from '@shared/contracts/index.ts'
 import { manifest } from './manifest.ts'
 import { Route } from './oak/types.ts'
@@ -69,7 +68,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/discoveries/process',
+      url: '/discovery/actions/process-location',
       handler: asyncRequestHandler<DiscoveryLocationRecord>(async ({ context: session, body }) => {
         return await discoveryApplication.processLocation(session, body?.locationWithDirection, body?.trailId)
       }),
@@ -77,7 +76,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/discovery/collections/discoveries',
+      url: '/discovery/discoveries',
       handler: asyncRequestHandler<Discovery[]>(async ({ context: session, query }) => {
         return await discoveryApplication.getDiscoveries(session, query?.trailId)
       }),
@@ -85,7 +84,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/discovery/collections/spots',
+      url: '/discovery/spots',
       handler: asyncRequestHandler<DiscoverySpot[]>(async ({ context: session, query }) => {
         return await discoveryApplication.getDiscoveredSpots(session, query?.trailId)
       }),
@@ -93,7 +92,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/discovery/collections/trails/:trailId/clues',
+      url: '/discovery/trails/:trailId/clues',
       handler: asyncRequestHandler<Clue[], { trailId: string }>(async ({ context: session, params }) => {
         return await discoveryApplication.getDiscoveredPreviewClues(session, params!.trailId)
       }),
@@ -101,7 +100,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/discovery/collections/trails/:trailId',
+      url: '/discovery/trails/:trailId',
       handler: asyncRequestHandler<DiscoveryTrail, { trailId: string }>(async ({ context: session, params }) => {
         return await discoveryApplication.getDiscoveryTrail(session, params!.trailId)
       }),
@@ -117,7 +116,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/discoveries/:discoveryId/stats',
+      url: '/discovery/discoveries/:discoveryId/stats',
       handler: asyncRequestHandler<DiscoveryStats, { discoveryId: string }>(async ({ context: session, params }) => {
         return await discoveryApplication.getDiscoveryStats(session, params!.discoveryId)
       }),
@@ -135,7 +134,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/discoveries/:discoveryId/content',
+      url: '/discovery/discoveries/:discoveryId/content',
       handler: asyncRequestHandler<DiscoveryContent | undefined, { discoveryId: string }>(async ({ context: session, params }) => {
         return await discoveryApplication.getDiscoveryContent(session, params!.discoveryId)
       }),
@@ -143,7 +142,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'PUT',
       version: 'v1',
-      url: '/discoveries/:discoveryId/content',
+      url: '/discovery/discoveries/:discoveryId/content',
       handler: asyncRequestHandler<DiscoveryContent, { discoveryId: string }>(async ({ context: session, params, body }) => {
         return await discoveryApplication.upsertDiscoveryContent(session, params!.discoveryId, body)
       }),
@@ -151,7 +150,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'DELETE',
       version: 'v1',
-      url: '/discoveries/:discoveryId/content',
+      url: '/discovery/discoveries/:discoveryId/content',
       handler: asyncRequestHandler<void, { discoveryId: string }>(async ({ context: session, params }) => {
         return await discoveryApplication.deleteDiscoveryContent(session, params!.discoveryId)
       }),
@@ -161,7 +160,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/spots/:spotId/ratings',
+      url: '/spot/spots/:spotId/ratings',
       handler: asyncRequestHandler<RatingSummary, { spotId: string }>(async ({ context: session, params }) => {
         return await discoveryApplication.getSpotRatingSummary(session, params!.spotId)
       }),
@@ -169,7 +168,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/spots/:spotId/ratings',
+      url: '/spot/spots/:spotId/ratings',
       handler: asyncRequestHandler<SpotRating, { spotId: string }>(async ({ context: session, params, body }) => {
         return await discoveryApplication.rateSpot(session, params!.spotId, body.rating)
       }),
@@ -177,7 +176,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'DELETE',
       version: 'v1',
-      url: '/spots/:spotId/ratings',
+      url: '/spot/spots/:spotId/ratings',
       handler: asyncRequestHandler<void, { spotId: string }>(async ({ context: session, params }) => {
         return await discoveryApplication.removeSpotRating(session, params!.spotId)
       }),
@@ -187,7 +186,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/trails/:trailId/ratings',
+      url: '/trail/trails/:trailId/ratings',
       handler: asyncRequestHandler<RatingSummary, { trailId: string }>(async ({ context: session, params }) => {
         return await trailApplication.getTrailRatingSummary(session, params!.trailId)
       }),
@@ -195,7 +194,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/trails/:trailId/ratings',
+      url: '/trail/trails/:trailId/ratings',
       handler: asyncRequestHandler<TrailRating, { trailId: string }>(async ({ context: session, params, body }) => {
         return await trailApplication.rateTrail(session, params!.trailId, body.rating)
       }),
@@ -203,7 +202,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'DELETE',
       version: 'v1',
-      url: '/trails/:trailId/ratings',
+      url: '/trail/trails/:trailId/ratings',
       handler: asyncRequestHandler<void, { trailId: string }>(async ({ context: session, params }) => {
         return await trailApplication.removeTrailRating(session, params!.trailId)
       }),
@@ -213,7 +212,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/trail/collections/trails',
+      url: '/trail/trails',
       handler: asyncRequestHandler<Trail[]>(async ({ context }) => {
         return await trailApplication.listTrails(context)
       }),
@@ -221,7 +220,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/trail/collections/trails/:id',
+      url: '/trail/trails/:id',
       handler: asyncRequestHandler<Trail | undefined, { id: string }, never>(async ({ params, context }) => {
         return await trailApplication.getTrail(context, params!.id)
       }),
@@ -229,39 +228,62 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/trail/collections/spots',
-      handler: asyncRequestHandler<Spot[]>(async ({ context, query }) => {
-        return await trailApplication.listSpots(context, query?.trailId)
+      url: '/trail/trails/:trailId/spots',
+      handler: asyncRequestHandler<Spot[]>(async ({ context, params }) => {
+        return await trailApplication.listTrailSpots(context, params!.trailId)
       }),
     },
     {
       method: 'GET',
       version: 'v1',
-      url: '/trail/collections/spot-previews',
-      handler: asyncRequestHandler<SpotPreview[]>(async ({ context, query }) => {
-        return await trailApplication.listSpotPreviews(context, query?.trailId)
-      }),
-    },
-    {
-      method: 'GET',
-      version: 'v1',
-      url: '/spots/:id',
+      url: '/spot/spots/:id',
+      // TODO: Access control implementation required
+      // This endpoint is currently blocked for security reasons.
+      // Direct spot access should only be allowed for:
+      // - Spot creators (spot.createdBy === context.accountId)
+      // - Admins/Moderators (future role system)
+      // - Users who have discovered the spot (check via discoveryApplication)
+      // Regular users should access spots via discovery routes instead:
+      // - GET /discovery/collections/spots (discovered spots)
+      // - GET /discovery/collections/trails/:trailId (spots in trail context with proper filtering)
       handler: asyncRequestHandler<Spot | undefined, { id: string }, never>(async ({ params, context }) => {
-        return await spotApplication.getSpot(context, params!.id)
+        // Block all requests until proper access control is implemented
+        return {
+          success: false,
+          error: {
+            message: 'Direct spot access not allowed. Use discovery endpoints instead.',
+            code: 'FORBIDDEN',
+          },
+        }
+
+        // Future implementation:
+        // const spot = await spotApplication.getSpot(context, params!.id)
+        // if (!spot.success || !spot.data) return spot
+        //
+        // // Check access rights
+        // const isOwner = spot.data.createdBy === context.accountId
+        // const isAdmin = await checkAdminRole(context) // Future role system
+        // const hasDiscovered = await discoveryApplication.hasDiscoveredSpot(context, params!.id)
+        //
+        // if (isOwner || isAdmin || hasDiscovered) {
+        //   return spot
+        // }
+        //
+        // return { success: false, error: { message: 'Access denied', code: 'FORBIDDEN' } }
       }),
     },
     {
       method: 'GET',
       version: 'v1',
-      url: '/trails/:trailId/stats',
+      url: '/trail/trails/:trailId/stats',
       handler: asyncRequestHandler<TrailStats, { trailId: string }>(async ({ context, params }) => {
-        return await trailApplication.getTrailStats(context, params!.trailId)
+        return await discoveryApplication.getDiscoveryTrailStats(context, params!.trailId)
       }),
     },
     {
       method: 'POST',
       version: 'v1',
-      url: '/trail/:trailId/spots/:spotId',
+      url: '/trail/trails/:trailId/spots/:spotId',
       handler: asyncRequestHandler<TrailSpot, { trailId: string; spotId: string }, { order?: number }>(async ({ params, context, body }) => {
         return await trailApplication.addSpotToTrail(context, params!.trailId, params!.spotId, body?.order)
       }),
@@ -269,7 +291,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'DELETE',
       version: 'v1',
-      url: '/trail/:trailId/spots/:spotId',
+      url: '/trail/trails/:trailId/spots/:spotId',
       handler: asyncRequestHandler<void, { trailId: string; spotId: string }, never>(async ({ params, context }) => {
         return await trailApplication.removeSpotFromTrail(context, params!.trailId, params!.spotId)
       }),
@@ -279,7 +301,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/sensor/collections/scans',
+      url: '/sensor/scans',
       handler: asyncRequestHandler(async ({ context, query }) => {
         return await sensorApplication.listScanEvents(context, query?.trailId)
       }),
@@ -287,7 +309,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/sensor/collections/scans',
+      url: '/sensor/scans',
       handler: asyncRequestHandler<ScanEvent>(async ({ context: session, body }) => {
         return await sensorApplication.createScanEvent(session, body?.userPosition, body?.trailId)
       }),
@@ -297,7 +319,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/account/sms/request',
+      url: '/account/actions/request-sms',
       config: { isPublic: true },
       handler: asyncRequestHandler<SMSCodeRequest>(async ({ body }) => {
         return await accountApplication.requestSMSCode(body?.phoneNumber)
@@ -306,7 +328,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/account/sms/verify',
+      url: '/account/actions/verify-sms',
       config: { isPublic: true },
       handler: asyncRequestHandler<SMSVerificationResult>(async ({ body }) => {
         return await accountApplication.verifySMSCode(body?.phoneNumber, body?.code)
@@ -315,7 +337,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/account/collections/accounts',
+      url: '/account/profile',
       handler: asyncRequestHandler<Account | null>(async ({ context }) => {
         return await accountApplication.getAccount(context)
       }),
@@ -323,7 +345,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/account/collections/accounts/:accountId',
+      url: '/account/profile/:accountId',
       handler: asyncRequestHandler<Account | null, { accountId: string }, never>(async ({ context }) => {
         return await accountApplication.getAccount(context)
       }),
@@ -331,7 +353,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'PUT',
       version: 'v1',
-      url: '/account/collections/accounts',
+      url: '/account/profile',
       handler: asyncRequestHandler<Account>(async ({ context, body }) => {
         return await accountApplication.updateAccount(context, body)
       }),
@@ -339,7 +361,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/account/avatar',
+      url: '/account/profile/avatar',
       handler: asyncRequestHandler<Account>(async ({ context, body }) => {
         return await accountApplication.uploadAvatar(context, body?.base64Data)
       }),
@@ -347,7 +369,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/account/session/validate',
+      url: '/account/actions/validate-session',
       config: { isPublic: true },
       handler: asyncRequestHandler(async ({ body }) => {
         return await accountApplication.validateSession(body?.sessionToken)
@@ -356,7 +378,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/account/session/revoke',
+      url: '/account/actions/revoke-session',
       config: { isPublic: true },
       handler: asyncRequestHandler(async ({ body }) => {
         return await accountApplication.revokeSession(body?.sessionToken)
@@ -365,7 +387,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/account/local-account',
+      url: '/account/actions/create-local',
       config: { isPublic: true },
       handler: asyncRequestHandler(async () => {
         return await accountApplication.createLocalAccount()
@@ -374,7 +396,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/account/upgrade-account',
+      url: '/account/actions/upgrade-to-phone',
       handler: asyncRequestHandler(async ({ context, body }) => {
         return await accountApplication.upgradeToPhoneAccount(context, body?.phoneNumber, body?.code)
       }),
@@ -390,7 +412,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/community/collections/communities',
+      url: '/community/communities',
       handler: asyncRequestHandler<Community>(async ({ context, body }) => {
         return await communityApplication.createCommunity(context, { name: body?.name || '', trailIds: body?.trailIds || [] })
       }),
@@ -398,7 +420,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/community/join',
+      url: '/community/actions/join',
       handler: asyncRequestHandler<Community>(async ({ context, body }) => {
         return await communityApplication.joinCommunity(context, body?.inviteCode)
       }),
@@ -406,7 +428,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/community/collections/communities',
+      url: '/community/communities',
       handler: asyncRequestHandler<Community[]>(async ({ context }) => {
         return await communityApplication.listCommunities(context)
       }),
@@ -414,7 +436,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/community/collections/communities/:communityId',
+      url: '/community/communities/:communityId',
       handler: asyncRequestHandler<Community | undefined, { communityId: string }>(async ({ context, params }) => {
         return await communityApplication.getCommunity(context, params!.communityId)
       }),
@@ -422,7 +444,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/community/collections/communities/:communityId/leave',
+      url: '/community/communities/:communityId/actions/leave',
       handler: asyncRequestHandler<void, { communityId: string }>(async ({ context, params }) => {
         return await communityApplication.leaveCommunity(context, params!.communityId)
       }),
@@ -430,7 +452,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'DELETE',
       version: 'v1',
-      url: '/community/collections/communities/:communityId',
+      url: '/community/communities/:communityId',
       handler: asyncRequestHandler<void, { communityId: string }>(async ({ context, params }) => {
         return await communityApplication.removeCommunity(context, params!.communityId)
       }),
@@ -438,7 +460,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/community/collections/communities/:communityId/members',
+      url: '/community/communities/:communityId/members',
       handler: asyncRequestHandler<CommunityMember[], { communityId: string }>(async ({ context, params }) => {
         return await communityApplication.listCommunityMembers(context, params!.communityId)
       }),
@@ -446,7 +468,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/community/collections/communities/:communityId/discoveries/:discoveryId/share',
+      url: '/community/communities/:communityId/discoveries/:discoveryId/share',
       handler: asyncRequestHandler<SharedDiscovery, { communityId: string; discoveryId: string }>(async ({ context, params }) => {
         return await communityApplication.shareDiscovery(context, params!.discoveryId, params!.communityId)
       }),
@@ -454,7 +476,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'DELETE',
       version: 'v1',
-      url: '/community/collections/communities/:communityId/discoveries/:discoveryId/share',
+      url: '/community/communities/:communityId/discoveries/:discoveryId/share',
       handler: asyncRequestHandler<void, { communityId: string; discoveryId: string }>(async ({ context, params }) => {
         return await communityApplication.unshareDiscovery(context, params!.discoveryId, params!.communityId)
       }),
@@ -462,7 +484,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
     {
       method: 'GET',
       version: 'v1',
-      url: '/community/collections/communities/:communityId/discoveries',
+      url: '/community/communities/:communityId/discoveries',
       handler: asyncRequestHandler<Discovery[], { communityId: string }>(async ({ context, params }) => {
         return await communityApplication.getSharedDiscoveries(context, params!.communityId)
       }),

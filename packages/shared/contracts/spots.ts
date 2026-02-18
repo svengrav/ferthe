@@ -1,25 +1,50 @@
 import { GeoLocation } from '@shared/geo/index.ts'
 import { AccountContext } from './accounts.ts'
 import { ImageReference } from './images.ts'
-import { Result } from './results.ts'
+import { QueryOptions, Result } from './results.ts'
+
+/**
+ * Aggregated rating summary for a spot.
+ */
+export interface RatingSummary {
+  average: number // Average rating (0-5, 0 if no ratings)
+  count: number // Total number of ratings
+  userRating?: number // Current user's rating (1-5), if any
+}
+
+/**
+ * User rating (1-5 stars) for a spot.
+ */
+export interface SpotRating {
+  id: string
+  spotId: string
+  accountId: string
+  rating: number // 1-5 stars
+  createdAt: Date
+}
 
 export interface SpotApplicationContract {
-  getSpotPreviews: () => Promise<Result<SpotPreview[]>>
-  getSpots: (context?: AccountContext) => Promise<Result<Spot[]>>
-  getSpot: (context: AccountContext, id: string) => Promise<Result<Spot | undefined>>
-  createSpot: (spotData: Omit<Spot, 'id'>) => Promise<Result<Spot>>
+  getSpotPreviews: (options?: QueryOptions) => Promise<Result<SpotPreview[]>>
+  getSpotPreviewsByIds: (context: AccountContext, spotIds: string[], options?: QueryOptions) => Promise<Result<SpotPreview[]>>
+  getSpots: (context?: AccountContext, options?: QueryOptions) => Promise<Result<Spot[]>>
+  getSpot: (context: AccountContext, id: string, options?: QueryOptions) => Promise<Result<Spot | undefined>>
+  getSpotsByIds: (context: AccountContext, spotIds: string[], options?: QueryOptions) => Promise<Result<Spot[]>>
+  createSpot: (context: AccountContext, spotData: Omit<Spot, 'id' | 'slug'>) => Promise<Result<Spot>>
+  rateSpot: (context: AccountContext, spotId: string, rating: number) => Promise<Result<SpotRating>>
+  removeSpotRating: (context: AccountContext, spotId: string) => Promise<Result<void>>
+  getSpotRatingSummary: (context: AccountContext, spotId: string) => Promise<Result<RatingSummary>>
 }
 
 export type SpotVisibility = 'hidden' | 'preview'
 
 /**
- * User-specific status of a spot from the perspective of the current user.
- * - 'discovered': User has discovered this spot
- * - 'preview': User has seen clues/preview but not discovered yet
- * - 'creator': User created this spot
- * - 'unknown': User has no interaction with this spot
+ * Source/origin indicating why this spot is visible and how it was loaded.
+ * Determines data access level and UI presentation.
+ * - 'discovery': User has discovered this spot (full access)
+ * - 'preview': Spot visible as trail preview/clue (blurred, limited data)
+ * - 'created': User created this spot (full access)
  */
-export type SpotUserStatus = 'discovered' | 'preview' | 'creator' | 'unknown'
+export type SpotSource = 'discovery' | 'preview' | 'created'
 
 /**
  * Public spot interface with runtime-generated image URLs.
@@ -40,7 +65,7 @@ export interface Spot {
   createdAt: Date
   updatedAt: Date
   createdBy?: string // Account ID of creator
-  userStatus?: SpotUserStatus // User-specific status (only present when fetched with user context)
+  source?: SpotSource // Source/origin of spot (set by backend based on context)
 }
 
 /**
@@ -52,7 +77,12 @@ export interface StoredSpot extends Spot {
   blurredImageBlobPath?: string
 }
 
+/**
+ * Reduced spot representation for list views and previews.
+ * Contains minimal data to display spots before discovery.
+ */
 export interface SpotPreview {
   id: string
   blurredImage?: ImageReference
+  rating: RatingSummary // Community rating (always included, batch-loaded)
 }

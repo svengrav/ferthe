@@ -2,24 +2,26 @@ import { GeoLocation } from '@shared/geo/index.ts'
 import { AccountContext } from './accounts.ts'
 import { DiscoveryProfile, DiscoveryProfileUpdateData } from './discoveryProfile.ts'
 import { ImageReference } from './images.ts'
-import { Result } from './results.ts'
-import { Spot } from './spots.ts'
-import { Trail } from './trails.ts'
+import { QueryOptions, Result } from './results.ts'
+import { RatingSummary, Spot, SpotRating } from "./spots.ts"
+import { Trail, TrailStats } from './trails.ts'
 
 export interface DiscoveryApplicationContract {
   processLocation: (context: AccountContext, locationWithDirection: LocationWithDirection, trailId: string) => Promise<Result<DiscoveryLocationRecord>>
-  getDiscoveries: (context: AccountContext, trailId?: string) => Promise<Result<Discovery[]>>
+  getDiscoveries: (context: AccountContext, trailId?: string, options?: QueryOptions) => Promise<Result<Discovery[]>>
   getDiscovery: (context: AccountContext, discoveryId: string) => Promise<Result<Discovery | undefined>>
   getDiscoveredSpotIds: (context: AccountContext, trailId?: string) => Promise<Result<string[]>>
-  getDiscoveredSpots: (context: AccountContext, trailId?: string) => Promise<Result<DiscoverySpot[]>>
+  getDiscoveredSpots: (context: AccountContext, trailId?: string, options?: QueryOptions) => Promise<Result<DiscoverySpot[]>>
   getDiscoveredPreviewClues: (context: AccountContext, trailId: string) => Promise<Result<Clue[]>>
   getDiscoveryTrail: (context: AccountContext, trailId: string, userLocation?: GeoLocation) => Promise<Result<DiscoveryTrail>>
   getDiscoveryStats: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryStats>>
+  getDiscoveryTrailStats: (context: AccountContext, trailId: string) => Promise<Result<TrailStats>>
   getDiscoveryProfile: (context: AccountContext) => Promise<Result<DiscoveryProfile>>
   updateDiscoveryProfile: (context: AccountContext, updateData: DiscoveryProfileUpdateData) => Promise<Result<DiscoveryProfile>>
   getDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
   upsertDiscoveryContent: (context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
   deleteDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<void>>
+  // Rating methods (delegated to SpotApplication with access control)
   rateSpot: (context: AccountContext, spotId: string, rating: number) => Promise<Result<SpotRating>>
   removeSpotRating: (context: AccountContext, spotId: string) => Promise<Result<void>>
   getSpotRatingSummary: (context: AccountContext, spotId: string) => Promise<Result<RatingSummary>>
@@ -105,24 +107,4 @@ export interface DiscoveryContent {
   comment?: string
   createdAt: Date
   updatedAt: Date
-}
-
-/**
- * User rating (1-5 stars) for a spot.
- */
-export interface SpotRating {
-  id: string
-  spotId: string
-  accountId: string
-  rating: number // 1-5 stars
-  createdAt: Date
-}
-
-/**
- * Aggregated rating summary for a spot.
- */
-export interface RatingSummary {
-  average: number // Average rating (0-5, 0 if no ratings)
-  count: number // Total number of ratings
-  userRating?: number // Current user's rating (1-5), if any
 }

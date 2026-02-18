@@ -1,5 +1,5 @@
 import { createDeterministicId } from '@core/utils/idGenerator'
-import { Clue, ClueSource, Discovery, DiscoveryContent, DiscoveryLocationRecord, DiscoverySnap, DiscoverySpot, DiscoveryStats, DiscoveryTrail, LocationWithDirection, RatingSummary, ScanEvent, Spot, SpotRating, Trail } from '@shared/contracts'
+import { Clue, ClueSource, Discovery, DiscoveryContent, DiscoveryLocationRecord, DiscoverySnap, DiscoverySpot, DiscoveryStats, DiscoveryTrail, LocationWithDirection, RatingSummary, ScanEvent, Spot, SpotRating, SpotSource, Trail, TrailStats } from '@shared/contracts'
 import { GeoLocation, geoUtils } from '@shared/geo'
 
 export interface Target {
@@ -13,6 +13,9 @@ export interface Target {
  * Type definition for the Discovery Service functionality
  */
 export type DiscoveryServiceActions = {
+  enrichSpotWithSource: (spot: Spot, userId: string, discoveries: Discovery[]) => Spot
+  enrichSpotsWithSource: (spots: Spot[], userId: string, discoveries: Discovery[]) => Spot[]
+  filterSpotBySource: (spot: Spot) => Spot | undefined
   getTargets: (accountId: string, trail: Trail, discoveries: Discovery[], spots: Spot[]) => Spot[]
   createDiscovery: (accountId: string, spotId: string, trailId: string, scanEventId?: string) => Discovery
   processScanEvent: (scanEvent: ScanEvent, trail: Trail, discoveries: Discovery[], trailSpotIds: string[]) => Discovery[] | null
@@ -29,10 +32,90 @@ export type DiscoveryServiceActions = {
   processLocationUpdate: (accountId: string, locationWithDirection: LocationWithDirection, discoveries: Discovery[], spots: Spot[], trail: Trail) => DiscoveryLocationRecord
   createDiscoveryTrail: (accountId: string, trail: Trail, discoveries: Discovery[], spots: Spot[], trailSpotIds: string[], userLocation?: GeoLocation) => DiscoveryTrail
   getDiscoveryStats: (discovery: Discovery, allDiscoveriesForSpot: Discovery[], userDiscoveries: Discovery[], trailSpotIds: string[], spots: Spot[]) => DiscoveryStats
+  getTrailStats: (accountId: string, trailId: string, allDiscoveries: Discovery[], trailSpotIds: string[]) => TrailStats
   createDiscoveryContent: (accountId: string, discoveryId: string, content: { imageUrl?: string; comment?: string }) => DiscoveryContent
   updateDiscoveryContent: (existing: DiscoveryContent, content: { imageUrl?: string; comment?: string }) => DiscoveryContent
   createSpotRating: (accountId: string, spotId: string, rating: number) => SpotRating
   getSpotRatingSummary: (spotId: string, ratings: SpotRating[], accountId: string) => RatingSummary
+}
+
+/**
+ * Calculates distance between two coordinates in meters using Haversine formula
+ */
+/**
+ * Determines the source/origin of a spot for the current user.
+ */
+const determineSpotSource = (spot: Spot, userId: string, discoveries: Discovery[]): SpotSource => {
+  // Check if user created this spot
+  if (spot.createdBy === userId) {
+    return 'created'
+  }
+
+  // Check if user discovered this spot
+  const hasDiscovered = discoveries.some(
+    d => d.accountId === userId && d.spotId === spot.id
+  )
+  if (hasDiscovered) {
+    return 'discovery'
+  }
+
+  // Spot is in preview mode (visible but not discovered)
+  return 'preview'
+}
+
+/**
+ * Enriches a single spot with source information.
+ */
+const enrichSpotWithSource = (spot: Spot, userId: string, discoveries: Discovery[]): Spot => {
+  const source = determineSpotSource(spot, userId, discoveries)
+  return {
+    ...spot,
+    source,
+  }
+}
+
+/**
+ * Enriches multiple spots with source information.
+ * Optimized for batch processing.
+ */
+const enrichSpotsWithSource = (spots: Spot[], userId: string, discoveries: Discovery[]): Spot[] => {
+  // Pre-filter discoveries for this user for better performance
+  const userDiscoveries = discoveries.filter(d => d.accountId === userId)
+
+  return spots.map(spot => enrichSpotWithSource(spot, userId, userDiscoveries))
+}
+
+/**
+ * Filters spot data based on source.
+ * Returns appropriate data level for each source:
+ * - 'discovery'/'created': Full spot data
+ * - 'preview': Limited data (blurred image, no exact location, no description)
+ */
+const filterSpotBySource = (spot: Spot): Spot | undefined => {
+  const { source } = spot
+
+  // Full access for discovered spots and creators
+  if (source === 'discovery' || source === 'created') {
+    return spot
+  }
+
+  // Preview mode: Limited information
+  if (source === 'preview') {
+    return {
+      ...spot,
+      // Remove sensitive data
+      description: '', // Hide description
+      image: undefined, // Hide clear image
+      location: {
+        // Obfuscate exact location (could be randomized in future)
+        lat: Math.round(spot.location.lat * 100) / 100, // Round to ~1km precision
+        lon: Math.round(spot.location.lon * 100) / 100,
+      },
+    }
+  }
+
+  // No source set: Should not be visible
+  return undefined
 }
 
 /**
@@ -82,7 +165,7 @@ const getDiscoveredSpots = (accountId: string, discoveries: Discovery[], spots: 
       ...spot,
       discoveredAt: discovery.discoveredAt,
       discoveryId: discovery.id,
-      userStatus: spot.createdBy === accountId ? 'creator' : 'discovered', // All discovered spots have userStatus
+      source: spot.createdBy === accountId ? 'created' : 'discovery', // All discovered spots have source set
     }
   })
 }
@@ -491,7 +574,102 @@ const getSpotRatingSummary = (spotId: string, ratings: SpotRating[], accountId: 
   }
 }
 
+/**
+ * Pure function to calculate trail statistics for a user.
+ */
+const getTrailStats = (
+  accountId: string,
+  trailId: string,
+  allDiscoveries: Discovery[],
+  trailSpotIds: string[]
+): TrailStats => {
+  // Get user's discoveries for this trail
+  const userTrailDiscoveries = allDiscoveries.filter(
+    d => d.accountId === accountId && d.trailId === trailId
+  )
+
+  // Get unique discovered spot IDs
+  const discoveredSpotIds = new Set(userTrailDiscoveries.map(d => d.spotId))
+  const discoveredSpots = discoveredSpotIds.size
+  const totalSpots = trailSpotIds.length
+  const discoveriesCount = userTrailDiscoveries.length
+
+  // Calculate progress
+  const progressPercentage = totalSpots > 0 ? Math.round((discoveredSpots / totalSpots) * 100) : 0
+
+  // Determine completion status
+  let completionStatus: 'not_started' | 'in_progress' | 'completed' = 'not_started'
+  if (discoveredSpots > 0) {
+    completionStatus = discoveredSpots === totalSpots ? 'completed' : 'in_progress'
+  }
+
+  // Calculate rank among all trail discoverers
+  const trailDiscoveries = allDiscoveries.filter(d => d.trailId === trailId)
+
+  // Group discoveries by account
+  const discovererMap = new Map<string, Set<string>>()
+  for (const discovery of trailDiscoveries) {
+    if (!discovererMap.has(discovery.accountId)) {
+      discovererMap.set(discovery.accountId, new Set())
+    }
+    discovererMap.get(discovery.accountId)!.add(discovery.spotId)
+  }
+
+  // Calculate spots discovered per user and sort
+  const discovererStats = Array.from(discovererMap.entries()).map(([accId, spotIds]) => ({
+    accountId: accId,
+    spotsDiscovered: spotIds.size
+  })).sort((a, b) => b.spotsDiscovered - a.spotsDiscovered)
+
+  // Find user's rank (0 if not started)
+  let rank = 0
+  if (discoveredSpots > 0) {
+    const userIndex = discovererStats.findIndex(s => s.accountId === accountId)
+    rank = userIndex + 1
+  }
+
+  const totalDiscoverers = discovererMap.size
+
+  // Calculate time-based stats
+  let firstDiscoveredAt: Date | undefined
+  let lastDiscoveredAt: Date | undefined
+  let averageTimeBetweenDiscoveries: number | undefined
+
+  if (userTrailDiscoveries.length > 0) {
+    const sortedDiscoveries = userTrailDiscoveries
+      .sort((a, b) => new Date(a.discoveredAt).getTime() - new Date(b.discoveredAt).getTime())
+
+    firstDiscoveredAt = sortedDiscoveries[0].discoveredAt
+    lastDiscoveredAt = sortedDiscoveries[sortedDiscoveries.length - 1].discoveredAt
+
+    // Calculate average time between discoveries (if more than 1)
+    if (sortedDiscoveries.length > 1) {
+      const firstTime = new Date(firstDiscoveredAt).getTime()
+      const lastTime = new Date(lastDiscoveredAt).getTime()
+      const totalTimeSeconds = (lastTime - firstTime) / 1000
+      averageTimeBetweenDiscoveries = Math.round(totalTimeSeconds / (sortedDiscoveries.length - 1))
+    }
+  }
+
+  return {
+    trailId,
+    totalSpots,
+    discoveredSpots,
+    discoveriesCount,
+    progressPercentage,
+    completionStatus,
+    rank,
+    totalDiscoverers,
+    firstDiscoveredAt,
+    lastDiscoveredAt,
+    averageTimeBetweenDiscoveries
+  }
+}
+
 export const createDiscoveryService = (): DiscoveryServiceActions => ({
+  enrichSpotWithSource,
+  enrichSpotsWithSource,
+  filterSpotBySource,
   getDiscoveredSpots,
   getDiscoveries,
   getDiscoverySpot,
@@ -508,6 +686,7 @@ export const createDiscoveryService = (): DiscoveryServiceActions => ({
   processLocationUpdate,
   createDiscoveryTrail,
   getDiscoveryStats,
+  getTrailStats,
   createDiscoveryContent,
   updateDiscoveryContent,
   createSpotRating,

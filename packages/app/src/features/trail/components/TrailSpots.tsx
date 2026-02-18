@@ -7,7 +7,7 @@ import { useApp } from '@app/shared/useApp'
 import { useMemo } from 'react'
 import { View } from 'react-native'
 import { useTrailStats } from '../hooks/useTrailStats'
-import { useTrailPreviewSpots } from '../stores/trailStore'
+import { usePreviewSpots, useTrailSpotIds } from '../stores/trailStore'
 
 interface TrailUnknownSpotsProps {
   trailId: string
@@ -22,27 +22,27 @@ function TrailSpots({ trailId }: TrailUnknownSpotsProps) {
   const { styles } = useTheme(useStyles)
   const { locales } = useApp()
   const spots = useSpots()
-  const spotPreviews = useTrailPreviewSpots(trailId)
+  const trailSpotIds = useTrailSpotIds(trailId)
+  const previewSpots = usePreviewSpots()
   const { stats } = useTrailStats(trailId)
   const { showDiscoveryCardDetails } = useDiscoveryCardPage()
 
   if (!styles) return null
 
-  // Filter discovered spots using userStatus (set by API)
-  const discoveredTrailSpots = spots.filter(s => s.userStatus === 'discovered')
+  // Filter spots that belong to this trail
+  const trailSpots = spots.filter(s => trailSpotIds.includes(s.id))
 
-  // Get preview spot IDs that are discovered
-  const discoveredPreviewSpotIds = new Set(discoveredTrailSpots.map(s => s.id))
-  const undiscoveredPreviews = spotPreviews.filter(p => !discoveredPreviewSpotIds.has(p.id))
+  // Get undiscovered spots (previews) that belong to this trail
+  const undiscoveredPreviews = previewSpots.filter(p => trailSpotIds.includes(p.id))
 
   // Use stats for accurate counts - this is the source of truth
   const totalSpots = stats?.totalSpots || 0
   const discoveredCount = stats?.discoveredSpots || 0
   const undiscoveredCount = totalSpots - discoveredCount
 
-  // Combine discovered + undiscovered spots for SpotCardList
+  // Build display list with discovered and undiscovered spots
   const allSpots = useMemo(() => {
-    const discovered = discoveredTrailSpots.slice(0, discoveredCount).map(spot => ({
+    const discovered = trailSpots.slice(0, discoveredCount).map(spot => ({
       id: spot.id,
       image: spot.image,
       title: spot.name,
@@ -57,7 +57,7 @@ function TrailSpots({ trailId }: TrailUnknownSpotsProps) {
       discovered: false,
     }))
     return [...discovered, ...undiscovered]
-  }, [discoveredTrailSpots, undiscoveredPreviews, discoveredCount, undiscoveredCount])
+  }, [trailSpots, undiscoveredPreviews, discoveredCount, undiscoveredCount])
 
   if (totalSpots === 0) {
     return (

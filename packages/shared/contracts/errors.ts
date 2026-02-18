@@ -33,7 +33,9 @@ export const ERROR_CODES = {
   ALREADY_VERIFIED: { code: 'ALREADY_VERIFIED', message: 'Account is already phone verified', httpStatus: 409 },
   // Discovery & Trail Management (404-500)
   TRAIL_NOT_FOUND: { code: 'TRAIL_NOT_FOUND', message: 'Trail not found', httpStatus: 404 },
+  TRAIL_HAS_NO_SPOTS: { code: 'TRAIL_HAS_NO_SPOTS', message: 'Trail has no spots', httpStatus: 404 },
   DISCOVERY_NOT_FOUND: { code: 'DISCOVERY_NOT_FOUND', message: 'Discovery not found', httpStatus: 404 },
+  SPOT_NOT_DISCOVERED: { code: 'SPOT_NOT_DISCOVERED', message: 'Spot has not been discovered yet. Discover it first to rate it.', httpStatus: 403 },
   GET_DISCOVERIES_ERROR: { code: 'GET_DISCOVERIES_ERROR', message: 'Failed to retrieve discoveries', httpStatus: 500 },
   GET_DISCOVERY_ERROR: { code: 'GET_DISCOVERY_ERROR', message: 'Failed to retrieve discovery', httpStatus: 500 },
   GET_DISCOVERY_STATS_ERROR: { code: 'GET_DISCOVERY_STATS_ERROR', message: 'Failed to retrieve discovery statistics', httpStatus: 500 },

@@ -14,6 +14,10 @@ export interface Result<T> {
   readonly message?: string
   readonly meta?: {
     readonly timestamp?: string
+    readonly total?: number // Total count for pagination
+    readonly hasMore?: boolean // More results available
+    readonly limit?: number
+    readonly offset?: number
   }
   data?: T
 }
@@ -25,24 +29,33 @@ export interface ErrorResult {
   details?: Record<string, any>
 }
 
-// interface Options {
-//   // Pagination
-//   readonly hasMore?: boolean
-//   readonly limit?: number
-//   readonly offset?: number
+/**
+ * Query options for list operations
+ * 
+ * Enrichment Groups (for include/exclude):
+ * - 'images': Generate fresh SAS-token URLs for all image fields (costly: ~50-200ms per image)
+ * - 'userStatus': Add user-specific status and filter data accordingly (requires extra DB query)
+ */
+export interface QueryOptions {
+  // Pagination
+  readonly limit?: number
+  readonly offset?: number
 
-//   // Sorting
-//   readonly sortBy?: string
-//   readonly sortOrder?: 'asc' | 'desc'
+  // Sorting
+  readonly sortBy?: string
+  readonly sortOrder?: 'asc' | 'desc'
 
-//   // Filtering & Search
-//   readonly filters?: Record<string, any>
-//   readonly search?: string
+  // Filtering
+  readonly filters?: Record<string, any>
+  readonly search?: string
 
-//   // Field selection
-//   readonly include?: string[]
-//   readonly exclude?: string[]
-// }
+  // Field selection (for enrichment control)
+  // - If not specified: all enrichments are applied (default)
+  // - If include is set: only specified enrichments are applied
+  // - If exclude is set: all except excluded enrichments are applied
+  readonly include?: string[]
+  readonly exclude?: string[]
+}
 
 /**
  * Create a successful result with data

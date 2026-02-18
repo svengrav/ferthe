@@ -66,6 +66,7 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
   const trailApplication = createTrailApplication({
     getAccountContext: accountApplication.getAccountContext,
     trailAPI: apiContext.trailApplication,
+    discoveryAPI: apiContext.discoveryApplication,
   })
 
   const spotApplication = createSpotApplication({

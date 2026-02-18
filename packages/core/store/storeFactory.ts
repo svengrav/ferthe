@@ -1,3 +1,4 @@
+import { QueryOptions } from '@shared/contracts/index.ts'
 import { createCosmosStore } from './cosmosStore.ts'
 import { createEnhancedStore, StoreOperationResult } from './enhancedStore.ts'
 import { createJsonStore } from './jsonStore.ts'
@@ -9,7 +10,7 @@ export interface Store<T extends StoreItem> {
   get(id: string): Promise<StoreOperationResult<T>>
   update(id: string, item: Partial<T>): Promise<StoreOperationResult<T>>
   delete(id: string): Promise<StoreOperationResult<void>>
-  list(): Promise<StoreOperationResult<T[]>>
+  list(options?: QueryOptions): Promise<StoreOperationResult<T[]>>
 }
 
 export type STORE_TYPES = 'memory' | 'cosmos' | 'json'
@@ -52,8 +53,8 @@ export function createStore<T extends StoreItem>(connector: StoreInterface, cont
     async delete(id: string): Promise<StoreOperationResult<void>> {
       return enhancedStore.delete(container, id)
     },
-    async list(): Promise<StoreOperationResult<T[]>> {
-      return enhancedStore.list<T>(container)
+    async list(options?: QueryOptions): Promise<StoreOperationResult<T[]>> {
+      return enhancedStore.list<T>(container, options)
     },
   }
 }

@@ -1,6 +1,6 @@
 import { logger } from '@app/shared/utils/logger'
 import { AccountContext, Result, Spot, SpotApplicationContract, TrailApplicationContract } from '@shared/contracts'
-import { getSpotStoreActions } from './stores/spotStore'
+import { getSpots, getSpotStoreActions } from './stores/spotStore'
 
 export interface SpotApplication {
   requestSpotsByTrail: (trailId: string) => Promise<void>
@@ -35,7 +35,14 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
     setStatus('loading')
     logger.log('SpotApplication: Requesting spots by trail', trailId)
 
-    const spots = await trailAPI.listSpots(accountSession.data, trailId)
+    const spotIdsResult = await trailAPI.getTrailSpotIds(accountSession.data, trailId)
+    if (!spotIdsResult.data || !spotIdsResult.success) {
+      logger.error('Failed to fetch spot IDs by trail:', spotIdsResult.error)
+      setStatus('error')
+      return
+    }
+
+    const spots = await spotAPI.getSpotsByIds(accountSession.data, spotIdsResult.data)
     if (!spots.data || !spots.success) {
       logger.error('Failed to fetch spots by trail:', spots.error)
       setStatus('error')
@@ -72,7 +79,16 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
     }
 
     logger.log('SpotApplication: Getting spot', spotId)
-    return await spotAPI.getSpot(accountSession.data, spotId)
+    const result = await spotAPI.getSpot(accountSession.data, spotId)
+
+    // Update store with fetched spot
+    if (result.success && result.data) {
+      const currentSpots = getSpots()
+      const otherSpots = currentSpots.filter(s => s.id !== spotId)
+      setSpots([...otherSpots, result.data])
+    }
+
+    return result
   }
 
   return {

@@ -48,18 +48,18 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     maxImageSizeBytes: config.constants.images.maxSizeBytes
   })
 
-  const trailApplication = createTrailApplication({
-    trailStore: createStore<StoredTrail>(storeConnector, STORE_IDS.TRAILS),
+  const spotApplication = createSpotApplication({
     spotStore: createStore<StoredSpot>(storeConnector, STORE_IDS.SPOTS),
-    trailSpotStore: createStore<TrailSpot>(storeConnector, STORE_IDS.TRAIL_SPOTS),
-    discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
-    trailRatingStore: createStore<TrailRating>(storeConnector, STORE_IDS.TRAIL_RATINGS),
+    ratingStore: createStore<SpotRating>(storeConnector, STORE_IDS.SPOT_RATINGS),
     imageApplication,
   })
 
-  const spotApplication = createSpotApplication({
-    spotStore: createStore<StoredSpot>(storeConnector, STORE_IDS.SPOTS),
-    discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
+  const trailApplication = createTrailApplication({
+    trailStore: createStore<StoredTrail>(storeConnector, STORE_IDS.TRAILS),
+    trailSpotStore: createStore<TrailSpot>(storeConnector, STORE_IDS.TRAIL_SPOTS),
+    trailRatingStore: createStore<TrailRating>(storeConnector, STORE_IDS.TRAIL_RATINGS),
+    imageApplication,
+    spotApplication,
   })
 
   const accountApplication = createAccountApplication({
@@ -74,6 +74,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
 
   const sensorApplication = createSensorApplication({
     trailApplication: trailApplication,
+    spotApplication: spotApplication,
     scanStore: createStore(storeConnector, STORE_IDS.SENSOR_SCANS),
     sensorService: createSensorService(),
     discoveryStore: createStore(storeConnector, STORE_IDS.DISCOVERIES),
@@ -82,11 +83,11 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
   const discoveryApplication = createDiscoveryApplication({
     sensorApplication: sensorApplication,
     trailApplication: trailApplication,
+    spotApplication: spotApplication,
     discoveryService: createDiscoveryService(),
     discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
     profileStore: createStore<DiscoveryProfile>(storeConnector, STORE_IDS.DISCOVERY_PROFILES),
     contentStore: createStore<DiscoveryContent>(storeConnector, STORE_IDS.DISCOVERY_CONTENTS),
-    ratingStore: createStore<SpotRating>(storeConnector, STORE_IDS.SPOT_RATINGS),
     imageApplication: imageApplication
   })
 

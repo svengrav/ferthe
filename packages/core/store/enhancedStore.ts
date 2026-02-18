@@ -1,3 +1,4 @@
+import { QueryOptions } from '@shared/contracts/index.ts'
 import { StoreInterface, StoreItem } from './storeInterface.ts'
 
 export interface StoreOperationResult<T> {
@@ -14,7 +15,7 @@ export interface StoreOperationResult<T> {
 export interface EnhancedStoreInterface {
   create<T extends StoreItem>(container: string, item: T): Promise<StoreOperationResult<T>>
   get<T extends StoreItem>(container: string, id: string): Promise<StoreOperationResult<T>>
-  list<T extends StoreItem>(container: string, query?: string, parameters?: Array<{ name: string; value: any }>): Promise<StoreOperationResult<T[]>>
+  list<T extends StoreItem>(container: string, options?: QueryOptions): Promise<StoreOperationResult<T[]>>
   update<T extends StoreItem>(container: string, id: string, item: Partial<T>): Promise<StoreOperationResult<T>>
   delete(container: string, id: string): Promise<StoreOperationResult<void>>
   deleteAll(container: string): Promise<StoreOperationResult<void>>
@@ -75,9 +76,9 @@ export const createEnhancedStore = (baseStore: StoreInterface): EnhancedStoreInt
       }
     },
 
-    async list<T extends StoreItem>(container: string, query?: string, parameters?: Array<{ name: string; value: any }>): Promise<StoreOperationResult<T[]>> {
+    async list<T extends StoreItem>(container: string, options?: QueryOptions): Promise<StoreOperationResult<T[]>> {
       try {
-        const result = await baseStore.list<T>(container, query, parameters)
+        const result = await baseStore.list<T>(container, options)
         return {
           success: true,
           data: result,

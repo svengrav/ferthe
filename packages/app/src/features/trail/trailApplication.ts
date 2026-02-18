@@ -1,5 +1,6 @@
+import { getSpotStoreActions } from '@app/features/spot/stores/spotStore'
 import { logger } from '@app/shared/utils/logger'
-import { AccountContext, RatingSummary, Result, TrailApplicationContract, TrailStats } from '@shared/contracts'
+import { AccountContext, DiscoveryApplicationContract, RatingSummary, Result, TrailApplicationContract, TrailStats } from '@shared/contracts'
 import { getTrailRatingActions } from './stores/trailRatingStore'
 import { getTrailStoreActions } from './stores/trailStore'
 
@@ -15,10 +16,11 @@ export interface TrailApplication {
 interface TrailApplicationOptions {
   getAccountContext: () => Promise<Result<AccountContext>>
   trailAPI: TrailApplicationContract
+  discoveryAPI: DiscoveryApplicationContract
 }
 
 export function createTrailApplication(options: TrailApplicationOptions) {
-  const { trailAPI, getAccountContext } = options
+  const { trailAPI, discoveryAPI, getAccountContext } = options
 
   const getSession = async (): Promise<Result<AccountContext>> => {
     const accountSession = await getAccountContext()
@@ -51,13 +53,25 @@ export function createTrailApplication(options: TrailApplicationOptions) {
     if (!accountSession.data) throw new Error('Account session not found!')
 
     setStatus('loading')
-    const spots = await trailAPI.listSpotPreviews(accountSession.data, trailId)
-    if (!spots.data || !spots.success) {
-      logger.error('Failed to fetch spots:', spots.error)
+
+    // Load all spots for trail (includes previews)
+    const spotsResult = await trailAPI.listTrailSpots(accountSession.data, trailId)
+
+    if (!spotsResult.success) {
+      logger.error('Failed to fetch trail spots:', spotsResult.error)
       setStatus('error')
     } else {
-      // Assuming there's a method to set spots in the store
-      getTrailStoreActions().setSpots(spots.data)
+      const spots = spotsResult.data || []
+      const spotIds = spots.map(s => s.id)
+
+      // Separate discovered spots from previews
+      const discoveredSpots = spots.filter(s => s.source === 'discovery' || (s.source === undefined && s.image))
+      const previewSpots = spots.filter(s => s.source === 'preview' || (s.source === undefined && !s.image))
+
+      // Store previews in trailStore, discovered in spotStore
+      getTrailStoreActions().setPreviewSpots(previewSpots as any)
+      getSpotStoreActions().setSpots(discoveredSpots)
+      getTrailStoreActions().setTrailSpotIds(trailId, spotIds)
       setStatus('ready')
     }
   }
@@ -67,7 +81,7 @@ export function createTrailApplication(options: TrailApplicationOptions) {
     if (!accountSession.data) {
       return { success: false, error: { message: 'Account session not found', code: 'SESSION_NOT_FOUND' } }
     }
-    return await trailAPI.getTrailStats(accountSession.data, trailId)
+    return await discoveryAPI.getDiscoveryTrailStats(accountSession.data, trailId)
   }
 
   const rateTrail = async (trailId: string, rating: number): Promise<Result<void>> => {

@@ -1,4 +1,6 @@
 import { createCuid2 } from '@core/utils/idGenerator.ts'
+import { QueryOptions } from '@shared/contracts/index.ts'
+import { applyQueryOptions } from './queryUtils.ts'
 import { StoreInterface, StoreItem } from './storeInterface.ts'
 
 /**
@@ -50,17 +52,11 @@ export const createMemoryStore = (): StoreInterface => {
       }
     },
 
-    async list<T>(container: string, query?: string, parameters?: Array<{ name: string; value: any }>): Promise<T[]> {
+    async list<T extends Record<string, any>>(container: string, options?: QueryOptions): Promise<T[]> {
       try {
         ensureContainerInitialized(container)
         const items = [...(MEMORY_STORAGE[container] as T[])]
-
-        // Simple query support for memory store (basic filtering)
-        if (query && query !== 'SELECT * FROM c') {
-          console.warn(`Advanced queries not supported in memory store: ${query}`)
-        }
-
-        return items
+        return applyQueryOptions(items, options)
       } catch (error) {
         console.error(`Error listing items from memory storage (${container}):`, error)
         return []

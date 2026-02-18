@@ -4,33 +4,26 @@ import { createCuid2 } from '@core/utils/idGenerator.ts'
 import { createSlug } from '@core/utils/slug.ts'
 import {
   AccountContext,
-  Discovery,
   ImageApplicationContract,
-  ImageReference,
+  QueryOptions,
   RatingSummary,
   Result,
   Spot,
-  SpotPreview,
-  StoredSpot,
+  SpotApplicationContract,
   StoredTrail,
   Trail,
   TrailApplicationContract,
   TrailRating,
-  TrailSpot,
-  TrailStats
+  TrailSpot
 } from '@shared/contracts/index.ts'
 import { geoUtils } from '@shared/geo/index.ts'
-import { createSpotService, SpotServiceActions } from '../spot/spotService.ts'
-import { createTrailService } from './trailService.ts'
 
 interface TrailApplicationOptions {
   trailStore: Store<StoredTrail>
-  spotStore: Store<StoredSpot>
   trailSpotStore: Store<TrailSpot>
-  discoveryStore: Store<Discovery>
   trailRatingStore: Store<TrailRating>
   imageApplication: ImageApplicationContract
-  spotService?: SpotServiceActions
+  spotApplication: SpotApplicationContract
 }
 
 /**
@@ -113,63 +106,18 @@ async function enrichTrailWithImages(
 }
 
 /**
- * Enrich spot entity with fresh image URLs
- */
-async function enrichSpotWithImages(
-  context: AccountContext,
-  spotEntity: StoredSpot,
-  imageApplication: ImageApplicationContract
-): Promise<Spot> {
-  let image: ImageReference | undefined
-  let blurredImage: ImageReference | undefined
-
-  if (spotEntity.imageBlobPath) {
-    const urlResult = await imageApplication.refreshImageUrl(context, spotEntity.imageBlobPath)
-
-    if (urlResult.success && urlResult.data) {
-      image = {
-        id: spotEntity.imageBlobPath,
-        url: urlResult.data,
-      }
-    }
-  }
-
-  // Load blurred image separately (for undiscovered spots)
-  if (spotEntity.blurredImageBlobPath) {
-    const blurredResult = await imageApplication.refreshImageUrl(context, spotEntity.blurredImageBlobPath)
-    if (blurredResult.success && blurredResult.data) {
-      blurredImage = {
-        id: spotEntity.blurredImageBlobPath,
-        url: blurredResult.data,
-      }
-    }
-  }
-
-  return {
-    id: spotEntity.id,
-    slug: spotEntity.slug,
-    name: spotEntity.name,
-    description: spotEntity.description,
-    image,
-    blurredImage,
-    location: spotEntity.location,
-    options: spotEntity.options,
-    createdAt: spotEntity.createdAt,
-    updatedAt: spotEntity.updatedAt,
-  }
-}
-
-/**
  * Helper: Enrich trail with calculated boundary from spots
+ * @param context Account context for authentication
  * @param trailEntity Trail entity to enrich
  * @param trailSpotStore Store for trail-spot relationships
- * @param spotStore Store for spot entities
+ * @param spotApplication SpotApplication for fetching spot data
  * @returns Trail entity with boundary calculated from its spots
  */
 async function enrichTrailWithBoundary(
+  context: AccountContext,
   trailEntity: StoredTrail,
   trailSpotStore: Store<TrailSpot>,
-  spotStore: Store<StoredSpot>
+  spotApplication: SpotApplicationContract
 ): Promise<StoredTrail> {
   // If boundary already exists, return as-is
   if (trailEntity.boundary) {
@@ -190,20 +138,18 @@ async function enrichTrailWithBoundary(
     return trailEntity // No spots, return original
   }
 
-  // Fetch actual spot entities
-  const spotsResult = await spotStore.list()
-  if (!spotsResult.success) {
+  // Fetch actual spot entities via SpotApplication
+  const spotsResult = await spotApplication.getSpotsByIds(context, spotIds, { exclude: ['images', 'userStatus'] })
+  if (!spotsResult.success || !spotsResult.data) {
     return trailEntity
   }
 
-  const spotEntities = (spotsResult.data || []).filter(spot => spotIds.includes(spot.id))
-
-  if (spotEntities.length === 0) {
+  if (spotsResult.data.length === 0) {
     return trailEntity
   }
 
   // Calculate boundary from spot locations
-  const boundary = geoUtils.calculateSpotBoundingBox(spotEntities.map(s => ({ ...s, image: undefined })), 50)
+  const boundary = geoUtils.calculateSpotBoundingBox(spotsResult.data.map(s => ({ ...s, image: undefined })), 50)
 
   return {
     ...trailEntity,
@@ -211,82 +157,8 @@ async function enrichTrailWithBoundary(
   }
 }
 
-export function createTrailApplication({ trailStore, spotStore, trailSpotStore, discoveryStore, trailRatingStore, imageApplication, spotService = createSpotService() }: TrailApplicationOptions): TrailApplicationContract {
-  const trailService = createTrailService()
-
+export function createTrailApplication({ trailStore, trailSpotStore, trailRatingStore, imageApplication, spotApplication }: TrailApplicationOptions): TrailApplicationContract {
   return {
-    listSpotPreviews: async (context: AccountContext, trailId?: string): Promise<Result<SpotPreview[]>> => {
-      try {
-        if (!trailId) {
-          const spotsResult = await spotStore.list()
-          if (!spotsResult.success) {
-            return { success: false, error: { message: 'Failed to list spots', code: 'GET_SPOT_PREVIEWS_ERROR' } }
-          }
-
-          // Enrich with blurred image URLs
-          const enrichedPreviews = await Promise.all(
-            (spotsResult.data || []).map(async (spotEntity) => {
-              const preview: SpotPreview = { id: spotEntity.id }
-
-              if (spotEntity.blurredImageBlobPath) {
-                const blurredUrlResult = await imageApplication.refreshImageUrl(context, spotEntity.blurredImageBlobPath)
-                if (blurredUrlResult.success && blurredUrlResult.data) {
-                  preview.blurredImage = {
-                    id: spotEntity.blurredImageBlobPath,
-                    url: blurredUrlResult.data,
-                  }
-                }
-              }
-
-              return preview
-            })
-          )
-
-          return { success: true, data: enrichedPreviews }
-        }
-
-        // Get trail-spot relationships
-        const trailSpotsResult = await trailSpotStore.list()
-        if (!trailSpotsResult.success) {
-          return { success: false, error: { message: 'Failed to list trail spots', code: 'GET_SPOT_PREVIEWS_ERROR' } }
-        }
-
-        const trailSpots = (trailSpotsResult.data || []).filter(ts => ts.trailId === trailId)
-        const spotIds = trailSpots.map(ts => ts.spotId)
-
-        // Get spot entities
-        const spotsResult = await spotStore.list()
-        if (!spotsResult.success) {
-          return { success: false, error: { message: 'Failed to list spots', code: 'GET_SPOT_PREVIEWS_ERROR' } }
-        }
-
-        const spotEntities = (spotsResult.data || []).filter(spot => spotIds.includes(spot.id))
-
-        // Enrich with blurred image URLs
-        const enrichedPreviews = await Promise.all(
-          spotEntities.map(async (spotEntity) => {
-            const preview: SpotPreview = { id: spotEntity.id }
-
-            if (spotEntity.blurredImageBlobPath) {
-              const blurredUrlResult = await imageApplication.refreshImageUrl(context, spotEntity.blurredImageBlobPath)
-              if (blurredUrlResult.success && blurredUrlResult.data) {
-                preview.blurredImage = {
-                  id: spotEntity.blurredImageBlobPath,
-                  url: blurredUrlResult.data,
-                }
-              }
-            }
-
-            return preview
-          })
-        )
-
-        return { success: true, data: enrichedPreviews }
-      } catch (error: unknown) {
-        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_SPOT_PREVIEWS_ERROR' } }
-      }
-    },
-
     getTrail: async (context: AccountContext, trailId: string): Promise<Result<Trail | undefined>> => {
       try {
         const trailResult = await trailStore.get(trailId)
@@ -299,7 +171,7 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore, 
         }
 
         // Enrich trail with calculated boundary
-        const enrichedWithBoundary = await enrichTrailWithBoundary(trailResult.data, trailSpotStore, spotStore)
+        const enrichedWithBoundary = await enrichTrailWithBoundary(context, trailResult.data, trailSpotStore, spotApplication)
 
         // Enrich with fresh image URLs
         const enrichedTrail = await enrichTrailWithImages(context, enrichedWithBoundary, imageApplication)
@@ -310,7 +182,7 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore, 
       }
     },
 
-    getTrailSpotIds: async (context: AccountContext, trailId: string): Promise<Result<string[]>> => {
+    getTrailSpotIds: async (_context: AccountContext, trailId: string): Promise<Result<string[]>> => {
       try {
         const trailSpotsResult = await trailSpotStore.list()
         if (!trailSpotsResult.success) {
@@ -335,141 +207,67 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore, 
       }
     },
 
-    listTrails: async (context: AccountContext): Promise<Result<Trail[]>> => {
+    listTrailSpots: async (context: AccountContext, trailId: string): Promise<Result<Spot[]>> => {
+      const spotIdsResult = await trailSpotStore.list()
+      if (!spotIdsResult.success) {
+        return { success: false, error: { message: 'Failed to get trail spots', code: 'GET_TRAIL_SPOTS_ERROR' } }
+      }
+
+      const spotIds = (spotIdsResult.data || [])
+        .filter(ts => ts.trailId === trailId)
+        .sort((a, b) => {
+          if (a.order !== undefined && b.order !== undefined) return a.order - b.order
+          if (a.order !== undefined) return -1
+          if (b.order !== undefined) return 1
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        })
+        .map(ts => ts.spotId)
+
+      return await spotApplication.getSpotsByIds(context, spotIds)
+    },
+
+    listTrails: async (context: AccountContext, options?: QueryOptions): Promise<Result<Trail[]>> => {
       try {
-        const trailsResult = await trailStore.list()
+        const trailsResult = await trailStore.list(options)
         if (!trailsResult.success) {
           return { success: false, error: { message: 'Failed to list trails', code: 'LIST_TRAILS_ERROR' } }
         }
 
         const trailEntities = trailsResult.data || []
 
-        // Enrich each trail with calculated boundary and fresh image URLs
+        // Check if images should be enriched
+        // Default: enrich unless explicitly excluded or not included
+        const shouldEnrichImages = options?.exclude?.includes('images') ? false :
+          (options?.include ? options.include.includes('images') : true)
+
+        // Enrich each trail with calculated boundary and optionally with fresh image URLs
         const enrichedTrails = await Promise.all(
           trailEntities.map(async (trailEntity) => {
-            const withBoundary = await enrichTrailWithBoundary(trailEntity, trailSpotStore, spotStore)
-            return enrichTrailWithImages(context, withBoundary, imageApplication)
+            const withBoundary = await enrichTrailWithBoundary(context, trailEntity, trailSpotStore, spotApplication)
+            if (shouldEnrichImages) {
+              return enrichTrailWithImages(context, withBoundary, imageApplication)
+            }
+            // Return trail without image enrichment
+            return {
+              id: withBoundary.id,
+              slug: withBoundary.slug,
+              name: withBoundary.name,
+              description: withBoundary.description,
+              map: { image: undefined },
+              viewport: undefined,
+              overview: undefined,
+              image: undefined,
+              boundary: withBoundary.boundary || { northEast: { lat: 0, lon: 0 }, southWest: { lat: 0, lon: 0 } },
+              options: withBoundary.options,
+              createdAt: withBoundary.createdAt,
+              updatedAt: withBoundary.updatedAt,
+            }
           })
         )
 
         return { success: true, data: enrichedTrails }
       } catch (error: unknown) {
         return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'LIST_TRAILS_ERROR' } }
-      }
-    },
-
-    listSpots: async (context: AccountContext, trailId?: string): Promise<Result<Spot[]>> => {
-      try {
-        if (!trailId) {
-          const spotsResult = await spotStore.list()
-          if (!spotsResult.success) {
-            return { success: false, error: { message: 'Failed to list spots', code: 'LIST_SPOTS_ERROR' } }
-          }
-
-          // Enrich all spots with fresh image URLs
-          let enrichedSpots = await Promise.all(
-            (spotsResult.data || []).map(spotEntity => enrichSpotWithImages(context, spotEntity, imageApplication))
-          )
-
-          // Enrich with userStatus if accountId is available
-          if (context.accountId) {
-            const discoveriesResult = await discoveryStore.list()
-            if (discoveriesResult.success && discoveriesResult.data) {
-              enrichedSpots = spotService.enrichSpotsWithUserStatus(enrichedSpots, context.accountId, discoveriesResult.data)
-            }
-          }
-
-          // Filter spots based on user status
-          const filteredSpots = enrichedSpots
-            .map(spot => spotService.filterSpotByUserStatus(spot))
-            .filter((spot): spot is Spot => spot !== undefined)
-
-          return { success: true, data: filteredSpots }
-        }
-
-        // Get trail-spot relationships
-        const trailSpotsResult = await trailSpotStore.list()
-        if (!trailSpotsResult.success) {
-          return { success: false, error: { message: 'Failed to list trail spots', code: 'LIST_SPOTS_ERROR' } }
-        }
-
-        const trailSpots = (trailSpotsResult.data || []).filter(ts => ts.trailId === trailId)
-        const spotIds = trailSpots.map(ts => ts.spotId)
-
-        // Get spot entities
-        const spotsResult = await spotStore.list()
-        if (!spotsResult.success) {
-          return { success: false, error: { message: 'Failed to list spots', code: 'LIST_SPOTS_ERROR' } }
-        }
-
-        const spotEntities = (spotsResult.data || []).filter(spot => spotIds.includes(spot.id))
-
-        // Enrich with fresh image URLs
-        let enrichedSpots = await Promise.all(
-          spotEntities.map(spotEntity => enrichSpotWithImages(context, spotEntity, imageApplication))
-        )
-
-        // Enrich with userStatus if accountId is available
-        if (context.accountId) {
-          const discoveriesResult = await discoveryStore.list()
-          if (discoveriesResult.success && discoveriesResult.data) {
-            enrichedSpots = spotService.enrichSpotsWithUserStatus(enrichedSpots, context.accountId, discoveriesResult.data)
-          }
-        }
-
-        // Filter spots based on user status
-        const filteredSpots = enrichedSpots
-          .map(spot => spotService.filterSpotByUserStatus(spot))
-          .filter((spot): spot is Spot => spot !== undefined)
-
-        return { success: true, data: filteredSpots }
-      } catch (error: unknown) {
-        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'LIST_SPOTS_ERROR' } }
-      }
-    },
-
-    getTrailStats: async (context: AccountContext, trailId: string): Promise<Result<TrailStats>> => {
-      try {
-        const accountId = context.accountId
-        if (!accountId) {
-          return { success: false, error: { message: 'Account ID is required', code: 'ACCOUNT_ID_REQUIRED' } }
-        }
-
-        // Verify trail exists
-        const trailResult = await trailStore.get(trailId)
-        if (!trailResult.success || !trailResult.data) {
-          return { success: false, error: { message: 'Trail not found', code: 'TRAIL_NOT_FOUND' } }
-        }
-
-        // Get trail spot IDs
-        const trailSpotsResult = await trailSpotStore.list()
-        if (!trailSpotsResult.success) {
-          return { success: false, error: { message: 'Failed to retrieve trail spots', code: 'GET_TRAIL_SPOTS_ERROR' } }
-        }
-
-        const trailSpotIds = (trailSpotsResult.data || [])
-          .filter(ts => ts.trailId === trailId)
-          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-          .map(ts => ts.spotId)
-
-        if (trailSpotIds.length === 0) {
-          return { success: false, error: { message: 'Trail has no spots', code: 'TRAIL_HAS_NO_SPOTS' } }
-        }
-
-        // Get all discoveries
-        const discoveriesResult = await discoveryStore.list()
-        if (!discoveriesResult.success) {
-          return { success: false, error: { message: 'Failed to retrieve discoveries', code: 'GET_DISCOVERIES_ERROR' } }
-        }
-
-        const allDiscoveries = discoveriesResult.data || []
-
-        // Calculate stats using service
-        const stats = trailService.getTrailStats(accountId, trailId, allDiscoveries, trailSpotIds)
-
-        return { success: true, data: stats }
-      } catch (error: any) {
-        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_TRAIL_STATS_ERROR' } }
       }
     },
 
@@ -514,52 +312,7 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore, 
       }
     },
 
-    createSpot: async (context: AccountContext, spotData: Omit<Spot, 'id' | 'slug'>): Promise<Result<Spot>> => {
-      try {
-        const id = createCuid2()
-        const slug = createSlug(spotData.name)
-
-        // Extract blob path from image URL
-        const imageBlobPath = spotData.image?.url ? extractBlobPathFromUrl(spotData.image.url) : undefined
-
-        // Auto-generate blurred path if image exists (by convention: <path>-blurred.<ext>)
-        let blurredImageBlobPath: string | undefined
-        if (imageBlobPath) {
-          const lastDot = imageBlobPath.lastIndexOf('.')
-          blurredImageBlobPath = lastDot === -1
-            ? `${imageBlobPath}-blurred`
-            : `${imageBlobPath.substring(0, lastDot)}-blurred${imageBlobPath.substring(lastDot)}`
-        }
-
-        // Convert Spot input to StoredSpot
-        const spotEntity: StoredSpot = {
-          id,
-          slug,
-          name: spotData.name,
-          description: spotData.description,
-          imageBlobPath,
-          blurredImageBlobPath,
-          location: spotData.location,
-          options: spotData.options,
-          createdAt: spotData.createdAt,
-          updatedAt: spotData.updatedAt,
-        }
-
-        // Store entity with blob paths
-        const createdSpotResult = await spotStore.create(spotEntity)
-        if (!createdSpotResult.success) {
-          return { success: false, error: { message: 'Failed to create spot', code: 'CREATE_SPOT_ERROR' } }
-        }
-
-        // Return enriched spot with fresh URLs
-        const enrichedSpot = await enrichSpotWithImages(context, createdSpotResult.data!, imageApplication)
-        return { success: true, data: enrichedSpot }
-      } catch (error: unknown) {
-        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'CREATE_SPOT_ERROR' } }
-      }
-    },
-
-    addSpotToTrail: async (context: AccountContext, trailId: string, spotId: string, order?: number): Promise<Result<TrailSpot>> => {
+    addSpotToTrail: async (_context: AccountContext, trailId: string, spotId: string, order?: number): Promise<Result<TrailSpot>> => {
       try {
         // Check if relationship already exists
         const existingResult = await trailSpotStore.list()
@@ -588,7 +341,7 @@ export function createTrailApplication({ trailStore, spotStore, trailSpotStore, 
       }
     },
 
-    removeSpotFromTrail: async (context: AccountContext, trailId: string, spotId: string): Promise<Result<void>> => {
+    removeSpotFromTrail: async (_context: AccountContext, trailId: string, spotId: string): Promise<Result<void>> => {
       try {
         const trailSpotsResult = await trailSpotStore.list()
         if (!trailSpotsResult.success) {

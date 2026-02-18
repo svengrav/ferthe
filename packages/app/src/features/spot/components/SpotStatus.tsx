@@ -18,22 +18,19 @@ function SpotStatus(props: SpotStatusProps) {
   const { locales } = useApp()
 
   const getStatusText = () => {
-    switch (spot.userStatus) {
-      case 'discovered':
+    switch (spot.source) {
+      case 'discovery':
         if (discovery?.discoveredAt) {
           const date = new Date(discovery.discoveredAt).toLocaleDateString()
           return `${locales.discovery.discovered} ${date}`
         }
         return locales.discovery.discovered
 
-      case 'creator':
+      case 'created':
         const createdDate = new Date(spot.createdAt).toLocaleDateString()
         return `${locales.common.created} ${createdDate}`
 
       case 'preview':
-        return locales.trails.preview || 'Preview'
-
-      case 'unknown':
       default:
         return locales.trails.preview || 'Preview'
     }
