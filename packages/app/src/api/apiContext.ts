@@ -17,6 +17,7 @@ import {
   DiscoveryTrail,
   FirebaseConfig,
   LocationWithDirection,
+  QueryOptions,
   RatingSummary,
   ScanEvent,
   SessionValidationResult,
@@ -32,7 +33,7 @@ import {
   TrailStats
 } from '@shared/contracts'
 import { APIError, createAPIClient } from './client'
-import { checkStatus, StatusResult } from './utils'
+import { checkStatus, serializeQueryOptions, StatusResult } from './utils'
 
 
 export interface ApiContextOptions {
@@ -76,16 +77,16 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
       processLocation: (_context: AccountContext, locationWithDirection: LocationWithDirection, trailId: string) =>
         API.send<DiscoveryLocationRecord>('/discovery/actions/process-location', 'POST', { locationWithDirection, trailId }),
 
-      getDiscoveries: (_context: AccountContext, trailId?: string) => {
-        const params = trailId ? `?trailId=${trailId}` : ''
-        return API.send<Discovery[]>(`/discovery/discoveries${params}`)
+      getDiscoveries: (_context: AccountContext, trailId?: string, options?: QueryOptions) => {
+        const queryParams = { ...(trailId ? { trailId } : {}), ...serializeQueryOptions(options) }
+        return API.send<Discovery[]>('/discovery/discoveries', 'GET', undefined, queryParams)
       },
 
       getDiscovery: (_context: AccountContext, discoveryId: string) => API.send<Discovery>(`/discovery/discoveries/${discoveryId}`),
 
-      getDiscoveredSpots: (_context: AccountContext, trailId?: string) => {
-        const params = trailId ? `?trailId=${trailId}` : ''
-        return API.send<DiscoverySpot[]>(`/discovery/spots${params}`)
+      getDiscoveredSpots: (_context: AccountContext, trailId?: string, options?: QueryOptions) => {
+        const queryParams = { ...(trailId ? { trailId } : {}), ...serializeQueryOptions(options) }
+        return API.send<DiscoverySpot[]>('/discovery/spots', 'GET', undefined, queryParams)
       },
 
       getDiscoveredSpotIds: async (_context: AccountContext, trailId?: string) => {
@@ -133,15 +134,19 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
      * Note: Rating methods are available but should be accessed via discoveryApplication for proper access control.
      */
     spotApplication: {
-      getSpot: (_context: AccountContext, id: string) => API.send<Spot | undefined>(`/spot/spots/${id}`),
+      getSpot: (_context: AccountContext, id: string, options?: QueryOptions) =>
+        API.send<Spot | undefined>(`/spot/spots/${id}`, 'GET', undefined, serializeQueryOptions(options)),
 
       getSpots: (_context?: AccountContext) => { throw new Error('Method not implemented. Use getSpotsByIds or getSpotPreviews instead.') },
 
-      getSpotsByIds: (_context: AccountContext, spotIds: string[]) => API.send<Spot[]>('/spot/queries/by-ids', 'POST', { spotIds }),
+      getSpotsByIds: (_context: AccountContext, spotIds: string[], options?: QueryOptions) =>
+        API.send<Spot[]>('/spot/queries/by-ids', 'POST', { spotIds }, serializeQueryOptions(options)),
 
-      getSpotPreviews: () => API.send<SpotPreview[]>('/spot/previews'),
+      getSpotPreviews: (options?: QueryOptions) =>
+        API.send<SpotPreview[]>('/spot/previews', 'GET', undefined, serializeQueryOptions(options)),
 
-      getSpotPreviewsByIds: (_context: AccountContext, spotIds: string[]) => API.send<SpotPreview[]>('/spot/queries/previews-by-ids', 'POST', { spotIds }),
+      getSpotPreviewsByIds: (_context: AccountContext, spotIds: string[], options?: QueryOptions) =>
+        API.send<SpotPreview[]>('/spot/queries/previews-by-ids', 'POST', { spotIds }, serializeQueryOptions(options)),
 
       createSpot: (_context: AccountContext, spotData: Omit<Spot, 'id' | 'slug'>) => API.send<Spot>('/spot/spots', 'POST', spotData),
 
@@ -162,7 +167,8 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
      * They are designed to be used in the context of trail and spot data management.
      */
     trailApplication: {
-      listTrails: (_context: AccountContext) => API.send<Trail[]>('/trail/trails'),
+      listTrails: (_context: AccountContext, options?: QueryOptions) =>
+        API.send<Trail[]>('/trail/trails', 'GET', undefined, serializeQueryOptions(options)),
 
       getTrail: (_context: AccountContext, id: string) => API.send<Trail | undefined>(`/trail/trails/${id}`),
 

@@ -1,3 +1,4 @@
+import { parseQueryOptions } from '@core/api/oak/queryOptions.ts'
 import { createAsyncRequestHandler } from '@core/api/oak/requestHandler.ts'
 
 import {
@@ -78,7 +79,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       version: 'v1',
       url: '/discovery/discoveries',
       handler: asyncRequestHandler<Discovery[]>(async ({ context: session, query }) => {
-        return await discoveryApplication.getDiscoveries(session, query?.trailId)
+        return await discoveryApplication.getDiscoveries(session, query?.trailId, parseQueryOptions(query))
       }),
     },
     {
@@ -86,7 +87,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       version: 'v1',
       url: '/discovery/spots',
       handler: asyncRequestHandler<DiscoverySpot[]>(async ({ context: session, query }) => {
-        return await discoveryApplication.getDiscoveredSpots(session, query?.trailId)
+        return await discoveryApplication.getDiscoveredSpots(session, query?.trailId, parseQueryOptions(query))
       }),
     },
     {
@@ -213,8 +214,8 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       method: 'GET',
       version: 'v1',
       url: '/trail/trails',
-      handler: asyncRequestHandler<Trail[]>(async ({ context }) => {
-        return await trailApplication.listTrails(context)
+      handler: asyncRequestHandler<Trail[]>(async ({ context, query }) => {
+        return await trailApplication.listTrails(context, parseQueryOptions(query))
       }),
     },
     {

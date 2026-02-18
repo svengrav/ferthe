@@ -16,9 +16,18 @@ export const createAPIClient = (
   getAccountSession: () => AccountSession | null,
   timeout: number = 10000,
 ) => {
-  const send = async <T>(endpoint: string, method: string = 'GET', body?: any): Promise<Result<T>> => {
+  const send = async <T>(endpoint: string, method: string = 'GET', body?: any, queryParams?: Record<string, string>): Promise<Result<T>> => {
     try {
       const credentials = getAccountSession()
+
+      // Build URL with query parameters
+      let url = `${apiEndpoint}${endpoint}`
+      if (queryParams) {
+        const entries = Object.entries(queryParams).filter(([, v]) => v !== undefined && v !== '')
+        if (entries.length > 0) {
+          url += '?' + new URLSearchParams(entries).toString()
+        }
+      }
 
       const headers: HeadersInit = {}
       if (body) {
@@ -30,7 +39,7 @@ export const createAPIClient = (
       }
 
 
-      const response = await fetchWithTimeout(`${apiEndpoint}${endpoint}`, {
+      const response = await fetchWithTimeout(url, {
         method: method.toUpperCase(),
         headers,
         body: body ? JSON.stringify(body) : null,

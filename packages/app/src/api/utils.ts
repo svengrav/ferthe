@@ -2,6 +2,8 @@
  * API Utility Functions
  */
 
+import { QueryOptions } from '@shared/contracts'
+
 export interface FetchWithTimeoutOptions extends RequestInit {
   timeout?: number
 }
@@ -70,6 +72,26 @@ export const deserializeDates = <T>(data: any): T => {
   }
 
   return result as T
+}
+
+/**
+ * Serializes QueryOptions into flat query parameter key-value pairs.
+ * Counterpart to core's parseQueryOptions.
+ */
+export const serializeQueryOptions = (options?: QueryOptions): Record<string, string> => {
+  if (!options) return {}
+
+  const params: Record<string, string> = {}
+
+  if (options.limit !== undefined) params.limit = String(options.limit)
+  if (options.offset !== undefined) params.offset = String(options.offset)
+  if (options.sortBy) params.sortBy = options.sortBy
+  if (options.sortOrder) params.sortOrder = options.sortOrder
+  if (options.search) params.search = options.search
+  if (options.include?.length) params.include = options.include.join(',')
+  if (options.exclude?.length) params.exclude = options.exclude.join(',')
+
+  return params
 }
 
 export interface StatusResult {
