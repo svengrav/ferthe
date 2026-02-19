@@ -112,7 +112,7 @@
         "cwd": "${workspaceFolder}/packages/core"
       },
       "group": "build",
-      "problemMatcher": "$tsc",
+      "problemMatcher": "$tsc"
     },
     {
       "label": "TypeScript Check: All",

@@ -64,9 +64,9 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
   }, [spots, boundary, size.width, size.height])
 
   // Pre-create styles based on theme
-  const markerStyle = useMemo(() => createMarkerContainerStyle(theme), [theme])
-  const imageStyle = useMemo(() => createImageStyle(theme), [theme])
-  const fallbackStyle = useMemo(() => createFallbackStyle(theme), [theme])
+  const markerStyle = createMarkerContainerStyle(theme)
+  const imageStyle = createImageStyle(theme)
+  const fallbackStyle = createFallbackStyle(theme)
 
   // Render spot marker at pre-calculated position
   const renderSpotMarker = ({ spot, position }: { spot: DiscoverySpot; position: { x: number; y: number } }, index: number) => {
