@@ -1,4 +1,4 @@
-import { useDiscoverySpots } from '@app/features/discovery/stores/discoveryTrailStore'
+import { useDiscoverySpotsViewModel } from '@app/features/discovery/hooks/useDiscoverySpotsViewModel'
 import { GeoBoundary } from '@shared/geo'
 import { memo, useMemo } from 'react'
 import { useMapTheme } from '../../stores/mapThemeStore'
@@ -11,7 +11,7 @@ interface MapTrailPathProps {
 }
 
 function MapTrailPath({ boundary, size }: MapTrailPathProps) {
-  const spots = useDiscoverySpots()
+  const spots = useDiscoverySpotsViewModel()
   const scale = useMapCompensatedScale()
   const points = useMemo(() =>
     spots.map(spot => spot.location),

@@ -1,19 +1,24 @@
 import { Status, StoreActions, StoreState } from '@app/shared/index'
-import { SpotPreview, Trail, TrailStats } from '@shared/contracts'
+import { Trail, TrailStats } from '@shared/contracts'
 import { create } from 'zustand'
+import { useShallow } from 'zustand/react/shallow'
+
+/**
+ * Converts an array of items with `id` to a Record keyed by id.
+ */
+const toById = <T extends { id: string }>(items: T[]): Record<string, T> =>
+  Object.fromEntries(items.map(item => [item.id, item]))
 
 interface TrailActions extends StoreActions {
   setTrails: (trails: Trail[]) => void
   setTrailSpotIds: (trailId: string, spotIds: string[]) => void
-  setPreviewSpots: (spots: SpotPreview[]) => void
   setTrailStats: (trailId: string, stats: TrailStats) => void
 }
 
 interface TrailState extends StoreState {
   status: Status
-  trails: Trail[]
-  trailSpotIds: Record<string, string[]> // Map of trailId -> spotIds
-  previewSpots: SpotPreview[] // Undiscovered spots for all trails
+  byId: Record<string, Trail>
+  trailSpotIds: Record<string, string[]>
   trailStats: Record<string, TrailStats>
 }
 
@@ -24,17 +29,15 @@ export const trailStore = create<TrailState & TrailActions>(set => ({
   error: undefined,
 
   // Trail specific data
-  trails: [],
+  byId: {},
   trailSpotIds: {},
-  previewSpots: [],
   trailStats: {},
 
   setStatus: status => set({ status }),
-  setTrails: trails => set({ trails }),
+  setTrails: trails => set({ byId: toById(trails) }),
   setTrailSpotIds: (trailId, spotIds) => set(state => ({
     trailSpotIds: { ...state.trailSpotIds, [trailId]: spotIds },
   })),
-  setPreviewSpots: spots => set({ previewSpots: spots }),
   setTrailStats: (trailId, stats) => set(state => ({
     trailStats: { ...state.trailStats, [trailId]: stats },
   })),
@@ -45,23 +48,24 @@ const emptyArray: string[] = []
 
 export const useTrailStatus = () => trailStore(state => state.status)
 export const useTrailData = () => trailStore(state => state)
-export const useTrails = () => trailStore(state => state.trails)
+export const useTrails = () => trailStore(useShallow(state => Object.values(state.byId)))
+export const useTrail = (trailId: string) => trailStore(state => state.byId[trailId])
 export const useTrailSpotIds = (trailId: string) => trailStore(state => state.trailSpotIds[trailId] ?? emptyArray)
-export const usePreviewSpots = () => trailStore(state => state.previewSpots)
 
 export const getTrailStoreActions = () => ({
   setTrails: trailStore.getState().setTrails,
   setStatus: trailStore.getState().setStatus,
   setTrailSpotIds: trailStore.getState().setTrailSpotIds,
-  setPreviewSpots: trailStore.getState().setPreviewSpots,
   setTrailStats: trailStore.getState().setTrailStats,
 })
 
 export const getTrailData = () => ({
-  trails: trailStore.getState().trails,
+  byId: trailStore.getState().byId,
   status: trailStore.getState().status,
   error: trailStore.getState().error,
   updatedAt: trailStore.getState().updatedAt,
 })
 
-export const getTrails = () => trailStore.getState().trails
+export const getTrails = () => Object.values(trailStore.getState().byId)
+export const getTrailsById = () => trailStore.getState().byId
+export const getTrail = (trailId: string) => trailStore.getState().byId[trailId]

@@ -7,7 +7,7 @@ import { useLocalizationStore } from '@app/shared/localization/useLocalizationSt
 
 import { SpotCardList } from '@app/features/spot/components/index.ts'
 import { useSettingsPage } from '../../settings/components/SettingsPage'
-import { useDiscoveryData, useDiscoveryStatus } from '../stores/discoveryStore'
+import { useDiscoveries, useDiscoveryStatus } from '../stores/discoveryStore'
 import { useDiscoveryCardPage } from './DiscoveryCardPage.tsx'
 
 // Status constants
@@ -19,7 +19,7 @@ const STATUS_LOADING = 'loading'
  * Hook to manage discovery screen state and data fetching
  */
 const useDiscoveryScreen = () => {
-  const { discoveries } = useDiscoveryData()
+  const discoveries = useDiscoveries()
   const discoveryStatus = useDiscoveryStatus()
   const { requestDiscoveryState, getDiscoveryCards } = getAppContext().discoveryApplication
 

@@ -2,8 +2,8 @@ import { GeoBoundary } from '@shared/geo/index.ts'
 import { AccountContext } from './accounts.ts'
 import { ImageReference } from './images.ts'
 import { QueryOptions, Result } from './results.ts'
-import { RatingSummary, Spot } from './spots.ts'
-import { TrailSpot } from './trailSpots.ts'
+import { RatingSummary } from './spots.ts'
+import { StoredTrailSpot, TrailSpot } from './trailSpots.ts'
 
 /**
  * Application contract for managing trails and their associated spots.
@@ -13,9 +13,9 @@ export interface TrailApplicationContract {
   listTrails: (context: AccountContext, options?: QueryOptions) => Promise<Result<Trail[]>>
   getTrail: (context: AccountContext, trailId: string) => Promise<Result<Trail | undefined>>
   getTrailSpotIds: (context: AccountContext, trailId: string) => Promise<Result<string[]>>
-  listTrailSpots: (context: AccountContext, trailId: string) => Promise<Result<Spot[]>>
+  getTrailSpots: (context: AccountContext, trailId: string) => Promise<Result<TrailSpot[]>>
   createTrail: (context: AccountContext, trailData: Omit<Trail, 'id'>) => Promise<Result<Trail>>
-  addSpotToTrail: (context: AccountContext, trailId: string, spotId: string, order?: number) => Promise<Result<TrailSpot>>
+  addSpotToTrail: (context: AccountContext, trailId: string, spotId: string, order?: number) => Promise<Result<StoredTrailSpot>>
   removeSpotFromTrail: (context: AccountContext, trailId: string, spotId: string) => Promise<Result<void>>
   rateTrail: (context: AccountContext, trailId: string, rating: number) => Promise<Result<TrailRating>>
   removeTrailRating: (context: AccountContext, trailId: string) => Promise<Result<void>>

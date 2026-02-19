@@ -8,9 +8,9 @@ import {
   QueryOptions,
   RatingSummary,
   Result,
-  Spot,
   SpotApplicationContract,
   StoredTrail,
+  StoredTrailSpot,
   Trail,
   TrailApplicationContract,
   TrailRating,
@@ -20,7 +20,7 @@ import { geoUtils } from '@shared/geo/index.ts'
 
 interface TrailApplicationOptions {
   trailStore: Store<StoredTrail>
-  trailSpotStore: Store<TrailSpot>
+  trailSpotStore: Store<StoredTrailSpot>
   trailRatingStore: Store<TrailRating>
   imageApplication: ImageApplicationContract
   spotApplication: SpotApplicationContract
@@ -116,7 +116,7 @@ async function enrichTrailWithImages(
 async function enrichTrailWithBoundary(
   context: AccountContext,
   trailEntity: StoredTrail,
-  trailSpotStore: Store<TrailSpot>,
+  trailSpotStore: Store<StoredTrailSpot>,
   spotApplication: SpotApplicationContract
 ): Promise<StoredTrail> {
   // If boundary already exists, return as-is
@@ -207,23 +207,48 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
       }
     },
 
-    listTrailSpots: async (context: AccountContext, trailId: string): Promise<Result<Spot[]>> => {
-      const spotIdsResult = await trailSpotStore.list()
-      if (!spotIdsResult.success) {
-        return { success: false, error: { message: 'Failed to get trail spots', code: 'GET_TRAIL_SPOTS_ERROR' } }
+    getTrailSpots: async (context: AccountContext, trailId: string): Promise<Result<TrailSpot[]>> => {
+      try {
+        const trailSpotsResult = await trailSpotStore.list()
+        if (!trailSpotsResult.success) {
+          return { success: false, error: { message: 'Failed to get trail spots', code: 'GET_TRAIL_SPOTS_ERROR' } }
+        }
+
+        const sortedTrailSpots = (trailSpotsResult.data || [])
+          .filter(ts => ts.trailId === trailId)
+          .sort((a, b) => {
+            if (a.order !== undefined && b.order !== undefined) return a.order - b.order
+            if (a.order !== undefined) return -1
+            if (b.order !== undefined) return 1
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          })
+
+        const spotIds = sortedTrailSpots.map(ts => ts.spotId)
+
+        // Load spot previews (safe, limited data)
+        const previewsResult = await spotApplication.getSpotPreviewsByIds(context, spotIds)
+        if (!previewsResult.success) {
+          return { success: false, error: { message: 'Failed to load spot previews', code: 'GET_SPOT_PREVIEWS_ERROR' } }
+        }
+
+        const previewsById = Object.fromEntries(
+          (previewsResult.data || []).map(p => [p.id, p])
+        )
+
+        // Map to TrailSpot DTOs with preview data
+        const trailSpots: TrailSpot[] = sortedTrailSpots.map((ts, index) => ({
+          spotId: ts.spotId,
+          order: ts.order ?? index,
+          preview: previewsById[ts.spotId] ? {
+            blurredImage: previewsById[ts.spotId].blurredImage,
+            rating: previewsById[ts.spotId].rating,
+          } : undefined,
+        }))
+
+        return { success: true, data: trailSpots }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_TRAIL_SPOTS_ERROR' } }
       }
-
-      const spotIds = (spotIdsResult.data || [])
-        .filter(ts => ts.trailId === trailId)
-        .sort((a, b) => {
-          if (a.order !== undefined && b.order !== undefined) return a.order - b.order
-          if (a.order !== undefined) return -1
-          if (b.order !== undefined) return 1
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        })
-        .map(ts => ts.spotId)
-
-      return await spotApplication.getSpotsByIds(context, spotIds)
     },
 
     listTrails: async (context: AccountContext, options?: QueryOptions): Promise<Result<Trail[]>> => {
@@ -312,7 +337,7 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
       }
     },
 
-    addSpotToTrail: async (_context: AccountContext, trailId: string, spotId: string, order?: number): Promise<Result<TrailSpot>> => {
+    addSpotToTrail: async (_context: AccountContext, trailId: string, spotId: string, order?: number): Promise<Result<StoredTrailSpot>> => {
       try {
         // Check if relationship already exists
         const existingResult = await trailSpotStore.list()
@@ -323,7 +348,7 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
           }
         }
 
-        const trailSpot: TrailSpot = {
+        const trailSpot: StoredTrailSpot = {
           id: createCuid2(),
           trailId,
           spotId,

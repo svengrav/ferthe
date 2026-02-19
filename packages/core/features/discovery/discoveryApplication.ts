@@ -72,7 +72,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         return createErrorResult('TRAIL_NOT_FOUND')
       }
 
-      const allSpotsResult = await spotApplication.getSpotsByIds(context, spotIdsResult.data, { exclude: ['images'] })
+      const allSpotsResult = await spotApplication.getSpotsByIds(context, spotIdsResult.data)
       const allSpots = allSpotsResult.data || []
 
       // Pure calculation moved to service, with map boundary filtering

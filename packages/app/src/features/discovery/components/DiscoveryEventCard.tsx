@@ -131,7 +131,7 @@ function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCa
 
         <SpotContainer width={width} height={height} withShadow={true}>
           <SpotGradientFrame padding={padding}>
-            <DiscoveryReveal mode={mode} blurredImage={card.blurredImage!} onReveal={handleOnReveal} padding={padding}>
+            <DiscoveryReveal mode={mode} blurredImage={card.blurredImage} onReveal={handleOnReveal} padding={padding}>
               <SpotImage
                 source={card.image}
               />

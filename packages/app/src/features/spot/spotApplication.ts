@@ -1,6 +1,6 @@
 import { logger } from '@app/shared/utils/logger'
 import { AccountContext, Result, Spot, SpotApplicationContract, TrailApplicationContract } from '@shared/contracts'
-import { getSpots, getSpotStoreActions } from './stores/spotStore'
+import { getSpotStoreActions } from './stores/spotStore'
 
 export interface SpotApplication {
   requestSpotsByTrail: (trailId: string) => Promise<void>
@@ -26,7 +26,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
   if (!spotAPI) throw new Error('Spot application dependency is required')
   if (!trailAPI) throw new Error('Trail application dependency is required')
 
-  const { setStatus, setSpots } = getSpotStoreActions()
+  const { setStatus, setSpots, upsertSpot } = getSpotStoreActions()
 
   const requestSpotsByTrail = async (trailId: string) => {
     const accountSession = await getSession()
@@ -83,9 +83,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
 
     // Update store with fetched spot
     if (result.success && result.data) {
-      const currentSpots = getSpots()
-      const otherSpots = currentSpots.filter(s => s.id !== spotId)
-      setSpots([...otherSpots, result.data])
+      upsertSpot(result.data)
     }
 
     return result

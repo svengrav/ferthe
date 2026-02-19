@@ -1,5 +1,5 @@
 import { useDiscoveryEventCardOverlay } from '@app/features/discovery/components/DiscoveryEventCard'
-import { useDiscoverySpots } from '@app/features/discovery/stores/discoveryTrailStore'
+import { useDiscoverySpotsViewModel } from '@app/features/discovery/hooks/useDiscoverySpotsViewModel'
 import { Image, Text } from '@app/shared/components'
 import { DiscoverySpot } from '@shared/contracts'
 import { GeoBoundary } from '@shared/geo'
@@ -46,7 +46,7 @@ interface MapSpotsProps {
  */
 function MapSpots({ boundary, size }: MapSpotsProps) {
   const theme = useMapTheme()
-  const spots = useDiscoverySpots()
+  const spots = useDiscoverySpotsViewModel()
   const scale = useMapCompensatedScale()
   const { showDiscoveryEventCard } = useDiscoveryEventCardOverlay()
 

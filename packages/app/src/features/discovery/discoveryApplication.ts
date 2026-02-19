@@ -1,6 +1,6 @@
 import { getSensorDevice, SensorApplication } from '@app/features/sensor'
-import { getSpotActions, getSpots } from '@app/features/spot'
-import { getTrailData } from '@app/features/trail'
+import { getSpotActions, getSpots, getSpotsById } from '@app/features/spot'
+import { getTrailsById } from '@app/features/trail/stores/trailStore'
 import { logger } from '@app/shared/utils/logger'
 import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryStats, RatingSummary, Result } from '@shared/contracts'
 import { Unsubscribe } from '@shared/events/eventHandler'
@@ -10,7 +10,7 @@ import { emitDiscoveryTrailUpdated, emitNewDiscoveries, onDiscoveryTrailUpdated,
 import { discoveryService } from './logic/discoveryService'
 import { DiscoveryEventState } from './logic/types'
 import { getDiscoveryContentActions } from './stores/discoveryContentStore'
-import { getDiscoveryActions, getDiscoveryData } from './stores/discoveryStore'
+import { getDiscoveries, getDiscoveriesById, getDiscoveryActions } from './stores/discoveryStore'
 import { getDiscoveryTrailActions, getDiscoveryTrailData, getDiscoveryTrailId } from './stores/discoveryTrailStore'
 import { getSpotRatingActions } from './stores/spotRatingStore'
 
@@ -46,7 +46,7 @@ type DiscoveryApplicationOptions = {
 
 export function createDiscoveryApplication(options: DiscoveryApplicationOptions): DiscoveryApplication {
   const { sensor, discoveryAPI, getAccountContext } = options
-  const { getDiscoveryTrail, getDiscoveredSpots, getDiscoveries, processLocation, updateDiscoveryProfile, getDiscoveryProfile } = discoveryAPI
+  const { getDiscoveryTrail, getDiscoveredSpots, getDiscoveries: fetchDiscoveries, processLocation, updateDiscoveryProfile, getDiscoveryProfile } = discoveryAPI
   const { setDiscoveryTrail, setStatus, resetScannedClues } = getDiscoveryTrailActions()
 
   const thresholdState = {
@@ -82,27 +82,54 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
           )
       )
 
-      const { trail, spots, createdAt } = result.data
-      const discoveryTrail = {
-        trailId: trail?.id,
-        updatedAt: createdAt,
-        trail: trail,
+      const { trail, spots, discoveries, createdAt } = result.data
+
+      // Upsert spots and discoveries into their respective stores
+      const { upsertSpot } = getSpotActions()
+      spots.forEach(discoverySpot => {
+        const { discoveryId, discoveredAt, ...spot } = discoverySpot
+        upsertSpot(spot)
+      })
+
+      const { upsertDiscoveries } = getDiscoveryActions()
+      upsertDiscoveries(discoveries)
+
+      // Update store with normalized IDs
+      const discovery = getDiscoveryTrailData()
+      setDiscoveryTrail({ ...discovery, scannedClues: scanEvent.clues, updatedAt: createdAt })
+
+      // Emit event with full denormalized data
+      emitDiscoveryTrailUpdated({
+        trail,
+        spots,
         scannedClues: [...uniqueScannedClues],
         previewClues: [...previewClues],
-        spots: spots,
-        discoveries: [] as Discovery[],
-        status: 'ready' as const,
-      }
-      const discovery = getDiscoveryTrailData()
-
-      setDiscoveryTrail({ ...discovery, scannedClues: scanEvent.clues, updatedAt: createdAt })
-      emitDiscoveryTrailUpdated(discoveryTrail)
+        createdAt,
+      })
 
       // Clear scanned clues after 4 seconds
       setTimeout(() => {
         const currentDiscovery = getDiscoveryTrailData()
         resetScannedClues()
-        emitDiscoveryTrailUpdated(currentDiscovery)
+        // Emit event with current spots state
+        const spotsById = getSpotsById()
+        const discoveriesById = getDiscoveriesById()
+        const discoverySpots = currentDiscovery.spotIds
+          .map(spotId => {
+            const spot = spotsById[spotId]
+            const discovery = (Object.values(discoveriesById) as Discovery[]).find(d => d.spotId === spotId)
+            if (!spot || !discovery) return undefined
+            return { ...spot, discoveryId: discovery.id, discoveredAt: discovery.discoveredAt }
+          })
+          .filter(Boolean) as any[]
+
+        emitDiscoveryTrailUpdated({
+          trail: currentDiscovery.trail,
+          spots: discoverySpots,
+          scannedClues: currentDiscovery.scannedClues,
+          previewClues: currentDiscovery.previewClues,
+          createdAt: currentDiscovery.updatedAt,
+        })
       }, 2000)
     }
   })
@@ -126,8 +153,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
     const device = getSensorDevice()
 
-    const { trails } = getTrailData()
-    const trail = trails.find(t => t.id === id)
+    const trailsById = getTrailsById()
+    const trail = trailsById[id]
     if (!trail) return
 
     // Update profile with new lastActiveTrailId
@@ -141,7 +168,18 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     const result = await getDiscoveryTrail(accountSession.data, id, device.location)
     if (!result.data) return
 
-    const { clues, spots, createdAt, previewClues } = result.data
+    const { clues, spots, discoveries, createdAt, previewClues } = result.data
+
+    // Upsert spots into spotStore (extract Spot data from DiscoverySpot)
+    const { upsertSpot } = getSpotActions()
+    spots.forEach(discoverySpot => {
+      const { discoveryId, discoveredAt, ...spot } = discoverySpot
+      upsertSpot(spot)
+    })
+
+    // Upsert discoveries into discoveryStore
+    const { upsertDiscoveries } = getDiscoveryActions()
+    upsertDiscoveries(discoveries)
 
     const discoveryTrail = {
       trailId: trail.id,
@@ -150,13 +188,20 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       clues: [...clues],
       scannedClues: [],
       previewClues: [...(previewClues || [])],
-      spots: spots,
-      discoveries: [] as Discovery[],
+      spotIds: spots.map(s => s.id),
+      discoveryIds: discoveries.map(d => d.id),
       status: 'ready' as const,
     }
     setDiscoveryTrail(discoveryTrail)
 
-    emitDiscoveryTrailUpdated(discoveryTrail)
+    // Emit event with full denormalized data
+    emitDiscoveryTrailUpdated({
+      trail,
+      spots,
+      scannedClues: [],
+      previewClues: [...(previewClues || [])],
+      createdAt,
+    })
   }
 
   const loadDiscoveryTrailFromProfile = async (accountSession: AccountContext) => {
@@ -181,7 +226,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     const { setSpots } = getSpotActions()
 
     const promises = [
-      getDiscoveries(accountSession.data).then(discoveries => {
+      fetchDiscoveries(accountSession.data).then(discoveries => {
         logger.log('Fetched discoveries:', discoveries.data?.length)
         discoveries.data && setDiscoveries(discoveries.data)
       }),
@@ -219,7 +264,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   const getDiscoveryCards = () => {
-    return discoveryService.createDiscoveryCards(getDiscoveryData().discoveries, getSpots())
+    return discoveryService.createDiscoveryCards(getDiscoveries(), getSpots())
   }
 
   const handleNewDiscoveries = async (
@@ -228,22 +273,22 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     accountContext: AccountContext,
     snap?: { distance: number; intensity: number }
   ) => {
-    const { setDiscoveries, setDiscoveryEvent } = getDiscoveryActions()
+    const { upsertDiscoveries, setDiscoveryEvent } = getDiscoveryActions()
     const { setSpots } = getSpotActions()
-    const { discoveries } = getDiscoveryData()
 
-    setDiscoveries([...discoveries, ...newDiscoveries])
+    upsertDiscoveries(newDiscoveries)
 
-    const allDiscoveries = [...discoveries, ...newDiscoveries]
+    const allDiscoveries = getDiscoveries()
     const allDiscoveredSpotIds = allDiscoveries.map(d => d.spotId)
     const currentTrailData = getDiscoveryTrailData()
+    const allDiscoveryIds = [...currentTrailData.discoveryIds, ...newDiscoveries.map(d => d.id)]
     const filteredClues = currentTrailData.scannedClues.filter(clue => !allDiscoveredSpotIds.includes(clue.spotId))
     const filteredPreviewClues = currentTrailData.previewClues?.filter(clue => !allDiscoveredSpotIds.includes(clue.spotId))
 
     setDiscoveryTrail({
       ...currentTrailData,
       trail: currentTrailData.trail,
-      discoveries: [...currentTrailData.discoveries, ...newDiscoveries],
+      discoveryIds: allDiscoveryIds,
       snap: snap,
       trailId: currentTrailData.trailId,
       scannedClues: filteredClues,

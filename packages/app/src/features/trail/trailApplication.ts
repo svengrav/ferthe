@@ -54,23 +54,29 @@ export function createTrailApplication(options: TrailApplicationOptions) {
 
     setStatus('loading')
 
-    // Load all spots for trail (includes previews)
-    const spotsResult = await trailAPI.listTrailSpots(accountSession.data, trailId)
+    // Load trail spots with preview data (safe, no full spot data leak)
+    const trailSpotsResult = await trailAPI.getTrailSpots(accountSession.data, trailId)
 
-    if (!spotsResult.success) {
-      logger.error('Failed to fetch trail spots:', spotsResult.error)
+    if (!trailSpotsResult.success) {
+      logger.error('Failed to fetch trail spots:', trailSpotsResult.error)
       setStatus('error')
     } else {
-      const spots = spotsResult.data || []
-      const spotIds = spots.map(s => s.id)
+      const trailSpots = trailSpotsResult.data || []
 
-      // Separate discovered spots from previews
-      const discoveredSpots = spots.filter(s => s.source === 'discovery' || (s.source === undefined && s.image))
-      const previewSpots = spots.filter(s => s.source === 'preview' || (s.source === undefined && !s.image))
+      // Extract spot IDs for trail store
+      const spotIds = trailSpots.map(ts => ts.spotId)
 
-      // Store previews in trailStore, discovered in spotStore
-      getTrailStoreActions().setPreviewSpots(previewSpots as any)
-      getSpotStoreActions().setSpots(discoveredSpots)
+      // Filter trail spots with preview data and convert to SpotPreview format
+      const spotPreviews = trailSpots
+        .filter(ts => ts.preview)
+        .map(ts => ({
+          id: ts.spotId,
+          blurredImage: ts.preview!.blurredImage,
+          rating: ts.preview!.rating,
+        }))
+
+      // Store previews and spot IDs
+      getSpotStoreActions().setSpotPreviews(spotPreviews)
       getTrailStoreActions().setTrailSpotIds(trailId, spotIds)
       setStatus('ready')
     }

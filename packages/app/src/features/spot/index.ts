@@ -8,6 +8,7 @@ export { useSpotData } from './hooks/useSpotData'
 export { useSpotWithDiscovery } from './hooks/useSpotWithDiscovery'
 export * from './spotApplication'
 export {
-  getSpot, getSpotStoreActions as getSpotActions, getSpotData as getSpotStoreData, getSpots, useSpot, useSpotStatus, useSpotStoreData, useSpots
+  getSpot, getSpotStoreActions as getSpotActions, getSpotData as getSpotStoreData, getSpots, getSpotsById,
+  useSpot, useSpotPreview, useSpotPreviews, useSpotPreviewsById, useSpotStatus, useSpotStoreData, useSpots
 } from './stores/spotStore'
 

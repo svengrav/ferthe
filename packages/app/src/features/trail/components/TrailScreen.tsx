@@ -1,6 +1,6 @@
 import { getAppContext } from '@app/appContext'
 import { useSettingsPage } from '@app/features/settings'
-import { useTrailData, useTrailStatus } from '@app/features/trail/stores/trailStore'
+import { useTrails, useTrailStatus } from '@app/features/trail/stores/trailStore'
 import { Button, FertheLogo, Page, Stack, Text } from '@app/shared/components'
 import Header from '@app/shared/components/header/Header'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
@@ -23,7 +23,7 @@ const LIST_GAP = 8
  * Hook to manage trail screen state and interactions
  */
 const useTrailScreen = () => {
-  const { trails } = useTrailData()
+  const trails = useTrails()
   const status = useTrailStatus()
   const { trailApplication } = getAppContext()
   const { showTrailPage } = useTrailPage()

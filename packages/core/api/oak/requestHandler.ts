@@ -56,9 +56,9 @@ export const createAsyncRequestHandler = (accountApplication: AccountApplication
 
         // Parse query parameters from URLSearchParams to object
         const queryParams: Record<string, string> = {}
-        for (const [key, value] of ctx.request.url.searchParams.entries()) {
+        ctx.request.url.searchParams.forEach((value, key) => {
           queryParams[key] = value
-        }
+        })
         const query = queryParams as TQuery
 
         const result = await handler({

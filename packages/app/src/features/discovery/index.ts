@@ -1,10 +1,11 @@
 export * from './discoveryApplication'
-export { getDiscoveryData, useDiscoveries, useDiscoveryData, useDiscoveryStatus } from './stores/discoveryStore'
+export { getDiscoveries, getDiscoveriesById, getDiscoveryData, useDiscoveries, useDiscovery, useDiscoveryBySpotId, useDiscoveryData, useDiscoveryStatus } from './stores/discoveryStore'
 
 export {
-  getDiscoveryTrailActions,
+  getDiscoverySpots, getDiscoveryTrailActions,
   getDiscoveryTrailData,
-  getDiscoveryTrailId, useDiscoveryTrail, useDiscoveryTrailStatus
+  getDiscoveryTrailId, useDiscoveryTrail,
+  useDiscoveryTrailStatus
 } from './stores/discoveryTrailStore'
 
 export {

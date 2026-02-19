@@ -7,6 +7,7 @@ import { useApp } from '@app/shared/useApp'
 
 import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
+import { useTrailSpotsViewModel } from '../hooks/useTrailSpotsViewModel'
 import TrailSpots from './TrailSpots'
 import TrailStats from './TrailStats'
 
@@ -34,6 +35,9 @@ function TrailPage(props: TrailPageProps) {
   const { styles } = useTheme(createStyles)
   const { context, locales, theme } = useApp()
   const { width: screenWidth } = useWindowDimensions()
+
+  // Load trail spots view model
+  const trailSpots = useTrailSpotsViewModel(trail.id)
 
   // Calculate image size - square format that fills screen width minus page padding
   const pageInset = theme.tokens.inset.md
@@ -66,7 +70,7 @@ function TrailPage(props: TrailPageProps) {
           </Stack>
         </PageTab>
         <PageTab id="spots" label={locales.trails.spots}>
-          <TrailSpots trailId={trail.id} />
+          <TrailSpots spots={trailSpots} />
         </PageTab>
         <PageTab id="stats" label={locales.trails.stats.name}>
           <TrailStats trailId={trail.id} />

@@ -1,4 +1,4 @@
-import { useDiscoveries } from '@app/features/discovery'
+import { useDiscoveryBySpotId } from '@app/features/discovery'
 import { Discovery, Spot } from '@shared/contracts'
 import { useSpotData } from './useSpotData'
 
@@ -17,10 +17,7 @@ interface UseSpotWithDiscoveryResult {
  */
 export const useSpotWithDiscovery = (spotId: string): UseSpotWithDiscoveryResult => {
   const { spot, isLoading } = useSpotData(spotId)
-  const discoveries = useDiscoveries()
-
-  // Find the user's discovery for this spot
-  const discovery = discoveries.find(d => d.spotId === spotId)
+  const discovery = useDiscoveryBySpotId(spotId)
 
   return {
     spot,

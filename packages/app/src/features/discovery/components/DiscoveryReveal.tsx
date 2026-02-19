@@ -40,7 +40,7 @@ const useRevealAnimations = (onRevealComplete: () => void) => {
 
 interface DiscoveryRevealProps {
   mode: RevealMode
-  blurredImage: ImageReference
+  blurredImage?: ImageReference
   onReveal: () => void
   children: ReactNode
   padding?: number
@@ -70,14 +70,16 @@ export function DiscoveryReveal(props: DiscoveryRevealProps) {
   return (
     <>
       {children}
-      <Animated.View style={[themedStyles.blurredOverlay, overlayAnimatedStyle, { display: isRevealed ? 'none' : 'flex' }]}>
-        <DiscoveryRevealButton onPress={handlePress} />
-        <Animated.Image
-          source={{ uri: blurredImage.url }}
-          style={themedStyles.image}
-          resizeMode='cover'
-        />
-      </Animated.View >
+      {blurredImage && (
+        <Animated.View style={[themedStyles.blurredOverlay, overlayAnimatedStyle, { display: isRevealed ? 'none' : 'flex' }]}>
+          <DiscoveryRevealButton onPress={handlePress} />
+          <Animated.Image
+            source={{ uri: blurredImage.url }}
+            style={themedStyles.image}
+            resizeMode='cover'
+          />
+        </Animated.View>
+      )}
     </>
   )
 }

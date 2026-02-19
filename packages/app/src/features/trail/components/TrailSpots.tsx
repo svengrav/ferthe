@@ -1,63 +1,28 @@
-import { useDiscoveryCardPage } from '@app/features/discovery/components/DiscoveryCardPage'
-import { useSpots } from '@app/features/spot'
 import { SpotCardList } from '@app/features/spot/components'
 import { Text } from '@app/shared/components'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
-import { useMemo } from 'react'
 import { View } from 'react-native'
-import { useTrailStats } from '../hooks/useTrailStats'
-import { usePreviewSpots, useTrailSpotIds } from '../stores/trailStore'
+import { TrailSpotRowVM } from '../types/viewModels'
 
-interface TrailUnknownSpotsProps {
-  trailId: string
+interface TrailSpotsProps {
+  spots: TrailSpotRowVM[]
 }
 
 /**
  * Displays all spots in a trail with discovered and undiscovered status.
  * Discovered spots show the full image, undiscovered spots show blurred image with lock icon.
- * Uses userStatus from API to determine discovery state.
+ * 
+ * This is a pure presentation component that receives pre-composed view model data.
  */
-function TrailSpots({ trailId }: TrailUnknownSpotsProps) {
+function TrailSpots({ spots }: TrailSpotsProps) {
   const { styles } = useTheme(useStyles)
   const { locales } = useApp()
-  const spots = useSpots()
-  const trailSpotIds = useTrailSpotIds(trailId)
-  const previewSpots = usePreviewSpots()
-  const { stats } = useTrailStats(trailId)
-  const { showDiscoveryCardDetails } = useDiscoveryCardPage()
 
   if (!styles) return null
 
-  // Filter spots that belong to this trail
-  const trailSpots = spots.filter(s => trailSpotIds.includes(s.id))
-
-  // Get undiscovered spots (previews) that belong to this trail
-  const undiscoveredPreviews = previewSpots.filter(p => trailSpotIds.includes(p.id))
-
-  // Use stats for accurate counts - this is the source of truth
-  const totalSpots = stats?.totalSpots || 0
-  const discoveredCount = stats?.discoveredSpots || 0
-  const undiscoveredCount = totalSpots - discoveredCount
-
-  // Build display list with discovered and undiscovered spots
-  const allSpots = useMemo(() => {
-    const discovered = trailSpots.slice(0, discoveredCount).map(spot => ({
-      id: spot.id,
-      image: spot.image,
-      title: spot.name,
-      blurredImage: undefined,
-      discovered: true,
-    }))
-    const undiscovered = undiscoveredPreviews.slice(0, undiscoveredCount).map(preview => ({
-      id: preview.id,
-      image: undefined,
-      title: undefined,
-      blurredImage: preview.blurredImage,
-      discovered: false,
-    }))
-    return [...discovered, ...undiscovered]
-  }, [trailSpots, undiscoveredPreviews, discoveredCount, undiscoveredCount])
+  const discoveredCount = spots.filter(s => s.discovered).length
+  const totalSpots = spots.length
 
   if (totalSpots === 0) {
     return (
@@ -76,7 +41,13 @@ function TrailSpots({ trailId }: TrailUnknownSpotsProps) {
         {discoveredCount} / {totalSpots} {locales.trails.spots} {locales.discovery.discovered.toLowerCase()}
       </Text>
       <SpotCardList
-        items={allSpots}
+        items={spots.map(spot => ({
+          id: spot.id,
+          image: spot.image,
+          title: spot.title,
+          blurredImage: spot.blurredImage,
+          discovered: spot.discovered,
+        }))}
       />
     </View>
   )

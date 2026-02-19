@@ -1,6 +1,8 @@
+import { getSpotsById } from '@app/features/spot/stores/spotStore'
 import { Status, StoreActions, StoreState } from '@app/shared/index'
 import { Clue, Discovery, DiscoverySpot, Trail } from '@shared/contracts'
 import { create } from 'zustand'
+import { getDiscoveriesById } from './discoveryStore'
 
 interface DiscoverySnap {
   intensity: number
@@ -19,9 +21,9 @@ interface DiscoveryTrailState extends StoreState {
   trailId: string | undefined
   trail: Trail | undefined
   scannedClues: Clue[]
-  discoveries: Discovery[]
+  discoveryIds: string[]
   previewClues?: Clue[]
-  spots: DiscoverySpot[]
+  spotIds: string[]
   snap?: DiscoverySnap | undefined
   lastDiscovery?: Discovery
 }
@@ -35,8 +37,8 @@ export const discoveryTrailStore = create<DiscoveryTrailState & DiscoveryTrailAc
   // Discovery Trail specific data
   trailId: undefined,
   trail: undefined,
-  discoveries: [],
-  spots: [],
+  discoveryIds: [],
+  spotIds: [],
   scannedClues: [],
   previewClues: [],
   snap: undefined,
@@ -53,12 +55,38 @@ export const discoveryTrailStore = create<DiscoveryTrailState & DiscoveryTrailAc
 export const useDiscoveryTrailStatus = () => discoveryTrailStore(state => state.status)
 export const useDiscoveryTrail = () => discoveryTrailStore(state => state)
 export const useDiscoveryTrailId = () => discoveryTrailStore(state => state.trailId)
-export const useDiscoverySpots = () => discoveryTrailStore(state => state.spots)
+export const useDiscoverySpotIds = () => discoveryTrailStore(state => state.spotIds)
 export const useDiscoveryPreviewClues = () => discoveryTrailStore(state => state.previewClues)
 export const useDiscoveryScannedClues = () => discoveryTrailStore(state => state.scannedClues)
 
 export const getDiscoveryTrailId = () => discoveryTrailStore.getState().trailId
 export const getDiscoveryTrailData = () => discoveryTrailStore.getState() as DiscoveryTrailState
+
+/**
+ * Get denormalized DiscoverySpot array by merging spotIds with data from spotStore and discoveryStore
+ */
+export const getDiscoverySpots = (): DiscoverySpot[] => {
+  const { spotIds } = discoveryTrailStore.getState()
+  const spotsById = getSpotsById()
+  const discoveriesById = getDiscoveriesById()
+
+  return spotIds
+    .map(spotId => {
+      const spot = spotsById[spotId]
+      const discovery = (Object.values(discoveriesById) as Discovery[]).find(d => d.spotId === spotId)
+      if (!spot || !discovery) return undefined
+
+      const discoverySpot: DiscoverySpot = {
+        ...spot,
+        discoveryId: discovery.id,
+        discoveredAt: discovery.discoveredAt,
+      }
+
+      return discoverySpot
+    })
+    .filter(Boolean) as DiscoverySpot[]
+}
+
 export const getDiscoveryTrailActions = () => ({
   setScannedClues: discoveryTrailStore.getState().setScannedClues,
   resetScannedClues: discoveryTrailStore.getState().resetScannedClues,

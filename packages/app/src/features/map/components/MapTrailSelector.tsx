@@ -3,7 +3,7 @@ import { GestureDetector } from 'react-native-gesture-handler'
 
 import { getAppContext } from '@app/appContext'
 import { useDiscoveryTrail } from '@app/features/discovery'
-import { useTrailData } from '@app/features/trail'
+import { useTrails } from '@app/features/trail'
 import TrailItem from '@app/features/trail/components/TrailItem'
 import { Button } from '@app/shared/components'
 import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
@@ -16,7 +16,7 @@ import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
  * Hook to open/close the trail list card overlay.
  */
 export const useMapTrailListCard = () => {
-  const { trails } = useTrailData()
+  const trails = useTrails()
   const { discoveryApplication } = getAppContext()
 
   return {

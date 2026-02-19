@@ -1,4 +1,4 @@
-import { useDiscoverySpots } from '@app/features/discovery/stores/discoveryTrailStore'
+import { useDiscoverySpotsViewModel } from '@app/features/discovery/hooks/useDiscoverySpotsViewModel'
 import { logger } from '@app/shared/utils/logger'
 import { geoUtils } from '@shared/geo'
 import { useEffect, useMemo, useRef } from 'react'
@@ -48,7 +48,7 @@ const useDebugMetrics = (): DebugMetrics => {
   const viewportSize = useMapCanvasDimensions()
   const { scale, translationX, translationY } = useMapCanvasValues()
   const surfaceLayout = useMapSurfaceLayout()
-  const spots = useDiscoverySpots()
+  const spots = useDiscoverySpotsViewModel()
   const trailBoundary = useMapSurfaceBoundary()
 
   // Calculate dimensions using geoUtils (consolidates degree/meter conversions)
@@ -152,7 +152,7 @@ export function MapCanvasDebug({ animatedStyles }: { animatedStyles: any }) {
   const { boundary: viewportBoundary, radiusMeters, deviceLocation } = useMapCanvasContext()
   const viewportSize = useMapCanvasDimensions()
   const { scale, translationX, translationY } = useMapCanvasValues()
-  const spots = useDiscoverySpots()
+  const spots = useDiscoverySpotsViewModel()
   const surfaceBoundary = useMapSurfaceBoundary()
   const viewRef = useRef<View>(null)
   const centerX = viewportSize.width / 2

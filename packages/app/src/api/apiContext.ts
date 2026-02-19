@@ -27,6 +27,7 @@ import {
   Spot,
   SpotPreview,
   SpotRating,
+  StoredTrailSpot,
   Trail,
   TrailRating,
   TrailSpot,
@@ -174,12 +175,12 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
 
       createTrail: (_context: AccountContext, trail: any) => API.send<Trail>('/trail/trails', 'POST', trail),
 
-      getTrailSpotIds: (_context: AccountContext, trailId: string) => API.send<string[]>(`/trail/trails/${trailId}/spots`),
+      getTrailSpotIds: (_context: AccountContext, trailId: string) => API.send<string[]>(`/trail/trails/${trailId}/spot-ids`),
 
-      listTrailSpots: (_context: AccountContext, trailId: string) => API.send<Spot[]>(`/trail/trails/${trailId}/spots`),
+      getTrailSpots: (_context: AccountContext, trailId: string) => API.send<TrailSpot[]>(`/trail/trails/${trailId}/spots`),
 
       addSpotToTrail: (_context: AccountContext, trailId: string, spotId: string, order?: number) =>
-        API.send<TrailSpot>(`/trail/trails/${trailId}/spots/${spotId}`, 'POST', { order }),
+        API.send<StoredTrailSpot>(`/trail/trails/${trailId}/spots/${spotId}`, 'POST', { order }),
 
       removeSpotFromTrail: (_context: AccountContext, trailId: string, spotId: string) =>
         API.send<void>(`/trail/trails/${trailId}/spots/${spotId}`, 'DELETE'),

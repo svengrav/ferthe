@@ -22,6 +22,7 @@ import {
   SharedDiscovery,
   Spot,
   SpotRating,
+  StoredTrailSpot,
   Trail,
   TrailRating,
   TrailSpot,
@@ -230,8 +231,8 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       method: 'GET',
       version: 'v1',
       url: '/trail/trails/:trailId/spots',
-      handler: asyncRequestHandler<Spot[]>(async ({ context, params }) => {
-        return await trailApplication.listTrailSpots(context, params!.trailId)
+      handler: asyncRequestHandler<TrailSpot[]>(async ({ context, params }) => {
+        return await trailApplication.getTrailSpots(context, params!.trailId)
       }),
     },
     {
@@ -285,7 +286,7 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/trail/trails/:trailId/spots/:spotId',
-      handler: asyncRequestHandler<TrailSpot, { trailId: string; spotId: string }, { order?: number }>(async ({ params, context, body }) => {
+      handler: asyncRequestHandler<StoredTrailSpot, { trailId: string; spotId: string }, { order?: number }>(async ({ params, context, body }) => {
         return await trailApplication.addSpotToTrail(context, params!.trailId, params!.spotId, body?.order)
       }),
     },
