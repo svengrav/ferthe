@@ -1,4 +1,4 @@
-import { Account, AccountSession, Community, CommunityMember, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryProfile, ImageApplicationContract, SharedDiscovery, SpotRating, StoredSpot, StoredTrail, TrailApplicationContract, TrailRating, TrailSpot, TwilioVerification } from '@shared/contracts/index.ts'
+import { Account, AccountSession, APIContract, Community, CommunityMember, Discovery, DiscoveryContent, DiscoveryProfile, ImageApplicationContract, SharedDiscovery, SpotRating, StoredSpot, StoredTrail, StoredTrailSpot, TrailRating, TwilioVerification } from '@shared/contracts/index.ts'
 import { Buffer } from "node:buffer"
 import { Config, STORE_IDS } from './config/index.ts'
 import { SMSConnector } from './connectors/smsConnector.ts'
@@ -6,6 +6,8 @@ import { AccountApplicationActions, createAccountApplication } from './features/
 import { createJWTService } from './features/account/jwtService.ts'
 import { createSMSService } from './features/account/smsService.ts'
 import { createCommunityApplication } from './features/community/communityApplication.ts'
+import { createDiscoveryStateComposite } from './features/composites/discoveryStateComposite.ts'
+import { createSpotAccessComposite } from './features/composites/spotAccessComposite.ts'
 import { createDiscoveryApplication } from './features/discovery/discoveryApplication.ts'
 import { createDiscoveryService } from './features/discovery/discoveryService.ts'
 import { createSensorApplication, SensorApplicationActions } from './features/sensor/sensorApplication.ts'
@@ -29,10 +31,8 @@ export interface CoreConnectors {
   storageConnector: StorageConnector
 }
 
-export interface CoreContext {
+export interface CoreContext extends APIContract {
   readonly config: Config
-  discoveryApplication: DiscoveryApplicationContract
-  trailApplication: TrailApplicationContract
   spotApplication: SpotApplicationActions
   sensorApplication: SensorApplicationActions
   accountApplication: AccountApplicationActions
@@ -56,7 +56,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
 
   const trailApplication = createTrailApplication({
     trailStore: createStore<StoredTrail>(storeConnector, STORE_IDS.TRAILS),
-    trailSpotStore: createStore<TrailSpot>(storeConnector, STORE_IDS.TRAIL_SPOTS),
+    trailSpotStore: createStore<StoredTrailSpot>(storeConnector, STORE_IDS.TRAIL_SPOTS),
     trailRatingStore: createStore<TrailRating>(storeConnector, STORE_IDS.TRAIL_RATINGS),
     imageApplication,
     spotApplication,
@@ -99,7 +99,17 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
       discoveries: createStore<SharedDiscovery>(storeConnector, STORE_IDS.COMMUNITY_DISCOVERIES),
     },
     discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
-    trailSpotStore: createStore<TrailSpot>(storeConnector, STORE_IDS.TRAIL_SPOTS),
+    trailSpotStore: createStore<StoredTrailSpot>(storeConnector, STORE_IDS.TRAIL_SPOTS),
+  })
+
+  // Composites: cross-feature aggregation, created after all applications
+  const spotAccessComposite = createSpotAccessComposite({
+    discoveryApplication,
+    spotApplication,
+  })
+
+  const discoveryStateComposite = createDiscoveryStateComposite({
+    discoveryApplication,
   })
 
   return {
@@ -111,5 +121,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     accountApplication,
     communityApplication,
     imageApplication,
+    spotAccessComposite,
+    discoveryStateComposite,
   }
 }

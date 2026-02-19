@@ -45,6 +45,7 @@ export const ERROR_CODES = {
   GET_CLUES_ERROR: { code: 'GET_CLUES_ERROR', message: 'Failed to retrieve preview clues', httpStatus: 500 },
   DISCOVERY_TRAIL_ERROR: { code: 'DISCOVERY_TRAIL_ERROR', message: 'Failed to retrieve discovery trail', httpStatus: 500 },
   PROCESS_LOCATION_ERROR: { code: 'PROCESS_LOCATION_ERROR', message: 'Failed to process location for discoveries', httpStatus: 500 },
+  DISCOVERY_STATE_ERROR: { code: 'DISCOVERY_STATE_ERROR', message: 'Failed to retrieve aggregated discovery state', httpStatus: 500 },
 
   // Discovery Profile Management (404-500)
   PROFILE_NOT_FOUND: { code: 'PROFILE_NOT_FOUND', message: 'Discovery profile not found', httpStatus: 404 },

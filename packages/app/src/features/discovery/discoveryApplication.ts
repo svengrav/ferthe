@@ -1,8 +1,8 @@
-import { getSensorDevice, SensorApplication } from '@app/features/sensor'
+import { SensorApplication } from '@app/features/sensor'
 import { getSpotActions, getSpots, getSpotsById } from '@app/features/spot'
 import { getTrailsById } from '@app/features/trail/stores/trailStore'
 import { logger } from '@app/shared/utils/logger'
-import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryStats, RatingSummary, Result } from '@shared/contracts'
+import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryStateCompositeContract, DiscoveryStats, RatingSummary, Result } from '@shared/contracts'
 import { Unsubscribe } from '@shared/events/eventHandler'
 import { GeoLocation, geoUtils } from '@shared/geo'
 import { getTrails } from '../trail/stores/trailStore'
@@ -42,11 +42,12 @@ type DiscoveryApplicationOptions = {
   getAccountContext: () => Promise<Result<AccountContext>>
   sensor?: SensorApplication
   discoveryAPI: DiscoveryApplicationContract
+  discoveryStateAPI: DiscoveryStateCompositeContract
 }
 
 export function createDiscoveryApplication(options: DiscoveryApplicationOptions): DiscoveryApplication {
-  const { sensor, discoveryAPI, getAccountContext } = options
-  const { getDiscoveryTrail, getDiscoveredSpots, getDiscoveries: fetchDiscoveries, processLocation, updateDiscoveryProfile, getDiscoveryProfile } = discoveryAPI
+  const { sensor, discoveryAPI, discoveryStateAPI, getAccountContext } = options
+  const { getDiscoveryTrail, getDiscoveredSpots, processLocation } = discoveryAPI
   const { setDiscoveryTrail, setStatus, resetScannedClues } = getDiscoveryTrailActions()
 
   const thresholdState = {
@@ -151,24 +152,16 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     const accountSession = await getSession()
     if (!accountSession.data) throw new Error('Account session not found!')
 
-    const device = getSensorDevice()
-
     const trailsById = getTrailsById()
     const trail = trailsById[id]
     if (!trail) return
 
-    // Update profile with new lastActiveTrailId
-    try {
-      await updateDiscoveryProfile(accountSession.data, { lastActiveTrailId: id })
-      logger.log(`Updated profile with lastActiveTrailId: ${id}`)
-    } catch (error) {
-      logger.error('Error updating discovery profile:', error)
-    }
-
-    const result = await getDiscoveryTrail(accountSession.data, id, device.location)
+    // Single composite call: updates profile + loads trail + spots
+    const result = await discoveryStateAPI.activateTrail(accountSession.data, id)
     if (!result.data) return
 
-    const { clues, spots, discoveries, createdAt, previewClues } = result.data
+    const { trail: discoveryTrailData, spots, profile } = result.data
+    const { clues, discoveries, createdAt, previewClues } = discoveryTrailData
 
     // Upsert spots into spotStore (extract Spot data from DiscoverySpot)
     const { upsertSpot } = getSpotActions()
@@ -185,9 +178,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       trailId: trail.id,
       updatedAt: createdAt,
       trail: trail,
-      clues: [...clues],
       scannedClues: [],
-      previewClues: [...(previewClues || [])],
+      previewClues: [...clues, ...(previewClues || [])],
       spotIds: spots.map(s => s.id),
       discoveryIds: discoveries.map(d => d.id),
       status: 'ready' as const,
@@ -204,59 +196,77 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     })
   }
 
-  const loadDiscoveryTrailFromProfile = async (accountSession: AccountContext) => {
-    const profileResult = await getDiscoveryProfile(accountSession)
-
-    if (profileResult.data?.lastActiveTrailId) {
-      // Use trail from profile
-      await setActiveTrail(profileResult.data.lastActiveTrailId)
-      logger.log(`Discovery state requested and set active trail from profile: ${profileResult.data.lastActiveTrailId}`)
-    } else {
-      // No trail in profile, use default
-      await setDefaultTrail()
-      logger.log('Discovery state requested and default trail set.')
-    }
-  }
 
   const requestDiscoveryState = async () => {
     const accountSession = await getSession()
     if (!accountSession.data) throw new Error('Account session not found!')
 
-    const { setDiscoveries } = getDiscoveryActions()
-    const { setSpots } = getSpotActions()
+    // Single composite call: profile + discoveries + spots + active trail
+    const stateResult = await discoveryStateAPI.getDiscoveryState(accountSession.data)
 
-    const promises = [
-      fetchDiscoveries(accountSession.data).then(discoveries => {
-        logger.log('Fetched discoveries:', discoveries.data?.length)
-        discoveries.data && setDiscoveries(discoveries.data)
-      }),
-      getDiscoveredSpots(accountSession.data).then(discoverySpots => {
-        logger.log('Fetched discovery spots:', discoverySpots.data?.length)
-        if (discoverySpots.data) {
-          // Extract Spot data from DiscoverySpot and store in spotStore
-          const spots = discoverySpots.data.map(({ discoveryId, discoveredAt, ...spot }) => spot)
-          setSpots(spots)
+    if (stateResult.data) {
+      const { profile, discoveries, spots, activeTrail } = stateResult.data
+
+      const { setDiscoveries } = getDiscoveryActions()
+      const { setSpots } = getSpotActions()
+
+      logger.log('Fetched discovery state:', { discoveries: discoveries.length, spots: spots.length })
+      setDiscoveries(discoveries)
+
+      // Extract Spot data from DiscoverySpot and store in spotStore
+      const extractedSpots = spots.map(({ discoveryId, discoveredAt, ...spot }) => spot)
+      setSpots(extractedSpots)
+
+      // Set active trail from composite response
+      if (activeTrail) {
+        const trailsById = getTrailsById()
+        const trail = activeTrail.trail ? trailsById[activeTrail.trail.id] : undefined
+
+        if (trail) {
+          const { clues, spots: trailSpots, discoveries: trailDiscoveries, createdAt, previewClues } = activeTrail
+
+          const { upsertSpot } = getSpotActions()
+          trailSpots.forEach(discoverySpot => {
+            const { discoveryId, discoveredAt, ...spot } = discoverySpot
+            upsertSpot(spot)
+          })
+
+          const { upsertDiscoveries } = getDiscoveryActions()
+          upsertDiscoveries(trailDiscoveries)
+
+          setDiscoveryTrail({
+            trailId: trail.id,
+            updatedAt: createdAt,
+            trail,
+            scannedClues: [],
+            previewClues: [...clues, ...(previewClues || [])],
+            spotIds: trailSpots.map(s => s.id),
+            discoveryIds: trailDiscoveries.map(d => d.id),
+            status: 'ready' as const,
+          })
+
+          emitDiscoveryTrailUpdated({
+            trail,
+            spots: trailSpots,
+            scannedClues: [],
+            previewClues: [...(previewClues || [])],
+            createdAt,
+          })
+
+          logger.log(`Discovery state loaded with active trail: ${trail.id}`)
+        } else {
+          await setDefaultTrail()
         }
-      }),
-    ]
-
-    await Promise.all(promises).catch(error => logger.error('Error retrieving discovery data:', error))
-
-    // Load profile and set active trail from profile or use default
-    try {
-      const profileResult = await getDiscoveryProfile(accountSession.data)
-
-      if (profileResult.data?.lastActiveTrailId) {
-        // Use trail from profile
-        await setActiveTrail(profileResult.data.lastActiveTrailId)
-        logger.log(`Discovery state requested and set active trail from profile: ${profileResult.data.lastActiveTrailId}`)
+      } else if (profile.lastActiveTrailId) {
+        await setActiveTrail(profile.lastActiveTrailId)
+        logger.log(`Discovery state loaded, set active trail from profile: ${profile.lastActiveTrailId}`)
       } else {
-        // No trail in profile, use default
         await setDefaultTrail()
-        logger.log('Discovery state requested and default trail set.')
+        logger.log('Discovery state loaded, default trail set.')
       }
-    } catch (error) {
-      logger.error('Error loading discovery profile, falling back to default trail:', error)
+    } else {
+      // Fallback: composite failed, try default trail
+      logger.error('Failed to load discovery state, falling back to default trail')
       await setDefaultTrail()
     }
 

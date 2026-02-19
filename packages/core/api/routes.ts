@@ -3,7 +3,8 @@ import { createAsyncRequestHandler } from '@core/api/oak/requestHandler.ts'
 
 import {
   Account,
-  ApplicationContract,
+  ActivateTrailResult,
+  APIContract,
   Clue,
   Community,
   CommunityMember,
@@ -12,14 +13,15 @@ import {
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoverySpot,
+  DiscoveryState,
   DiscoveryStats,
   DiscoveryTrail,
   FirebaseConfig,
   RatingSummary,
-  SMSCodeRequest,
-  SMSVerificationResult,
   ScanEvent,
   SharedDiscovery,
+  SMSCodeRequest,
+  SMSVerificationResult,
   Spot,
   SpotRating,
   StoredTrailSpot,
@@ -31,8 +33,8 @@ import {
 import { manifest } from './manifest.ts'
 import { Route } from './oak/types.ts'
 
-const createRoutes = (ctx: ApplicationContract): Route[] => {
-  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication } = ctx
+const createRoutes = (ctx: APIContract): Route[] => {
+  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication, spotAccessComposite, discoveryStateComposite } = ctx
 
   // Create the request handler with account application access
   const asyncRequestHandler = createAsyncRequestHandler(accountApplication)
@@ -155,6 +157,32 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       url: '/discovery/discoveries/:discoveryId/content',
       handler: asyncRequestHandler<void, { discoveryId: string }>(async ({ context: session, params }) => {
         return await discoveryApplication.deleteDiscoveryContent(session, params!.discoveryId)
+      }),
+    },
+
+    // Composite Routes: Aggregated cross-feature queries
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/composite/discovery/state',
+      handler: asyncRequestHandler<DiscoveryState>(async ({ context: session }) => {
+        return await discoveryStateComposite.getDiscoveryState(session)
+      }),
+    },
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/composite/discovery/actions/activate-trail',
+      handler: asyncRequestHandler<ActivateTrailResult>(async ({ context: session, body }) => {
+        return await discoveryStateComposite.activateTrail(session, body?.trailId)
+      }),
+    },
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/composite/spots/accessible',
+      handler: asyncRequestHandler<Spot[]>(async ({ context: session, query }) => {
+        return await spotAccessComposite.getAccessibleSpots(session, query?.trailId, parseQueryOptions(query))
       }),
     },
 

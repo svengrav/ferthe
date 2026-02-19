@@ -1,12 +1,12 @@
 import { Store } from '@core/store/storeFactory.ts'
-import { AccountContext, Community, CommunityApplicationContract, CommunityMember, createErrorResult, createSuccessResult, Discovery, Result, SharedDiscovery, TrailSpot } from '@shared/contracts'
+import { AccountContext, Community, CommunityApplicationContract, CommunityMember, createErrorResult, createSuccessResult, Discovery, Result, SharedDiscovery, StoredTrailSpot } from '@shared/contracts'
 import { CommunityServiceActions, createCommunityService } from './communityService.ts'
 import { CommunityStore } from './communityStore.ts'
 
 export interface CommunityApplicationOptions {
   communityStore: CommunityStore
   discoveryStore: Store<Discovery>
-  trailSpotStore: Store<TrailSpot>
+  trailSpotStore: Store<StoredTrailSpot>
   communityService?: CommunityServiceActions
 }
 

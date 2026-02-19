@@ -3,7 +3,8 @@ import {
   AccountContext,
   AccountSession,
   AccountUpdateData,
-  ApplicationContract,
+  ActivateTrailResult,
+  APIContract,
   Clue,
   Community,
   CommunityMember,
@@ -13,6 +14,7 @@ import {
   DiscoveryProfile,
   DiscoveryProfileUpdateData,
   DiscoverySpot,
+  DiscoveryState,
   DiscoveryStats,
   DiscoveryTrail,
   FirebaseConfig,
@@ -49,7 +51,7 @@ interface CoreConfiguration {
   environment?: 'production' | 'development' | 'test'
 }
 
-export type APIContext = Omit<ApplicationContract, 'none'> & {
+export type APIContext = APIContract & {
   readonly config: CoreConfiguration
   system: {
     checkStatus: () => Promise<StatusResult>
@@ -272,6 +274,29 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
 
       getSharedDiscoveries: (_context: AccountContext, communityId: string) =>
         API.send<Discovery[]>(`/community/communities/${communityId}/discoveries`),
+    },
+
+    /**
+     * Composite: Access-controlled spot queries
+     * Resolves circular dependency between spot and discovery domains.
+     */
+    spotAccessComposite: {
+      getAccessibleSpots: (_context: AccountContext, trailId?: string, options?: QueryOptions) => {
+        const queryParams = { ...(trailId ? { trailId } : {}), ...serializeQueryOptions(options) }
+        return API.send<Spot[]>('/composite/spots/accessible', 'GET', undefined, queryParams)
+      },
+    },
+
+    /**
+     * Composite: Aggregated discovery state operations
+     * Reduces HTTP round-trips by bundling related data.
+     */
+    discoveryStateComposite: {
+      getDiscoveryState: (_context: AccountContext) =>
+        API.send<DiscoveryState>('/composite/discovery/state'),
+
+      activateTrail: (_context: AccountContext, trailId: string) =>
+        API.send<ActivateTrailResult>('/composite/discovery/actions/activate-trail', 'POST', { trailId }),
     },
   }
 }
