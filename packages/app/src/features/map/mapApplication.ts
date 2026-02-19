@@ -2,7 +2,9 @@ import { getMapService } from './utils/mapService'
 
 import { DiscoveryApplication, getDiscoverySpots, getDiscoveryTrailData } from '@app/features/discovery'
 import { discoveryService } from '@app/features/discovery/logic/discoveryService'
+import { getDiscoveriesById } from '@app/features/discovery/stores/discoveryStore'
 import { getSensorActions, getSensorData, SensorApplication } from '@app/features/sensor'
+import { getTrailsById } from '@app/features/trail/stores/trailStore'
 import { logger } from '@app/shared/utils/logger'
 import { discoveryTrailStore } from '../discovery/stores/discoveryTrailStore'
 import { getMapDefaults } from './config/mapDefaults'
@@ -27,7 +29,9 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
   let lastTrailId: string | undefined
 
   sensor?.onDeviceUpdate(device => {
-    const { trail, snap, lastDiscovery } = getDiscoveryTrailData()
+    const { trailId, snap, lastDiscoveryId } = getDiscoveryTrailData()
+    const trail = trailId ? getTrailsById()[trailId] : undefined
+    const lastDiscovery = lastDiscoveryId ? Object.values(getDiscoveriesById()).find(d => d.id === lastDiscoveryId) : undefined
     const spots = getDiscoverySpots()
     const currentState = getMapState()
     if (!trail) return
@@ -64,7 +68,9 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
   })
 
   const newMapState = async () => {
-    const { trail, snap, lastDiscovery } = getDiscoveryTrailData()
+    const { trailId, snap, lastDiscoveryId } = getDiscoveryTrailData()
+    const trail = trailId ? getTrailsById()[trailId] : undefined
+    const lastDiscovery = lastDiscoveryId ? Object.values(getDiscoveriesById()).find(d => d.id === lastDiscoveryId) : undefined
     const spots = getDiscoverySpots()
     const currentCanvas = getMapState().canvas
     const { device } = getSensorData()

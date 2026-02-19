@@ -1,6 +1,6 @@
 import { getSpotsById } from '@app/features/spot/stores/spotStore'
 import { Status, StoreActions, StoreState } from '@app/shared/index'
-import { Clue, Discovery, DiscoverySpot, Trail } from '@shared/contracts'
+import { Clue, Discovery, DiscoverySpot } from '@shared/contracts'
 import { create } from 'zustand'
 import { getDiscoveriesById } from './discoveryStore'
 
@@ -19,13 +19,12 @@ interface DiscoveryTrailActions extends StoreActions {
 interface DiscoveryTrailState extends StoreState {
   status: Status
   trailId: string | undefined
-  trail: Trail | undefined
   scannedClues: Clue[]
   discoveryIds: string[]
   previewClues?: Clue[]
   spotIds: string[]
   snap?: DiscoverySnap | undefined
-  lastDiscovery?: Discovery
+  lastDiscoveryId?: string
 }
 
 export const discoveryTrailStore = create<DiscoveryTrailState & DiscoveryTrailActions>(set => ({
@@ -36,13 +35,12 @@ export const discoveryTrailStore = create<DiscoveryTrailState & DiscoveryTrailAc
 
   // Discovery Trail specific data
   trailId: undefined,
-  trail: undefined,
   discoveryIds: [],
   spotIds: [],
   scannedClues: [],
   previewClues: [],
   snap: undefined,
-  lastDiscovery: undefined,
+  lastDiscoveryId: undefined,
 
   // Actions
   setScannedClues: clues => set({ scannedClues: clues }),

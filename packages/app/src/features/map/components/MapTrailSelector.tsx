@@ -5,6 +5,7 @@ import { getAppContext } from '@app/appContext'
 import { useDiscoveryTrail } from '@app/features/discovery'
 import { useTrails } from '@app/features/trail'
 import TrailItem from '@app/features/trail/components/TrailItem'
+import { getTrailsById } from '@app/features/trail/stores/trailStore'
 import { Button } from '@app/shared/components'
 import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
@@ -74,10 +75,11 @@ function MapTrailListCard(props: MapTrailListCardProps) {
  */
 const useMapTrailSelector = () => {
   const activeTrail = useDiscoveryTrail()
+  const trailsById = getTrailsById()
   const { showTrailListCard } = useMapTrailListCard()
 
   return {
-    selectedTrail: activeTrail?.trail,
+    selectedTrail: activeTrail?.trailId ? trailsById[activeTrail.trailId] : undefined,
     openTrailSelector: showTrailListCard,
   }
 }

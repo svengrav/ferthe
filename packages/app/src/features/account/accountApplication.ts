@@ -88,29 +88,40 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     }
   }
 
-  // Helper functions
-  const loadStoredSession = async (): Promise<AccountSession | null> => {
-    try {
-      const session = await secureStore?.read<AccountSession>(AUTH_SESSION_KEY)
-      if (session) {
-        // Check if session is expired using business logic
-        const expiresAt = new Date(session.expiresAt)
-        if (!accountService?.isSessionExpired(expiresAt)) {
-          // Sync store with loaded session
-          await syncStoreWithSession(session)
-          return session
-        } else {
-          // Session expired, remove it
-          await secureStore.delete(AUTH_SESSION_KEY)
+  // Shared promise to deduplicate concurrent loadStoredSession calls
+  let loadSessionPromise: Promise<AccountSession | null> | null = null
 
-          // Sync store to clear expired session
-          await syncStoreWithSession(undefined)
+  // Helper functions
+  const loadStoredSession = (): Promise<AccountSession | null> => {
+    if (loadSessionPromise) return loadSessionPromise
+
+    loadSessionPromise = (async (): Promise<AccountSession | null> => {
+      try {
+        const session = await secureStore?.read<AccountSession>(AUTH_SESSION_KEY)
+        if (session) {
+          // Check if session is expired using business logic
+          const expiresAt = new Date(session.expiresAt)
+          if (!accountService?.isSessionExpired(expiresAt)) {
+            // Sync store with loaded session
+            await syncStoreWithSession(session)
+            return session
+          } else {
+            // Session expired, remove it
+            await secureStore.delete(AUTH_SESSION_KEY)
+
+            // Sync store to clear expired session
+            await syncStoreWithSession(undefined)
+          }
         }
+      } catch (error) {
+        logger.error('Failed to load stored session:', error)
+      } finally {
+        loadSessionPromise = null
       }
-    } catch (error) {
-      logger.error('Failed to load stored session:', error)
-    }
-    return null
+      return null
+    })()
+
+    return loadSessionPromise
   }
 
   // Initialize by loading existing session (async)

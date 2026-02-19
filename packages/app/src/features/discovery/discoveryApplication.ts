@@ -2,7 +2,7 @@ import { SensorApplication } from '@app/features/sensor'
 import { getSpotActions, getSpots, getSpotsById } from '@app/features/spot'
 import { getTrailsById } from '@app/features/trail/stores/trailStore'
 import { logger } from '@app/shared/utils/logger'
-import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryStateCompositeContract, DiscoveryStats, RatingSummary, Result } from '@shared/contracts'
+import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryStateCompositeContract, DiscoveryStats, RatingSummary, Result, SpotSummary } from '@shared/contracts'
 import { Unsubscribe } from '@shared/events/eventHandler'
 import { GeoLocation, geoUtils } from '@shared/geo'
 import { getTrails } from '../trail/stores/trailStore'
@@ -124,8 +124,9 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
           })
           .filter(Boolean) as any[]
 
+        const trail = currentDiscovery.trailId ? getTrailsById()[currentDiscovery.trailId] : undefined
         emitDiscoveryTrailUpdated({
-          trail: currentDiscovery.trail,
+          trail,
           spots: discoverySpots,
           scannedClues: currentDiscovery.scannedClues,
           previewClues: currentDiscovery.previewClues,
@@ -160,106 +161,122 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     const result = await discoveryStateAPI.activateTrail(accountSession.data, id)
     if (!result.data) return
 
-    const { trail: discoveryTrailData, spots, profile } = result.data
-    const { clues, discoveries, createdAt, previewClues } = discoveryTrailData
+    const { activeTrail, spots, discoveries } = result.data
 
-    // Upsert spots into spotStore (extract Spot data from DiscoverySpot)
+    // Upsert spots into spotStore
     const { upsertSpot } = getSpotActions()
-    spots.forEach(discoverySpot => {
-      const { discoveryId, discoveredAt, ...spot } = discoverySpot
-      upsertSpot(spot)
-    })
+    spots.forEach(spot => upsertSpot(toSpot(spot)))
 
     // Upsert discoveries into discoveryStore
     const { upsertDiscoveries } = getDiscoveryActions()
-    upsertDiscoveries(discoveries)
+    upsertDiscoveries(discoveries as Discovery[])
 
-    const discoveryTrail = {
+    setDiscoveryTrail({
       trailId: trail.id,
-      updatedAt: createdAt,
-      trail: trail,
+      updatedAt: activeTrail.createdAt,
       scannedClues: [],
-      previewClues: [...clues, ...(previewClues || [])],
-      spotIds: spots.map(s => s.id),
-      discoveryIds: discoveries.map(d => d.id),
+      previewClues: [...activeTrail.clues, ...activeTrail.previewClues],
+      spotIds: activeTrail.spotIds,
+      discoveryIds: activeTrail.discoveryIds,
       status: 'ready' as const,
-    }
-    setDiscoveryTrail(discoveryTrail)
+    })
+    // Emit event with denormalized data from stores
+    const spotsById = getSpotsById()
+    const discoveriesById = getDiscoveriesById()
+    const trailSpots = activeTrail.spotIds
+      .map(spotId => {
+        const spot = spotsById[spotId]
+        const discovery = (Object.values(discoveriesById) as Discovery[]).find(d => d.spotId === spotId)
+        if (!spot || !discovery) return undefined
+        return { ...spot, discoveryId: discovery.id, discoveredAt: discovery.discoveredAt }
+      })
+      .filter(Boolean) as any[]
 
-    // Emit event with full denormalized data
     emitDiscoveryTrailUpdated({
       trail,
-      spots,
+      spots: trailSpots,
       scannedClues: [],
-      previewClues: [...(previewClues || [])],
-      createdAt,
+      previewClues: [...activeTrail.previewClues],
+      createdAt: activeTrail.createdAt,
     })
   }
 
+
+  // Convert SpotSummary to Spot shape for the store (fill defaults for backend-only fields)
+  const toSpot = (summary: SpotSummary) => ({
+    id: summary.id,
+    slug: '',
+    name: summary.name,
+    description: summary.description,
+    image: summary.image,
+    blurredImage: summary.blurredImage,
+    location: summary.location,
+    options: { discoveryRadius: 0, clueRadius: 0 },
+    source: summary.source as any,
+    createdAt: summary.createdAt,
+    updatedAt: summary.createdAt,
+  })
 
   const requestDiscoveryState = async () => {
     const accountSession = await getSession()
     if (!accountSession.data) throw new Error('Account session not found!')
 
-    // Single composite call: profile + discoveries + spots + active trail
+    // Single composite call: profile + discoveries + spots + active trail (normalized)
     const stateResult = await discoveryStateAPI.getDiscoveryState(accountSession.data)
 
     if (stateResult.data) {
-      const { profile, discoveries, spots, activeTrail } = stateResult.data
+      const { lastActiveTrailId, discoveries, spots, activeTrail } = stateResult.data
 
       const { setDiscoveries } = getDiscoveryActions()
       const { setSpots } = getSpotActions()
 
       logger.log('Fetched discovery state:', { discoveries: discoveries.length, spots: spots.length })
-      setDiscoveries(discoveries)
+      setDiscoveries(discoveries as Discovery[])
+      setSpots(spots.map(toSpot))
 
-      // Extract Spot data from DiscoverySpot and store in spotStore
-      const extractedSpots = spots.map(({ discoveryId, discoveredAt, ...spot }) => spot)
-      setSpots(extractedSpots)
-
-      // Set active trail from composite response
+      // Set active trail from normalized ID references
       if (activeTrail) {
         const trailsById = getTrailsById()
-        const trail = activeTrail.trail ? trailsById[activeTrail.trail.id] : undefined
+        const trail = trailsById[activeTrail.trailId]
 
         if (trail) {
-          const { clues, spots: trailSpots, discoveries: trailDiscoveries, createdAt, previewClues } = activeTrail
-
-          const { upsertSpot } = getSpotActions()
-          trailSpots.forEach(discoverySpot => {
-            const { discoveryId, discoveredAt, ...spot } = discoverySpot
-            upsertSpot(spot)
-          })
-
-          const { upsertDiscoveries } = getDiscoveryActions()
-          upsertDiscoveries(trailDiscoveries)
-
           setDiscoveryTrail({
             trailId: trail.id,
-            updatedAt: createdAt,
-            trail,
+            updatedAt: activeTrail.createdAt,
             scannedClues: [],
-            previewClues: [...clues, ...(previewClues || [])],
-            spotIds: trailSpots.map(s => s.id),
-            discoveryIds: trailDiscoveries.map(d => d.id),
+            previewClues: [...activeTrail.clues, ...activeTrail.previewClues],
+            spotIds: activeTrail.spotIds,
+            discoveryIds: activeTrail.discoveryIds,
             status: 'ready' as const,
           })
+
+          // Emit event with denormalized data from stores
+          const spotsById = getSpotsById()
+          const discoveriesById = getDiscoveriesById()
+          const trailSpots = activeTrail.spotIds
+            .map(spotId => {
+              const spot = spotsById[spotId]
+              const discovery = (Object.values(discoveriesById) as Discovery[]).find(d => d.spotId === spotId)
+              if (!spot || !discovery) return undefined
+              return { ...spot, discoveryId: discovery.id, discoveredAt: discovery.discoveredAt }
+            })
+            .filter(Boolean) as any[]
 
           emitDiscoveryTrailUpdated({
             trail,
             spots: trailSpots,
             scannedClues: [],
-            previewClues: [...(previewClues || [])],
-            createdAt,
+            previewClues: [...activeTrail.previewClues],
+            createdAt: activeTrail.createdAt,
           })
 
           logger.log(`Discovery state loaded with active trail: ${trail.id}`)
         } else {
           await setDefaultTrail()
         }
-      } else if (profile.lastActiveTrailId) {
-        await setActiveTrail(profile.lastActiveTrailId)
-        logger.log(`Discovery state loaded, set active trail from profile: ${profile.lastActiveTrailId}`)
+      } else if (lastActiveTrailId) {
+        await setActiveTrail(lastActiveTrailId)
+        logger.log(`Discovery state loaded, set active trail from profile: ${lastActiveTrailId}`)
       } else {
         await setDefaultTrail()
         logger.log('Discovery state loaded, default trail set.')
@@ -296,14 +313,12 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     const filteredPreviewClues = currentTrailData.previewClues?.filter(clue => !allDiscoveredSpotIds.includes(clue.spotId))
 
     setDiscoveryTrail({
-      ...currentTrailData,
-      trail: currentTrailData.trail,
       discoveryIds: allDiscoveryIds,
       snap: snap,
       trailId: currentTrailData.trailId,
       scannedClues: filteredClues,
       previewClues: filteredPreviewClues,
-      lastDiscovery: newDiscoveries[newDiscoveries.length - 1],
+      lastDiscoveryId: newDiscoveries[newDiscoveries.length - 1]?.id,
       updatedAt: new Date(),
     })
 

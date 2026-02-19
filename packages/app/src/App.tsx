@@ -81,6 +81,9 @@ const useAppInitialization = () => {
           },
         })
 
+        // Ensure session is loaded before data requests (avoids redundant auth calls)
+        await context.accountApplication.getAccountContext()
+
         // Load Trail and Discovery Data
         await Promise.all([
           context.trailApplication.requestTrailState(),

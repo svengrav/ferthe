@@ -48,6 +48,13 @@
       "source.fixAll.eslint": "explicit",
       "source.organizeImports": "explicit"
     },
+    "files.watcherExclude": {
+      "**/node_modules/**": true,
+      "**/.git/**": true,
+      "**/dist/**": true,
+      "**/build/**": true,
+      "**/.next/**": true
+    },
     "workbench.editor.enablePreview": true,
     "github.copilot.chat.codesearch.enabled": true,
     "editor.tabSize": 2,

@@ -3,8 +3,7 @@ import { createAsyncRequestHandler } from '@core/api/oak/requestHandler.ts'
 
 import {
   Account,
-  ActivateTrailResult,
-  APIContract,
+  ApplicationContract,
   Clue,
   Community,
   CommunityMember,
@@ -13,15 +12,14 @@ import {
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoverySpot,
-  DiscoveryState,
   DiscoveryStats,
   DiscoveryTrail,
   FirebaseConfig,
   RatingSummary,
-  ScanEvent,
-  SharedDiscovery,
   SMSCodeRequest,
   SMSVerificationResult,
+  ScanEvent,
+  SharedDiscovery,
   Spot,
   SpotRating,
   StoredTrailSpot,
@@ -33,8 +31,8 @@ import {
 import { manifest } from './manifest.ts'
 import { Route } from './oak/types.ts'
 
-const createRoutes = (ctx: APIContract): Route[] => {
-  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication, spotAccessComposite, discoveryStateComposite } = ctx
+const createRoutes = (ctx: ApplicationContract): Route[] => {
+  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication } = ctx
 
   // Create the request handler with account application access
   const asyncRequestHandler = createAsyncRequestHandler(accountApplication)
@@ -160,32 +158,6 @@ const createRoutes = (ctx: APIContract): Route[] => {
       }),
     },
 
-    // Composite Routes: Aggregated cross-feature queries
-    {
-      method: 'GET',
-      version: 'v1',
-      url: '/composite/discovery/state',
-      handler: asyncRequestHandler<DiscoveryState>(async ({ context: session }) => {
-        return await discoveryStateComposite.getDiscoveryState(session)
-      }),
-    },
-    {
-      method: 'POST',
-      version: 'v1',
-      url: '/composite/discovery/actions/activate-trail',
-      handler: asyncRequestHandler<ActivateTrailResult>(async ({ context: session, body }) => {
-        return await discoveryStateComposite.activateTrail(session, body?.trailId)
-      }),
-    },
-    {
-      method: 'GET',
-      version: 'v1',
-      url: '/composite/spots/accessible',
-      handler: asyncRequestHandler<Spot[]>(async ({ context: session, query }) => {
-        return await spotAccessComposite.getAccessibleSpots(session, query?.trailId, parseQueryOptions(query))
-      }),
-    },
-
     // Spot Rating Routes
     {
       method: 'GET',
@@ -267,39 +239,13 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'GET',
       version: 'v1',
       url: '/spot/spots/:id',
-      // TODO: Access control implementation required
-      // This endpoint is currently blocked for security reasons.
-      // Direct spot access should only be allowed for:
-      // - Spot creators (spot.createdBy === context.accountId)
-      // - Admins/Moderators (future role system)
-      // - Users who have discovered the spot (check via discoveryApplication)
-      // Regular users should access spots via discovery routes instead:
-      // - GET /discovery/collections/spots (discovered spots)
-      // - GET /discovery/collections/trails/:trailId (spots in trail context with proper filtering)
+      // TODO: Enhanced access control implementation recommended
+      // Currently allows authenticated access. Consider adding:
+      // - Ownership check (spot.createdBy === context.accountId)
+      // - Admin role verification
+      // - Discovery verification (check if user discovered the spot)
       handler: asyncRequestHandler<Spot | undefined, { id: string }, never>(async ({ params, context }) => {
-        // Block all requests until proper access control is implemented
-        return {
-          success: false,
-          error: {
-            message: 'Direct spot access not allowed. Use discovery endpoints instead.',
-            code: 'FORBIDDEN',
-          },
-        }
-
-        // Future implementation:
-        // const spot = await spotApplication.getSpot(context, params!.id)
-        // if (!spot.success || !spot.data) return spot
-        //
-        // // Check access rights
-        // const isOwner = spot.data.createdBy === context.accountId
-        // const isAdmin = await checkAdminRole(context) // Future role system
-        // const hasDiscovered = await discoveryApplication.hasDiscoveredSpot(context, params!.id)
-        //
-        // if (isOwner || isAdmin || hasDiscovered) {
-        //   return spot
-        // }
-        //
-        // return { success: false, error: { message: 'Access denied', code: 'FORBIDDEN' } }
+        return await spotApplication.getSpot(context, params!.id)
       }),
     },
     {
