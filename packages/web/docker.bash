@@ -2,8 +2,10 @@
 # git update-index --chmod=+x docker.bash
 
 # Setup app version
-NGINX_PATH="/root/workspace/nginx"
+NGINX_PATH="/data/nginx"
 ENV_FILE="deno.json"
+
+deno check 
 
 if [ -f "$ENV_FILE" ]; then
   CURRENT_VERSION=$(grep -oP '"version":\s*"\K[0-9]+\.[0-9]+\.[0-9]+' "$ENV_FILE")
@@ -32,9 +34,9 @@ docker compose up --build -d
 docker exec nginx-gateway nginx -s reload
 
 # 2. Git Commit & Push
-if [ -n "$NEW_VERSION" ]; then
-  git add -A
-  git commit -m "v$NEW_VERSION"
-  git push
-  echo "Git: v$NEW_VERSION gepusht"
-fi
+# if [ -n "$NEW_VERSION" ]; then
+#   git add -A
+#   git commit -m "v$NEW_VERSION"
+#   git push
+#   echo "Git: v$NEW_VERSION gepusht"
+# fi
