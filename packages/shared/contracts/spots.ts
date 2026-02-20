@@ -1,7 +1,39 @@
 import { GeoLocation } from '@shared/geo/index.ts'
 import { AccountContext } from './accounts.ts'
+import { ContentBlock } from './contentBlocks.ts'
 import { ImageReference } from './images.ts'
 import { QueryOptions, Result } from './results.ts'
+
+/**
+ * Separable content block for a spot.
+ * Designed for future extensibility (e.g. rich media, tags, links).
+ */
+export interface SpotContent {
+  name: string
+  description: string
+  imageBase64?: string // Base64-encoded image data for upload
+}
+
+/**
+ * Request payload for creating a new spot.
+ */
+export interface CreateSpotRequest {
+  content: SpotContent
+  location: GeoLocation
+  visibility: SpotVisibility
+  trailIds?: string[]
+  consent: true // Must be explicitly true
+}
+
+/**
+ * Request payload for updating an existing spot.
+ * All fields are optional - only provided fields will be updated.
+ */
+export interface UpdateSpotRequest {
+  content?: Partial<SpotContent>
+  visibility?: SpotVisibility
+  trailIds?: string[] // Replaces all trail assignments
+}
 
 /**
  * Aggregated rating summary for a spot.
@@ -29,7 +61,9 @@ export interface SpotApplicationContract {
   getSpots: (context?: AccountContext, options?: QueryOptions) => Promise<Result<Spot[]>>
   getSpot: (context: AccountContext, id: string, options?: QueryOptions) => Promise<Result<Spot | undefined>>
   getSpotsByIds: (context: AccountContext, spotIds: string[], options?: QueryOptions) => Promise<Result<Spot[]>>
-  createSpot: (context: AccountContext, spotData: Omit<Spot, 'id' | 'slug'>) => Promise<Result<Spot>>
+  createSpot: (context: AccountContext, spotData: CreateSpotRequest | Omit<Spot, 'id' | 'slug'>) => Promise<Result<Spot>>
+  updateSpot: (context: AccountContext, spotId: string, updates: UpdateSpotRequest) => Promise<Result<Spot>>
+  deleteSpot: (context: AccountContext, spotId: string) => Promise<Result<void>>
   rateSpot: (context: AccountContext, spotId: string, rating: number) => Promise<Result<SpotRating>>
   removeSpotRating: (context: AccountContext, spotId: string) => Promise<Result<void>>
   getSpotRatingSummary: (context: AccountContext, spotId: string) => Promise<Result<RatingSummary>>
@@ -57,6 +91,7 @@ export interface Spot {
   image?: ImageReference
   blurredImage?: ImageReference // Blurred version for undiscovered spots
   location: GeoLocation
+  contentBlocks?: ContentBlock[]
   options: {
     discoveryRadius: number
     clueRadius: number

@@ -12,6 +12,7 @@ const toById = <T extends { id: string }>(items: T[]): Record<string, T> =>
 interface SpotActions extends StoreActions {
   setSpots: (spots: Spot[]) => void
   upsertSpot: (spot: Spot) => void
+  removeSpot: (spotId: string) => void
   setSpotPreviews: (previews: SpotPreview[]) => void
 }
 
@@ -34,6 +35,10 @@ export const spotStore = create<SpotState & SpotActions>(set => ({
   setStatus: status => set({ status }),
   setSpots: spots => set({ byId: toById(spots) }),
   upsertSpot: spot => set(state => ({ byId: { ...state.byId, [spot.id]: spot } })),
+  removeSpot: spotId => set(state => {
+    const { [spotId]: _, ...remainingSpots } = state.byId
+    return { byId: remainingSpots }
+  }),
   setSpotPreviews: previews => set({ previewsById: toById(previews) }),
 }))
 
@@ -48,6 +53,7 @@ export const useSpotPreviewsById = () => spotStore(state => state.previewsById)
 export const getSpotStoreActions = () => ({
   setSpots: spotStore.getState().setSpots,
   upsertSpot: spotStore.getState().upsertSpot,
+  removeSpot: spotStore.getState().removeSpot,
   setStatus: spotStore.getState().setStatus,
   setSpotPreviews: spotStore.getState().setSpotPreviews,
 })

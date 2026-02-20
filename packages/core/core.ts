@@ -62,6 +62,9 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     spotApplication,
   })
 
+  // Late-bind trailApplication to spotApplication (avoids circular init dependency)
+  spotApplication.setTrailApplication(trailApplication)
+
   const accountApplication = createAccountApplication({
     accountStore: createStore<Account>(storeConnector, STORE_IDS.ACCOUNTS),
     accountSessionStore: createStore<AccountSession>(storeConnector, STORE_IDS.ACCOUNT_SESSIONS),

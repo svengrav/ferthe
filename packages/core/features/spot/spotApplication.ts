@@ -3,10 +3,12 @@ import { Store } from '@core/store/storeFactory.ts'
 import { createCuid2 } from '@core/utils/idGenerator.ts'
 import { createSlug } from '@core/utils/slug.ts'
 import { ERROR_CODES } from '@shared/contracts/errors.ts'
-import { AccountContext, ImageApplicationContract, QueryOptions, RatingSummary, Result, Spot, SpotApplicationContract, SpotPreview, SpotRating, StoredSpot } from '@shared/contracts/index.ts'
+import { AccountContext, CreateSpotRequest, ImageApplicationContract, QueryOptions, RatingSummary, Result, Spot, SpotApplicationContract, SpotPreview, SpotRating, StoredSpot, TrailApplicationContract, UpdateSpotRequest } from '@shared/contracts/index.ts'
 import { enrichSpotWithImages } from './spotEnrichment.ts'
 
-export interface SpotApplicationActions extends SpotApplicationContract { }
+export interface SpotApplicationActions extends SpotApplicationContract {
+  setTrailApplication: (trailApp: TrailApplicationContract) => void
+}
 
 export interface SpotApplicationConfig {
   spotStore: Store<StoredSpot>
@@ -16,6 +18,7 @@ export interface SpotApplicationConfig {
 
 export function createSpotApplication(config: SpotApplicationConfig): SpotApplicationActions {
   const { spotStore, ratingStore, imageApplication } = config
+  let trailApplication: TrailApplicationContract | undefined
 
   // Helper function to calculate rating summary for a spot
   const calculateRatingSummary = (spotId: string, allRatings: SpotRating[], accountId?: string): RatingSummary => {
@@ -31,7 +34,96 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
     }
   }
 
+  // Create spot from raw Spot data (internal/admin usage)
+  const createSpotFromData = async (context: AccountContext, spotData: Omit<Spot, 'id' | 'slug'>): Promise<Result<Spot>> => {
+    const id = createCuid2()
+    const slug = createSlug(spotData.name)
+
+    const imageBlobPath = spotData.image?.url ? extractBlobPathFromUrl(spotData.image.url) : undefined
+
+    let blurredImageBlobPath: string | undefined
+    if (imageBlobPath) {
+      const lastDot = imageBlobPath.lastIndexOf('.')
+      blurredImageBlobPath = lastDot === -1
+        ? `${imageBlobPath}-blurred`
+        : `${imageBlobPath.substring(0, lastDot)}-blurred${imageBlobPath.substring(lastDot)}`
+    }
+
+    const spotEntity: StoredSpot = {
+      id,
+      slug,
+      name: spotData.name,
+      description: spotData.description,
+      imageBlobPath,
+      blurredImageBlobPath,
+      location: spotData.location,
+      options: spotData.options,
+      createdAt: spotData.createdAt,
+      updatedAt: spotData.updatedAt,
+    }
+
+    const createdSpotResult = await spotStore.create(spotEntity)
+    if (!createdSpotResult.success) {
+      return { success: false, error: { message: 'Failed to create spot', code: 'CREATE_SPOT_ERROR' } }
+    }
+
+    const enrichedSpot = await enrichSpotWithImages(context, createdSpotResult.data!, imageApplication)
+    return { success: true, data: enrichedSpot }
+  }
+
+  // Create spot from user CreateSpotRequest (image upload + trail assignment)
+  const createSpotFromRequest = async (context: AccountContext, request: CreateSpotRequest): Promise<Result<Spot>> => {
+    if (!request.consent) {
+      return { success: false, error: { message: 'Consent is required', code: 'CONSENT_REQUIRED' } }
+    }
+
+    // Process image upload if provided
+    let imageRef: { id: string; url: string } | undefined
+    if (request.content.imageBase64) {
+      const imageResult = await imageApplication.processAndStore(
+        context, 'spot', 'pending', request.content.imageBase64, { blur: true }
+      )
+      if (!imageResult.success || !imageResult.data) {
+        return { success: false, error: { message: 'Image upload failed', code: 'IMAGE_UPLOAD_ERROR' } }
+      }
+      const urlResult = await imageApplication.refreshImageUrl(context, imageResult.data.blobPath)
+      if (urlResult.success && urlResult.data) {
+        imageRef = { id: imageResult.data.blobPath, url: urlResult.data }
+      }
+    }
+
+    const now = new Date()
+    const spotResult = await createSpotFromData(context, {
+      name: request.content.name,
+      description: request.content.description,
+      image: imageRef,
+      location: request.location,
+      options: {
+        discoveryRadius: 50,
+        clueRadius: 500,
+        visibility: request.visibility,
+      },
+      createdBy: context.accountId,
+      source: 'created',
+      createdAt: now,
+      updatedAt: now,
+    })
+
+    // Add to trails if requested
+    if (spotResult.success && spotResult.data && request.trailIds?.length && trailApplication) {
+      for (const trailId of request.trailIds) {
+        await trailApplication.addSpotToTrail(context, trailId, spotResult.data.id)
+      }
+    }
+
+    return spotResult
+  }
+
   return {
+    setTrailApplication: (trailApp: TrailApplicationContract) => {
+      trailApplication = trailApp
+    },
+
     async getSpots(context?: AccountContext, options?: QueryOptions): Promise<Result<Spot[]>> {
       try {
         const spotsResult = await spotStore.list(options)
@@ -118,50 +210,163 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
       }
     },
 
-    async createSpot(context: AccountContext, spotData: Omit<Spot, 'id' | 'slug'>): Promise<Result<Spot>> {
+    async createSpot(context: AccountContext, spotData: CreateSpotRequest | Omit<Spot, 'id' | 'slug'>): Promise<Result<Spot>> {
       try {
-        const id = createCuid2()
-        const slug = createSlug(spotData.name)
+        // Handle CreateSpotRequest (user-created spot with image upload + trail assignment)
+        if ('content' in spotData) {
+          return await createSpotFromRequest(context, spotData)
+        }
 
-        // Extract blob path from image URL
-        const imageBlobPath = spotData.image?.url ? extractBlobPathFromUrl(spotData.image.url) : undefined
+        // Handle raw Spot data (internal/admin usage)
+        return await createSpotFromData(context, spotData)
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'CREATE_SPOT_ERROR' } }
+      }
+    },
 
-        // Auto-generate blurred path if image exists (by convention: <path>-blurred.<ext>)
-        let blurredImageBlobPath: string | undefined
-        if (imageBlobPath) {
+    async updateSpot(context: AccountContext, spotId: string, updates: UpdateSpotRequest): Promise<Result<Spot>> {
+      try {
+        // Get spot to verify ownership
+        const spotsResult = await spotStore.list()
+        if (!spotsResult.success) {
+          return { success: false, error: { message: 'Failed to list spots', code: 'GET_SPOT_ERROR' } }
+        }
+        const spot = spotsResult.data?.find(s => s.id === spotId)
+        if (!spot) {
+          return { success: false, error: { message: 'Spot not found', code: 'SPOT_NOT_FOUND' } }
+        }
+
+        // Verify ownership
+        if (spot.createdBy !== context.accountId) {
+          return { success: false, error: { message: 'Not authorized to update this spot', code: 'UNAUTHORIZED' } }
+        }
+
+        // Process image upload if provided
+        let imageBlobPath = spot.imageBlobPath
+        let blurredImageBlobPath = spot.blurredImageBlobPath
+        if (updates.content?.imageBase64) {
+          // Delete old images if they exist
+          if (spot.imageBlobPath) {
+            await imageApplication.deleteImage(context, spot.imageBlobPath)
+          }
+          if (spot.blurredImageBlobPath) {
+            await imageApplication.deleteImage(context, spot.blurredImageBlobPath)
+          }
+
+          // Upload new image
+          const imageResult = await imageApplication.processAndStore(
+            context, 'spot', 'pending', updates.content.imageBase64, { blur: true }
+          )
+          if (!imageResult.success || !imageResult.data) {
+            return { success: false, error: { message: 'Image upload failed', code: 'IMAGE_UPLOAD_ERROR' } }
+          }
+          imageBlobPath = imageResult.data.blobPath
+
+          // Generate blurred image path
           const lastDot = imageBlobPath.lastIndexOf('.')
           blurredImageBlobPath = lastDot === -1
             ? `${imageBlobPath}-blurred`
             : `${imageBlobPath.substring(0, lastDot)}-blurred${imageBlobPath.substring(lastDot)}`
         }
 
-        // Convert Spot input to StoredSpot
-        const spotEntity: StoredSpot = {
-          id,
-          slug,
-          name: spotData.name,
-          description: spotData.description,
+        // Update spot entity
+        const updatedSpot: StoredSpot = {
+          ...spot,
+          name: updates.content?.name ?? spot.name,
+          description: updates.content?.description ?? spot.description,
           imageBlobPath,
           blurredImageBlobPath,
-          location: spotData.location,
-          options: spotData.options,
-          createdAt: spotData.createdAt,
-          updatedAt: spotData.updatedAt,
+          options: {
+            ...spot.options,
+            visibility: updates.visibility ?? spot.options.visibility,
+          },
+          updatedAt: new Date(),
         }
 
-        // Store entity with blob paths
-        const createdSpotResult = await spotStore.create(spotEntity)
-        if (!createdSpotResult.success) {
-          return { success: false, error: { message: 'Failed to create spot', code: 'CREATE_SPOT_ERROR' } }
+        const updateResult = await spotStore.update(spotId, updatedSpot)
+        if (!updateResult.success) {
+          return { success: false, error: { message: 'Failed to update spot', code: 'UPDATE_SPOT_ERROR' } }
         }
 
-        // Return enriched spot with fresh URLs
-        const enrichedSpot = await enrichSpotWithImages(context, createdSpotResult.data!, imageApplication)
+        // Handle trail assignments if provided
+        if (updates.trailIds !== undefined && trailApplication) {
+          // Get current trail assignments
+          const trailsResult = await trailApplication.listTrails(context)
+          if (trailsResult.success && trailsResult.data) {
+            // Remove spot from all current trails
+            for (const trail of trailsResult.data) {
+              await trailApplication.removeSpotFromTrail(context, trail.id, spotId)
+            }
+            // Add spot to new trails
+            for (const trailId of updates.trailIds) {
+              await trailApplication.addSpotToTrail(context, trailId, spotId)
+            }
+          }
+        }
+
+        const enrichedSpot = await enrichSpotWithImages(context, updatedSpot, imageApplication)
         return { success: true, data: enrichedSpot }
       } catch (error: unknown) {
-        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'CREATE_SPOT_ERROR' } }
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'UPDATE_SPOT_ERROR' } }
       }
     },
+
+    async deleteSpot(context: AccountContext, spotId: string): Promise<Result<void>> {
+      try {
+        // Get spot to verify ownership
+        const spotsResult = await spotStore.list()
+        if (!spotsResult.success) {
+          return { success: false, error: { message: 'Failed to list spots', code: 'GET_SPOT_ERROR' } }
+        }
+        const spot = spotsResult.data?.find(s => s.id === spotId)
+        if (!spot) {
+          return { success: false, error: { message: 'Spot not found', code: 'SPOT_NOT_FOUND' } }
+        }
+
+        // Verify ownership
+        if (spot.createdBy !== context.accountId) {
+          return { success: false, error: { message: 'Not authorized to delete this spot', code: 'UNAUTHORIZED' } }
+        }
+
+        // Delete images from blob storage if they exist
+        if (spot.imageBlobPath) {
+          await imageApplication.deleteImage(context, spot.imageBlobPath)
+        }
+        if (spot.blurredImageBlobPath) {
+          await imageApplication.deleteImage(context, spot.blurredImageBlobPath)
+        }
+
+        // Remove spot from all trails
+        if (trailApplication) {
+          const trailsResult = await trailApplication.listTrails(context)
+          if (trailsResult.success && trailsResult.data) {
+            for (const trail of trailsResult.data) {
+              await trailApplication.removeSpotFromTrail(context, trail.id, spotId)
+            }
+          }
+        }
+
+        // Delete all ratings for this spot
+        const ratingsResult = await ratingStore.list()
+        if (ratingsResult.success && ratingsResult.data) {
+          const spotRatings = ratingsResult.data.filter(r => r.spotId === spotId)
+          for (const rating of spotRatings) {
+            await ratingStore.delete(rating.id)
+          }
+        }
+
+        // Delete the spot
+        const deleteResult = await spotStore.delete(spotId)
+        if (!deleteResult.success) {
+          return { success: false, error: { message: 'Failed to delete spot', code: 'DELETE_SPOT_ERROR' } }
+        }
+
+        return { success: true, data: undefined }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'DELETE_SPOT_ERROR' } }
+      }
+    },
+
     getSpotPreviews: async (options?: QueryOptions): Promise<Result<SpotPreview[]>> => {
       try {
         const spotsResult = await spotStore.list(options)

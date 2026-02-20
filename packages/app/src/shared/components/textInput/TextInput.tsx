@@ -35,6 +35,7 @@ const useStyles = createThemedStyles(theme => ({
   },
   multiline: {
     minHeight: 80,
+    maxHeight: 400,
     textAlignVertical: 'top',
   },
   inputError: {

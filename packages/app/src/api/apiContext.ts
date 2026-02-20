@@ -8,6 +8,7 @@ import {
   Clue,
   Community,
   CommunityMember,
+  CreateSpotRequest,
   Discovery,
   DiscoveryContent,
   DiscoveryLocationRecord,
@@ -33,7 +34,8 @@ import {
   Trail,
   TrailRating,
   TrailSpot,
-  TrailStats
+  TrailStats,
+  UpdateSpotRequest
 } from '@shared/contracts'
 import { APIError, createAPIClient } from './client'
 import { checkStatus, serializeQueryOptions, StatusResult } from './utils'
@@ -151,7 +153,11 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
       getSpotPreviewsByIds: (_context: AccountContext, spotIds: string[], options?: QueryOptions) =>
         API.send<SpotPreview[]>('/spot/queries/previews-by-ids', 'POST', { spotIds }, serializeQueryOptions(options)),
 
-      createSpot: (_context: AccountContext, spotData: Omit<Spot, 'id' | 'slug'>) => API.send<Spot>('/spot/spots', 'POST', spotData),
+      createSpot: (_context: AccountContext, spotData: CreateSpotRequest) => API.send<Spot>('/spot/spots', 'POST', spotData),
+
+      updateSpot: (_context: AccountContext, spotId: string, updates: UpdateSpotRequest) => API.send<Spot>(`/spot/spots/${spotId}`, 'PUT', updates),
+
+      deleteSpot: (_context: AccountContext, spotId: string) => API.send<void>(`/spot/spots/${spotId}`, 'DELETE'),
 
       // Rating methods (prefer using discoveryApplication.rateSpot for access control)
       rateSpot: (_context: AccountContext, spotId: string, rating: number) =>

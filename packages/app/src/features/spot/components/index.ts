@@ -17,6 +17,9 @@ export { default as SpotCard } from './card/SpotCard.tsx'
 // List components
 export { default as SpotCardList } from './SpotCardList.tsx'
 
+// Form components (create + edit)
+export { SpotFormPage, useCreateSpotPage, useEditSpotPage } from './creation/index.ts'
+
 // Hooks
 export { useSpotCardDimensions } from './card/useSpotCardDimensions.ts'
 export type { SpotVariant } from './card/useSpotCardDimensions.ts'

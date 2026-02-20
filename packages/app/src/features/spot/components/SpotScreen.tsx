@@ -1,11 +1,12 @@
 import { getAppContext } from '@app/appContext'
 import { useDiscoveryStatus } from '@app/features/discovery/stores/discoveryStore'
 import { useSettingsPage } from '@app/features/settings/components/SettingsPage'
-import { Page } from '@app/shared/components'
+import { Button, Page } from '@app/shared/components'
 import Header from '@app/shared/components/header/Header'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { useMemo } from 'react'
 import { useSpots } from '../stores/spotStore'
+import { useCreateSpotPage } from './creation/SpotFormPage'
 import SpotCardList from './SpotCardList'
 import { useSpotPage } from './SpotPage'
 
@@ -18,6 +19,7 @@ function SpotScreen() {
   const { t } = useLocalizationStore()
   const { showSettings } = useSettingsPage()
   const { showSpotPage } = useSpotPage()
+  const { showCreateSpotPage } = useCreateSpotPage()
 
   const spots = useSpots()
   const status = useDiscoveryStatus()
@@ -50,7 +52,10 @@ function SpotScreen() {
 
   return (
     <Page options={[{ label: t.navigation.settings, onPress: showSettings }]}>
-      <Header title={t.navigation.feed} />
+      <Header
+        title={t.navigation.feed}
+        trailing={<Button icon="add" onPress={showCreateSpotPage} />}
+      />
 
       <SpotCardList
         items={spotItems}

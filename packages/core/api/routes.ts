@@ -3,36 +3,40 @@ import { createAsyncRequestHandler } from '@core/api/oak/requestHandler.ts'
 
 import {
   Account,
-  ApplicationContract,
+  ActivateTrailResult,
+  APIContract,
   Clue,
   Community,
   CommunityMember,
+  CreateSpotRequest,
   Discovery,
   DiscoveryContent,
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoverySpot,
+  DiscoveryState,
   DiscoveryStats,
   DiscoveryTrail,
   FirebaseConfig,
   RatingSummary,
-  SMSCodeRequest,
-  SMSVerificationResult,
   ScanEvent,
   SharedDiscovery,
+  SMSCodeRequest,
+  SMSVerificationResult,
   Spot,
   SpotRating,
   StoredTrailSpot,
   Trail,
   TrailRating,
   TrailSpot,
-  TrailStats
+  TrailStats,
+  UpdateSpotRequest
 } from '@shared/contracts/index.ts'
 import { manifest } from './manifest.ts'
 import { Route } from './oak/types.ts'
 
-const createRoutes = (ctx: ApplicationContract): Route[] => {
-  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication } = ctx
+const createRoutes = (ctx: APIContract): Route[] => {
+  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication, spotAccessComposite, discoveryStateComposite } = ctx
 
   // Create the request handler with account application access
   const asyncRequestHandler = createAsyncRequestHandler(accountApplication)
@@ -236,6 +240,14 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       }),
     },
     {
+      method: 'POST',
+      version: 'v1',
+      url: '/spot/spots',
+      handler: asyncRequestHandler<Spot, never, CreateSpotRequest>(async ({ context, body }) => {
+        return await spotApplication.createSpot(context, body!)
+      }),
+    },
+    {
       method: 'GET',
       version: 'v1',
       url: '/spot/spots/:id',
@@ -246,6 +258,30 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       // - Discovery verification (check if user discovered the spot)
       handler: asyncRequestHandler<Spot | undefined, { id: string }, never>(async ({ params, context }) => {
         return await spotApplication.getSpot(context, params!.id)
+      }),
+    },
+    {
+      method: 'DELETE',
+      version: 'v1',
+      url: '/spot/spots/:id',
+      handler: asyncRequestHandler<void, { id: string }, never>(async ({ params, context }) => {
+        return await spotApplication.deleteSpot(context, params!.id)
+      }),
+    },
+    {
+      method: 'PUT',
+      version: 'v1',
+      url: '/spot/spots/:id',
+      handler: asyncRequestHandler<Spot, { id: string }, UpdateSpotRequest>(async ({ params, context, body }) => {
+        return await spotApplication.updateSpot(context, params!.id, body!)
+      }),
+    },
+    {
+      method: 'PUT',
+      version: 'v1',
+      url: '/spot/spots/:id',
+      handler: asyncRequestHandler<Spot, { id: string }, UpdateSpotRequest>(async ({ params, context, body }) => {
+        return await spotApplication.updateSpot(context, params!.id, body!)
       }),
     },
     {
@@ -463,6 +499,36 @@ const createRoutes = (ctx: ApplicationContract): Route[] => {
       url: '/community/communities/:communityId/discoveries',
       handler: asyncRequestHandler<Discovery[], { communityId: string }>(async ({ context, params }) => {
         return await communityApplication.getSharedDiscoveries(context, params!.communityId)
+      }),
+    },
+
+    // ── Composite Routes ─────────────────────────────────────────
+
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/composite/spots/accessible',
+      handler: asyncRequestHandler<Spot[]>(async ({ context, query }) => {
+        const options = parseQueryOptions(query)
+        const trailId = query?.trailId as string | undefined
+        return await spotAccessComposite.getAccessibleSpots(context, trailId, options)
+      }),
+    },
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/composite/discovery/state',
+      handler: asyncRequestHandler<DiscoveryState>(async ({ context }) => {
+        return await discoveryStateComposite.getDiscoveryState(context)
+      }),
+    },
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/composite/discovery/actions/activate-trail',
+      handler: asyncRequestHandler<ActivateTrailResult>(async ({ context, body }) => {
+        const { trailId } = body as { trailId: string }
+        return await discoveryStateComposite.activateTrail(context, trailId)
       }),
     },
   ]

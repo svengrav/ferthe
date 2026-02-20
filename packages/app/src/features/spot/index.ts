@@ -1,5 +1,6 @@
 export { default as SpotCard } from './components/card/SpotCard'
 export { useSpotCardDimensions } from './components/card/useSpotCardDimensions'
+export { SpotFormPage, useCreateSpotPage, useEditSpotPage } from './components/creation'
 export { default as SpotCardList } from './components/SpotCardList'
 export { default as SpotPage, useSpotPage } from './components/SpotPage'
 export { default as SpotScreen } from './components/SpotScreen'

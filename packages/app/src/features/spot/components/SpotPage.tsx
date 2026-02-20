@@ -1,6 +1,8 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 
-import { Button, Page, PageTab, PageTabs, Stack, Text } from '@app/shared/components'
+import { useAccountId } from '@app/features/account'
+import { Button, ContentBlockList, Page, PageTab, PageTabs, Stack, Text } from '@app/shared/components'
+import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
@@ -10,6 +12,7 @@ import SpotRating from '@app/features/discovery/components/SpotRating'
 import { useSpotWithDiscovery } from '../hooks/useSpotWithDiscovery'
 import SpotCard from './card/SpotCard'
 import { useSpotCardDimensions } from './card/useSpotCardDimensions'
+import { useEditSpotPage } from './creation/SpotFormPage'
 import { SpotLocation } from './SpotLocation'
 import SpotStatus from './SpotStatus'
 
@@ -36,15 +39,45 @@ interface SpotPageProps {
 function SpotPage(props: SpotPageProps) {
   const { spotId, onClose } = props
   const { styles } = useTheme(createStyles)
-  const { locales } = useApp()
+  const { locales, context } = useApp()
   const { width, height } = useSpotCardDimensions()
   const { spot, discovery, isLoading } = useSpotWithDiscovery(spotId)
+  const accountId = useAccountId()
+  const { showEditSpotPage } = useEditSpotPage()
+  const { openDialog } = useRemoveDialog()
+
+  const isOwner = spot?.createdBy === accountId
+
+  const handleEdit = () => {
+    if (!spot) return
+    showEditSpotPage(spot)
+  }
+
+  const handleDelete = () => {
+    if (!spot) return
+
+    openDialog({
+      message: `${locales.common.delete} "${spot.name}"?`,
+      onConfirm: async () => {
+        const result = await context.spotApplication.deleteSpot(spotId)
+        if (result.success) {
+          onClose?.()
+        }
+      }
+    })
+  }
 
   return (
     <Page
       style={styles.container}
       title={spot?.name}
       leading={<Button icon="arrow-back" variant='outlined' onPress={onClose} />}
+      trailing={isOwner ? (
+        <View style={styles.actions}>
+          <Button icon="edit" variant='outlined' onPress={handleEdit} />
+          <Button icon="delete" variant='outlined' onPress={handleDelete} />
+        </View>
+      ) : undefined}
       loading={isLoading}
     >
       {spot && (
@@ -67,6 +100,11 @@ function SpotPage(props: SpotPageProps) {
               <SpotLocation location={spot.location} />
 
               <Text variant='body'>{spot.description}</Text>
+
+              {spot.contentBlocks && spot.contentBlocks.length > 0 && (
+                <ContentBlockList blocks={spot.contentBlocks} />
+              )}
+
               <Text variant="caption">{spot.createdAt.toDateString()}</Text>
 
               {discovery && <DiscoveryUserContentSection id={discovery.id} />}
@@ -89,6 +127,10 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   image: {
     borderRadius: theme.tokens.borderRadius.md,
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: theme.tokens.spacing.sm,
   },
 })
 

@@ -1,11 +1,14 @@
 import { logger } from '@app/shared/utils/logger'
-import { AccountContext, Result, Spot, SpotApplicationContract, TrailApplicationContract } from '@shared/contracts'
+import { AccountContext, CreateSpotRequest, Result, Spot, SpotApplicationContract, TrailApplicationContract, UpdateSpotRequest } from '@shared/contracts'
 import { getSpotStoreActions } from './stores/spotStore'
 
 export interface SpotApplication {
   requestSpotsByTrail: (trailId: string) => Promise<void>
   requestNearbySpots: (lat: number, lng: number, radiusMeters: number) => Promise<void>
   getSpot: (spotId: string) => Promise<Result<Spot | undefined>>
+  createSpot: (request: CreateSpotRequest) => Promise<Result<Spot>>
+  updateSpot: (spotId: string, updates: UpdateSpotRequest) => Promise<Result<Spot>>
+  deleteSpot: (spotId: string) => Promise<Result<void>>
 }
 
 interface SpotApplicationOptions {
@@ -26,7 +29,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
   if (!spotAPI) throw new Error('Spot application dependency is required')
   if (!trailAPI) throw new Error('Trail application dependency is required')
 
-  const { setStatus, setSpots, upsertSpot } = getSpotStoreActions()
+  const { setStatus, setSpots, upsertSpot, removeSpot } = getSpotStoreActions()
 
   const requestSpotsByTrail = async (trailId: string) => {
     const accountSession = await getSession()
@@ -89,9 +92,66 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
     return result
   }
 
+  const createSpot = async (request: CreateSpotRequest): Promise<Result<Spot>> => {
+    const accountSession = await getSession()
+    if (!accountSession.data) {
+      return { success: false, error: { message: 'Account session not found', code: 'SESSION_NOT_FOUND' } }
+    }
+
+    logger.log('SpotApplication: Creating spot', request.content.name)
+
+    const result = await spotAPI.createSpot(accountSession.data, request)
+
+    if (result.success && result.data) {
+      upsertSpot(result.data)
+      logger.log('SpotApplication: Spot created', result.data.id)
+    }
+
+    return result as Result<Spot>
+  }
+
+  const deleteSpot = async (spotId: string): Promise<Result<void>> => {
+    const accountSession = await getSession()
+    if (!accountSession.data) {
+      return { success: false, error: { message: 'Account session not found', code: 'SESSION_NOT_FOUND' } }
+    }
+
+    logger.log('SpotApplication: Deleting spot', spotId)
+
+    const result = await spotAPI.deleteSpot(accountSession.data, spotId)
+
+    if (result.success) {
+      removeSpot(spotId)
+      logger.log('SpotApplication: Spot deleted', spotId)
+    }
+
+    return result
+  }
+
+  const updateSpot = async (spotId: string, updates: UpdateSpotRequest): Promise<Result<Spot>> => {
+    const accountSession = await getSession()
+    if (!accountSession.data) {
+      return { success: false, error: { message: 'Account session not found', code: 'SESSION_NOT_FOUND' } }
+    }
+
+    logger.log('SpotApplication: Updating spot', spotId)
+
+    const result = await spotAPI.updateSpot(accountSession.data, spotId, updates)
+
+    if (result.success && result.data) {
+      upsertSpot(result.data)
+      logger.log('SpotApplication: Spot updated', result.data.id)
+    }
+
+    return result as Result<Spot>
+  }
+
   return {
     requestSpotsByTrail,
     requestNearbySpots,
     getSpot,
+    createSpot,
+    updateSpot,
+    deleteSpot,
   }
 }
