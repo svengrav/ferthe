@@ -28,6 +28,10 @@ const en = {
     notFound: 'Not found.',
     serverError: 'Server error.',
   },
+  validation: {
+    nameMinLength: 'Name must be at least 2 characters',
+    contentBlockEmpty: 'All content blocks must be filled in',
+  },
   navigation: {
     home: 'Home',
     settings: 'Settings',

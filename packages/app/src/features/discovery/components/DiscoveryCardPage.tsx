@@ -2,7 +2,7 @@ import { Button, Page, PageTab, PageTabs } from '@app/shared/components'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { useApp } from '@app/shared/useApp'
 
-import { DiscoveryEventState } from '../logic/types'
+import { DiscoveryEventState } from '../services/types'
 import DiscoveryCardContent from './DiscoveryCardContent'
 import DiscoveryStats from './DiscoveryStats'
 

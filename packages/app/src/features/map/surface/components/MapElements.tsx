@@ -3,7 +3,7 @@ import { StyleProp, View, ViewStyle } from 'react-native'
 import Animated, { SharedValue, useAnimatedProps } from 'react-native-reanimated'
 import Svg, { Path } from 'react-native-svg'
 import { JSX } from 'react/jsx-runtime'
-import { mapUtils } from '../../utils/geoToScreenTransform'
+import { mapUtils } from '../../services/geoToScreenTransform'
 
 const DEFAULT_STROKE_COLOR = '#3498db'
 

@@ -8,7 +8,7 @@ import { Text } from '@app/shared/components'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
-import { DiscoveryEventState } from '../logic/types'
+import { DiscoveryEventState } from '../services/types'
 import DiscoveryShareSection from './DiscoveryShareSection'
 import DiscoveryUserContentSection from './DiscoveryUserContentSection'
 import SpotRating from './SpotRating'

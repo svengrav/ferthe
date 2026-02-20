@@ -13,7 +13,7 @@ import Animated, {
   withDelay,
   withTiming
 } from 'react-native-reanimated'
-import { DiscoveryEventState } from '../logic/types'
+import { DiscoveryEventState } from '../services/types'
 import { useDiscoveryCardPage } from './DiscoveryCardPage'
 import { DiscoveryReveal, RevealMode } from './DiscoveryReveal'
 import DiscoveryStats from './DiscoveryStats'

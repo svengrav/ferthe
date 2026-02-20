@@ -8,7 +8,7 @@ import { Theme, useTheme } from '@app/shared/theme'
 import { useMapScannerAnimation } from '../hooks/useMapScannerAnimation'
 import { useMapCanvas, useMapDevice, useMapScanner } from '../stores/mapStore'
 import { useMapTheme } from '../stores/mapThemeStore'
-import { mapUtils } from '../utils/geoToScreenTransform'
+import { mapUtils } from '../services/geoToScreenTransform'
 
 // Animation timing constants
 const COOLDOWN_FADE_DURATION = 200

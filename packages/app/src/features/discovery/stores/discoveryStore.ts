@@ -2,7 +2,7 @@ import { Status, StoreActions, StoreState } from '@app/shared/index'
 import { Discovery, DiscoveryStats } from '@shared/contracts'
 import { create } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
-import { DiscoveryEventState } from '../logic/types'
+import { DiscoveryEventState } from '../services/types'
 
 /**
  * Converts an array of items with `id` to a Record keyed by id.

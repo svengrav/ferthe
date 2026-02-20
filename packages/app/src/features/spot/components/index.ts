@@ -1,26 +1,26 @@
 // Image components
-export { default as SpotBlurredImage } from './card/SpotBlurredImage.tsx'
-export { default as SpotImage } from './card/SpotImage.tsx'
-export { default as SpotLockIcon } from './card/SpotLockIcon.tsx'
+export { default as SpotBlurredImage } from '../card/components/SpotBlurredImage'
+export { default as SpotImage } from '../card/components/SpotImage'
+export { default as SpotLockIcon } from '../card/components/SpotLockIcon'
 
 // Overlay components
-export { default as SpotBadge } from './card/SpotBadge.tsx'
-export { default as SpotGradientFrame } from './card/SpotGradientFrame.tsx'
-export { default as SpotTitle } from './card/SpotTitle.tsx'
+export { default as SpotBadge } from '../card/components/SpotBadge'
+export { default as SpotGradientFrame } from '../card/components/SpotGradientFrame'
+export { default as SpotTitle } from '../card/components/SpotTitle'
 
 // Container components
-export { default as SpotContainer } from './card/SpotContainer.tsx'
+export { default as SpotContainer } from '../card/components/SpotContainer'
 
 // Composed components
-export { default as SpotCard } from './card/SpotCard.tsx'
+export { default as SpotCard } from '../card/components/SpotCard'
 
 // List components
-export { default as SpotCardList } from './SpotCardList.tsx'
+export { default as SpotCardList } from './SpotCardList'
 
 // Form components (create + edit)
-export { SpotFormPage, useCreateSpotPage, useEditSpotPage } from './creation/index.ts'
+export { SpotFormPage, useCreateSpotPage, useEditSpotPage } from '../creation/index'
 
 // Hooks
-export { useSpotCardDimensions } from './card/useSpotCardDimensions.ts'
-export type { SpotVariant } from './card/useSpotCardDimensions.ts'
+export { useSpotCardDimensions } from '../card/hooks/useSpotCardDimensions'
+export type { SpotVariant } from '../card/hooks/useSpotCardDimensions'
 

@@ -72,5 +72,5 @@ export const getSensorActions = () => ({
   setDeviceStateRequestHandler: sensorStore.getState().setDeviceStateRequestHandler,
 })
 
-export const getSensorDevice = () => sensorStore.getState().device
+export const getDeviceLocation = () => sensorStore.getState().device
 export const getSensorData = () => sensorStore.getState()

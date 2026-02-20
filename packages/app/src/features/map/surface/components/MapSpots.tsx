@@ -7,7 +7,7 @@ import { memo, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
-import { mapUtils } from '../../utils/geoToScreenTransform'
+import { mapUtils } from '../../services/geoToScreenTransform'
 import { useMapCompensatedScale } from './MapCompensatedScale'
 
 // Pre-create style functions outside component for performance

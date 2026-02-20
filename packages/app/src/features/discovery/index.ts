@@ -1,4 +1,4 @@
-export * from './discoveryApplication'
+export * from './application'
 export { getDiscoveries, getDiscoveriesById, getDiscoveryData, useDiscoveries, useDiscovery, useDiscoveryBySpotId, useDiscoveryData, useDiscoveryStatus } from './stores/discoveryStore'
 
 export {

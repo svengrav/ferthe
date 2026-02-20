@@ -9,12 +9,12 @@ import { GeoBoundary } from '@shared/geo'
 import { getMapDefaults } from '../config/mapDefaults'
 import { useOverlayGestures } from '../hooks/useOverlayGestures'
 import { getMapStoreActions, useMapContainerSize, useMapOverview, useMapSurfaceBoundary } from '../stores/mapStore'
-import { mapUtils } from '../utils/geoToScreenTransform'
-import MapClues from './surface/MapClues'
-import { MapCompensatedScaleProvider } from './surface/MapCompensatedScale'
-import MapDeviceMarker from './surface/MapDeviceMarker'
-import MapSpots from './surface/MapSpots'
-import MapTrailPath from './surface/MapTrailPath'
+import { mapUtils } from '../services/geoToScreenTransform'
+import MapClues from '../surface/components/MapClues'
+import { MapCompensatedScaleProvider } from '../surface/components/MapCompensatedScale'
+import MapDeviceMarker from '../surface/components/MapDeviceMarker'
+import MapSpots from '../surface/components/MapSpots'
+import MapTrailPath from '../surface/components/MapTrailPath'
 
 const OVERVIEW_IMAGE_OPACITY = 0.7
 

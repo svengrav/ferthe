@@ -8,7 +8,7 @@ import { View } from 'react-native'
 import Animated, { Easing, runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated'
 import { useMapDevice } from '../../stores/mapStore'
 import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
-import { mapUtils } from '../../utils/geoToScreenTransform'
+import { mapUtils } from '../../services/geoToScreenTransform'
 import { useMapCompensatedScale } from './MapCompensatedScale'
 
 const CLUE_SIZE = 20

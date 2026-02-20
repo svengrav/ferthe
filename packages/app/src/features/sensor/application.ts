@@ -1,5 +1,5 @@
 import { DeviceConnector, DeviceLocation } from './device/types'
-import { getSensorActions, getSensorDevice, sensorStore } from './stores/sensorStore'
+import { getDeviceLocation, getSensorActions, sensorStore } from './stores/sensorStore'
 
 import { Result, ScanEvent } from '@shared/contracts'
 import { createEventSystem, Unsubscribe } from '@shared/events/eventHandler'
@@ -117,7 +117,7 @@ export const createSensorApplication = (options?: SensorApplicationOptions) => {
 
   const startScan = async (trailId: string) => {
     const { addScanRecord } = getSensorActions()
-    const device = getSensorDevice()
+    const device = getDeviceLocation()
 
     if (!core) throw new Error('Sensor application core is not initialized')
     if (!getAccountSession) throw new Error('getAccountSession function is not provided')

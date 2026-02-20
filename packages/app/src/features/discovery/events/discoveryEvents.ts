@@ -1,6 +1,6 @@
 import { Clue, DiscoverySpot, Trail } from '@shared/contracts'
 import { createEventSystem } from '@shared/events/eventHandler'
-import { DiscoveryEventState } from '../logic/types'
+import { DiscoveryEventState } from '../services/types'
 
 export interface DiscoveryTrailState {
   createdAt?: Date

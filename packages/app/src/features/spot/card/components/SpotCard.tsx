@@ -1,5 +1,6 @@
 import { ImageReference } from '@shared/contracts'
-import { View } from 'react-native'
+import { ReactNode } from 'react'
+import { StyleSheet, View } from 'react-native'
 import SpotContainer from './SpotContainer'
 import SpotGradientFrame from './SpotGradientFrame'
 import SpotImage from './SpotImage'
@@ -14,6 +15,8 @@ interface SpotCardProps {
   height: number
   borderRadius?: number
   onPress?: () => void
+  /** Optional overlay content rendered on top of the card image area. */
+  children?: ReactNode
 }
 
 /**
@@ -28,6 +31,7 @@ function SpotCard({
   height,
   borderRadius = 10,
   onPress,
+  children,
 }: SpotCardProps) {
   return (
     <SpotContainer
@@ -52,10 +56,18 @@ function SpotCard({
             <SpotLockIcon />
           </>
         )}
+        {children && <View style={styles.overlay}>{children}</View>}
       </SpotGradientFrame>
     </SpotContainer>
-
   )
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+})
 
 export default SpotCard

@@ -30,6 +30,10 @@ const de: LocalizationSet = {
     notFound: 'Nicht gefunden.',
     serverError: 'Serverfehler.',
   },
+  validation: {
+    nameMinLength: 'Name muss mindestens 2 Zeichen lang sein',
+    contentBlockEmpty: 'Alle Inhaltsblöcke müssen ausgefüllt sein',
+  },
   navigation: {
     home: 'Startseite',
     settings: 'Einstellungen',

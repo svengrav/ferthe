@@ -1,7 +1,7 @@
-import { getMapService } from './utils/mapService'
+import { getMapService } from './services/mapService'
 
 import { DiscoveryApplication, getDiscoverySpots, getDiscoveryTrailData } from '@app/features/discovery'
-import { discoveryService } from '@app/features/discovery/logic/discoveryService'
+import { discoveryService } from '@app/features/discovery/services/discoveryService'
 import { getDiscoveriesById } from '@app/features/discovery/stores/discoveryStore'
 import { getSensorActions, getSensorData, SensorApplication } from '@app/features/sensor'
 import { getTrailsById } from '@app/features/trail/stores/trailStore'
@@ -9,8 +9,8 @@ import { logger } from '@app/shared/utils/logger'
 import { discoveryTrailStore } from '../discovery/stores/discoveryTrailStore'
 import { getMapDefaults } from './config/mapDefaults'
 import { getMapState, getMapStoreActions } from './stores/mapStore'
-import { mapUtils } from './utils/geoToScreenTransform'
-import { calculateScaleForRadius } from './utils/viewportUtils'
+import { mapUtils } from './services/geoToScreenTransform'
+import { calculateScaleForRadius } from './services/viewportUtils'
 
 export interface MapApplication {
   requestMapState: (viewbox?: { width: number; height: number }) => Promise<void>

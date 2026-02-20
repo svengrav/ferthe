@@ -5,7 +5,7 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 import Svg, { Circle, Polygon } from 'react-native-svg'
 import { useMapDevice } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
-import { mapUtils } from '../../utils/geoToScreenTransform'
+import { mapUtils } from '../../services/geoToScreenTransform'
 import { useMapCompensatedScale } from './MapCompensatedScale'
 
 // Arrow SVG constants (geometry)

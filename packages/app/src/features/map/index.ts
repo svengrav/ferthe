@@ -1,6 +1,6 @@
 // Public API for map feature
 export { MapCanvas } from './components/MapCanvas.tsx'
-export { createMapApplication, type MapApplication } from './mapApplication'
+export { createMapApplication, type MapApplication } from './application'
 
 // Hooks - State
 export {
@@ -21,7 +21,7 @@ export {
 } from './stores/mapStore'
 
 // Hooks - Derived (from Context)
-export { useMapCompensatedScale } from './components/surface/MapCompensatedScale'
+export { useMapCompensatedScale } from './surface/components/MapCompensatedScale'
 
 // Hooks - Actions
 export { useSetActiveLayer } from './stores/mapStore'
@@ -33,6 +33,6 @@ export { getMapCanvasActions, getMapCanvasContext, getMapCanvasValues, getMapSta
 export type { MapActions, MapState } from './stores/mapStore'
 
 // Utils
-export { mapUtils } from './utils/geoToScreenTransform'
-export { mapService } from './utils/mapService'
+export { mapUtils } from './services/geoToScreenTransform'
+export { mapService } from './services/mapService'
 

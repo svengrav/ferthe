@@ -1,5 +1,5 @@
 import { SpotCardList } from '@app/features/spot/components'
-import { DiscoveryEventState } from '../logic/types'
+import { DiscoveryEventState } from '../services/types'
 
 interface DiscoveryCardListProps {
   onPress?: (card: DiscoveryEventState) => void

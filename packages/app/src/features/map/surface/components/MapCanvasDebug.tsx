@@ -12,7 +12,7 @@ import {
   useMapSurfaceBoundary,
   useMapSurfaceLayout
 } from '../../stores/mapStore'
-import { mapUtils } from '../../utils/geoToScreenTransform'
+import { mapUtils } from '../../services/geoToScreenTransform'
 
 interface DebugMetrics {
   // Viewport metrics

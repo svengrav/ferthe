@@ -3,7 +3,7 @@ import { ComposedGesture, Gesture } from 'react-native-gesture-handler'
 import { SharedValue, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useMapContainerSize } from '../stores/mapStore'
-import { calculateMinScale } from '../utils/viewportUtils'
+import { calculateMinScale } from '../services/viewportUtils'
 import { useMapWheelZoom } from './useMapWheelZoom'
 
 interface ViewportGestureConfig {

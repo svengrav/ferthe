@@ -6,7 +6,7 @@ import Header from '@app/shared/components/header/Header'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { useMemo } from 'react'
 import { useSpots } from '../stores/spotStore'
-import { useCreateSpotPage } from './creation/SpotFormPage'
+import { useCreateSpotPage } from '../creation/components/SpotFormPage'
 import SpotCardList from './SpotCardList'
 import { useSpotPage } from './SpotPage'
 
