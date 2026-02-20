@@ -125,6 +125,12 @@
         "isDefault": true
       },
       "problemMatcher": []
-    }
+    },
+    {
+      "label": "web:deploy",
+      "type": "shell",
+      "command": "cd ${workspaceFolder}/packages/web && bash deploy.bash",
+      "group": "build",
+    },
   ]
 }
