@@ -12,8 +12,8 @@ import { logger } from '@app/shared/utils/logger'
 
 import { getMapThemeDefaults } from '../../config/mapThemeDefaults.ts'
 import { useViewportGestures } from '../../hooks/useViewportGestures.ts'
-import { getMapCanvasActions, getMapState, useMapCanvas, useMapSurfaceBoundary } from '../../stores/mapStore.ts'
 import { mapUtils } from '../../services/geoToScreenTransform.ts'
+import { getMapCanvasActions, getMapState, useMapCanvas, useMapSurfaceBoundary } from '../../stores/mapStore.ts'
 import { MapCanvasDebug } from './MapCanvasDebug.tsx'
 import { MapCompensatedScaleContext } from './MapCompensatedScale.tsx'
 

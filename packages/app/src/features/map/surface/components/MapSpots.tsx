@@ -6,8 +6,8 @@ import { GeoBoundary } from '@shared/geo'
 import { memo, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle } from 'react-native-reanimated'
-import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
 import { mapUtils } from '../../services/geoToScreenTransform'
+import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
 import { useMapCompensatedScale } from './MapCompensatedScale'
 
 // Pre-create style functions outside component for performance

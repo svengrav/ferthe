@@ -6,9 +6,9 @@ import * as Haptics from 'expo-haptics'
 import { memo, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import Animated, { Easing, runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated'
+import { mapUtils } from '../../services/geoToScreenTransform'
 import { useMapDevice } from '../../stores/mapStore'
 import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
-import { mapUtils } from '../../services/geoToScreenTransform'
 import { useMapCompensatedScale } from './MapCompensatedScale'
 
 const CLUE_SIZE = 20

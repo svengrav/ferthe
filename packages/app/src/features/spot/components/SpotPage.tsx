@@ -9,10 +9,10 @@ import { useApp } from '@app/shared/useApp'
 
 import { DiscoveryStats, DiscoveryUserContentSection } from '@app/features/discovery'
 import SpotRating from '@app/features/discovery/components/SpotRating'
-import { useSpotWithDiscovery } from '../hooks/useSpotWithDiscovery'
 import SpotCard from '../card/components/SpotCard'
 import { useSpotCardDimensions } from '../card/hooks/useSpotCardDimensions'
 import { useEditSpotPage } from '../creation/components/SpotFormPage'
+import { useSpotWithDiscovery } from '../hooks/useSpotWithDiscovery'
 import { SpotLocation } from './SpotLocation'
 import SpotStatus from './SpotStatus'
 

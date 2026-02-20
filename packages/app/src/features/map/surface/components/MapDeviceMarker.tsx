@@ -3,9 +3,9 @@ import { memo } from 'react'
 import { View } from 'react-native'
 import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 import Svg, { Circle, Polygon } from 'react-native-svg'
+import { mapUtils } from '../../services/geoToScreenTransform'
 import { useMapDevice } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
-import { mapUtils } from '../../services/geoToScreenTransform'
 import { useMapCompensatedScale } from './MapCompensatedScale'
 
 // Arrow SVG constants (geometry)

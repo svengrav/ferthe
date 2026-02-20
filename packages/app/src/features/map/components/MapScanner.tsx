@@ -6,9 +6,9 @@ import { Icon } from '@app/shared/components'
 import { Theme, useTheme } from '@app/shared/theme'
 
 import { useMapScannerAnimation } from '../hooks/useMapScannerAnimation'
+import { mapUtils } from '../services/geoToScreenTransform'
 import { useMapCanvas, useMapDevice, useMapScanner } from '../stores/mapStore'
 import { useMapTheme } from '../stores/mapThemeStore'
-import { mapUtils } from '../services/geoToScreenTransform'
 
 // Animation timing constants
 const COOLDOWN_FADE_DURATION = 200

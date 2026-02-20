@@ -1,6 +1,6 @@
 // Public API for map feature
-export { MapCanvas } from './components/MapCanvas.tsx'
 export { createMapApplication, type MapApplication } from './application'
+export { MapCanvas } from './components/MapCanvas.tsx'
 
 // Hooks - State
 export {

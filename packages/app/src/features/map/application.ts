@@ -8,9 +8,9 @@ import { getTrailsById } from '@app/features/trail/stores/trailStore'
 import { logger } from '@app/shared/utils/logger'
 import { discoveryTrailStore } from '../discovery/stores/discoveryTrailStore'
 import { getMapDefaults } from './config/mapDefaults'
-import { getMapState, getMapStoreActions } from './stores/mapStore'
 import { mapUtils } from './services/geoToScreenTransform'
 import { calculateScaleForRadius } from './services/viewportUtils'
+import { getMapState, getMapStoreActions } from './stores/mapStore'
 
 export interface MapApplication {
   requestMapState: (viewbox?: { width: number; height: number }) => Promise<void>

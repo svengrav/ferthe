@@ -10,12 +10,12 @@ import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
 import { Spot } from '@shared/contracts'
+import { SpotFormStep, useSpotFormNavigation } from '../hooks/useSpotFormNavigation'
+import { SpotContentFormValues, SpotOptionsFormValues } from '../services/spotFormSchema'
+import { buildCreateRequest, buildUpdateRequest, getSpotTrailIds } from '../services/spotFormService'
 import SpotConsentForm from './SpotConsentForm'
 import SpotContentForm from './SpotContentForm'
 import SpotOptionsForm from './SpotOptionsForm'
-import { SpotContentFormValues, SpotOptionsFormValues } from '../services/spotFormSchema'
-import { buildCreateRequest, buildUpdateRequest, getSpotTrailIds } from '../services/spotFormService'
-import { SpotFormStep, useSpotFormNavigation } from '../hooks/useSpotFormNavigation'
 
 const CREATE_OVERLAY_KEY = 'spot-creation'
 

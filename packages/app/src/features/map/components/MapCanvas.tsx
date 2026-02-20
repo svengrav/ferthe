@@ -4,8 +4,6 @@ import { Theme, useThemeStore } from '@app/shared/theme'
 import { View } from 'react-native'
 import { useMapCanvas, useMapSurface } from '../stores/mapStore.ts'
 import { MapTheme, useMapTheme } from '../stores/mapThemeStore.ts'
-import MapDeviceCords from './MapDeviceCords.tsx'
-import { MapScanner, MapScannerControl } from './MapScanner.tsx'
 import { MapCanvasViewport } from '../surface/components/MapCanvasViewport.tsx'
 import MapCenterMarker from '../surface/components/MapCenterMarker.tsx'
 import MapClues from '../surface/components/MapClues.tsx'
@@ -14,6 +12,8 @@ import MapSnap from '../surface/components/MapSnap.tsx'
 import MapSpots from '../surface/components/MapSpots.tsx'
 import MapSurface from '../surface/components/MapSurface.tsx'
 import MapTrailPath from '../surface/components/MapTrailPath.tsx'
+import MapDeviceCords from './MapDeviceCords.tsx'
+import { MapScanner, MapScannerControl } from './MapScanner.tsx'
 
 
 export function MapCanvas() {

@@ -4,6 +4,7 @@ import { geoUtils } from '@shared/geo'
 import { useEffect, useMemo, useRef } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import Animated from 'react-native-reanimated'
+import { mapUtils } from '../../services/geoToScreenTransform'
 import {
   useMapCanvasContext,
   useMapCanvasDimensions,
@@ -12,7 +13,6 @@ import {
   useMapSurfaceBoundary,
   useMapSurfaceLayout
 } from '../../stores/mapStore'
-import { mapUtils } from '../../services/geoToScreenTransform'
 
 interface DebugMetrics {
   // Viewport metrics
