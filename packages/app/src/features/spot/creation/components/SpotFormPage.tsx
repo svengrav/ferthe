@@ -155,7 +155,18 @@ function SpotFormPage(props: SpotFormPageProps) {
         imageBase64 = await convertToBase64(content.imageBase64)
       }
 
-      const request = buildCreateRequest(content, options, device.location, imageBase64)
+      // Convert content block image local URIs to base64
+      const processedBlocks = await Promise.all(
+        content.contentBlocks.map(async block => {
+          if (block.type === 'image' && block.data.imageUrl && !block.data.imageUrl.startsWith('http')) {
+            const base64 = await convertToBase64(block.data.imageUrl)
+            return { ...block, data: { ...block.data, imageUrl: base64 } }
+          }
+          return block
+        })
+      )
+
+      const request = buildCreateRequest({ ...content, contentBlocks: processedBlocks }, options, device.location, imageBase64)
       const result = await context.spotApplication.createSpot(request)
 
       if (result.success) {
@@ -182,7 +193,18 @@ function SpotFormPage(props: SpotFormPageProps) {
         imageBase64 = await convertToBase64(content.imageBase64)
       }
 
-      const updates = buildUpdateRequest(content, options, spot, imageBase64)
+      // Convert content block image local URIs to base64
+      const processedBlocks = await Promise.all(
+        content.contentBlocks.map(async block => {
+          if (block.type === 'image' && block.data.imageUrl && !block.data.imageUrl.startsWith('http')) {
+            const base64 = await convertToBase64(block.data.imageUrl)
+            return { ...block, data: { ...block.data, imageUrl: base64 } }
+          }
+          return block
+        })
+      )
+
+      const updates = buildUpdateRequest({ ...content, contentBlocks: processedBlocks }, options, spot, imageBase64)
 
       if (!updates) {
         onClose()
@@ -253,6 +275,15 @@ function SpotFormPage(props: SpotFormPageProps) {
             onConsentChange={setConsent}
             onSubmit={handleCreateSubmit}
             isSubmitting={isSubmitting}
+          />
+        )}
+
+        {isEditMode && nav.isLastStep && (
+          <Button
+            label={isSubmitting ? locales.spotCreation.creating : locales.common.save}
+            variant="primary"
+            onPress={triggerCurrentStepSubmit}
+            disabled={isSubmitting}
           />
         )}
 

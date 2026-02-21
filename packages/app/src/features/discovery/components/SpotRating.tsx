@@ -56,8 +56,6 @@ const useStyles = createThemedStyles(theme => ({
     flexDirection: 'row',
     justifyContent: 'center',
     paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.divider,
   },
 }))
 

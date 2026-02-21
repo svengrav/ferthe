@@ -6,7 +6,8 @@ import { AccountContext, ImageApplicationContract, ImageReference, Spot, StoredS
 export async function enrichSpotWithImages(
   context: AccountContext,
   spotEntity: StoredSpot,
-  imageApplication: ImageApplicationContract
+  imageApplication: ImageApplicationContract,
+  options?: { includeContentBlocks?: boolean }
 ): Promise<Spot> {
   let image: ImageReference | undefined
   let blurredImage: ImageReference | undefined
@@ -41,7 +42,10 @@ export async function enrichSpotWithImages(
     image,
     blurredImage,
     location: spotEntity.location,
+    contentBlocks: options?.includeContentBlocks ? spotEntity.contentBlocks : undefined,
     options: spotEntity.options,
+    createdBy: spotEntity.createdBy,
+    source: spotEntity.source,
     createdAt: spotEntity.createdAt,
     updatedAt: spotEntity.updatedAt,
   }

@@ -271,6 +271,7 @@ const de: LocalizationSet = {
     created: 'Spot erstellt!',
     error: 'Spot konnte nicht erstellt werden',
     locationRequired: 'Standort wird benötigt, um einen Spot zu erstellen',
+    mySpots: 'Meine Spots',
   },
   contentBlocks: {
     addText: 'Text',

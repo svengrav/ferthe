@@ -113,6 +113,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
 
   const discoveryStateComposite = createDiscoveryStateComposite({
     discoveryApplication,
+    spotApplication,
   })
 
   return {

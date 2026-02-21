@@ -526,7 +526,16 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
-      // Access control - verify user has discovered this spot
+      // Access control - only users who discovered the spot may rate it (creator cannot rate own spot)
+      const spotResult = await spotApplication.getSpot(context, spotId)
+      if (!spotResult.success) {
+        return createErrorResult('GET_SPOT_ERROR')
+      }
+
+      if (spotResult.data?.createdBy === accountId) {
+        return createErrorResult('SPOT_RATING_NOT_ALLOWED')
+      }
+
       const discoveriesResult = await discoveryStore.list()
       if (!discoveriesResult.success) {
         return createErrorResult('GET_DISCOVERIES_ERROR')

@@ -1,6 +1,6 @@
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { ReactNode } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, StyleProp, View, ViewStyle } from 'react-native'
 
 type SpotContainerVariant = 'marker' | 'grid' | 'card' | 'highlight'
 
@@ -12,6 +12,7 @@ interface SpotContainerProps {
   borderRadius?: number
   withShadow?: boolean
   onPress?: () => void
+  style?: StyleProp<ViewStyle>
 }
 
 /**
@@ -20,7 +21,7 @@ interface SpotContainerProps {
  */
 function SpotContainer({
   children,
-  variant = 'card',
+  style,
   width,
   height,
   borderRadius = 18,
@@ -40,7 +41,7 @@ function SpotContainer({
   if (!styles) return null
 
   const content = (
-    <View style={[styles.container, containerStyle, shadowStyle]}>
+    <View style={[styles.container, containerStyle, shadowStyle, style]}>
       {children}
     </View>
   )

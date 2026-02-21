@@ -65,7 +65,7 @@ function DiscoveryScreen() {
           id: c.spotId,
           image: c.image,
           title: c.title,
-          discovered: true,
+          isLocked: false,
         }))}
         onPress={(item) => {
           const card = cards.find(c => c.spotId === item.id)

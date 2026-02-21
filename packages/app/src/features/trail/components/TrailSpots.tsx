@@ -46,7 +46,7 @@ function TrailSpots({ spots }: TrailSpotsProps) {
           image: spot.image,
           title: spot.title,
           blurredImage: spot.blurredImage,
-          discovered: spot.discovered,
+          isLocked: !spot.discovered,
         }))}
       />
     </View>

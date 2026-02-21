@@ -1,4 +1,4 @@
-import { Text } from '@app/shared/components'
+import { Chip } from '@app/shared/components'
 import { useApp } from '@app/shared/useApp'
 import { Discovery, Spot } from '@shared/contracts'
 
@@ -36,7 +36,7 @@ function SpotStatus(props: SpotStatusProps) {
     }
   }
 
-  return <Text variant="body">{getStatusText()}</Text>
+  return <Chip label={getStatusText()} />
 }
 
 export default SpotStatus

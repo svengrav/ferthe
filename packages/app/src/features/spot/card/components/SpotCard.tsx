@@ -1,5 +1,5 @@
 import { ImageReference } from '@shared/contracts'
-import { View } from 'react-native'
+import { StyleProp, View, ViewStyle } from 'react-native'
 import SpotContainer from './SpotContainer'
 import SpotGradientFrame from './SpotGradientFrame'
 import SpotImage from './SpotImage'
@@ -10,24 +10,29 @@ interface SpotCardProps {
   title?: string
   image?: ImageReference
   blurredImage?: ImageReference
+  isLocked?: boolean
   width: number
   height: number
   borderRadius?: number
   onPress?: () => void
+  style?: StyleProp<ViewStyle>
 }
 
 /**
- * Card for spots in trails.
- * Shows full image for discovered spots, blurred image with lock for undiscovered spots.
+ * Card for spots.
+ * isLocked=true: shows lock icon + blurred image (if available) or dark placeholder.
+ * isLocked=false: shows full image.
  */
 function SpotCard({
   title,
   image,
   blurredImage,
+  isLocked = false,
   width,
   height,
   borderRadius = 10,
   onPress,
+  style
 }: SpotCardProps) {
   return (
     <SpotContainer
@@ -36,21 +41,22 @@ function SpotCard({
       borderRadius={borderRadius}
       withShadow={true}
       onPress={onPress}
+      style={style}
     >
       <SpotGradientFrame colors={['#a341fffd', 'rgba(65, 73, 185, 0.767)']} padding={4}>
         <SpotTitle title={title} />
-        {image ? (
+        {isLocked ? (
+          <>
+            {blurredImage
+              ? <SpotImage source={blurredImage} borderRadius={borderRadius} />
+              : <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.1)' }} />
+            }
+            <SpotLockIcon />
+          </>
+        ) : image ? (
           <SpotImage source={image} borderRadius={borderRadius} />
-        ) : blurredImage ? (
-          <>
-            <SpotImage source={blurredImage} borderRadius={borderRadius} />
-            <SpotLockIcon />
-          </>
         ) : (
-          <>
-            <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.1)' }} />
-            <SpotLockIcon />
-          </>
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.1)' }} />
         )}
       </SpotGradientFrame>
     </SpotContainer>

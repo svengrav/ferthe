@@ -19,7 +19,7 @@ export function DiscoveryCardList({
     id: card.spotId,
     image: card.image,
     title: card.title,
-    discovered: true,
+    isLocked: false,
   }))
 
   return (

@@ -38,7 +38,7 @@ interface SpotCardListItem {
   image?: any
   blurredImage?: any
   title?: string
-  discovered: boolean
+  isLocked: boolean
 }
 
 interface SpotCardListProps<T extends SpotCardListItem> {
@@ -49,6 +49,9 @@ interface SpotCardListProps<T extends SpotCardListItem> {
   columns?: number
   gap?: number
   padding?: number
+  scrollEnabled?: boolean
+  horizontal?: boolean
+  style?: object
   renderItem?: (item: T, width: number, height: number) => ReactElement
 }
 
@@ -59,31 +62,40 @@ function SpotCardList<T extends SpotCardListItem>({
   refreshing,
   columns = DEFAULT_COLUMNS,
   gap = DEFAULT_GAP,
+  scrollEnabled = true,
+  horizontal = false,
+  style,
   renderItem,
 }: SpotCardListProps<T>) {
   const containerRef = useRef<View>(null)
   const [cardSize, setCardSize] = useState({ width: 0, height: 0 })
-  const { cardRatio } = useSpotCardDimensions({ variant: 'card' })
+  const { cardRatio, width: fixedWidth, height: fixedHeight } = useSpotCardDimensions(
+    horizontal ? { variant: 'grid', customWidth: 160 } : { variant: 'card' }
+  )
   const { showSpotPage } = useSpotPage()
 
-  // Measure container and calculate card dimensions
+  // Measure container and calculate card dimensions (grid mode only)
   useEffect(() => {
+    if (horizontal) return
     containerRef.current?.measure((x, y, width) => {
-      // Calculate: (containerWidth - padding*2 - gap*(columns-1)) / columns
       const availableWidth = width - gap * (columns - 1)
       const cardWidth = availableWidth / columns
       const cardHeight = cardWidth * cardRatio
       setCardSize({ width: cardWidth, height: cardHeight })
     })
-  }, [containerRef.current, columns, gap, cardRatio])
+  }, [containerRef.current, columns, gap, cardRatio, horizontal])
+
+  const resolvedWidth = horizontal ? fixedWidth : cardSize.width
+  const resolvedHeight = horizontal ? fixedHeight : cardSize.height
 
   const defaultRenderItem = (item: T) => (
     <SpotCard
       key={item.id}
-      width={cardSize.width}
-      height={cardSize.height}
+      width={resolvedWidth}
+      height={resolvedHeight}
       image={item.image}
       blurredImage={item.blurredImage}
+      isLocked={item.isLocked}
       title={item.title}
       onPress={() => {
         if (onPress) {
@@ -95,20 +107,35 @@ function SpotCardList<T extends SpotCardListItem>({
     />
   )
 
-  return (
-    <View ref={containerRef} style={styles.container}>
+  if (horizontal) {
+    return (
       <FlatList
         data={items}
         renderItem={({ item }) =>
-          renderItem
-            ? renderItem(item, cardSize.width, cardSize.height)
-            : defaultRenderItem(item)
+          renderItem ? renderItem(item, resolvedWidth, resolvedHeight) : defaultRenderItem(item)
+        }
+        keyExtractor={(item) => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        ItemSeparatorComponent={() => <View style={{ width: gap }} />}
+        contentContainerStyle={{ paddingHorizontal: gap }}
+        style={style}
+      />
+    )
+  }
+
+  return (
+    <View ref={containerRef} style={[styles.container, style]}>
+      <FlatList
+        data={items}
+        renderItem={({ item }) =>
+          renderItem ? renderItem(item, resolvedWidth, resolvedHeight) : defaultRenderItem(item)
         }
         keyExtractor={(item) => item.id}
         numColumns={columns}
         refreshing={refreshing}
         onRefresh={onRefresh}
-        scrollEnabled={true}
+        scrollEnabled={scrollEnabled}
         columnWrapperStyle={columns > 1 ? { gap } : undefined}
         contentContainerStyle={styles.listContainer}
         ItemSeparatorComponent={() => <View style={{ height: gap }} />}

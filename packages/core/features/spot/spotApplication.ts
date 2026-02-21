@@ -69,7 +69,7 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
       return { success: false, error: { message: 'Failed to create spot', code: 'CREATE_SPOT_ERROR' } }
     }
 
-    const enrichedSpot = await enrichSpotWithImages(context, createdSpotResult.data!, imageApplication)
+    const enrichedSpot = await enrichSpotWithImages(context, createdSpotResult.data!, imageApplication, { includeContentBlocks: true })
     return { success: true, data: enrichedSpot }
   }
 
@@ -94,12 +94,31 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
       }
     }
 
+    // Upload content block images (base64 → remote URL)
+    let processedContentBlocks = request.content.contentBlocks
+    if (processedContentBlocks) {
+      processedContentBlocks = await Promise.all(
+        processedContentBlocks.map(async block => {
+          if (block.type === 'image' && block.data.imageUrl?.startsWith('data:')) {
+            const uploadResult = await imageApplication.processAndStore(context, 'spot', 'pending', block.data.imageUrl, { processImage: true })
+            if (uploadResult.success && uploadResult.data) {
+              const urlResult = await imageApplication.refreshImageUrl(context, uploadResult.data.blobPath)
+              if (urlResult.success && urlResult.data) {
+                return { ...block, data: { ...block.data, imageUrl: urlResult.data } }
+              }
+            }
+          }
+          return block
+        })
+      )
+    }
+
     const now = new Date()
     const spotResult = await createSpotFromData(context, {
       name: request.content.name,
       description: request.content.description,
       image: imageRef,
-      contentBlocks: request.content.contentBlocks,
+      contentBlocks: processedContentBlocks,
       location: request.location,
       options: {
         discoveryRadius: 50,
@@ -170,7 +189,7 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
           (options?.include ? options.include.includes('images') : true)
 
         const spot = shouldEnrichImages
-          ? await enrichSpotWithImages(context, spotEntity, imageApplication)
+          ? await enrichSpotWithImages(context, spotEntity, imageApplication, { includeContentBlocks: true })
           : spotEntity
 
         return { success: true, data: spot }
@@ -308,7 +327,7 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
           }
         }
 
-        const enrichedSpot = await enrichSpotWithImages(context, updatedSpot, imageApplication)
+        const enrichedSpot = await enrichSpotWithImages(context, updatedSpot, imageApplication, { includeContentBlocks: true })
         return { success: true, data: enrichedSpot }
       } catch (error: unknown) {
         return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'UPDATE_SPOT_ERROR' } }

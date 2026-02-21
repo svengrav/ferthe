@@ -271,6 +271,7 @@ const en = {
     created: 'Spot created!',
     error: 'Failed to create spot',
     locationRequired: 'Location is required to create a spot',
+    mySpots: 'My Spots',
   },
   contentBlocks: {
     addText: 'Text',

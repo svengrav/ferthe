@@ -10,11 +10,14 @@ import {
   DiscoveryStateCompositeContract,
   DiscoverySummary,
   Result,
+  SpotApplicationContract,
   SpotSummary,
 } from '@shared/contracts/index.ts'
+import type { Spot } from '@shared/contracts/spots.ts'
 
 export interface DiscoveryStateCompositeOptions {
   discoveryApplication: DiscoveryApplicationContract
+  spotApplication: SpotApplicationContract
 }
 
 // Project Discovery → DiscoverySummary (drop trailId, scanEventId, updatedAt, accountId)
@@ -36,12 +39,24 @@ const toSpotSummary = (s: DiscoverySpot): SpotSummary => ({
   createdAt: s.createdAt,
 })
 
+// Project Spot → SpotSummary for creator-owned spots
+const createdSpotToSpotSummary = (s: Spot): SpotSummary => ({
+  id: s.id,
+  name: s.name,
+  description: s.description,
+  image: s.image ? { id: s.image.id, url: s.image.url } : undefined,
+  blurredImage: s.blurredImage ? { id: s.blurredImage.id, url: s.blurredImage.url } : undefined,
+  location: { lat: s.location.lat, lon: s.location.lon },
+  source: 'created',
+  createdAt: s.createdAt,
+})
+
 /**
  * Aggregates discovery-related data into single responses.
  * Reduces HTTP round-trips for common multi-step operations.
  */
 export function createDiscoveryStateComposite(options: DiscoveryStateCompositeOptions): DiscoveryStateCompositeContract {
-  const { discoveryApplication } = options
+  const { discoveryApplication, spotApplication } = options
 
   return {
     async getDiscoveryState(context: AccountContext): Promise<Result<DiscoveryState>> {
@@ -51,11 +66,12 @@ export function createDiscoveryStateComposite(options: DiscoveryStateCompositeOp
           return createErrorResult('ACCOUNT_ID_REQUIRED')
         }
 
-        // Parallel: profile + discoveries + spots (independent queries)
-        const [profileResult, discoveriesResult, spotsResult] = await Promise.all([
+        // Parallel: profile + discoveries + discovered spots + created spots
+        const [profileResult, discoveriesResult, spotsResult, createdSpotsResult] = await Promise.all([
           discoveryApplication.getDiscoveryProfile(context),
           discoveryApplication.getDiscoveries(context),
           discoveryApplication.getDiscoveredSpots(context),
+          spotApplication.getSpots(context, { filters: { createdBy: accountId } }),
         ])
 
         if (!profileResult.data) {
@@ -80,10 +96,19 @@ export function createDiscoveryStateComposite(options: DiscoveryStateCompositeOp
           }
         }
 
+        // Merge discovered spots + created spots (deduplicated by id, created takes priority)
+        const discoveredSpots = (spotsResult.data || []).map(toSpotSummary)
+        const createdSpots = (createdSpotsResult.data || []).map(createdSpotToSpotSummary)
+        const discoveredSpotIds = new Set(createdSpots.map(s => s.id))
+        const mergedSpots = [
+          ...createdSpots,
+          ...discoveredSpots.filter(s => !discoveredSpotIds.has(s.id)),
+        ]
+
         return createSuccessResult({
           lastActiveTrailId,
           discoveries: (discoveriesResult.data || []).map(toDiscoverySummary),
-          spots: (spotsResult.data || []).map(toSpotSummary),
+          spots: mergedSpots,
           activeTrail,
         })
       } catch (error: any) {

@@ -44,12 +44,13 @@ function SpotPage(props: SpotPageProps) {
   const { spot, discovery, isLoading } = useSpotWithDiscovery(spotId)
   const accountId = useAccountId()
   const { showEditSpotPage } = useEditSpotPage()
-  const { openDialog } = useRemoveDialog()
+  const { openDialog, closeDialog } = useRemoveDialog()
 
   const isOwner = spot?.createdBy === accountId
 
-  // Load rating summary when the page opens
+  // Fetch full spot data (including contentBlocks) and rating summary on open
   useEffect(() => {
+    context.spotApplication.getSpot(spotId)
     context.discoveryApplication.getSpotRatingSummary(spotId)
   }, [spotId])
 
@@ -66,6 +67,7 @@ function SpotPage(props: SpotPageProps) {
       onConfirm: async () => {
         const result = await context.spotApplication.deleteSpot(spotId)
         if (result.success) {
+          closeDialog()
           onClose?.()
         }
       }
@@ -90,27 +92,29 @@ function SpotPage(props: SpotPageProps) {
           <PageTab id="overview" label={locales.trails.overview}>
             <Stack spacing='md'>
               <SpotCard
+                style={{ alignSelf: 'center' }}
                 width={width}
                 height={height}
                 image={spot.image}
                 blurredImage={spot.blurredImage}
                 title={spot.name}
               />
+              <View style={{ flexDirection: 'row', gap: 4 }}>
+                <SpotStatus spot={spot} discovery={discovery} />
+                <SpotLocation location={spot.location} />
+                <Text variant="body">{spot.createdAt?.toDateString()}</Text>
 
-              <Text variant='section'>{locales.common.status || 'Status'}</Text>
-              <SpotStatus spot={spot} discovery={discovery} />
+              </View>
 
               <SpotRating spotId={spotId} />
-              <Text variant="section">Location</Text>
-              <SpotLocation location={spot.location} />
 
+              <Text variant='section'>Description</Text>
               <Text variant='body'>{spot.description}</Text>
 
               {spot.contentBlocks && spot.contentBlocks.length > 0 && (
                 <ContentBlockList blocks={spot.contentBlocks} />
               )}
 
-              <Text variant="caption">{spot.createdAt?.toDateString()}</Text>
 
               {discovery && <DiscoveryUserContentSection id={discovery.id} />}
 

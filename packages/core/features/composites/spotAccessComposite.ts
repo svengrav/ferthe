@@ -74,7 +74,7 @@ export function createSpotAccessComposite(options: SpotAccessCompositeOptions): 
 
         // Creators always have access to their own spots
         if (spot.createdBy === accountId) {
-          return createSuccessResult(spot)
+          return createSuccessResult({ ...spot, source: 'created' })
         }
 
         // All others must have discovered the spot
@@ -84,7 +84,7 @@ export function createSpotAccessComposite(options: SpotAccessCompositeOptions): 
         }
 
         if (discoveredIdsResult.data.includes(spotId)) {
-          return createSuccessResult(spot)
+          return createSuccessResult({ ...spot, source: 'discovery' })
         }
 
         // Not discovered — return preview data only (no name, location, or description)

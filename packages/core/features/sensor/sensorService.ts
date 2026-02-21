@@ -15,13 +15,13 @@ export const createSensorService = (): SensorServiceType => ({
 
     const spotsInRange = spots.filter(spot => {
       const distance = geoUtils.calculateDistance(location, spot.location)
-      return distance <= radiusUsed
+      return distance <= radiusUsed && spot.createdBy !== accountId
     })
 
     const clues: Clue[] = spots
       .filter(spot => {
         const distance = geoUtils.calculateDistance(location, spot.location)
-        return distance <= radiusUsed && distance > spot.options.discoveryRadius && !discoveredSpotIds.includes(spot.id)
+        return distance <= radiusUsed && distance > spot.options.discoveryRadius && !discoveredSpotIds.includes(spot.id) && spot.createdBy !== accountId
       })
       .map(spot => ({
         id: createCuid2(),
