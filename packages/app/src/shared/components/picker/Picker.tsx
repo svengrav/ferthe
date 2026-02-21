@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization/'
 import { Theme, useTheme } from '@app/shared/theme'
 
 import Dropdown from '../dropdown/Dropdown.tsx'
@@ -29,7 +29,7 @@ function Picker(props: PickerProps) {
 
   const [isMenuVisible, setMenuVisible] = useState(false)
   const buttonRef = useRef<View>(null)
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
   const { styles, theme } = useTheme(createStyles)
 
   const handleOptionSelect = (value: string) => {
@@ -63,7 +63,7 @@ function Picker(props: PickerProps) {
     <View id="picker">
       <Pressable ref={buttonRef} style={buttonStyle} onPress={() => setMenuVisible(true)}>
         <Text style={textStyle}>
-          {options.find(option => option.value === selected)?.label || t.common.select}
+          {options.find(option => option.value === selected)?.label || locales.common.select}
         </Text>
       </Pressable>
       <Dropdown

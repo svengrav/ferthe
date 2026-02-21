@@ -1,12 +1,12 @@
 import { Button, FertheLogo, Page, PulseAnimation, Stack, Text } from '@app/shared/components'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { Linking, StyleSheet } from 'react-native'
 
 export default function AboutScreen() {
   const theme = useThemeStore()
   const styles = createStyles(theme)
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
 
   const handleOpenLink = () => {
     Linking.openURL('https://ferthe.de')
@@ -18,10 +18,10 @@ export default function AboutScreen() {
         <PulseAnimation>
           <FertheLogo style={styles.logo} fill={theme.colors.primary} />
         </PulseAnimation>
-        <Text variant='body'>{t.about.storyIntro}</Text>
-        <Text variant='body'>{t.about.aboutText}</Text>
-        <Text variant='body'>{t.about.followYourTrail}</Text>
-        <Button label={t.about.fertheWebsite} variant='primary' onPress={handleOpenLink} />
+        <Text variant='body'>{locales.about.storyIntro}</Text>
+        <Text variant='body'>{locales.about.aboutText}</Text>
+        <Text variant='body'>{locales.about.followYourTrail}</Text>
+        <Button label={locales.about.fertheWebsite} variant='primary' onPress={handleOpenLink} />
       </Stack>
     </Page>
   )

@@ -6,15 +6,18 @@ import { Button, ContentBlockList, Page, PageTab, PageTabs, Stack, Text } from '
 import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 
-import { DiscoveryStats, DiscoveryUserContentSection, SpotRating } from '@app/features/discovery'
+import DiscoveryStats from '@app/features/discovery/components/DiscoveryStats'
+import DiscoveryUserContentSection from '@app/features/discovery/components/DiscoveryUserContentSection'
+import SpotRating from '@app/features/discovery/components/SpotRating'
+import { useLocalization } from '@app/shared/localization'
 import SpotCard from '../card/components/SpotCard'
 import { useSpotCardDimensions } from '../card/hooks/useSpotCardDimensions'
 import { useEditSpotPage } from '../creation/components/SpotFormPage'
 import { useSpotWithDiscovery } from '../hooks/useSpotWithDiscovery'
 import { SpotLocation } from './SpotLocation'
 import SpotStatus from './SpotStatus'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 export const useSpotPage = () => ({
   showSpotPage: (spotId: string) => {
@@ -39,7 +42,8 @@ interface SpotPageProps {
 function SpotPage(props: SpotPageProps) {
   const { spotId, onClose } = props
   const { styles } = useTheme(createStyles)
-  const { locales, context } = useApp()
+  const { locales } = useLocalization()
+  const context = getAppContextStore()
   const { width, height } = useSpotCardDimensions()
   const { spot, discovery, isLoading } = useSpotWithDiscovery(spotId)
   const accountId = useAccountId()

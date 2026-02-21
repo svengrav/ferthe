@@ -1,6 +1,5 @@
-import { getAppContext } from '@app/appContext'
 import { Avatar, Button, Page, PageTab, PageTabs, Text } from '@app/shared/components'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization/'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
@@ -10,6 +9,7 @@ import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native'
 import { useCommunityData } from '../stores/communityStore'
 import { useCommunityUpdaterCard } from './CommunityUpdaterCard.tsx'
 import SharedDiscoveryCard from './SharedDiscoveryCard'
+import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
 
 export const useCommunityDiscoveryPage = () => ({
   showCommunityDiscoveries: (communityId: string, communityName: string) => setOverlay(
@@ -33,7 +33,7 @@ interface CommunityDiscoveriesScreenProps {
  * Hook to manage shared discoveries loading and refresh.
  */
 const useSharedDiscoveries = (communityId: string) => {
-  const { communityApplication } = getAppContext()
+  const { communityApplication } = getAppContextStore()
   const [discoveries, setDiscoveries] = useState<Discovery[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -78,7 +78,7 @@ const useSharedDiscoveries = (communityId: string) => {
  */
 function CommunityDiscoveryPage({ communityId, communityName, onBack }: CommunityDiscoveriesScreenProps) {
   const { styles } = useTheme(createStyles)
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
   const { discoveries, isLoading, isRefreshing, loadDiscoveries } = useSharedDiscoveries(communityId)
   const { communities } = useCommunityData()
   const { showCommunityUpdaterCard } = useCommunityUpdaterCard()
@@ -103,10 +103,10 @@ function CommunityDiscoveryPage({ communityId, communityName, onBack }: Communit
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text variant="body" style={styles.emptyText}>
-        {t.community.noDiscoveriesYet}
+        {locales.community.noDiscoveriesYet}
       </Text>
       <Text variant="caption" style={styles.emptyHint}>
-        {t.community.shareFromProfile}
+        {locales.community.shareFromProfile}
       </Text>
     </View>
   )
@@ -147,17 +147,17 @@ function CommunityDiscoveryPage({ communityId, communityName, onBack }: Communit
       trailing={<Button
         icon="more-vert"
         variant="outlined"
-        options={[{ label: t.common.edit, onPress: handleEdit }]}
+        options={[{ label: locales.common.edit, onPress: handleEdit }]}
       />}
     >
 
       {/* Content tabs */}
       <PageTabs variant="chips" defaultTab="overview">
-        <PageTab id="overview" label={t.community.overview}>
+        <PageTab id="overview" label={locales.community.overview}>
           <Avatar />
           {discoveries.length === 0 ? renderEmptyState() : renderDiscoveryList()}
         </PageTab>
-        <PageTab id="members" label={t.community.members}>
+        <PageTab id="members" label={locales.community.members}>
           <View />
         </PageTab>
       </PageTabs>

@@ -1,7 +1,7 @@
-import { getAppContext } from '@app/appContext'
-import { useEvent } from '@app/shared/events/useEvent'
-import { useEffect } from 'react'
-import { Easing, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated'
+import { useEvent } from '@app/shared/events/useEvent';
+import { getAppContextStore } from '@app/shared/stores/appContextStore';
+import { useEffect } from 'react';
+import { Easing, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 
 interface MapScannerAnimationProps {
   point: { x: number; y: number }
@@ -15,7 +15,7 @@ interface MapScannerAnimationProps {
  */
 export const useMapScannerAnimation = ({ point, width, style }: MapScannerAnimationProps) => {
   // Shared values for animations
-  const sensorApplication = getAppContext().sensorApplication
+  const { sensorApplication } = getAppContextStore()
   const animatedRadius = useSharedValue(0)
   const animatedPoint = useSharedValue({ x: 0, y: 0 })
   const animatedWidth = useSharedValue(0)

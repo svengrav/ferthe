@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
 
-import { getAppContext } from '@app/appContext'
 import { Page } from '@app/shared/components'
 import Header from '@app/shared/components/header/Header'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization'
 
 import { SpotCardList } from '@app/features/spot/components/index.ts'
+import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
 import { useSettingsPage } from '../../settings/components/SettingsPage'
 import { useDiscoveries, useDiscoveryStatus } from '../stores/discoveryStore'
 import { useDiscoveryCardPage } from './DiscoveryCardPage.tsx'
@@ -21,7 +21,7 @@ const STATUS_LOADING = 'loading'
 const useDiscoveryScreen = () => {
   const discoveries = useDiscoveries()
   const discoveryStatus = useDiscoveryStatus()
-  const { requestDiscoveryState, getDiscoveryCards } = getAppContext().discoveryApplication
+  const { requestDiscoveryState, getDiscoveryCards } = getAppContextStore().discoveryApplication
 
   // Initialize discovery data if needed
   useEffect(() => {
@@ -46,7 +46,7 @@ const useDiscoveryScreen = () => {
  * Supports deep-linking to specific discovery cards via route parameters.
  */
 function DiscoveryScreen() {
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
   const { showSettings } = useSettingsPage()
   const { showDiscoveryCardDetails } = useDiscoveryCardPage()
 
@@ -57,8 +57,8 @@ function DiscoveryScreen() {
   } = useDiscoveryScreen()
 
   return (
-    <Page options={[{ label: t.navigation.settings, onPress: showSettings }]}>
-      <Header title={t.discovery.discoveries} />
+    <Page options={[{ label: locales.navigation.settings, onPress: showSettings }]}>
+      <Header title={locales.discovery.discoveries} />
 
       <SpotCardList
         items={cards.map(c => ({

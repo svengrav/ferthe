@@ -1,9 +1,9 @@
-import { getSensorData } from '@app/features/sensor'
-import { createTestContext } from '@test/testContext'
+import { getSensorData } from '@app/features/sensor';
+import { createTestContext } from '@test/testContext';
 
 describe('when user is using discovery map', () => {
   const testContext = createTestContext()
-  const { sensorApplication } = testContext.getAppContext();
+  const { sensorApplication } = testContext.getAppContextStore();
 
   beforeAll(async () => {
     await testContext.createSession()

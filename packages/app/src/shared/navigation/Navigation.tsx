@@ -4,7 +4,7 @@ import MapScreen from '@app/features/map/components/MapScreen'
 import SpotScreen from '@app/features/spot/components/SpotScreen'
 import TrailScreen from '@app/features/trail/components/TrailScreen'
 import { Icon } from '@app/shared/components'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization/'
 import { Theme, useTheme } from '@app/shared/theme'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { NavigationContainer } from '@react-navigation/native'
@@ -32,7 +32,7 @@ export type RootParamList = {
  */
 export function Navigation() {
   const { styles, theme } = useTheme(createStyles)
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
   const clearAll = useOverlayStore(s => s.clearAll)
   const insets = useSafeAreaInsets()
 
@@ -65,7 +65,7 @@ export function Navigation() {
           options={{
             tabBarIcon: ({ color, size }) => <Icon name='line-axis' color={color} size='md' />,
             headerShown: false,
-            title: t.navigation.trails,
+            title: locales.navigation.trails,
           }}
         />
         <Tab.Screen
@@ -74,7 +74,7 @@ export function Navigation() {
           options={{
             tabBarIcon: ({ color, size }) => <CardIcon color={color} size={size} />,
             headerShown: false,
-            title: t.navigation.feed,
+            title: locales.navigation.feed,
           }}
         />
         <Tab.Screen
@@ -83,7 +83,7 @@ export function Navigation() {
           options={{
             tabBarIcon: ({ color, size }) => <Icon name='compass' color={color} size='md' />,
             headerShown: false,
-            title: t.navigation.map,
+            title: locales.navigation.map,
           }}
         />
         <Tab.Screen
@@ -92,7 +92,7 @@ export function Navigation() {
           options={{
             tabBarIcon: ({ color, size }) => <Icon name='people' color={color} size='md' />,
             headerShown: false,
-            title: t.navigation.socials,
+            title: locales.navigation.socials,
           }}
         />
         <Tab.Screen
@@ -101,7 +101,7 @@ export function Navigation() {
           options={{
             tabBarIcon: ({ color, size }) => <FoxIcon color={color} size={size} />,
             headerShown: false,
-            title: t.navigation.about,
+            title: locales.navigation.about,
           }}
         />
       </Tab.Navigator>
@@ -113,7 +113,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   tabBar: {
     backgroundColor: theme.colors.background,
     elevation: 0,
-    shadowOpacity: 0,
     borderColor: theme.colors.divider,
   },
   tabBarLabel: {

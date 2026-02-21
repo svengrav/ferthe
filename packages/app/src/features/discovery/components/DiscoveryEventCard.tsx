@@ -2,8 +2,7 @@ import { SpotContainer, SpotGradientFrame, SpotImage, SpotTitle, useSpotCardDime
 import { Button, Text } from '@app/shared/components'
 import { Flippable } from '@app/shared/components/animation/Flippable'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -77,7 +76,7 @@ interface DiscoveryEventCardProps {
  * when a new spot is discovered. Features gradient background and smooth transitions.
  */
 function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCardProps) {
-  const { styles } = useApp(useStyles)
+  const { styles } = useTheme(useStyles)
   const { width, height, padding } = useSpotCardDimensions({ variant: 'card' })
   const { titleAnimatedStyle, triggerReveal } = useDiscoveryAnimations(mode)
   const [isFlipped, setIsFlipped] = useState(false)

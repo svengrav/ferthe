@@ -1,10 +1,10 @@
-import { getAppContext } from '@app/appContext'
 import AccountPage from '@app/features/account/components/AccountPage'
 import { useAccountData } from '@app/features/account/stores/accountStore'
 import { Avatar, Button, Page, Stack } from '@app/shared/components'
 import { Header } from '@app/shared/components/'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { useEffect } from 'react'
 import { useCommunityData, useCommunityStatus } from '../stores/communityStore'
 import { useCommunityJoinCard } from './CommunityJoin'
@@ -16,11 +16,11 @@ const AVATAR_SIZE = 80
  * Screen for managing communities: creating new communities, joining with invite codes, and viewing existing communities.
  */
 function CommunitiesScreen() {
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
   const { account } = useAccountData()
   const { communities } = useCommunityData()
   const status = useCommunityStatus()
-  const { communityApplication } = getAppContext()
+  const { communityApplication } = getAppContextStore()
   const { showCommunityJoinCard } = useCommunityJoinCard()
 
   // Initialize communities on mount
@@ -39,15 +39,15 @@ function CommunitiesScreen() {
     setOverlay('accountView', <AccountPage onBack={() => closeOverlay('accountView')} />)
   }
 
-  const displayName = account?.displayName || t.community.defaultName
-  const greeting = `${t.community.greeting}, ${displayName}`
+  const displayName = account?.displayName || locales.community.defaultName
+  const greeting = `${locales.community.greeting}, ${displayName}`
 
   return (
     <Page scrollable trailing={<Button icon="person" onPress={handleOpenAccountOverlay} />} >
       <Stack>
         <Header title={greeting} />
         <Avatar size={AVATAR_SIZE} avatar={account?.avatar} label={account?.displayName} />
-        <Header title={t.community.communities} />
+        <Header title={locales.community.communities} />
         <CommunityList
           communities={communities}
           isLoading={status === 'loading'}

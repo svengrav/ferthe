@@ -1,4 +1,4 @@
-import { getAppContext } from '@app/appContext'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { useEffect } from 'react'
 import { useSpot } from '../stores/spotStore'
 
@@ -8,7 +8,7 @@ import { useSpot } from '../stores/spotStore'
  */
 export const useSpotData = (spotId: string) => {
   const spot = useSpot(spotId)
-  const { spotApplication } = getAppContext()
+  const { spotApplication } = getAppContextStore()
 
   useEffect(() => {
     if (!spot && spotApplication) {

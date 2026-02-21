@@ -19,6 +19,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { createApiContext } from './api'
 import { configureAppContext } from './appContext'
+import { useAppContextStore } from './shared/stores/appContextStore'
 import { config } from './config'
 import { getSession } from './features/account/'
 import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
@@ -80,6 +81,8 @@ const useAppInitialization = () => {
             }),
           },
         })
+
+        useAppContextStore.getState().setContext(context)
 
         // Ensure session is loaded before data requests (avoids redundant auth calls)
         await context.accountApplication.getAccountContext()

@@ -118,6 +118,10 @@ export const ERROR_CODES = {
   TRAIL_ID_REQUIRED: { code: 'TRAIL_ID_REQUIRED', message: 'Trail ID is required', httpStatus: 400 },
   CREATE_SCAN_EVENT_ERROR: { code: 'CREATE_SCAN_EVENT_ERROR', message: 'Failed to create scan event', httpStatus: 500 },
   LIST_SCAN_EVENTS_ERROR: { code: 'LIST_SCAN_EVENTS_ERROR', message: 'Failed to list scan events', httpStatus: 500 },
+
+  // Spot access
+  GET_SPOT_ERROR: { code: 'GET_SPOT_ERROR', message: 'Failed to get spot', httpStatus: 500 },
+  SPOT_RATING_NOT_ALLOWED: { code: 'SPOT_RATING_NOT_ALLOWED', message: 'Creator cannot rate own spot', httpStatus: 403 },
 } as const
 
 export type ApiErrorCode = keyof typeof ERROR_CODES

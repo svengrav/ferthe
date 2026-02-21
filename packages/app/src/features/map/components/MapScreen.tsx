@@ -1,7 +1,6 @@
 import { LoadingSpinner, Page } from '@app/shared/components'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { useLocalization } from '@app/shared/localization'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 import { useEffect, useRef } from 'react'
 import { Animated, View } from 'react-native'
@@ -14,14 +13,16 @@ import MapLayerSwitch from './MapLayerSwitch'
 import MapOverview from './MapOverview'
 import MapToolbar from './MapToolbar'
 import { MapTrailSelector } from './MapTrailSelector'
+import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
 
 function MapScreen() {
-  const { styles, context } = useApp(theme => useStyles(theme))
-  const { t } = useLocalizationStore()
+  const { styles } = useTheme(useStyles)
+  const { locales } = useLocalization()
   const status = useMapStatus()
   const activeLayer = useMapLayer()
   const fadeAnim = useRef(new Animated.Value(0)).current
   const { setContainer } = getMapStoreActions()
+  const context = getAppContextStore()
 
   useEffect(() => {
     if (status !== 'uninitialized') {
@@ -60,7 +61,7 @@ function MapScreen() {
   const { showSettings } = useSettingsPage()
 
   return (
-    <Page inset='none' options={[{ label: t.navigation.settings, onPress: () => showSettings() }]}>
+    <Page inset='none' options={[{ label: locales.navigation.settings, onPress: () => showSettings() }]}>
       <View style={styles?.container} >
         <MapToolbar center={<MapCompass />} trailing={<MapLayerSwitch />} />
         <MapDistanceWarning />

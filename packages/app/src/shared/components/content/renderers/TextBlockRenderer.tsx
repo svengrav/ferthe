@@ -1,4 +1,4 @@
-import { Text } from '@app/shared/components'
+import Text from '@app/shared/components/text/Text'
 import { TextBlockData } from '@shared/contracts'
 
 interface TextBlockRendererProps {

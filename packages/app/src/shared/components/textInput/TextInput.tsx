@@ -1,5 +1,4 @@
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { TextInput as RNTextInput, TextInputProps as RNTextInputProps } from 'react-native'
 
 interface TextInputProps extends RNTextInputProps {
@@ -7,7 +6,7 @@ interface TextInputProps extends RNTextInputProps {
 }
 
 const TextInput = ({ error, style, multiline, ...props }: TextInputProps) => {
-  const { styles, theme } = useApp(useStyles)
+  const { styles, theme } = useTheme(useStyles)
 
   if (!styles) {
     return null

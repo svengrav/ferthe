@@ -1,4 +1,4 @@
-import { useDiscoveryBySpotId } from '@app/features/discovery'
+import { useDiscoveryBySpotId } from '@app/features/discovery/stores/discoveryStore'
 import { Discovery, Spot } from '@shared/contracts'
 import { useSpotData } from './useSpotData'
 

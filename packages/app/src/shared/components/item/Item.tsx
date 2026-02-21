@@ -1,6 +1,5 @@
 import { StyleSheet, View } from 'react-native'
 
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 
@@ -48,7 +47,6 @@ function Item(props: ItemProps) {
   } = props
 
   const { styles, theme } = useTheme(createStyles)
-  const { t } = useLocalizationStore()
 
   // Open edit overlay or call custom onEdit handler
   const handleOnEdit = () => {

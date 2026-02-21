@@ -1,5 +1,5 @@
 import { SensorApplication } from '@app/features/sensor'
-import { getSpotActions, getSpots, getSpotsById } from '@app/features/spot'
+import { getSpotStoreActions as getSpotActions, getSpots, getSpotsById } from '@app/features/spot/stores/spotStore'
 import { getTrailsById } from '@app/features/trail/stores/trailStore'
 import { logger } from '@app/shared/utils/logger'
 import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryStateCompositeContract, DiscoveryStats, RatingSummary, Result, SpotSummary } from '@shared/contracts'

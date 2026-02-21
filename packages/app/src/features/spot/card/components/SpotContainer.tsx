@@ -61,10 +61,7 @@ const useStyles = createThemedStyles(theme => ({
   },
   shadow: {
     elevation: 8,
-    shadowColor: theme.colors.surface,
-    shadowOpacity: 0.18,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
+
   },
 }))
 

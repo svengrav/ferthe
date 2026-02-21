@@ -1,4 +1,5 @@
-import { Button, Text } from '@app/shared/components/'
+import Button from '@app/shared/components/button/Button'
+import Text from '@app/shared/components/text/Text'
 import { Theme } from '@app/shared/theme'
 import { useTheme } from '@app/shared/theme/themeStore'
 import { Modal, StyleSheet, View } from 'react-native'

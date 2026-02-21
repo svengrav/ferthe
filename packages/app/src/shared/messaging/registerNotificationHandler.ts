@@ -1,9 +1,9 @@
-import { getAppContext } from '@app/appContext'
 import { getSession } from '@app/features/account/stores/accountStore'
 import { logger } from '@app/shared/utils/logger'
 import { getApps, initializeApp } from '@react-native-firebase/app'
 import { AuthorizationStatus, getMessaging } from '@react-native-firebase/messaging'
 import { FirebaseConfig } from '@shared/contracts'
+import { getAppContextStore } from '../stores/appContextStore'
 
 let firebaseConfig: FirebaseConfig | null = null
 
@@ -18,7 +18,7 @@ async function getFirebaseConfig(): Promise<FirebaseConfig | null> {
       return null
     }
 
-    const { accountApplication } = getAppContext()
+    const { accountApplication } = getAppContextStore()
     const result = await accountApplication.getFirebaseConfig()
 
     if (result.success && result.data) {

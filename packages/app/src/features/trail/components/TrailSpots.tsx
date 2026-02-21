@@ -1,7 +1,7 @@
 import { SpotCardList } from '@app/features/spot/components'
 import { Text } from '@app/shared/components'
+import { useLocalization } from '@app/shared/localization'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 import { View } from 'react-native'
 import { TrailSpotRowVM } from '../types/viewModels'
 
@@ -17,7 +17,7 @@ interface TrailSpotsProps {
  */
 function TrailSpots({ spots }: TrailSpotsProps) {
   const { styles } = useTheme(useStyles)
-  const { locales } = useApp()
+  const { locales } = useLocalization()
 
   if (!styles) return null
 

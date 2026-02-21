@@ -1,10 +1,10 @@
-import { getAppContext } from '@app/appContext'
 import StarRating from '@app/shared/components/reaction/StarRating'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { RatingSummary } from '@shared/contracts'
 import { View } from 'react-native'
-import { DiscoveryApplication, useSpotRatingSummary } from '../index'
+import { DiscoveryApplication } from '../application'
+import { useSpotRatingSummary } from '../stores/spotRatingStore'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 interface SpotRatingProps {
   spotId: string
@@ -33,8 +33,8 @@ const useRatingHandler = (spotId: string, ratingSummary: RatingSummary, discover
 function SpotRating({
   spotId,
 }: SpotRatingProps) {
-  const { styles } = useApp(useStyles)
-  const { discoveryApplication } = getAppContext()
+  const { styles } = useTheme(useStyles)
+  const { discoveryApplication } = getAppContextStore()
   const ratingSummary = useSpotRatingSummary(spotId)
 
   if (!spotId || !styles) return null

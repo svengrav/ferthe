@@ -3,14 +3,14 @@ import { StyleSheet, View } from 'react-native'
 
 import { Button } from '@app/shared/components'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
-import { useApp } from '@app/shared/useApp'
 import { ImageReference } from '@shared/contracts'
 
+import { useLocalization } from '@app/shared/localization'
 import SpotContainer from '../../card/components/SpotContainer'
 import SpotGradientFrame from '../../card/components/SpotGradientFrame'
 import SpotImage from '../../card/components/SpotImage'
 import SpotTitle from '../../card/components/SpotTitle'
-import { useSpotCardDimensions } from '../../components'
+import { useSpotCardDimensions } from '../../card/hooks/useSpotCardDimensions'
 
 interface SpotCardPickerProps {
   name?: string
@@ -24,7 +24,7 @@ interface SpotCardPickerProps {
  * with add/change/remove photo controls.
  */
 function SpotCardPicker({ name, imageUri, onChange }: SpotCardPickerProps) {
-  const { locales } = useApp()
+  const { locales } = useLocalization()
   const { selectedImageUri, pickImage } = useImagePicker()
   const { width, height } = useSpotCardDimensions({ variant: 'card' })
 

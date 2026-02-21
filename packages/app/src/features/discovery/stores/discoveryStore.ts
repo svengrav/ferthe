@@ -1,4 +1,4 @@
-import { Status, StoreActions, StoreState } from '@app/shared/index'
+import { Status, StoreActions, StoreState } from '@app/shared/stores/types'
 import { Discovery, DiscoveryStats } from '@shared/contracts'
 import { create } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'

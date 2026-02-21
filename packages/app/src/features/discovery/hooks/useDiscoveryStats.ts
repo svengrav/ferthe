@@ -1,8 +1,9 @@
-import { useApp } from '@app/shared/useApp'
+import { useLocalization } from '@app/shared/localization'
 import { logger } from '@app/shared/utils/logger'
 import { DiscoveryStats } from '@shared/contracts'
 import { useEffect, useState } from 'react'
 import { discoveryStore, getDiscoveryActions } from '../stores/discoveryStore'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 interface UseDiscoveryStatsResult {
   stats: DiscoveryStats | null
@@ -16,9 +17,10 @@ interface UseDiscoveryStatsResult {
  * Stats are cached in the discoveryStore to avoid redundant API calls.
  */
 export const useDiscoveryStats = (discoveryId: string): UseDiscoveryStatsResult => {
-  const { context } = useApp()
+  const { locales } = useLocalization()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const context = getAppContextStore()
 
   const stats = discoveryStore(state => state.discoveryStats[discoveryId] || null)
 

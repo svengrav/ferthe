@@ -1,7 +1,7 @@
 import { Button, Page, PageTab, PageTabs } from '@app/shared/components'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
-import { useApp } from '@app/shared/useApp'
 
+import { useLocalization } from '@app/shared/localization'
 import { DiscoveryEventState } from '../services/types'
 import DiscoveryCardContent from './DiscoveryCardContent'
 import DiscoveryStats from './DiscoveryStats'
@@ -29,7 +29,7 @@ interface DiscoveryCardPageProps {
  */
 function DiscoveryCardPage(props: DiscoveryCardPageProps) {
   const { card, onClose } = props
-  const { locales } = useApp()
+  const { locales } = useLocalization()
 
   return (
     <Page

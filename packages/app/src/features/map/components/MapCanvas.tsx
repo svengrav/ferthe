@@ -1,5 +1,5 @@
-import { getAppContext } from '@app/appContext'
 import { useDiscoveryTrailId } from '@app/features/discovery/stores/discoveryTrailStore'
+import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { View } from 'react-native'
 import { useMapCanvas, useMapSurface } from '../stores/mapStore.ts'
@@ -17,7 +17,7 @@ import { MapScanner, MapScannerControl } from './MapScanner.tsx'
 
 
 export function MapCanvas() {
-  const { sensorApplication } = getAppContext()
+  const { sensorApplication } = getAppContextStore()
   const surface = useMapSurface()
   const { size, boundary } = useMapCanvas()
   const trailId = useDiscoveryTrailId()

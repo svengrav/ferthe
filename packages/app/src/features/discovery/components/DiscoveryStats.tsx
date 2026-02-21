@@ -1,7 +1,7 @@
 import { Icon, ProgressBar, Stack, Text } from '@app/shared/components'
 import { LoadingSpinner } from '@app/shared/components/activityIndicator/ActivityIndicator'
+import { useLocalization } from '@app/shared/localization'
 import { Theme, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { useDiscoveryStats } from '../hooks/useDiscoveryStats'
 
@@ -17,7 +17,7 @@ interface DiscoveryStatsProps {
  */
 function DiscoveryStats(props: DiscoveryStatsProps) {
   const { discoveryId, animationDelay = 0, style } = props
-  const { locales } = useApp()
+  const { locales } = useLocalization()
   const { styles, theme } = useTheme(createStyles)
   const { stats, loading, error } = useDiscoveryStats(discoveryId)
 

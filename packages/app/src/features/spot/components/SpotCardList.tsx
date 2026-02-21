@@ -1,4 +1,4 @@
-import { useSpotCardDimensions } from '@app/features/spot/components'
+import { useSpotCardDimensions } from '../card/hooks/useSpotCardDimensions'
 import { ReactElement, useEffect, useRef, useState } from 'react'
 import { FlatList, StyleSheet, View } from 'react-native'
 import SpotCard from '../card/components/SpotCard'

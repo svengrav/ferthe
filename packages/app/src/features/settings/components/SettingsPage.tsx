@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native'
 import { z } from 'zod'
 
 import { Button, Form, FormPicker, Page, Text, useFormSubmitWatcher } from '@app/shared/components'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization'
 import { closeOverlay, setOverlay } from '@app/shared/overlay/'
 import { Theme, useTheme } from '@app/shared/theme'
 
@@ -38,7 +38,7 @@ interface SettingsFormProps {
 function SettingsPage(props: SettingsFormProps) {
   const { onClose, onSubmit } = props
   const { styles, theme } = useTheme(createStyles)
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
   const { initialValues, handleSubmit: processSettings } = useSettings()
 
   const onFormSubmit = (values: SettingsFormValues) => {
@@ -54,7 +54,7 @@ function SettingsPage(props: SettingsFormProps) {
 
   return (
     <Page
-      title={t.settings.yourSettings}
+      title={locales.settings.yourSettings}
       leading={<Button icon="arrow-back" variant='outlined' onPress={onClose} />}
     >
       <Form<SettingsFormValues>
@@ -65,7 +65,7 @@ function SettingsPage(props: SettingsFormProps) {
         <AutoSaveSettings />
         <View style={{ marginTop: theme.tokens.spacing.lg }}>
           <View style={styles.settingRow}>
-            <Text variant='body'>{t.settings.chooseLanguage}</Text>
+            <Text variant='body'>{locales.settings.chooseLanguage}</Text>
             <FormPicker
               variant='secondary'
               name="language"
@@ -77,12 +77,12 @@ function SettingsPage(props: SettingsFormProps) {
           </View>
 
           <View style={styles.settingRow}>
-            <Text variant='body'>{t.settings.forestIs}</Text>
+            <Text variant='body'>{locales.settings.forestIs}</Text>
             <FormPicker
               variant='secondary'
               name="theme"
               options={[
-                { label: t.settings.dark, value: ThemeMode.Dark },
+                { label: locales.settings.dark, value: ThemeMode.Dark },
               ]}
             />
           </View>

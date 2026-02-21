@@ -1,9 +1,10 @@
 import { StyleSheet, View } from 'react-native'
 
-import { Button, Text } from '@app/shared/components'
+import Button from '@app/shared/components/button/Button'
+import Text from '@app/shared/components/text/Text'
+import { useLocalization } from '@app/shared/localization'
 import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 
 /**
  * Hook for opening a confirmation dialog.
@@ -17,7 +18,7 @@ export function useDialog() {
 }
 
 export function useRemoveDialog() {
-  const { locales } = useApp()
+  const { locales } = useLocalization()
 
   return {
     openDialog: (props: {
@@ -64,7 +65,7 @@ function Dialog(props: ConfirmationDialogProps) {
     onClose
   } = props
   const { styles } = useTheme(createStyles)
-  const { locales } = useApp()
+  const { locales } = useLocalization()
 
   return (
     <OverlayCard title={title} onClose={onClose}>

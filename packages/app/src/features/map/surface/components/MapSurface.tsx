@@ -1,6 +1,5 @@
-import { createThemedStyles } from "@app/shared"
 import { Image } from "@app/shared/components"
-import { useApp } from "@app/shared/useApp"
+import { createThemedStyles, useTheme } from "@app/shared/theme"
 import { View } from "react-native"
 import { getMapThemeDefaults } from "../../config/mapThemeDefaults"
 import { useMapSurface } from "../../stores/mapStore"
@@ -11,7 +10,7 @@ import { useMapSurface } from "../../stores/mapStore"
  * Layout position updates automatically when device moves.
  */
 function MapSurface() {
-  const { styles } = useApp(useStyles)
+  const { styles } = useTheme(useStyles)
   const { image, layout } = useMapSurface()
 
   return (

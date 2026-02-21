@@ -1,4 +1,4 @@
-import { Text } from '@app/shared/components/'
+import Text from '@app/shared/components/text/Text'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { Pressable, StyleSheet, View } from 'react-native'
 

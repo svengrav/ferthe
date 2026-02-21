@@ -1,8 +1,8 @@
-import { getAppContext } from '@app/appContext'
 import { Button, Stack, TextInput } from '@app/shared/components'
 import Field from '@app/shared/components/field/Field'
+import { useLocalization } from '@app/shared/localization'
 import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
-import { useApp } from '@app/shared/useApp'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { useState } from 'react'
 
 const CODE_LENGTH = 6
@@ -20,7 +20,7 @@ export const useCommunityJoinCard = () => ({
  * Handles code input state, loading state, and join logic.
  */
 const useCommunityJoin = (onClose?: () => void) => {
-  const { communityApplication } = getAppContext()
+  const { communityApplication } = getAppContextStore()
   const [code, setCode] = useState('')
   const [isJoining, setIsJoining] = useState(false)
 
@@ -60,7 +60,7 @@ interface CommunityJoinCardProps {
  */
 function CommunityJoinCard(props: CommunityJoinCardProps) {
   const { onClose } = props
-  const { locales } = useApp()
+  const { locales } = useLocalization()
   const { code, handleCodeChange, handleJoin, isJoining, isValid } = useCommunityJoin(onClose)
 
   return (

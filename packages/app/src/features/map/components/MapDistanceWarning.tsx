@@ -1,6 +1,6 @@
 import { Text } from '@app/shared/components'
+import { useLocalization } from '@app/shared/localization'
 import { Theme, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 import { StyleSheet, View } from 'react-native'
 import { useDeviceBoundaryStatus } from '../stores/mapStore'
 
@@ -20,7 +20,7 @@ const formatDistance = (meters: number): string => {
  */
 function MapDistanceWarning() {
   const { styles } = useTheme(createStyles)
-  const { locales } = useApp()
+  const { locales } = useLocalization()
   const { isOutsideBoundary, distanceFromBoundary } = useDeviceBoundaryStatus()
 
   if (!isOutsideBoundary) {

@@ -1,4 +1,4 @@
-import { Status, StoreActions, StoreState } from '@app/shared/index'
+import { Status, StoreActions, StoreState } from '@app/shared/stores/types'
 import { create, StateCreator } from 'zustand'
 
 export interface RatingSummary {

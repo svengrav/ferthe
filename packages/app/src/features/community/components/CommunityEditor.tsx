@@ -1,7 +1,7 @@
 import { createCommunitySchema, Trail } from '@shared/contracts'
 
 import { Form, FormInput, FormPicker, FormSubmitButton, Stack } from '@app/shared/components'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization'
 
 interface CommunityEditorProps {
   trails: Trail[]
@@ -15,7 +15,7 @@ interface CommunityEditorProps {
  */
 function CommunityEditor(props: CommunityEditorProps) {
   const { trails, initialData, onSubmit } = props
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
 
   const trailOptions = trails.map(trail => ({
     label: trail.name,
@@ -31,16 +31,16 @@ function CommunityEditor(props: CommunityEditorProps) {
         <Stack spacing="lg">
           <FormInput
             name="name"
-            placeholder={t.community.communityName}
-            helperText={t.community.yourCommunityName}
+            placeholder={locales.community.communityName}
+            helperText={locales.community.yourCommunityName}
           />
           <FormPicker
             name="trailId"
             options={trailOptions}
             variant='outlined'
-            helperText={t.community.selectTrail}
+            helperText={locales.community.selectTrail}
           />
-          <FormSubmitButton label={t.common.save} />
+          <FormSubmitButton label={locales.common.save} />
         </Stack>
       </Form>
     </Stack>

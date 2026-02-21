@@ -3,7 +3,7 @@ import { DiscoveryHorizontalList } from '@app/features/discovery/components/Disc
 import { useDiscoveryTrailId } from '@app/features/discovery/stores/discoveryTrailStore'
 import { useSpots } from '@app/features/spot'
 import { Page, Text } from '@app/shared/components'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization/'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { Discovery, Spot } from '@shared/contracts'
 import { useState } from 'react'
@@ -22,7 +22,7 @@ function enrichDiscoveriesWithSpots(discoveries: Discovery[], spots: Spot[]) {
 
 export default function DevScreen() {
   const theme = useThemeStore()
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
   const [visible, setVisible] = useState(false)
   const [currentDiscovery, setCurrentDiscovery] = useState<any | null>(null)
   const [isDiscoveryVisible, setDiscoveryVisible] = useState(false)

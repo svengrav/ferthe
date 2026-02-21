@@ -1,6 +1,6 @@
 import { Button, Checkbox, Stack, Text } from '@app/shared/components'
+import { useLocalization } from '@app/shared/localization'
 import { Theme, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 import { ScrollView, StyleSheet, View } from 'react-native'
 
 interface SpotConsentFormProps {
@@ -15,7 +15,7 @@ interface SpotConsentFormProps {
  */
 function SpotConsentForm(props: SpotConsentFormProps) {
   const { consent, onConsentChange, onSubmit, isSubmitting } = props
-  const { locales } = useApp()
+  const { locales } = useLocalization()
   const { styles } = useTheme(createStyles)
 
   return (

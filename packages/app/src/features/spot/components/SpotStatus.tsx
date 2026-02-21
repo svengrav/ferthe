@@ -1,5 +1,5 @@
 import { Chip } from '@app/shared/components'
-import { useApp } from '@app/shared/useApp'
+import { useLocalization } from '@app/shared/localization'
 import { Discovery, Spot } from '@shared/contracts'
 
 interface SpotStatusProps {
@@ -15,7 +15,7 @@ interface SpotStatusProps {
  */
 function SpotStatus(props: SpotStatusProps) {
   const { spot, discovery } = props
-  const { locales } = useApp()
+  const { locales } = useLocalization()
 
   const getStatusText = () => {
     switch (spot.source) {

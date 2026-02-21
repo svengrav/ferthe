@@ -3,13 +3,14 @@ import { StyleSheet, useWindowDimensions } from 'react-native'
 import { Button, Image, Page, PageTab, PageTabs, Stack, Text } from '@app/shared/components'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 
+import { useLocalization } from '@app/shared/localization'
 import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
 import { useTrailSpotsViewModel } from '../hooks/useTrailSpotsViewModel'
 import TrailSpots from './TrailSpots'
 import TrailStats from './TrailStats'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 export const useTrailPage = () => ({
   showTrailPage: (trail: Trail) => {
@@ -32,8 +33,9 @@ interface TrailPageProps {
  */
 function TrailPage(props: TrailPageProps) {
   const { trail, onClose } = props
-  const { styles } = useTheme(createStyles)
-  const { context, locales, theme } = useApp()
+  const { styles, theme } = useTheme(createStyles)
+  const { locales } = useLocalization()
+  const { trailApplication } = getAppContextStore()
   const { width: screenWidth } = useWindowDimensions()
 
   // Load trail spots view model
@@ -45,8 +47,8 @@ function TrailPage(props: TrailPageProps) {
 
   // Request trail spot previews on mount or trail change
   useEffect(() => {
-    context?.trailApplication.requestTrailSpotPreviews(trail.id)
-  }, [trail.id, context])
+    trailApplication.requestTrailSpotPreviews(trail.id)
+  }, [trail.id])
 
   return (
     <Page

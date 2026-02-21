@@ -1,8 +1,8 @@
-import { getAppContext } from '@app/appContext'
 import { useTrails } from '@app/features/trail/stores/trailStore'
 import { Stack, Text } from '@app/shared/components'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization'
 import { closeOverlay, OverlayCard, setOverlay, useOverlayStore } from '@app/shared/overlay'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { logger } from '@app/shared/utils/logger'
 import { useState } from 'react'
 import CommunityEditor from './CommunityEditor'
@@ -20,7 +20,7 @@ export function useCommunityUpdaterCard() {
  * Handles loading state and update logic.
  */
 function useCommunityUpdater(communityId: string) {
-  const { communityApplication } = getAppContext()
+  const { communityApplication } = getAppContextStore()
   const [isUpdating, setIsUpdating] = useState(false)
 
   const handleUpdate = async (data: { name: string; trailId: string }) => {
@@ -53,13 +53,13 @@ interface CommunityUpdaterCardProps {
  */
 export function CommunityUpdaterCard({ communityId, initialData, onClose }: CommunityUpdaterCardProps) {
   const trails = useTrails()
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
   const { handleUpdate } = useCommunityUpdater(communityId)
 
   return (
     <OverlayCard onClose={onClose}>
       <Stack spacing="lg">
-        <Text variant="heading">{t.community.editCommunity}</Text>
+        <Text variant="heading">{locales.community.editCommunity}</Text>
         <CommunityEditor
           trails={trails}
           initialData={initialData}

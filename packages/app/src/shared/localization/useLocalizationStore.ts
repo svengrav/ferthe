@@ -8,16 +8,16 @@ type Localization = 'de' | 'en'
 
 export interface LocalizationStore {
   language: Localization
-  t: LocalizationSet
+  locales: LocalizationSet
   setLocalization: (lang: Localization) => void
 }
 
 export const useLocalizationStore = create<LocalizationStore>()(persist(
   set => ({
     language: 'en',
-    t: en,
+    locales: en,
     setLocalization: (lang: Localization) => {
-      set({ language: lang, t: lang === 'en' ? en : de })
+      set({ language: lang, locales: lang === 'en' ? en : de })
     },
   }),
   {

@@ -1,5 +1,6 @@
-import { Field, TextInput } from '@app/shared/components'
-import { useApp } from '@app/shared/useApp'
+import Field from '@app/shared/components/field/Field'
+import TextInput from '@app/shared/components/textInput/TextInput'
+import { useLocalization } from '@app/shared/localization'
 import { TextBlock } from '@shared/contracts'
 
 interface TextBlockEditorProps {
@@ -9,7 +10,7 @@ interface TextBlockEditorProps {
 
 function TextBlockEditor(props: TextBlockEditorProps) {
   const { block, onChange } = props
-  const { locales } = useApp()
+  const { locales } = useLocalization()
 
   return (
     <Field label={locales.contentBlocks.text}>

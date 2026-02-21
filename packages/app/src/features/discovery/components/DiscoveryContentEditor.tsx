@@ -3,10 +3,9 @@ import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import Field from '@app/shared/components/field/Field'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization'
 import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 import { DiscoveryContent } from '@shared/contracts'
 import { useState } from 'react'
@@ -48,8 +47,8 @@ interface DiscoveryContentEditorCardProps {
  */
 function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
   const { existingContent, onSubmit, onClose } = props
-  const { styles } = useApp(useStyles)
-  const { t } = useLocalizationStore()
+  const { styles } = useTheme(useStyles)
+  const { locales } = useLocalization()
   const { selectedImageUri, pickImage, clearImage, isLoading: isPickingImage } = useImagePicker()
   const { convertToBase64, isConverting } = useImageToBase64()
 
@@ -97,7 +96,7 @@ function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
 
   if (!styles) return null
 
-  const title = isEditing ? t.discovery.editYourDiscovery : t.discovery.documentYourDiscovery
+  const title = isEditing ? locales.discovery.editYourDiscovery : locales.discovery.documentYourDiscovery
 
   const renderImageSection = () => {
     if (!displayImageUrl) return null
@@ -127,17 +126,17 @@ function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
         {renderImageSection()}
 
         <Button
-          label={isPickingImage ? t.discovery.pickingImage : t.discovery.pickImageFromDevice}
+          label={isPickingImage ? locales.discovery.pickingImage : locales.discovery.pickImageFromDevice}
           variant="outlined"
           onPress={pickImage}
           disabled={isLoading || isPickingImage}
         />
 
-        <Field helperText={t.discovery.shareYourStory}>
+        <Field helperText={locales.discovery.shareYourStory}>
           <TextInput
             value={comment}
             onChangeText={setComment}
-            placeholder={t.discovery.shareYourStoryPlaceholder}
+            placeholder={locales.discovery.shareYourStoryPlaceholder}
             multiline
             numberOfLines={4}
             editable={!isLoading}
@@ -145,13 +144,13 @@ function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
         </Field>
         <View style={styles.buttonRow}>
           <Button
-            label={t.discovery.cancel}
+            label={locales.discovery.cancel}
             variant="outlined"
             onPress={onClose}
             disabled={isLoading}
           />
           <Button
-            label={isConverting ? t.discovery.processing : isSubmitting ? t.discovery.saving : isEditing ? t.discovery.update : t.discovery.save}
+            label={isConverting ? locales.discovery.processing : isSubmitting ? locales.discovery.saving : isEditing ? locales.discovery.update : locales.discovery.save}
             variant="primary"
             onPress={handleSubmit}
             disabled={isLoading || (!commentChanged && !imageChanged && isEditing)}

@@ -1,4 +1,4 @@
-import { useLocalizationStore } from '@app/shared/localization'
+import { useLocalization } from '@app/shared/localization'
 import { setTheme } from '@app/shared/theme/themeStore'
 import { useEffect } from 'react'
 import settingsStore from '../stores/settingsStore'
@@ -8,9 +8,10 @@ import settingsStore from '../stores/settingsStore'
  * Ensures that user preferences are applied immediately after rehydration.
  */
 export function useSettingsSync() {
+  const { setLocalization } = useLocalization()
+  const { settings } = settingsStore.getState()
+
   useEffect(() => {
-    const { settings } = settingsStore.getState()
-    const { setLocalization } = useLocalizationStore.getState()
 
     // Sync theme and language from persisted settings
     if (settings.theme) {

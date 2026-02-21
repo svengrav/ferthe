@@ -1,7 +1,6 @@
-import { getAppContext } from '@app/appContext'
 import { Page, Text } from '@app/shared/components'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { CommunityMember } from '@shared/contracts'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, FlatList, View } from 'react-native'
@@ -11,8 +10,8 @@ interface CommunityMembersScreenProps {
 }
 
 function CommunityMembersPage({ communityId }: CommunityMembersScreenProps) {
-  const { styles, theme } = useApp(useStyles)
-  const { communityApplication } = getAppContext()
+  const { styles, theme } = useTheme(useStyles)
+  const { communityApplication } = getAppContextStore()
   const [members, setMembers] = useState<CommunityMember[]>([])
   const [loading, setLoading] = useState(true)
 

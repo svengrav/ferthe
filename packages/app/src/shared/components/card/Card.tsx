@@ -61,15 +61,11 @@ const createStyles = (theme: Theme) =>
     primary: {
       backgroundColor: theme.colors.primary,
       ...theme.tokens.shadows.md,
-      shadowColor: theme.colors.black,
-      shadowOpacity: SHADOW_OPACITY,
       elevation: ELEVATION,
     },
     secondary: {
       backgroundColor: theme.colors.surface,
       ...theme.tokens.shadows.md,
-      shadowColor: theme.colors.black,
-      shadowOpacity: SHADOW_OPACITY,
       elevation: 0.1,
     },
     outlined: {

@@ -3,11 +3,9 @@ import { LayoutChangeEvent, View } from 'react-native'
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
 import Animated from 'react-native-reanimated'
 
-import { getAppContext } from '@app/appContext'
 import { config } from '@app/config'
 import { Image } from '@app/shared/components'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 
 import { getMapThemeDefaults } from '../../config/mapThemeDefaults.ts'
@@ -16,6 +14,7 @@ import { mapUtils } from '../../services/geoToScreenTransform.ts'
 import { getMapCanvasActions, getMapState, useMapCanvas, useMapSurfaceBoundary } from '../../stores/mapStore.ts'
 import { MapCanvasDebug } from './MapCanvasDebug.tsx'
 import { MapCompensatedScaleContext } from './MapCompensatedScale.tsx'
+import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
 
 interface MapCanvasViewportProps {
   children: ReactNode
@@ -31,10 +30,10 @@ interface MapCanvasViewportProps {
  */
 function MapCanvasViewport(props: MapCanvasViewportProps) {
   const { children, onLayout } = props
-  const { styles } = useApp(useStyles)
+  const { styles } = useTheme(useStyles)
   const { size, boundary, image } = useMapCanvas()
   const surfaceBoundary = useMapSurfaceBoundary()
-  const { sensorApplication } = getAppContext()
+  const { sensorApplication } = getAppContextStore()
   const actions = getMapCanvasActions()
 
   // Handle long press for dev teleport

@@ -24,6 +24,7 @@ import {
   SMSCodeRequest,
   SMSVerificationResult,
   Spot,
+  SpotPreview,
   SpotRating,
   StoredTrailSpot,
   Trail,
@@ -251,7 +252,7 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'GET',
       version: 'v1',
       url: '/spot/spots/:id',
-      handler: asyncRequestHandler<Spot | undefined, { id: string }, never>(async ({ params, context }) => {
+      handler: asyncRequestHandler<Spot | SpotPreview | undefined, { id: string }, never>(async ({ params, context }) => {
         return await spotAccessComposite.getAccessibleSpot(context, params!.id)
       }),
     },

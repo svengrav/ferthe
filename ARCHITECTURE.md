@@ -18,7 +18,7 @@ The app is organized into features, which are self-contained modules that encaps
 
 The public API of a feature consists of two kinds of exports:
 
-1. **Application** (`application.ts`) — async actions that mutate state or call the backend (e.g., `createSpot`, `updateSpot`). Accessed via `useApp().context.<featureApplication>`.
+1. **Application** (`application.ts`) — async actions that mutate state or call the backend (e.g., `createSpot`, `updateSpot`). Accessed via `useLocalization().context.<featureApplication>`.
 2. **Reactive hooks and getters** — exported directly from `index.ts` for reading state reactively (e.g., `useTrails`, `getDeviceLocation`). Use hooks when the consuming component needs to re-render on changes; use getters for one-time reads outside of render (e.g., in submit handlers).
 
 ```ts

@@ -1,4 +1,4 @@
-import { Status, StoreActions, StoreState } from '@app/shared/index'
+import { Status, StoreActions, StoreState } from '@app/shared/stores/types'
 import { DiscoveryContent } from '@shared/contracts'
 import { create } from 'zustand'
 

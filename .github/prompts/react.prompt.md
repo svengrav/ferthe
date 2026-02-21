@@ -52,7 +52,7 @@ Follow this structure:
 - All user-facing text must be defined in `LocalizationSet` interface.
 - Check if there are already existing keys for the text you want to use before adding new ones. 
 - Check if its is a common key like "save" or "cancel" that could be used across the app, or if it is a specific key that is only used in one place.
-- Access localized strings via `useLocalizationStore().t` or `useApp().locales`.
+- Access localized strings via `useLocalization().t` or `useLocalization().locales`.
 - Examples:
   - Bad: `<Button label="Save" />`
   - Good: `<Button label={t.common.save} />`
@@ -151,7 +151,7 @@ function Component(props: ComponentProps) {
   const { styles } = useTheme(createStyles)
   
   // Use useApp for app context, or locales (only when needed)
-  const { locales } = useApp()
+  const { locales } = useLocalization()
 
   const deeplyNestedView = () => {
     // This function can be used to render deeply nested views

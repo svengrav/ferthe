@@ -1,8 +1,8 @@
-import { useApp } from '@app/shared/useApp'
 import { logger } from '@app/shared/utils/logger'
 import { TrailStats } from '@shared/contracts'
 import { useEffect, useState } from 'react'
 import { getTrailStoreActions, trailStore } from '../stores/trailStore'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 interface UseTrailStatsResult {
   stats: TrailStats | null
@@ -16,7 +16,7 @@ interface UseTrailStatsResult {
  * Stats are cached in the trailStore to avoid redundant API calls.
  */
 export const useTrailStats = (trailId: string): UseTrailStatsResult => {
-  const { context } = useApp()
+  const { trailApplication } = getAppContextStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -27,7 +27,7 @@ export const useTrailStats = (trailId: string): UseTrailStatsResult => {
       setLoading(true)
       setError(null)
 
-      const result = await context.trailApplication.getTrailStats(trailId)
+      const result = await trailApplication.getTrailStats(trailId)
 
       if (result.success && result.data) {
         getTrailStoreActions().setTrailStats(trailId, result.data)

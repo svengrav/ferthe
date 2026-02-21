@@ -2,12 +2,12 @@ import { useEffect } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import Animated, { interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 
-import { getAppContext } from '@app/appContext'
 import { SpotCard, useSpotCardDimensions } from '@app/features/spot/components'
 import { Text } from '@app/shared/components'
 import { Theme, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 
+import { useLocalization } from '@app/shared/localization'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { DiscoveryEventState } from '../services/types'
 import DiscoveryShareSection from './DiscoveryShareSection'
 import DiscoveryUserContentSection from './DiscoveryUserContentSection'
@@ -105,8 +105,8 @@ interface DiscoveryCardContentProps {
 function DiscoveryCardContent(props: DiscoveryCardContentProps) {
   const { card } = props
   const { styles } = useTheme(createStyles)
-  const { locales } = useApp()
-  const { discoveryApplication } = getAppContext()
+  const { locales } = useLocalization()
+  const { discoveryApplication } = getAppContextStore()
   const { title, image, description, discoveryId } = card
   const { width, height, borderRadius } = useSpotCardDimensions()
   const { scrollHandler, titleOpacityStyle } = useCardAnimations(height)
@@ -203,9 +203,6 @@ const createStyles = (theme: Theme) => ({
     fontWeight: 'semibold' as const,
     color: 'white',
     textAlign: 'center' as const,
-    textShadowColor: 'rgba(0, 0, 0, 0.7)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
   scrollView: {
     width: '100%' as const,

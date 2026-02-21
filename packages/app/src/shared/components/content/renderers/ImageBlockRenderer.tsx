@@ -1,4 +1,5 @@
-import { Stack, Text } from '@app/shared/components'
+import Stack from '@app/shared/components/stack/Stack'
+import Text from '@app/shared/components/text/Text'
 import { Theme, useTheme } from '@app/shared/theme'
 import { ImageBlockData } from '@shared/contracts'
 import { Image, StyleSheet } from 'react-native'

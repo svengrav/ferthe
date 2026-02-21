@@ -3,8 +3,7 @@ import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-ha
 import Animated from 'react-native-reanimated'
 
 import { Image } from '@app/shared/components'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { GeoBoundary } from '@shared/geo'
 import { getMapDefaults } from '../config/mapDefaults'
 import { useOverlayGestures } from '../hooks/useOverlayGestures'
@@ -23,7 +22,7 @@ const OVERVIEW_IMAGE_OPACITY = 0.7
  * Displays full trail with zoom/pan gestures
  */
 function MapOverview() {
-  const { styles } = useApp(useStyles)
+  const { styles } = useTheme(useStyles)
   const trailBoundary = useMapSurfaceBoundary()
   const screenSize = useMapContainerSize()
   const overview = useMapOverview()

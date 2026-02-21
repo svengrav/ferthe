@@ -1,9 +1,9 @@
-import { getAppContext } from '@app/appContext'
 import { useTrails } from '@app/features/trail/stores/trailStore'
 import { Stack, Text } from '@app/shared/components'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization/'
 import { OverlayCard } from '@app/shared/overlay'
 import { closeOverlay, setOverlay } from '@app/shared/overlay/'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { useState } from 'react'
 import CommunityEditor from './CommunityEditor'
 
@@ -19,7 +19,7 @@ export function useCommunityCreatorCard() {
  * Handles loading state and creation logic.
  */
 function useCommunityCreator() {
-  const { communityApplication } = getAppContext()
+  const { communityApplication } = getAppContextStore()
   const [isCreating, setIsCreating] = useState(false)
 
   const handleCreate = async (data: { name: string; trailId: string }) => {
@@ -51,13 +51,13 @@ interface CommunityCreatorCardProps {
 
 export function CommunityCreatorCard({ onClose }: CommunityCreatorCardProps) {
   const trails = useTrails()
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
   const { handleCreate } = useCommunityCreator()
 
   return (
     <OverlayCard title='Create Community' onClose={onClose}>
       <Stack spacing="lg">
-        <Text variant="heading">{t.community.createNewCommunity}</Text>
+        <Text variant="heading">{locales.community.createNewCommunity}</Text>
         <CommunityEditor trails={trails} onSubmit={handleCreate} />
       </Stack>
     </OverlayCard>

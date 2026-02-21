@@ -1,5 +1,7 @@
-import { Field, Stack, TextInput } from '@app/shared/components'
-import { useApp } from '@app/shared/useApp'
+import Field from '@app/shared/components/field/Field'
+import Stack from '@app/shared/components/stack/Stack'
+import TextInput from '@app/shared/components/textInput/TextInput'
+import { useLocalization } from '@app/shared/localization'
 import { QuoteBlock } from '@shared/contracts'
 
 interface QuoteBlockEditorProps {
@@ -9,7 +11,7 @@ interface QuoteBlockEditorProps {
 
 function QuoteBlockEditor(props: QuoteBlockEditorProps) {
   const { block, onChange } = props
-  const { locales } = useApp()
+  const { locales } = useLocalization()
 
   return (
     <Stack spacing="sm">

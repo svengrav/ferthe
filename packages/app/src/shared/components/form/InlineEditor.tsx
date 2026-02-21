@@ -1,6 +1,6 @@
-import { Button, TextInput } from '@app/shared/components'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import Button from '@app/shared/components/button/Button'
+import TextInput from '@app/shared/components/textInput/TextInput'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import React, { useState } from 'react'
 import { View } from 'react-native'
 
@@ -27,7 +27,7 @@ export const InlineEditor: React.FC<InlineEditorProps> = ({
   validator,
   disabled = false,
 }) => {
-  const { styles } = useApp(useStyles)
+  const { styles } = useTheme(useStyles)
   const [value, setValue] = useState(initialValue)
   const [isSaving, setIsSaving] = useState(false)
 

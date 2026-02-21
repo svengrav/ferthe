@@ -2,9 +2,9 @@ import { MutableRefObject, useEffect, useMemo } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 
 import { ContentBlockEditorList, Field, Form, FormInput, Stack } from '@app/shared/components'
-import { useApp } from '@app/shared/useApp'
 import { ContentBlock } from '@shared/contracts'
 
+import { useLocalization } from '@app/shared/localization'
 import { createSpotContentSchema, SpotContentFormValues } from '../services/spotFormSchema'
 import SpotCardPicker from './SpotCardPicker'
 
@@ -29,7 +29,7 @@ function SubmitBridge({ submitRef, onSubmit }: { submitRef: MutableRefObject<(()
  */
 function SpotContentForm(props: SpotContentFormProps) {
   const { defaultValues, onSubmit, submitRef } = props
-  const { locales } = useApp()
+  const { locales } = useLocalization()
 
   const schema = useMemo(
     () => createSpotContentSchema(locales.validation),
@@ -46,7 +46,7 @@ function SpotContentForm(props: SpotContentFormProps) {
 
 /** Inner fields rendered inside Form context. */
 function SpotContentFormFields() {
-  const { locales } = useApp()
+  const { locales } = useLocalization()
   const { control, watch } = useFormContext()
 
   const name = watch('name')

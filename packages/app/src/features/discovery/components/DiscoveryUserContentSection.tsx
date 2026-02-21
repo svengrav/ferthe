@@ -1,13 +1,12 @@
-import { getAppContext } from '@app/appContext'
 import { Button, Text } from '@app/shared/components'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { useLocalization } from '@app/shared/localization'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 import { useState } from 'react'
 import { Animated, View } from 'react-native'
-import { useDiscoveryContent } from '../index'
+import { useDiscoveryContent } from '../stores/discoveryContentStore'
 import { useDiscoveryContentEditorCard } from './DiscoveryContentEditor'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 interface DiscoveryUserContentSectionProps {
   id: string
@@ -17,7 +16,7 @@ interface DiscoveryUserContentSectionProps {
  * Hook to handle content API calls (update, delete)
  */
 const useContentActions = (id: string) => {
-  const { discoveryApplication } = getAppContext()
+  const { discoveryApplication } = getAppContextStore()
 
   const updateContent = async (data: { imageUrl?: string; comment?: string }) => {
     try {
@@ -53,8 +52,8 @@ const useContentActions = (id: string) => {
  * or a link to add new content. Manages content state and overlay interactions.
  */
 function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
-  const { styles } = useApp(useStyles)
-  const { t } = useLocalizationStore()
+  const { styles } = useTheme(useStyles)
+  const { locales } = useLocalization()
   const content = useDiscoveryContent(id)
   const { updateContent, deleteContent } = useContentActions(id)
   const { showDiscoveryContentEditorCard, closeDiscoveryContentEditorCard } = useDiscoveryContentEditorCard()
@@ -81,7 +80,7 @@ function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
   // Content rendering
   const renderAddContent = () => (
     <Button
-      label={t.discovery.addNote}
+      label={locales.discovery.addNote}
       variant='outlined'
       style={styles.addContentLink}
       onPress={showEditor}

@@ -1,7 +1,6 @@
 import { FlatList, StyleSheet, View } from 'react-native'
 import { GestureDetector } from 'react-native-gesture-handler'
 
-import { getAppContext } from '@app/appContext'
 import { useDiscoveryTrail } from '@app/features/discovery'
 import { useTrails } from '@app/features/trail'
 import TrailItem from '@app/features/trail/components/TrailItem'
@@ -11,6 +10,7 @@ import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
 
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
 
 /**
@@ -18,7 +18,7 @@ import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
  */
 export const useMapTrailListCard = () => {
   const trails = useTrails()
-  const { discoveryApplication } = getAppContext()
+  const { discoveryApplication } = getAppContextStore()
 
   return {
     showTrailListCard: () => {

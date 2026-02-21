@@ -1,6 +1,5 @@
-import { Text } from '@app/shared/components'
-import { createThemedStyles } from '@app/shared/theme/themeStore'
-import { useApp } from '@app/shared/useApp'
+import Text from '@app/shared/components/text/Text'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import React, { useEffect, useState } from 'react'
 import { Dimensions, Modal, TouchableOpacity, View } from 'react-native'
 import { Option } from '../types'
@@ -67,7 +66,7 @@ interface DropdownMenuProps {
  * Features automatic positioning to stay within screen bounds and smooth fade animation.
  */
 function Dropdown({ isVisible, onClose, options, anchorRef }: DropdownMenuProps) {
-  const { styles } = useApp(useStyles)
+  const { styles } = useTheme(useStyles)
   const position = useMenuPosition(anchorRef, isVisible, options.length)
 
   if (!styles) return null
@@ -123,10 +122,6 @@ const useStyles = createThemedStyles(theme => ({
     padding: MENU_PADDING,
     width: MENU_WIDTH,
     elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
   },
   menuOption: {
     padding: OPTION_PADDING,

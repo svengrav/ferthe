@@ -9,7 +9,7 @@ interface ComponentProps {
 }
 
 const Component = ({ ... }: ComponentProps) => {
-  const { t } = useLocalizationStore()
+  const { t } = useLocalization()
   const theme = useThemeStore()
   const styles = createStyles(theme)
 

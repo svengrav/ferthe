@@ -1,7 +1,7 @@
-import { getAppContext } from '@app/appContext'
 import { Button, Divider, Stack, Text } from '@app/shared/components'
+import { useLocalization } from '@app/shared/localization'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { Theme, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 import { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { useAccountVerificationCard } from './AccountVerificationCard'
@@ -14,7 +14,7 @@ interface AccountLoginProps {
  * Hook for managing local account creation.
  */
 const useAccountLogin = () => {
-  const { accountApplication } = getAppContext()
+  const { accountApplication } = getAppContextStore()
   const [isCreatingLocal, setIsCreatingLocal] = useState(false)
 
   const handleCreateLocalAccount = async () => {
@@ -36,7 +36,7 @@ const useAccountLogin = () => {
  */
 function AccountLogin(props: AccountLoginProps) {
   const { styles } = useTheme(createStyles)
-  const { locales } = useApp()
+  const { locales } = useLocalization()
   const { showAccountVerificationCard } = useAccountVerificationCard()
   const { handleCreateLocalAccount, isCreatingLocal } = useAccountLogin()
 

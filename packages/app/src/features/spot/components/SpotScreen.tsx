@@ -1,9 +1,8 @@
-import { getAppContext } from '@app/appContext'
 import { useDiscoveryStatus } from '@app/features/discovery/stores/discoveryStore'
 import { useSettingsPage } from '@app/features/settings/components/SettingsPage'
 import { Button, Page, Text } from '@app/shared/components'
 import Header from '@app/shared/components/header/Header'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useMemo } from 'react'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
@@ -11,13 +10,14 @@ import { useCreateSpotPage } from '../creation/components/SpotFormPage'
 import { useSpots } from '../stores/spotStore'
 import SpotCardList from './SpotCardList'
 import { useSpotPage } from './SpotPage'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 /**
  * Spot screen component that displays latest discovered spots.
  * Shows two sections: "My Spots" (created) and "Discoveries".
  */
 function SpotScreen() {
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
   const { styles } = useTheme(createStyles)
   const { showSettings } = useSettingsPage()
   const { showSpotPage } = useSpotPage()
@@ -25,7 +25,7 @@ function SpotScreen() {
 
   const spots = useSpots()
   const status = useDiscoveryStatus()
-  const { discoveryApplication } = getAppContext()
+  const { discoveryApplication } = getAppContextStore()
 
   const toItem = (spot: typeof spots[number]) => ({
     id: spot.id,
@@ -43,9 +43,9 @@ function SpotScreen() {
   const isRefreshing = status === 'loading'
 
   return (
-    <Page options={[{ label: t.navigation.settings, onPress: showSettings }]}>
+    <Page options={[{ label: locales.navigation.settings, onPress: showSettings }]}>
       <Header
-        title={t.navigation.feed}
+        title={locales.navigation.feed}
         trailing={<Button icon="add" onPress={showCreateSpotPage} />}
       />
       <ScrollView
@@ -54,7 +54,7 @@ function SpotScreen() {
       >
         {mySpots.length > 0 && (
           <View style={styles.section}>
-            <Text variant="section" style={styles.sectionTitle}>{t.spotCreation.mySpots}</Text>
+            <Text variant="section" style={styles.sectionTitle}>{locales.spotCreation.mySpots}</Text>
             <SpotCardList
               items={mySpots}
               onPress={handleSpotPress}
@@ -64,7 +64,7 @@ function SpotScreen() {
         )}
         {discoveredSpots.length > 0 && (
           <View style={styles.section}>
-            <Text variant="section" style={styles.sectionTitle}>{t.discovery.discoveries}</Text>
+            <Text variant="section" style={styles.sectionTitle}>{locales.discovery.discoveries}</Text>
             <SpotCardList
               items={discoveredSpots}
               onPress={handleSpotPress}

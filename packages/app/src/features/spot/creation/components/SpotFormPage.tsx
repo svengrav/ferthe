@@ -9,8 +9,8 @@ import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
 import { useStepNavigation } from '@app/shared/hooks/useStepNavigation'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 
+import { useLocalization } from '@app/shared/localization'
 import { Spot } from '@shared/contracts'
 import { SpotLocation } from '../../components/SpotLocation'
 import { SpotContentFormValues, SpotOptionsFormValues } from '../services/spotFormSchema'
@@ -18,6 +18,7 @@ import { buildCreateRequest, buildUpdateRequest, getSpotTrailIds } from '../serv
 import SpotConsentForm from './SpotConsentForm'
 import SpotContentForm from './SpotContentForm'
 import SpotOptionsForm from './SpotOptionsForm'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 type SpotFormStep = 'content' | 'options' | 'consent'
 
@@ -60,8 +61,9 @@ interface SpotFormPageProps {
 function SpotFormPage(props: SpotFormPageProps) {
   const { spot, onClose } = props
   const isEditMode = !!spot
+  const context = getAppContextStore()
 
-  const { locales, context } = useApp()
+  const { locales } = useLocalization()
   const { styles } = useTheme(createStyles)
   const { convertToBase64 } = useImageToBase64()
   const nav = useStepNavigation(isEditMode ? EDIT_STEPS : CREATE_STEPS)

@@ -68,8 +68,8 @@ export const PRIMITIVES = {
     xl: 16,
   },
   shadows: {
-    sm: { shadowOffset: { width: 0, height: 1 }, shadowRadius: 2 },
-    md: { shadowOffset: { width: 0, height: 2 }, shadowRadius: 4 },
+    sm: {},
+    md: {},
   },
   fontSize: {
     sm: 12,

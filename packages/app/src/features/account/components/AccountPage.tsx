@@ -1,12 +1,12 @@
 import { StyleSheet, View } from 'react-native'
 
-import { getAppContext } from '@app/appContext'
 import { Avatar, Button, InfoField, Page, Stack, Text } from '@app/shared/components'
 import Item from '@app/shared/components/item/Item'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 
+import { useLocalization } from '@app/shared/localization/index.ts'
+import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
 import { useAccountData } from '../stores/accountStore'
 import AccountVerification from './AccountVerificationCard.tsx'
 import AvatarUpload from './AvatarUploadCard.tsx'
@@ -33,9 +33,9 @@ interface AccountPageProps {
 function AccountPage(props: AccountPageProps) {
   const { onBack } = props
   const { styles, theme } = useTheme(createStyles)
-  const { locales } = useApp()
+  const { locales } = useLocalization()
   const { account, accountType } = useAccountData()
-  const { accountApplication } = getAppContext()
+  const { accountApplication } = getAppContextStore()
 
   // Update account field with new value
   const handleEdit = async (field: string, value: string) => {

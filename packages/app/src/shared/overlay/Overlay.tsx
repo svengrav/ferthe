@@ -1,5 +1,4 @@
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import React, { useEffect } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
@@ -93,7 +92,7 @@ interface OverlayProps {
  */
 function Overlay(props: OverlayProps) {
   const { visible, onClose, showBackdrop = true, closeOnBackdropPress = false, children, style } = props
-  const { styles } = useApp(useStyles)
+  const { styles } = useTheme(useStyles)
   const { animatedContainerStyle, shouldRender } = useOverlayAnimation(visible ?? true)
   const insets = useSafeAreaInsets()
 

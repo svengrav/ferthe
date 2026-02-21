@@ -1,13 +1,13 @@
 import { useCallback } from 'react'
 import { StyleSheet, View } from 'react-native'
 
-import { Button } from '@app/shared/components'
+import Button from '@app/shared/components/button/Button'
 import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import { OrderedListContext, useOrderedList } from '@app/shared/hooks/useOrderedList'
 import { Theme, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 import { ContentBlock, ContentBlockType } from '@shared/contracts'
 
+import { useLocalization } from '@app/shared/localization'
 import DraggableList from '../draggable/DraggableList'
 import ImageBlockEditor from './editors/ImageBlockEditor'
 import LinkBlockEditor from './editors/LinkBlockEditor'
@@ -28,7 +28,7 @@ const generateBlockId = () => `block-${Date.now()}-${Math.random().toString(36).
  */
 function ContentBlockEditorList(props: ContentBlockEditorListProps) {
   const { blocks, onChange } = props
-  const { locales } = useApp()
+  const { locales } = useLocalization()
   const { styles, theme } = useTheme(createStyles)
   const list = useOrderedList(blocks, onChange)
   const { openDialog } = useRemoveDialog()

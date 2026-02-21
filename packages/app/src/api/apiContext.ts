@@ -291,6 +291,8 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
         const queryParams = { ...(trailId ? { trailId } : {}), ...serializeQueryOptions(options) }
         return API.send<Spot[]>('/composite/spots/accessible', 'GET', undefined, queryParams)
       },
+      getAccessibleSpot: (_context: AccountContext, spotId: string) =>
+        API.send<Spot | SpotPreview | undefined>(`/spot/spots/${spotId}`),
     },
 
     /**

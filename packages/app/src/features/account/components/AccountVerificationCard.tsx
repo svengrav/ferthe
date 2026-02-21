@@ -1,8 +1,8 @@
-import { getAppContext } from '@app/appContext'
-import { Stack, Theme } from '@app/shared'
-import { Form, FormInput, FormSubmitButton, Text } from '@app/shared/components'
+import { Form, FormInput, FormSubmitButton, Stack, Text } from '@app/shared/components'
+import { useLocalization } from '@app/shared/localization'
 import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
-import { useApp } from '@app/shared/useApp'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
+import { Theme, useTheme } from '@app/shared/theme'
 import { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { z } from 'zod'
@@ -41,7 +41,7 @@ const useAccountVerification = () => {
   const [error, setError] = useState<string | null>(null)
   const [showCodeInput, setShowCodeInput] = useState(false)
 
-  const { accountApplication } = getAppContext()
+  const { accountApplication } = getAppContextStore()
 
   const handleRequestSmsCode = async (data: PhoneFormData) => {
     const result = await accountApplication.requestSMSCode(data.phoneNumber.trim())
@@ -80,7 +80,8 @@ interface AccountVerificationCardProps {
 
 function AccountVerificationCard({ onClose }: AccountVerificationCardProps) {
   const { showCodeInput, error, handleRequestSmsCode, handleVerifyCode } = useAccountVerification()
-  const { styles, locales } = useApp(useStyles)
+  const { styles } = useTheme(useStyles)
+  const { locales } = useLocalization()
 
   return (
     <OverlayCard title='Verify your account' onClose={onClose}>

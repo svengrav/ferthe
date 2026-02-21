@@ -1,15 +1,15 @@
-import { getAppContext } from '@app/appContext'
 import { useSettingsPage } from '@app/features/settings'
 import { useTrails, useTrailStatus } from '@app/features/trail/stores/trailStore'
 import { Button, FertheLogo, Page, Stack, Text } from '@app/shared/components'
 import Header from '@app/shared/components/header/Header'
+import { useLocalization } from '@app/shared/localization'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
 import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
 import { FlatList, View } from 'react-native'
 import TrailItem from './TrailItem'
 import { useTrailPage } from './TrailPage'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 const INTRO_PADDING = 16
 const INTRO_MAX_WIDTH = 200
@@ -25,7 +25,7 @@ const LIST_GAP = 8
 const useTrailScreen = () => {
   const trails = useTrails()
   const status = useTrailStatus()
-  const { trailApplication } = getAppContext()
+  const { trailApplication } = getAppContextStore()
   const { showTrailPage } = useTrailPage()
 
   // Initialize trail data if needed
@@ -61,7 +61,7 @@ const useTrailScreen = () => {
  */
 function TrailScreen() {
   const { styles } = useTheme(useStyles)
-  const { locales } = useApp()
+  const { locales } = useLocalization()
   const {
     trails,
     isRefreshing,

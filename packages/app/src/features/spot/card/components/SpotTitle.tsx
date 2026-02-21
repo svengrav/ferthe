@@ -68,9 +68,6 @@ const styles = StyleSheet.create({
     fontWeight: 'semibold',
     color: 'white',
     textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.7)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
 
   },
 })

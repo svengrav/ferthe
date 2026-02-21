@@ -1,11 +1,11 @@
-import { useLocalizationStore } from '@app/shared/localization'
+import { useLocalization } from '@app/shared/localization'
 import { setTheme } from '@app/shared/theme/themeStore'
 import settingsStore from '../stores/settingsStore'
 import { LanguageOptions, ThemeMode } from '../types/types'
 
 function useSettings() {
   const { saveSettings, settings } = settingsStore()
-  const { setLocalization } = useLocalizationStore()
+  const { setLocalization } = useLocalization()
 
   const handleSubmit = values => {
     const updatedSettings = {

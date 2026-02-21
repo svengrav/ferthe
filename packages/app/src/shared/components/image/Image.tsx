@@ -3,7 +3,7 @@ import { Image as ExpoImage, ImageContentFit } from 'expo-image';
 import { useState } from 'react';
 import { ActivityIndicator, ImageStyle, StyleProp, View } from 'react-native';
 
-import { Text } from '@app/shared/components/';
+import Text from '@app/shared/components/text/Text';
 import React from 'react';
 import { createThemedStyles, useTheme } from '../../theme';
 

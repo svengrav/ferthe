@@ -1,4 +1,4 @@
-import { Text } from '@app/shared/components'
+import Text from '@app/shared/components/text/Text'
 import { Theme, useTheme } from '@app/shared/theme'
 import { LinkBlockData } from '@shared/contracts'
 import { Linking, StyleSheet, TouchableOpacity } from 'react-native'

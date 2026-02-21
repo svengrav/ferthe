@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 
-import { getAppContext } from '@app/appContext'
 import { Avatar, Button, Card } from '@app/shared/components'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization'
 import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { useAccountData } from '../stores/accountStore'
 
 /**
@@ -35,9 +35,9 @@ function AvatarUploadCard(props: AvatarUploadCardProps) {
   const { onSubmit, onClose } = props
 
   const { styles } = useTheme(createStyles)
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
   const { account } = useAccountData()
-  const { accountApplication } = getAppContext()
+  const { accountApplication } = getAppContextStore()
   const { selectedImageUri, pickImage, isLoading: isPickingImage } = useImagePicker()
   const { convertToBase64, isConverting } = useImageToBase64()
   const [isUploading, setIsUploading] = useState(false)
@@ -69,7 +69,7 @@ function AvatarUploadCard(props: AvatarUploadCardProps) {
   }
 
   return (
-    <OverlayCard title={t.account.uploadAvatar} onClose={onClose}>
+    <OverlayCard title={locales.account.uploadAvatar} onClose={onClose}>
       <Card style={styles.card}>
         <View style={styles.container}>
           <Avatar
@@ -80,14 +80,14 @@ function AvatarUploadCard(props: AvatarUploadCardProps) {
 
           <View style={styles.buttonContainer}>
             <Button
-              label={t.account.selectImage}
+              label={locales.account.selectImage}
               onPress={pickImage}
               variant="outlined"
               disabled={isLoading}
             />
             {selectedImageUri && (
               <Button
-                label={t.account.save}
+                label={locales.account.save}
                 onPress={handleUpload}
                 variant="primary"
                 disabled={isLoading}

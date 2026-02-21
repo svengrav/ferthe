@@ -1,10 +1,9 @@
-import { getAppContext } from '@app/appContext'
 import { useCommunityData } from '@app/features/community/stores/communityStore'
 import { Button, Text } from '@app/shared/components'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
+import { useLocalization } from '@app/shared/localization'
 import { setOverlay, useOverlayStore } from '@app/shared/overlay'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 import { useState } from 'react'
 import { View } from 'react-native'
@@ -18,9 +17,9 @@ interface DiscoveryShareSectionProps {
  * Handles community selection and share/error states.
  */
 function DiscoveryShareSection({ discoveryId }: DiscoveryShareSectionProps) {
-  const { styles } = useApp(useStyles)
-  const { t } = useLocalizationStore()
-  const { communityApplication } = getAppContext()
+  const { styles } = useTheme(useStyles)
+  const { locales } = useLocalization()
+  const { communityApplication } = getAppContextStore()
   const { communities } = useCommunityData()
   const [isSharing, setIsSharing] = useState(false)
 
@@ -53,7 +52,7 @@ function DiscoveryShareSection({ discoveryId }: DiscoveryShareSectionProps) {
             />
           ))}
           <Button
-            label={t.discovery.cancel}
+            label={locales.discovery.cancel}
             onPress={() => useOverlayStore.getState().removeByKey('selectCommunity')}
             variant="secondary"
           />
@@ -65,7 +64,7 @@ function DiscoveryShareSection({ discoveryId }: DiscoveryShareSectionProps) {
   return (
     <View style={styles.shareContainer}>
       <Button
-        label={t.discovery.share}
+        label={locales.discovery.share}
         onPress={handleShare}
         disabled={isSharing}
       />

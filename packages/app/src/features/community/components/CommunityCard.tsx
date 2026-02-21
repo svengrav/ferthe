@@ -1,14 +1,14 @@
 import { StyleSheet, View } from 'react-native'
 
-import { getAppContext } from '@app/appContext'
 import { Avatar, PressableWithActions, Text } from '@app/shared/components'
 import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { Theme, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 
 import { Community } from '@shared/contracts'
 
+import { useLocalization } from '@app/shared/localization'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { useCommunityDiscoveryPage } from './CommunityDiscoveryPage'
 
 interface CommunityCardProps {
@@ -22,10 +22,10 @@ interface CommunityCardProps {
 function CommunityCard(props: CommunityCardProps) {
   const { community } = props
   const { styles } = useTheme(createStyles)
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
   const { openDialog, closeDialog } = useRemoveDialog()
   const { showCommunityDiscoveries } = useCommunityDiscoveryPage()
-  const { communityApplication } = getAppContext()
+  const { communityApplication } = getAppContextStore()
 
   const handleLeave = async (communityId: string) => {
     const result = await communityApplication.leaveCommunity(communityId)
@@ -47,7 +47,7 @@ function CommunityCard(props: CommunityCardProps) {
 
   const confirmRemove = (communityId: string) => {
     openDialog({
-      message: t.community.confirmRemove,
+      message: locales.community.confirmRemove,
       onConfirm: async () => {
         await handleRemove(communityId)
         closeDialog()
@@ -66,11 +66,11 @@ function CommunityCard(props: CommunityCardProps) {
       onPress={handlePress}
       actions={[
         {
-          label: t.community.leave,
+          label: locales.community.leave,
           onPress: () => handleLeave(community.id),
         },
         {
-          label: t.community.remove,
+          label: locales.community.remove,
           onPress: () => confirmRemove(community.id),
         }]}>
       <View style={styles.content}>
@@ -79,11 +79,11 @@ function CommunityCard(props: CommunityCardProps) {
           <Text variant="title">{community.name}</Text>
 
           <Text variant="body" style={styles.inviteCode}>
-            {t.community.inviteCode}: {community.inviteCode}
+            {locales.community.inviteCode}: {community.inviteCode}
           </Text>
 
           <Text variant="body" style={styles.meta}>
-            {t.community.created} {new Date(community.createdAt).toLocaleDateString()}
+            {locales.community.created} {new Date(community.createdAt).toLocaleDateString()}
           </Text>
         </View>
       </View>

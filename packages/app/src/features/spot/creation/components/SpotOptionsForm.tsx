@@ -3,9 +3,9 @@ import { Controller, useFormContext } from 'react-hook-form'
 
 import { useTrails } from '@app/features/trail/stores/trailStore'
 import { ChipMultiSelect, Form, FormPicker, Stack, Text } from '@app/shared/components'
-import { useApp } from '@app/shared/useApp'
 import { Trail } from '@shared/contracts'
 
+import { useLocalization } from '@app/shared/localization'
 import { SpotOptionsFormValues, spotOptionsSchema } from '../services/spotFormSchema'
 
 interface SpotOptionsFormProps {
@@ -40,7 +40,7 @@ function SpotOptionsForm(props: SpotOptionsFormProps) {
 
 /** Inner fields rendered inside Form context. */
 function SpotOptionsFormFields() {
-  const { locales } = useApp()
+  const { locales } = useLocalization()
   const { control, watch } = useFormContext()
   const trails = useTrails()
   const visibility = watch('visibility')

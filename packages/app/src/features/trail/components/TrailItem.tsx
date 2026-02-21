@@ -1,7 +1,6 @@
 import { Card, Image, Text } from '@app/shared/components'
-import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { useLocalization } from '@app/shared/localization'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
 import { useRef, useState } from 'react'
 import { Pressable, View } from 'react-native'
@@ -18,7 +17,7 @@ const DESCRIPTION_MAX_LINES = 1
 const useTrailItem = (trail: Trail) => {
   const [contextMenu, setContextMenu] = useState(false)
   const cardRef = useRef<View>(null)
-  const { t } = useLocalizationStore()
+  const { locales } = useLocalization()
 
   const openContextMenu = () => setContextMenu(true)
   const closeContextMenu = () => setContextMenu(false)
@@ -26,7 +25,7 @@ const useTrailItem = (trail: Trail) => {
   return {
     contextMenu,
     cardRef,
-    t,
+    locales,
     openContextMenu,
     closeContextMenu,
   }
@@ -36,7 +35,7 @@ const useTrailItem = (trail: Trail) => {
  * Avatar component for displaying trail initial
  */
 export function TrailAvatar({ trail }: { trail: Trail }) {
-  const { styles } = useApp(useAvatarStyles)
+  const { styles } = useTheme(useAvatarStyles)
 
   if (!styles) return null
 
@@ -61,10 +60,10 @@ interface TrailCardProps {
  * Trail card component displaying trail information with context menu and overlay
  */
 function TrailItem({ trail, actions, onPress }: TrailCardProps) {
-  const { styles } = useApp(useStyles)
+  const { styles } = useTheme(useStyles)
   const {
     cardRef,
-    t,
+    locales,
     openContextMenu,
   } = useTrailItem(trail)
   const itemTap = onPress
@@ -82,7 +81,7 @@ function TrailItem({ trail, actions, onPress }: TrailCardProps) {
           ellipsizeMode="tail"
           numberOfLines={DESCRIPTION_MAX_LINES}
         >
-          {trail?.description || t.trails.noDescription}
+          {trail?.description || locales.trails.noDescription}
         </Text>
       </View>
       <View>

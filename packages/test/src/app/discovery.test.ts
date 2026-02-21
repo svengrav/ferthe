@@ -3,7 +3,7 @@ import { waitForEvent } from '@test/utils/eventTestUtils'
 
 describe('Discovery Events', () => {
   const testContext = createTestContext()
-  const { discoveryApplication, sensorApplication } = testContext.getAppContext()
+  const { discoveryApplication, sensorApplication } = testContext.getAppContextStore()
 
   beforeAll(async () => {
     await testContext.createSession()

@@ -1,7 +1,6 @@
 import Icon from '@app/shared/components/icon/Icon'
 import Text from '@app/shared/components/text/Text'
-import { createThemedStyles } from '@app/shared/theme'
-import { useApp } from '@app/shared/useApp'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { RatingSummary } from '@shared/contracts'
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
@@ -23,7 +22,7 @@ function StarRating({
   disabled = false,
   size = 24,
 }: StarRatingProps) {
-  const { styles, theme } = useApp(useStyles)
+  const { styles, theme } = useTheme(useStyles)
   const [hoveredStar, setHoveredStar] = useState<number | null>(null)
 
   if (!styles) return null
