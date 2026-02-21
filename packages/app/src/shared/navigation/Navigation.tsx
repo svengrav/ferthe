@@ -63,7 +63,7 @@ export function Navigation() {
           name='Trails'
           component={TrailScreen}
           options={{
-            tabBarIcon: ({ color, size }) => <Icon name='line-axis' color={color} size={size} />,
+            tabBarIcon: ({ color, size }) => <Icon name='line-axis' color={color} size='md' />,
             headerShown: false,
             title: t.navigation.trails,
           }}
@@ -81,7 +81,7 @@ export function Navigation() {
           name='Map'
           component={MapScreen}
           options={{
-            tabBarIcon: ({ color, size }) => <Icon name='compass' color={color} size={size} />,
+            tabBarIcon: ({ color, size }) => <Icon name='compass' color={color} size='md' />,
             headerShown: false,
             title: t.navigation.map,
           }}
@@ -90,7 +90,7 @@ export function Navigation() {
           name='Socials'
           component={CommunityScreen}
           options={{
-            tabBarIcon: ({ color, size }) => <Icon name='people' color={color} size={size} />,
+            tabBarIcon: ({ color, size }) => <Icon name='people' color={color} size='md' />,
             headerShown: false,
             title: t.navigation.socials,
           }}

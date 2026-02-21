@@ -94,7 +94,7 @@ export const MapTrailSelector = () => {
   const swipeGesture = useSwipeUpGesture(openTrailSelector)
 
   return (
-    <GestureDetector gesture={swipeGesture}>
+    <GestureDetector gesture={swipeGesture} >
       <View style={styles.selector} id="map">
         {selectedTrail && (
           <TrailItem
@@ -116,12 +116,11 @@ export const MapTrailSelector = () => {
 
 const createStyles = (theme: Theme) => StyleSheet.create({
   selector: {
-    height: 66,
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     borderTopColor: theme.colors.divider,
     backgroundColor: theme.colors.surface,
     borderTopWidth: 1,
-    padding: 8,
+
   },
 })

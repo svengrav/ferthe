@@ -11,7 +11,7 @@ function SpotLockIcon() {
 
   return (
     <View style={styles.lockIconContainer}>
-      <Icon name="lock" size={20} color="white" />
+      <Icon name="lock" size='md' color="white" />
     </View>
   )
 }

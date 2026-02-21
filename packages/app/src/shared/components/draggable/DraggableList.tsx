@@ -1,8 +1,7 @@
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
-  runOnJS,
   SharedValue,
   useAnimatedStyle,
   useSharedValue,
@@ -11,12 +10,12 @@ import Animated, {
 
 import { Icon } from '@app/shared/components/icon/Icon'
 import { Theme, useTheme } from '@app/shared/theme'
-import Button from '../button/Button'
 
 interface DraggableListProps<T> {
   data: T[]
   keyExtractor: (item: T) => string
   renderItem: (item: T, index: number) => React.ReactNode
+  renderActions?: (item: T, index: number) => React.ReactNode
   onReorder: (fromIndex: number, toIndex: number) => void
   gap?: number
 }
@@ -28,7 +27,7 @@ const SPRING_CONFIG = { damping: 28, stiffness: 180, overshootClamping: true }
  * Long-press on the drag handle to activate, pan to reorder.
  */
 function DraggableList<T>(props: DraggableListProps<T>) {
-  const { data, keyExtractor, renderItem, onReorder, gap = 8 } = props
+  const { data, keyExtractor, renderItem, renderActions, onReorder, gap = 8 } = props
   const { styles, theme } = useTheme(createStyles)
 
   const activeIndex = useSharedValue(-1)
@@ -64,6 +63,7 @@ function DraggableList<T>(props: DraggableListProps<T>) {
           handleColor={theme.colors.secondary}
           handleSize={20}
           handlePadding={theme.tokens.spacing.sm}
+          actions={renderActions?.(item, index)}
         >
           {renderItem(item, index)}
         </DraggableItem>
@@ -76,6 +76,7 @@ function DraggableList<T>(props: DraggableListProps<T>) {
 
 interface DraggableItemProps {
   children: React.ReactNode
+  actions?: React.ReactNode
   index: number
   itemCount: number
   activeIndex: SharedValue<number>
@@ -130,6 +131,7 @@ function computeTargetIndex(
 function DraggableItem(props: DraggableItemProps) {
   const {
     children,
+    actions,
     index,
     itemCount,
     activeIndex,
@@ -142,6 +144,10 @@ function DraggableItem(props: DraggableItemProps) {
     handleSize,
     handlePadding,
   } = props
+
+  // Ref-based callback avoids deprecated runOnJS
+  const onReorderRef = useRef(onReorder)
+  onReorderRef.current = onReorder
 
   const gesture = Gesture.Pan()
     .activateAfterLongPress(200)
@@ -168,7 +174,7 @@ function DraggableItem(props: DraggableItemProps) {
       dragY.value = 0
 
       if (target !== from) {
-        runOnJS(onReorder)(from, target)
+        onReorderRef.current(from, target)
       }
     })
     .onFinalize(() => {
@@ -180,10 +186,10 @@ function DraggableItem(props: DraggableItemProps) {
   const animatedStyle = useAnimatedStyle(() => {
     const ai = activeIndex.value
 
-    // No drag active — reset
+    // No drag active — snap to position immediately (no spring)
     if (ai < 0) {
       return {
-        transform: [{ translateY: withSpring(0, SPRING_CONFIG) }],
+        transform: [{ translateY: 0 }],
         zIndex: 0,
         opacity: 1,
       }
@@ -198,7 +204,7 @@ function DraggableItem(props: DraggableItemProps) {
       }
     }
 
-    // Calculate target and determine shift
+    // Calculate target and determine shift (spring only during active drag)
     const heights = itemHeights.value
     const draggedHeight = heights[ai] || 0
     const target = computeTargetIndex(ai, dragY.value, heights, gap)
@@ -231,31 +237,33 @@ function DraggableItem(props: DraggableItemProps) {
       style={animatedStyle}
       onLayout={(e) => onMeasure(index, e.nativeEvent.layout.height)}
     >
-      <View style={itemStyles.row}>
-        <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
-          <GestureDetector gesture={gesture}>
-            <Animated.View style={{ padding: handlePadding }}>
-              <Icon name="drag-handle" size={handleSize} color={handleColor} />
-            </Animated.View>
-          </GestureDetector>
-          <Button dense label='TEST' />
-        </View>
+      <View style={itemStyles.toolbar}>
+        <GestureDetector gesture={gesture}>
+          <Animated.View style={{ padding: handlePadding }}>
+            <Icon name="drag-handle" size={'md'} />
+          </Animated.View>
+        </GestureDetector>
+        {actions && <View style={itemStyles.actions}>{actions}</View>}
+      </View>
 
-        <View style={itemStyles.content}>
-          {children}
-        </View>
+      <View style={itemStyles.content}>
+        {children}
       </View>
     </Animated.View>
   )
 }
 
 const itemStyles = StyleSheet.create({
-  row: {
-    alignItems: 'flex-start',
-    backgroundColor: 'red'
+  toolbar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   content: {
-    width: '100%',
     flex: 1,
   },
 })

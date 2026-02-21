@@ -57,7 +57,9 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
       imageBlobPath,
       blurredImageBlobPath,
       location: spotData.location,
+      contentBlocks: spotData.contentBlocks,
       options: spotData.options,
+      createdBy: spotData.createdBy,
       createdAt: spotData.createdAt,
       updatedAt: spotData.updatedAt,
     }

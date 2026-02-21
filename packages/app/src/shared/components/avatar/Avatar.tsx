@@ -31,7 +31,7 @@ function Avatar(props: AvatarProps) {
       <Pressable onPress={onPress} disabled={!onPress} >
         {showEditIcon && onPress && (
           <View style={styles.editBadge}>
-            <Icon name="edit" size={16} />
+            <Icon name="edit" size='md' />
           </View>
         )}
         <View style={styles.avatarContainer}>
@@ -43,7 +43,7 @@ function Avatar(props: AvatarProps) {
             style={styles.avatar}
             placeholder={
               <View style={styles.placeholder}>
-                <Icon name="person" size={size * 0.5} color="#999" />
+                <Icon name="person" size='md' color="#999" />
               </View>
             }
           />

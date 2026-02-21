@@ -7,27 +7,27 @@ import { create } from 'zustand'
 const MODAL_WIDTH_PERCENT = '80%'
 const OVERLAY_OPACITY = 'rgba(0, 0, 0, 0.5)'
 
+const AUTO_DISMISS_MS = 3000
+
 // Store
 interface NotificationState {
   visible: boolean
-  showNotification: () => void
-  hideNotification: () => void
   notification: { title: string; body: string }
-  setNotification: (data: { title: string; body: string }) => void
+  show: (title: string, body: string) => void
+  hide: () => void
 }
 
 export const useNotificationStore = create<NotificationState>()(set => ({
   visible: false,
-  showNotification: () => set({ visible: true }),
-  hideNotification: () => set({ visible: false }),
   notification: { title: '', body: '' },
-  setNotification: data => set({ notification: data }),
+  show: (title, body) => set({ visible: true, notification: { title, body } }),
+  hide: () => set({ visible: false, notification: { title: '', body: '' } }),
 }))
 
 export const setNotification = (title: string, body: string) => {
-  const { setNotification, showNotification } = useNotificationStore.getState()
-  setNotification({ title, body })
-  showNotification()
+  const { show, hide } = useNotificationStore.getState()
+  show(title, body)
+  setTimeout(hide, AUTO_DISMISS_MS)
 }
 
 /**
@@ -36,22 +36,19 @@ export const setNotification = (title: string, body: string) => {
  */
 function Notification() {
   const { styles } = useTheme(createStyles)
-  const { visible, hideNotification, notification } = useNotificationStore()
+  const { visible, hide, notification } = useNotificationStore()
 
-  // Don't show the modal if there's no notification data
-  if (notification.title === '' && notification.body === '') {
-    return null
-  }
+  if (!visible) return null
 
   return (
-    <Modal animationType='fade' transparent={true} visible={visible} onRequestClose={hideNotification}>
+    <Modal animationType='fade' transparent={true} visible={visible} onRequestClose={hide}>
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <Text variant='title'>{notification.title}</Text>
-            <Button icon='close' variant='outlined' onPress={hideNotification} />
+            <Button icon='close' variant='outlined' onPress={hide} />
           </View>
-          <Text variant='body'>{notification.body}</Text>
+          {!!notification.body && <Text variant='body'>{notification.body}</Text>}
         </View>
       </View>
     </Modal>

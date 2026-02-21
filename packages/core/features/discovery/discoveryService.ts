@@ -156,18 +156,17 @@ const getDiscoveredSpots = (accountId: string, discoveries: Discovery[], spots: 
     new Date(a.discoveredAt).getTime() - new Date(b.discoveredAt).getTime()
   )
 
-  return sortedDiscoveries.map(discovery => {
+  return sortedDiscoveries.reduce<DiscoverySpot[]>((acc, discovery) => {
     const spot = spots.find(s => s.id === discovery.spotId)
-    if (!spot) {
-      throw new Error(`Spot not found for discovery ${discovery.id}`)
-    }
-    return {
+    if (!spot) return acc // skip orphaned discoveries
+    acc.push({
       ...spot,
       discoveredAt: discovery.discoveredAt,
       discoveryId: discovery.id,
-      source: spot.createdBy === accountId ? 'created' : 'discovery', // All discovered spots have source set
-    }
-  })
+      source: spot.createdBy === accountId ? 'created' : 'discovery',
+    })
+    return acc
+  }, [])
 }
 /**
  * Determines valid targets for a user on a trail based on discovery mode
@@ -212,7 +211,10 @@ const createDiscovery = (accountId: string, spotId: string, trailId: string, sca
 }
 
 const getNewDiscoveries = (accountId: string, position: GeoLocation, spots: Spot[], discoveries: Discovery[], trail: Trail): Discovery[] => {
-  const undiscoveredSpots = spots.filter(spot => !discoveries.some(discovery => discovery.accountId === accountId && discovery.spotId === spot.id))
+  const undiscoveredSpots = spots.filter(spot =>
+    spot.createdBy !== accountId &&
+    !discoveries.some(discovery => discovery.accountId === accountId && discovery.spotId === spot.id)
+  )
   const newDiscoveries: Discovery[] = []
   for (const spot of undiscoveredSpots) {
     const distanceToSpot = geoUtils.calculateDistance(position, spot.location)
@@ -342,7 +344,7 @@ const getCluesBasedOnPreviewMode = (accountId: string, trail: Trail, discoveries
   const previewSpotIds = trailSpotIds.filter(spotId => !discoveredSpotIds.includes(spotId))
   return previewSpotIds
     .map(spotId => getDiscoverySpot(spotId, spots))
-    .filter(spot => spot && spot.options.visibility === 'preview')
+    .filter(spot => spot && spot.options.visibility === 'preview' && spot.createdBy !== accountId)
     .map(spot => createClue(spot as Spot, trail.id, 'preview'))
 }
 
@@ -403,7 +405,7 @@ const processLocationUpdate = (
   // Include new discoveries in explored spot IDs
   const exploredSpotIds = [...discoveries.filter(d => d.accountId === accountId).map(d => d.spotId), ...newDiscoveries.map(d => d.spotId)]
 
-  const snap = getDiscoverySnap(location, spots, exploredSpotIds, trail.options?.snapRadius || trail.options.scannerRadius)
+  const snap = getDiscoverySnap(location, spots.filter(s => s.createdBy !== accountId), exploredSpotIds, trail.options?.snapRadius || trail.options.scannerRadius)
 
   return {
     locationWithDirection: { location, direction },

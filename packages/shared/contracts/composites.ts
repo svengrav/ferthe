@@ -3,7 +3,7 @@ import { AccountContext } from './accounts.ts';
 import { Clue } from './discoveries.ts';
 import { ImageReference } from "./images.ts";
 import { QueryOptions, Result } from './results.ts';
-import { Spot, SpotPreview } from './spots.ts'
+import { Spot, SpotPreview } from './spots.ts';
 
 /**
  * Lightweight discovery summary for a single discovery.

@@ -15,43 +15,42 @@ const OPTION_PADDING = 8
 const FONT_SIZE = 14
 
 /**
- * Hook to calculate dropdown menu position based on anchor element
+ * Hook to calculate dropdown menu position based on anchor element.
+ * Centers the menu under the anchor when there is enough space,
+ * otherwise aligns to the closer screen edge.
  */
 const useMenuPosition = (
   anchorRef: React.RefObject<View | null>,
   isVisible: boolean,
   optionsCount: number
 ) => {
-  const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
     if (anchorRef?.current && isVisible) {
-      anchorRef.current.measure((x, y, width, height, pageX, pageY) => {
+      anchorRef.current.measure((_x, _y, width, height, pageX, pageY) => {
         const screenWidth = Dimensions.get('window').width
         const screenHeight = Dimensions.get('window').height
         const menuHeight = optionsCount * MENU_ITEM_HEIGHT
 
-        // Calculate x position to keep menu within screen bounds
-        let adjustedX = pageX
-        if (pageX + MENU_WIDTH > screenWidth) {
-          adjustedX = screenWidth - MENU_WIDTH - SCREEN_MARGIN
-        } else if (pageX < 0) {
-          adjustedX = SCREEN_MARGIN
-        }
+        // Center menu horizontally under anchor, then clamp to screen bounds
+        const centeredX = pageX + width / 2 - MENU_WIDTH / 2
+        const adjustedX = Math.max(
+          SCREEN_MARGIN,
+          Math.min(centeredX, screenWidth - MENU_WIDTH - SCREEN_MARGIN)
+        )
 
-        // Calculate y position to keep menu within screen bounds
+        // Place below anchor; flip above if not enough space
         let adjustedY = pageY + height
         if (pageY + height + menuHeight > screenHeight) {
           adjustedY = pageY - menuHeight
         }
-        if (adjustedY < 0) {
-          adjustedY = SCREEN_MARGIN
-        }
+        adjustedY = Math.max(SCREEN_MARGIN, adjustedY)
 
         setPosition({ x: adjustedX, y: adjustedY })
       })
     }
-  }, [anchorRef, isVisible, optionsCount])
+  }, [isVisible, optionsCount])
 
   return position
 }
@@ -73,11 +72,10 @@ function Dropdown({ isVisible, onClose, options, anchorRef }: DropdownMenuProps)
 
   if (!styles) return null
 
-  // Dynamic styles that depend on position
-  const menuPositionStyles = {
-    top: position.y,
-    left: position.x,
-  }
+  // Only render menu once position is measured to avoid blink at (0,0)
+  const menuPositionStyles = position
+    ? { top: position.y, left: position.x }
+    : { opacity: 0 as const }
 
   const handleOptionPress = (option: Option) => {
     option.onPress?.()

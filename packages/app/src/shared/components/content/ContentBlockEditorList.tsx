@@ -2,6 +2,8 @@ import { useCallback } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 import { Button } from '@app/shared/components'
+import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
+import { OrderedListContext, useOrderedList } from '@app/shared/hooks/useOrderedList'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 import { ContentBlock, ContentBlockType } from '@shared/contracts'
@@ -21,76 +23,62 @@ const generateBlockId = () => `block-${Date.now()}-${Math.random().toString(36).
 
 /**
  * Editor for a list of content blocks.
- * Supports drag-and-drop reorder, add, remove, and edit operations.
+ * Uses useOrderedList for state management and provides context for child access.
+ * Supports drag-and-drop reorder, add, and remove operations.
  */
 function ContentBlockEditorList(props: ContentBlockEditorListProps) {
   const { blocks, onChange } = props
   const { locales } = useApp()
   const { styles, theme } = useTheme(createStyles)
-
-  const sorted = [...blocks].sort((a, b) => a.order - b.order)
-
-  const updateBlock = (id: string, updated: ContentBlock) => {
-    onChange(blocks.map(b => b.id === id ? updated : b))
-  }
-
-  const removeBlock = (id: string) => {
-    onChange(blocks.filter(b => b.id !== id))
-  }
-
-  const handleReorder = useCallback((fromIndex: number, toIndex: number) => {
-    const reordered = [...sorted]
-    const [moved] = reordered.splice(fromIndex, 1)
-    reordered.splice(toIndex, 0, moved)
-
-    // Reassign order values based on new positions
-    onChange(reordered.map((block, i) => ({ ...block, order: i })))
-  }, [sorted, onChange])
+  const list = useOrderedList(blocks, onChange)
+  const { openDialog } = useRemoveDialog()
 
   const addBlock = (type: ContentBlockType) => {
     const maxOrder = blocks.length > 0 ? Math.max(...blocks.map(b => b.order)) : -1
-    const newBlock = createEmptyBlock(type, maxOrder + 1)
-    onChange([...blocks, newBlock])
+    list.add(createEmptyBlock(type, maxOrder + 1))
   }
 
-  const renderBlock = useCallback((block: ContentBlock, index: number) => (
+  const renderBlock = useCallback((block: ContentBlock) => (
     <View style={styles.blockWrapper}>
-      <View style={styles.blockActions}>
-        <Button
-          icon="close"
-          variant="outlined"
-          size="sm"
-          onPress={() => removeBlock(block.id)}
-        />
-      </View>
-      <BlockEditor block={block} onChange={(updated) => updateBlock(block.id, updated)} />
+      <BlockEditor block={block} onChange={(updated) => list.update(block.id, updated)} />
     </View>
-  ), [styles, locales])
+  ), [styles, list])
+
+  const renderActions = (block: ContentBlock) => (
+    <Button
+      icon="close"
+      variant="outlined"
+      size="sm"
+      onPress={() => openDialog({ onConfirm: () => list.remove(block.id) })}
+    />
+  )
 
   return (
-    <View style={styles.root}>
-      <DraggableList
-        data={sorted}
-        keyExtractor={(block) => block.id}
-        renderItem={renderBlock}
-        onReorder={handleReorder}
-        gap={theme.tokens.spacing.md}
-      />
+    <OrderedListContext.Provider value={list}>
+      <View style={styles.root}>
+        <DraggableList
+          data={list.items}
+          keyExtractor={(block) => block.id}
+          renderItem={renderBlock}
+          renderActions={renderActions}
+          onReorder={list.reorder}
+          gap={theme.tokens.spacing.md}
+        />
 
-      {/* Centered add block button with dropdown */}
-      <Button
-        icon="add"
-        variant="primary"
-        size="md"
-        style={styles.addButton}
-        options={[
-          { label: locales.contentBlocks.addText, onPress: () => addBlock('text') },
-          { label: locales.contentBlocks.addQuote, onPress: () => addBlock('quote') },
-          { label: locales.contentBlocks.addImage, onPress: () => addBlock('image') },
-          { label: locales.contentBlocks.addLink, onPress: () => addBlock('link') },
-        ]}
-      />
-    </View>
+        <Button
+          icon="add"
+          variant="primary"
+          size="md"
+          style={styles.addButton}
+          options={[
+            { label: locales.contentBlocks.addText, onPress: () => addBlock('text') },
+            { label: locales.contentBlocks.addQuote, onPress: () => addBlock('quote') },
+            { label: locales.contentBlocks.addImage, onPress: () => addBlock('image') },
+            { label: locales.contentBlocks.addLink, onPress: () => addBlock('link') },
+          ]}
+        />
+      </View>
+    </OrderedListContext.Provider>
   )
 }
 
@@ -138,15 +126,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     padding: theme.tokens.spacing.sm,
     gap: theme.tokens.spacing.sm,
     backgroundColor: theme.colors.surface,
-  },
-  blockActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: theme.tokens.spacing.xs,
-  },
-  addButtonContainer: {
-
-    alignItems: 'center',
   },
   addButton: {
     width: 44,

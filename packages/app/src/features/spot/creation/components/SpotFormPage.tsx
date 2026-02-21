@@ -4,6 +4,7 @@ import { StyleSheet } from 'react-native'
 import { getDeviceLocation } from '@app/features/sensor'
 import { getTrailSpotIds } from '@app/features/trail'
 import { Button, Page, Stack, StepIndicator, Text } from '@app/shared/components'
+import { setNotification } from '@app/shared/components/notification/Notification'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
 import { useStepNavigation } from '@app/shared/hooks/useStepNavigation'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
@@ -11,6 +12,7 @@ import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
 import { Spot } from '@shared/contracts'
+import { SpotLocation } from '../../components/SpotLocation'
 import { SpotContentFormValues, SpotOptionsFormValues } from '../services/spotFormSchema'
 import { buildCreateRequest, buildUpdateRequest, getSpotTrailIds } from '../services/spotFormService'
 import SpotConsentForm from './SpotConsentForm'
@@ -157,6 +159,7 @@ function SpotFormPage(props: SpotFormPageProps) {
       const result = await context.spotApplication.createSpot(request)
 
       if (result.success) {
+        setNotification(locales.spotCreation.created, '')
         onClose()
       } else {
         setError(result.error?.message ?? locales.spotCreation.error)
@@ -223,6 +226,8 @@ function SpotFormPage(props: SpotFormPageProps) {
         onForward={nav.isLastStep ? undefined : triggerCurrentStepSubmit}
         onStepPress={handleStepPress}
       />
+
+      <SpotLocation location={getDeviceLocation().location} />
 
       {/* Step content */}
       <Stack spacing="lg">

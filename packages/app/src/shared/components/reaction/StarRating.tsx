@@ -54,7 +54,7 @@ function StarRating({
         disabled={disabled}
         style={styles.starButton}
       >
-        <Icon name={iconName} size={size} color={color} />
+        <Icon name={iconName} size='md' color={color} />
       </Pressable>
     )
   }

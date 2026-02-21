@@ -37,7 +37,7 @@ function Page(props: PageProps) {
     : {}
 
   return (
-    <View style={[styles.page, { paddingTop: insets.top }, style]}>
+    <View style={[styles.page, { paddingTop: insets.top, paddingBottom: inset !== 'none' ? insets.bottom : 0 }, style]}>
       <PageHeader title={title} options={options} trailing={trailing} leading={leading} />
 
       <ContentContainer style={[styles.container, { paddingHorizontal: insetValue }]} {...contentProps}>

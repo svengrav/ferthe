@@ -53,9 +53,9 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     borderRadius: theme.tokens.borderRadius.md,
     backgroundColor: theme.colors.surface,
     alignSelf: 'center',
-    maxWidth: 500,
     position: 'absolute',
-    top: '20%',
+    top: '50%',
+    transform: [{ translateY: "-50%" }],
     left: theme.tokens.inset.md,
     right: theme.tokens.inset.md,
     padding: theme.tokens.inset.sm

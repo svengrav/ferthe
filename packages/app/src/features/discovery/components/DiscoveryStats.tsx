@@ -32,7 +32,7 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
   if (error || !styles) {
     return (
       <View style={[styles?.container, style]}>
-        <Icon name="warning" size={24} color={theme.colors.error} />
+        <Icon name="warning" size='lg' color={theme.colors.error} />
         <Text variant="caption" style={{ color: theme.colors.error }}>
           {error || 'Error loading stats'}
         </Text>
@@ -51,7 +51,7 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
 
         {/* Rank */}
         <View style={styles.statRow}>
-          <Icon name="trophy" size={20} color={theme.colors.primary} />
+          <Icon name="trophy" size='md' color={theme.colors.primary} />
           <View style={styles.statContent}>
             <Text variant="caption">{locales.discovery.stats.rank}</Text>
             <Text variant="body">
@@ -67,7 +67,7 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
 
         {/* Trail Position */}
         <View style={styles.statRow}>
-          <Icon name="map" size={20} color={theme.colors.secondary} />
+          <Icon name="map" size='md' color={theme.colors.secondary} />
           <View style={styles.statContent}>
             <Text variant="caption">{locales.discovery.stats.trailPosition}</Text>
             <Text variant="body">
@@ -83,7 +83,7 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
 
         {/* Time Since Last Discovery */}
         <View style={styles.statRow}>
-          <Icon name="timer" size={20} color={theme.colors.onSurface} />
+          <Icon name="timer" size='md' color={theme.colors.onSurface} />
           <View style={styles.statContent}>
             <Text variant="caption">{locales.discovery.stats.timeSinceLast}</Text>
             <Text variant="body">
@@ -94,7 +94,7 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
 
         {/* Distance From Last Discovery */}
         <View style={styles.statRow}>
-          <Icon name="near-me" size={20} color={theme.colors.onSurface} />
+          <Icon name="near-me" size='md' color={theme.colors.onSurface} />
           <View style={styles.statContent}>
             <Text variant="caption">{locales.discovery.stats.distanceFromLast}</Text>
             <Text variant="body">

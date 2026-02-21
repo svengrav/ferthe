@@ -22,6 +22,8 @@ const de: LocalizationSet = {
     more: 'Mehr',
     select: 'Auswählen',
     confirm: 'Ok',
+    remove: 'Entfernen',
+    confirmRemove: 'Entfernen bestätigen',
     status: 'Status',
     created: 'Erstellt',
   },

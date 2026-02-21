@@ -94,7 +94,7 @@ function MapScannerControl(props: MapScannerControlProps) {
     <View style={styles.controlsContainer}>
       <Animated.View style={animatedButtonStyle}>
         <Pressable onPress={handleStartScan} disabled={isOnCooldown}>
-          <Icon name="sensors" />
+          <Icon size='md' name="sensors" />
         </Pressable>
       </Animated.View>
     </View>

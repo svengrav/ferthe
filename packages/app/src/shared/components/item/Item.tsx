@@ -77,7 +77,7 @@ function Item(props: ItemProps) {
         {icon && (
           <Icon
             name={icon}
-            size={iconSize}
+            size='md'
             color={iconColor || theme.colors.onSurface}
           />
         )}

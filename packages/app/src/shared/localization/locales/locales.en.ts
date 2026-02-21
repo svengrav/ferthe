@@ -20,6 +20,8 @@ const en = {
     run: 'Run',
     more: 'More',
     select: 'Select',
+    remove: 'Remove',
+    confirmRemove: 'Are you sure you want to remove this?',
     status: 'Status',
     created: 'Created',
   },

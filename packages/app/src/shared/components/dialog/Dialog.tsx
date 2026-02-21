@@ -27,9 +27,10 @@ export function useRemoveDialog() {
     }) => setOverlay(
       'remove-dialog',
       <Dialog
-        title={locales.community.remove}
-        message={props.message || locales.community.confirmRemove}
+        title={locales.common.remove}
+        message={props.message || locales.common.confirmRemove}
         onClose={() => closeOverlay('remove-dialog')}
+        onCancel={props.onCancel ?? (() => closeOverlay('remove-dialog'))}
         {...props}
       />
     ),

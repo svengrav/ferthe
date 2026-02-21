@@ -93,7 +93,7 @@ function Button(props: ButtonProps) {
         disabled={disabled}
         style={buttonStyle}
         hitSlop={isIconOnly ? { top: 8, bottom: 8, left: 8, right: 8 } : undefined}>
-        {icon && <Icon name={icon} color={iconColor} size={iconSize} />}
+        {icon && <Icon name={icon} color={iconColor} size='md' />}
         {label && <Text style={textStyle}>{label}</Text>}
       </Pressable>
       {options && (

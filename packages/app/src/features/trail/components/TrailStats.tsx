@@ -32,7 +32,7 @@ function TrailStats(props: TrailStatsProps) {
   if (error || !styles) {
     return (
       <View style={[styles?.container, style]}>
-        <Icon name="warning" size={24} color={theme.colors.error} />
+        <Icon name="warning" size='md' color={theme.colors.error} />
         <Text variant="caption" style={{ color: theme.colors.error }}>
           {error || 'Error loading stats'}
         </Text>
@@ -73,7 +73,7 @@ function TrailStats(props: TrailStatsProps) {
 
         {/* Progress */}
         <View style={styles.statRow}>
-          <Icon name="map" size={20} color={theme.colors.primary} />
+          <Icon name="map" size='md' color={theme.colors.primary} />
           <View style={styles.statContent}>
             <Text variant="caption">{locales.trails.stats.progress}</Text>
             <Text variant="body">
@@ -89,7 +89,7 @@ function TrailStats(props: TrailStatsProps) {
 
         {/* Completion Status */}
         <View style={styles.statRow}>
-          <Icon name={getCompletionIcon()} size={20} color={getCompletionColor()} />
+          <Icon name={getCompletionIcon()} size='md' color={getCompletionColor()} />
           <View style={styles.statContent}>
             <Text variant="caption">{locales.trails.stats.status}</Text>
             <Text variant="body" style={{ color: getCompletionColor() }}>
@@ -100,7 +100,7 @@ function TrailStats(props: TrailStatsProps) {
 
         {/* Rank */}
         <View style={styles.statRow}>
-          <Icon name="trophy" size={20} color={theme.colors.secondary} />
+          <Icon name="trophy" size='md' color={theme.colors.secondary} />
           <View style={styles.statContent}>
             <Text variant="caption">{locales.trails.stats.rank}</Text>
             <Text variant="body">
@@ -118,7 +118,7 @@ function TrailStats(props: TrailStatsProps) {
 
         {/* Time Stats */}
         <View style={styles.statRow}>
-          <Icon name="timer" size={20} color={theme.colors.onSurface} />
+          <Icon name="timer" size='md' color={theme.colors.onSurface} />
           <View style={styles.statContent}>
             <Text variant="caption">{locales.trails.stats.averageTime}</Text>
             <Text variant="body">

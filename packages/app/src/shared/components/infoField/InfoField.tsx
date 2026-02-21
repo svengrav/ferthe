@@ -32,7 +32,7 @@ const InfoField: React.FC<InfoFieldProps> = ({
       <View style={styles.iconContainer}>
         <Icon
           name={icon}
-          size={iconSize}
+          size='md'
           color={iconColor || theme.colors.onSurface}
         />
       </View>
