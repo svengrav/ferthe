@@ -4,7 +4,9 @@ import { Controller, useFormContext } from 'react-hook-form'
 import { ContentBlockEditorList, Field, Form, FormInput, Stack } from '@app/shared/components'
 import { ContentBlock } from '@shared/contracts'
 
+import { useDeviceLocation } from '@app/features/sensor/stores/sensorStore'
 import { useLocalization } from '@app/shared/localization'
+import { SpotLocation } from '../../components/SpotLocation'
 import { createSpotContentSchema, SpotContentFormValues } from '../services/spotFormSchema'
 import SpotCardPicker from './SpotCardPicker'
 
@@ -48,6 +50,7 @@ function SpotContentForm(props: SpotContentFormProps) {
 function SpotContentFormFields() {
   const { locales } = useLocalization()
   const { control, watch } = useFormContext()
+  const { location } = useDeviceLocation();
 
   const name = watch('name')
   const imageUri: string | undefined = watch('imageBase64')
@@ -65,6 +68,8 @@ function SpotContentFormFields() {
           />
         )}
       />
+
+      <SpotLocation location={location} style={{ alignSelf: 'center' }} />
 
       <FormInput
         name="name"

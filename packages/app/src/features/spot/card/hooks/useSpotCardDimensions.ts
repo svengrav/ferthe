@@ -25,6 +25,12 @@ const SPOT_IMAGE_BORDER_RADIUS = 16
  */
 const SPOT_PADDING = 8
 
+/**
+ * Reference width for a standard spot card.
+ * Used to calculate relative scale for sub-components (e.g. SpotTitle).
+ */
+export const SPOT_CARD_BASE_WIDTH = 400
+
 export type SpotVariant = 'marker' | 'grid' | 'card' | 'responsive'
 
 interface UseSpotDimensionsOptions {

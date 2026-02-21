@@ -21,6 +21,6 @@ export {
 export { default as DiscoveryStats } from './components/DiscoveryStats'
 export { useDiscoveryStats } from './hooks/useDiscoveryStats'
 
+export { default as SpotRating } from '../spot/components/SpotRating'
 export { default as DiscoveryUserContentSection } from './components/DiscoveryUserContentSection'
-export { default as SpotRating } from './components/SpotRating'
 

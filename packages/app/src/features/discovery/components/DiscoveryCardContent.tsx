@@ -8,10 +8,10 @@ import { Theme, useTheme } from '@app/shared/theme'
 
 import { useLocalization } from '@app/shared/localization'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
+import SpotRating from '../../spot/components/SpotRating.tsx'
 import { DiscoveryEventState } from '../services/types'
 import DiscoveryShareSection from './DiscoveryShareSection'
 import DiscoveryUserContentSection from './DiscoveryUserContentSection'
-import SpotRating from './SpotRating'
 
 const PAGE_PADDING = 16
 const RESERVED_UI_SPACE = 200

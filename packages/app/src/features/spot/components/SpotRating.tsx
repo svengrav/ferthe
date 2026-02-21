@@ -1,10 +1,12 @@
+import { useAccountId } from '@app/features/account'
 import StarRating from '@app/shared/components/reaction/StarRating'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { RatingSummary } from '@shared/contracts'
 import { View } from 'react-native'
-import { DiscoveryApplication } from '../application'
-import { useSpotRatingSummary } from '../stores/spotRatingStore'
+import { DiscoveryApplication } from '../../discovery/application.ts'
+import { useSpotRatingSummary } from '../../discovery/stores/spotRatingStore.ts'
+import { useSpot } from '../stores/spotStore'
 
 interface SpotRatingProps {
   spotId: string
@@ -30,15 +32,16 @@ const useRatingHandler = (spotId: string, ratingSummary: RatingSummary, discover
  * Renders star rating section for spots.
  * Encapsulates rating logic and state management.
  */
-function SpotRating({
-  spotId,
-}: SpotRatingProps) {
+function SpotRating({ spotId }: SpotRatingProps) {
   const { styles } = useTheme(useStyles)
   const { discoveryApplication } = getAppContextStore()
   const ratingSummary = useSpotRatingSummary(spotId)
+  const spot = useSpot(spotId)
+  const accountId = useAccountId()
 
   if (!spotId || !styles) return null
 
+  const isOwnSpot = !!spot?.createdBy && spot.createdBy === accountId
   const { handleRate } = useRatingHandler(spotId, ratingSummary, discoveryApplication)
 
   return (
@@ -46,6 +49,7 @@ function SpotRating({
       <StarRating
         summary={ratingSummary}
         onRate={handleRate}
+        disabled={isOwnSpot}
       />
     </View>
   )

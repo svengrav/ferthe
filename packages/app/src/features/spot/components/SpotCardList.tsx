@@ -118,7 +118,6 @@ function SpotCardList<T extends SpotCardListItem>({
         horizontal
         showsHorizontalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={{ width: gap }} />}
-        contentContainerStyle={{ paddingHorizontal: gap }}
         style={style}
       />
     )

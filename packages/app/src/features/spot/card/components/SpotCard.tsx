@@ -1,5 +1,6 @@
 import { ImageReference } from '@shared/contracts'
 import { StyleProp, View, ViewStyle } from 'react-native'
+import { SPOT_CARD_BASE_WIDTH } from '../hooks/useSpotCardDimensions'
 import SpotContainer from './SpotContainer'
 import SpotGradientFrame from './SpotGradientFrame'
 import SpotImage from './SpotImage'
@@ -44,7 +45,7 @@ function SpotCard({
       style={style}
     >
       <SpotGradientFrame colors={['#a341fffd', 'rgba(65, 73, 185, 0.767)']} padding={4}>
-        <SpotTitle title={title} />
+        <SpotTitle title={title} scale={Math.max(0.6, width / SPOT_CARD_BASE_WIDTH)} />
         {isLocked ? (
           <>
             {blurredImage

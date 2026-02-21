@@ -84,8 +84,8 @@ const useStyles = createThemedStyles(theme => ({
     padding: theme.tokens.spacing.xs / 2,
   },
   summary: {
-    fontSize: 14,
-    color: theme.colors.onSurface,
+    fontSize: theme.tokens.fontSize.sm,
+    color: theme.opacity(theme.colors.onSurface, 0.5),
   },
 }))
 

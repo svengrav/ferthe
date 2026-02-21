@@ -9,15 +9,15 @@ import { Theme, useTheme } from '@app/shared/theme'
 
 import DiscoveryStats from '@app/features/discovery/components/DiscoveryStats'
 import DiscoveryUserContentSection from '@app/features/discovery/components/DiscoveryUserContentSection'
-import SpotRating from '@app/features/discovery/components/SpotRating'
+import SpotRating from '@app/features/spot/components/SpotRating.tsx'
 import { useLocalization } from '@app/shared/localization'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
+import { formatDate } from '@app/shared/utils/dateTimeUtils.ts'
 import SpotCard from '../card/components/SpotCard'
 import { useSpotCardDimensions } from '../card/hooks/useSpotCardDimensions'
-import { useEditSpotPage } from '../creation/components/SpotFormPage'
+import { useEditSpotPage } from '../creation/components/SpotCreationPage.tsx'
 import { useSpotWithDiscovery } from '../hooks/useSpotWithDiscovery'
 import { SpotLocation } from './SpotLocation'
-import SpotStatus from './SpotStatus'
 
 export const useSpotPage = () => ({
   showSpotPage: (spotId: string) => {
@@ -41,7 +41,7 @@ interface SpotPageProps {
  */
 function SpotPage(props: SpotPageProps) {
   const { spotId, onClose } = props
-  const { styles } = useTheme(createStyles)
+  const { styles, theme } = useTheme(createStyles)
   const { locales } = useLocalization()
   const context = getAppContextStore()
   const { width, height } = useSpotCardDimensions()
@@ -94,7 +94,7 @@ function SpotPage(props: SpotPageProps) {
       {spot && (
         <PageTabs variant="chips" defaultTab="overview">
           <PageTab id="overview" label={locales.trails.overview}>
-            <Stack spacing='md'>
+            <Stack spacing='lg'>
               <SpotCard
                 style={{ alignSelf: 'center' }}
                 width={width}
@@ -103,14 +103,23 @@ function SpotPage(props: SpotPageProps) {
                 blurredImage={spot.blurredImage}
                 title={spot.name}
               />
-              <View style={{ flexDirection: 'row', gap: 4 }}>
-                <SpotStatus spot={spot} discovery={discovery} />
-                <SpotLocation location={spot.location} />
-                <Text variant="body">{spot.createdAt?.toDateString()}</Text>
+              <SpotLocation location={spot.location} style={{ alignSelf: 'center' }} />
 
+              <View style={{ borderWidth: 1, borderColor: theme.colors.divider, padding: theme.tokens.spacing.md, backgroundColor: theme.colors.background, borderRadius: theme.tokens.borderRadius.md }}>
+                <SpotRating spotId={spotId} />
+
+                <View style={{ flexDirection: 'row', }}>
+                  <View style={{ flex: 1 }}>
+                    <Text variant="caption">Created</Text>
+                    <Text variant="body">{formatDate(spot.createdAt)}</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text variant="caption">Entdeckt</Text>
+                    <Text variant="body">{formatDate(discovery?.discoveredAt)}</Text>
+                  </View>
+                </View>
               </View>
 
-              <SpotRating spotId={spotId} />
 
               <Text variant='section'>Description</Text>
               <Text variant='body'>{spot.description}</Text>
@@ -144,6 +153,13 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: theme.tokens.spacing.sm,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    gap: theme.tokens.spacing.sm,
+  },
+  metaCell: {
+    flex: 1,
   },
 })
 

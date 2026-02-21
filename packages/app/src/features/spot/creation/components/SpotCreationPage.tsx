@@ -11,14 +11,13 @@ import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 
 import { useLocalization } from '@app/shared/localization'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { Spot } from '@shared/contracts'
-import { SpotLocation } from '../../components/SpotLocation'
 import { SpotContentFormValues, SpotOptionsFormValues } from '../services/spotFormSchema'
 import { buildCreateRequest, buildUpdateRequest, getSpotTrailIds } from '../services/spotFormService'
 import SpotConsentForm from './SpotConsentForm'
 import SpotContentForm from './SpotContentForm'
 import SpotOptionsForm from './SpotOptionsForm'
-import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 type SpotFormStep = 'content' | 'options' | 'consent'
 
@@ -251,7 +250,6 @@ function SpotFormPage(props: SpotFormPageProps) {
         onStepPress={handleStepPress}
       />
 
-      <SpotLocation location={getDeviceLocation().location} />
 
       {/* Step content */}
       <Stack spacing="lg">

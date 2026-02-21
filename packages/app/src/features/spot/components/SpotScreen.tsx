@@ -3,14 +3,14 @@ import { useSettingsPage } from '@app/features/settings/components/SettingsPage'
 import { Button, Page, Text } from '@app/shared/components'
 import Header from '@app/shared/components/header/Header'
 import { useLocalization } from '@app/shared/localization'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useMemo } from 'react'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
-import { useCreateSpotPage } from '../creation/components/SpotFormPage'
+import { useCreateSpotPage } from '../creation/components/SpotCreationPage.tsx'
 import { useSpots } from '../stores/spotStore'
 import SpotCardList from './SpotCardList'
 import { useSpotPage } from './SpotPage'
-import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 /**
  * Spot screen component that displays latest discovered spots.
@@ -43,7 +43,7 @@ function SpotScreen() {
   const isRefreshing = status === 'loading'
 
   return (
-    <Page options={[{ label: locales.navigation.settings, onPress: showSettings }]}>
+    <Page scrollable options={[{ label: locales.navigation.settings, onPress: showSettings }]}>
       <Header
         title={locales.navigation.feed}
         trailing={<Button icon="add" onPress={showCreateSpotPage} />}
@@ -53,7 +53,7 @@ function SpotScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         {mySpots.length > 0 && (
-          <View style={styles.section}>
+          <View style={styles.section} id="my-spots">
             <Text variant="section" style={styles.sectionTitle}>{locales.spotCreation.mySpots}</Text>
             <SpotCardList
               items={mySpots}
@@ -63,7 +63,7 @@ function SpotScreen() {
           </View>
         )}
         {discoveredSpots.length > 0 && (
-          <View style={styles.section}>
+          <View style={styles.section} id="my-discoveries">
             <Text variant="section" style={styles.sectionTitle}>{locales.discovery.discoveries}</Text>
             <SpotCardList
               items={discoveredSpots}

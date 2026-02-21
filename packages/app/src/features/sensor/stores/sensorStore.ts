@@ -74,3 +74,5 @@ export const getSensorActions = () => ({
 
 export const getDeviceLocation = () => sensorStore.getState().device
 export const getSensorData = () => sensorStore.getState()
+
+export const useDeviceLocation = () => sensorStore(state => state.device)

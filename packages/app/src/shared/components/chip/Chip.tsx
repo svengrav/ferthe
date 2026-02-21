@@ -1,5 +1,6 @@
-import { Theme, useThemeStore } from '@app/shared/theme'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { themedVariants, useVariants } from '@app/shared/theme/variants'
+import { StyleProp, Text, TouchableOpacity, View, ViewStyle } from 'react-native'
+import Icon, { IconName } from '../icon/Icon'
 import { ComponentSize, ComponentVariant, DisableableProps } from '../types'
 
 interface ChipProps extends DisableableProps {
@@ -7,84 +8,79 @@ interface ChipProps extends DisableableProps {
   onPress?: () => void
   variant?: ComponentVariant
   size?: ComponentSize
+  style?: StyleProp<ViewStyle>
+  icon?: IconName
 }
 
-function Chip({ label, onPress, variant = 'primary', size = 'md', disabled = false }: ChipProps) {
-  const theme = useThemeStore()
-  const styles = createStyles(theme, variant, size)
-
+function Chip({ label, icon, onPress, variant = 'primary', size = 'md', disabled = false, style }: ChipProps) {
+  const chip = useVariants(chipStyle, { variant, size })
+  const chipText = useVariants(chipTextStyle, { variant, size })
+  const chipIcon = useVariants(chipIconStyle, { variant, size })
   const ChipContainer = onPress ? TouchableOpacity : View
 
   return (
-    <ChipContainer style={styles.chip} onPress={onPress} disabled={disabled}>
-      <Text style={styles.chipText}>{label}</Text>
+    <ChipContainer style={[chip, style]} onPress={onPress} disabled={disabled} >
+      {icon && <Icon name={icon} style={chipIcon} />}
+      <Text style={chipText}>{label}</Text>
     </ChipContainer>
   )
 }
 
 export default Chip
 
-const createStyles = (
-  theme: Theme,
-  variant: ComponentVariant,
-  size: ComponentSize
-) => {
-  // Variant styles
-  let backgroundColor, borderColor, textColor
-  switch (variant) {
-    case 'secondary':
-      backgroundColor = theme.colors.surface
-      borderColor = theme.colors.onSurface
-      textColor = theme.colors.onSurface
-      break
-    case 'outlined':
-      backgroundColor = 'transparent'
-      borderColor = theme.colors.onSurface
-      textColor = theme.colors.onSurface
-      break
-    case 'primary':
-    default:
-      backgroundColor = theme.colors.onSurface
-      borderColor = 'transparent'
-      textColor = theme.colors.surface
-      break
-  }
-
-  // Size styles
-  let paddingVertical, paddingHorizontal, fontSize
-  switch (size) {
-    case 'sm':
-      paddingVertical = 2
-      paddingHorizontal = 8
-      fontSize = 12
-      break
-    case 'lg':
-      paddingVertical = 8
-      paddingHorizontal = 20
-      fontSize = 18
-      break
-    case 'md':
-    default:
-      paddingVertical = 4
-      paddingHorizontal = 12
-      fontSize = 14
-      break
-  }
-
-  return StyleSheet.create({
-    chip: {
-      alignSelf: 'flex-start',
-      flexDirection: 'row',
-      backgroundColor,
-      borderRadius: 16,
-      paddingVertical,
-      paddingHorizontal,
-      borderWidth: variant === 'outlined' ? 1 : 0,
-      borderColor,
+const chipStyle = themedVariants({
+  base: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    borderRadius: 16,
+  },
+  variants: {
+    variant: {
+      primary: (t) => ({ backgroundColor: t.colors.onSurface, borderWidth: 0 }),
+      secondary: (t) => ({ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.onSurface }),
+      outlined: (t) => ({ backgroundColor: 'transparent', borderWidth: 1, borderColor: t.colors.onSurface }),
     },
-    chipText: {
-      color: textColor,
-      fontSize,
+    size: {
+      sm: { paddingVertical: 2, paddingHorizontal: 8 },
+      md: { paddingVertical: 4, paddingHorizontal: 12 },
+      lg: { paddingVertical: 8, paddingHorizontal: 20 },
     },
-  })
-}
+  },
+  defaultVariants: { variant: 'primary', size: 'md' },
+})
+
+const chipIconStyle = themedVariants({
+  base: {
+    marginRight: 4,
+    alignSelf: 'center'
+  },
+  variants: {
+    variant: {
+      primary: (t) => ({ color: t.colors.surface }),
+      secondary: (t) => ({ color: t.colors.onSurface }),
+      outlined: (t) => ({ color: t.colors.onSurface }),
+    },
+    size: {
+      sm: { fontSize: 12 },
+      md: { fontSize: 14 },
+      lg: { fontSize: 18 },
+    },
+  },
+  defaultVariants: { variant: 'primary', size: 'md' },
+})
+
+const chipTextStyle = themedVariants({
+  variants: {
+    variant: {
+      primary: (t) => ({ color: t.colors.surface }),
+      secondary: (t) => ({ color: t.colors.onSurface }),
+      outlined: (t) => ({ color: t.colors.onSurface }),
+    },
+    size: {
+      sm: { fontSize: 12 },
+      md: { fontSize: 14 },
+      lg: { fontSize: 18 },
+    },
+  },
+  defaultVariants: { variant: 'primary', size: 'md' },
+})
