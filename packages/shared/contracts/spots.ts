@@ -12,6 +12,7 @@ export interface SpotContent {
   name: string
   description: string
   imageBase64?: string // Base64-encoded image data for upload
+  contentBlocks?: ContentBlock[]
 }
 
 /**

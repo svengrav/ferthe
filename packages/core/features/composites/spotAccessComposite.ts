@@ -8,6 +8,7 @@ import {
   Spot,
   SpotAccessCompositeContract,
   SpotApplicationContract,
+  SpotPreview,
 } from '@shared/contracts/index.ts'
 
 export interface SpotAccessCompositeOptions {
@@ -48,6 +49,51 @@ export function createSpotAccessComposite(options: SpotAccessCompositeOptions): 
         }
 
         return createSuccessResult(spotsResult.data || [])
+      } catch (error: any) {
+        return createErrorResult('GET_SPOTS_ERROR', { originalError: error.message })
+      }
+    },
+
+    async getAccessibleSpot(context: AccountContext, spotId: string): Promise<Result<Spot | SpotPreview | undefined>> {
+      try {
+        const accountId = context.accountId
+        if (!accountId) {
+          return createErrorResult('ACCOUNT_ID_REQUIRED')
+        }
+
+        // Fetch spot to check ownership
+        const spotResult = await spotApplication.getSpot(context, spotId)
+        if (!spotResult.success) {
+          return spotResult
+        }
+
+        const spot = spotResult.data
+        if (!spot) {
+          return createSuccessResult(undefined)
+        }
+
+        // Creators always have access to their own spots
+        if (spot.createdBy === accountId) {
+          return createSuccessResult(spot)
+        }
+
+        // All others must have discovered the spot
+        const discoveredIdsResult = await discoveryApplication.getDiscoveredSpotIds(context)
+        if (!discoveredIdsResult.success || !discoveredIdsResult.data) {
+          return createErrorResult('GET_SPOTS_ERROR', { reason: 'Failed to resolve discovered spot IDs' })
+        }
+
+        if (discoveredIdsResult.data.includes(spotId)) {
+          return createSuccessResult(spot)
+        }
+
+        // Not discovered — return preview data only (no name, location, or description)
+        const previewResult = await spotApplication.getSpotPreviewsByIds(context, [spotId])
+        if (!previewResult.success || !previewResult.data?.length) {
+          return createSuccessResult(undefined)
+        }
+
+        return createSuccessResult(previewResult.data[0])
       } catch (error: any) {
         return createErrorResult('GET_SPOTS_ERROR', { originalError: error.message })
       }

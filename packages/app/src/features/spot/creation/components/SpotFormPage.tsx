@@ -1,21 +1,26 @@
-import { useMemo, useState } from 'react'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { useRef, useState } from 'react'
+import { StyleSheet } from 'react-native'
 
-import { getDeviceLocation } from '@app/features/sensor/stores/sensorStore'
-import { trailStore } from '@app/features/trail/stores/trailStore'
-import { Button, Page, Stack, Text } from '@app/shared/components'
+import { getDeviceLocation } from '@app/features/sensor'
+import { getTrailSpotIds } from '@app/features/trail'
+import { Button, Page, Stack, StepIndicator, Text } from '@app/shared/components'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
+import { useStepNavigation } from '@app/shared/hooks/useStepNavigation'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
 import { Spot } from '@shared/contracts'
-import { SpotFormStep, useSpotFormNavigation } from '../hooks/useSpotFormNavigation'
 import { SpotContentFormValues, SpotOptionsFormValues } from '../services/spotFormSchema'
 import { buildCreateRequest, buildUpdateRequest, getSpotTrailIds } from '../services/spotFormService'
 import SpotConsentForm from './SpotConsentForm'
 import SpotContentForm from './SpotContentForm'
 import SpotOptionsForm from './SpotOptionsForm'
+
+type SpotFormStep = 'content' | 'options' | 'consent'
+
+const CREATE_STEPS: SpotFormStep[] = ['content', 'options', 'consent']
+const EDIT_STEPS: SpotFormStep[] = ['content', 'options']
 
 const CREATE_OVERLAY_KEY = 'spot-creation'
 
@@ -57,7 +62,7 @@ function SpotFormPage(props: SpotFormPageProps) {
   const { locales, context } = useApp()
   const { styles } = useTheme(createStyles)
   const { convertToBase64 } = useImageToBase64()
-  const nav = useSpotFormNavigation(isEditMode)
+  const nav = useStepNavigation(isEditMode ? EDIT_STEPS : CREATE_STEPS)
 
   // Collected data from completed steps
   const [contentData, setContentData] = useState<SpotContentFormValues | null>(null)
@@ -65,28 +70,37 @@ function SpotFormPage(props: SpotFormPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string>()
 
-  // Consent state (not form-managed — simple checkboxes)
-  const [consent, setConsent] = useState({
-    permission: false,
-    copyright: false,
-    appropriate: false,
-    privacy: false,
-    responsibility: false,
-  })
+  // Refs to trigger form submission from outside (StepIndicator forward/step press)
+  const contentSubmitRef = useRef<(() => void) | undefined>(undefined)
+  const optionsSubmitRef = useRef<(() => void) | undefined>(undefined)
+
+  const triggerCurrentStepSubmit = () => {
+    if (nav.currentStep === 'content') contentSubmitRef.current?.()
+    else if (nav.currentStep === 'options') optionsSubmitRef.current?.()
+  }
+
+  const handleStepPress = (step: SpotFormStep) => {
+    const targetIndex = (isEditMode ? EDIT_STEPS : CREATE_STEPS).indexOf(step)
+    if (targetIndex < nav.stepIndex) nav.goToStep(step)
+    else if (targetIndex > nav.stepIndex) triggerCurrentStepSubmit()
+  }
+
+  // Consent state — single confirm checkbox
+  const [consent, setConsent] = useState(false)
 
   // --- Default values ---
 
-  const contentDefaults = useMemo<SpotContentFormValues>(() => ({
+  const contentDefaults: SpotContentFormValues = {
     name: spot?.name ?? '',
     description: spot?.description ?? '',
     imageBase64: spot?.image?.url,
     contentBlocks: spot?.contentBlocks ?? [],
-  }), [spot])
+  }
 
-  const optionsDefaults = useMemo<SpotOptionsFormValues>(() => ({
+  const optionsDefaults: SpotOptionsFormValues = {
     visibility: spot?.options.visibility ?? 'preview',
-    trailIds: spot ? getSpotTrailIds(spot.id, trailStore.getState().trailSpotIds) : [],
-  }), [spot])
+    trailIds: spot ? getSpotTrailIds(spot.id, getTrailSpotIds()) : [],
+  }
 
   // Use last-confirmed data when re-entering a step, or defaults on first visit
   const currentContentValues = contentData ?? contentDefaults
@@ -186,13 +200,6 @@ function SpotFormPage(props: SpotFormPageProps) {
     }
   }
 
-  // --- Submit label per step ---
-
-  const getSubmitLabel = (): string => {
-    if (nav.currentStep === 'options' && isEditMode) return locales.common.save
-    return locales.common.next
-  }
-
   return (
     <Page
       title={isEditMode ? locales.spotCreation.editTitle : locales.spotCreation.title}
@@ -205,20 +212,17 @@ function SpotFormPage(props: SpotFormPageProps) {
       }
       scrollable
     >
-      {/* Step indicator */}
-      <View style={styles.stepIndicator}>
-        {nav.steps.map((step, i) => (
-          <Pressable
-            key={step}
-            style={[styles.stepDot, i <= nav.stepIndex && styles.stepDotActive]}
-            onPress={() => nav.goToStep(step)}
-          >
-            <Text variant="caption" style={i <= nav.stepIndex ? styles.stepTextActive : undefined}>
-              {stepLabels[step]}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+
+      <StepIndicator
+        steps={nav.steps}
+        currentIndex={nav.stepIndex}
+        labels={stepLabels}
+        isFirstStep={nav.isFirstStep}
+        isLastStep={nav.isLastStep}
+        onBack={nav.isFirstStep ? undefined : nav.goBack}
+        onForward={nav.isLastStep ? undefined : triggerCurrentStepSubmit}
+        onStepPress={handleStepPress}
+      />
 
       {/* Step content */}
       <Stack spacing="lg">
@@ -226,7 +230,7 @@ function SpotFormPage(props: SpotFormPageProps) {
           <SpotContentForm
             defaultValues={currentContentValues}
             onSubmit={handleContentComplete}
-            submitLabel={locales.common.next}
+            submitRef={contentSubmitRef}
           />
         )}
 
@@ -234,7 +238,7 @@ function SpotFormPage(props: SpotFormPageProps) {
           <SpotOptionsForm
             defaultValues={currentOptionsValues}
             onSubmit={handleOptionsComplete}
-            submitLabel={getSubmitLabel()}
+            submitRef={optionsSubmitRef}
           />
         )}
 
@@ -254,22 +258,6 @@ function SpotFormPage(props: SpotFormPageProps) {
 }
 
 const createStyles = (theme: Theme) => StyleSheet.create({
-  stepIndicator: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: theme.tokens.spacing.lg,
-    paddingVertical: theme.tokens.spacing.md,
-  },
-  stepDot: {
-    alignItems: 'center',
-    opacity: 0.4,
-  },
-  stepDotActive: {
-    opacity: 1,
-  },
-  stepTextActive: {
-    color: theme.colors.primary,
-  },
   error: {
     color: theme.colors.error,
   },

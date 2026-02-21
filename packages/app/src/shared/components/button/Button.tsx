@@ -1,6 +1,6 @@
 import { Theme, useTheme } from '@app/shared/theme'
 import { useRef, useState } from 'react'
-import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native'
+import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native'
 import Dropdown from '../dropdown/Dropdown.tsx'
 import { Icon, IconSymbolName } from '../icon/Icon'
 import { DisableableProps, Option, SizeableProps, VariantableProps } from '../types'
@@ -11,7 +11,7 @@ interface ButtonProps extends DisableableProps, SizeableProps, VariantableProps 
   onPress?: () => void
   dense?: boolean
   options?: Option[]
-  style?: ViewStyle
+  style?: StyleProp<ViewStyle>
 }
 
 /**

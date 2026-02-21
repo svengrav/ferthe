@@ -1,17 +1,26 @@
-import { useMemo } from 'react'
+import { MutableRefObject, useEffect } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 
 import { useTrails } from '@app/features/trail/stores/trailStore'
-import { ChipMultiSelect, Form, FormPicker, FormSubmitButton, Stack, Text } from '@app/shared/components'
+import { ChipMultiSelect, Form, FormPicker, Stack, Text } from '@app/shared/components'
 import { useApp } from '@app/shared/useApp'
 import { Trail } from '@shared/contracts'
 
-import { createSpotOptionsSchema, SpotOptionsFormValues } from '../services/spotFormSchema'
+import { SpotOptionsFormValues, spotOptionsSchema } from '../services/spotFormSchema'
 
 interface SpotOptionsFormProps {
   defaultValues: SpotOptionsFormValues
   onSubmit: (data: SpotOptionsFormValues) => void
-  submitLabel: string
+  submitRef?: MutableRefObject<(() => void) | undefined>
+}
+
+/** Registers the form's submit handler into an external ref. Must be rendered inside Form context. */
+function SubmitBridge({ submitRef, onSubmit }: { submitRef: MutableRefObject<(() => void) | undefined>, onSubmit: (data: SpotOptionsFormValues) => void }) {
+  const { handleSubmit } = useFormContext()
+  useEffect(() => {
+    submitRef.current = handleSubmit(onSubmit)
+  })
+  return null
 }
 
 /**
@@ -19,18 +28,18 @@ interface SpotOptionsFormProps {
  * Uses Form + zod schema for validation.
  */
 function SpotOptionsForm(props: SpotOptionsFormProps) {
-  const { defaultValues, onSubmit, submitLabel } = props
-  const schema = useMemo(() => createSpotOptionsSchema(), [])
+  const { defaultValues, onSubmit, submitRef } = props
 
   return (
-    <Form schema={schema} defaultValues={defaultValues} onSubmit={onSubmit}>
-      <SpotOptionsFormFields submitLabel={submitLabel} />
+    <Form schema={spotOptionsSchema} defaultValues={defaultValues} onSubmit={onSubmit}>
+      {submitRef && <SubmitBridge submitRef={submitRef} onSubmit={onSubmit} />}
+      <SpotOptionsFormFields />
     </Form>
   )
 }
 
 /** Inner fields rendered inside Form context. */
-function SpotOptionsFormFields({ submitLabel }: { submitLabel: string }) {
+function SpotOptionsFormFields() {
   const { locales } = useApp()
   const { control, watch } = useFormContext()
   const trails = useTrails()
@@ -77,8 +86,6 @@ function SpotOptionsFormFields({ submitLabel }: { submitLabel: string }) {
       ) : (
         <Text variant="caption">{locales.spotCreation.noTrailsSelected}</Text>
       )}
-
-      <FormSubmitButton label={submitLabel} />
     </Stack>
   )
 }

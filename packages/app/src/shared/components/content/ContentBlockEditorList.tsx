@@ -78,20 +78,18 @@ function ContentBlockEditorList(props: ContentBlockEditorListProps) {
       />
 
       {/* Centered add block button with dropdown */}
-      <View style={styles.addButtonContainer}>
-        <Button
-          icon="add"
-          variant="primary"
-          size="md"
-          style={styles.addButton}
-          options={[
-            { label: locales.contentBlocks.addText, onPress: () => addBlock('text') },
-            { label: locales.contentBlocks.addQuote, onPress: () => addBlock('quote') },
-            { label: locales.contentBlocks.addImage, onPress: () => addBlock('image') },
-            { label: locales.contentBlocks.addLink, onPress: () => addBlock('link') },
-          ]}
-        />
-      </View>
+      <Button
+        icon="add"
+        variant="primary"
+        size="md"
+        style={styles.addButton}
+        options={[
+          { label: locales.contentBlocks.addText, onPress: () => addBlock('text') },
+          { label: locales.contentBlocks.addQuote, onPress: () => addBlock('quote') },
+          { label: locales.contentBlocks.addImage, onPress: () => addBlock('image') },
+          { label: locales.contentBlocks.addLink, onPress: () => addBlock('link') },
+        ]}
+      />
     </View>
   )
 }
@@ -131,6 +129,7 @@ function createEmptyBlock(type: ContentBlockType, order: number): ContentBlock {
 const createStyles = (theme: Theme) => StyleSheet.create({
   root: {
     gap: theme.tokens.spacing.md,
+    paddingVertical: theme.tokens.spacing.lg
   },
   blockWrapper: {
     borderWidth: 1,
@@ -146,6 +145,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     gap: theme.tokens.spacing.xs,
   },
   addButtonContainer: {
+
     alignItems: 'center',
   },
   addButton: {

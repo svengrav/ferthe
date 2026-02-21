@@ -97,6 +97,7 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
       name: request.content.name,
       description: request.content.description,
       image: imageRef,
+      contentBlocks: request.content.contentBlocks,
       location: request.location,
       options: {
         discoveryRadius: 50,
@@ -274,6 +275,7 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
           ...spot,
           name: updates.content?.name ?? spot.name,
           description: updates.content?.description ?? spot.description,
+          contentBlocks: updates.content?.contentBlocks ?? spot.contentBlocks,
           imageBlobPath,
           blurredImageBlobPath,
           options: {

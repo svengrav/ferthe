@@ -1,19 +1,26 @@
-import { useEffect, useMemo } from 'react'
+import { MutableRefObject, useEffect, useMemo } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
-import { StyleSheet, View } from 'react-native'
 
-import { Button, ContentBlockEditorList, Field, Form, FormInput, FormSubmitButton, Stack } from '@app/shared/components'
-import { useImagePicker } from '@app/shared/hooks/useImagePicker'
+import { ContentBlockEditorList, Field, Form, FormInput, Stack } from '@app/shared/components'
 import { useApp } from '@app/shared/useApp'
 import { ContentBlock } from '@shared/contracts'
 
-import SpotCard from '../../card/components/SpotCard'
 import { createSpotContentSchema, SpotContentFormValues } from '../services/spotFormSchema'
+import SpotCardPicker from './SpotCardPicker'
 
 interface SpotContentFormProps {
   defaultValues: SpotContentFormValues
   onSubmit: (data: SpotContentFormValues) => void
-  submitLabel: string
+  submitRef?: MutableRefObject<(() => void) | undefined>
+}
+
+/** Registers the form's submit handler into an external ref. Must be rendered inside Form context. */
+function SubmitBridge({ submitRef, onSubmit }: { submitRef: MutableRefObject<(() => void) | undefined>, onSubmit: (data: SpotContentFormValues) => void }) {
+  const { handleSubmit } = useFormContext()
+  useEffect(() => {
+    submitRef.current = handleSubmit(onSubmit)
+  })
+  return null
 }
 
 /**
@@ -21,7 +28,7 @@ interface SpotContentFormProps {
  * Uses Form + zod schema for field validation.
  */
 function SpotContentForm(props: SpotContentFormProps) {
-  const { defaultValues, onSubmit, submitLabel } = props
+  const { defaultValues, onSubmit, submitRef } = props
   const { locales } = useApp()
 
   const schema = useMemo(
@@ -31,31 +38,29 @@ function SpotContentForm(props: SpotContentFormProps) {
 
   return (
     <Form schema={schema} defaultValues={defaultValues} onSubmit={onSubmit}>
-      <SpotContentFormFields submitLabel={submitLabel} />
+      {submitRef && <SubmitBridge submitRef={submitRef} onSubmit={onSubmit} />}
+      <SpotContentFormFields />
     </Form>
   )
 }
 
 /** Inner fields rendered inside Form context. */
-function SpotContentFormFields({ submitLabel }: { submitLabel: string }) {
+function SpotContentFormFields() {
   const { locales } = useApp()
   const { control, watch } = useFormContext()
 
   const name = watch('name')
   const imageUri: string | undefined = watch('imageBase64')
-  const previewImage = imageUri ? { id: 'preview', url: imageUri } : undefined
 
   return (
     <Stack spacing="md">
-      {/* Live spot card preview with integrated image picker */}
       <Controller
         control={control}
         name="imageBase64"
         render={({ field: { onChange } }) => (
-          <SpotCardImagePicker
-            name={name}
+          <SpotCardPicker
+            name={name || undefined}
             imageUri={imageUri}
-            previewImage={previewImage}
             onChange={onChange}
           />
         )}
@@ -86,73 +91,8 @@ function SpotContentFormFields({ submitLabel }: { submitLabel: string }) {
           </Field>
         )}
       />
-
-      <FormSubmitButton label={submitLabel} />
     </Stack>
   )
 }
-
-/** SpotCard with image picker. Syncs picked image URI into form field. */
-function SpotCardImagePicker({ name, imageUri, previewImage, onChange }: {
-  name: string
-  imageUri?: string
-  previewImage?: { id: string; url: string }
-  onChange: (value: string | undefined) => void
-}) {
-  const { locales } = useApp()
-  const { selectedImageUri, pickImage } = useImagePicker()
-
-  // Sync picked image into form field
-  useEffect(() => {
-    if (selectedImageUri) onChange(selectedImageUri)
-  }, [selectedImageUri])
-
-  return (
-    <View style={styles.cardContainer}>
-      <SpotCard
-        width={300}
-        height={500}
-        title={name || undefined}
-        image={previewImage}
-      >
-        {!imageUri && (
-          <Button
-            icon="image"
-            label={locales.spotCreation.addPhoto}
-            variant="outlined"
-            onPress={pickImage}
-          />
-        )}
-      </SpotCard>
-      {imageUri && (
-        <View style={styles.changePhotoRow}>
-          <Button
-            label={locales.spotCreation.changePhoto}
-            variant="outlined"
-            size="sm"
-            onPress={pickImage}
-          />
-          <Button
-            icon="close"
-            variant="outlined"
-            size="sm"
-            onPress={() => onChange(undefined)}
-          />
-        </View>
-      )}
-    </View>
-  )
-}
-
-const styles = StyleSheet.create({
-  cardContainer: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  changePhotoRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-})
 
 export default SpotContentForm

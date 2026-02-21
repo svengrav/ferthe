@@ -3,7 +3,7 @@ import { AccountContext } from './accounts.ts';
 import { Clue } from './discoveries.ts';
 import { ImageReference } from "./images.ts";
 import { QueryOptions, Result } from './results.ts';
-import { Spot } from './spots.ts';
+import { Spot, SpotPreview } from './spots.ts'
 
 /**
  * Lightweight discovery summary for a single discovery.
@@ -73,6 +73,8 @@ export interface ActivateTrailResult {
 export interface SpotAccessCompositeContract {
   /** Returns only spots the user has discovered */
   getAccessibleSpots: (context: AccountContext, trailId?: string, options?: QueryOptions) => Promise<Result<Spot[]>>
+  /** Returns full Spot if discovered/creator, SpotPreview (blurred, no sensitive data) otherwise */
+  getAccessibleSpot: (context: AccountContext, spotId: string) => Promise<Result<Spot | SpotPreview | undefined>>
 }
 
 /**

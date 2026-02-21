@@ -69,3 +69,4 @@ export const getTrailData = () => ({
 export const getTrails = () => Object.values(trailStore.getState().byId)
 export const getTrailsById = () => trailStore.getState().byId
 export const getTrail = (trailId: string) => trailStore.getState().byId[trailId]
+export const getTrailSpotIds = () => trailStore.getState().trailSpotIds

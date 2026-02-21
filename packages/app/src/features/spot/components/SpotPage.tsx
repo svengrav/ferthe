@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 import { useAccountId } from '@app/features/account'
@@ -7,8 +8,7 @@ import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useApp } from '@app/shared/useApp'
 
-import { DiscoveryStats, DiscoveryUserContentSection } from '@app/features/discovery'
-import SpotRating from '@app/features/discovery/components/SpotRating'
+import { DiscoveryStats, DiscoveryUserContentSection, SpotRating } from '@app/features/discovery'
 import SpotCard from '../card/components/SpotCard'
 import { useSpotCardDimensions } from '../card/hooks/useSpotCardDimensions'
 import { useEditSpotPage } from '../creation/components/SpotFormPage'
@@ -47,6 +47,11 @@ function SpotPage(props: SpotPageProps) {
   const { openDialog } = useRemoveDialog()
 
   const isOwner = spot?.createdBy === accountId
+
+  // Load rating summary when the page opens
+  useEffect(() => {
+    context.discoveryApplication.getSpotRatingSummary(spotId)
+  }, [spotId])
 
   const handleEdit = () => {
     if (!spot) return
@@ -105,7 +110,7 @@ function SpotPage(props: SpotPageProps) {
                 <ContentBlockList blocks={spot.contentBlocks} />
               )}
 
-              <Text variant="caption">{spot.createdAt.toDateString()}</Text>
+              <Text variant="caption">{spot.createdAt?.toDateString()}</Text>
 
               {discovery && <DiscoveryUserContentSection id={discovery.id} />}
 

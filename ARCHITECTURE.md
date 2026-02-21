@@ -12,10 +12,27 @@ Screen
 
 
 ### Features
-The app is organized into features, which are self-contained modules that encapsulate a specific functionality or domain. Each feature has its own folder structure and can contain screens, pages, components, and stores related to that feature.
-- Sometimes it is neccessary to use components or pages from other features. In this case, it is recommended to create a new component or page within the current feature that wraps the component or page from the other feature. This allows for better separation of concerns and makes it easier to manage the dependencies between features.
-- Features should expose a public API that other features can use to interact with it. This can include functions to open and close pages, as well as any other functions that are necessary for other features to interact with it.
-- Try to avoid to directly use components or pages from other features, as this can create tight coupling between features and make it harder to manage the dependencies between them. Instead, use the public API of the feature to interact with it.
+The app is organized into features, which are self-contained modules that encapsulate a specific functionality or domain. Each feature has its own folder structure and can contain screens, pages, components, hooks, stores, and services.
+
+**Every feature exposes a public API exclusively via its `index.ts` barrel.** All cross-feature access must go through this barrel — never by importing from internal paths like `../other-feature/stores/someStore` or `../other-feature/components/SomeComponent`.
+
+The public API of a feature consists of two kinds of exports:
+
+1. **Application** (`application.ts`) — async actions that mutate state or call the backend (e.g., `createSpot`, `updateSpot`). Accessed via `useApp().context.<featureApplication>`.
+2. **Reactive hooks and getters** — exported directly from `index.ts` for reading state reactively (e.g., `useTrails`, `getDeviceLocation`). Use hooks when the consuming component needs to re-render on changes; use getters for one-time reads outside of render (e.g., in submit handlers).
+
+```ts
+// ✅ Correct — accessing another feature via its barrel
+import { useTrails, getTrailSpotIds } from '@app/features/trail'
+import { getDeviceLocation } from '@app/features/sensor'
+
+// ❌ Wrong — direct import from internal feature path
+import { trailStore } from '@app/features/trail/stores/trailStore'
+import { getDeviceLocation } from '@app/features/sensor/stores/sensorStore'
+```
+
+- UI components from other features should not be imported directly. If a cross-feature UI element is needed, wrap it in a component within the consuming feature.
+- If a hook or getter is missing from a feature's barrel, add it there — do not reach into the internals.
 
 ### Screen
 
@@ -74,4 +91,7 @@ The app is organized into features, which are self-contained modules that encaps
 - Discovery domain applies `filterSpotByUserStatus()` to enforce data visibility rules
 
 ## Rules
-- Avoid using stores of an other feature. Always ask the specific feature appliaction for the data you need. 
+- **Never import from internal feature paths.** Only use a feature's `index.ts` barrel.
+- **Use reactive hooks for state reads in components** (e.g., `useTrails()`); use getters for one-time reads outside render (e.g., in submit handlers).
+- **Async actions go through the application layer** (`context.spotApplication.createSpot(...)`), not by calling services or stores directly.
+- If a needed hook or getter is not yet exported from a feature's barrel, add it there rather than reaching into internals.

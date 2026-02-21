@@ -47,10 +47,8 @@ export function createSpotContentSchema(messages: ValidationMessages) {
   })
 }
 
-/** Create zod schema for spot options step (visibility, trail assignment). */
-export function createSpotOptionsSchema() {
-  return z.object({
-    visibility: z.enum(['preview', 'hidden']),
-    trailIds: z.array(z.string()),
-  })
-}
+/** Zod schema for spot options step (visibility, trail assignment). */
+export const spotOptionsSchema = z.object({
+  visibility: z.enum(['preview', 'hidden']),
+  trailIds: z.array(z.string()),
+})

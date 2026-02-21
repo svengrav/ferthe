@@ -251,13 +251,8 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'GET',
       version: 'v1',
       url: '/spot/spots/:id',
-      // TODO: Enhanced access control implementation recommended
-      // Currently allows authenticated access. Consider adding:
-      // - Ownership check (spot.createdBy === context.accountId)
-      // - Admin role verification
-      // - Discovery verification (check if user discovered the spot)
       handler: asyncRequestHandler<Spot | undefined, { id: string }, never>(async ({ params, context }) => {
-        return await spotApplication.getSpot(context, params!.id)
+        return await spotAccessComposite.getAccessibleSpot(context, params!.id)
       }),
     },
     {

@@ -11,6 +11,7 @@ import Animated, {
 
 import { Icon } from '@app/shared/components/icon/Icon'
 import { Theme, useTheme } from '@app/shared/theme'
+import Button from '../button/Button'
 
 interface DraggableListProps<T> {
   data: T[]
@@ -231,11 +232,15 @@ function DraggableItem(props: DraggableItemProps) {
       onLayout={(e) => onMeasure(index, e.nativeEvent.layout.height)}
     >
       <View style={itemStyles.row}>
-        <GestureDetector gesture={gesture}>
-          <Animated.View style={{ padding: handlePadding }}>
-            <Icon name="drag-handle" size={handleSize} color={handleColor} />
-          </Animated.View>
-        </GestureDetector>
+        <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
+          <GestureDetector gesture={gesture}>
+            <Animated.View style={{ padding: handlePadding }}>
+              <Icon name="drag-handle" size={handleSize} color={handleColor} />
+            </Animated.View>
+          </GestureDetector>
+          <Button dense label='TEST' />
+        </View>
+
         <View style={itemStyles.content}>
           {children}
         </View>
@@ -246,10 +251,11 @@ function DraggableItem(props: DraggableItemProps) {
 
 const itemStyles = StyleSheet.create({
   row: {
-    flexDirection: 'row',
     alignItems: 'flex-start',
+    backgroundColor: 'red'
   },
   content: {
+    width: '100%',
     flex: 1,
   },
 })

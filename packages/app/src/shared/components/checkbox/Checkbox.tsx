@@ -1,5 +1,6 @@
+import { Text } from '@app/shared/components/'
 import { Theme, useThemeStore } from '@app/shared/theme'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 
 interface CheckboxProps {
   checked: boolean
@@ -21,17 +22,16 @@ export const Checkbox = ({
   const theme = useThemeStore()
   const styles = createStyles(theme, checked, disabled, size, variant)
   return (
-    <TouchableOpacity
+    <Pressable
       style={styles.container}
       onPress={disabled ? undefined : onPress}
       disabled={disabled}
-      activeOpacity={0.7}
     >
       <View style={styles.checkbox}>
         {checked && <Text style={styles.checkmark}>✓</Text>}
       </View>
       {label && <Text>{label}</Text>}
-    </TouchableOpacity>
+    </Pressable>
   )
 }
 
@@ -41,6 +41,7 @@ const createStyles = (theme: Theme, checked: boolean, disabled: boolean, size: '
       flexDirection: 'row',
       alignItems: 'center',
       opacity: disabled ? 0.5 : 1,
+      gap: theme.tokens.spacing.md
     },
     checkbox: {
       width: 16,

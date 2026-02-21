@@ -2,7 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { ReactNode } from 'react'
 import { StyleSheet, View } from 'react-native'
 
-const DEFAULT_GRADIENT_COLORS = ['#3a3fa7fd', 'rgb(46, 46, 112)'] as const
+const DEFAULT_GRADIENT_COLORS = ['#a341fffd', 'rgba(65, 73, 185, 0.767)'] as const
 
 interface SpotGradientFrameProps {
   colors?: readonly [string, string, ...string[]]
