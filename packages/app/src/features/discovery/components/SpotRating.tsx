@@ -1,10 +1,10 @@
 import StarRating from '@app/shared/components/reaction/StarRating'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { RatingSummary } from '@shared/contracts'
 import { View } from 'react-native'
 import { DiscoveryApplication } from '../application'
 import { useSpotRatingSummary } from '../stores/spotRatingStore'
-import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 interface SpotRatingProps {
   spotId: string

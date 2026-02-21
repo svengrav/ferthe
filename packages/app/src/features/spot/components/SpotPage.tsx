@@ -11,13 +11,13 @@ import DiscoveryStats from '@app/features/discovery/components/DiscoveryStats'
 import DiscoveryUserContentSection from '@app/features/discovery/components/DiscoveryUserContentSection'
 import SpotRating from '@app/features/discovery/components/SpotRating'
 import { useLocalization } from '@app/shared/localization'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import SpotCard from '../card/components/SpotCard'
 import { useSpotCardDimensions } from '../card/hooks/useSpotCardDimensions'
 import { useEditSpotPage } from '../creation/components/SpotFormPage'
 import { useSpotWithDiscovery } from '../hooks/useSpotWithDiscovery'
 import { SpotLocation } from './SpotLocation'
 import SpotStatus from './SpotStatus'
-import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 export const useSpotPage = () => ({
   showSpotPage: (spotId: string) => {

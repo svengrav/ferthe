@@ -1,12 +1,12 @@
 import { Button, Text } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 import { useState } from 'react'
 import { Animated, View } from 'react-native'
 import { useDiscoveryContent } from '../stores/discoveryContentStore'
 import { useDiscoveryContentEditorCard } from './DiscoveryContentEditor'
-import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 interface DiscoveryUserContentSectionProps {
   id: string
