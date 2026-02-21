@@ -153,7 +153,8 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
           return { success: false, error: { message: 'Failed to list spots', code: 'GET_SPOTS_ERROR' } }
         }
 
-        let spots = spotsResult.data || []
+        let spots = (spotsResult.data || [])
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
         // Check if images should be enriched
         const shouldEnrichImages = options?.exclude?.includes('images') ? false :
