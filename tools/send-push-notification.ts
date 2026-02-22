@@ -32,10 +32,14 @@ import * as dotenv from 'dotenv'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-// Load .env from project root (parent directory of tools/)
+// Load .env from project root and core package
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const envPath = resolve(__dirname, '..', '.env')
-dotenv.config({ path: envPath })
+const rootEnvPath = resolve(__dirname, '..', '.env')
+const coreEnvPath = resolve(__dirname, '..', 'packages', 'core', '.env')
+
+// Try core/.env first (where backend config usually lives), then root/.env
+dotenv.config({ path: coreEnvPath })
+dotenv.config({ path: rootEnvPath })
 
 interface PushOptions {
   accountId: string
