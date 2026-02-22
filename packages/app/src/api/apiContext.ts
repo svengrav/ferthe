@@ -36,8 +36,10 @@ import {
   TrailRating,
   TrailSpot,
   TrailStats,
-  UpdateSpotRequest
+  UpdateSpotRequest,
+  WelcomeDiscoveryResult
 } from '@shared/contracts'
+import { GeoLocation } from '@shared/geo'
 import { APIError, createAPIClient } from './client'
 import { checkStatus, serializeQueryOptions, StatusResult } from './utils'
 
@@ -132,6 +134,9 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
 
       getDiscoveryTrailStats: (_context: AccountContext, trailId: string) =>
         API.send<TrailStats>(`/trail/trails/${trailId}/stats`),
+
+      createWelcomeDiscovery: (_context: AccountContext, location: GeoLocation) =>
+        API.send<WelcomeDiscoveryResult>('/discovery/welcome', 'POST', { location }),
     },
 
     /**

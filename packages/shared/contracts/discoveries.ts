@@ -6,8 +6,18 @@ import { QueryOptions, Result } from './results.ts'
 import { RatingSummary, Spot, SpotRating } from "./spots.ts"
 import { Trail, TrailStats } from './trails.ts'
 
+/**
+ * Result of creating a welcome discovery after onboarding.
+ * Contains the auto-generated spot and the persisted discovery record.
+ */
+export interface WelcomeDiscoveryResult {
+  discovery: Discovery
+  spot: Spot
+}
+
 export interface DiscoveryApplicationContract {
   processLocation: (context: AccountContext, locationWithDirection: LocationWithDirection, trailId: string) => Promise<Result<DiscoveryLocationRecord>>
+  createWelcomeDiscovery: (context: AccountContext, location: GeoLocation) => Promise<Result<WelcomeDiscoveryResult>>
   getDiscoveries: (context: AccountContext, trailId?: string, options?: QueryOptions) => Promise<Result<Discovery[]>>
   getDiscovery: (context: AccountContext, discoveryId: string) => Promise<Result<Discovery | undefined>>
   getDiscoveredSpotIds: (context: AccountContext, trailId?: string) => Promise<Result<string[]>>

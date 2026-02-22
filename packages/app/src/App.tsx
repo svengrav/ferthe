@@ -22,6 +22,7 @@ import { configureAppContext } from './appContext'
 import { config } from './config'
 import { getSession } from './features/account/'
 import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
+import { showOnboardingIfNeeded } from './features/account/components/AccountOnboarding.tsx'
 import { useDiscoveryEventCard } from './features/discovery/hooks/useDiscovery'
 import { getDeviceConnector } from './features/sensor/device/deviceConnector'
 import { useSettingsSync } from './features/settings/hooks/useSettingsSync'
@@ -94,6 +95,7 @@ const useAppInitialization = () => {
         ]).catch(error => logger.error('Error loading initial app data:', error))
 
         await SplashScreen.hideAsync()
+        showOnboardingIfNeeded()
         setIsReady(true)
       } catch (err) {
         logger.error('Error during app initialization:', err)

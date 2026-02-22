@@ -40,7 +40,8 @@ import {
   TrailRating,
   TrailSpot,
   TrailStats,
-  UpdateSpotRequest
+  UpdateSpotRequest,
+  WelcomeDiscoveryResult
 } from '@shared/contracts/index.ts'
 import { manifest } from './manifest.ts'
 import { Route } from './oak/types.ts'
@@ -143,6 +144,16 @@ const createRoutes = (ctx: APIContract): Route[] => {
       url: '/discovery/profile',
       handler: asyncRequestHandler<DiscoveryProfile>(async ({ context: session, body }) => {
         return await discoveryApplication.updateDiscoveryProfile(session, body)
+      }),
+    },
+
+    // Welcome Discovery
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/discovery/welcome',
+      handler: asyncRequestHandler<WelcomeDiscoveryResult>(async ({ context, body }) => {
+        return await discoveryApplication.createWelcomeDiscovery(context, body.location)
       }),
     },
 

@@ -8,7 +8,13 @@ export enum ThemeMode {
   Light = 'light',
 }
 
+export interface AppFlags {
+  hasSeenOnboarding: boolean
+  // add more flags here as needed
+}
+
 export interface Settings {
   theme: ThemeMode
   language: LanguageOptions
+  flags: AppFlags
 }

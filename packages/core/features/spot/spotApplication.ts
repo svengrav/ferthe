@@ -35,14 +35,15 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
   }
 
   // Create spot from raw Spot data (internal/admin usage)
-  const createSpotFromData = async (context: AccountContext, spotData: Omit<Spot, 'id' | 'slug'>): Promise<Result<Spot>> => {
+  const createSpotFromData = async (context: AccountContext, spotData: Omit<StoredSpot, 'id' | 'slug'>): Promise<Result<Spot>> => {
     const id = createCuid2()
     const slug = createSlug(spotData.name)
 
-    const imageBlobPath = spotData.image?.url ? extractBlobPathFromUrl(spotData.image.url) : undefined
+    // Use provided blob paths directly, or derive from image URL as fallback
+    const imageBlobPath = spotData.imageBlobPath ?? (spotData.image?.url ? extractBlobPathFromUrl(spotData.image.url) : undefined)
 
-    let blurredImageBlobPath: string | undefined
-    if (imageBlobPath) {
+    let blurredImageBlobPath: string | undefined = spotData.blurredImageBlobPath
+    if (!blurredImageBlobPath && imageBlobPath) {
       const lastDot = imageBlobPath.lastIndexOf('.')
       blurredImageBlobPath = lastDot === -1
         ? `${imageBlobPath}-blurred`

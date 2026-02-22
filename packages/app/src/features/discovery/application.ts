@@ -36,6 +36,8 @@ export interface DiscoveryApplication {
   rateSpot: (spotId: string, rating: number) => Promise<Result<void>>
   removeSpotRating: (spotId: string) => Promise<Result<void>>
   getSpotRatingSummary: (spotId: string) => Promise<Result<RatingSummary>>
+  // Welcome Discovery
+  createWelcomeDiscovery: (location: GeoLocation) => Promise<Result<DiscoveryEventState>>
 }
 
 type DiscoveryApplicationOptions = {
@@ -466,6 +468,29 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     return await discoveryAPI.getDiscoveryStats(session.data, discoveryId)
   }
 
+  const createWelcomeDiscovery = async (location: GeoLocation): Promise<Result<DiscoveryEventState>> => {
+    const session = await getSession()
+    if (!session.data) return { success: false, error: { message: 'Account session not found', code: 'SESSION_NOT_FOUND' } }
+
+    const result = await discoveryAPI.createWelcomeDiscovery(session.data, location)
+    if (!result.success || !result.data) return { success: false, error: result.error }
+
+    const { discovery, spot } = result.data
+
+    // Persist in local stores
+    const { upsertSpot } = getSpotActions()
+    const { upsertDiscoveries, setDiscoveryEvent } = getDiscoveryActions()
+    upsertSpot(spot)
+    upsertDiscoveries([discovery])
+
+    const cards = discoveryService.createDiscoveryCards([discovery], getSpots())
+    const card = cards[0]
+    setDiscoveryEvent(card)
+    emitNewDiscoveries([card])
+
+    return { success: true, data: card }
+  }
+
   return {
     getDiscoveryCards,
     setActiveTrail,
@@ -479,5 +504,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     rateSpot,
     removeSpotRating,
     getSpotRatingSummary,
+    createWelcomeDiscovery,
   }
 }

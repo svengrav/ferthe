@@ -1,12 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-import { LanguageOptions, Settings, ThemeMode } from '../types/types'
+import { AppFlags, LanguageOptions, Settings, ThemeMode } from '../types/types'
 
 interface SettingsStore {
   settings: Settings
   isLoading: boolean
   saveSettings: (settings: Partial<Settings>) => void
+  setFlag: (flag: Partial<AppFlags>) => void
 }
 
 const settingsStore = create<SettingsStore>()(
@@ -16,12 +17,23 @@ const settingsStore = create<SettingsStore>()(
       settings: {
         theme: ThemeMode.Dark,
         language: LanguageOptions.English,
+        flags: {
+          hasSeenOnboarding: false,
+        },
       },
       saveSettings: (updatedSettings: Partial<Settings>) => {
         set(state => ({
           settings: {
             ...state.settings,
             ...updatedSettings,
+          },
+        }))
+      },
+      setFlag: (flag: Partial<AppFlags>) => {
+        set(state => ({
+          settings: {
+            ...state.settings,
+            flags: { ...state.settings.flags, ...flag },
           },
         }))
       },
