@@ -108,6 +108,7 @@ router.get("/api/:language/blog", async (context) => {
 
           posts.push({
             slug,
+            url: `/api/${language}/blog/${slug}`,
             title: metadata.title || 'Untitled',
             date: metadata.date || '',
             language: metadata.language,
