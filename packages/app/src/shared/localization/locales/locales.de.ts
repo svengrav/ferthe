@@ -43,7 +43,7 @@ const de: LocalizationSet = {
     trails: 'Pfade',
     feed: 'Spots',
     map: 'Karte',
-    about: 'Über uns',
+    about: 'ferthe',
     account: 'Konto',
     socials: 'Soziales',
   },

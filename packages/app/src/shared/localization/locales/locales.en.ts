@@ -41,7 +41,7 @@ const en = {
     trails: 'Trails',
     feed: 'Spots',
     map: 'Map',
-    about: 'About',
+    about: 'ferthe',
     account: 'Account',
     socials: 'Socials',
   },
