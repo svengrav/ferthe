@@ -44,4 +44,3 @@ yarn-error.*
 *.tsbuildinfo
 .vite
 
-google-services.json

@@ -1,0 +1,32 @@
+{
+  "project_info": {
+    "project_number": "162900310838",
+    "project_id": "ferthe-app",
+    "storage_bucket": "ferthe-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:162900310838:android:c6cf871d48955c77879197",
+        "android_client_info": {
+          "package_name": "de.ferthe.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA31rLlneDZSnzYl6_tvfKfJ4wFIDUg07I"
+        },
+        {
+          "current_key": "AIzaSyDO_CcUe4jf653lWOMcHvG24tPtIVJIMoo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
