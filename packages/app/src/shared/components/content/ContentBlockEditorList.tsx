@@ -57,28 +57,28 @@ function ContentBlockEditorList(props: ContentBlockEditorListProps) {
     <OrderedListContext.Provider value={list}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={styles.root}>
-        <DraggableList
-          data={list.items}
-          keyExtractor={(block) => block.id}
-          renderItem={renderBlock}
-          renderActions={renderActions}
-          onReorder={list.reorder}
-          gap={theme.tokens.spacing.md}
-        />
+          <DraggableList
+            data={list.items}
+            keyExtractor={(block) => block.id}
+            renderItem={renderBlock}
+            renderActions={renderActions}
+            onReorder={list.reorder}
+            gap={theme.tokens.spacing.md}
+          />
 
-        <Button
-          icon="add"
-          variant="primary"
-          size="md"
-          style={styles.addButton}
-          options={[
-            { label: locales.contentBlocks.addText, onPress: () => addBlock('text') },
-            { label: locales.contentBlocks.addQuote, onPress: () => addBlock('quote') },
-            { label: locales.contentBlocks.addImage, onPress: () => addBlock('image') },
-            { label: locales.contentBlocks.addLink, onPress: () => addBlock('link') },
-          ]}
-        />
-      </View>
+          <Button
+            icon="add"
+            variant="primary"
+            size="md"
+            style={styles.addButton}
+            options={[
+              { label: locales.contentBlocks.addText, onPress: () => addBlock('text') },
+              { label: locales.contentBlocks.addQuote, onPress: () => addBlock('quote') },
+              { label: locales.contentBlocks.addImage, onPress: () => addBlock('image') },
+              { label: locales.contentBlocks.addLink, onPress: () => addBlock('link') },
+            ]}
+          />
+        </View>
       </KeyboardAvoidingView>
     </OrderedListContext.Provider>
   )
