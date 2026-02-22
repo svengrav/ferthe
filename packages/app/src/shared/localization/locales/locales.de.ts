@@ -122,6 +122,7 @@ const de: LocalizationSet = {
     fertheWebsite: 'Ferthe Webseite',
     storyIntro: 'Die Reise beginnt...',
     aboutText: 'Ferthe ist eine Anwendung, die dir hilft, Informationspfade zu entdecken und zu verfolgen.',
+    latestPosts: 'Neueste Beiträge',
   },
   notifications: {
     enable: 'Benachrichtigungen aktivieren',

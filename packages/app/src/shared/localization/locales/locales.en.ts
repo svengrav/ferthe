@@ -121,6 +121,7 @@ const en = {
     storyIntro: 'Somewhere in Münster, in the heart of Europe, a fox picks up a trail. Not in haste, but with intent. Focused. Curious. Always moving forward.',
     aboutText:
       'Ferthe follows that spirit – helping you stay on top of things in a world overflowing with information. Rooted in European values: transparency, self-determination, and digital sovereignty. Thoughtfully built in Münster – where history, progress, and quality of life meet.',
+    latestPosts: 'Latest Posts',
   },
   notifications: {
     enable: 'Enable notifications',
