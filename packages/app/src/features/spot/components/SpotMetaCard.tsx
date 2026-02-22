@@ -33,10 +33,10 @@ function SpotMetaCard({ spotId, createdBy, createdAt, discoveredAt }: SpotMetaCa
         </View>
         <View style={styles.cell}>
           <Text variant="caption">{locales.spot.rating}</Text>
-          <SpotRating spotId={spotId} style={{ alignSelf: 'flex-start', paddingVertical: theme.tokens.spacing.sm }} />
+          <SpotRating spotId={spotId} style={styles.rating} />
         </View>
       </View>
-      <Divider size='lg' />
+      <Divider />
       <View style={styles.row}>
         <View style={styles.cell}>
           <Text variant="caption">{locales.spot.created}</Text>
@@ -52,6 +52,10 @@ function SpotMetaCard({ spotId, createdBy, createdAt, discoveredAt }: SpotMetaCa
 }
 
 const useStyles = createThemedStyles(theme => ({
+  rating: {
+    alignSelf: 'flex-start',
+    paddingVertical: theme.tokens.spacing.sm
+  },
   container: {
     borderWidth: 1,
     borderColor: theme.colors.divider,
