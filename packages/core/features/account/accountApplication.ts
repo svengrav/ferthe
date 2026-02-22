@@ -9,6 +9,7 @@ import {
   AccountApplicationContract,
   AccountContext,
   AccountDeviceInfo,
+  AccountPublicProfile,
   AccountSession,
   AccountUpdateData,
   FirebaseConfig,
@@ -544,6 +545,13 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     }
   }
 
+  const getPublicProfile = async (context: AccountContext, targetAccountId: string): Promise<Result<AccountPublicProfile>> => {
+    const result = await getAccount({ ...context, accountId: targetAccountId })
+    if (!result.success || !result.data) return createErrorResult('ACCOUNT_NOT_FOUND')
+    const { id, displayName, avatar } = result.data
+    return createSuccessResult({ accountId: id!, displayName, avatar, spotCount: 0 })
+  }
+
   return {
     requestSMSCode,
     verifySMSCode,
@@ -555,5 +563,6 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     upgradeToPhoneAccount,
     getFirebaseConfig,
     uploadAvatar,
+    getPublicProfile,
   }
 }

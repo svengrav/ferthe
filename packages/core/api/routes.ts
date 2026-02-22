@@ -1,8 +1,17 @@
+/**
+ * This file is only for routes.
+ * Dont put any business logic here, instead call the relevant application methods.
+ * The applications should be accessed via the context parameter.
+ * If you find yourself importing an application directly into this file, 
+ * it's a sign that the APPLICATION or COMPOSITE method should be added to the context and accessed that way.
+ */
+
 import { parseQueryOptions } from '@core/api/oak/queryOptions.ts'
 import { createAsyncRequestHandler } from '@core/api/oak/requestHandler.ts'
 
 import {
   Account,
+  AccountPublicProfile,
   ActivateTrailResult,
   APIContract,
   Clue,
@@ -37,7 +46,7 @@ import { manifest } from './manifest.ts'
 import { Route } from './oak/types.ts'
 
 const createRoutes = (ctx: APIContract): Route[] => {
-  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication, spotAccessComposite, discoveryStateComposite } = ctx
+  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication, spotAccessComposite, discoveryStateComposite, accountProfileComposite } = ctx
 
   // Create the request handler with account application access
   const asyncRequestHandler = createAsyncRequestHandler(accountApplication)
@@ -340,6 +349,22 @@ const createRoutes = (ctx: APIContract): Route[] => {
       config: { isPublic: true },
       handler: asyncRequestHandler<SMSVerificationResult>(async ({ body }) => {
         return await accountApplication.verifySMSCode(body?.phoneNumber, body?.code)
+      }),
+    },
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/account/public/profiles/:accountId',
+      handler: asyncRequestHandler<AccountPublicProfile, { accountId: string }>(async ({ context, params }) => {
+        return await accountProfileComposite.getPublicProfile(context, params!.accountId)
+      }),
+    },
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/account/public/profiles',
+      handler: asyncRequestHandler<AccountPublicProfile[], never, { accountIds: string[] }>(async ({ context, body }) => {
+        return await accountProfileComposite.getPublicProfiles(context, body!.accountIds)
       }),
     },
     {

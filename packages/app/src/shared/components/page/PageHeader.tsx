@@ -39,6 +39,7 @@ const createStyles = (theme: Theme) =>
       width: '100%',
       height: theme.dimensions.HEADER_HEIGHT,
       flexDirection: 'row',
+      paddingHorizontal: theme.tokens.spacing.md,
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingVertical: 8,
@@ -55,6 +56,7 @@ const createStyles = (theme: Theme) =>
       justifyContent: 'center'
     },
     leading: {
+      alignItems: 'flex-start',
       width: 60,
     },
     trailing: {

@@ -3,13 +3,14 @@ import StarRating from '@app/shared/components/reaction/StarRating'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { RatingSummary } from '@shared/contracts'
-import { View } from 'react-native'
+import { StyleProp, View, ViewStyle } from 'react-native'
 import { DiscoveryApplication } from '../../discovery/application.ts'
 import { useSpotRatingSummary } from '../../discovery/stores/spotRatingStore.ts'
 import { useSpot } from '../stores/spotStore'
 
 interface SpotRatingProps {
-  spotId: string
+  spotId: string,
+  style?: StyleProp<ViewStyle>
 }
 
 /**
@@ -32,7 +33,7 @@ const useRatingHandler = (spotId: string, ratingSummary: RatingSummary, discover
  * Renders star rating section for spots.
  * Encapsulates rating logic and state management.
  */
-function SpotRating({ spotId }: SpotRatingProps) {
+function SpotRating({ spotId, style }: SpotRatingProps) {
   const { styles } = useTheme(useStyles)
   const { discoveryApplication } = getAppContextStore()
   const ratingSummary = useSpotRatingSummary(spotId)
@@ -45,7 +46,7 @@ function SpotRating({ spotId }: SpotRatingProps) {
   const { handleRate } = useRatingHandler(spotId, ratingSummary, discoveryApplication)
 
   return (
-    <View style={styles.reactionsContainer}>
+    <View style={[styles.reactionsContainer, style]}>
       <StarRating
         summary={ratingSummary}
         onRate={handleRate}

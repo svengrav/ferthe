@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native'
 
-import { setOverlay } from '@app/shared/overlay'
+import { OverlayCard, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 
 import Button from '../button/Button'
@@ -36,11 +36,8 @@ function Item(props: ItemProps) {
     label,
     value,
     iconColor,
-    iconSize = 20,
     action,
     onEdit,
-    variant = 'secondary',
-    size = 'md',
     editable = false,
     onSubmitEdit,
     type = 'text',
@@ -57,14 +54,16 @@ function Item(props: ItemProps) {
     } else if (onSubmitEdit) {
       const close = setOverlay(
         'edit-item',
-        <ItemTextEditor
-          value={value || ''}
-          multiline={type === 'multiline'}
-          onSubmit={async (newValue) => {
-            await onSubmitEdit(newValue)
-            close()
-          }}
-        />
+        <OverlayCard title={`Edit ${label}`} onClose={() => close()}>
+          <ItemTextEditor
+            value={value || ''}
+            multiline={type === 'multiline'}
+            onSubmit={async (newValue) => {
+              await onSubmitEdit(newValue)
+              close()
+            }}
+          />
+        </OverlayCard>
       )
     }
   }
@@ -106,6 +105,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 2,
+    marginRight: 4
   },
   content: {
     flex: 1,

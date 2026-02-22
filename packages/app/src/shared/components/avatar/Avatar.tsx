@@ -1,9 +1,10 @@
-import { Theme } from '@app/shared/theme'
+import { Theme, themedVariants, useVariants } from '@app/shared/theme'
 import useThemeStore from '@app/shared/theme/themeStore'
 import { ImageReference } from '@shared/contracts'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import Icon from '../icon/Icon.tsx'
 import { Image } from '../image/Image'
+import { ComponentVariant } from '../types'
 
 interface AvatarProps {
   avatarUrl?: string
@@ -12,22 +13,36 @@ interface AvatarProps {
   onPress?: () => void
   size?: number
   showEditIcon?: boolean
+  variant?: ComponentVariant
+  style?: StyleProp<ViewStyle>
 }
+
+const ringVariants = themedVariants<ViewStyle>({
+  base: { borderRadius: 999 },
+  variants: {
+    variant: {
+      primary: (t) => ({}),
+      secondary: (t) => ({}),
+      outlined: (t) => ({ borderWidth: 2, borderColor: t.colors.divider }),
+    },
+  },
+})
 
 /**
  * Reusable avatar component with optional edit functionality
  * Displays user avatar with label fallback or placeholder icon
  */
 function Avatar(props: AvatarProps) {
-  const { avatarUrl, avatar, label, onPress, size = 100, showEditIcon = false } = props
+  const { avatarUrl, avatar, label, onPress, size = 100, showEditIcon = false, variant, style } = props
   const theme = useThemeStore()
   const styles = createStyles(theme, size)
+  const ringStyle = variant ? useVariants(ringVariants, { variant }) : undefined
 
   // Determine source (priority: avatar > avatarUrl)
   const source = avatar || (avatarUrl ? { uri: avatarUrl } : undefined)
 
   return (
-    <View style={styles.container} id='avatar-container'>
+    <View style={[styles.container, ringStyle, style]} id='avatar-container'>
       <Pressable onPress={onPress} disabled={!onPress} >
         {showEditIcon && onPress && (
           <View style={styles.editBadge}>

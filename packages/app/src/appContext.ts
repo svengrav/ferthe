@@ -1,5 +1,5 @@
 import { APIContext } from '@app/api/apiContext'
-import { AccountSession } from '@shared/contracts'
+import { AccountProfileCompositeContract, AccountSession } from '@shared/contracts'
 import { StatusResult } from './api/utils'
 import { AccountApplication, createAccountApplication } from './features/account'
 import { CommunityApplication, createCommunityApplication } from './features/community/application'
@@ -25,6 +25,7 @@ export interface AppContext {
   mapApplication: MapApplication
   accountApplication: AccountApplication
   communityApplication: CommunityApplication
+  accountProfileComposite: AccountProfileCompositeContract
 }
 
 interface AppConfiguration {
@@ -100,6 +101,7 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
     mapApplication,
     accountApplication,
     communityApplication,
+    accountProfileComposite: apiContext.accountProfileComposite,
   }
 }
 

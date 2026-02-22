@@ -1,6 +1,7 @@
 import {
   Account,
   AccountContext,
+  AccountPublicProfile,
   AccountSession,
   AccountUpdateData,
   ActivateTrailResult,
@@ -230,6 +231,8 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
 
       getAccount: (_context: AccountContext) => API.send<Account | null>('/account/profile'),
 
+      getPublicProfile: (_context: AccountContext, accountId: string) => API.send<AccountPublicProfile>(`/account/public/profiles/${accountId}`),
+
       updateAccount: (_context: AccountContext, data: AccountUpdateData) => API.send<Account>('/account/profile', 'PUT', data),
 
       uploadAvatar: (_context: AccountContext, base64Data: string) => API.send<Account>('/account/profile/avatar', 'POST', { base64Data }),
@@ -305,6 +308,16 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
 
       activateTrail: (_context: AccountContext, trailId: string) =>
         API.send<ActivateTrailResult>('/composite/discovery/actions/activate-trail', 'POST', { trailId }),
+    },
+
+    /**
+     * Composite: Account public profile with cross-domain spot count.
+     */
+    accountProfileComposite: {
+      getPublicProfile: (_context: AccountContext, accountId: string) =>
+        API.send<AccountPublicProfile>(`/account/public/profiles/${accountId}`),
+      getPublicProfiles: (_context: AccountContext, accountIds: string[]) =>
+        API.send<AccountPublicProfile[]>('/account/public/profiles', 'POST', { accountIds }),
     },
   }
 }

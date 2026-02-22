@@ -6,6 +6,7 @@ import { AccountApplicationActions, createAccountApplication } from './features/
 import { createJWTService } from './features/account/jwtService.ts'
 import { createSMSService } from './features/account/smsService.ts'
 import { createCommunityApplication } from './features/community/communityApplication.ts'
+import { createAccountProfileComposite } from './features/composites/accountProfileComposite.ts'
 import { createDiscoveryStateComposite } from './features/composites/discoveryStateComposite.ts'
 import { createSpotAccessComposite } from './features/composites/spotAccessComposite.ts'
 import { createDiscoveryApplication } from './features/discovery/discoveryApplication.ts'
@@ -116,6 +117,11 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     spotApplication,
   })
 
+  const accountProfileComposite = createAccountProfileComposite({
+    accountApplication,
+    spotApplication,
+  })
+
   return {
     config: config,
     discoveryApplication,
@@ -127,5 +133,6 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     imageApplication,
     spotAccessComposite,
     discoveryStateComposite,
+    accountProfileComposite,
   }
 }

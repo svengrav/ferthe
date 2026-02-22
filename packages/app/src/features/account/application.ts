@@ -5,6 +5,7 @@ import {
   AccountApplicationContract,
   AccountContext,
   AccountDeviceInfo,
+  AccountPublicProfile,
   AccountSession,
   AccountUpdateData,
   FirebaseConfig,
@@ -35,6 +36,7 @@ export interface AccountApplication {
   upgradeToPhoneAccount: (phoneNumber: string, code: string) => Promise<Result<AccountSession>>
   getFirebaseConfig: () => Promise<Result<FirebaseConfig>>
   uploadAvatar: (base64Data: string) => Promise<Result<Account>>
+  getPublicProfile: (accountId: string) => Promise<Result<AccountPublicProfile>>
 }
 
 interface AccountApplicationOptions {
@@ -214,6 +216,12 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         storeActions.setAccount(result.data)
       }
       return result
+    },
+
+    getPublicProfile: function (accountId: string): Promise<Result<AccountPublicProfile>> {
+      const session = getSession()
+      if (!session) return Promise.resolve({ success: false, data: undefined })
+      return accountAPI.getPublicProfile(session, accountId)
     },
   }
 }

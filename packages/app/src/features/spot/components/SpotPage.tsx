@@ -7,6 +7,7 @@ import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 
+import AccountSmartCard from '@app/features/account/components/AccountSmartCard.tsx'
 import DiscoveryStats from '@app/features/discovery/components/DiscoveryStats'
 import DiscoveryUserContentSection from '@app/features/discovery/components/DiscoveryUserContentSection'
 import SpotRating from '@app/features/spot/components/SpotRating.tsx'
@@ -105,14 +106,23 @@ function SpotPage(props: SpotPageProps) {
               />
               <SpotLocation location={spot.location} style={{ alignSelf: 'center' }} />
 
-              <View style={{ borderWidth: 1, borderColor: theme.colors.divider, padding: theme.tokens.spacing.md, backgroundColor: theme.colors.background, borderRadius: theme.tokens.borderRadius.md }}>
-                <SpotRating spotId={spotId} />
+              <View style={{ borderWidth: 1, gap: 8, borderColor: theme.colors.divider, padding: theme.tokens.spacing.md, backgroundColor: theme.colors.background, borderRadius: theme.tokens.borderRadius.md }}>
+                <View style={{ flexDirection: 'row', flex: 1, gap: 8, }}>
+                  <View style={{ flex: 1 }}>
+                    <AccountSmartCard accountId={spot.createdBy!} variant='secondary' style={{ backgroundColor: 'transparent', padding: 0 }} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <SpotRating spotId={spotId} style={{ alignSelf: 'flex-start' }} />
 
-                <View style={{ flexDirection: 'row', }}>
+                  </View>
+                </View>
+
+                <View style={{ flexDirection: 'row', flex: 1, gap: 8 }}>
                   <View style={{ flex: 1 }}>
                     <Text variant="caption">Created</Text>
                     <Text variant="body">{formatDate(spot.createdAt)}</Text>
                   </View>
+
                   <View style={{ flex: 1 }}>
                     <Text variant="caption">Entdeckt</Text>
                     <Text variant="body">{formatDate(discovery?.discoveredAt)}</Text>
@@ -146,6 +156,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
     gap: theme.tokens.spacing.sm,
+    paddingBottom: theme.tokens.spacing.lg
   },
   image: {
     borderRadius: theme.tokens.borderRadius.md,

@@ -46,6 +46,32 @@ import { getDeviceLocation } from '@app/features/sensor/stores/sensorStore'
 - Components should receive props from their parent components. Try to avoid using stores, but instead should receive the data they need as props. This allows for better separation of concerns and makes it easier to manage the state of the component.
 - They should be reusable and composable.
 - They usually work with callback functions as props to communicate with their parent components.
+- **Top-level components always expose a `style?: StyleProp<ViewStyle>` prop** so consumers can apply layout or spacing overrides without wrapping the component in an extra `View`.
+- **If a component supports multiple visual appearances, use `variant?: ComponentVariant` together with `themedVariants` + `useVariants`** instead of ad-hoc inline styles or boolean flags. This keeps visual logic centralised and theme-aware.
+
+```tsx
+// ✅ Correct
+interface MyCardProps {
+  style?: StyleProp<ViewStyle>
+  variant?: ComponentVariant // 'primary' | 'secondary' | 'outlined'
+}
+
+const cardVariants = themedVariants<ViewStyle>({
+  variants: {
+    variant: {
+      primary: (t) => ({ backgroundColor: t.colors.primary }),
+      secondary: (t) => ({ backgroundColor: t.colors.surface }),
+      outlined: () => ({ backgroundColor: 'transparent' }),
+    },
+  },
+  defaultVariants: { variant: 'secondary' },
+})
+
+function MyCard({ style, variant = 'secondary' }: MyCardProps) {
+  const variantStyle = useVariants(cardVariants, { variant })
+  return <View style={{ ...variantStyle, ...StyleSheet.flatten(style) }} />
+}
+```
 
 ## Core
 

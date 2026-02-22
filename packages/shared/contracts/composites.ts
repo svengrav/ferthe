@@ -1,5 +1,5 @@
 import { GeoLocation } from "../geo/types.ts";
-import { AccountContext } from './accounts.ts';
+import { AccountContext, AccountPublicProfile } from './accounts.ts';
 import { Clue } from './discoveries.ts';
 import { ImageReference } from "./images.ts";
 import { QueryOptions, Result } from './results.ts';
@@ -89,9 +89,21 @@ export interface DiscoveryStateCompositeContract {
 }
 
 /**
+ * Composite contract for assembling account public profile across domains.
+ * Combines account data with spot count from the spot domain.
+ */
+export interface AccountProfileCompositeContract {
+  /** Returns public profile with spot count for any account */
+  getPublicProfile: (context: AccountContext, accountId: string) => Promise<Result<AccountPublicProfile>>
+  /** Returns public profiles for multiple accounts in one request */
+  getPublicProfiles: (context: AccountContext, accountIds: string[]) => Promise<Result<AccountPublicProfile[]>>
+}
+
+/**
  * Bundles all composite contracts exposed over the API boundary.
  */
 export interface CompositeContract {
   spotAccessComposite: SpotAccessCompositeContract
   discoveryStateComposite: DiscoveryStateCompositeContract
+  accountProfileComposite: AccountProfileCompositeContract
 }

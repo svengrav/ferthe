@@ -22,6 +22,19 @@ export interface AccountApplicationContract {
 
   // Configuration - Require authenticated context
   getFirebaseConfig: (context: AccountContext) => Promise<Result<FirebaseConfig>>
+
+  // Public profile
+  getPublicProfile: (context: AccountContext, accountId: string) => Promise<Result<AccountPublicProfile>>
+}
+
+/**
+ * Public-facing account profile, safe to expose to any authenticated user.
+ */
+export interface AccountPublicProfile {
+  accountId: string
+  displayName?: string
+  avatar?: ImageReference
+  spotCount: number
 }
 
 /**

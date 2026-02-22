@@ -32,7 +32,10 @@ export function useRemoveDialog() {
         message={props.message || locales.common.confirmRemove}
         onClose={() => closeOverlay('remove-dialog')}
         onCancel={props.onCancel ?? (() => closeOverlay('remove-dialog'))}
-        {...props}
+        onConfirm={() => {
+          props.onConfirm()
+          closeOverlay('remove-dialog')
+        }}
       />
     ),
     closeDialog: () => closeOverlay('remove-dialog')

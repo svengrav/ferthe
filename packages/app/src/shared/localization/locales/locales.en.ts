@@ -177,6 +177,8 @@ const en = {
     addDescription: 'Add a description...',
     uploadAvatar: 'Upload Avatar',
     notSet: 'Not set',
+    profile: 'Profile',
+    spots: 'Spots',
   },
   community: {
     communities: 'Communities',

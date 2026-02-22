@@ -65,6 +65,13 @@ A spot is usually a point of interest, but can also be:
 - Probably Advisory: Spots should not be placed in private areas or places that could cause safety issues. Clear guidelines and moderation are needed to ensure responsible spot placement.
 - Maybe it's possible to destroy a spot if enough people don't like it (e.g. if it's in a dangerous location or if it's fake). This would require a reporting and review system.
 
+### Create Spots
+- You can create a new spot by providing its name, description, location, and other properties. This allows you to contribute to the community and share interesting locations with others.
+- Not yet: Created spots are submitted for review by the team to ensure they meet the guidelines and are safe?
+**Future Notes**
+- User gets a push message if somebody else discovers a spot they created or if somebody shares a discovery in a community they are part of. This encourages engagement and creates a sense of community around the spots you contribute.
+- Users cann add a note to a disocvered spot and decide to share it with the community or not. This allows you to share your thoughts, tips, or stories about the spot when you share it with others.
+
 ## Discovery
 
 - Discoveries are a subpart of Spots. They represent your personal finding of a spot.

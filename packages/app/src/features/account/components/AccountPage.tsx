@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native'
 
-import { Avatar, Button, InfoField, Page, Stack, Text } from '@app/shared/components'
+import { Avatar, Button, Page, Stack, Text } from '@app/shared/components'
 import Item from '@app/shared/components/item/Item'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
@@ -114,7 +114,7 @@ function AccountPage(props: AccountPageProps) {
         />
 
         {/* Feature Access */}
-        <InfoField
+        <Item
           icon="sync"
           label={locales.account.featureAccess}
           value={accountType === 'local_unverified'
