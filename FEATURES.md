@@ -135,10 +135,11 @@ A spot is usually a point of interest, but can also be:
 - **Free**: Discover spots in any order, explore freely
 - **Sequence**: Spots must be discovered in specific order (linear progression)
 
-**Preview Modes:**
+**Visible Map:**
 - **Hidden**: No clues shown, spots are completely hidden
 - **Preview**: Shows clues for undiscovered spots (if spot has `visibility: 'preview'`)
 - **Discovered**: Shows only discovered spots
+- **Public**: Also shows all undiscovered spots as visible on the map (e.g. for a tourist trail where you want to show all points of interest)
 
 **Trail Selection:**
 - App remembers your last active trail

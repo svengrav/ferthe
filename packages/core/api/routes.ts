@@ -18,6 +18,7 @@ import {
   Community,
   CommunityMember,
   CreateSpotRequest,
+  DeviceToken,
   Discovery,
   DiscoveryContent,
   DiscoveryLocationRecord,
@@ -451,6 +452,22 @@ const createRoutes = (ctx: APIContract): Route[] => {
       url: '/account/config/firebase',
       handler: asyncRequestHandler<FirebaseConfig>(async ({ context }) => {
         return await accountApplication.getFirebaseConfig(context)
+      }),
+    },
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/account/device-token',
+      handler: asyncRequestHandler<DeviceToken>(async ({ context, body }) => {
+        return await accountApplication.registerDeviceToken(context, body?.token, body?.platform)
+      }),
+    },
+    {
+      method: 'DELETE',
+      version: 'v1',
+      url: '/account/device-token',
+      handler: asyncRequestHandler<void>(async ({ context, body }) => {
+        return await accountApplication.removeDeviceToken(context, body?.token)
       }),
     },
     {

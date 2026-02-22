@@ -52,4 +52,5 @@ export const STORE_IDS = {
   COMMUNITIES: 'community-collection',
   COMMUNITY_MEMBERS: 'community-members',
   COMMUNITY_DISCOVERIES: 'community-discoveries',
+  DEVICE_TOKENS: 'device-tokens',
 } as const

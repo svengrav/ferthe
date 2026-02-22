@@ -10,6 +10,8 @@ import {
   Community,
   CommunityMember,
   CreateSpotRequest,
+  DevicePlatform,
+  DeviceToken,
   Discovery,
   DiscoveryContent,
   DiscoveryLocationRecord,
@@ -252,6 +254,12 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
         API.send<AccountSession>('/account/actions/upgrade-to-phone', 'POST', { phoneNumber, code }),
 
       getFirebaseConfig: (_context: AccountContext) => API.send<FirebaseConfig>('/account/config/firebase'),
+
+      registerDeviceToken: (_context: AccountContext, token: string, platform: DevicePlatform) =>
+        API.send<DeviceToken>('/account/device-token', 'POST', { token, platform }),
+
+      removeDeviceToken: (_context: AccountContext, token: string) =>
+        API.send<void>('/account/device-token', 'DELETE', { token }),
     },
 
     /**

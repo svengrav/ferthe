@@ -8,6 +8,8 @@ import {
   AccountPublicProfile,
   AccountSession,
   AccountUpdateData,
+  DevicePlatform,
+  DeviceToken,
   FirebaseConfig,
   Result,
   SessionValidationResult,
@@ -35,6 +37,8 @@ export interface AccountApplication {
   updateAccount: (data: AccountUpdateData) => Promise<Result<Account>>
   upgradeToPhoneAccount: (phoneNumber: string, code: string) => Promise<Result<AccountSession>>
   getFirebaseConfig: () => Promise<Result<FirebaseConfig>>
+  registerDeviceToken: (token: string, platform: DevicePlatform) => Promise<Result<DeviceToken>>
+  removeDeviceToken: (token: string) => Promise<Result<void>>
   uploadAvatar: (base64Data: string) => Promise<Result<Account>>
   getPublicProfile: (accountId: string) => Promise<Result<AccountPublicProfile>>
 }
@@ -205,6 +209,18 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       const session = getSession()
       if (!session) return Promise.resolve({ success: false, data: undefined })
       return accountAPI.getFirebaseConfig(session)
+    },
+
+    registerDeviceToken: function (token: string, platform: DevicePlatform): Promise<Result<DeviceToken>> {
+      const session = getSession()
+      if (!session) return Promise.resolve({ success: false, data: undefined })
+      return accountAPI.registerDeviceToken(session, token, platform)
+    },
+
+    removeDeviceToken: function (token: string): Promise<Result<void>> {
+      const session = getSession()
+      if (!session) return Promise.resolve({ success: false, data: undefined })
+      return accountAPI.removeDeviceToken(session, token)
     },
 
     uploadAvatar: async function (base64Data: string): Promise<Result<Account>> {

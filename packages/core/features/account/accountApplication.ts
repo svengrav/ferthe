@@ -12,6 +12,8 @@ import {
   AccountPublicProfile,
   AccountSession,
   AccountUpdateData,
+  DevicePlatform,
+  DeviceToken,
   FirebaseConfig,
   Result,
   SMSCodeRequest,
@@ -35,6 +37,7 @@ interface AccountApplicationOptions {
   accountStore: Store<StoredAccount>
   accountSessionStore: Store<AccountSession>
   twilioVerificationStore: Store<TwilioVerification>
+  deviceTokenStore: Store<DeviceToken>
   smsConnector?: SMSConnector
   smsService?: SMSService
   jwtService?: JWTService
@@ -42,7 +45,7 @@ interface AccountApplicationOptions {
 }
 
 export function createAccountApplication(options: AccountApplicationOptions): AccountApplicationActions {
-  const { accountStore, accountSessionStore, twilioVerificationStore, smsConnector, smsService = createSMSService(), jwtService, imageApplication } = options
+  const { accountStore, accountSessionStore, twilioVerificationStore, deviceTokenStore, smsConnector, smsService = createSMSService(), jwtService, imageApplication } = options
   const { createJWT, verifyJWT } = jwtService || createJWTService()
 
   // Helper functions
@@ -552,6 +555,47 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     return createSuccessResult({ accountId: id!, displayName, avatar, spotCount: 0 })
   }
 
+  // Register or update a device token for push notifications
+  const registerDeviceToken = async (context: AccountContext, token: string, platform: DevicePlatform): Promise<Result<DeviceToken>> => {
+    try {
+      // Check if this token already exists (idempotent upsert)
+      const existing = await deviceTokenStore.list()
+      const existingToken = existing.data?.find(dt => dt.token === token)
+
+      if (existingToken) {
+        // Update: reassign to current account if needed, refresh timestamp
+        const updated: DeviceToken = { ...existingToken, accountId: context.accountId, platform, updatedAt: new Date() }
+        await deviceTokenStore.update(existingToken.id, updated)
+        return createSuccessResult(updated)
+      }
+
+      // Create new device token
+      const deviceToken: DeviceToken = {
+        id: createCuid2(),
+        accountId: context.accountId,
+        token,
+        platform,
+        updatedAt: new Date(),
+      }
+      await deviceTokenStore.create(deviceToken)
+      return createSuccessResult(deviceToken)
+    } catch (error: unknown) {
+      return createErrorResult('DEVICE_TOKEN_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  // Remove a device token (e.g. on logout)
+  const removeDeviceToken = async (context: AccountContext, token: string): Promise<Result<void>> => {
+    try {
+      const existing = await deviceTokenStore.list()
+      const match = existing.data?.find(dt => dt.token === token && dt.accountId === context.accountId)
+      if (match) await deviceTokenStore.delete(match.id)
+      return createSuccessResult(undefined)
+    } catch (error: unknown) {
+      return createErrorResult('DEVICE_TOKEN_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
   return {
     requestSMSCode,
     verifySMSCode,
@@ -564,5 +608,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     getFirebaseConfig,
     uploadAvatar,
     getPublicProfile,
+    registerDeviceToken,
+    removeDeviceToken,
   }
 }

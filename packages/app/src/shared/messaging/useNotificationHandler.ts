@@ -11,20 +11,6 @@ import { useEffect } from 'react'
 import { Platform } from 'react-native'
 import { appNavigator } from "../navigation/navigationRef"
 
-async function setBackgroundMessageHandler() {
-  const messagingInstance = getMessaging()
-  messagingInstance.setBackgroundMessageHandler(async remoteMessage => {
-    await onMessageReceived(remoteMessage)
-  })
-}
-
-async function setForegroundMessageHandler() {
-  const messagingInstance = getMessaging()
-  messagingInstance.onMessage(async remoteMessage => {
-    await onMessageReceived(remoteMessage)
-  })
-}
-
 // Request user permission for notifications
 // This is required for iOS and Android 13+ devices
 async function requestUserPermission() {
@@ -197,7 +183,16 @@ async function handleActionPress(actionId: string, notification?: any) {
 }
 
 export function useNotificationHandler() {
+  // Handle Notifee foreground events (must be called unconditionally)
+  showNotificationHook()
+
   useEffect(() => {
+    // Skip notification handler on web (only supported on iOS/Android)
+    if (Platform.OS === 'web') {
+      logger.log('[Push] Skipping notification handler on web')
+      return
+    }
+
     requestUserPermission()
     setupNotificationChannels()
 
@@ -213,8 +208,4 @@ export function useNotificationHandler() {
       unsubscribeForeground()
     }
   }, [])
-
-  setForegroundMessageHandler()
-  setBackgroundMessageHandler()
-  showNotificationHook()
 }

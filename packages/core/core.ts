@@ -1,6 +1,7 @@
-import { Account, AccountSession, APIContract, Community, CommunityMember, Discovery, DiscoveryContent, DiscoveryProfile, ImageApplicationContract, SharedDiscovery, SpotRating, StoredSpot, StoredTrail, StoredTrailSpot, TrailRating, TwilioVerification } from '@shared/contracts/index.ts'
+import { Account, AccountSession, APIContract, Community, CommunityMember, DeviceToken, Discovery, DiscoveryContent, DiscoveryProfile, ImageApplicationContract, SharedDiscovery, SpotRating, StoredSpot, StoredTrail, StoredTrailSpot, TrailRating, TwilioVerification } from '@shared/contracts/index.ts'
 import { Buffer } from "node:buffer"
 import { Config, STORE_IDS } from './config/index.ts'
+import { createFirebaseConnector, FirebaseConnector } from './connectors/firebaseConnector.ts'
 import { SMSConnector } from './connectors/smsConnector.ts'
 import { AccountApplicationActions, createAccountApplication } from './features/account/accountApplication.ts'
 import { createJWTService } from './features/account/jwtService.ts'
@@ -11,6 +12,7 @@ import { createDiscoveryStateComposite } from './features/composites/discoverySt
 import { createSpotAccessComposite } from './features/composites/spotAccessComposite.ts'
 import { createDiscoveryApplication } from './features/discovery/discoveryApplication.ts'
 import { createDiscoveryService } from './features/discovery/discoveryService.ts'
+import { createNotificationService, NotificationService } from './features/notification/notificationService.ts'
 import { createSensorApplication, SensorApplicationActions } from './features/sensor/sensorApplication.ts'
 import { createSensorService } from './features/sensor/sensorService.ts'
 import { createSpotApplication, SpotApplicationActions } from './features/spot/spotApplication.ts'
@@ -39,6 +41,7 @@ export interface CoreContext extends APIContract {
   accountApplication: AccountApplicationActions
   communityApplication: any
   imageApplication?: ImageApplicationContract
+  notificationService: NotificationService
 }
 
 export function createCoreContext(config: Config, connectors: CoreConnectors): CoreContext {
@@ -70,6 +73,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     accountStore: createStore<Account>(storeConnector, STORE_IDS.ACCOUNTS),
     accountSessionStore: createStore<AccountSession>(storeConnector, STORE_IDS.ACCOUNT_SESSIONS),
     twilioVerificationStore: createStore<TwilioVerification>(storeConnector, STORE_IDS.ACCOUNT_SMS_CODES),
+    deviceTokenStore: createStore<DeviceToken>(storeConnector, STORE_IDS.DEVICE_TOKENS),
     smsConnector,
     jwtService: createJWTService({ secret: config.secrets.jwtSecret }),
     smsService: createSMSService({ phoneSalt: config.secrets.phoneHashSalt }),
@@ -122,6 +126,20 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     spotApplication,
   })
 
+  // Firebase push connector (optional, requires service account)
+  let firebaseConnector: FirebaseConnector | undefined
+  if (config.secrets.firebaseServiceAccount) {
+    firebaseConnector = createFirebaseConnector(config.secrets.firebaseServiceAccount)
+    console.log('[Firebase] Push notification connector initialized')
+  } else {
+    console.log('[Firebase] No service account configured — push notifications disabled')
+  }
+
+  const notificationService = createNotificationService({
+    deviceTokenStore: createStore<DeviceToken>(storeConnector, STORE_IDS.DEVICE_TOKENS),
+    firebaseConnector,
+  })
+
   return {
     config: config,
     discoveryApplication,
@@ -131,6 +149,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     accountApplication,
     communityApplication,
     imageApplication,
+    notificationService,
     spotAccessComposite,
     discoveryStateComposite,
     accountProfileComposite,

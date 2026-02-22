@@ -25,6 +25,10 @@ export interface AccountApplicationContract {
 
   // Public profile
   getPublicProfile: (context: AccountContext, accountId: string) => Promise<Result<AccountPublicProfile>>
+
+  // Push notification device tokens
+  registerDeviceToken: (context: AccountContext, token: string, platform: DevicePlatform) => Promise<Result<DeviceToken>>
+  removeDeviceToken: (context: AccountContext, token: string) => Promise<Result<void>>
 }
 
 /**
@@ -152,4 +156,14 @@ export interface SMSVerificationResult {
 export interface SessionValidationResult {
   accountId: string
   valid: boolean
+}
+
+export type DevicePlatform = 'ios' | 'android'
+
+export interface DeviceToken {
+  id: string
+  accountId: string
+  token: string
+  platform: DevicePlatform
+  updatedAt: Date
 }

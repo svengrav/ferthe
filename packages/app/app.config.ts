@@ -29,7 +29,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         cameraPermission: "Allow ferthe to access your camera.",
         cameraRollPermission: "Allow ferthe to access your camera roll."
       }
-    ]
+    ],
+    "@react-native-firebase/app",
+    "@react-native-firebase/messaging",
   ],
   splash: {
     image: './assets/splash-icon.png',
@@ -39,6 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     bundleIdentifier: 'de.ferthe.app',
     supportsTablet: true,
+    googleServicesFile: './GoogleService-Info.plist',
     entitlements: {
       'aps-environment': 'production',
     },
@@ -52,6 +55,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#12121e',
     },
     package: 'de.ferthe.app',
+    googleServicesFile: './google-services.json',
   },
   web: {
     favicon: './assets/favicon.png',

@@ -27,6 +27,8 @@ import { useDiscoveryEventCard } from './features/discovery/hooks/useDiscovery'
 import { getDeviceConnector } from './features/sensor/device/deviceConnector'
 import { useSettingsSync } from './features/settings/hooks/useSettingsSync'
 import { createStoreConnector } from './shared/device'
+import { registerForPushNotificationsAsync } from './shared/messaging/registerNotificationHandler'
+import { useNotificationHandler } from './shared/messaging/useNotificationHandler'
 import { OverlayProvider } from './shared/overlay'
 import { useAppContextStore } from './shared/stores/appContextStore'
 import { logger } from './shared/utils/logger'
@@ -96,6 +98,12 @@ const useAppInitialization = () => {
 
         await SplashScreen.hideAsync()
         showOnboardingIfNeeded()
+
+        // Register for push notifications after auth
+        registerForPushNotificationsAsync().catch(error =>
+          logger.error('Failed to register push notifications:', error)
+        )
+
         setIsReady(true)
       } catch (err) {
         logger.error('Error during app initialization:', err)
@@ -110,6 +118,7 @@ const useAppInitialization = () => {
 
 export default function App() {
   const isReady = useAppInitialization()
+  useNotificationHandler()
 
   if (!isReady) {
     return <SplashView />

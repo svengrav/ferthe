@@ -7,7 +7,9 @@
   "scripts": {
     "build": "tsc",
     "dev": "npx expo start --dev-client",
-    "android:build": "bash .docker/build.sh"
+    "android:build": "bash .docker/build.sh",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.3.0",
@@ -33,7 +35,6 @@
     "expo-image-picker": "^17.0.10",
     "expo-linear-gradient": "~15.0.8",
     "expo-location": "~19.0.8",
-    "expo-notifications": "~0.32.16",
     "expo-secure-store": "~15.0.8",
     "expo-sensors": "~15.0.8",
     "expo-splash-screen": "~31.0.13",

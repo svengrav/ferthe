@@ -126,6 +126,9 @@ export const ERROR_CODES = {
   CREATE_DISCOVERY_ERROR: { code: 'CREATE_DISCOVERY_ERROR', message: 'Failed to create discovery', httpStatus: 500 },
   CREATE_WELCOME_DISCOVERY_ERROR: { code: 'CREATE_WELCOME_DISCOVERY_ERROR', message: 'Failed to create welcome discovery', httpStatus: 500 },
   SPOT_RATING_NOT_ALLOWED: { code: 'SPOT_RATING_NOT_ALLOWED', message: 'Creator cannot rate own spot', httpStatus: 403 },
+
+  // Push Notifications (500)
+  DEVICE_TOKEN_ERROR: { code: 'DEVICE_TOKEN_ERROR', message: 'Failed to manage device token', httpStatus: 500 },
 } as const
 
 export type ApiErrorCode = keyof typeof ERROR_CODES
