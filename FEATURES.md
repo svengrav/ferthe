@@ -45,9 +45,11 @@ A spot is usually a point of interest, but can also be:
 - An area (e.g. a viewpoint)
 
 **Visibility Modes:**
+- **Private**: This is a spot your create your self and it's only visible to you. You can use it to mark interesting places for yourself without sharing them.
 - **Hidden** (default): Not visible on the map until discovered
 - **Preview**: Shows a clue on the map that you must reach to reveal the spot
 - Visibility is set per spot, independent of the trail
+- **Public**: Visible on the map for everyone without discovery (e.g. for important landmarks or points of interest). You still get a discovery if you reach it for the first time, but it's visible to everyone from the start.
 
 **Discovery Mechanics:**
 - Hidden spots can be scanned based on scan radius and your location
@@ -78,7 +80,7 @@ A spot is usually a point of interest, but can also be:
 - A Discovery cant exist without a Spot, but a Spot can exist without a Discovery (e.g. if nobody found it yet or if you haven't found it yet).
 - Discovery always extends the Spot data with user-specific information like timestamp, photos, comments, and whether it's shared with the community or not.
 
-A Discovery is a unique finding of a user at a specific spot. It is private to you until you choose to share it with the community. Discoveries are the core of the app's social features, as they represent your achievements and contributions to the community.
+- A Discovery is a unique finding of a user at a specific spot. It is private to you until you choose to share it with the community. Discoveries are the core of the app's social features, as they represent your achievements and contributions to the community.
 - You get a discovery when you find a spot for the first time
 - Discoveries can be shared with the community, making the spot visible to others and contributing
 - Discoveries have a timestamp and can be used to track your activity and engagement
@@ -100,7 +102,6 @@ A Discovery is a unique finding of a user at a specific spot. It is private to y
 **TODO**
 - You can remove a discovery if you want to (e.g. if it was a mistake or if you want to hide it again)
 - Pushup if somebody discovers a spot you created or if somebody shares a discovery in a community you are part of
-- Show Discovery stats 
 
 ### Discovery Content
 
