@@ -13,8 +13,9 @@ function TextBlockEditor(props: TextBlockEditorProps) {
   const { locales } = useLocalization()
 
   return (
-    <Field label={locales.contentBlocks.text}>
+    <Field label={locales.contentBlocks.text} >
       <TextInput
+        style={{ minHeight: 200 }}
         value={block.data.text}
         onChangeText={(text: string) => onChange({ ...block, data: { ...block.data, text } })}
         placeholder={locales.contentBlocks.textPlaceholder}

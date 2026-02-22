@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native'
 
 import Button from '@app/shared/components/button/Button'
 import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
@@ -55,7 +55,8 @@ function ContentBlockEditorList(props: ContentBlockEditorListProps) {
 
   return (
     <OrderedListContext.Provider value={list}>
-      <View style={styles.root}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <View style={styles.root}>
         <DraggableList
           data={list.items}
           keyExtractor={(block) => block.id}
@@ -78,6 +79,7 @@ function ContentBlockEditorList(props: ContentBlockEditorListProps) {
           ]}
         />
       </View>
+      </KeyboardAvoidingView>
     </OrderedListContext.Provider>
   )
 }
@@ -120,12 +122,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     paddingVertical: theme.tokens.spacing.lg
   },
   blockWrapper: {
-    borderWidth: 1,
-    borderColor: theme.colors.onSurface + '20',
-    borderRadius: theme.tokens.borderRadius.md,
-    padding: theme.tokens.spacing.sm,
-    gap: theme.tokens.spacing.sm,
-    backgroundColor: theme.colors.surface,
+
   },
   addButton: {
     width: 44,
