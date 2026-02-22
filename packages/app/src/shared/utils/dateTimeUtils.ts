@@ -4,7 +4,7 @@ export const formatDatetime = (date?: Date): string => {
 }
 
 
-export const formatDate = (date?: Date): string => {
+export const formatDate = (date?: Date | string): string => {
   if (!date) return ''
 
   return new Date(date).toLocaleString('de-DE', {

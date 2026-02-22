@@ -1,4 +1,4 @@
-import { Button, FertheLogo, LoadingSpinner, Page, PulseAnimation, Stack, Text } from '@app/shared/components'
+import { Button, Divider, FertheLogo, LoadingSpinner, Page, PulseAnimation, Stack, Text } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { Linking, StyleSheet } from 'react-native'
@@ -25,7 +25,7 @@ export default function AboutScreen() {
         <Text variant='body'>{locales.about.aboutText}</Text>
         <Text variant='body'>{locales.about.followYourTrail}</Text>
         <Button label={locales.about.fertheWebsite} variant='primary' onPress={handleOpenLink} />
-
+        <Divider />
         <Text variant='heading' style={styles.sectionTitle}>{locales.about.latestPosts}</Text>
         {loading ? (
           <LoadingSpinner />

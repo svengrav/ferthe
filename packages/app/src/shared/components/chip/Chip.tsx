@@ -37,7 +37,7 @@ const chipStyle = themedVariants({
   variants: {
     variant: {
       primary: (t) => ({ backgroundColor: t.colors.onSurface, borderWidth: 0 }),
-      secondary: (t) => ({ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.onSurface }),
+      secondary: (t) => ({ backgroundColor: t.deriveColor(t.colors.onSurface, 0.8), color: t.colors.onSurface, borderWidth: 0, }),
       outlined: (t) => ({ backgroundColor: 'transparent', borderWidth: 1, borderColor: t.colors.onSurface }),
     },
     size: {

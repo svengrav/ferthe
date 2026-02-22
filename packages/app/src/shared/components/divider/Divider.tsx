@@ -28,7 +28,7 @@ export default function Divider({ text, size = 'md', style }: DividerProps) {
   const sizeStyle = useVariants(sizeVariants, { size })
 
   return (
-    <View style={[styles.divider, sizeStyle, style]}>
+    <View style={[styles.divider, sizeStyle, style]} id="divider">
       <View style={styles.dividerLine} />
       {text && <Text style={styles.dividerText}>{text}</Text>}
       <View style={styles.dividerLine} />
@@ -39,6 +39,7 @@ export default function Divider({ text, size = 'md', style }: DividerProps) {
 const createStyles = (theme: Theme) => {
   return StyleSheet.create({
     divider: {
+      width: '100%',
       flexDirection: 'row',
       alignItems: 'center',
     },

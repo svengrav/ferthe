@@ -119,10 +119,10 @@ const de: LocalizationSet = {
   },
   about: {
     followYourTrail: 'Folge dem Pfad...',
-    fertheWebsite: 'Ferthe Webseite',
+    fertheWebsite: 'ferthe.de',
     storyIntro: 'Die Reise beginnt...',
     aboutText: 'Ferthe ist eine Anwendung, die dir hilft, Informationspfade zu entdecken und zu verfolgen.',
-    latestPosts: 'Neueste Beiträge',
+    latestPosts: 'Neues',
   },
   notifications: {
     enable: 'Benachrichtigungen aktivieren',

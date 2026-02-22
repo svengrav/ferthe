@@ -6,7 +6,8 @@ import { ERROR_CODES } from '@shared/contracts/errors.ts'
 import { AccountContext, CreateSpotRequest, ImageApplicationContract, QueryOptions, RatingSummary, Result, Spot, SpotApplicationContract, SpotPreview, SpotRating, StoredSpot, TrailApplicationContract, UpdateSpotRequest } from '@shared/contracts/index.ts'
 import { enrichSpotWithImages } from './spotEnrichment.ts'
 
-export interface SpotApplicationActions extends SpotApplicationContract {
+export interface SpotApplicationActions extends Omit<SpotApplicationContract, 'createSpot'> {
+  createSpot: (context: AccountContext, spotData: CreateSpotRequest | Omit<StoredSpot, 'id' | 'slug'>) => Promise<Result<Spot>>
   setTrailApplication: (trailApp: TrailApplicationContract) => void
 }
 

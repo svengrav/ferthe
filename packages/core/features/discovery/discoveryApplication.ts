@@ -1,4 +1,5 @@
 import { SensorApplicationActions } from '@core/features/sensor'
+import { SpotApplicationActions } from '@core/features/spot/spotApplication.ts'
 import { Store } from '@core/store/storeFactory'
 import { createDeterministicId } from '@core/utils/idGenerator.ts'
 import {
@@ -20,7 +21,6 @@ import {
   QueryOptions,
   RatingSummary,
   Result,
-  SpotApplicationContract,
   SpotRating,
   TrailApplicationContract,
   TrailStats,
@@ -49,7 +49,7 @@ interface DiscoveryApplicationOptions {
   contentStore: Store<DiscoveryContent>
   sensorApplication: SensorApplicationActions
   trailApplication: TrailApplicationContract
-  spotApplication: SpotApplicationContract
+  spotApplication: SpotApplicationActions
   imageApplication?: ImageApplicationContract
 }
 

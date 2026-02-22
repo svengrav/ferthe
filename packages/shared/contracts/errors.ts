@@ -121,6 +121,10 @@ export const ERROR_CODES = {
 
   // Spot access
   GET_SPOT_ERROR: { code: 'GET_SPOT_ERROR', message: 'Failed to get spot', httpStatus: 500 },
+  SPOT_NOT_FOUND: { code: 'SPOT_NOT_FOUND', message: 'Spot not found', httpStatus: 404 },
+  CREATE_SPOT_ERROR: { code: 'CREATE_SPOT_ERROR', message: 'Failed to create spot', httpStatus: 500 },
+  CREATE_DISCOVERY_ERROR: { code: 'CREATE_DISCOVERY_ERROR', message: 'Failed to create discovery', httpStatus: 500 },
+  CREATE_WELCOME_DISCOVERY_ERROR: { code: 'CREATE_WELCOME_DISCOVERY_ERROR', message: 'Failed to create welcome discovery', httpStatus: 500 },
   SPOT_RATING_NOT_ALLOWED: { code: 'SPOT_RATING_NOT_ALLOWED', message: 'Creator cannot rate own spot', httpStatus: 403 },
 } as const
 

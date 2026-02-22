@@ -1,6 +1,7 @@
-import { Card, Text } from '@app/shared/components'
+import { Card, Chip, Text } from '@app/shared/components'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
-import { Linking } from 'react-native'
+import { formatDate } from '@app/shared/utils/dateTimeUtils'
+import { Linking, View } from 'react-native'
 import { BlogPost } from '../hooks/useBlogPosts'
 
 interface BlogPostCardProps {
@@ -21,15 +22,18 @@ function BlogPostCard({ post }: BlogPostCardProps) {
 
   return (
     <Card variant='secondary' onPress={handlePress} style={styles.card}>
-      <Text variant='title'>{post.title}</Text>
-      <Text variant='hint' style={styles.date}>
-        {new Date(post.date).toLocaleDateString()}
-      </Text>
-      {post.tags.length > 0 && (
-        <Text variant='hint' style={styles.tags}>
-          {post.tags.join(' · ')}
+      <View style={{ flexDirection: 'row' }}>
+
+        <Text variant='hint' style={styles.date}>
+          {formatDate(post.date)}
         </Text>
-      )}
+        <View style={{ flex: 1 }} />
+        {post.tags.length > 0 && (
+          <Chip variant='secondary' size='sm' label={post.tags.join(' · ')} />
+        )}
+      </View>
+      <Text variant='title'>{post.title}</Text>
+
       <Text variant='body' style={styles.preview} numberOfLines={3}>
         {post.preview}
       </Text>
