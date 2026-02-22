@@ -60,7 +60,6 @@ const useStyles = createThemedStyles(theme => ({
   reactionsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingVertical: 8,
   },
 }))
 

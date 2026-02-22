@@ -50,24 +50,27 @@ import { getDeviceLocation } from '@app/features/sensor/stores/sensorStore'
 - **If a component supports multiple visual appearances, use `variant?: ComponentVariant` together with `themedVariants` + `useVariants`** instead of ad-hoc inline styles or boolean flags. This keeps visual logic centralised and theme-aware.
 
 ```tsx
-// ✅ Correct
-interface MyCardProps {
-  style?: StyleProp<ViewStyle>
-  variant?: ComponentVariant // 'primary' | 'secondary' | 'outlined'
-}
-
-const cardVariants = themedVariants<ViewStyle>({
+// ✅ Correct — define config with satisfies, derive type via VariantOf
+const cardConfig = {
   variants: {
     variant: {
       primary: (t) => ({ backgroundColor: t.colors.primary }),
-      secondary: (t) => ({ backgroundColor: t.colors.surface }),
-      outlined: () => ({ backgroundColor: 'transparent' }),
+      elevated: (t) => ({ backgroundColor: t.colors.surface, elevation: 4 }),
+      ghost: () => ({ backgroundColor: 'transparent' }),
     },
   },
-  defaultVariants: { variant: 'secondary' },
-})
+  defaultVariants: { variant: 'primary' },
+} satisfies ThemedConfig<ViewStyle>
 
-function MyCard({ style, variant = 'secondary' }: MyCardProps) {
+const cardVariants = themedVariants<ViewStyle>(cardConfig)
+type CardVariant = VariantOf<typeof cardConfig>  // 'primary' | 'elevated' | 'ghost'
+
+interface MyCardProps {
+  style?: StyleProp<ViewStyle>
+  variant?: CardVariant
+}
+
+function MyCard({ style, variant = 'primary' }: MyCardProps) {
   const variantStyle = useVariants(cardVariants, { variant })
   return <View style={{ ...variantStyle, ...StyleSheet.flatten(style) }} />
 }

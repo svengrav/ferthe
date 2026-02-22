@@ -275,6 +275,12 @@ const en = {
     locationRequired: 'Location is required to create a spot',
     mySpots: 'My Spots',
   },
+  spot: {
+    rating: 'Spot Rating',
+    created: 'Created',
+    creator: 'Creator',
+    you: 'You',
+  },
   contentBlocks: {
     addText: 'Text',
     addQuote: 'Quote',

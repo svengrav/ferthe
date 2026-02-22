@@ -121,3 +121,16 @@ export function useVariants<K extends Style, V extends ThemedVariantShape>(
   const { theme } = useTheme()
   return variantFn(theme, options)
 }
+
+/**
+ * Extracts the union type of keys from a named variant dimension in a themedVariants config.
+ * Defaults to the `variant` dimension.
+ *
+ * @example
+ * type CardVariant = VariantOf<typeof cardConfig>           // from 'variant' key
+ * type CardSize   = VariantOf<typeof cardConfig, 'size'>    // from 'size' key
+ */
+export type VariantOf<
+  C extends ThemedConfig<any, any>,
+  K extends string = 'variant'
+> = C['variants'] extends { [P in K]: Record<infer V extends string, any> } ? V : never

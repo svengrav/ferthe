@@ -275,7 +275,12 @@ const de: LocalizationSet = {
     locationRequired: 'Standort wird benötigt, um einen Spot zu erstellen',
     mySpots: 'Deine Spots',
   },
-  contentBlocks: {
+  spot: {
+    rating: 'Spot Bewertung',
+    created: 'Erstellt',
+    creator: 'Ersteller',
+    you: 'Du',
+  }, contentBlocks: {
     addText: 'Text',
     addQuote: 'Zitat',
     addImage: 'Bild',

@@ -7,18 +7,16 @@ import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 
-import AccountSmartCard from '@app/features/account/components/AccountSmartCard.tsx'
 import DiscoveryStats from '@app/features/discovery/components/DiscoveryStats'
 import DiscoveryUserContentSection from '@app/features/discovery/components/DiscoveryUserContentSection'
-import SpotRating from '@app/features/spot/components/SpotRating.tsx'
 import { useLocalization } from '@app/shared/localization'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
-import { formatDate } from '@app/shared/utils/dateTimeUtils.ts'
 import SpotCard from '../card/components/SpotCard'
 import { useSpotCardDimensions } from '../card/hooks/useSpotCardDimensions'
 import { useEditSpotPage } from '../creation/components/SpotCreationPage.tsx'
 import { useSpotWithDiscovery } from '../hooks/useSpotWithDiscovery'
 import { SpotLocation } from './SpotLocation'
+import SpotMetaCard from './SpotMetaCard'
 
 export const useSpotPage = () => ({
   showSpotPage: (spotId: string) => {
@@ -106,29 +104,12 @@ function SpotPage(props: SpotPageProps) {
               />
               <SpotLocation location={spot.location} style={{ alignSelf: 'center' }} />
 
-              <View style={{ borderWidth: 1, gap: 8, borderColor: theme.colors.divider, padding: theme.tokens.spacing.md, backgroundColor: theme.colors.background, borderRadius: theme.tokens.borderRadius.md }}>
-                <View style={{ flexDirection: 'row', flex: 1, gap: 8, }}>
-                  <View style={{ flex: 1 }}>
-                    <AccountSmartCard accountId={spot.createdBy!} variant='secondary' style={{ backgroundColor: 'transparent', padding: 0 }} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <SpotRating spotId={spotId} style={{ alignSelf: 'flex-start' }} />
-
-                  </View>
-                </View>
-
-                <View style={{ flexDirection: 'row', flex: 1, gap: 8 }}>
-                  <View style={{ flex: 1 }}>
-                    <Text variant="caption">Created</Text>
-                    <Text variant="body">{formatDate(spot.createdAt)}</Text>
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                    <Text variant="caption">Entdeckt</Text>
-                    <Text variant="body">{formatDate(discovery?.discoveredAt)}</Text>
-                  </View>
-                </View>
-              </View>
+              <SpotMetaCard
+                spotId={spotId}
+                createdBy={spot.createdBy!}
+                createdAt={spot.createdAt}
+                discoveredAt={discovery?.discoveredAt}
+              />
 
 
               <Text variant='section'>Description</Text>

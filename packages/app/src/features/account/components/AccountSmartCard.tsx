@@ -1,41 +1,44 @@
 import { Avatar, Card, Text } from '@app/shared/components'
-import { ComponentVariant } from '@app/shared/components/types'
-import { createThemedStyles, themedVariants, useTheme, useVariants } from '@app/shared/theme'
+import { ThemedConfig, VariantOf, createThemedStyles, themedVariants, useTheme, useVariants } from '@app/shared/theme'
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { usePublicProfile } from '../stores/publicProfileStore'
 import { usePublicProfilePage } from './PublicProfilePage'
 
 const AVATAR_SIZE = 44
 
-interface AccountSmartCardProps {
-  accountId: string
-  variant?: ComponentVariant
-  style?: StyleProp<ViewStyle>
-  onPress?: () => void
-}
-
-const cardVariants = themedVariants<ViewStyle>({
+const cardConfig = {
   variants: {
     variant: {
-      primary: (t) => ({ backgroundColor: t.colors.primary }),
-      secondary: (t) => ({ backgroundColor: t.colors.surface }),
+      primary: (t: any) => ({ backgroundColor: t.colors.primary }),
+      secondary: (t: any) => ({ backgroundColor: t.colors.surface }),
       outlined: () => ({ backgroundColor: 'transparent' }),
     },
   },
-  defaultVariants: { variant: 'secondary' },
-})
+  defaultVariants: { variant: 'secondary' as const },
+} satisfies ThemedConfig<ViewStyle>
 
-const nameVariants = themedVariants({
+const nameConfig = {
   variants: {
     variant: {
-      primary: (t) => ({ color: t.colors.onPrimary }),
-      secondary: (t) => ({ color: t.colors.onSurface }),
-      outlined: (t) => ({ color: t.colors.onSurface }),
+      primary: (t: any) => ({ color: t.colors.onPrimary }),
+      secondary: (t: any) => ({ color: t.colors.onSurface }),
+      outlined: (t: any) => ({ color: t.colors.onSurface }),
     },
   },
-  defaultVariants: { variant: 'secondary' },
-})
+  defaultVariants: { variant: 'secondary' as const },
+} satisfies ThemedConfig<ViewStyle>
 
+const cardVariants = themedVariants<ViewStyle>(cardConfig)
+const nameVariants = themedVariants(nameConfig)
+
+type AccountCardVariant = VariantOf<typeof cardConfig>
+
+interface AccountSmartCardProps {
+  accountId: string
+  variant?: AccountCardVariant
+  style?: StyleProp<ViewStyle>
+  onPress?: () => void
+}
 
 /**
  * Compact account card showing avatar, display name and spot count.
