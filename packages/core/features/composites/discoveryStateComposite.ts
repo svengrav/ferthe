@@ -129,19 +129,33 @@ export function createDiscoveryStateComposite(options: DiscoveryStateCompositeOp
           return createErrorResult('UPDATE_TRAIL_ERROR')
         }
 
-        // Step 2: Parallel – trail data + spots for this trail
-        const [trailResult, spotsResult] = await Promise.all([
+        // Step 2: Parallel – trail data + discovered spots for this trail + created spots by user
+        const [trailResult, spotsResult, createdSpotsResult] = await Promise.all([
           discoveryApplication.getDiscoveryTrail(context, trailId),
           discoveryApplication.getDiscoveredSpots(context, trailId),
+          spotApplication.getSpots(context, { filters: { createdBy: accountId } }),
         ])
 
         if (!trailResult.data) {
           return createErrorResult('TRAIL_NOT_FOUND')
         }
 
+        // Merge discovered spots + created spots (deduplicated by id, created takes priority)
+        const discoveredSpots = (spotsResult.data || []).map(toSpotSummary)
+        const createdSpots = (createdSpotsResult.data || []).map(createdSpotToSpotSummary)
+        const createdSpotIds = new Set(createdSpots.map(s => s.id))
+        const mergedSpots = [
+          ...createdSpots,
+          ...discoveredSpots.filter(s => !createdSpotIds.has(s.id)),
+        ]
+
+        // Merge spotIds: trail spots + created spots
+        const trailSpotIds = trailResult.data.spots.map(s => s.id)
+        const allSpotIds = Array.from(new Set([...trailSpotIds, ...createdSpots.map(s => s.id)]))
+
         const activeTrail: ActiveTrailRef = {
           trailId,
-          spotIds: trailResult.data.spots.map(s => s.id),
+          spotIds: allSpotIds,
           discoveryIds: trailResult.data.discoveries.map(d => d.id),
           clues: trailResult.data.clues,
           previewClues: trailResult.data.previewClues || [],
@@ -150,7 +164,7 @@ export function createDiscoveryStateComposite(options: DiscoveryStateCompositeOp
 
         return createSuccessResult({
           activeTrail,
-          spots: (spotsResult.data || []).map(toSpotSummary),
+          spots: mergedSpots,
           discoveries: trailResult.data.discoveries.map(toDiscoverySummary),
         })
       } catch (error: any) {
