@@ -1,5 +1,6 @@
-export { SecureStoreConnector, secureStoreConnector } from './secureStoreConnector'
-export { MemoryStoreConnector, memoryStoreConnector } from './memoryStoreConnector'
 export { JsonStoreConnector, jsonStoreConnector } from './jsonStoreConnector'
-export { createStoreConnector, getStoreConnector, StoreType } from './storeConnectorFactory'
+export { MemoryStoreConnector, memoryStoreConnector } from './memoryStoreConnector'
+export { SecureStoreConnector, secureStoreConnector } from './secureStoreConnector'
 export { createStateStorage } from './storeAdapter'
+export { StoreType, createStoreConnector, getStoreConnector } from './storeConnectorFactory'
+
