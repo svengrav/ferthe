@@ -3,9 +3,11 @@ import { useDiscoveryPreviewClues, useDiscoveryScannedClues } from '@app/feature
 import { Clue } from '@shared/contracts'
 import { GeoBoundary, geoUtils } from '@shared/geo'
 import * as Haptics from 'expo-haptics'
+import { Image } from 'expo-image'
 import { memo, useEffect, useState } from 'react'
 import { View } from 'react-native'
-import Animated, { Easing, runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated'
+import Animated, { Easing, useAnimatedReaction, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 import { mapUtils } from '../../services/geoToScreenTransform'
 import { useMapDevice } from '../../stores/mapStore'
 import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
@@ -61,6 +63,13 @@ const createClueStyles = (theme: MapTheme, clueSize: number, scaleValue: number)
     height: clueSize,
     borderRadius: clueSize / 2,
     backgroundColor: theme.clue.fill,
+    borderWidth: theme.clue.strokeWidth * scaleValue,
+    borderColor: theme.clue.strokeColor,
+  },
+  clueImage: {
+    width: clueSize,
+    height: clueSize,
+    borderRadius: clueSize / 2,
     borderWidth: theme.clue.strokeWidth * scaleValue,
     borderColor: theme.clue.strokeColor,
   },
@@ -183,7 +192,11 @@ const AnimatedClue = memo(({ clue, delay, isExiting, boundary, size, scale, them
     >
       <ClueDiscoveryRadius clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} clueSize={clueSize} />
       <ClueDebugCircles clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} clueSize={clueSize} />
-      <View style={styles.clueMarker} />
+      {clue.image?.micro?.url ? (
+        <Image source={{ uri: clue.image.micro.url }} style={styles.clueImage} />
+      ) : (
+        <View style={styles.clueMarker} />
+      )}
     </Animated.View>
   )
 })
@@ -255,7 +268,7 @@ const useSharedValueAsNumber = (sharedValue: any): number => {
   useAnimatedReaction(
     () => sharedValue.value,
     (current) => {
-      runOnJS(setValue)(current)
+      scheduleOnRN(setValue, current)
     },
     [sharedValue]
   )
@@ -304,7 +317,11 @@ function MapClues({ boundary, size }: MapCluesProps) {
           >
             <ClueDiscoveryRadius clue={clue} boundary={boundary} size={size} scale={scaleValue} theme={theme} clueSize={clueSize} />
             <ClueDebugCircles clue={clue} boundary={boundary} size={size} scale={scaleValue} theme={theme} clueSize={clueSize} />
-            <View style={styles.clueMarker} />
+            {clue.image?.micro?.url ? (
+              <Image source={{ uri: clue.image.micro.url }} style={styles.clueImage} />
+            ) : (
+              <View style={styles.clueMarker} />
+            )}
           </View>
         )
       })}

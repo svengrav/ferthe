@@ -51,6 +51,13 @@ export interface ImageProcessOptions {
    * Default: false
    */
   blur?: boolean
+  /**
+   * Create a micro thumbnail (40x40px) for instant preview.
+   * Used for clues / list items to show instant visual feedback.
+   * Ignored if processImage is false.
+   * Default: false
+   */
+  micro?: boolean
 }
 
 export interface ImageApplicationContract {

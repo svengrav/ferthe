@@ -193,6 +193,11 @@ Feature Notes:
 - Every trail can define a own background image for the map. This can be used to create thematic maps for specific trails (e.g. fantasy map for a fantasy trail)
 - You can switch between a navigation and a overview map (different images if you want so)
 - Map shows your current location and heading
+
+
+### Futures
+- If the user is not in trail range, the map shows a preview of the trail boundary and the direction to the closest spot. This gives you a hint where to go to find the trail and start discovering spots.
+- Map shows latest scan locations (like last 10)
 - Map shows other community members' discoveries as little icons (if they shared them)
 
 ## Community

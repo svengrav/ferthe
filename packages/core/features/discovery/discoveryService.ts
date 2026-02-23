@@ -1,5 +1,5 @@
 import { createDeterministicId } from '@core/utils/idGenerator'
-import { Clue, ClueSource, Discovery, DiscoveryContent, DiscoveryLocationRecord, DiscoverySnap, DiscoverySpot, DiscoveryStats, DiscoveryTrail, LocationWithDirection, RatingSummary, ScanEvent, Spot, SpotRating, SpotSource, Trail, TrailStats } from '@shared/contracts'
+import { Clue, ClueSource, Discovery, DiscoveryContent, DiscoveryLocationRecord, DiscoverySnap, DiscoverySpot, DiscoveryStats, DiscoveryTrail, ImageReference, LocationWithDirection, RatingSummary, ScanEvent, Spot, SpotRating, SpotSource, Trail, TrailStats } from '@shared/contracts'
 import { GeoLocation, geoUtils } from '@shared/geo'
 
 export interface Target {
@@ -325,6 +325,19 @@ const getDiscoverySpot = (id: string, spots: Spot[]): Spot | undefined => {
 
 const createClue = (spot: Spot, trailId: string, source: ClueSource): Clue => {
   const now = new Date()
+
+  // Derive micro image from blurred image if available
+  let clueImage: { micro?: ImageReference; blurred?: ImageReference } | undefined
+  if (spot.blurredImage) {
+    const microUrl = spot.blurredImage.url.replace('-blurred', '-micro')
+    const microId = spot.blurredImage.id.replace('-blurred', '-micro')
+
+    clueImage = {
+      micro: { id: microId, url: microUrl },
+      blurred: spot.blurredImage,
+    }
+  }
+
   return {
     id: `${spot.id}-${now.getTime()}`,
     spotId: spot.id,
@@ -332,6 +345,7 @@ const createClue = (spot: Spot, trailId: string, source: ClueSource): Clue => {
     location: spot.location,
     source: source,
     discoveryRadius: spot.options.discoveryRadius,
+    image: clueImage,
   }
 }
 

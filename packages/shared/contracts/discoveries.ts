@@ -96,6 +96,9 @@ export interface DiscoverySpot extends Spot {
 
 export type ClueSource = 'preview' | 'scanEvent'
 
+/**
+ * Clue with optional image (micro + blurred variants for progressive loading).
+ */
 export interface Clue {
   id: string
   spotId: string
@@ -103,6 +106,10 @@ export interface Clue {
   location: GeoLocation
   source: ClueSource
   discoveryRadius: number
+  image?: {
+    micro?: ImageReference   // 40x40px thumbnail (~1-2 KB, instant load)
+    blurred?: ImageReference // Full blurred image (lazy load on tap)
+  }
 }
 
 /**

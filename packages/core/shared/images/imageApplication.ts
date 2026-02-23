@@ -3,7 +3,7 @@ import { ImageApplicationContract, ImageProcessOptions, ImageType, ImageUploadRe
 import { createErrorResult, createSuccessResult, Result } from '@shared/contracts/results.ts'
 import { Buffer } from 'node:buffer'
 import { StorageConnector } from '../../connectors/storageConnector.ts'
-import { getBlurredPath, processImage } from '../../utils/imageProcessor.ts'
+import { getBlurredPath, getMicroPath, processImage } from '../../utils/imageProcessor.ts'
 import {
   createImageMetadata,
   detectExtensionFromDataUri,
@@ -26,6 +26,8 @@ export function createImageApplication({ storageConnector, maxImageSizeBytes }: 
     base64Data: string,
     options: (ImageProcessOptions & { extension?: string }) = {}
   ): Promise<Result<ImageUploadResult>> => {
+    const { processImage: shouldProcess = true, blur = false, micro = false, extension: optionExt } = options
+
     try {
       const accountId = context.accountId
       if (!accountId) {
@@ -37,9 +39,6 @@ export function createImageApplication({ storageConnector, maxImageSizeBytes }: 
       if (!sizeValidation.success) {
         return { ...sizeValidation, data: undefined }
       }
-
-      const { processImage: shouldProcess = true, blur = false, extension: optionExt } = options
-
       // Detect extension from data URI if not provided
       let ext = optionExt
       if (!ext && base64Data.startsWith('data:image')) {
@@ -64,8 +63,8 @@ export function createImageApplication({ storageConnector, maxImageSizeBytes }: 
       }
 
       if (shouldProcess) {
-        // Process image (resize, compress, optional blur)
-        const processed = await processImage(base64Data, { blur })
+        // Process image (resize, compress, optional blur, optional micro)
+        const processed = await processImage(base64Data, { blur, micro })
 
         // Generate image ID with processed extension (webp after processing)
         const blobPath = generateImageId(processed.extension)
@@ -78,6 +77,13 @@ export function createImageApplication({ storageConnector, maxImageSizeBytes }: 
           const blurredPath = getBlurredPath(blobPath)
           const previewMetadata = { ...blobMetadata, type: 'preview' }
           await storageConnector.uploadFile(blurredPath, processed.blurred, previewMetadata)
+        }
+
+        // Store micro thumbnail if present
+        if (processed.micro) {
+          const microPath = getMicroPath(blobPath)
+          const microMetadata = { ...blobMetadata, type: 'micro' }
+          await storageConnector.uploadFile(microPath, processed.micro, microMetadata)
         }
 
         return createSuccessResult({ blobPath })
