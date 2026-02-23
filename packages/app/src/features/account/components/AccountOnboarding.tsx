@@ -1,13 +1,15 @@
 import { getDeviceLocation } from '@app/features/sensor'
-import settingsStore from '@app/features/settings/stores/settingsStore'
+import settingsStore, { useOnboardingFlag } from '@app/features/settings/stores/settingsStore'
 import { Button, FertheLogo, Stack, Text } from '@app/shared/components'
 import { useStepNavigation } from '@app/shared/hooks'
 import { closeOverlay, OverlayCard, OverlayContainer, setOverlay } from '@app/shared/overlay'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
+import { useEffect } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useAccount } from '../stores/accountStore'
 
 const ONBOARDING_KEY = 'onboarding'
 
@@ -139,6 +141,18 @@ export function showOnboardingIfNeeded() {
   }
 
   setOverlay(ONBOARDING_KEY, <OverlayContainer><OverlayCard><AccountOnboarding onDone={handleDone} /></OverlayCard></OverlayContainer>, { showBackdrop: false })
+}
+
+export function useAccountOnboarding() {
+  const { hasSeenOnboarding } = useOnboardingFlag()
+  const account = useAccount()
+
+  useEffect(() => {
+    if (!account) return
+    if (hasSeenOnboarding) return
+
+    showOnboardingIfNeeded()
+  }, [account, hasSeenOnboarding])
 }
 
 /**

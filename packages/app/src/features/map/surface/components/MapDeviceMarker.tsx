@@ -34,7 +34,7 @@ function Arrow({ rotation = 0, fill, strokeColor, circleBackground, size = 18 }:
   }
 
   return (
-    <View style={animatedStyle}>
+    <View style={animatedStyle} id="map-device-arrow">
       <Svg viewBox={SVG_VIEWBOX}>
         <Circle
           cx={CIRCLE_CENTER}
@@ -94,6 +94,7 @@ function MapDeviceMarker({ mode, canvasSize, boundary }: MapDeviceMarkerProps) {
     if (!boundary) {
       return null
     }
+
     const screenPos = mapUtils.coordinatesToPosition(device.location, boundary, canvasSize)
     position = {
       left: screenPos.x,
@@ -103,6 +104,7 @@ function MapDeviceMarker({ mode, canvasSize, boundary }: MapDeviceMarkerProps) {
 
   return (
     <Animated.View
+      id="map-device-marker"
       style={[
         {
           position: 'absolute',

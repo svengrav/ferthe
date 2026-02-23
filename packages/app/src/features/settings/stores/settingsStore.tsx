@@ -1,14 +1,7 @@
-import { config } from '@app/config'
-import { createStateStorage, createStoreConnector } from '@app/shared/device'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { AppFlags, LanguageOptions, Settings, ThemeMode } from '../types/types'
-
-// Create store connector for settings persistence
-const storeConnector = createStoreConnector({
-  json: { baseDirectory: config.storage.jsonStoreUrl },
-  type: config.storage.type,
-})
 
 interface SettingsStore {
   settings: Settings
@@ -46,8 +39,8 @@ const settingsStore = create<SettingsStore>()(
       },
     }),
     {
-      name: 'settings',
-      storage: createJSONStorage(() => createStateStorage(storeConnector)),
+      name: 'settings-storage',
+      storage: createJSONStorage(() => AsyncStorage),
       onRehydrateStorage: () => state => {
         if (state) {
           state.isLoading = false
@@ -56,5 +49,20 @@ const settingsStore = create<SettingsStore>()(
     }
   )
 )
+
+/**
+ * Hook for managing the onboarding flag.
+ * Returns the flag value and a setter function.
+ */
+export function useOnboardingFlag() {
+  const hasSeenOnboarding = settingsStore(state => state.settings.flags?.hasSeenOnboarding ?? false)
+  const setFlag = settingsStore(state => state.setFlag)
+
+  const setHasSeenOnboarding = (value: boolean) => {
+    setFlag({ hasSeenOnboarding: value })
+  }
+
+  return { hasSeenOnboarding, setHasSeenOnboarding }
+}
 
 export default settingsStore

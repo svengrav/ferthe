@@ -236,7 +236,7 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
 
       verifySMSCode: (phoneNumber: string, code: string) => API.send<SMSVerificationResult>('/account/actions/verify-sms', 'POST', { phoneNumber, code }),
 
-      getAccount: (_context: AccountContext) => API.send<Account | null>('/account/profile'),
+      getAccount: (context: AccountContext) => API.send<Account | null>(`/account/profile/${context.accountId}`),
 
       getPublicProfile: (_context: AccountContext, accountId: string) => API.send<AccountPublicProfile>(`/account/public/profiles/${accountId}`),
 

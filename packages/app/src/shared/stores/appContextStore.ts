@@ -1,3 +1,4 @@
+import type { APIContext } from '@app/api'
 import type { AppContext } from '@app/appContext'
 import { create } from 'zustand'
 
@@ -17,12 +18,16 @@ import { create } from 'zustand'
 
 interface AppContextStore {
   context: AppContext | null
+  api: APIContext | null
   setContext: (context: AppContext) => void
+  setApi: (api: APIContext) => void
 }
 
 export const useAppContextStore = create<AppContextStore>(set => ({
   context: null,
+  api: null,
   setContext: context => set({ context }),
+  setApi: api => set({ api }),
 }))
 
 /**

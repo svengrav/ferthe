@@ -9,7 +9,9 @@ import notifee, {
 import { AuthorizationStatus, getMessaging } from '@react-native-firebase/messaging'
 import { useEffect } from 'react'
 import { Platform } from 'react-native'
+import { registerForPushNotificationsAsync } from '../shared/messaging/registerNotificationHandler'
 import { appNavigator } from "../shared/navigation/navigationRef"
+import { useInitStore } from './useInitializationPipeline'
 
 // Request user permission for notifications
 // This is required for iOS and Android 13+ devices
@@ -186,8 +188,13 @@ async function handleActionPress(actionId: string, notification?: any) {
  * Hook that initializes push notification handling for the app.
  * Sets up Firebase Cloud Messaging (FCM) and Notifee for displaying notifications.
  * Handles foreground and background notifications, permissions, and user interactions.
+ * 
+ * Dependencies: sessionReady (waits for session before registering push token)
  */
 export function usePushNotifications() {
+  const { setPushReady } = useInitStore()
+  const sessionReady = useInitStore(state => state.sessionReady)
+
   // Handle Notifee foreground events (must be called unconditionally)
   showNotificationHook()
 
@@ -195,6 +202,7 @@ export function usePushNotifications() {
     // Skip notification handler on web (only supported on iOS/Android)
     if (Platform.OS === 'web') {
       logger.log('[Push] Skipping notification handler on web')
+      setPushReady()
       return
     }
 
@@ -213,4 +221,24 @@ export function usePushNotifications() {
       unsubscribeForeground()
     }
   }, [])
+
+  // Register push token after session is ready
+  useEffect(() => {
+    if (!sessionReady) return
+
+    async function registerPush() {
+      try {
+        logger.log('[Push] Registering for push notifications...')
+        await registerForPushNotificationsAsync()
+        logger.log('[Push] Registration completed')
+        setPushReady()
+      } catch (error) {
+        logger.error('[Push] Failed to register push notifications:', error)
+        // Set ready anyway to not block app
+        setPushReady()
+      }
+    }
+
+    registerPush()
+  }, [sessionReady])
 }

@@ -1,3 +1,5 @@
+import { Platform } from 'react-native'
+
 export type AppConfig = ReturnType<typeof createAppConfig>
 
 type Environment = 'production' | 'development'
@@ -5,6 +7,7 @@ type StoreType = 'secure' | 'json'
 
 export function createAppConfig() {
   const isProduction = process.env.EXPO_PUBLIC_ENVIRONMENT === 'production'
+  const isWeb = Platform.OS === 'web'
 
   return {
     environment: (isProduction ? 'production' : 'development') as Environment,
@@ -15,7 +18,8 @@ export function createAppConfig() {
     },
 
     storage: {
-      type: (isProduction ? 'secure' : 'json') as StoreType,
+      // Web always uses json, mobile uses secure in production
+      type: (isWeb ? 'json' : (isProduction ? 'secure' : 'json')) as StoreType,
       jsonStoreUrl: process.env.EXPO_PUBLIC_JSON_STORE_URL,
     },
 

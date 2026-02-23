@@ -6,6 +6,7 @@ import { useSession } from '../features/account/stores/accountStore'
 /**
  * Hook that reactively loads trail and discovery data when a session is available.
  * Triggers on initial mount with session, and when session changes (e.g., after login/account creation).
+ * Also shows onboarding after account creation.
  */
 export function useDataInitialization() {
   const session = useSession()
@@ -35,6 +36,8 @@ export function useDataInitialization() {
 
         hasLoadedRef.current = true
         logger.log('[DataInit] Data loaded successfully')
+
+
       } catch (error) {
         logger.error('[DataInit] Failed to load data:', error)
       }

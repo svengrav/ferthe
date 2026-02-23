@@ -1,6 +1,7 @@
 import { logger } from '@app/shared/utils/logger'
 import { createEventSystem } from '@shared/events/eventHandler'
 import * as Location from 'expo-location'
+import { Platform } from 'react-native'
 import { hasSignificantLocationChange } from './deviceUtils'
 import { DeviceConnector, DeviceLocation } from './types'
 
@@ -120,38 +121,42 @@ export const createDeviceConnector = (): DeviceConnector => {
         }
       )
 
-      // Watch Heading with error handling
-      headingSubscription = await Location.watchHeadingAsync(headingData => {
-        try {
-          const rawHeading = headingData.magHeading ?? headingData.trueHeading ?? 0
+      // Watch Heading with error handling (only on native platforms)
+      if (Platform.OS !== 'web') {
+        headingSubscription = await Location.watchHeadingAsync(headingData => {
+          try {
+            const rawHeading = headingData.magHeading ?? headingData.trueHeading ?? 0
 
-          // Apply Exponential Moving Average for smooth transitions
-          if (smoothedHeading === null) {
-            smoothedHeading = rawHeading
-          } else {
-            // Handle circular nature of degrees (0° = 360°)
-            let delta = rawHeading - smoothedHeading
-            if (delta > 180) delta -= 360
-            if (delta < -180) delta += 360
+            // Apply Exponential Moving Average for smooth transitions
+            if (smoothedHeading === null) {
+              smoothedHeading = rawHeading
+            } else {
+              // Handle circular nature of degrees (0° = 360°)
+              let delta = rawHeading - smoothedHeading
+              if (delta > 180) delta -= 360
+              if (delta < -180) delta += 360
 
-            smoothedHeading = (smoothedHeading + SMOOTHING_FACTOR * delta + 360) % 360
-          }
-
-          // Round to 10° increments for less jitter
-          const roundedHeading = Math.round(smoothedHeading / 10) * 10
-
-          // Only update if heading changed significantly (10° threshold)
-          if (Math.abs(roundedHeading - lastDeviceUpdate.heading) >= 10) {
-            const updatedDevice = {
-              ...lastDeviceUpdate, // Keep the current location
-              heading: roundedHeading,
+              smoothedHeading = (smoothedHeading + SMOOTHING_FACTOR * delta + 360) % 360
             }
-            emitIfSignificant(updatedDevice)
+
+            // Round to 10° increments for less jitter
+            const roundedHeading = Math.round(smoothedHeading / 10) * 10
+
+            // Only update if heading changed significantly (10° threshold)
+            if (Math.abs(roundedHeading - lastDeviceUpdate.heading) >= 10) {
+              const updatedDevice = {
+                ...lastDeviceUpdate, // Keep the current location
+                heading: roundedHeading,
+              }
+              emitIfSignificant(updatedDevice)
+            }
+          } catch (error) {
+            logger.error('Heading update error:', error)
           }
-        } catch (error) {
-          logger.error('Heading update error:', error)
-        }
-      })
+        })
+      } else {
+        logger.log('Heading tracking not supported on web platform')
+      }
 
       // Start health check to monitor subscriptions
       startHealthCheck()

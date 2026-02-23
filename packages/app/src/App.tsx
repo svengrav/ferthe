@@ -9,17 +9,14 @@ import * as SplashScreen from 'expo-splash-screen'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
-import { useAppInitialization } from './init/useAppInitialization'
-import { useDataInitialization } from './init/useDataInitialization'
-import { usePushNotifications } from './init/usePushNotifications'
+import { useInitializationPipeline } from './init/useInitializationPipeline'
 import { OverlayProvider } from './shared/overlay'
 
 SplashScreen.preventAutoHideAsync()
 
 export default function App() {
-  const isReady = useAppInitialization()
-  usePushNotifications()
-  useDataInitialization()
+  const { isReady } = useInitializationPipeline()
+
 
   if (!isReady) {
     return <SplashView />

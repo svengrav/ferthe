@@ -45,9 +45,7 @@ export class JsonStoreConnector implements SecureStoreConnector {
   async read<T = string>(key: string): Promise<T | null> {
     try {
       const response = await this.makeRequest<{ success: boolean; data: T }>(`/storage/${encodeURIComponent(key)}`)
-      const data = response?.data || null
-      // Serialize back to string for Zustand persist compatibility
-      return data ? JSON.stringify(data) as T : null
+      return response?.data || null
     } catch (error) {
       logger.error(`Failed to read from JSON store with key: ${key}`, error)
       return null
@@ -56,11 +54,9 @@ export class JsonStoreConnector implements SecureStoreConnector {
 
   async write<T>(key: string, value: T): Promise<void> {
     try {
-      // Parse string values (from Zustand persist) to avoid double-serialization
-      const payload = typeof value === 'string' ? JSON.parse(value) : value
       await this.makeRequest(`/storage/${encodeURIComponent(key)}`, {
         method: 'POST',
-        body: JSON.stringify({ value: payload }),
+        body: JSON.stringify({ value }),
       })
     } catch (error) {
       logger.error(`Failed to write to JSON store with key: ${key}`, error)

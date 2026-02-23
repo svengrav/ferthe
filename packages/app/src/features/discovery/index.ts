@@ -23,4 +23,5 @@ export { useDiscoveryStats } from './hooks/useDiscoveryStats'
 
 export { default as SpotRating } from '../spot/components/SpotRating'
 export { default as DiscoveryUserContentSection } from './components/DiscoveryUserContentSection'
+export { useDiscoveryEventCard } from './hooks/useDiscovery'
 
