@@ -1,7 +1,7 @@
 import { useAppContextStore } from '@app/shared/stores/appContextStore'
 import { logger } from '@app/shared/utils/logger'
 import { useEffect, useRef } from 'react'
-import { useSession } from '../../features/account/stores/accountStore'
+import { useSession } from '../features/account/stores/accountStore'
 
 /**
  * Hook that reactively loads trail and discovery data when a session is available.

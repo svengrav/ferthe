@@ -1,7 +1,14 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { config } from '@app/config'
+import { createStateStorage, createStoreConnector } from '@app/shared/device'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { AppFlags, LanguageOptions, Settings, ThemeMode } from '../types/types'
+
+// Create store connector for settings persistence
+const storeConnector = createStoreConnector({
+  json: { baseDirectory: config.storage.jsonStoreUrl },
+  type: config.storage.type,
+})
 
 interface SettingsStore {
   settings: Settings
@@ -39,8 +46,8 @@ const settingsStore = create<SettingsStore>()(
       },
     }),
     {
-      name: 'settings-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      name: 'settings',
+      storage: createJSONStorage(() => createStateStorage(storeConnector)),
       onRehydrateStorage: () => state => {
         if (state) {
           state.isLoading = false
