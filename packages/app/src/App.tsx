@@ -27,6 +27,7 @@ import { useDiscoveryEventCard } from './features/discovery/hooks/useDiscovery'
 import { getDeviceConnector } from './features/sensor/device/deviceConnector'
 import { useSettingsSync } from './features/settings/hooks/useSettingsSync'
 import { createStoreConnector } from './shared/device'
+import { useDataInitialization } from './shared/hooks/useDataInitialization'
 import { registerForPushNotificationsAsync } from './shared/messaging/registerNotificationHandler'
 import { useNotificationHandler } from './shared/messaging/useNotificationHandler'
 import { OverlayProvider } from './shared/overlay'
@@ -87,14 +88,8 @@ const useAppInitialization = () => {
 
         useAppContextStore.getState().setContext(context)
 
-        // Ensure session is loaded before data requests (avoids redundant auth calls)
+        // Load session from storage (does not create account)
         await context.accountApplication.getAccountContext()
-
-        // Load Trail and Discovery Data
-        await Promise.all([
-          context.trailApplication.requestTrailState(),
-          context.discoveryApplication.requestDiscoveryState()
-        ]).catch(error => logger.error('Error loading initial app data:', error))
 
         await SplashScreen.hideAsync()
         showOnboardingIfNeeded()
@@ -119,6 +114,7 @@ const useAppInitialization = () => {
 export default function App() {
   const isReady = useAppInitialization()
   useNotificationHandler()
+  useDataInitialization()
 
   if (!isReady) {
     return <SplashView />

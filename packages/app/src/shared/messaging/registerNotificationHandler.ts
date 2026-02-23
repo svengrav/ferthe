@@ -79,7 +79,6 @@ export async function registerForPushNotificationsAsync(): Promise<string | unde
 
     const token = await messagingInstance.getToken().catch((error) => {
       // FIS_AUTH_ERROR: SHA fingerprint not registered in Firebase Console
-      console.log(JSON.stringify(error.message))
       if (error.message?.includes('FIS_AUTH_ERROR')) {
         logger.error('[Push] Firebase authentication failed - SHA fingerprint missing in Firebase Console')
         logger.error('[Push] Add your app\'s SHA-1/SHA-256 to Firebase Console → Android App → SHA certificate fingerprints')
