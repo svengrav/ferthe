@@ -408,7 +408,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   const upsertDiscoveryContent = async (
     context: AccountContext,
     discoveryId: string,
-    content: { imageUrl?: string; comment?: string }
+    content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }
   ): Promise<Result<DiscoveryContent>> => {
     try {
       const accountId = context.accountId

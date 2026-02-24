@@ -1,15 +1,27 @@
-import { useRef, useState } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { ReactNode, useRef, useState } from 'react'
+import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native'
 
 import { useLocalization } from '@app/shared/localization/'
 import { Theme, useTheme } from '@app/shared/theme'
 
-import Dropdown from '../dropdown/Dropdown.tsx'
-import { ComponentSize, ComponentVariant } from '../types.ts'
+import { IconName } from '../icon/Icon.tsx'
+import { ComponentSize, ComponentVariant } from '../types'
+import PickerButton from './PickerButton.tsx'
+import PickerDropdown from './PickerDropdown.tsx'
+import PickerItem from './PickerItem.tsx'
+
+const DROPDOWN_MIN_SPACE = 250
+const DROPDOWN_APPROXIMATE_HEIGHT = 200
+
+interface PickerItemOption {
+  label: string
+  value: string
+  icon?: IconName
+}
 
 interface PickerProps {
   /** Available options for selection */
-  options: { label: string; value: string }[]
+  options: PickerItemOption[]
   /** Currently selected value */
   selected: string
   /** Callback when a value is selected */
@@ -18,97 +30,98 @@ interface PickerProps {
   variant?: ComponentVariant
   /** Size of the picker */
   size?: ComponentSize
+  /** Custom button renderer */
+  renderButton?: (label: string, onPress: () => void) => ReactNode
+  /** Custom item renderer */
+  renderItem?: (option: PickerItemOption, onPress: () => void, selected: boolean) => ReactNode
 }
 
 /**
  * Picker component with dropdown menu.
- * Supports primary, secondary, and outlined variants.
+ * Supports custom rendering via renderButton and renderItem props.
  */
 function Picker(props: PickerProps) {
-  const { options, selected, onValueChange, variant = 'primary', size = 'md' } = props
+  const { options, selected, onValueChange, variant = 'primary', size = 'md', renderButton, renderItem } = props
 
   const [isMenuVisible, setMenuVisible] = useState(false)
+  const [dropdownPosition, setDropdownPosition] = useState({ x: 0, y: 0, width: 0 })
+
   const buttonRef = useRef<View>(null)
+  const { height: screenHeight } = useWindowDimensions()
   const { locales } = useLocalization()
-  const { styles, theme } = useTheme(createStyles)
+  const { styles } = useTheme(createStyles)
+
+  const handleTogglePicker = () => {
+    if (!isMenuVisible) {
+      buttonRef.current?.measureInWindow((x, y, w, h) => {
+        const spaceBelow = screenHeight - (y + h)
+        const shouldOpenUp = spaceBelow < DROPDOWN_MIN_SPACE
+
+        setDropdownPosition({
+          x,
+          y: shouldOpenUp ? y - DROPDOWN_APPROXIMATE_HEIGHT : y + h,
+          width: w,
+        })
+        setMenuVisible(true)
+      })
+    } else {
+      setMenuVisible(false)
+    }
+  }
 
   const handleOptionSelect = (value: string) => {
     onValueChange(value)
     setMenuVisible(false)
   }
 
-  const sizeConfig = {
-    sm: { padding: theme.tokens.spacing.sm, fontSize: theme.tokens.fontSize.sm },
-    md: { padding: theme.tokens.spacing.lg, fontSize: theme.tokens.fontSize.md },
-    lg: { padding: theme.tokens.spacing.lg, fontSize: theme.tokens.fontSize.md },
-  }[size]
-
-  const buttonStyle = [
-    styles.pickerButton,
-    variant === 'primary' && styles.pickerPrimary,
-    variant === 'secondary' && styles.pickerSecondary,
-    variant === 'outlined' && styles.pickerOutlined,
-    { padding: sizeConfig.padding, },
-  ]
-
-  const textStyle = [
-    styles.pickerButtonText,
-    variant === 'primary' && styles.textPrimary,
-    variant === 'secondary' && styles.textSecondary,
-    variant === 'outlined' && styles.textOutlined,
-    { fontSize: sizeConfig.fontSize },
-  ]
+  const selectedOption = options.find(option => option.value === selected)
+  const selectedLabel = selectedOption?.label || locales.common.select
+  const selectedIcon = selectedOption?.icon
 
   return (
-    <View id="picker">
-      <Pressable ref={buttonRef} style={buttonStyle} onPress={() => setMenuVisible(true)}>
-        <Text style={textStyle}>
-          {options.find(option => option.value === selected)?.label || locales.common.select}
-        </Text>
-      </Pressable>
-      <Dropdown
-        isVisible={isMenuVisible}
-        onClose={() => setMenuVisible(false)}
-        options={options.map(option => ({
-          label: option.label,
-          onPress: () => handleOptionSelect(option.value),
-        }))}
-        anchorRef={buttonRef}
-      />
+    <View ref={buttonRef}>
+      {renderButton ? (
+        renderButton(selectedLabel, handleTogglePicker)
+      ) : (
+        <PickerButton
+          label={selectedLabel}
+          icon={selectedIcon}
+          variant={variant}
+          size={size}
+          onPress={handleTogglePicker}
+        />
+      )}
+
+      <Modal visible={isMenuVisible} transparent onRequestClose={() => setMenuVisible(false)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setMenuVisible(false)}>
+          <PickerDropdown position={dropdownPosition}>
+            {options.map(option =>
+              renderItem ? (
+                <View key={option.value}>
+                  {renderItem(option, () => handleOptionSelect(option.value), option.value === selected)}
+                </View>
+              ) : (
+                <PickerItem
+                  key={option.value}
+                  label={option.label}
+                  value={option.value}
+                  selected={option.value === selected}
+                  onPress={() => handleOptionSelect(option.value)}
+                  icon={option.icon}
+                />
+              )
+            )}
+          </PickerDropdown>
+        </Pressable>
+      </Modal>
     </View>
   )
 }
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    pickerButton: {
-      flexGrow: 0,
-      borderRadius: 8,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    pickerPrimary: {
-      backgroundColor: theme.colors.primary,
-    },
-    pickerSecondary: {
-      backgroundColor: theme.colors.black,
-    },
-    pickerOutlined: {
-      backgroundColor: 'transparent',
-      borderWidth: 1,
-      borderColor: theme.colors.divider,
-    },
-    pickerButtonText: {
-      fontSize: 14,
-    },
-    textPrimary: {
-      color: theme.colors.onPrimary,
-    },
-    textSecondary: {
-      color: theme.colors.onSurface,
-    },
-    textOutlined: {
-      color: theme.colors.primary,
+    modalBackdrop: {
+      flex: 1,
     },
   })
 

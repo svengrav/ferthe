@@ -2,7 +2,7 @@ import { SensorApplication } from '@app/features/sensor'
 import { getSpotStoreActions as getSpotActions, getSpots, getSpotsById } from '@app/features/spot/stores/spotStore'
 import { getTrailsById } from '@app/features/trail/stores/trailStore'
 import { logger } from '@app/shared/utils/logger'
-import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryStateCompositeContract, DiscoveryStats, RatingSummary, Result, SpotSummary } from '@shared/contracts'
+import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryContentVisibility, DiscoveryStateCompositeContract, DiscoveryStats, RatingSummary, Result, SpotSummary } from '@shared/contracts'
 import { Unsubscribe } from '@shared/events/eventHandler'
 import { GeoLocation, geoUtils } from '@shared/geo'
 import { getTrails } from '../trail/stores/trailStore'
@@ -29,7 +29,7 @@ export interface DiscoveryApplication {
   // Stats method
   getDiscoveryStats: (discoveryId: string) => Promise<Result<DiscoveryStats>>
   // Content methods
-  upsertDiscoveryContent: (discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
+  upsertDiscoveryContent: (discoveryId: string, content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }) => Promise<Result<DiscoveryContent>>
   deleteDiscoveryContent: (discoveryId: string) => Promise<Result<void>>
   getDiscoveryContent: (discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
   // Rating methods
@@ -379,7 +379,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   // Content methods
-  const upsertDiscoveryContent = async (discoveryId: string, content: { imageUrl?: string; comment?: string }): Promise<Result<DiscoveryContent>> => {
+  const upsertDiscoveryContent = async (discoveryId: string, content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }): Promise<Result<DiscoveryContent>> => {
     const session = await getSession()
     if (!session.data) return { success: false, data: undefined as any }
 

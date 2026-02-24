@@ -1,13 +1,14 @@
 import { Button, TextInput } from '@app/shared/components'
 import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import Field from '@app/shared/components/field/Field'
+import Picker from '@app/shared/components/picker/Picker'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
 import { useLocalization } from '@app/shared/localization'
 import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
-import { DiscoveryContent } from '@shared/contracts'
+import { DiscoveryContent, DiscoveryContentVisibility } from '@shared/contracts'
 import { useState } from 'react'
 import { Image, View } from 'react-native'
 
@@ -19,7 +20,7 @@ export function useDiscoveryContentEditorCard() {
     showDiscoveryContentEditorCard: (
       id: string,
       content: DiscoveryContent | undefined,
-      onSubmit: (data: { imageUrl?: string; comment?: string }) => Promise<void>
+      onSubmit: (data: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }) => Promise<void>
     ) => {
       const cardId = 'discovery-content-editor-card-' + id
       return setOverlay(
@@ -37,7 +38,7 @@ export function useDiscoveryContentEditorCard() {
 
 interface DiscoveryContentEditorCardProps {
   existingContent?: DiscoveryContent
-  onSubmit: (data: { imageUrl?: string; comment?: string }) => Promise<void>
+  onSubmit: (data: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }) => Promise<void>
   onClose: () => void
 }
 
@@ -47,15 +48,17 @@ interface DiscoveryContentEditorCardProps {
  */
 function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
   const { existingContent, onSubmit, onClose } = props
-  const { styles } = useTheme(useStyles)
+  const { styles, theme } = useTheme(useStyles)
   const { locales } = useLocalization()
   const { selectedImageUri, pickImage, clearImage, isLoading: isPickingImage } = useImagePicker()
   const { convertToBase64, isConverting } = useImageToBase64()
 
   const [comment, setComment] = useState(existingContent?.comment ?? '')
+  const [visibility, setVisibility] = useState<DiscoveryContentVisibility>(existingContent?.visibility ?? 'private')
   const [hasExistingImage, setHasExistingImage] = useState(!!existingContent?.image)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { closeDialog, openDialog } = useRemoveDialog()
+
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true)
@@ -70,6 +73,7 @@ function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
       await onSubmit({
         imageUrl: imageDataToSubmit,
         comment: comment.trim() || undefined,
+        visibility,
       })
       clearImage()
     } catch (error) {
@@ -91,6 +95,7 @@ function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
   const displayImageUrl = selectedImageUri || (hasExistingImage ? existingContent?.image?.url : undefined)
   const isEditing = !!existingContent
   const commentChanged = comment !== (existingContent?.comment ?? '')
+  const visibilityChanged = visibility !== (existingContent?.visibility ?? 'private')
   const imageChanged = selectedImageUri || !hasExistingImage
   const isLoading = isSubmitting || isConverting
 
@@ -142,6 +147,19 @@ function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
             editable={!isLoading}
           />
         </Field>
+
+        <Field helperText={locales.discovery.visibilityLabel}>
+          <Picker
+            options={[
+              { icon: 'lock', value: 'private', label: locales.discovery.visibilityPrivate },
+              { icon: 'public', value: 'public', label: locales.discovery.visibilityPublic },
+            ]}
+            selected={visibility}
+            onValueChange={(value) => setVisibility(value as DiscoveryContentVisibility)}
+            variant="outlined"
+          />
+        </Field>
+
         <View style={styles.buttonRow}>
           <Button
             label={locales.discovery.cancel}
@@ -153,7 +171,7 @@ function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
             label={isConverting ? locales.discovery.processing : isSubmitting ? locales.discovery.saving : isEditing ? locales.discovery.update : locales.discovery.save}
             variant="primary"
             onPress={handleSubmit}
-            disabled={isLoading || (!commentChanged && !imageChanged && isEditing)}
+            disabled={isLoading || (!commentChanged && !imageChanged && !visibilityChanged && isEditing)}
           />
         </View>
       </View>

@@ -40,6 +40,8 @@ function Field(props: FieldProps) {
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
+      zIndex: 1,
+      position: 'relative',
       gap: 6,
     },
     label: {

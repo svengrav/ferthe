@@ -14,6 +14,7 @@ import {
   DeviceToken,
   Discovery,
   DiscoveryContent,
+  DiscoveryContentVisibility,
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoveryProfileUpdateData,
@@ -118,7 +119,7 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
       // Content methods
       getDiscoveryContent: (_context: AccountContext, discoveryId: string) => API.send<DiscoveryContent | undefined>(`/discovery/discoveries/${discoveryId}/content`),
 
-      upsertDiscoveryContent: (_context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) =>
+      upsertDiscoveryContent: (_context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }) =>
         API.send<DiscoveryContent>(`/discovery/discoveries/${discoveryId}/content`, 'PUT', content),
 
       deleteDiscoveryContent: (_context: AccountContext, discoveryId: string) =>

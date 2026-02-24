@@ -1,5 +1,5 @@
 import { createDeterministicId } from '@core/utils/idGenerator'
-import { Clue, ClueSource, Discovery, DiscoveryContent, DiscoveryLocationRecord, DiscoverySnap, DiscoverySpot, DiscoveryStats, DiscoveryTrail, ImageReference, LocationWithDirection, RatingSummary, ScanEvent, Spot, SpotRating, SpotSource, Trail, TrailStats } from '@shared/contracts'
+import { Clue, ClueSource, Discovery, DiscoveryContent, DiscoveryContentVisibility, DiscoveryLocationRecord, DiscoverySnap, DiscoverySpot, DiscoveryStats, DiscoveryTrail, ImageReference, LocationWithDirection, RatingSummary, ScanEvent, Spot, SpotRating, SpotSource, Trail, TrailStats } from '@shared/contracts'
 import { GeoLocation, geoUtils } from '@shared/geo'
 
 export interface Target {
@@ -33,8 +33,8 @@ export type DiscoveryServiceActions = {
   createDiscoveryTrail: (accountId: string, trail: Trail, discoveries: Discovery[], spots: Spot[], trailSpotIds: string[], userLocation?: GeoLocation) => DiscoveryTrail
   getDiscoveryStats: (discovery: Discovery, allDiscoveriesForSpot: Discovery[], userDiscoveries: Discovery[], trailSpotIds: string[], spots: Spot[]) => DiscoveryStats
   getTrailStats: (accountId: string, trailId: string, allDiscoveries: Discovery[], trailSpotIds: string[]) => TrailStats
-  createDiscoveryContent: (accountId: string, discoveryId: string, content: { imageUrl?: string; comment?: string }) => DiscoveryContent
-  updateDiscoveryContent: (existing: DiscoveryContent, content: { imageUrl?: string; comment?: string }) => DiscoveryContent
+  createDiscoveryContent: (accountId: string, discoveryId: string, content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }) => DiscoveryContent
+  updateDiscoveryContent: (existing: DiscoveryContent, content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }) => DiscoveryContent
   createSpotRating: (accountId: string, spotId: string, rating: number) => SpotRating
   getSpotRatingSummary: (spotId: string, ratings: SpotRating[], accountId: string) => RatingSummary
 }
@@ -522,7 +522,7 @@ const getDiscoveryStats = (
 /**
  * Creates a new discovery content entry (image + comment)
  */
-const createDiscoveryContent = (accountId: string, discoveryId: string, content: { imageUrl?: string; comment?: string }): DiscoveryContent => {
+const createDiscoveryContent = (accountId: string, discoveryId: string, content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }): DiscoveryContent => {
   const now = new Date()
 
   // Convert imageUrl to ImageReference if provided
@@ -537,6 +537,7 @@ const createDiscoveryContent = (accountId: string, discoveryId: string, content:
     accountId,
     image,
     comment: content.comment,
+    visibility: content.visibility ?? 'private', // Default to private
     createdAt: now,
     updatedAt: now,
   }
@@ -545,7 +546,7 @@ const createDiscoveryContent = (accountId: string, discoveryId: string, content:
 /**
  * Updates an existing discovery content entry
  */
-const updateDiscoveryContent = (existing: DiscoveryContent, content: { imageUrl?: string; comment?: string }): DiscoveryContent => {
+const updateDiscoveryContent = (existing: DiscoveryContent, content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }): DiscoveryContent => {
   // Convert imageUrl to ImageReference if provided, otherwise keep existing
   const image = content.imageUrl ? {
     id: '', // Will be set by upload result
@@ -556,6 +557,7 @@ const updateDiscoveryContent = (existing: DiscoveryContent, content: { imageUrl?
     ...existing,
     image,
     comment: content.comment ?? existing.comment,
+    visibility: content.visibility ?? existing.visibility,
     updatedAt: new Date(),
   }
 }

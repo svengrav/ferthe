@@ -29,7 +29,7 @@ export interface DiscoveryApplicationContract {
   getDiscoveryProfile: (context: AccountContext) => Promise<Result<DiscoveryProfile>>
   updateDiscoveryProfile: (context: AccountContext, updateData: DiscoveryProfileUpdateData) => Promise<Result<DiscoveryProfile>>
   getDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
-  upsertDiscoveryContent: (context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string }) => Promise<Result<DiscoveryContent>>
+  upsertDiscoveryContent: (context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }) => Promise<Result<DiscoveryContent>>
   deleteDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<void>>
   // Rating methods (delegated to SpotApplication with access control)
   rateSpot: (context: AccountContext, spotId: string, rating: number) => Promise<Result<SpotRating>>
@@ -113,6 +113,13 @@ export interface Clue {
 }
 
 /**
+ * Visibility level for discovery content.
+ * - 'private': Only visible to the content owner
+ * - 'public': Visible in public profiles
+ */
+export type DiscoveryContentVisibility = 'private' | 'public'
+
+/**
  * User-generated content for a discovery (image + comment).
  * Each discovery can have at most one content entry.
  */
@@ -122,6 +129,7 @@ export interface DiscoveryContent {
   accountId: string
   image?: ImageReference
   comment?: string
+  visibility: DiscoveryContentVisibility
   createdAt: Date
   updatedAt: Date
 }
