@@ -6,6 +6,7 @@ export interface SpotApplication {
   requestSpotsByTrail: (trailId: string) => Promise<void>
   requestNearbySpots: (lat: number, lng: number, radiusMeters: number) => Promise<void>
   getSpot: (spotId: string) => Promise<Result<Spot | undefined>>
+  getSpotsByIds: (spotIds: string[]) => Promise<Result<Spot[]>>
   createSpot: (request: CreateSpotRequest) => Promise<Result<Spot>>
   updateSpot: (spotId: string, updates: UpdateSpotRequest) => Promise<Result<Spot>>
   deleteSpot: (spotId: string) => Promise<Result<void>>
@@ -38,14 +39,15 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
     setStatus('loading')
     logger.log('SpotApplication: Requesting spots by trail', trailId)
 
-    const spotIdsResult = await trailAPI.getTrailSpotIds(accountSession.data, trailId)
-    if (!spotIdsResult.data || !spotIdsResult.success) {
-      logger.error('Failed to fetch spot IDs by trail:', spotIdsResult.error)
+    const trailSpotsResult = await trailAPI.getTrailSpots(accountSession.data, trailId)
+    if (!trailSpotsResult.data || !trailSpotsResult.success) {
+      logger.error('Failed to fetch trail spots:', trailSpotsResult.error)
       setStatus('error')
       return
     }
 
-    const spots = await spotAPI.getSpotsByIds(accountSession.data, spotIdsResult.data)
+    const spotIds = trailSpotsResult.data.map(ts => ts.spotId)
+    const spots = await spotAPI.getSpotsByIds(accountSession.data, spotIds)
     if (!spots.data || !spots.success) {
       logger.error('Failed to fetch spots by trail:', spots.error)
       setStatus('error')
@@ -73,6 +75,21 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
     // }
 
     setStatus('ready')
+  }
+
+  const getSpotsByIds = async (spotIds: string[]): Promise<Result<Spot[]>> => {
+    if (spotIds.length === 0) return { success: true, data: [] }
+
+    const accountSession = await getSession()
+    if (!accountSession.data) {
+      return { success: false, error: { message: 'Account session not found', code: 'SESSION_NOT_FOUND' } }
+    }
+
+    const result = await spotAPI.getSpotsByIds(accountSession.data, spotIds)
+    if (result.success && result.data) {
+      result.data.forEach(spot => upsertSpot(spot))
+    }
+    return result as Result<Spot[]>
   }
 
   const getSpot = async (spotId: string): Promise<Result<Spot | undefined>> => {
@@ -150,6 +167,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
     requestSpotsByTrail,
     requestNearbySpots,
     getSpot,
+    getSpotsByIds,
     createSpot,
     updateSpot,
     deleteSpot,

@@ -90,8 +90,8 @@ export interface DiscoveryTrail {
  * Extends Spot with discovery context (when/how it was discovered).
  */
 export interface DiscoverySpot extends Spot {
-  discoveredAt: Date
-  discoveryId: string
+  discoveredAt?: Date // Optional: undefined for undiscovered spots (e.g., public spots)
+  discoveryId: string // Empty string if not discovered
 }
 
 export type ClueSource = 'preview' | 'scanEvent'

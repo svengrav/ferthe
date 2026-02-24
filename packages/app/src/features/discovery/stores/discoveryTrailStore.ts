@@ -22,7 +22,7 @@ interface DiscoveryTrailState extends StoreState {
   scannedClues: Clue[]
   discoveryIds: string[]
   previewClues?: Clue[]
-  spotIds: string[]
+  spotIds: string[] // All spots (discovered + created + public)
   snap?: DiscoverySnap | undefined
   lastDiscoveryId?: string
 }

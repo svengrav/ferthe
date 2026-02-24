@@ -47,16 +47,17 @@ export const createAPIClient = (
       })
 
       if (!response.ok) {
-        const error = new Error(`HTTP ${response.status}: ${response.statusText}`) as APIError
-        error.type = 'http'
-        error.statusCode = response.status
+        let code = `HTTP_${response.status}`
+        let message = `HTTP ${response.status}: ${response.statusText}`
+        try {
+          const errorJson = await response.json()
+          if (errorJson?.error?.code) code = errorJson.error.code
+          if (errorJson?.error?.message) message = errorJson.error.message
+        } catch { /* ignore parse errors */ }
 
         return {
           success: false,
-          error: {
-            message: error.message,
-            code: `HTTP_${response.status}`,
-          }
+          error: { code, message },
         }
       }
 

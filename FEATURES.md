@@ -70,9 +70,10 @@ A spot is usually a point of interest, but can also be:
 ### Create Spots
 - You can create a new spot by providing its name, description, location, and other properties. This allows you to contribute to the community and share interesting locations with others.
 - Not yet: Created spots are submitted for review by the team to ensure they meet the guidelines and are safe?
-**Future Notes**
+
+### Futures
 - User gets a push message if somebody else discovers a spot they created or if somebody shares a discovery in a community they are part of. This encourages engagement and creates a sense of community around the spots you contribute.
-- Users cann add a note to a disocvered spot and decide to share it with the community or not. This allows you to share your thoughts, tips, or stories about the spot when you share it with others.
+
 
 ## Discovery
 
@@ -85,7 +86,8 @@ A spot is usually a point of interest, but can also be:
 - Discoveries can be shared with the community, making the spot visible to others and contributing
 - Discoveries have a timestamp and can be used to track your activity and engagement
 - Discovery stats can be aggregated to show popular spots and trails. It also shows your rank among all discoverers of that spot (e.g. 5th out of 100 discoverers)
-
+- Users cann add a note to a disocvered spot and decide to share it with the community or not. This allows you to share your thoughts, tips, or stories about the spot when you share it with others.
+  
 **Stats**
 - Amount of scans between discoveries
 - Time between discoveries
@@ -99,7 +101,7 @@ A spot is usually a point of interest, but can also be:
 - When you reopen the app, you resume where you left off
 - Profile syncs across devices when using phone authentication
 
-**TODO**
+### Features
 - You can remove a discovery if you want to (e.g. if it was a mistake or if you want to hide it again)
 - Pushup if somebody discovers a spot you created or if somebody shares a discovery in a community you are part of
 
@@ -112,9 +114,8 @@ A spot is usually a point of interest, but can also be:
 - Each discovery can have one content entry (photo + comment)
 
 **Reactions:**
-- You can like or dislike discoveries (your own or from others in communities)
-- Reaction summary shows total likes and dislikes
-- Your current reaction is highlighted
+- You can rate discovered spots 1-5 stars.
+- Reaction summary shows average rating and total ratings for each spot
 - Reactions help surface popular and quality discoveries
 
 ## Trail
@@ -130,6 +131,7 @@ A spot is usually a point of interest, but can also be:
 - Snap radius (when directional hints appear)
 - Custom map background image (optional)
 - Trail shows stats about how many spots are discovered, how many discoveries you have, and your rank among all discoverers of that trail.
+- Trail shows 4-5 Spots and your discovered Spots as preview as blurred preview images.
 
 **Discovery Modes:**
 - **Free**: Discover spots in any order, explore freely
@@ -151,15 +153,16 @@ A spot is usually a point of interest, but can also be:
 - Trail Overview Map Background: Custom image for the map when viewing the overview
 - Trail Navigation Map Background: Custom image for the map when navigating the trail (optional, can be same as overview)
 
-**TODO**
-- Trail Preview shows 4-5 Spots as blurred preview images.
+### Futures
 - Trail Completed Animation when you discover the last spot of a trail.
+- Trail Completed Image that appears on the map and in your profile when you complete a trail. This can be a special badge or icon that celebrates your achievement and shows off your accomplishment to others.
   
 
 ## Clue
 
 **Definition:**
 - **Clue** = Hint marker on the map showing approximate location of an undiscovered spot
+- Shows blurred micro thumbnail of the spot (if available)
 
 **Purpose:**
 - Guides you toward spots with `visibility: 'preview'`
@@ -183,7 +186,7 @@ A spot is usually a point of interest, but can also be:
 - When a scan is performed, clues are generated for any undiscovered spots within the scan radius
 - Scans can be triggered manually by the user but it has a cooldown period to prevent abuse
 
-Feature Notes:
+### Futures
 - Your (latest) scans are visible on the map as little points
 
 ## Map
@@ -193,12 +196,19 @@ Feature Notes:
 - Every trail can define a own background image for the map. This can be used to create thematic maps for specific trails (e.g. fantasy map for a fantasy trail)
 - You can switch between a navigation and a overview map (different images if you want so)
 - Map shows your current location and heading
+- The map shows different type of Spots:
+  - Private: Visible for you only
+  - Hidden: Not visible on the map until discovered
+  - Preview: Shows a clue on the map that you must reach to reveal the spot
+  - Public: Visible on the map for everyone without discovery. You still get a discovery if you reach it for the first time, but it's visible to everyone from the start.
 
 
 ### Futures
 - If the user is not in trail range, the map shows a preview of the trail boundary and the direction to the closest spot. This gives you a hint where to go to find the trail and start discovering spots.
 - Map shows latest scan locations (like last 10)
 - Map shows other community members' discoveries as little icons (if they shared them)
+- Range Filters: Only show clues/spots within a certain distance from the user to reduce clutter and focus on nearby discoveries. Boost performance.
+- Only load the latest X Spots in the map view to improve performance and reduce clutter. Older spots can be loaded when zooming out or on demand.
 
 ## Community
 

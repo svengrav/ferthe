@@ -350,7 +350,8 @@ const createClue = (spot: Spot, trailId: string, source: ClueSource): Clue => {
 }
 
 /**
- * Returns spots as clues based on the trail's previewMode setting and spot visibility
+ * Returns spots as clues based on the trail's previewMode setting and spot visibility.
+ * Filters out private spots that don't belong to the user.
  */
 const getCluesBasedOnPreviewMode = (accountId: string, trail: Trail, discoveries: Discovery[], spots: Spot[], trailSpotIds: string[]): Clue[] => {
   if (trail.options?.previewMode !== 'preview') return []
@@ -358,7 +359,11 @@ const getCluesBasedOnPreviewMode = (accountId: string, trail: Trail, discoveries
   const previewSpotIds = trailSpotIds.filter(spotId => !discoveredSpotIds.includes(spotId))
   return previewSpotIds
     .map(spotId => getDiscoverySpot(spotId, spots))
-    .filter(spot => spot && spot.options.visibility === 'preview' && spot.createdBy !== accountId)
+    .filter(spot =>
+      spot &&
+      spot.options.visibility === 'preview' &&
+      spot.createdBy !== accountId // Never show other users' spots as clues (includes private)
+    )
     .map(spot => createClue(spot as Spot, trail.id, 'preview'))
 }
 

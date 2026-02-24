@@ -16,7 +16,7 @@ const createDiscoveryCards = (discoveries: Discovery[], spots: Spot[]): Discover
       image: spot?.image || { id: '', url: '' },
       blurredImage: spot?.blurredImage,
       description: spot?.description || 'No description available.',
-      discoveredAt: discovery.createdAt,
+      discoveredAt: discovery.discoveredAt, // Use actual discovery date
       spotId: discovery.spotId,
     }
   })

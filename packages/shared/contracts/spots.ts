@@ -70,7 +70,14 @@ export interface SpotApplicationContract {
   getSpotRatingSummary: (context: AccountContext, spotId: string) => Promise<Result<RatingSummary>>
 }
 
-export type SpotVisibility = 'hidden' | 'preview'
+/**
+ * Spot visibility modes:
+ * - 'hidden': Not visible until discovered (default)
+ * - 'preview': Shows clue with blurred image on map
+ * - 'private': Only visible to creator (never shown to others)
+ * - 'public': Always visible to everyone (discovery still possible)
+ */
+export type SpotVisibility = 'hidden' | 'preview' | 'private' | 'public'
 
 /**
  * Source/origin indicating why this spot is visible and how it was loaded.
@@ -78,8 +85,9 @@ export type SpotVisibility = 'hidden' | 'preview'
  * - 'discovery': User has discovered this spot (full access)
  * - 'preview': Spot visible as trail preview/clue (blurred, limited data)
  * - 'created': User created this spot (full access)
+ * - 'public': Spot has visibility='public' (visible before discovery)
  */
-export type SpotSource = 'discovery' | 'preview' | 'created'
+export type SpotSource = 'discovery' | 'preview' | 'created' | 'public'
 
 /**
  * Public spot interface with runtime-generated image URLs.

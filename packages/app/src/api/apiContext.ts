@@ -8,7 +8,7 @@ import {
   APIContract,
   Clue,
   Community,
-  CommunityMember,
+  CommunityMemberWithProfile,
   CreateSpotRequest,
   DevicePlatform,
   DeviceToken,
@@ -150,16 +150,17 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
       getSpot: (_context: AccountContext, id: string, options?: QueryOptions) =>
         API.send<Spot | undefined>(`/spot/spots/${id}`, 'GET', undefined, serializeQueryOptions(options)),
 
-      getSpots: (_context?: AccountContext) => { throw new Error('Method not implemented. Use getSpotsByIds or getSpotPreviews instead.') },
+      getSpots: (_context?: AccountContext, options?: QueryOptions) =>
+        API.send<Spot[]>('/spot/spots', 'GET', undefined, serializeQueryOptions(options)),
 
-      getSpotsByIds: (_context: AccountContext, spotIds: string[], options?: QueryOptions) =>
-        API.send<Spot[]>('/spot/queries/by-ids', 'POST', { spotIds }, serializeQueryOptions(options)),
+      getSpotsByIds: (_context: AccountContext, spotIds: string[]) =>
+        API.send<Spot[]>('/spot/spots/batch', 'POST', { ids: spotIds }),
 
       getSpotPreviews: (options?: QueryOptions) =>
         API.send<SpotPreview[]>('/spot/previews', 'GET', undefined, serializeQueryOptions(options)),
 
-      getSpotPreviewsByIds: (_context: AccountContext, spotIds: string[], options?: QueryOptions) =>
-        API.send<SpotPreview[]>('/spot/queries/previews-by-ids', 'POST', { spotIds }, serializeQueryOptions(options)),
+      getSpotPreviewsByIds: (_context: AccountContext, spotIds: string[]) =>
+        API.send<SpotPreview[]>('/spot/previews', 'GET', undefined, { ids: spotIds.join(',') }),
 
       createSpot: (_context: AccountContext, spotData: CreateSpotRequest) => API.send<Spot>('/spot/spots', 'POST', spotData),
 
@@ -276,6 +277,9 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
       leaveCommunity: (_context: AccountContext, communityId: string) =>
         API.send<void>(`/community/communities/${communityId}/actions/leave`, 'POST'),
 
+      updateCommunity: (_context: AccountContext, communityId: string, input: { name: string; trailIds: string[] }) =>
+        API.send<Community>(`/community/communities/${communityId}`, 'PUT', input),
+
       removeCommunity: (_context: AccountContext, communityId: string) =>
         API.send<void>(`/community/communities/${communityId}`, 'DELETE'),
 
@@ -286,7 +290,7 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
         API.send<Community[]>('/community/communities'),
 
       listCommunityMembers: (_context: AccountContext, communityId: string) =>
-        API.send<CommunityMember[]>(`/community/communities/${communityId}/members`),
+        API.send<CommunityMemberWithProfile[]>(`/community/communities/${communityId}/members`),
 
       shareDiscovery: (_context: AccountContext, discoveryId: string, communityId: string) =>
         API.send<SharedDiscovery>(`/community/communities/${communityId}/discoveries/${discoveryId}/share`, 'POST'),

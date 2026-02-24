@@ -171,7 +171,8 @@ export const createDeviceConnector = (): DeviceConnector => {
     }
 
     healthCheckInterval = setInterval(() => {
-      if (!locationSubscription || !headingSubscription) {
+      const headingLost = Platform.OS !== 'web' && !headingSubscription
+      if (!locationSubscription || headingLost) {
         logger.warn('Location subscriptions lost, attempting to reinitialize...')
         initializeLocationTracking()
       }

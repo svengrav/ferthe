@@ -99,17 +99,6 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     imageApplication: imageApplication
   })
 
-  const communityApplication = createCommunityApplication({
-    communityStore: {
-      communities: createStore<Community>(storeConnector, STORE_IDS.COMMUNITIES),
-      members: createStore<CommunityMember>(storeConnector, STORE_IDS.COMMUNITY_MEMBERS),
-      ratings: createStore<SpotRating>(storeConnector, STORE_IDS.SPOT_RATINGS),
-      discoveries: createStore<SharedDiscovery>(storeConnector, STORE_IDS.COMMUNITY_DISCOVERIES),
-    },
-    discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
-    trailSpotStore: createStore<StoredTrailSpot>(storeConnector, STORE_IDS.TRAIL_SPOTS),
-  })
-
   // Composites: cross-feature aggregation, created after all applications
   const spotAccessComposite = createSpotAccessComposite({
     discoveryApplication,
@@ -124,6 +113,18 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
   const accountProfileComposite = createAccountProfileComposite({
     accountApplication,
     spotApplication,
+  })
+
+  const communityApplication = createCommunityApplication({
+    communityStore: {
+      communities: createStore<Community>(storeConnector, STORE_IDS.COMMUNITIES),
+      members: createStore<CommunityMember>(storeConnector, STORE_IDS.COMMUNITY_MEMBERS),
+      ratings: createStore<SpotRating>(storeConnector, STORE_IDS.SPOT_RATINGS),
+      discoveries: createStore<SharedDiscovery>(storeConnector, STORE_IDS.COMMUNITY_DISCOVERIES),
+    },
+    discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
+    trailSpotStore: createStore<StoredTrailSpot>(storeConnector, STORE_IDS.TRAIL_SPOTS),
+    accountProfileComposite,
   })
 
   // Firebase push connector (optional, requires service account)

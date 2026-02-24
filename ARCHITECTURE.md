@@ -7,7 +7,7 @@ Screen
     - Component
 
 - Screens are the main entry point for features. They are also represented in the nav bar. 
-- Pages are the main entry point for components. They are not represented in the nav bar, but can be used within screens or other pages. They always work as overlays, meaning they are rendered on top of the current screen and can be closed to return to the previous screen.
+- Pages are a combination of components and represent a view for a feature or subfeature. They are not represented in the nav bar, but can be used within screens or other pages. They always work as overlays, meaning they are rendered on top of the current screen and can be closed to return to the previous screen.
 - Components are the main entry point for UI elements. They can be used within screens, pages, or other components. They are reusable and can be composed together to create more complex UI elements.
 
 
@@ -124,3 +124,10 @@ function MyCard({ style, variant = 'primary' }: MyCardProps) {
 - **Use reactive hooks for state reads in components** (e.g., `useTrails()`); use getters for one-time reads outside render (e.g., in submit handlers).
 - **Async actions go through the application layer** (`context.spotApplication.createSpot(...)`), not by calling services or stores directly.
 - If a needed hook or getter is not yet exported from a feature's barrel, add it there rather than reaching into internals.
+
+## Components API Style
+
+- Check if a component is just "atomar ui" or is for a specific task like "share in community"
+- If it has a speciiic task: 
+  - Use an hook that handles the logic and state management for that task. 
+  - Fetch API endpoint, store it, then the component just uses the hook to get the data and display it.

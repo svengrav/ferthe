@@ -140,16 +140,27 @@ export function createDiscoveryStateComposite(options: DiscoveryStateCompositeOp
           return createErrorResult('TRAIL_NOT_FOUND')
         }
 
-        // Merge discovered spots + created spots (deduplicated by id, created takes priority)
+        // Merge discovered spots + created spots + public spots (deduplicated by id, created takes priority)
         const discoveredSpots = (spotsResult.data || []).map(toSpotSummary)
         const createdSpots = (createdSpotsResult.data || []).map(createdSpotToSpotSummary)
         const createdSpotIds = new Set(createdSpots.map(s => s.id))
+
+        // Extract public spots (visibility='public', not owned by user)
+        const publicSpots = trailResult.data.spots
+          .filter(s => s.options.visibility === 'public' && s.createdBy !== accountId)
+          .map(s => ({
+            ...toSpotSummary({ ...s, discoveryId: '', discoveredAt: new Date() } as DiscoverySpot),
+            source: 'public' as const
+          }))
+        const publicSpotIds = new Set(publicSpots.map(s => s.id))
+
         const mergedSpots = [
           ...createdSpots,
-          ...discoveredSpots.filter(s => !createdSpotIds.has(s.id)),
+          ...publicSpots,
+          ...discoveredSpots.filter(s => !createdSpotIds.has(s.id) && !publicSpotIds.has(s.id)),
         ]
 
-        // Merge spotIds: trail spots + created spots
+        // Merge spotIds: trail spots + created spots (public spots are in trail spots)
         const trailSpotIds = trailResult.data.spots.map(s => s.id)
         const allSpotIds = Array.from(new Set([...trailSpotIds, ...createdSpots.map(s => s.id)]))
 

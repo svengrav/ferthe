@@ -262,6 +262,33 @@ const createRoutes = (ctx: APIContract): Route[] => {
       }),
     },
     {
+      method: 'GET',
+      version: 'v1',
+      url: '/spot/spots',
+      handler: asyncRequestHandler<Spot[]>(async ({ context, query }) => {
+        return await spotApplication.getSpots(context, parseQueryOptions(query))
+      }),
+    },
+    {
+      method: 'GET',
+      version: 'v1',
+      url: '/spot/previews',
+      handler: asyncRequestHandler<SpotPreview[]>(async ({ context, query }) => {
+        if (query?.ids) {
+          return await spotApplication.getSpotPreviewsByIds(context, query.ids.split(','))
+        }
+        return await spotApplication.getSpotPreviews(parseQueryOptions(query))
+      }),
+    },
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/spot/spots/batch',
+      handler: asyncRequestHandler<Spot[], never, { ids: string[] }>(async ({ context, body }) => {
+        return await spotApplication.getSpotsByIds(context, body?.ids ?? [])
+      }),
+    },
+    {
       method: 'POST',
       version: 'v1',
       url: '/spot/spots',
@@ -500,6 +527,14 @@ const createRoutes = (ctx: APIContract): Route[] => {
       url: '/community/communities/:communityId',
       handler: asyncRequestHandler<Community | undefined, { communityId: string }>(async ({ context, params }) => {
         return await communityApplication.getCommunity(context, params!.communityId)
+      }),
+    },
+    {
+      method: 'PUT',
+      version: 'v1',
+      url: '/community/communities/:communityId',
+      handler: asyncRequestHandler<Community, { communityId: string }>(async ({ context, params, body }) => {
+        return await communityApplication.updateCommunity(context, params!.communityId, body!)
       }),
     },
     {

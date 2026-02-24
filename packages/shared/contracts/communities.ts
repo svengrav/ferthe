@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { AccountContext } from './accounts.ts';
+import { AccountContext, AccountPublicProfile } from './accounts.ts';
 import { Discovery } from './discoveries.ts';
 import { Result } from './results.ts';
 
@@ -11,10 +11,11 @@ export interface CommunityApplicationContract {
   createCommunity: (context: AccountContext, options: { name: string; trailIds: string[] }) => Promise<Result<Community>>
   joinCommunity: (context: AccountContext, inviteCode: string) => Promise<Result<Community>>
   leaveCommunity: (context: AccountContext, communityId: string) => Promise<Result<void>>
+  updateCommunity: (context: AccountContext, communityId: string, input: { name: string; trailIds: string[] }) => Promise<Result<Community>>
   removeCommunity: (context: AccountContext, communityId: string) => Promise<Result<void>>
   getCommunity: (context: AccountContext, communityId: string) => Promise<Result<Community | undefined>>
   listCommunities: (context: AccountContext) => Promise<Result<Community[]>>
-  listCommunityMembers: (context: AccountContext, communityId: string) => Promise<Result<CommunityMember[]>>
+  listCommunityMembers: (context: AccountContext, communityId: string) => Promise<Result<CommunityMemberWithProfile[]>>
   shareDiscovery: (context: AccountContext, discoveryId: string, communityId: string) => Promise<Result<SharedDiscovery>>
   unshareDiscovery: (context: AccountContext, discoveryId: string, communityId: string) => Promise<Result<void>>
   getSharedDiscoveries: (context: AccountContext, communityId: string) => Promise<Result<Discovery[]>>
@@ -42,6 +43,13 @@ export interface CommunityMember {
   communityId: string
   accountId: string
   joinedAt: Date
+}
+
+/**
+ * Community member enriched with public profile data.
+ */
+export interface CommunityMemberWithProfile extends CommunityMember {
+  profile: AccountPublicProfile
 }
 
 /**

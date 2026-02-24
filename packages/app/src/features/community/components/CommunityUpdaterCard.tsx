@@ -25,14 +25,17 @@ function useCommunityUpdater(communityId: string) {
 
   const handleUpdate = async (data: { name: string; trailId: string }) => {
     setIsUpdating(true)
-    logger.log(`Update community not yet implemented: ${communityId}`)
-    // TODO: Implement update functionality when API is ready
-    // const result = await communityApplication.updateCommunity(communityId, {
-    //   name: data.name.trim(),
-    //   trailIds: [data.trailId]
-    // })
+    const result = await communityApplication.updateCommunity(communityId, {
+      name: data.name.trim(),
+      trailIds: [data.trailId],
+    })
     setIsUpdating(false)
-    useOverlayStore.getState().removeByKey('community-updater-card')
+
+    if (result.success) {
+      useOverlayStore.getState().removeByKey('community-updater-card')
+    } else {
+      logger.error('Failed to update community:', result.error)
+    }
   }
 
   return {

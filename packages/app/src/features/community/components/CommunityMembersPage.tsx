@@ -1,18 +1,32 @@
-import { Page, Text } from '@app/shared/components'
+import { Avatar, Page, Text } from '@app/shared/components'
+import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
-import { CommunityMember } from '@shared/contracts'
+import { logger } from '@app/shared/utils/logger'
+import { CommunityMemberWithProfile } from '@shared/contracts'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, FlatList, View } from 'react-native'
 
+export const useCommunityMembersPage = () => ({
+  showCommunityMembers: (communityId: string) => setOverlay(
+    'communityMembers',
+    <CommunityMembersPage
+      communityId={communityId}
+      onBack={() => closeOverlay('communityMembers')}
+    />,
+  ),
+  closeCommunityMembers: () => closeOverlay('communityMembers'),
+})
+
 interface CommunityMembersScreenProps {
   communityId: string
+  onBack?: () => void
 }
 
-function CommunityMembersPage({ communityId }: CommunityMembersScreenProps) {
+function CommunityMembersPage({ communityId, onBack }: CommunityMembersScreenProps) {
   const { styles, theme } = useTheme(useStyles)
   const { communityApplication } = getAppContextStore()
-  const [members, setMembers] = useState<CommunityMember[]>([])
+  const [members, setMembers] = useState<CommunityMemberWithProfile[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -21,9 +35,13 @@ function CommunityMembersPage({ communityId }: CommunityMembersScreenProps) {
 
   const loadMembers = async () => {
     setLoading(true)
+    logger.log(`Loading members for community: ${communityId}`)
     const result = await communityApplication.getCommunityMembers(communityId)
     if (result.success && result.data) {
       setMembers(result.data)
+      logger.log(`Loaded ${result.data.length} members`)
+    } else {
+      logger.error('Failed to load members:', result.error)
     }
     setLoading(false)
   }
@@ -31,7 +49,7 @@ function CommunityMembersPage({ communityId }: CommunityMembersScreenProps) {
   if (!styles) return null
 
   return (
-    <Page>
+    <Page onBack={onBack}>
       <Text variant='heading'>Community Members</Text>
 
       <View style={styles.content}>
@@ -44,8 +62,18 @@ function CommunityMembersPage({ communityId }: CommunityMembersScreenProps) {
             data={members}
             renderItem={({ item }) => (
               <View style={styles.memberCard}>
-                <Text variant='label'>{item.accountId}</Text>
-                <Text>Joined: {item.joinedAt.toLocaleDateString()}</Text>
+                <View style={styles.memberInfo}>
+                  <Avatar
+                    size={48}
+                    avatar={item.profile.avatar}
+                    label={item.profile.displayName}
+                  />
+                  <View style={styles.memberDetails}>
+                    <Text variant='label'>{item.profile.displayName || 'Unknown User'}</Text>
+                    <Text variant='body'>{item.profile.spotCount} spots created</Text>
+                    <Text variant='caption'>Joined: {item.joinedAt.toLocaleDateString()}</Text>
+                  </View>
+                </View>
               </View>
             )}
             keyExtractor={item => `${item.communityId}_${item.accountId}`}
@@ -66,6 +94,15 @@ const useStyles = createThemedStyles(theme => ({
     borderRadius: 8,
     backgroundColor: theme.colors.surface,
     marginBottom: 8,
+  },
+  memberInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  memberDetails: {
+    flex: 1,
+    gap: 4,
   },
 }))
 

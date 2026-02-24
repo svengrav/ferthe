@@ -2,6 +2,7 @@ import { Theme, useTheme } from '@app/shared/theme'
 import { ActivityIndicator, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import Button from '../button/Button'
 import { Inset, Option } from '../types'
 import { PageHeader } from './PageHeader'
 
@@ -15,6 +16,7 @@ interface PageProps {
   scrollable?: boolean
   inset?: Inset
   loading?: boolean
+  onBack?: () => void
 }
 
 /**
@@ -24,21 +26,23 @@ interface PageProps {
  * Shows loading indicator when loading=true.
  */
 function Page(props: PageProps) {
-  const { children, title, style, options, scrollable = false, trailing, leading, inset = 'md', loading = false } = props
+  const { children, title, style, options, scrollable = false, trailing, leading, inset = 'md', loading = false, onBack } = props
   const { styles, theme } = useTheme(createStyles)
   const insets = useSafeAreaInsets()
+
+  const resolvedLeading = leading ?? (onBack ? <Button icon='arrow-back' onPress={onBack} /> : undefined)
 
   const insetValue = theme.tokens.inset[inset]
 
   // Dynamic content container based on scrollable prop
   const ContentContainer = scrollable ? ScrollView : View
   const contentProps = scrollable
-    ? { contentContainerStyle: [{ flexGrow: 1, paddingHorizontal: insetValue }] }
+    ? { contentContainerStyle: [{ flexGrow: 1 }] }
     : {}
 
   return (
     <View style={[styles.page, { paddingTop: insets.top, paddingBottom: inset !== 'none' ? insets.bottom : 0 }, style]}>
-      <PageHeader title={title} options={options} trailing={trailing} leading={leading} />
+      <PageHeader title={title} options={options} trailing={trailing} leading={resolvedLeading} />
 
       <ContentContainer style={[styles.container, { paddingHorizontal: insetValue }]} {...contentProps}>
         {loading ? (

@@ -9,6 +9,11 @@ import { useDiscoverySpotIds } from '../stores/discoveryTrailStore'
  * to create DiscoverySpot objects.
  * 
  * DiscoverySpot = Spot + Discovery metadata (discoveryId, discoveredAt)
+ * 
+ * Returns all spots from active trail:
+ * - Discovered spots (have discovery record)
+ * - Created spots (user-created, have discovery)
+ * - Public spots (no discovery, use spot.createdAt)
  */
 export function useDiscoverySpotsViewModel(): DiscoverySpot[] {
   const spotIds = useDiscoverySpotIds()
@@ -24,12 +29,11 @@ export function useDiscoverySpotsViewModel(): DiscoverySpot[] {
 
         // Find discovery for this spot
         const discovery = Object.values(discoveriesById).find(d => d.spotId === spotId)
-        if (!discovery) return undefined
 
         const discoverySpot: DiscoverySpot = {
           ...spot,
-          discoveryId: discovery.id,
-          discoveredAt: discovery.discoveredAt,
+          discoveryId: discovery?.id || '',
+          discoveredAt: discovery?.discoveredAt, // undefined if not discovered
         }
 
         return discoverySpot

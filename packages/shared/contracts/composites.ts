@@ -37,7 +37,7 @@ export interface SpotSummary {
  */
 export interface ActiveTrailRef {
   trailId: string
-  spotIds: string[]
+  spotIds: string[] // All spot IDs (discovered + created + public)
   discoveryIds: string[]
   clues: Clue[]
   previewClues: Clue[]

@@ -1,5 +1,5 @@
 import { Store } from '@core/store/storeFactory.ts'
-import { AccountContext, Community, CommunityApplicationContract, CommunityMember, createErrorResult, createSuccessResult, Discovery, Result, SharedDiscovery, StoredTrailSpot } from '@shared/contracts'
+import { AccountContext, AccountProfileCompositeContract, Community, CommunityApplicationContract, CommunityMemberWithProfile, createErrorResult, createSuccessResult, Discovery, Result, SharedDiscovery, StoredTrailSpot } from '@shared/contracts'
 import { CommunityServiceActions, createCommunityService } from './communityService.ts'
 import { CommunityStore } from './communityStore.ts'
 
@@ -7,6 +7,7 @@ export interface CommunityApplicationOptions {
   communityStore: CommunityStore
   discoveryStore: Store<Discovery>
   trailSpotStore: Store<StoredTrailSpot>
+  accountProfileComposite: AccountProfileCompositeContract
   communityService?: CommunityServiceActions
 }
 
@@ -14,7 +15,7 @@ export interface CommunityApplicationOptions {
  * Creates a community application that handles all community-related operations.
  */
 export function createCommunityApplication(options: CommunityApplicationOptions): CommunityApplicationContract {
-  const { communityStore, discoveryStore, trailSpotStore, communityService = createCommunityService() } = options
+  const { communityStore, discoveryStore, trailSpotStore, accountProfileComposite, communityService = createCommunityService() } = options
 
   const createCommunity = async (context: AccountContext, options: { name: string; trailIds: string[] }): Promise<Result<Community>> => {
     try {
@@ -148,7 +149,37 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
       return createErrorResult('LEAVE_COMMUNITY_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
+  const updateCommunity = async (context: AccountContext, communityId: string, input: { name: string; trailIds: string[] }): Promise<Result<Community>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) {
+        return createErrorResult('ACCOUNT_ID_REQUIRED')
+      }
 
+      const communityResult = await communityStore.communities.get(communityId)
+      if (!communityResult.success || !communityResult.data) {
+        return createErrorResult('COMMUNITY_NOT_FOUND')
+      }
+
+      if (communityResult.data.createdBy !== accountId) {
+        return createErrorResult('NOT_CREATOR')
+      }
+
+      const updated = await communityStore.communities.update(communityId, {
+        name: input.name,
+        trailIds: input.trailIds,
+        updatedAt: new Date(),
+      })
+
+      if (!updated.success || !updated.data) {
+        return createErrorResult('UPDATE_COMMUNITY_ERROR')
+      }
+
+      return createSuccessResult(updated.data)
+    } catch (error: unknown) {
+      return createErrorResult('UPDATE_COMMUNITY_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
   const getCommunity = async (_context: AccountContext, communityId: string): Promise<Result<Community | undefined>> => {
     try {
       const result = await communityStore.communities.get(communityId)
@@ -192,7 +223,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     }
   }
 
-  const listCommunityMembers = async (_context: AccountContext, communityId: string): Promise<Result<CommunityMember[]>> => {
+  const listCommunityMembers = async (context: AccountContext, communityId: string): Promise<Result<CommunityMemberWithProfile[]>> => {
     try {
       const membersResult = await communityStore.members.list()
       if (!membersResult.success) {
@@ -200,7 +231,26 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
       }
 
       const members = membersResult.data?.filter(m => m.communityId === communityId) || []
-      return createSuccessResult(members)
+
+      // Get public profiles for all members
+      const accountIds = members.map(m => m.accountId)
+      if (accountIds.length === 0) {
+        return createSuccessResult([])
+      }
+
+      const profilesResult = await accountProfileComposite.getPublicProfiles(context, accountIds)
+      if (!profilesResult.success) {
+        return createErrorResult('GET_PROFILES_ERROR')
+      }
+
+      // Enrich members with profiles
+      const profileMap = new Map(profilesResult.data!.map(p => [p.accountId, p]))
+      const enrichedMembers: CommunityMemberWithProfile[] = members.map(member => ({
+        ...member,
+        profile: profileMap.get(member.accountId)!,
+      }))
+
+      return createSuccessResult(enrichedMembers)
     } catch (error: unknown) {
       return createErrorResult('GET_MEMBERS_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
@@ -258,7 +308,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
 
       // Verify discovery is not older than 24 hours
       const now = new Date()
-      const discoveryAge = now.getTime() - discovery.discoveredAt.getTime()
+      const discoveryAge = now.getTime() - new Date(discovery.discoveredAt).getTime()
       const maxAge = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
       if (discoveryAge > maxAge) {
         return createErrorResult('DISCOVERY_TOO_OLD')
@@ -412,6 +462,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
 
   return {
     createCommunity,
+    updateCommunity,
     joinCommunity,
     leaveCommunity,
     removeCommunity,

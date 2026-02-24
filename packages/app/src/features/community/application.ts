@@ -1,6 +1,6 @@
 import { getSession } from '@app/features/account'
 import { logger } from '@app/shared/utils/logger'
-import { Community, CommunityApplicationContract, CommunityMember, Discovery, Result, SharedDiscovery } from '@shared/contracts'
+import { Community, CommunityApplicationContract, CommunityMemberWithProfile, Discovery, Result, SharedDiscovery } from '@shared/contracts'
 import { getCommunityActions } from './stores/communityStore'
 
 export interface CommunityApplicationOptions {
@@ -10,11 +10,12 @@ export interface CommunityApplicationOptions {
 export interface CommunityApplication {
   requestCommunities: () => Promise<void>
   createCommunity: (input: { name: string; trailIds: string[] }) => Promise<Result<Community>>
+  updateCommunity: (communityId: string, input: { name: string; trailIds: string[] }) => Promise<Result<Community>>
   joinCommunity: (inviteCode: string) => Promise<Result<Community>>
   leaveCommunity: (communityId: string) => Promise<Result<void>>
   removeCommunity: (communityId: string) => Promise<Result<void>>
   setActiveCommunity: (communityId: string | undefined) => void
-  getCommunityMembers: (communityId: string) => Promise<Result<CommunityMember[]>>
+  getCommunityMembers: (communityId: string) => Promise<Result<CommunityMemberWithProfile[]>>
   shareDiscovery: (discoveryId: string, communityId: string) => Promise<Result<SharedDiscovery>>
   unshareDiscovery: (discoveryId: string, communityId: string) => Promise<Result<void>>
   getSharedDiscoveries: (communityId: string) => Promise<Result<Discovery[]>>
@@ -66,6 +67,28 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     } catch (error: any) {
       logger.error('Error creating community:', error)
       return { success: false, error: { code: 'CREATE_ERROR', message: error.message } }
+    }
+  }
+
+  const updateCommunity = async (communityId: string, input: { name: string; trailIds: string[] }): Promise<Result<Community>> => {
+    const { replaceCommunity } = getCommunityActions()
+
+    try {
+      const session = getSession()
+      if (!session) {
+        throw new Error('No session found')
+      }
+
+      const result = await communityAPI.updateCommunity(session, communityId, input)
+      if (result.success && result.data) {
+        replaceCommunity(result.data)
+        logger.log(`Community updated: ${result.data.name}`)
+      }
+
+      return result
+    } catch (error: any) {
+      logger.error('Error updating community:', error)
+      return { success: false, error: { code: 'UPDATE_COMMUNITY_ERROR', message: error.message } }
     }
   }
 
@@ -141,7 +164,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     logger.log(`Active community set: ${communityId || 'none'}`)
   }
 
-  const getCommunityMembers = async (communityId: string): Promise<Result<CommunityMember[]>> => {
+  const getCommunityMembers = async (communityId: string): Promise<Result<CommunityMemberWithProfile[]>> => {
     try {
       const session = getSession()
       if (!session) {
@@ -208,6 +231,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
   return {
     requestCommunities,
     createCommunity,
+    updateCommunity,
     joinCommunity,
     leaveCommunity,
     removeCommunity,

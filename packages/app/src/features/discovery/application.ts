@@ -38,6 +38,8 @@ export interface DiscoveryApplication {
   getSpotRatingSummary: (spotId: string) => Promise<Result<RatingSummary>>
   // Welcome Discovery
   createWelcomeDiscovery: (location: GeoLocation) => Promise<Result<DiscoveryEventState>>
+  // Spot Screen
+  requestSpotScreenData: () => Promise<void>
 }
 
 type DiscoveryApplicationOptions = {
@@ -491,6 +493,19 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     return { success: true, data: card }
   }
 
+  // Single call that atomically populates both created and discovered spots.
+  // Uses getDiscoveryState so source priority (created > discovered) is enforced server-side.
+  const requestSpotScreenData = async (): Promise<void> => {
+    const accountSession = await getSession()
+    if (!accountSession.data) return
+
+    const result = await discoveryStateAPI.getDiscoveryState(accountSession.data)
+    if (result.data?.spots) {
+      const { upsertSpot } = getSpotActions()
+      result.data.spots.forEach(spot => upsertSpot(toSpot(spot)))
+    }
+  }
+
   return {
     getDiscoveryCards,
     setActiveTrail,
@@ -505,5 +520,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     removeSpotRating,
     getSpotRatingSummary,
     createWelcomeDiscovery,
+    requestSpotScreenData,
   }
 }

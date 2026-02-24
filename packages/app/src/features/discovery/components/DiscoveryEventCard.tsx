@@ -1,4 +1,6 @@
+import { useCommunityShareDialog } from '@app/features/community/components/CommunityShareDialog'
 import { SpotContainer, SpotGradientFrame, SpotImage, SpotTitle, useSpotCardDimensions } from '@app/features/spot/components'
+import { spotStore } from '@app/features/spot/stores/spotStore'
 import { Button, Text } from '@app/shared/components'
 import { Flippable } from '@app/shared/components/animation/Flippable'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
@@ -13,6 +15,7 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated'
 import { DiscoveryEventState } from '../services/types'
+import { discoveryStore } from '../stores/discoveryStore'
 import { useDiscoveryCardPage } from './DiscoveryCardPage'
 import { DiscoveryReveal, RevealMode } from './DiscoveryReveal'
 import DiscoveryStats from './DiscoveryStats'
@@ -24,7 +27,25 @@ const CLOSE_BUTTON_RIGHT = 10
 const CLOSE_BUTTON_Z_INDEX = 4
 
 export const useDiscoveryEventCardOverlay = () => ({
-  showDiscoveryEventCard: (card: DiscoveryEventState, options?: { mode: RevealMode }) => {
+  showDiscoveryEventCard: (spotId: string, options?: { mode: RevealMode }) => {
+    const spot = spotStore.getState().byId[spotId]
+    const discovery = Object.values(discoveryStore.getState().byId).find(d => d.spotId === spotId)
+
+    if (!spot) {
+      console.warn(`[DiscoveryEventCard] Spot not found: ${spotId}`)
+      return
+    }
+
+    const card: DiscoveryEventState = {
+      discoveryId: discovery?.id || '',
+      title: spot.name,
+      image: spot.image!,
+      description: spot.description,
+      discoveredAt: discovery?.discoveredAt,
+      spotId: spot.id,
+      blurredImage: spot.blurredImage,
+    }
+
     const overlayId = 'discoveryEventCard-' + card.discoveryId
     setOverlay(
       overlayId,
@@ -81,6 +102,7 @@ function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCa
   const { titleAnimatedStyle, triggerReveal } = useDiscoveryAnimations(mode)
   const [isFlipped, setIsFlipped] = useState(false)
   const { showDiscoveryCardDetails } = useDiscoveryCardPage()
+  const { showCommunityShare } = useCommunityShareDialog()
 
   if (!styles) return null
 
@@ -110,6 +132,13 @@ function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCa
             variant='secondary'
             onPress={() => showDiscoveryCardDetails(card)}
           />
+          {card.discoveryId && (
+            <Button
+              icon='share'
+              variant='secondary'
+              onPress={() => showCommunityShare(card.discoveryId)}
+            />
+          )}
           {onClose && (
             <Button
               icon='close'
@@ -158,6 +187,13 @@ function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCa
                 icon='zoom-out-map'
                 variant='secondary'
                 onPress={() => showDiscoveryCardDetails(card)}
+              />
+            )}
+            {card.discoveryId && (
+              <Button
+                icon='share'
+                variant='secondary'
+                onPress={() => showCommunityShare(card.discoveryId)}
               />
             )}
             {onClose && (

@@ -1,11 +1,10 @@
 import { useDiscoveryEventCardOverlay } from '@app/features/discovery/components/DiscoveryEventCard'
-import { useDiscoverySpotsViewModel } from '@app/features/discovery/hooks/useDiscoverySpotsViewModel'
 import { Image, Text } from '@app/shared/components'
-import { DiscoverySpot } from '@shared/contracts'
 import { GeoBoundary } from '@shared/geo'
 import { memo, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle } from 'react-native-reanimated'
+import { MapSpot, useMapSpotsViewModel } from '../../hooks/useMapSpotsViewModel'
 import { mapUtils } from '../../services/geoToScreenTransform'
 import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
 import { useMapCompensatedScale } from './MapCompensatedScale'
@@ -41,12 +40,14 @@ interface MapSpotsProps {
 }
 
 /**
- * Component that renders spot markers on the map with images or initials
+ * Component that renders spot markers on the map with images or initials.
+ * Shows all spots from active trail (discovered + created + public).
+ * Visual distinction: public spots have reduced opacity.
  * Props-based: boundary and size determine positioning
  */
 function MapSpots({ boundary, size }: MapSpotsProps) {
   const theme = useMapTheme()
-  const spots = useDiscoverySpotsViewModel()
+  const spots = useMapSpotsViewModel()
   const scale = useMapCompensatedScale()
   const { showDiscoveryEventCard } = useDiscoveryEventCardOverlay()
 
@@ -55,11 +56,12 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
     transform: [{ scale: scale.value }]
   }), [scale])
 
-  // Pre-calculate all spot positions
+  // Pre-calculate spot positions
   const spotPositions = useMemo(() => {
     return spots.map(spot => ({
       spot,
-      position: mapUtils.coordinatesToPosition(spot.location, boundary, size)
+      position: mapUtils.coordinatesToPosition(spot.location, boundary, size),
+      isPublic: spot.source === 'public', // Visual distinction for public spots
     }))
   }, [spots, boundary, size.width, size.height])
 
@@ -69,7 +71,10 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
   const fallbackStyle = createFallbackStyle(theme)
 
   // Render spot marker at pre-calculated position
-  const renderSpotMarker = ({ spot, position }: { spot: DiscoverySpot; position: { x: number; y: number } }, index: number) => {
+  const renderSpotMarker = (
+    { spot, position, isPublic }: { spot: MapSpot; position: { x: number; y: number }; isPublic: boolean },
+    index: number
+  ) => {
     const spotInitial = spot.name[0]
 
     return (
@@ -80,20 +85,13 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
             position: 'absolute',
             left: position.x - theme.spot.offsetX,
             top: position.y - theme.spot.offsetY,
-            zIndex: 99,
+            zIndex: isPublic ? 98 : 99, // Public spots slightly below discovered
+            opacity: isPublic ? 0.7 : 1, // Visual distinction for public spots
           },
           scaleStyle
         ]}
       >
-        <Pressable onPress={() => showDiscoveryEventCard({
-          discoveryId: spot.discoveryId,
-          title: spot.name,
-          image: spot.image!,
-          description: spot.description,
-          discoveredAt: spot.createdAt,
-          spotId: spot.id,
-          blurredImage: spot.blurredImage,
-        }, { mode: 'instant' })} >
+        <Pressable onPress={() => showDiscoveryEventCard(spot.id, { mode: 'instant' })}>
           <View style={markerStyle}>
             {spot.image?.url ? (
               <Image
@@ -115,7 +113,7 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
 
   return (
     <>
-      {spotPositions.map(renderSpotMarker)}
+      {spotPositions.map((data, index) => renderSpotMarker(data, index))}
     </>
   )
 }

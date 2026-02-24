@@ -14,6 +14,7 @@ interface CommunityActions extends StoreActions {
   setMembers: (members: CommunityMember[]) => void
   setActiveCommunity: (communityId: string | undefined) => void
   addCommunity: (community: Community) => void
+  replaceCommunity: (community: Community) => void
   removeCommunity: (communityId: string) => void
 }
 
@@ -36,6 +37,11 @@ export const communityStore = create<CommunityState & CommunityActions>(set => (
   addCommunity: community =>
     set(state => ({
       communities: [...state.communities, community],
+      updatedAt: new Date(),
+    })),
+  replaceCommunity: community =>
+    set(state => ({
+      communities: state.communities.map(c => c.id === community.id ? community : c),
       updatedAt: new Date(),
     })),
   removeCommunity: communityId =>
@@ -61,6 +67,7 @@ export const getCommunityActions = () => ({
   setMembers: communityStore.getState().setMembers,
   setActiveCommunity: communityStore.getState().setActiveCommunity,
   addCommunity: communityStore.getState().addCommunity,
+  replaceCommunity: communityStore.getState().replaceCommunity,
   removeCommunity: communityStore.getState().removeCommunity,
   setStatus: communityStore.getState().setStatus,
 })

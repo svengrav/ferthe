@@ -1,4 +1,4 @@
-import { ContentBlock } from '@shared/contracts'
+import { ContentBlock, SpotVisibility } from '@shared/contracts'
 import { z } from 'zod'
 
 // --- Types ---
@@ -11,7 +11,7 @@ export interface SpotContentFormValues {
 }
 
 export interface SpotOptionsFormValues {
-  visibility: 'preview' | 'hidden'
+  visibility: SpotVisibility
   trailIds: string[]
 }
 
@@ -49,6 +49,6 @@ export function createSpotContentSchema(messages: ValidationMessages) {
 
 /** Zod schema for spot options step (visibility, trail assignment). */
 export const spotOptionsSchema = z.object({
-  visibility: z.enum(['preview', 'hidden']),
+  visibility: z.enum(['hidden', 'preview', 'private', 'public']),
   trailIds: z.array(z.string()),
 })

@@ -46,9 +46,18 @@ function SpotOptionsFormFields() {
   const visibility = watch('visibility')
 
   const visibilityOptions = [
-    { label: locales.spotCreation.visibilityPreview, value: 'preview' },
     { label: locales.spotCreation.visibilityHidden, value: 'hidden' },
+    { label: locales.spotCreation.visibilityPreview, value: 'preview' },
+    { label: locales.spotCreation.visibilityPrivate, value: 'private' },
+    { label: locales.spotCreation.visibilityPublic, value: 'public' },
   ]
+
+  const visibilityDescriptions: Record<string, string> = {
+    hidden: locales.spotCreation.visibilityHiddenDescription,
+    preview: locales.spotCreation.visibilityPreviewDescription,
+    private: locales.spotCreation.visibilityPrivateDescription,
+    public: locales.spotCreation.visibilityPublicDescription,
+  }
 
   const trailOptions = trails.map((trail: Trail) => ({
     label: trail.name,
@@ -64,9 +73,7 @@ function SpotOptionsFormFields() {
         variant="outlined"
       />
       <Text variant="caption">
-        {visibility === 'preview'
-          ? locales.spotCreation.visibilityPreviewDescription
-          : locales.spotCreation.visibilityHiddenDescription}
+        {visibilityDescriptions[visibility] || ''}
       </Text>
 
       {/* Trail assignment */}

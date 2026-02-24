@@ -7,7 +7,7 @@ export const useDiscoveryEventCard = () => {
   const { showDiscoveryEventCard } = useDiscoveryEventCardOverlay()
   useEffect(() => {
     if (discoveryEvent) {
-      showDiscoveryEventCard(discoveryEvent, { mode: 'reveal' })
+      showDiscoveryEventCard(discoveryEvent.spotId, { mode: 'reveal' })
     }
   }, [discoveryEvent, showDiscoveryEventCard])
 }
