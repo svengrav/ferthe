@@ -131,3 +131,8 @@ function MyCard({ style, variant = 'primary' }: MyCardProps) {
 - If it has a speciiic task: 
   - Use an hook that handles the logic and state management for that task. 
   - Fetch API endpoint, store it, then the component just uses the hook to get the data and display it.
+
+
+## Status and Boolean
+
+- Enums are preferred over booleans for status flags, as they are more descriptive and allow for future expansion without breaking changes. For example, instead of `isDiscovered: boolean`, use `discoveryStatus: 'undiscovered' | 'discovered' | 'pending'`. 

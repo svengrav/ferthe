@@ -5,9 +5,9 @@ import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
 import { Theme, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 import { Community } from '@shared/contracts'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { useCommunityData, useCommunityStatus } from '../stores/communityStore'
+import { useCommunityData } from '../stores/communityStore'
 
 export const useCommunityShareDialog = () => ({
   showCommunityShare: (discoveryId: string) => setOverlay(
@@ -29,40 +29,20 @@ interface CommunityShareDialogProps {
  * Dialog for sharing a discovery to a community.
  * Shows list of communities and allows selection via radio button.
  */
-/**
- * Ensures communities are loaded in the store.
- * Triggers a fetch if the store is still uninitialized.
- */
-function useCommunityShareData() {
-  const { communityApplication } = getAppContextStore()
-  const { communities } = useCommunityData()
-  const status = useCommunityStatus()
-
-  useEffect(() => {
-    if (status === 'uninitialized') {
-      communityApplication.requestCommunities()
-    }
-  }, [status, communityApplication])
-
-  return { communities }
-}
-
 function CommunityShareDialog(props: CommunityShareDialogProps) {
   const { discoveryId, onClose } = props
   const { styles, theme } = useTheme(createStyles)
   const { locales } = useLocalization()
   const { communityApplication } = getAppContextStore()
-  const { communities } = useCommunityShareData()
+  const { communities } = useCommunityData()
 
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null)
   const [isSharing, setIsSharing] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleShare = useCallback(async () => {
     if (!selectedCommunityId) return
 
     setIsSharing(true)
-    setErrorMessage(null)
     const result = await communityApplication.shareDiscovery(discoveryId, selectedCommunityId)
 
     if (result.success) {
@@ -70,7 +50,9 @@ function CommunityShareDialog(props: CommunityShareDialogProps) {
       onClose()
     } else if (result.error) {
       logger.error('[CommunityShareDialog] Share failed', result.error)
-      setErrorMessage(getErrorMessage(result.error.code, locales))
+      // Show error message based on error code
+      const errorMessage = getErrorMessage(result.error.code, locales)
+      logger.error('[CommunityShareDialog] Error: ' + errorMessage)
     }
 
     setIsSharing(false)
@@ -108,11 +90,6 @@ function CommunityShareDialog(props: CommunityShareDialogProps) {
         <Text variant="caption" style={styles.subtitle}>
           {locales.community.selectCommunity}
         </Text>
-        {errorMessage && (
-          <Text variant="caption" style={styles.errorText}>
-            {errorMessage}
-          </Text>
-        )}
 
         {communities.length === 0 ? (
           <View style={styles.emptyState}>
@@ -151,11 +128,11 @@ function CommunityShareDialog(props: CommunityShareDialogProps) {
 
 function getErrorMessage(errorCode: string, locales: any): string {
   switch (errorCode) {
-    case 'ALREADY_SHARED':
+    case 'DISCOVERY_ALREADY_SHARED':
       return locales.community.alreadyShared
     case 'DISCOVERY_TOO_OLD':
       return locales.community.discoveryTooOld
-    case 'DISCOVERY_SPOT_NOT_IN_COMMUNITY_TRAILS':
+    case 'SPOT_NOT_IN_TRAIL':
       return locales.community.notInCommunityTrail
     default:
       return locales.community.shareFailed
@@ -215,10 +192,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   emptyText: {
     opacity: 0.5,
-  },
-  errorText: {
-    textAlign: 'center',
-    color: theme.colors.error,
   },
   actions: {
     flexDirection: 'row',
