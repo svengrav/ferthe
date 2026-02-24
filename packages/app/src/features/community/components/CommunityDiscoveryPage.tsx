@@ -1,6 +1,6 @@
 import { usePublicProfilePage } from '@app/features/account/components/PublicProfilePage'
-import { useSpotPage } from '@app/features/spot/components/SpotPage'
 import SpotCardList from '@app/features/spot/components/SpotCardList'
+import { useSpotPage } from '@app/features/spot/components/SpotPage'
 import { Avatar, Button, Page, PageTab, PageTabs, Text } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization/'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
