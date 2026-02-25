@@ -1,0 +1,121 @@
+/**
+ * Admin API client with authentication.
+ * Requires ADMIN_TOKEN to be set in localStorage.
+ */
+
+const ADMIN_TOKEN_KEY = 'ferthe_admin_token';
+
+export function setAdminToken(token: string) {
+  localStorage.setItem(ADMIN_TOKEN_KEY, token);
+}
+
+export function getAdminToken(): string | null {
+  return localStorage.getItem(ADMIN_TOKEN_KEY);
+}
+
+export function clearAdminToken() {
+  localStorage.removeItem(ADMIN_TOKEN_KEY);
+}
+
+async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const token = getAdminToken();
+  
+  if (!token) {
+    throw new Error('Admin token not set. Please login first.');
+  }
+
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => response.statusText);
+    throw new Error(`API Error: ${response.status} - ${errorText}`);
+  }
+
+  const contentType = response.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    const text = await response.text();
+    throw new Error(`Expected JSON but got ${contentType}. Response: ${text.substring(0, 100)}`);
+  }
+
+  return response.json();
+}
+
+export const adminApi = {
+  // Spots
+  getSpots() {
+    return request('/admin/api/v1/spot/spots');
+  },
+
+  getSpot(id: string) {
+    return request(`/admin/api/v1/spot/spots/${id}`);
+  },
+
+  createSpot(data: any) {
+    return request('/admin/api/v1/spot/spots', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateSpot(id: string, data: any) {
+    return request(`/admin/api/v1/spot/spots/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteSpot(id: string) {
+    return request(`/admin/api/v1/spot/spots/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Trails
+  getTrails() {
+    return request('/admin/api/v1/trail/trails');
+  },
+
+  getTrail(id: string) {
+    return request(`/admin/api/v1/trail/trails/${id}`);
+  },
+
+  createTrail(data: any) {
+    return request('/admin/api/v1/trail/trails', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateTrail(id: string, data: any) {
+    return request(`/admin/api/v1/trail/trails/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteTrail(id: string) {
+    return request(`/admin/api/v1/trail/trails/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Trail-Spot relationships
+  addSpotToTrail(trailId: string, spotId: string) {
+    return request(`/admin/api/v1/trail/trails/${trailId}/spots/${spotId}`, {
+      method: 'POST',
+    });
+  },
+
+  removeSpotFromTrail(trailId: string, spotId: string) {
+    return request(`/admin/api/v1/trail/trails/${trailId}/spots/${spotId}`, {
+      method: 'DELETE',
+    });
+  },
+};

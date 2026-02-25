@@ -1,6 +1,6 @@
-import { blogApi } from '../api/endpoints';
-import type { BlogPost } from '../types/blog';
-import { useFetch } from './useFetch';
+import { blogApi } from '../../api/endpoints';
+import { useFetch } from '../../hooks/useFetch';
+import type { BlogPost } from '../../types/blog';
 
 export function useBlogPosts(language: 'en' | 'de' = 'de') {
   const { data: posts, loading, error } = useFetch<BlogPost[]>(() => blogApi.list(language), [language]);

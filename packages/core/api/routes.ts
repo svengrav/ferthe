@@ -254,6 +254,30 @@ const createRoutes = (ctx: APIContract): Route[] => {
       }),
     },
     {
+      method: 'POST',
+      version: 'v1',
+      url: '/trail/trails',
+      handler: asyncRequestHandler<Trail, never, Omit<Trail, 'id'>>(async ({ context, body }) => {
+        return await trailApplication.createTrail(context, body!)
+      }),
+    },
+    {
+      method: 'PUT',
+      version: 'v1',
+      url: '/trail/trails/:id',
+      handler: asyncRequestHandler<Trail, { id: string }, Partial<Trail>>(async ({ params, context, body }) => {
+        return await trailApplication.updateTrail(context, params!.id, body!)
+      }),
+    },
+    {
+      method: 'DELETE',
+      version: 'v1',
+      url: '/trail/trails/:id',
+      handler: asyncRequestHandler<void, { id: string }, never>(async ({ params, context }) => {
+        return await trailApplication.deleteTrail(context, params!.id)
+      }),
+    },
+    {
       method: 'GET',
       version: 'v1',
       url: '/trail/trails/:trailId/spots',
@@ -583,6 +607,20 @@ const createRoutes = (ctx: APIContract): Route[] => {
       url: '/community/communities/:communityId/discoveries',
       handler: asyncRequestHandler<Discovery[], { communityId: string }>(async ({ context, params }) => {
         return await communityApplication.getSharedDiscoveries(context, params!.communityId)
+      }),
+    },
+
+    // Account API Routes
+    {
+      method: 'POST',
+      version: 'v1',
+      url: '/account/dev-session',
+      config: { isPublic: true },
+      handler: asyncRequestHandler<AccountSession, never, { accountId: string }>(async ({ body }) => {
+        if (!body?.accountId) {
+          return { success: false, error: { code: 'MISSING_ACCOUNT_ID', message: 'accountId is required' } }
+        }
+        return await accountApplication.createDevSession(body.accountId)
       }),
     },
 

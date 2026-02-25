@@ -156,6 +156,8 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
         }
 
         let spots = (spotsResult.data || [])
+          // Filter by createdBy if context has accountId (exclude public/admin)
+          .filter(spot => !context || context.accountType === 'public' || spot.createdBy === context.accountId)
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
         // Check if images should be enriched

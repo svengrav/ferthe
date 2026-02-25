@@ -1,14 +1,14 @@
-import { BlogListContent } from "../components/BlogListContent";
-import { BlogPostContent } from "../components/BlogPostContent.tsx";
 import { ButtonLink } from "../components/ButtonLink";
-import { FAQCarousel } from "../components/FAQCarousel";
 import { FeedbackButton } from "../components/FeedbackButton.tsx";
 import { Heading } from "../components/Heading";
 import { LinkedInButton } from "../components/LinkedInButton.tsx";
 import { Logo } from "../components/Logo.tsx";
 import Page from "../components/Page";
 import { TrailCanvas } from "../components/TrailCanvas.tsx";
-import { useBlogPost, useBlogPosts } from "../hooks/useBlog";
+import { BlogListContent } from "../features/blog/BlogListContent";
+import { BlogPostContent } from "../features/blog/BlogPostContent.tsx";
+import { useBlogPost, useBlogPosts } from "../features/blog/useBlog";
+import { FAQCarousel } from "../features/faq/FAQCarousel";
 import { useContent } from "../hooks/useContent";
 
 export function Home() {

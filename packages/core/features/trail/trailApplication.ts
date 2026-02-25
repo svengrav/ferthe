@@ -265,7 +265,9 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
           return { success: false, error: { message: 'Failed to list trails', code: 'LIST_TRAILS_ERROR' } }
         }
 
-        const trailEntities = trailsResult.data || []
+        const trailEntities = (trailsResult.data || [])
+          // Filter by createdBy if context has accountId (exclude public/admin)
+          .filter(trail => !context || context.accountType === 'public' || trail.createdBy === context.accountId)
 
         // Check if images should be enriched
         // Default: enrich unless explicitly excluded or not included
@@ -308,6 +310,25 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
       try {
         const id = createCuid2()
         const slug = createSlug(trailData.name)
+        const extra = trailData as unknown as { imageBase64?: string; mapImageBase64?: string }
+
+        // Process base64 trail image if provided
+        let imageBlobPath: string | undefined
+        if (extra.imageBase64) {
+          const result = await imageApplication.processAndStore(context, 'trail', 'pending', extra.imageBase64, {})
+          if (result.success && result.data) imageBlobPath = result.data.blobPath
+        } else {
+          imageBlobPath = trailData.image?.url ? extractBlobPathFromUrl(trailData.image.url) : undefined
+        }
+
+        // Process base64 map image if provided
+        let mapImageBlobPath: string | undefined
+        if (extra.mapImageBase64) {
+          const result = await imageApplication.processAndStore(context, 'trail-surface', 'pending', extra.mapImageBase64, {})
+          if (result.success && result.data) mapImageBlobPath = result.data.blobPath
+        } else {
+          mapImageBlobPath = trailData.map.image?.url ? extractBlobPathFromUrl(trailData.map.image.url) : undefined
+        }
 
         // Convert Trail input to StoredTrail (extract blob paths from URLs)
         const trailEntity: StoredTrail = {
@@ -315,16 +336,14 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
           slug,
           name: trailData.name,
           description: trailData.description,
-          map: {
-            imageBlobPath: trailData.map.image?.url ? extractBlobPathFromUrl(trailData.map.image.url) : undefined,
-          },
+          map: { imageBlobPath: mapImageBlobPath },
           viewport: trailData.viewport ? {
             imageBlobPath: trailData.viewport.image?.url ? extractBlobPathFromUrl(trailData.viewport.image.url) : undefined,
           } : undefined,
           overview: trailData.overview ? {
             imageBlobPath: trailData.overview.image?.url ? extractBlobPathFromUrl(trailData.overview.image.url) : undefined,
           } : undefined,
-          imageBlobPath: trailData.image?.url ? extractBlobPathFromUrl(trailData.image.url) : undefined,
+          imageBlobPath,
           boundary: trailData.boundary,
           options: trailData.options,
           createdBy: trailData.createdBy,
@@ -343,6 +362,59 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
         return { success: true, data: enrichedTrail }
       } catch (error: unknown) {
         return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'CREATE_TRAIL_ERROR' } }
+      }
+    },
+
+    updateTrail: async (context: AccountContext, trailId: string, trailData: Partial<Pick<Trail, 'name' | 'description' | 'boundary'>>): Promise<Result<Trail>> => {
+      try {
+        const existingResult = await trailStore.get(trailId)
+        if (!existingResult.success || !existingResult.data) {
+          return { success: false, error: { message: 'Trail not found', code: 'TRAIL_NOT_FOUND' } }
+        }
+        const extra = trailData as unknown as { imageBase64?: string; mapImageBase64?: string }
+
+        const updates: Partial<StoredTrail> = {
+          name: trailData.name,
+          description: trailData.description,
+          boundary: trailData.boundary,
+          updatedAt: new Date(),
+        }
+
+        // Process base64 trail image if provided
+        if (extra.imageBase64) {
+          const result = await imageApplication.processAndStore(context, 'trail', trailId, extra.imageBase64, {})
+          if (result.success && result.data) updates.imageBlobPath = result.data.blobPath
+        }
+
+        // Process base64 map image if provided
+        if (extra.mapImageBase64) {
+          const result = await imageApplication.processAndStore(context, 'trail-surface', trailId, extra.mapImageBase64, {})
+          if (result.success && result.data) {
+            updates.map = { ...(existingResult.data.map ?? {}), imageBlobPath: result.data.blobPath }
+          }
+        }
+
+        const updateResult = await trailStore.update(trailId, updates)
+        if (!updateResult.success || !updateResult.data) {
+          return { success: false, error: { message: 'Failed to update trail', code: 'UPDATE_TRAIL_ERROR' } }
+        }
+
+        const enrichedTrail = await enrichTrailWithImages(context, updateResult.data, imageApplication)
+        return { success: true, data: enrichedTrail }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'UPDATE_TRAIL_ERROR' } }
+      }
+    },
+
+    deleteTrail: async (_context: AccountContext, trailId: string): Promise<Result<void>> => {
+      try {
+        const deleteResult = await trailStore.delete(trailId)
+        if (!deleteResult.success) {
+          return { success: false, error: { message: 'Failed to delete trail', code: 'DELETE_TRAIL_ERROR' } }
+        }
+        return { success: true, data: undefined }
+      } catch (error: unknown) {
+        return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'DELETE_TRAIL_ERROR' } }
       }
     },
 

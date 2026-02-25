@@ -1,12 +1,12 @@
-import { useMarkdown } from "../hooks/useMarkdown";
-import type { BlogPost } from "../types/blog";
+import Markdown from "../../components/Markdown";
+import { Tag } from "../../components/Tag.tsx";
+import { useMarkdown } from "../../hooks/useMarkdown";
+import type { BlogPost } from "../../types/blog";
 import {
   resolveBlogImagePaths,
   resolveHeroImagePath,
-} from "../utils/blogImagePaths";
-import { dateToLocaleString } from "../utils/date.ts";
-import Markdown from "./Markdown";
-import { Tag } from "./Tag.tsx";
+} from "../../utils/blogImagePaths";
+import { dateToLocaleString } from "../../utils/date.ts";
 
 interface BlogPostContentProps {
   className?: string;

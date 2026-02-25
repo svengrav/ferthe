@@ -1,10 +1,11 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { FeedbackButton } from "./components/FeedbackButton";
 import { OverlayProvider } from "./components/overlay/Overlay";
+import { BlogList } from "./features/blog/BlogList";
+import { BlogPost } from "./features/blog/BlogPost";
+import { ContentBoard } from "./features/creator/ContentBoard";
+import { FAQ } from "./features/faq/FAQ";
 import { About } from "./pages/About";
-import { BlogList } from "./pages/BlogList";
-import { BlogPost } from "./pages/BlogPost";
-import { FAQ } from "./pages/FAQ";
 import { Home } from "./pages/Home";
 import { Privacy } from "./pages/Privacy";
 
@@ -19,6 +20,7 @@ function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/blog" element={<BlogList />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/admin/content" element={<ContentBoard />} />
         </Routes>
       </Router>
       <FeedbackButton className="fixed bottom-6 right-6" />

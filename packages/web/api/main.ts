@@ -10,6 +10,7 @@ await load({ export: true });
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FEEDBACK_EMAIL = Deno.env.get("FEEDBACK_EMAIL") || "feedback@ferthe.de";
+const CORE_API_URL = Deno.env.get("CORE_API_URL") || "http://localhost:3000";
 
 export const app = new Application();
 const router = new Router();
@@ -288,7 +289,152 @@ router.post("/api/feedback", async (context) => {
   }
 });
 
+router.post("/api/admin/dev-login", async (context) => {
+  try {
+    const body = await context.request.body.json();
+    const { accountId } = body;
+
+    if (!accountId) {
+      context.response.status = 400;
+      context.response.body = { error: "accountId is required" };
+      return;
+    }
+
+    // Create a session with Core API
+    const response = await fetch(`${CORE_API_URL}/core/api/v1/account/dev-session`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ accountId }),
+    });
+
+    if (!response.ok) {
+      context.response.status = response.status;
+      context.response.body = await response.json();
+      return;
+    }
+
+    const sessionData = await response.json();
+    context.response.status = 200;
+    context.response.body = sessionData;
+  } catch (error) {
+    console.error("Dev login error:", error);
+    context.response.status = 500;
+    context.response.body = { error: "Login failed" };
+  }
+});
+
+// Admin API Routes (proxy to Core API with authentication)
+const adminRouter = new Router({ prefix: "/admin/api" });
+
+// NO auth middleware - Core API handles authentication
+
+// Proxy GET requests to Core API
+adminRouter.get("/:endpoint(.*)", async (context) => {
+  try {
+    const endpoint = context.params.endpoint;
+    const url = new URL(context.request.url);
+    const queryString = url.search;
+
+    const coreUrl = `${CORE_API_URL}/core/api/${endpoint}${queryString}`;
+
+    const response = await fetch(coreUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": context.request.headers.get("Authorization") || "",
+      },
+    });
+
+    context.response.status = response.status;
+    context.response.body = await response.json();
+  } catch (error) {
+    console.error("Admin API proxy error:", error);
+    context.response.status = 500;
+    context.response.body = { error: "Failed to proxy request to Core API" };
+  }
+});
+
+// Proxy POST requests to Core API
+adminRouter.post("/:endpoint(.*)", async (context) => {
+  try {
+    const endpoint = context.params.endpoint;
+    const body = await context.request.body.json();
+
+    const coreUrl = `${CORE_API_URL}/core/api/${endpoint}`;
+
+    const response = await fetch(coreUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": context.request.headers.get("Authorization") || "",
+      },
+      body: JSON.stringify(body),
+    });
+
+    context.response.status = response.status;
+    context.response.body = await response.json();
+  } catch (error) {
+    console.error("Admin API proxy error:", error);
+    context.response.status = 500;
+    context.response.body = { error: "Failed to proxy request to Core API" };
+  }
+});
+
+// Proxy PUT requests to Core API
+adminRouter.put("/:endpoint(.*)", async (context) => {
+  try {
+    const endpoint = context.params.endpoint;
+    const body = await context.request.body.json();
+
+    const coreUrl = `${CORE_API_URL}/core/api/${endpoint}`;
+
+    const response = await fetch(coreUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": context.request.headers.get("Authorization") || "",
+      },
+      body: JSON.stringify(body),
+    });
+
+    context.response.status = response.status;
+    context.response.body = await response.json();
+  } catch (error) {
+    console.error("Admin API proxy error:", error);
+    context.response.status = 500;
+    context.response.body = { error: "Failed to proxy request to Core API" };
+  }
+});
+
+// Proxy DELETE requests to Core API
+adminRouter.delete("/:endpoint(.*)", async (context) => {
+  try {
+    const endpoint = context.params.endpoint;
+
+    const coreUrl = `${CORE_API_URL}/core/api/${endpoint}`;
+
+    const response = await fetch(coreUrl, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": context.request.headers.get("Authorization") || "",
+      },
+    });
+
+    context.response.status = response.status;
+    context.response.body = await response.json();
+  } catch (error) {
+    console.error("Admin API proxy error:", error);
+    context.response.status = 500;
+    context.response.body = { error: "Failed to proxy request to Core API" };
+  }
+});
+
 app.use(oakCors());
+app.use(adminRouter.routes());
+app.use(adminRouter.allowedMethods());
 app.use(router.routes());
 app.use(router.allowedMethods());
 app.use(routeStaticFilesFrom([

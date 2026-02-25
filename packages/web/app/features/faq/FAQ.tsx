@@ -1,6 +1,6 @@
-import { FAQContent } from "../components/FAQContent";
-import Page from "../components/Page";
-import { useFAQContent } from "../hooks/useFAQContent.ts";
+import Page from "../../components/Page";
+import { FAQContent } from "./FAQContent";
+import { useFAQContent } from "./useFAQContent.ts";
 
 export function FAQ() {
   const {

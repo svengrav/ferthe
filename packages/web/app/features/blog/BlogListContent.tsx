@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import type { BlogPost } from "../types/blog";
-import { dateToLocaleString } from "../utils/date.ts";
-import { Tag } from "./Tag.tsx";
+import { Tag } from "../../components/Tag.tsx";
+import type { BlogPost } from "../../types/blog";
+import { dateToLocaleString } from "../../utils/date.ts";
 
 interface BlogListContentProps {
   className?: string;

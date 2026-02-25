@@ -1,5 +1,5 @@
-import { FAQItem } from "../components/FAQContent.tsx";
-import { useContent } from "./useContent.ts";
+import { useContent } from "../../hooks/useContent.ts";
+import { FAQItem } from "./FAQContent.tsx";
 
 export function parseFAQContent(content: string): FAQItem[] {
   return content

@@ -462,6 +462,22 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     return authSession
   }
 
+  const createDevSession = async (accountId: string): Promise<Result<AccountSession>> => {
+    try {
+      // Check if account exists
+      const accountResult = await accountStore.get(accountId)
+      if (!accountResult.success || !accountResult.data) {
+        return createErrorResult('ACCOUNT_NOT_FOUND')
+      }
+
+      // Create session for this account
+      const authSession = createAuthSession(accountId)
+      return createSuccessResult(authSession)
+    } catch (error: unknown) {
+      return createErrorResult('CREATE_DEV_SESSION_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
   const getFirebaseConfig = async (context: AccountContext): Promise<Result<FirebaseConfig>> => {
     try {
       // Verify the account exists
@@ -610,5 +626,6 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     getPublicProfile,
     registerDeviceToken,
     removeDeviceToken,
+    createDevSession,
   }
 }

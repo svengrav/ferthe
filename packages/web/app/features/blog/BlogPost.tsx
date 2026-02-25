@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
-import { BlogPostContent } from "../components/BlogPostContent";
-import Page from "../components/Page";
-import { useBlogPost } from "../hooks/useBlog";
+import Page from "../../components/Page";
+import { BlogPostContent } from "./BlogPostContent";
+import { useBlogPost } from "./useBlog";
 
 export function BlogPost() {
   const { slug } = useParams<{ slug: string }>();

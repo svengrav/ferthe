@@ -1,6 +1,6 @@
-import { BlogListContent } from "../components/BlogListContent";
-import Page from "../components/Page";
-import { useBlogPosts } from "../hooks/useBlog";
+import Page from "../../components/Page";
+import { BlogListContent } from "./BlogListContent";
+import { useBlogPosts } from "./useBlog";
 
 export function BlogList() {
   const { posts, loading, error } = useBlogPosts();

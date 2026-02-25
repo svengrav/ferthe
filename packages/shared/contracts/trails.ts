@@ -15,6 +15,8 @@ export interface TrailApplicationContract {
   getTrailSpotIds: (context: AccountContext, trailId: string) => Promise<Result<string[]>>
   getTrailSpots: (context: AccountContext, trailId: string) => Promise<Result<TrailSpot[]>>
   createTrail: (context: AccountContext, trailData: Omit<Trail, 'id'>) => Promise<Result<Trail>>
+  updateTrail: (context: AccountContext, trailId: string, trailData: Partial<Pick<Trail, 'name' | 'description' | 'boundary'>>) => Promise<Result<Trail>>
+  deleteTrail: (context: AccountContext, trailId: string) => Promise<Result<void>>
   addSpotToTrail: (context: AccountContext, trailId: string, spotId: string, order?: number) => Promise<Result<StoredTrailSpot>>
   removeSpotFromTrail: (context: AccountContext, trailId: string, spotId: string) => Promise<Result<void>>
   rateTrail: (context: AccountContext, trailId: string, rating: number) => Promise<Result<TrailRating>>
