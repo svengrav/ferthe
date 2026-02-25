@@ -19,7 +19,7 @@ export function clearAdminToken() {
 
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   const token = getAdminToken();
-  
+
   if (!token) {
     throw new Error('Admin token not set. Please login first.');
   }
