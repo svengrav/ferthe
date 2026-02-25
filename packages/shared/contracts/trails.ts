@@ -61,6 +61,7 @@ export interface Trail {
   image?: ImageReference
   boundary: GeoBoundary
   options: Options
+  createdBy?: string
   createdAt: Date
   updatedAt: Date
 }

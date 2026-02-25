@@ -1,4 +1,5 @@
 import { Button, Text } from '@app/shared/components'
+import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import { useLocalization } from '@app/shared/localization'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
@@ -57,6 +58,7 @@ function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
   const content = useDiscoveryContent(id)
   const { updateContent, deleteContent } = useContentActions(id)
   const { showDiscoveryContentEditorCard, closeDiscoveryContentEditorCard } = useDiscoveryContentEditorCard()
+  const { openDialog, closeDialog } = useRemoveDialog()
   const [isLoading, setIsLoading] = useState(false)
 
   if (!id || !styles) return null
@@ -71,10 +73,16 @@ function DiscoveryUserContentSection({ id }: DiscoveryUserContentSectionProps) {
     })
   }
 
-  const handleDeleteContent = async () => {
-    setIsLoading(true)
-    await deleteContent()
-    setIsLoading(false)
+  const handleDeleteContent = () => {
+    openDialog({
+      onConfirm: async () => {
+        closeDialog()
+        setIsLoading(true)
+        await deleteContent()
+        setIsLoading(false)
+      },
+      onCancel: closeDialog,
+    })
   }
 
   // Content rendering

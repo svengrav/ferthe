@@ -3,8 +3,7 @@ import { StyleSheet } from 'react-native'
 
 import { getDeviceLocation } from '@app/features/sensor'
 import { getTrailSpotIds } from '@app/features/trail'
-import { Button, Page, Stack, StepIndicator, Text } from '@app/shared/components'
-import { setNotification } from '@app/shared/components/notification/Notification'
+import { Button, Page, showSnackbar, Stack, StepIndicator, Text } from '@app/shared/components'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
 import { useStepNavigation } from '@app/shared/hooks/useStepNavigation'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
@@ -171,7 +170,7 @@ function SpotFormPage(props: SpotFormPageProps) {
       const result = await context.spotApplication.createSpot(request)
 
       if (result.success) {
-        setNotification(locales.spotCreation.created, '')
+        showSnackbar(locales.spotCreation.created)
         onClose()
       } else {
         setError(result.error?.message ?? locales.spotCreation.error)

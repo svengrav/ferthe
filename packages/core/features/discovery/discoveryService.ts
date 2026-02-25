@@ -611,11 +611,14 @@ const getTrailStats = (
     d => d.accountId === accountId && d.trailId === trailId
   )
 
-  // Get unique discovered spot IDs
-  const discoveredSpotIds = new Set(userTrailDiscoveries.map(d => d.spotId))
+  // Get unique discovered spot IDs — intersected with trail's spots
+  const trailSpotIdSet = new Set(trailSpotIds)
+  const discoveredSpotIds = new Set(
+    userTrailDiscoveries.map(d => d.spotId).filter(id => trailSpotIdSet.has(id))
+  )
   const discoveredSpots = discoveredSpotIds.size
   const totalSpots = trailSpotIds.length
-  const discoveriesCount = userTrailDiscoveries.length
+  const discoveriesCount = userTrailDiscoveries.filter(d => trailSpotIdSet.has(d.spotId)).length
 
   // Calculate progress
   const progressPercentage = totalSpots > 0 ? Math.round((discoveredSpots / totalSpots) * 100) : 0

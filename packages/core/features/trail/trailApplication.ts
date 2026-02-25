@@ -100,6 +100,7 @@ async function enrichTrailWithImages(
     image,
     boundary: trailEntity.boundary || { northEast: { lat: 0, lon: 0 }, southWest: { lat: 0, lon: 0 } },
     options: trailEntity.options,
+    createdBy: trailEntity.createdBy,
     createdAt: trailEntity.createdAt,
     updatedAt: trailEntity.updatedAt,
   }
@@ -201,7 +202,13 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
             return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
           })
 
-        return { success: true, data: trailSpots.map(ts => ts.spotId) }
+        // Deduplicate spot IDs (guards against duplicate store entries)
+        const seen = new Set<string>()
+        const uniqueSpotIds = trailSpots
+          .map(ts => ts.spotId)
+          .filter(id => seen.has(id) ? false : (seen.add(id), true))
+
+        return { success: true, data: uniqueSpotIds }
       } catch (error: unknown) {
         return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_TRAIL_SPOT_IDS_ERROR' } }
       }
@@ -284,6 +291,7 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
               image: undefined,
               boundary: withBoundary.boundary || { northEast: { lat: 0, lon: 0 }, southWest: { lat: 0, lon: 0 } },
               options: withBoundary.options,
+              createdBy: withBoundary.createdBy,
               createdAt: withBoundary.createdAt,
               updatedAt: withBoundary.updatedAt,
             }
@@ -319,6 +327,7 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
           imageBlobPath: trailData.image?.url ? extractBlobPathFromUrl(trailData.image.url) : undefined,
           boundary: trailData.boundary,
           options: trailData.options,
+          createdBy: trailData.createdBy,
           createdAt: trailData.createdAt,
           updatedAt: trailData.updatedAt,
         }

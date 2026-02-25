@@ -5,12 +5,13 @@ import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 
 import { useLocalization } from '@app/shared/localization'
+import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
 import { useTrailSpotsViewModel } from '../hooks/useTrailSpotsViewModel'
+import TrailMetaCard from './TrailMetaCard'
 import TrailSpots from './TrailSpots'
 import TrailStats from './TrailStats'
-import { getAppContextStore } from '@app/shared/stores/appContextStore'
 
 export const useTrailPage = () => ({
   showTrailPage: (trail: Trail) => {
@@ -48,6 +49,7 @@ function TrailPage(props: TrailPageProps) {
   // Request trail spot previews on mount or trail change
   useEffect(() => {
     trailApplication.requestTrailSpotPreviews(trail.id)
+    trailApplication.getTrailRatingSummary(trail.id)
   }, [trail.id])
 
   return (
@@ -66,9 +68,9 @@ function TrailPage(props: TrailPageProps) {
               width={imageSize}
               resizeMode="cover"
             />
+            <TrailMetaCard trailId={trail.id} createdAt={trail.createdAt} createdBy={trail.createdBy} />
             <Text variant="section">{locales.trails.description}</Text>
             <Text variant="body">{trail.description}</Text>
-            <Text variant="body">{trail.updatedAt.toDateString()}</Text>
           </Stack>
         </PageTab>
         <PageTab id="spots" label={locales.trails.spots}>

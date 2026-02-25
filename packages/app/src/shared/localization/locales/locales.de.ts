@@ -80,6 +80,7 @@ const de: LocalizationSet = {
     spot: 'Spot',
     toDiscover: 'noch zu entdecken',
     allSpotsDiscovered: 'Alle Spots wurden entdeckt!',
+    rating: 'Trail Bewertung',
     stats: {
       name: 'Statistik',
       progress: 'Fortschritt',

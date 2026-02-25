@@ -1,11 +1,11 @@
-import { Button, TextInput } from '@app/shared/components'
+import { Button, showSnackbar, TextInput } from '@app/shared/components'
 import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import Field from '@app/shared/components/field/Field'
 import Picker from '@app/shared/components/picker/Picker'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
 import { useLocalization } from '@app/shared/localization'
-import { OverlayCard, closeOverlay, setOverlay } from '@app/shared/overlay'
+import { closeOverlay, OverlayCard, setOverlay } from '@app/shared/overlay'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 import { DiscoveryContent, DiscoveryContentVisibility } from '@shared/contracts'
@@ -80,6 +80,8 @@ function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
       logger.error('Error submitting content:', error)
     } finally {
       setIsSubmitting(false)
+      showSnackbar(locales.spotCreation.created)
+
     }
   }
 

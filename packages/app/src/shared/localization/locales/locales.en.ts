@@ -78,6 +78,7 @@ const en = {
     spot: 'spot',
     toDiscover: 'to discover',
     allSpotsDiscovered: 'All spots discovered!',
+    rating: 'Trail Rating',
     stats: {
       name: 'Stats',
       progress: 'Progress',

@@ -10,6 +10,7 @@ import {
   Discovery,
   DiscoveryApplicationContract,
   DiscoveryContent,
+  DiscoveryContentVisibility,
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoveryProfileUpdateData,
@@ -612,6 +613,15 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         return createErrorResult('TRAIL_HAS_NO_SPOTS')
       }
 
+      // Filter to only spots that actually exist in the spot store
+      // (trail-spot-relations may contain stale entries for deleted/non-existent spots)
+      const existingSpotsResult = await spotApplication.getSpotsByIds(context, trailSpotIds, { exclude: ['images', 'userStatus'] })
+      const existingSpotIds = (existingSpotsResult.data || []).map(s => s.id)
+
+      if (existingSpotIds.length === 0) {
+        return createErrorResult('TRAIL_HAS_NO_SPOTS')
+      }
+
       // Get all discoveries
       const discoveriesResult = await discoveryStore.list()
       if (!discoveriesResult.success) {
@@ -620,8 +630,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
       const allDiscoveries = discoveriesResult.data || []
 
-      // Calculate stats using service
-      const stats = discoveryService.getTrailStats(accountId, trailId, allDiscoveries, trailSpotIds)
+      // Calculate stats using service (only counting spots that actually exist)
+      const stats = discoveryService.getTrailStats(accountId, trailId, allDiscoveries, existingSpotIds)
 
       return createSuccessResult(stats)
     } catch (error: any) {

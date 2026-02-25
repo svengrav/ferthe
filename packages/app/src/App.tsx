@@ -3,7 +3,7 @@
 // Web Only:
 import '@expo/metro-runtime'
 // ---------------------------------------
-import { Notification, SplashView } from '@app/shared/components'
+import { Snackbar, SplashView } from '@app/shared/components'
 import { Navigation } from '@app/shared/navigation/Navigation'
 import * as SplashScreen from 'expo-splash-screen'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
@@ -25,7 +25,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView>
-        <Notification />
+        <Snackbar />
         <AccountAuthWrapper>
           <Navigation />
         </AccountAuthWrapper>
