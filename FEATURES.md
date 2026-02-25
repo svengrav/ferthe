@@ -1,11 +1,12 @@
 ## UX
 
 - UX Feedback like vibrations, sounds, and visual effects are used to enhance the user experience and provide feedback on interactions. For example, when you discover a spot, you might feel a vibration and see a visual effect to celebrate the achievement.
+- Share the app? 
 
 ## Welcome and Onboarding
 - When you open the app for the first time, you are greeted with a welcome screen that introduces the concept of the app and its core features. This screen sets the tone for the adventure and encourages you to start exploring.
-- You discover your first spot, this spot is dynamically generated based on your location and is meant to be easily discoverable to give you a quick win and show you how the discovery process works. This helps you understand the core mechanics of the app right away and motivates you to continue exploring.
-
+- You discover your first spot, this spot is dynamically generated based on your location and is meant to be easily discoverable to give you a quick win and show you how the discovery process works. 
+  
 ## Participation and Development Engagement
 - You can give feedback on the app and suggest new features or improvements. This can be done through in-app feedback forms, community forums, or social media channels.
 - You can participate in beta testing new features and provide feedback to the development team.
@@ -57,23 +58,19 @@ A spot is usually a point of interest, but can also be:
 - Discovered spots become visible on the map for others
 - Spots can have additional information: photos, descriptions, reviews
 
-**Time-Based Spots:**
-- Spots can be time-based, only discoverable during specific time windows
-- Use cases: events, seasonal spots
-
-**Future Notes:**
-- Clue offset: A clue is not right on the spot but reaching the clue reveals the true spot location (encourages exploration)
-- A spot can have a one time secret like a discount code
-- Probably Advisory: Spots should not be placed in private areas or places that could cause safety issues. Clear guidelines and moderation are needed to ensure responsible spot placement.
-- Maybe it's possible to destroy a spot if enough people don't like it (e.g. if it's in a dangerous location or if it's fake). This would require a reporting and review system.
-
 ### Create Spots
 - You can create a new spot by providing its name, description, location, and other properties. This allows you to contribute to the community and share interesting locations with others.
 - Not yet: Created spots are submitted for review by the team to ensure they meet the guidelines and are safe?
 
 ### Futures
 - User gets a push message if somebody else discovers a spot they created or if somebody shares a discovery in a community they are part of. This encourages engagement and creates a sense of community around the spots you contribute.
-
+- Clue offset: A clue is not right on the spot but reaching the clue reveals the true spot location (encourages exploration)
+- A spot can have a one time secret like a discount code
+- Probably Advisory: Spots should not be placed in private areas or places that could cause safety issues. Clear guidelines and moderation are needed to ensure responsible spot placement.
+- Maybe it's possible to destroy a spot if enough people don't like it (e.g. if it's in a dangerous location or if it's fake). This would require a reporting and review system.
+**Time-Based Spots:**
+- Spots can be time-based, only discoverable during specific time windows
+- Use cases: events, seasonal spots
 
 ## Discovery
 

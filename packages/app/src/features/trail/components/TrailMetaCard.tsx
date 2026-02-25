@@ -30,17 +30,6 @@ function TrailMetaCard({ trailId, createdAt, createdBy }: TrailMetaCardProps) {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <View style={styles.cell}>
-          <Text variant="caption">{locales.trails.rating}</Text>
-          <TrailRating trailId={trailId} style={styles.rating} />
-        </View>
-        <View style={styles.cell}>
-          <Text variant="caption">{locales.trails.stats.rank}</Text>
-          <Text variant="body">{rankText}</Text>
-        </View>
-      </View>
-      <Divider />
-      <View style={styles.row}>
         {createdBy && (
           <View style={styles.cell}>
             <Text variant="caption">{locales.spot.creator}</Text>
@@ -51,6 +40,17 @@ function TrailMetaCard({ trailId, createdAt, createdBy }: TrailMetaCardProps) {
             />
           </View>
         )}
+        <View style={styles.cell}>
+          <Text variant="caption">{locales.trails.rating}</Text>
+          <TrailRating trailId={trailId} style={styles.rating} />
+        </View>
+      </View>
+      <Divider />
+      <View style={styles.row}>
+        <View style={styles.cell}>
+          <Text variant="caption">{locales.trails.stats.rank}</Text>
+          <Text variant="body">{rankText}</Text>
+        </View>
         <View style={styles.cell}>
           <Text variant="caption">{locales.spot.created}</Text>
           <Text variant="body">{formatDate(createdAt)}</Text>

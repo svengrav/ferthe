@@ -1,14 +1,16 @@
 import { StyleSheet, useWindowDimensions } from 'react-native'
 
-import { Button, Image, Page, PageTab, PageTabs, Stack, Text } from '@app/shared/components'
+import { Button, Image, LocationChip, Page, PageTab, PageTabs, Stack, Text } from '@app/shared/components'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 
+import { useExternalMap } from '@app/shared/hooks'
 import { useLocalization } from '@app/shared/localization'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { Trail } from '@shared/contracts'
 import { useEffect } from 'react'
 import { useTrailSpotsViewModel } from '../hooks/useTrailSpotsViewModel'
+import { getTrailCenter } from '../services/trailService'
 import TrailMetaCard from './TrailMetaCard'
 import TrailSpots from './TrailSpots'
 import TrailStats from './TrailStats'
@@ -41,6 +43,7 @@ function TrailPage(props: TrailPageProps) {
 
   // Load trail spots view model
   const trailSpots = useTrailSpotsViewModel(trail.id)
+  const { openMap } = useExternalMap()
 
   // Calculate image size - square format that fills screen width minus page padding
   const pageInset = theme.tokens.inset.md
@@ -67,8 +70,10 @@ function TrailPage(props: TrailPageProps) {
               height={imageSize}
               width={imageSize}
               resizeMode="cover"
+              placeholder={<Text style={{ color: theme.colors.onPrimary }}>Trail Image</Text>}
             />
             <TrailMetaCard trailId={trail.id} createdAt={trail.createdAt} createdBy={trail.createdBy} />
+            <LocationChip location={getTrailCenter(trail)} style={{ alignSelf: 'center' }} onPress={() => { const center = getTrailCenter(trail); if (center) openMap(center) }} />
             <Text variant="section">{locales.trails.description}</Text>
             <Text variant="body">{trail.description}</Text>
           </Stack>
@@ -90,6 +95,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     gap: theme.tokens.spacing.sm,
   },
   image: {
+    backgroundColor: theme.colors.primary,
     borderRadius: theme.tokens.borderRadius.md,
   },
 })

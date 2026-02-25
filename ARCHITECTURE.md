@@ -128,7 +128,7 @@ function MyCard({ style, variant = 'primary' }: MyCardProps) {
 ## Components API Style
 
 - Check if a component is just "atomar ui" or is for a specific task like "share in community"
-- If it has a speciiic task: 
+- If it has a specific task: 
   - Use an hook that handles the logic and state management for that task. 
   - Fetch API endpoint, store it, then the component just uses the hook to get the data and display it.
 

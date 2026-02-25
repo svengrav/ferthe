@@ -52,11 +52,11 @@ function AccountSmartCard({ accountId, variant = 'secondary', style, onPress }: 
   const cardStyle = useVariants(cardVariants, { variant })
   const nameStyle = useVariants(nameVariants, { variant })
 
-  const handlePress = onPress ?? (() => showPublicProfile(accountId))
+  const handlePress = onPress ?? (() => accountId && showPublicProfile(accountId))
 
   return (
-    <Card onPress={handlePress} style={{ ...cardStyle, ...StyleSheet.flatten(style) }}>
-      <View style={styles.content}>
+    <Card onPress={handlePress} style={{ ...cardStyle, ...StyleSheet.flatten(style) }} >
+      <View style={styles.content} id="account-smart-card">
         <Avatar size={AVATAR_SIZE} avatar={profile?.avatar} label={profile?.displayName} variant={variant} />
         <View style={styles.info}>
           <Text variant="label" style={nameStyle}>{profile?.displayName ?? 'Fox'}</Text>

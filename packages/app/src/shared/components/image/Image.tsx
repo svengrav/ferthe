@@ -71,8 +71,8 @@ export function Image({
 
   // Error or missing source
   if (!source || !uri || loadingState === 'error') {
-    return <View style={containerStyle}>
-      <View style={styles.fallbackContainer}>
+    return <View style={[containerStyle, style]} id="image-container">
+      <View style={styles.fallbackContainer} id="image-fallback">
         <Text style={[styles.fallbackText, { fontSize: dynamicLabelFontSize }]}>
           {labelText || placeholder}
         </Text>
@@ -81,7 +81,7 @@ export function Image({
   }
 
   return (
-    <View style={containerStyle}>
+    <View style={[containerStyle, style]} id="image-container">
       <ExpoImage
         source={{ uri }}
         style={styles.image}
@@ -93,7 +93,7 @@ export function Image({
 
       {/* Loading indicator */}
       {showLoader && loadingState === 'loading' && (
-        <View style={styles.loadingOverlay}>
+        <View style={styles.loadingOverlay} id="image-loading">
           <ActivityIndicator size="small" color={theme.colors.primary} />
         </View>
       )}
@@ -103,7 +103,7 @@ export function Image({
 
 const useStyles = createThemedStyles(theme => ({
   container: {
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
@@ -115,7 +115,6 @@ const useStyles = createThemedStyles(theme => ({
   fallbackContainer: {
     width: '100%',
     height: '100%',
-    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },

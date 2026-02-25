@@ -9,13 +9,13 @@ import { Theme, useTheme } from '@app/shared/theme'
 
 import DiscoveryStats from '@app/features/discovery/components/DiscoveryStats'
 import DiscoveryUserContentSection from '@app/features/discovery/components/DiscoveryUserContentSection'
+import { LocationChip } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import SpotCard from '../card/components/SpotCard'
 import { useSpotCardDimensions } from '../card/hooks/useSpotCardDimensions'
 import { useEditSpotPage } from '../creation/components/SpotCreationPage.tsx'
 import { useSpotWithDiscovery } from '../hooks/useSpotWithDiscovery'
-import { SpotLocation } from './SpotLocation'
 import SpotMetaCard from './SpotMetaCard'
 
 export const useSpotPage = () => ({
@@ -102,7 +102,7 @@ function SpotPage(props: SpotPageProps) {
                 blurredImage={spot.blurredImage}
                 title={spot.name}
               />
-              <SpotLocation location={spot.location} style={{ alignSelf: 'center' }} />
+              <LocationChip location={spot.location} style={{ alignSelf: 'center' }} />
 
               <SpotMetaCard
                 spotId={spotId}

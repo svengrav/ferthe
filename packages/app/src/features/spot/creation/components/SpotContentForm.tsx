@@ -5,8 +5,8 @@ import { ContentBlockEditorList, Field, Form, FormInput, Stack } from '@app/shar
 import { ContentBlock } from '@shared/contracts'
 
 import { useDeviceLocation } from '@app/features/sensor/stores/sensorStore'
+import { LocationChip } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization'
-import { SpotLocation } from '../../components/SpotLocation'
 import { createSpotContentSchema, SpotContentFormValues } from '../services/spotFormSchema'
 import SpotCardPicker from './SpotCardPicker'
 
@@ -69,7 +69,7 @@ function SpotContentFormFields() {
         )}
       />
 
-      <SpotLocation location={location} style={{ alignSelf: 'center' }} />
+      <LocationChip location={location} style={{ alignSelf: 'center' }} />
 
       <FormInput
         name="name"
