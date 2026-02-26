@@ -23,6 +23,8 @@ interface SpotFormProps {
   existingImageUrl?: string;
   /** Available trails for assignment */
   trails?: { id: string; name: string }[];
+  /** Called when location changes (for map sync) */
+  onLocationChange?: (location: { lat: number; lon: number }) => void;
   onSubmit: (data: SpotFormData) => Promise<void>;
   onCancel: () => void;
 }
@@ -32,8 +34,14 @@ interface SpotFormProps {
  * Supports image upload, content blocks, trail assignment, and visibility.
  */
 export function SpotForm(
-  { initialData, existingImageUrl, trails = [], onSubmit, onCancel }:
-    SpotFormProps,
+  {
+    initialData,
+    existingImageUrl,
+    trails = [],
+    onLocationChange,
+    onSubmit,
+    onCancel,
+  }: SpotFormProps,
 ) {
   const [name, setName] = useState(initialData?.name ?? "");
   const [description, setDescription] = useState(
@@ -60,11 +68,19 @@ export function SpotForm(
   // Show existing image as preview until a new one is picked
   const displayImage = imageBase64 ?? existingImageUrl;
 
+  // Sync location from external source (map click)
   useEffect(() => {
     if (initialData?.location) {
       setLocation(initialData.location);
     }
   }, [initialData?.location?.lat, initialData?.location?.lon]);
+
+  // Update location and notify parent for map sync
+  const updateLocation = (newLocation: { lat: number; lon: number }) => {
+    if (isNaN(newLocation.lat) || isNaN(newLocation.lon)) return;
+    setLocation(newLocation);
+    onLocationChange?.(newLocation);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,7 +166,7 @@ export function SpotForm(
             step="any"
             value={location.lat}
             onChange={(e) =>
-              setLocation({ ...location, lat: parseFloat(e.target.value) })}
+              updateLocation({ ...location, lat: parseFloat(e.target.value) })}
             className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:primary"
           />
         </div>
@@ -161,7 +177,7 @@ export function SpotForm(
             step="any"
             value={location.lon}
             onChange={(e) =>
-              setLocation({ ...location, lon: parseFloat(e.target.value) })}
+              updateLocation({ ...location, lon: parseFloat(e.target.value) })}
             className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:primary"
           />
         </div>

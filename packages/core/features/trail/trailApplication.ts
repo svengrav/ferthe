@@ -346,9 +346,9 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
           imageBlobPath,
           boundary: trailData.boundary,
           options: trailData.options,
-          createdBy: trailData.createdBy,
-          createdAt: trailData.createdAt,
-          updatedAt: trailData.updatedAt,
+          createdBy: context.accountId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         }
 
         // Store entity with blob paths

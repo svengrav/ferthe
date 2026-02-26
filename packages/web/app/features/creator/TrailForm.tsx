@@ -64,6 +64,16 @@ export function TrailForm(
     externalBoundary?.southWest.lon,
   ]);
 
+  const displayImage = imageBase64 ?? existingImageUrl;
+  const displayMapImage = mapImageBase64 ?? existingMapImageUrl;
+
+  // Aspect ratio of map image should match the geographic boundary ratio
+  const mapImageAspectRatio = (() => {
+    const lngSpan = boundary.northEast.lon - boundary.southWest.lon;
+    const latSpan = boundary.northEast.lat - boundary.southWest.lat;
+    return latSpan > 0 && lngSpan > 0 ? lngSpan / latSpan : 1;
+  })();
+
   const updateBoundary = (next: typeof boundary) => {
     setBoundary(next);
     onBoundaryChange?.(next);
@@ -97,16 +107,17 @@ export function TrailForm(
       {/* Trail preview image */}
       <ImageUpload
         label="Trail Image"
-        value={imageBase64 ?? existingImageUrl}
+        value={displayImage}
         onChange={setImageBase64}
         aspectRatio={16 / 9}
       />
 
-      {/* Map background image */}
+      {/* Map background image — aspect ratio matches the trail boundary */}
       <ImageUpload
         label="Map Image"
-        value={mapImageBase64 ?? existingMapImageUrl}
+        value={displayMapImage}
         onChange={setMapImageBase64}
+        aspectRatio={mapImageAspectRatio}
       />
 
       <div>
