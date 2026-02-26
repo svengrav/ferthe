@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+
 import { useRemoveDialog } from "../../hooks/useRemoveDialog.tsx";
 import type { SpotFormData } from "./SpotForm.tsx";
 import { SpotForm } from "./SpotForm.tsx";
 import * as service from "./mapEditorService.ts";
 import type { Spot } from "./mapEditorStore.ts";
 import { useMapEditorStore } from "./mapEditorStore.ts";
+import { DeleteButton, ErrorMessage, PanelHeader } from "./ui/index.ts";
 
 /**
  * Panel for creating and editing spots.
@@ -39,9 +41,11 @@ export function SpotEditorPanel(props: { onDataChanged: () => Promise<void> }) {
       return;
     }
     setDetailedSpot(null);
-    service.fetchSpot(editingSpotId).then((spot) => {
+    const load = async () => {
+      const spot = await service.fetchSpot(editingSpotId);
       if (spot) setDetailedSpot(spot);
-    });
+    };
+    load();
   }, [editingSpotId]);
 
   const trailOptions = trails.map((t) => ({ id: t.id, name: t.name }));
@@ -55,25 +59,17 @@ export function SpotEditorPanel(props: { onDataChanged: () => Promise<void> }) {
 
   // --- Create Spot ---
   const handleCreate = async (data: SpotFormData) => {
-    try {
-      await service.createSpot(data);
-      resetToView();
-      await onDataChanged();
-    } catch (err) {
-      throw err;
-    }
+    await service.createSpot(data);
+    resetToView();
+    await onDataChanged();
   };
 
   // --- Update Spot ---
   const handleUpdate = async (data: SpotFormData) => {
     if (selectedItem?.type !== "spot") return;
-    try {
-      await service.updateSpot(selectedItem.item.id, data);
-      resetToView();
-      await onDataChanged();
-    } catch (err) {
-      throw err;
-    }
+    await service.updateSpot(selectedItem.item.id, data);
+    resetToView();
+    await onDataChanged();
   };
 
   // --- Delete Spot ---
@@ -148,34 +144,11 @@ export function SpotEditorPanel(props: { onDataChanged: () => Promise<void> }) {
           onSubmit={handleUpdate}
           onCancel={clearSelection}
         />
-        {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="w-full mt-4 px-4 py-2 bg-danger rounded hover:bg-danger/90"
-        >
-          Delete Spot
-        </button>
+        <ErrorMessage error={error} />
+        <DeleteButton onClick={handleDelete} label="Delete Spot" />
       </div>
     );
   }
 
   return null;
-}
-
-// --- Shared panel header ---
-
-function PanelHeader(props: { title: string; onClose: () => void }) {
-  return (
-    <div className="flex justify-between items-center mb-4">
-      <h3 className="font-semibold text-lg">{props.title}</h3>
-      <button
-        type="button"
-        onClick={props.onClose}
-        className="text-gray-400 hover:text-primary"
-      >
-        ✕
-      </button>
-    </div>
-  );
 }

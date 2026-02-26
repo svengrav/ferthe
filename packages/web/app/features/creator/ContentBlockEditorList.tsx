@@ -1,4 +1,5 @@
 import { ImageUpload } from "@/app/components/";
+import { INPUT_SM_CLASS, LABEL_SM_CLASS } from "./ui/index.ts";
 
 // --- Content block types (mirror of shared/contracts/contentBlocks) ---
 
@@ -72,16 +73,14 @@ function TextBlockEditor(
 ) {
   return (
     <div>
-      <label className="block text-xs font-medium text-gray-400 mb-1">
-        Text
-      </label>
+      <label className={LABEL_SM_CLASS}>Text</label>
       <textarea
         value={block.data.text}
         onChange={(e) =>
           onChange({ ...block, data: { ...block.data, text: e.target.value } })}
         placeholder="Enter text..."
         rows={4}
-        className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:primary"
+        className={INPUT_SM_CLASS}
       />
     </div>
   );
@@ -93,9 +92,7 @@ function QuoteBlockEditor(
   return (
     <div className="space-y-2">
       <div>
-        <label className="block text-xs font-medium text-gray-400 mb-1">
-          Quote
-        </label>
+        <label className={LABEL_SM_CLASS}>Quote</label>
         <textarea
           value={block.data.text}
           onChange={(e) =>
@@ -105,13 +102,11 @@ function QuoteBlockEditor(
             })}
           placeholder="Enter quote..."
           rows={2}
-          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:primary"
+          className={INPUT_SM_CLASS}
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-gray-400 mb-1">
-          Author (optional)
-        </label>
+        <label className={LABEL_SM_CLASS}>Author (optional)</label>
         <input
           type="text"
           value={block.data.author ?? ""}
@@ -121,7 +116,7 @@ function QuoteBlockEditor(
               data: { ...block.data, author: e.target.value },
             })}
           placeholder="Author name"
-          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:primary"
+          className={INPUT_SM_CLASS}
         />
       </div>
     </div>
@@ -143,9 +138,7 @@ function ImageBlockEditor(
           })}
       />
       <div>
-        <label className="block text-xs font-medium text-gray-400 mb-1">
-          Caption (optional)
-        </label>
+        <label className={LABEL_SM_CLASS}>Caption (optional)</label>
         <input
           type="text"
           value={block.data.caption ?? ""}
@@ -155,7 +148,7 @@ function ImageBlockEditor(
               data: { ...block.data, caption: e.target.value },
             })}
           placeholder="Image caption"
-          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:primary"
+          className={INPUT_SM_CLASS}
         />
       </div>
     </div>
@@ -168,9 +161,7 @@ function LinkBlockEditor(
   return (
     <div className="space-y-2">
       <div>
-        <label className="block text-xs font-medium text-gray-400 mb-1">
-          URL
-        </label>
+        <label className={LABEL_SM_CLASS}>URL</label>
         <input
           type="url"
           value={block.data.url}
@@ -180,13 +171,11 @@ function LinkBlockEditor(
               data: { ...block.data, url: e.target.value },
             })}
           placeholder="https://..."
-          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:primary"
+          className={INPUT_SM_CLASS}
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-gray-400 mb-1">
-          Label (optional)
-        </label>
+        <label className={LABEL_SM_CLASS}>Label (optional)</label>
         <input
           type="text"
           value={block.data.label ?? ""}
@@ -196,7 +185,7 @@ function LinkBlockEditor(
               data: { ...block.data, label: e.target.value },
             })}
           placeholder="Link label"
-          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:primary"
+          className={INPUT_SM_CLASS}
         />
       </div>
     </div>

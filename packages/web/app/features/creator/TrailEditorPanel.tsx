@@ -1,9 +1,11 @@
 import { useState } from "react";
+
 import { useRemoveDialog } from "../../hooks/useRemoveDialog.tsx";
 import { TrailForm } from "./TrailForm.tsx";
 import * as service from "./mapEditorService.ts";
 import type { Boundary, Trail } from "./mapEditorStore.ts";
 import { useMapEditorStore } from "./mapEditorStore.ts";
+import { DeleteButton, ErrorMessage, PanelHeader } from "./ui/index.ts";
 
 interface TrailEditorPanelProps {
   editableRectRef: React.RefObject<google.maps.Rectangle | null>;
@@ -42,25 +44,17 @@ export function TrailEditorPanel(props: TrailEditorPanelProps) {
 
   // --- Create Trail ---
   const handleCreate = async (data: any) => {
-    try {
-      await service.createTrail(data);
-      resetToView();
-      await onDataChanged();
-    } catch (err) {
-      throw err;
-    }
+    await service.createTrail(data);
+    resetToView();
+    await onDataChanged();
   };
 
   // --- Update Trail ---
   const handleUpdate = async (data: any) => {
     if (selectedItem?.type !== "trail") return;
-    try {
-      await service.updateTrail(selectedItem.item.id, data);
-      resetToView();
-      await onDataChanged();
-    } catch (err) {
-      throw err;
-    }
+    await service.updateTrail(selectedItem.item.id, data);
+    resetToView();
+    await onDataChanged();
   };
 
   // --- Delete Trail ---
@@ -129,34 +123,11 @@ export function TrailEditorPanel(props: TrailEditorPanelProps) {
           onSubmit={handleUpdate}
           onCancel={clearSelection}
         />
-        {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="w-full mt-4 px-4 py-2 bg-danger rounded hover:bg-danger/90 text-white"
-        >
-          Delete Trail
-        </button>
+        <ErrorMessage error={error} />
+        <DeleteButton onClick={handleDelete} label="Delete Trail" />
       </div>
     );
   }
 
   return null;
-}
-
-// --- Shared panel header ---
-
-function PanelHeader(props: { title: string; onClose: () => void }) {
-  return (
-    <div className="flex justify-between items-center mb-4">
-      <h3 className="font-semibold text-lg">{props.title}</h3>
-      <button
-        type="button"
-        onClick={props.onClose}
-        className="text-gray-400 hover:text-primary"
-      >
-        ✕
-      </button>
-    </div>
-  );
 }

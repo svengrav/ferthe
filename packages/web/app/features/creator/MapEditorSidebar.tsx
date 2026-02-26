@@ -1,3 +1,5 @@
+import clsx from "clsx";
+
 import type { Boundary, EditorMode, Spot } from "./mapEditorStore.ts";
 import { useMapEditorStore } from "./mapEditorStore.ts";
 
@@ -45,9 +47,10 @@ export function MapEditorSidebar(props: MapEditorSidebarProps) {
 
   const renderThumbnail = (url?: string) => (
     <div
-      className={`w-10 h-10 rounded overflow-hidden shrink-0 ${
-        !url ? PLACEHOLDER_BG : ""
-      }`}
+      className={clsx(
+        "w-10 h-10 rounded overflow-hidden shrink-0",
+        !url && PLACEHOLDER_BG,
+      )}
     >
       {url
         ? (
@@ -76,33 +79,36 @@ export function MapEditorSidebar(props: MapEditorSidebarProps) {
             <button
               type="button"
               onClick={() => handleModeClick("view")}
-              className={`flex-1 px-3 py-2 text-sm rounded ${
+              className={clsx(
+                "flex-1 px-3 py-2 text-sm rounded",
                 mode === "view"
                   ? "bg-primary text-onprimary"
-                  : "bg-gray-200 hover:bg-gray-300"
-              }`}
+                  : "bg-gray-200 hover:bg-gray-300",
+              )}
             >
               View
             </button>
             <button
               type="button"
               onClick={() => handleModeClick("create-spot")}
-              className={`flex-1 px-3 py-2 text-sm rounded ${
+              className={clsx(
+                "flex-1 px-3 py-2 text-sm rounded",
                 mode === "create-spot"
                   ? "bg-primary text-onprimary"
-                  : "bg-gray-200 hover:bg-gray-300"
-              }`}
+                  : "bg-gray-200 hover:bg-gray-300",
+              )}
             >
               + Spot
             </button>
             <button
               type="button"
               onClick={() => handleModeClick("create-trail")}
-              className={`flex-1 px-3 py-2 text-sm rounded ${
+              className={clsx(
+                "flex-1 px-3 py-2 text-sm rounded",
                 mode === "create-trail"
                   ? "bg-primary text-onprimary"
-                  : "bg-gray-200 hover:bg-gray-300"
-              }`}
+                  : "bg-gray-200 hover:bg-gray-300",
+              )}
             >
               + Trail
             </button>
@@ -150,13 +156,12 @@ export function MapEditorSidebar(props: MapEditorSidebarProps) {
               return (
                 <div
                   key={trail.id}
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-sm ${
-                    isActive
-                      ? "bg-primary text-onprimary"
-                      : isEditing
-                      ? "bg-gray-200 text-gray-700"
-                      : "bg-gray-100 hover:bg-gray-200"
-                  }`}
+                  className={clsx(
+                    "flex items-center gap-2 px-2 py-1.5 rounded text-sm",
+                    isActive && "bg-primary text-onprimary",
+                    !isActive && isEditing && "bg-gray-200 text-gray-700",
+                    !isActive && !isEditing && "bg-gray-100 hover:bg-gray-200",
+                  )}
                 >
                   {renderThumbnail(trail.image?.url)}
                   <button
@@ -195,11 +200,12 @@ export function MapEditorSidebar(props: MapEditorSidebarProps) {
               return (
                 <div
                   key={spot.id}
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-sm ${
+                  className={clsx(
+                    "flex items-center gap-2 px-2 py-1.5 rounded text-sm",
                     isSelected
                       ? "bg-primary text-onprimary"
-                      : "bg-gray-100 hover:bg-gray-200"
-                  }`}
+                      : "bg-gray-100 hover:bg-gray-200",
+                  )}
                 >
                   {renderThumbnail(spot.image?.url)}
                   <button
@@ -209,9 +215,10 @@ export function MapEditorSidebar(props: MapEditorSidebarProps) {
                   >
                     <div className="font-medium truncate">{spot.name}</div>
                     <div
-                      className={`text-xs truncate ${
-                        isSelected ? "text-onprimary/70" : "text-gray-400"
-                      }`}
+                      className={clsx(
+                        "text-xs truncate",
+                        isSelected ? "text-onprimary/70" : "text-gray-400",
+                      )}
                     >
                       {spot.location.lat.toFixed(5)},{" "}
                       {spot.location.lon.toFixed(5)}

@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
+
 import { ImageUpload } from "../../components/ImageUpload.tsx";
+import {
+  ErrorMessage,
+  FormActions,
+  FormField,
+  INPUT_CLASS,
+} from "./ui/index.ts";
 
 interface TrailFormData {
   name: string;
@@ -125,35 +132,30 @@ export function TrailForm(
         aspectRatio={mapImageAspectRatio}
       />
 
-      <div>
-        <label className="block text-sm font-medium mb-1">Name</label>
+      <FormField label="Name">
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded"
+          className={INPUT_CLASS}
           placeholder="Enter trail name"
         />
-      </div>
+      </FormField>
 
-      <div>
-        <label className="block text-sm font-medium mb-1">Description</label>
+      <FormField label="Description">
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded"
+          className={INPUT_CLASS}
           placeholder="Enter description"
           rows={3}
         />
-      </div>
+      </FormField>
 
       <div className="space-y-2">
         <label className="block text-sm font-medium">Boundary</label>
         <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">
-              North Lat
-            </label>
+          <FormField label="North Lat" small>
             <input
               type="number"
               step="any"
@@ -166,11 +168,10 @@ export function TrailForm(
                     lat: parseFloat(e.target.value),
                   },
                 })}
-              className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded"
+              className={INPUT_CLASS}
             />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">East Lon</label>
+          </FormField>
+          <FormField label="East Lon" small>
             <input
               type="number"
               step="any"
@@ -183,15 +184,12 @@ export function TrailForm(
                     lon: parseFloat(e.target.value),
                   },
                 })}
-              className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded"
+              className={INPUT_CLASS}
             />
-          </div>
+          </FormField>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">
-              South Lat
-            </label>
+          <FormField label="South Lat" small>
             <input
               type="number"
               step="any"
@@ -204,11 +202,10 @@ export function TrailForm(
                     lat: parseFloat(e.target.value),
                   },
                 })}
-              className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded"
+              className={INPUT_CLASS}
             />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">West Lon</label>
+          </FormField>
+          <FormField label="West Lon" small>
             <input
               type="number"
               step="any"
@@ -221,30 +218,14 @@ export function TrailForm(
                     lon: parseFloat(e.target.value),
                   },
                 })}
-              className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded"
+              className={INPUT_CLASS}
             />
-          </div>
+          </FormField>
         </div>
       </div>
 
-      {error && <div className="text-red-400 text-sm">{error}</div>}
-
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex-1 px-4 py-2 bg-primary text-onprimary rounded hover:bg-primary-700 disabled:opacity-50"
-        >
-          {loading ? "Saving..." : "Save"}
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex-1 px-4 py-2 bg-gray-100 rounded hover:bg-gray-300"
-        >
-          Cancel
-        </button>
-      </div>
+      <ErrorMessage error={error} />
+      <FormActions loading={loading} onCancel={onCancel} />
     </form>
   );
 }

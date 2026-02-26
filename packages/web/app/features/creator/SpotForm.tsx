@@ -1,7 +1,16 @@
+import clsx from "clsx";
 import { useEffect, useState } from "react";
+
 import { ImageUpload } from "../../components/ImageUpload.tsx";
 import type { ContentBlock } from "./ContentBlockEditorList.tsx";
 import { ContentBlockEditorList } from "./ContentBlockEditorList.tsx";
+import {
+  ErrorMessage,
+  FormActions,
+  FormField,
+  INPUT_CLASS,
+  SELECT_CLASS,
+} from "./ui/index.ts";
 
 // --- Types ---
 
@@ -128,28 +137,26 @@ export function SpotForm(
       />
 
       {/* Name */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Name</label>
+      <FormField label="Name">
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:primary"
+          className={INPUT_CLASS}
           placeholder="Enter spot name"
         />
-      </div>
+      </FormField>
 
       {/* Description */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Description</label>
+      <FormField label="Description">
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:primary"
+          className={INPUT_CLASS}
           placeholder="Enter description"
           rows={3}
         />
-      </div>
+      </FormField>
 
       {/* Content Blocks */}
       <ContentBlockEditorList
@@ -159,88 +166,67 @@ export function SpotForm(
 
       {/* Location */}
       <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="block text-sm font-medium mb-1">Latitude</label>
+        <FormField label="Latitude">
           <input
             type="number"
             step="any"
             value={location.lat}
             onChange={(e) =>
               updateLocation({ ...location, lat: parseFloat(e.target.value) })}
-            className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:primary"
+            className={INPUT_CLASS}
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Longitude</label>
+        </FormField>
+        <FormField label="Longitude">
           <input
             type="number"
             step="any"
             value={location.lon}
             onChange={(e) =>
               updateLocation({ ...location, lon: parseFloat(e.target.value) })}
-            className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:primary"
+            className={INPUT_CLASS}
           />
-        </div>
+        </FormField>
       </div>
 
       {/* Visibility */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Visibility</label>
+      <FormField label="Visibility">
         <select
           value={visibility}
           onChange={(e) => setVisibility(e.target.value as SpotVisibility)}
-          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:primary"
+          className={SELECT_CLASS}
         >
           <option value="hidden">Hidden</option>
           <option value="preview">Preview</option>
           <option value="private">Private</option>
           <option value="public">Public</option>
         </select>
-      </div>
+      </FormField>
 
       {/* Trail Assignment */}
       {trails.length > 0 && (
-        <div>
-          <label className="block text-sm font-medium mb-1">Trails</label>
+        <FormField label="Trails">
           <div className="flex flex-wrap gap-2">
             {trails.map((trail) => (
               <button
                 key={trail.id}
                 type="button"
                 onClick={() => toggleTrail(trail.id)}
-                className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                className={clsx(
+                  "px-3 py-1 text-xs rounded-full border transition-colors",
                   trailIds.includes(trail.id)
                     ? "bg-primary border-gray-500 text-white"
-                    : "bg-gray-100 border-gray-300 text-gray-300 hover:bg-gray-100"
-                }`}
+                    : "bg-gray-100 border-gray-300 text-gray-300 hover:bg-gray-100",
+                )}
               >
                 {trail.name}
               </button>
             ))}
           </div>
-        </div>
+        </FormField>
       )}
 
-      {/* Error */}
-      {error && <div className="text-red-400 text-sm">{error}</div>}
-
-      {/* Actions */}
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex-1 px-4 py-2 bg-primary text-onprimary rounded hover:bg-gray-700 disabled:opacity-50"
-        >
-          {loading ? "Saving..." : "Save"}
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-300"
-        >
-          Cancel
-        </button>
-      </div>
+      <ErrorMessage error={error} />
+      <FormActions loading={loading} onCancel={onCancel} />
     </form>
   );
 }
