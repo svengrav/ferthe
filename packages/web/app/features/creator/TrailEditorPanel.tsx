@@ -133,7 +133,7 @@ export function TrailEditorPanel(props: TrailEditorPanelProps) {
         <button
           type="button"
           onClick={handleDelete}
-          className="w-full mt-4 px-4 py-2 bg-red-600 rounded hover:bg-red-700"
+          className="w-full mt-4 px-4 py-2 bg-red-400 rounded hover:bg-red-700 text-white"
         >
           Delete Trail
         </button>

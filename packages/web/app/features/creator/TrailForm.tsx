@@ -67,11 +67,16 @@ export function TrailForm(
   const displayImage = imageBase64 ?? existingImageUrl;
   const displayMapImage = mapImageBase64 ?? existingMapImageUrl;
 
-  // Aspect ratio of map image should match the geographic boundary ratio
+  // Aspect ratio of map image must match the visual rectangle on the Mercator map.
+  // Longitude degrees are shorter than latitude degrees by factor cos(lat),
+  // so we correct for that to match the GroundOverlay rendering.
   const mapImageAspectRatio = (() => {
     const lngSpan = boundary.northEast.lon - boundary.southWest.lon;
     const latSpan = boundary.northEast.lat - boundary.southWest.lat;
-    return latSpan > 0 && lngSpan > 0 ? lngSpan / latSpan : 1;
+    if (latSpan <= 0 || lngSpan <= 0) return 1;
+    const centerLat = (boundary.northEast.lat + boundary.southWest.lat) / 2;
+    const mercatorCorrection = Math.cos(centerLat * (Math.PI / 180));
+    return (lngSpan * mercatorCorrection) / latSpan;
   })();
 
   const updateBoundary = (next: typeof boundary) => {

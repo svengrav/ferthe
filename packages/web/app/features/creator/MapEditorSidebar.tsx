@@ -152,9 +152,9 @@ export function MapEditorSidebar(props: MapEditorSidebarProps) {
                   key={trail.id}
                   className={`flex items-center gap-2 px-2 py-1.5 rounded text-sm ${
                     isActive
-                      ? "bg-purple-100 ring-2 ring-purple-500"
+                      ? "bg-gray-300 "
                       : isEditing
-                      ? "bg-purple-600 text-white"
+                      ? "bg-gray-200 text-gray-700"
                       : "bg-gray-100 hover:bg-gray-200"
                   }`}
                 >
@@ -166,7 +166,7 @@ export function MapEditorSidebar(props: MapEditorSidebarProps) {
                   >
                     <div className="font-medium truncate">{trail.name}</div>
                     {isActive && (
-                      <div className="text-xs text-purple-600">Active</div>
+                      <div className="text-xs text-gray-600">Active</div>
                     )}
                   </button>
                   <button
