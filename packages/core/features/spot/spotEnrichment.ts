@@ -11,6 +11,7 @@ export async function enrichSpotWithImages(
 ): Promise<Spot> {
   let image: ImageReference | undefined
   let blurredImage: ImageReference | undefined
+  let microImage: ImageReference | undefined
 
   if (spotEntity.imageBlobPath) {
     const urlResult = await imageApplication.refreshImageUrl(context, spotEntity.imageBlobPath)
@@ -32,6 +33,16 @@ export async function enrichSpotWithImages(
         url: blurredResult.data,
       }
     }
+
+    // Load micro thumbnail (derived blob path: -blurred → -micro)
+    const microBlobPath = spotEntity.blurredImageBlobPath.replace('-blurred', '-micro')
+    const microResult = await imageApplication.refreshImageUrl(context, microBlobPath)
+    if (microResult.success && microResult.data) {
+      microImage = {
+        id: microBlobPath,
+        url: microResult.data,
+      }
+    }
   }
 
   return {
@@ -41,6 +52,7 @@ export async function enrichSpotWithImages(
     description: spotEntity.description,
     image,
     blurredImage,
+    microImage,
     location: spotEntity.location,
     contentBlocks: options?.includeContentBlocks ? spotEntity.contentBlocks : undefined,
     options: spotEntity.options,

@@ -265,9 +265,10 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
           return { success: false, error: { message: 'Failed to list trails', code: 'LIST_TRAILS_ERROR' } }
         }
 
-        const trailEntities = (trailsResult.data || [])
-          // Filter by createdBy if context has accountId (exclude public/admin)
-          .filter(trail => !context || context.accountType === 'public' || trail.createdBy === context.accountId)
+        const createdByFilter = options?.filters?.['createdBy']
+        const trailEntities = createdByFilter
+          ? (trailsResult.data || []).filter(t => t.createdBy === createdByFilter)
+          : (trailsResult.data || [])
 
         // Check if images should be enriched
         // Default: enrich unless explicitly excluded or not included

@@ -99,6 +99,7 @@ export interface Spot {
   description: string
   image?: ImageReference
   blurredImage?: ImageReference // Blurred version for undiscovered spots
+  microImage?: ImageReference  // Micro thumbnail (~40px) for instant preview
   location: GeoLocation
   contentBlocks?: ContentBlock[]
   options: {

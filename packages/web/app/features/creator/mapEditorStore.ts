@@ -53,7 +53,7 @@ interface MapEditorState {
   // UI state
   mode: EditorMode;
   selectedItem: SelectedItem;
-  activeTrailId: string | null;
+  activeTrailIds: Set<string>;
   newSpotLocation: { lat: number; lng: number } | null;
   editableSpotLocation: { lat: number; lon: number } | null;
   editableBounds: Boundary | null;
@@ -73,7 +73,6 @@ interface MapEditorActions {
   selectSpot: (spot: Spot) => void;
   selectTrail: (trail: Trail) => void;
   clearSelection: () => void;
-  setActiveTrailId: (id: string | null) => void;
   toggleActiveTrail: (id: string) => void;
   setNewSpotLocation: (location: { lat: number; lng: number } | null) => void;
   setEditableSpotLocation: (location: { lat: number; lon: number } | null) => void;
@@ -94,7 +93,7 @@ export const useMapEditorStore = create<MapEditorState & MapEditorActions>(
     error: "",
     mode: "view",
     selectedItem: null,
-    activeTrailId: null,
+    activeTrailIds: new Set<string>(),
     newSpotLocation: null,
     editableSpotLocation: null,
     editableBounds: null,
@@ -122,11 +121,13 @@ export const useMapEditorStore = create<MapEditorState & MapEditorActions>(
         mode: "view",
       }),
     clearSelection: () => set({ selectedItem: null, editableSpotLocation: null, editableBounds: null }),
-    setActiveTrailId: (id) => set({ activeTrailId: id }),
     toggleActiveTrail: (id) =>
-      set((state) => ({
-        activeTrailId: state.activeTrailId === id ? null : id,
-      })),
+      set((state) => {
+        const next = new Set(state.activeTrailIds);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return { activeTrailIds: next };
+      }),
     setNewSpotLocation: (location) => set({ newSpotLocation: location }),
     setEditableSpotLocation: (location) => set({ editableSpotLocation: location }),
     setEditableBounds: (bounds) => set({ editableBounds: bounds }),
@@ -141,7 +142,7 @@ export const useMapEditorStore = create<MapEditorState & MapEditorActions>(
         newSpotLocation: null,
         editableSpotLocation: null,
         editableBounds: null,
-        activeTrailId: null,
+        activeTrailIds: new Set(),
       }),
   }),
 );

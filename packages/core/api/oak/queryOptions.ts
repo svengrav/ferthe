@@ -18,6 +18,7 @@ export const parseQueryOptions = (query?: Record<string, string>): QueryOptions 
   if (query.search) { options.search = query.search; hasOptions = true }
   if (query.include) { options.include = query.include.split(','); hasOptions = true }
   if (query.exclude) { options.exclude = query.exclude.split(','); hasOptions = true }
+  if (query.createdBy) { options.filters = { ...options.filters as object, createdBy: query.createdBy }; hasOptions = true }
 
   return hasOptions ? options as QueryOptions : undefined
 }

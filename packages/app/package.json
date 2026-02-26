@@ -6,7 +6,7 @@
   "main": "./index.ts",
   "scripts": {
     "build": "tsc",
-    "dev": "npx expo start --dev-client",
+    "dev": "npx expo start --dev-client --port 7004",
     "android:build": "bash .docker/build.sh",
     "android": "expo run:android",
     "ios": "expo run:ios"

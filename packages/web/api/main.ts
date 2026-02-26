@@ -10,7 +10,7 @@ await load({ export: true });
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FEEDBACK_EMAIL = Deno.env.get("FEEDBACK_EMAIL") || "feedback@ferthe.de";
-const CORE_API_URL = Deno.env.get("CORE_API_URL") || "http://localhost:3000";
+const CORE_API_URL = Deno.env.get("CORE_API_URL") || "http://localhost:7000";
 
 export const app = new Application();
 const router = new Router();
@@ -443,6 +443,6 @@ app.use(routeStaticFilesFrom([
 ]));
 
 if (import.meta.main) {
-  console.log("Server listening on port http://localhost:8000");
-  await app.listen({ port: 8000 });
+  console.log("Server listening on port http://localhost:7001");
+  await app.listen({ port: 7001 });
 }

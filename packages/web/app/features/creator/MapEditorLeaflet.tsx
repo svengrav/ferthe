@@ -1,5 +1,7 @@
 import {
+  Autocomplete,
   GoogleMap,
+  type Libraries,
   OverlayView,
   Rectangle,
   useLoadScript,
@@ -14,6 +16,9 @@ import type { Boundary } from "./mapEditorStore.ts";
 import { useMapEditorStore } from "./mapEditorStore.ts";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyDPPI3WoxR8aQiHvpS_C4rQv56X94EIaog";
+
+// Stable reference required — must not be defined inline in the component
+const LIBRARIES: Libraries = ["places"];
 
 const MAP_CONTAINER_STYLE = { width: "100%", height: "100%" };
 const DEFAULT_CENTER = { lat: 51.9607, lng: 7.6261 };
@@ -66,9 +71,14 @@ function NativeGroundOverlay(props: NativeGroundOverlayProps) {
  * Main map editor component.
  * Composes sidebar, map, and editor panels. Owns Google Maps refs.
  */
-export function MapEditor() {
+interface MapEditorProps {
+  accountId?: string;
+}
+
+export function MapEditor({ accountId }: MapEditorProps) {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    libraries: LIBRARIES,
   });
 
   const {
@@ -82,7 +92,7 @@ export function MapEditor() {
     editableBounds,
     showSpots,
     showTrails,
-    activeTrailId,
+    activeTrailIds,
     editableSpotLocation,
     setSpots,
     setTrails,
@@ -97,6 +107,15 @@ export function MapEditor() {
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+
+  // Pan to the selected place and zoom in
+  const handlePlaceSelect = useCallback(() => {
+    const place = autocompleteRef.current?.getPlace();
+    if (!place?.geometry?.location) return;
+    mapRef.current?.panTo(place.geometry.location);
+    mapRef.current?.setZoom(15);
+  }, []);
   const editableRectRef = useRef<google.maps.Rectangle | null>(null);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -104,12 +123,13 @@ export function MapEditor() {
   const trailRectRefs = useRef<Map<string, google.maps.Rectangle>>(new Map());
   // NativeGroundOverlay handles its own lifecycle; no ref map needed
 
-  // Imperatively toggle Rectangle visibility when showTrails changes
+  // Imperatively toggle Rectangle visibility when showTrails or activeTrailIds changes
   useEffect(() => {
-    trailRectRefs.current.forEach((rect) => {
-      rect.setOptions({ visible: showTrails });
+    trailRectRefs.current.forEach((rect, key) => {
+      const trailId = key.startsWith("edit-") ? key.slice(5) : key;
+      rect.setOptions({ visible: showTrails && activeTrailIds.has(trailId) });
     });
-  }, [showTrails]);
+  }, [showTrails, activeTrailIds]);
 
   // --- Data loading ---
 
@@ -117,7 +137,7 @@ export function MapEditor() {
     try {
       setLoading(true);
       setError("");
-      const { spots, trails } = await service.fetchAllData();
+      const { spots, trails } = await service.fetchAllData(accountId);
       setSpots(spots);
       setTrails(trails);
     } catch (err) {
@@ -342,7 +362,9 @@ export function MapEditor() {
                   east: b.northEast.lon,
                   west: b.southWest.lon,
                 }}
-                opacity={showTrails ? MAP_IMAGE_OPACITY : 0}
+                opacity={showTrails && activeTrailIds.has(trail.id)
+                  ? MAP_IMAGE_OPACITY
+                  : 0}
               />
             );
           })}
@@ -373,6 +395,9 @@ export function MapEditor() {
                   onLoad={(rect) => {
                     editableRectRef.current = rect;
                     trailRectRefs.current.set(`edit-${trail.id}`, rect);
+                    rect.setOptions({
+                      visible: showTrails && activeTrailIds.has(trail.id),
+                    });
                     const b = editableBounds ?? trail.boundary;
                     rect.setBounds({
                       north: b.northEast.lat,
@@ -407,7 +432,7 @@ export function MapEditor() {
                   fillOpacity: 0.2,
                   editable: false,
                   draggable: false,
-                  visible: showTrails,
+                  visible: showTrails && activeTrailIds.has(trail.id),
                 }}
                 onLoad={(rect) => {
                   trailRectRefs.current.set(trail.id, rect);
@@ -467,6 +492,22 @@ export function MapEditor() {
             </OverlayView>
           )}
         </GoogleMap>
+
+        {/* Location Search */}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 w-72">
+          <Autocomplete
+            onLoad={(ac) => {
+              autocompleteRef.current = ac;
+            }}
+            onPlaceChanged={handlePlaceSelect}
+          >
+            <input
+              type="text"
+              placeholder="Search location..."
+              className="w-full px-3 py-2 text-sm rounded-md shadow bg-white border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </Autocomplete>
+        </div>
 
         {/* Editor Panel Overlay */}
         {showEditorPanel && (

@@ -10,6 +10,7 @@ interface PageProps {
   children: React.ReactNode;
   showFooter?: boolean;
   wide?: boolean;
+  headerWide?: boolean;
   loading?: boolean;
   className?: string;
   backButton?: {
@@ -19,6 +20,7 @@ interface PageProps {
 }
 
 function Page({
+  headerWide,
   wide,
   title,
   children,
@@ -48,7 +50,7 @@ function Page({
   return (
     <div className="flex flex-1 justify-center">
       <div className="flex flex-col w-full flex-1">
-        <PageHeader />
+        <PageHeader wide={headerWide} />
         <div
           className={clsx(
             `w-full mx-auto flex flex-col flex-1 `,

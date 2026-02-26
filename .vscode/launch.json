@@ -5,6 +5,7 @@
       "name": "🟦 Run API",
       "request": "launch",
       "type": "node",
+      "preLaunchTask": "Kill: All Servers",
       "cwd": "${workspaceFolder}/packages/core",
       "runtimeExecutable": "deno",
       "runtimeArgs": [
@@ -14,7 +15,7 @@
         "--inspect",
         "main.ts"
       ],
-      "attachSimplePort": 9229,
+      "attachSimplePort": 7009,
       "env": {
         "NODE_ENV": "development"
       },
@@ -25,7 +26,7 @@
       "name": "🟥 Run App",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:8081",
+      "url": "http://localhost:7004",
       "webRoot": "${workspaceFolder}/packages/app",
       "preLaunchTask": "Start Expo Web Server",
       "sourceMapPathOverrides": {
@@ -38,19 +39,20 @@
       "name": "🟨 Run Web",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:15173",
+      "url": "http://localhost:7002",
       "webRoot": "${workspaceFolder}/packages/web/app",
       "preLaunchTask": "Start Web Server"
     }
   ],
   "compounds": [
     {
-      "name": "🟩 Run Web",
+      "name": "🟧 Run Web",
       "configurations": [
         "🟦 Run API",
         "🟨 Run Web"
       ],
-      "stopAll": true
+      "stopAll": true,
+      "preLaunchTask": "Kill: All Servers"
     },
     {
       "name": "🟩 Run App",
@@ -58,7 +60,8 @@
         "🟥 Run App",
         "🟦 Run API"
       ],
-      "stopAll": true
+      "stopAll": true,
+      "preLaunchTask": "Kill: All Servers"
     }
   ]
 }

@@ -146,8 +146,15 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
   const setDefaultTrail = async () => {
     const trails = getTrails()
-    const defaultTrail = trails.find(t => t.slug === DEFAULT_DISCOVERY_SLUG)
-    if (!defaultTrail) throw new Error(`Default discovery trail '${DEFAULT_DISCOVERY_SLUG}' not found!`)
+    if (trails.length === 0) {
+      logger.warn('setDefaultTrail: no trails loaded yet.')
+      return
+    }
+
+    const defaultTrail = trails.find(t => t.slug === DEFAULT_DISCOVERY_SLUG) ?? trails[0]
+    if (defaultTrail.slug !== DEFAULT_DISCOVERY_SLUG) {
+      logger.warn(`Default trail '${DEFAULT_DISCOVERY_SLUG}' not found, falling back to '${defaultTrail.slug}'`)
+    }
 
     await setActiveTrail(defaultTrail.id)
   }

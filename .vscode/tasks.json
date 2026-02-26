@@ -2,6 +2,16 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Kill: All Servers",
+      "type": "shell",
+      "command": "fuser -k 7000/tcp 7001/tcp 7002/tcp 7003/tcp 7004/tcp 7009/tcp 2>/dev/null; pkill -f 'deno.*main.ts' 2>/dev/null; pkill -f 'deno.*--inspect' 2>/dev/null; pkill -f 'metro' 2>/dev/null; exit 0",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Start Expo Web Server",
       "type": "shell",
       "command": "npm run dev",
@@ -11,6 +21,7 @@
       "dependsOn": [
         "Start Storage Server"
       ],
+      "dependsOrder": "sequence",
       "isBackground": true,
       "problemMatcher": {
         "pattern": {
@@ -79,6 +90,10 @@
       "label": "Start Web Server",
       "type": "shell",
       "command": "deno run dev",
+      "dependsOn": [
+        "Kill: All Servers"
+      ],
+      "dependsOrder": "sequence",
       "options": {
         "cwd": "${workspaceFolder}/packages/web"
       },

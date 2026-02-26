@@ -1,11 +1,21 @@
+import clsx from "clsx";
 import { Link } from "react-router-dom";
 import { Logo } from "./Logo.tsx";
 import { Navigation } from "./Navigation.tsx";
 
-export function PageHeader() {
+interface PageHeaderProps {
+  wide?: boolean;
+}
+
+export function PageHeader({ wide }: PageHeaderProps) {
   return (
     <div className="flex items-center justify-center bg-surface text-center border-b border-b-surface-divider py-2 lg:py-6 px-4 ">
-      <div className="flex items-center w-full  max-w-6xl mx-auto">
+      <div
+        className={clsx(
+          `flex items-center w-full  mx-auto`,
+          wide ? "max-w-full" : "max-w-6xl",
+        )}
+      >
         <Link
           key="home"
           to="/"

@@ -23,7 +23,7 @@ export function MapEditorSidebar(props: MapEditorSidebarProps) {
     showSpots,
     showTrails,
     selectedItem,
-    activeTrailId,
+    activeTrailIds,
     setMode,
     selectSpot,
     selectTrail,
@@ -150,34 +150,31 @@ export function MapEditorSidebar(props: MapEditorSidebarProps) {
           <h3 className="font-semibold mb-2">Trails ({trails.length})</h3>
           <div className="space-y-1 max-h-60 overflow-y-auto">
             {trails.map((trail) => {
-              const isActive = activeTrailId === trail.id;
+              const isActive = activeTrailIds.has(trail.id);
               const isEditing = selectedItem?.type === "trail" &&
                 selectedItem.item.id === trail.id;
               return (
                 <div
                   key={trail.id}
                   className={clsx(
-                    "flex items-center gap-2 px-2 py-1.5 rounded text-sm",
+                    "flex items-center gap-2 px-2 py-1.5 rounded text-sm cursor-pointer",
                     isActive && "bg-primary text-onprimary",
                     !isActive && isEditing && "bg-gray-200 text-gray-700",
                     !isActive && !isEditing && "bg-gray-100 hover:bg-gray-200",
                   )}
+                  onClick={() => toggleActiveTrail(trail.id)}
                 >
                   {renderThumbnail(trail.image?.url)}
-                  <button
-                    type="button"
-                    onClick={() => toggleActiveTrail(trail.id)}
-                    className="flex-1 text-left truncate"
-                  >
+                  <div className="flex-1 min-w-0">
                     <div className="font-medium truncate">{trail.name}</div>
-                    {isActive && (
-                      <div className="text-xs text-onprimary/70">Active</div>
-                    )}
-                  </button>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => selectTrail(trail)}
-                    className="px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300 text-gray-700 shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      selectTrail(trail);
+                    }}
+                    className="px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300 text-gray-700 shrink-0 cursor-pointer"
                   >
                     Edit
                   </button>
@@ -227,7 +224,7 @@ export function MapEditorSidebar(props: MapEditorSidebarProps) {
                   <button
                     type="button"
                     onClick={() => selectSpot(spot)}
-                    className="px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300 text-gray-700 shrink-0"
+                    className="px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300 text-gray-700 shrink-0 cursor-pointer"
                   >
                     Edit
                   </button>

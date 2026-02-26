@@ -1,7 +1,9 @@
 import {
   adminApi,
   clearAdminToken,
+  getAdminAccountId,
   getAdminToken,
+  setAdminAccountId,
   setAdminToken,
 } from "@/app/api/adminClient.ts";
 import { Page } from "@/app/components";
@@ -16,7 +18,9 @@ export function ContentBoard() {
 
   useEffect(() => {
     const existingToken = getAdminToken();
-    if (existingToken) {
+    const existingAccountId = getAdminAccountId();
+    if (existingToken && existingAccountId) {
+      setAccountId(existingAccountId);
       setIsAuthenticated(true);
     }
   }, []);
@@ -46,9 +50,10 @@ export function ContentBoard() {
 
       // Store session token
       setAdminToken(result.data.sessionToken);
+      setAdminAccountId(accountId);
 
       // Test token by fetching trails
-      await adminApi.getTrails();
+      await adminApi.getTrails(accountId);
       setIsAuthenticated(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed");
@@ -112,7 +117,7 @@ export function ContentBoard() {
   }
 
   return (
-    <Page className="h-screen overflow-hidden" wide>
+    <Page className="h-screen overflow-hidden" wide headerWide>
       <div className="flex flex-col h-full">
         <div className="flex justify-between items-center p-4 bg-white border-b border-gray-300">
           <h1 className="text-2xl font-bold">Content Board</h1>
@@ -126,7 +131,7 @@ export function ContentBoard() {
         </div>
 
         <div className="flex-1 overflow-hidden">
-          <MapEditor />
+          <MapEditor accountId={accountId} />
         </div>
       </div>
     </Page>

@@ -8,18 +8,18 @@ export default defineConfig({
   base: '/',
   plugins: [deno(), react(), tailwindcss()],
   server: {
-    port: 15173,
+    port: 7002,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:7001',
         changeOrigin: true,
       },
       '/admin/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:7001',
         changeOrigin: true,
       },
       '/blog/images': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:7001',
         changeOrigin: true,
       },
     },

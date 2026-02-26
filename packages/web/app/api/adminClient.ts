@@ -4,6 +4,7 @@
  */
 
 const ADMIN_TOKEN_KEY = 'ferthe_admin_token';
+const ADMIN_ACCOUNT_ID_KEY = 'ferthe_admin_account_id';
 
 export function setAdminToken(token: string) {
   localStorage.setItem(ADMIN_TOKEN_KEY, token);
@@ -15,6 +16,15 @@ export function getAdminToken(): string | null {
 
 export function clearAdminToken() {
   localStorage.removeItem(ADMIN_TOKEN_KEY);
+  localStorage.removeItem(ADMIN_ACCOUNT_ID_KEY);
+}
+
+export function setAdminAccountId(accountId: string) {
+  localStorage.setItem(ADMIN_ACCOUNT_ID_KEY, accountId);
+}
+
+export function getAdminAccountId(): string | null {
+  return localStorage.getItem(ADMIN_ACCOUNT_ID_KEY);
 }
 
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
@@ -78,8 +88,11 @@ export const adminApi = {
   },
 
   // Trails
-  getTrails() {
-    return request('/admin/api/v1/trail/trails');
+  getTrails(createdBy?: string) {
+    const url = createdBy
+      ? `/admin/api/v1/trail/trails?createdBy=${encodeURIComponent(createdBy)}`
+      : '/admin/api/v1/trail/trails';
+    return request(url);
   },
 
   getTrail(id: string) {

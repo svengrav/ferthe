@@ -21,7 +21,7 @@ export function SpotEditorPanel(props: { onDataChanged: () => Promise<void> }) {
     newSpotLocation,
     editableSpotLocation,
     trails,
-    activeTrailId,
+    activeTrailIds,
     setEditableSpotLocation,
     resetToView,
     clearSelection,
@@ -92,8 +92,8 @@ export function SpotEditorPanel(props: { onDataChanged: () => Promise<void> }) {
     });
   };
 
-  // Pre-select active trail for new spots
-  const defaultTrailIds = activeTrailId ? [activeTrailId] : [];
+  // Pre-select active trails for new spots
+  const defaultTrailIds = Array.from(activeTrailIds);
 
   // Create spot mode
   if (mode === "create-spot" && newSpotLocation) {

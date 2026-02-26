@@ -329,11 +329,8 @@ const createClue = (spot: Spot, trailId: string, source: ClueSource): Clue => {
   // Derive micro image from blurred image if available
   let clueImage: { micro?: ImageReference; blurred?: ImageReference } | undefined
   if (spot.blurredImage) {
-    const microUrl = spot.blurredImage.url.replace('-blurred', '-micro')
-    const microId = spot.blurredImage.id.replace('-blurred', '-micro')
-
     clueImage = {
-      micro: { id: microId, url: microUrl },
+      micro: spot.microImage,      // already a correctly-signed SAS URL
       blurred: spot.blurredImage,
     }
   }

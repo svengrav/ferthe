@@ -14,8 +14,8 @@
  */
 
 const STORAGE_DIR = `${Deno.cwd()}/_data/app`
-const PORT = 3010
-const ALLOWED_ORIGINS = ['http://localhost:8081', 'http://localhost:3000', 'http://localhost:19006']
+const PORT = 7003
+const ALLOWED_ORIGINS = ['http://localhost:7004', 'http://localhost:7000', 'http://localhost:19006']
 
 // Ensure storage directory exists
 try {
@@ -27,10 +27,10 @@ const getFilePath = (key: string): string => {
   return `${STORAGE_DIR}/${sanitizedKey}.json`
 }
 
-const json = (data: unknown, status = 200): Response => 
-  new Response(JSON.stringify(data), { 
-    status, 
-    headers: { 'Content-Type': 'application/json' } 
+const json = (data: unknown, status = 200): Response =>
+  new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json' }
   })
 
 const cors = (response: Response, origin: string | null): Response => {

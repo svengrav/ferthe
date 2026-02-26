@@ -87,8 +87,8 @@ const DEFAULT_TRAIL_OPTIONS = {
 interface TrailSpot { spotId: string }
 
 /** Load all trails from the API, enriched with their spot IDs */
-export const fetchTrails = async (): Promise<Trail[]> => {
-  const result = await adminApi.getTrails() as ApiListResponse<Trail>;
+export const fetchTrails = async (createdBy?: string): Promise<Trail[]> => {
+  const result = await adminApi.getTrails(createdBy) as ApiListResponse<Trail>;
   const trails = result?.data ?? [];
 
   // Fetch spot IDs for each trail in parallel
@@ -134,9 +134,9 @@ export const deleteTrail = async (id: string) => {
 // --- Data loading ---
 
 /** Load all spots and trails in parallel */
-export const fetchAllData = async (): Promise<
+export const fetchAllData = async (createdBy?: string): Promise<
   { spots: Spot[]; trails: Trail[] }
 > => {
-  const [spots, trails] = await Promise.all([fetchSpots(), fetchTrails()]);
+  const [spots, trails] = await Promise.all([fetchSpots(), fetchTrails(createdBy)]);
   return { spots, trails };
 };

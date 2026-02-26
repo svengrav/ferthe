@@ -29,10 +29,8 @@ export function useDataInitialization() {
       logger.log('[DataInit] Loading trails and discoveries for account:', session.accountId)
 
       try {
-        await Promise.all([
-          context?.trailApplication.requestTrailState(),
-          context?.discoveryApplication.requestDiscoveryState()
-        ])
+        await context?.trailApplication.requestTrailState()
+        await context?.discoveryApplication.requestDiscoveryState()
 
         hasLoadedRef.current = true
         logger.log('[DataInit] Data loaded successfully')
