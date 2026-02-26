@@ -155,9 +155,9 @@ export function ImageUpload(
           <button
             type="button"
             onClick={applyCrop}
-            className="flex-1 px-3 py-1.5 bg-primary rounded text-sm hover:bg-gray-700"
+            className="flex-1 px-3 py-1.5 bg-primary rounded text-sm hover:bg-primary/90 text-onprimary"
           >
-            Apply Crop
+            Set
           </button>
           <button
             type="button"
@@ -199,7 +199,7 @@ export function ImageUpload(
             <button
               type="button"
               onClick={() => onChange(undefined)}
-              className="px-3 py-1.5 bg-red-600 rounded text-sm hover:bg-red-700"
+              className="px-3 py-1.5 bg-danger text-white rounded text-sm hover:bg-danger/90"
             >
               Remove
             </button>

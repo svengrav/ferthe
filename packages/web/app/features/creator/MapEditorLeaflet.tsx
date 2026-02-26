@@ -1,11 +1,10 @@
 import {
   GoogleMap,
-  GroundOverlay,
   OverlayView,
   Rectangle,
   useLoadScript,
 } from "@react-google-maps/api";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MapEditorSidebar } from "./MapEditorSidebar.tsx";
 import { SpotEditorPanel } from "./SpotEditorPanel.tsx";
 import { SpotMapCard } from "./SpotMapCard.tsx";
@@ -22,6 +21,46 @@ const VIEWPORT_BOUNDS_RATIO = 0.2;
 const DEFAULT_OFFSET = { lat: 0.005, lng: 0.008 };
 
 const MAP_IMAGE_OPACITY = 0.45;
+
+/**
+ * Native GroundOverlay wrapper — manages google.maps.GroundOverlay imperatively
+ * because the @react-google-maps/api wrapper does not reliably apply prop changes after mount.
+ */
+interface NativeGroundOverlayProps {
+  map: google.maps.Map | null;
+  url: string;
+  bounds: google.maps.LatLngBoundsLiteral;
+  opacity: number;
+}
+
+function NativeGroundOverlay(props: NativeGroundOverlayProps) {
+  const { map, url, bounds, opacity } = props;
+  const overlayRef = useRef<google.maps.GroundOverlay | null>(null);
+
+  // Create and destroy overlay with the map instance
+  useEffect(() => {
+    if (!map) return;
+    const overlay = new google.maps.GroundOverlay(url, bounds, {
+      opacity,
+      clickable: false,
+    });
+    overlay.setMap(map);
+    overlayRef.current = overlay;
+    return () => {
+      overlay.setMap(null);
+      overlayRef.current = null;
+    };
+    // url/bounds/map changes recreate the overlay; opacity is handled separately
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, url, bounds.north, bounds.south, bounds.east, bounds.west]);
+
+  // Update opacity imperatively without recreating the overlay
+  useEffect(() => {
+    overlayRef.current?.setOpacity(opacity);
+  }, [opacity]);
+
+  return null;
+}
 
 /**
  * Main map editor component.
@@ -43,6 +82,7 @@ export function MapEditor() {
     editableBounds,
     showSpots,
     showTrails,
+    activeTrailId,
     editableSpotLocation,
     setSpots,
     setTrails,
@@ -56,7 +96,20 @@ export function MapEditor() {
   } = useMapEditorStore();
 
   const mapRef = useRef<google.maps.Map | null>(null);
+  const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
   const editableRectRef = useRef<google.maps.Rectangle | null>(null);
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Native refs for imperative visibility control (options prop updates don't work reliably after mount)
+  const trailRectRefs = useRef<Map<string, google.maps.Rectangle>>(new Map());
+  // NativeGroundOverlay handles its own lifecycle; no ref map needed
+
+  // Imperatively toggle Rectangle visibility when showTrails changes
+  useEffect(() => {
+    trailRectRefs.current.forEach((rect) => {
+      rect.setOptions({ visible: showTrails });
+    });
+  }, [showTrails]);
 
   // --- Data loading ---
 
@@ -83,21 +136,29 @@ export function MapEditor() {
 
   // --- Map interaction handlers ---
 
+  const cancelLongPress = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  // Click: only for placing new spots
   const handleMapClick = (e: google.maps.MapMouseEvent) => {
-    if (!e.latLng) return;
+    if (!e.latLng || mode !== "create-spot") return;
+    setNewSpotLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+  };
+
+  // Long-press (600ms): reposition selected spot
+  const LONG_PRESS_DELAY = 600;
+
+  const handleMapMouseDown = (e: google.maps.MapMouseEvent) => {
+    if (!e.latLng || mode !== "view" || selectedItem?.type !== "spot") return;
     const lat = e.latLng.lat();
     const lng = e.latLng.lng();
-
-    // Place new spot
-    if (mode === "create-spot") {
-      setNewSpotLocation({ lat, lng });
-      return;
-    }
-
-    // Reposition existing spot
-    if (mode === "view" && selectedItem?.type === "spot") {
+    longPressTimerRef.current = setTimeout(() => {
       setEditableSpotLocation({ lat, lon: lng });
-    }
+    }, LONG_PRESS_DELAY);
   };
 
   /** Sync editable rectangle bounds back to store */
@@ -219,8 +280,12 @@ export function MapEditor() {
           center={DEFAULT_CENTER}
           zoom={13}
           onClick={handleMapClick}
+          onMouseDown={handleMapMouseDown}
+          onMouseUp={cancelLongPress}
+          onDrag={cancelLongPress}
           onLoad={(map) => {
             mapRef.current = map;
+            setMapInstance(map);
           }}
           options={{
             mapTypeControl: true,
@@ -256,92 +321,104 @@ export function MapEditor() {
               );
             })}
 
-          {/* Trail map image overlays */}
-          {showTrails &&
-            trails.map((trail) => {
-              const imageUrl = trail.map?.image?.url;
-              if (!imageUrl) return null;
-              const isEditing = mode === "view" &&
-                selectedItem?.type === "trail" &&
-                selectedItem.item.id === trail.id;
-              const bounds = isEditing && editableBounds
-                ? editableBounds
-                : trail.boundary;
-              return (
-                <GroundOverlay
-                  key={`mapimg-${trail.id}`}
-                  url={imageUrl}
-                  bounds={{
-                    north: bounds.northEast.lat,
-                    south: bounds.southWest.lat,
-                    east: bounds.northEast.lon,
-                    west: bounds.southWest.lon,
-                  }}
-                  options={{ opacity: MAP_IMAGE_OPACITY }}
-                />
-              );
-            })}
+          {/* Trail map image overlays — NativeGroundOverlay reacts to opacity prop changes imperatively */}
+          {trails.map((trail) => {
+            const imageUrl = trail.map?.image?.url;
+            if (!imageUrl) return null;
+            const isEditing = mode === "view" &&
+              selectedItem?.type === "trail" &&
+              selectedItem.item.id === trail.id;
+            const b = isEditing && editableBounds
+              ? editableBounds
+              : trail.boundary;
+            return (
+              <NativeGroundOverlay
+                key={`mapimg-${trail.id}`}
+                map={mapInstance}
+                url={imageUrl}
+                bounds={{
+                  north: b.northEast.lat,
+                  south: b.southWest.lat,
+                  east: b.northEast.lon,
+                  west: b.southWest.lon,
+                }}
+                opacity={showTrails ? MAP_IMAGE_OPACITY : 0}
+              />
+            );
+          })}
 
-          {/* Trail rectangles */}
-          {showTrails &&
-            trails.map((trail) => {
-              const isEditing = mode === "view" &&
-                selectedItem?.type === "trail" &&
-                selectedItem.item.id === trail.id;
+          {
+            /* Trail rectangles — always mounted to avoid Rectangle stacking bug on remount.
+               Visibility is controlled imperatively via trailRectRefs + useEffect. */
+          }
+          {trails.map((trail) => {
+            const isEditing = mode === "view" &&
+              selectedItem?.type === "trail" &&
+              selectedItem.item.id === trail.id;
 
-              if (isEditing) {
-                return (
-                  <Rectangle
-                    key={`edit-${trail.id}`}
-                    options={{
-                      strokeColor: "#facc15",
-                      strokeOpacity: 0.8,
-                      strokeWeight: 3,
-                      fillColor: "#facc15",
-                      fillOpacity: 0.15,
-                      editable: true,
-                      draggable: true,
-                    }}
-                    onLoad={(rect) => {
-                      editableRectRef.current = rect;
-                      const b = editableBounds ?? trail.boundary;
-                      rect.setBounds({
-                        north: b.northEast.lat,
-                        south: b.southWest.lat,
-                        east: b.northEast.lon,
-                        west: b.southWest.lon,
-                      });
-                    }}
-                    onUnmount={() => {
-                      editableRectRef.current = null;
-                    }}
-                    onBoundsChanged={syncBoundsFromRect}
-                  />
-                );
-              }
-
+            if (isEditing) {
               return (
                 <Rectangle
-                  key={trail.id}
-                  bounds={{
-                    north: trail.boundary.northEast.lat,
-                    south: trail.boundary.southWest.lat,
-                    east: trail.boundary.northEast.lon,
-                    west: trail.boundary.southWest.lon,
-                  }}
+                  key={`edit-${trail.id}`}
                   options={{
-                    strokeColor: "#9333EA",
+                    strokeColor: "#facc15",
                     strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: "#9333EA",
-                    fillOpacity: 0.2,
-                    editable: false,
-                    draggable: false,
+                    strokeWeight: 3,
+                    fillColor: "#facc15",
+                    fillOpacity: 0.15,
+                    editable: true,
+                    draggable: true,
+                    visible: showTrails,
                   }}
-                  onClick={() => selectTrail(trail)}
+                  onLoad={(rect) => {
+                    editableRectRef.current = rect;
+                    trailRectRefs.current.set(`edit-${trail.id}`, rect);
+                    const b = editableBounds ?? trail.boundary;
+                    rect.setBounds({
+                      north: b.northEast.lat,
+                      south: b.southWest.lat,
+                      east: b.northEast.lon,
+                      west: b.southWest.lon,
+                    });
+                  }}
+                  onUnmount={() => {
+                    editableRectRef.current = null;
+                    trailRectRefs.current.delete(`edit-${trail.id}`);
+                  }}
+                  onBoundsChanged={syncBoundsFromRect}
                 />
               );
-            })}
+            }
+
+            return (
+              <Rectangle
+                key={trail.id}
+                bounds={{
+                  north: trail.boundary.northEast.lat,
+                  south: trail.boundary.southWest.lat,
+                  east: trail.boundary.northEast.lon,
+                  west: trail.boundary.southWest.lon,
+                }}
+                options={{
+                  strokeColor: "#9333EA",
+                  strokeOpacity: 0.8,
+                  strokeWeight: 2,
+                  fillColor: "#9333EA",
+                  fillOpacity: 0.2,
+                  editable: false,
+                  draggable: false,
+                  visible: showTrails,
+                }}
+                onLoad={(rect) => {
+                  trailRectRefs.current.set(trail.id, rect);
+                }}
+                onUnmount={() => {
+                  trailRectRefs.current.delete(trail.id);
+                }}
+                onClick={() => showTrails && selectTrail(trail)}
+              />
+            );
+          })}
 
           {/* Editable rectangle for new trail */}
           {mode === "create-trail" && editableBounds && (

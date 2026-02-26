@@ -94,7 +94,7 @@ export function ContentBoard() {
               </div>
 
               {error && (
-                <div className="text-red-400 text-sm text-center">{error}</div>
+                <div className="text-danger text-sm text-center">{error}</div>
               )}
 
               <button

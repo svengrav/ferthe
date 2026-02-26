@@ -319,7 +319,7 @@ export function ContentBlockEditorList(
               <button
                 type="button"
                 onClick={() => removeBlock(block.id)}
-                className="px-1.5 py-0.5 text-xs bg-red-300 rounded hover:bg-red-400 text-white"
+                className="px-1.5 py-0.5 text-xs bg-danger rounded hover:bg-danger/90 text-white"
                 title="Remove"
               >
                 ✕

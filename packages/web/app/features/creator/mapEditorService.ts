@@ -16,6 +16,12 @@ export const fetchSpots = async (): Promise<Spot[]> => {
   return result?.data ?? [];
 };
 
+/** Load a single spot with full detail (including contentBlocks) */
+export const fetchSpot = async (id: string): Promise<Spot | null> => {
+  const result = await adminApi.getSpot(id) as { data?: Spot };
+  return result?.data ?? null;
+};
+
 /** Create a new spot */
 export const createSpot = async (data: SpotFormData) => {
   await adminApi.createSpot({
@@ -78,10 +84,22 @@ const DEFAULT_TRAIL_OPTIONS = {
   previewMode: "preview" as const,
 };
 
-/** Load all trails from the API */
+interface TrailSpot { spotId: string }
+
+/** Load all trails from the API, enriched with their spot IDs */
 export const fetchTrails = async (): Promise<Trail[]> => {
   const result = await adminApi.getTrails() as ApiListResponse<Trail>;
-  return result?.data ?? [];
+  const trails = result?.data ?? [];
+
+  // Fetch spot IDs for each trail in parallel
+  const trailsWithSpots = await Promise.all(
+    trails.map(async (trail) => {
+      const spotsResult = await adminApi.getTrailSpots(trail.id) as { data?: TrailSpot[] };
+      return { ...trail, spotIds: (spotsResult?.data ?? []).map((ts) => ts.spotId) };
+    }),
+  );
+
+  return trailsWithSpots;
 };
 
 /** Create a new trail */

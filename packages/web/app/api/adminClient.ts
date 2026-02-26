@@ -107,6 +107,10 @@ export const adminApi = {
   },
 
   // Trail-Spot relationships
+  getTrailSpots(trailId: string) {
+    return request(`/admin/api/v1/trail/trails/${trailId}/spots`);
+  },
+
   addSpotToTrail(trailId: string, spotId: string) {
     return request(`/admin/api/v1/trail/trails/${trailId}/spots/${spotId}`, {
       method: 'POST',

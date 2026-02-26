@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRemoveDialog } from "../../hooks/useRemoveDialog.tsx";
 import type { SpotFormData } from "./SpotForm.tsx";
 import { SpotForm } from "./SpotForm.tsx";
@@ -26,9 +26,32 @@ export function SpotEditorPanel(props: { onDataChanged: () => Promise<void> }) {
   } = useMapEditorStore();
 
   const [error, setError] = useState("");
+  const [detailedSpot, setDetailedSpot] = useState<Spot | null>(null);
   const { openDialog: openRemoveDialog } = useRemoveDialog();
 
+  // Fetch full spot detail (includes contentBlocks) when a spot is selected for editing
+  const editingSpotId = selectedItem?.type === "spot"
+    ? selectedItem.item.id
+    : null;
+  useEffect(() => {
+    if (!editingSpotId) {
+      setDetailedSpot(null);
+      return;
+    }
+    setDetailedSpot(null);
+    service.fetchSpot(editingSpotId).then((spot) => {
+      if (spot) setDetailedSpot(spot);
+    });
+  }, [editingSpotId]);
+
   const trailOptions = trails.map((t) => ({ id: t.id, name: t.name }));
+
+  // Derive which trails the selected spot belongs to from loaded trail data
+  const editingSpotTrailIds = selectedItem?.type === "spot"
+    ? trails.filter((t) => t.spotIds?.includes(selectedItem.item.id)).map((t) =>
+      t.id
+    )
+    : [];
 
   // --- Create Spot ---
   const handleCreate = async (data: SpotFormData) => {
@@ -98,6 +121,14 @@ export function SpotEditorPanel(props: { onDataChanged: () => Promise<void> }) {
   // Edit spot mode
   if (mode === "view" && selectedItem?.type === "spot") {
     const spot = selectedItem.item as Spot;
+    if (!detailedSpot) {
+      return (
+        <div>
+          <PanelHeader title="Edit Spot" onClose={clearSelection} />
+          <p className="text-sm text-gray-400 p-4">Loading…</p>
+        </div>
+      );
+    }
     return (
       <div>
         <PanelHeader title="Edit Spot" onClose={clearSelection} />
@@ -108,7 +139,8 @@ export function SpotEditorPanel(props: { onDataChanged: () => Promise<void> }) {
             description: spot.description,
             location: editableSpotLocation ?? spot.location,
             visibility: spot.options?.visibility as SpotFormData["visibility"],
-            contentBlocks: spot.contentBlocks ?? [],
+            contentBlocks: detailedSpot.contentBlocks ?? [],
+            trailIds: editingSpotTrailIds,
           }}
           existingImageUrl={spot.image?.url}
           trails={trailOptions}
@@ -120,7 +152,7 @@ export function SpotEditorPanel(props: { onDataChanged: () => Promise<void> }) {
         <button
           type="button"
           onClick={handleDelete}
-          className="w-full mt-4 px-4 py-2 bg-red-600 rounded hover:bg-red-700"
+          className="w-full mt-4 px-4 py-2 bg-danger rounded hover:bg-danger/90"
         >
           Delete Spot
         </button>

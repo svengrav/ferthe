@@ -10,6 +10,7 @@ export interface Spot {
   image?: { id: string; url: string };
   contentBlocks?: ContentBlock[];
   options?: { visibility?: string };
+  trailIds?: string[];
 }
 
 export interface Trail {
@@ -19,6 +20,7 @@ export interface Trail {
   image?: { id: string; url: string };
   map?: { image?: { id: string; url: string } };
   boundary: Boundary;
+  spotIds?: string[];
 }
 
 export interface Boundary {
