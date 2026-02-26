@@ -66,7 +66,7 @@ export function ContentBoard() {
 
   if (!isAuthenticated) {
     return (
-      <Page title="Admin Login">
+      <Page title="Admin Login" wide>
         <div className="flex flex-col items-center justify-center min-h-screen p-4">
           <div className="w-full max-w-md space-y-8">
             <div>
@@ -88,7 +88,7 @@ export function ContentBoard() {
                   required
                   value={accountId}
                   onChange={(e) => setAccountId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-white text-white focus:outline-none focus:ring-2 focus:primary"
                   placeholder="Account ID (e.g., cm6abc123...)"
                 />
               </div>
@@ -100,7 +100,7 @@ export function ContentBoard() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
+                className="w-full px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:primary disabled:opacity-50"
               >
                 {loading ? "Authenticating..." : "Login"}
               </button>
@@ -112,14 +112,14 @@ export function ContentBoard() {
   }
 
   return (
-    <Page title="Content Board" className="h-screen overflow-hidden">
+    <Page className="h-screen overflow-hidden" wide>
       <div className="flex flex-col h-full">
-        <div className="flex justify-between items-center p-4 bg-gray-800 border-b border-gray-700">
+        <div className="flex justify-between items-center p-4 bg-white border-b border-gray-300">
           <h1 className="text-2xl font-bold">Content Board</h1>
           <button
             type="button"
             onClick={handleLogout}
-            className="px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-lg hover:bg-gray-600"
+            className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-700 cursor-pointer"
           >
             Logout
           </button>

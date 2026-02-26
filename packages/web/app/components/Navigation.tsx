@@ -17,7 +17,7 @@ export function Navigation() {
     <div className="flex justify-end">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden p-2 text-primary hover:text-indigo-500"
+        className="md:hidden p-2 text-light hover:text-gray-500"
         aria-label="Toggle menu"
       >
         {isOpen
@@ -25,13 +25,13 @@ export function Navigation() {
           : <Bars3Icon className="w-6 h-6" />}
       </button>
 
-      <div className="hidden md:flex gap-4 text-primary items-center">
+      <div className="hidden md:flex gap-4 text-light items-center">
         {links.map((link, i) => [
           i > 0 && <span key={`sep-${i}`} className="text-gray-400">·</span>,
           <Link
             key={link.to}
             to={link.to}
-            className="hover:text-indigo-500 font-medium"
+            className="hover:text-gray-500 font-medium"
           >
             {link.label}
           </Link>,
@@ -39,13 +39,13 @@ export function Navigation() {
       </div>
 
       {isOpen && (
-        <div className="md:hidden absolute top-16 right-4 bg-surface border border-gray-700 rounded-lg shadow-lg p-4 flex flex-col gap-3 z-99">
+        <div className="md:hidden absolute top-16 right-4 bg-surface border border-gray-300 rounded-lg shadow-lg p-4 flex flex-col gap-3 z-99">
           {links.map((link) => (
             <Link
               key={link.to}
               to={link.to}
               onClick={() => setIsOpen(false)}
-              className="text-primary hover:text-blue-300 font-medium"
+              className="text-light hover:text-blue-300 font-medium"
             >
               {link.label}
             </Link>

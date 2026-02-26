@@ -118,7 +118,7 @@ export function SpotForm(
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:primary"
           placeholder="Enter spot name"
         />
       </div>
@@ -129,7 +129,7 @@ export function SpotForm(
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:primary"
           placeholder="Enter description"
           rows={3}
         />
@@ -151,7 +151,7 @@ export function SpotForm(
             value={location.lat}
             onChange={(e) =>
               setLocation({ ...location, lat: parseFloat(e.target.value) })}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:primary"
           />
         </div>
         <div>
@@ -162,7 +162,7 @@ export function SpotForm(
             value={location.lon}
             onChange={(e) =>
               setLocation({ ...location, lon: parseFloat(e.target.value) })}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:primary"
           />
         </div>
       </div>
@@ -173,7 +173,7 @@ export function SpotForm(
         <select
           value={visibility}
           onChange={(e) => setVisibility(e.target.value as SpotVisibility)}
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:primary"
         >
           <option value="hidden">Hidden</option>
           <option value="preview">Preview</option>
@@ -194,8 +194,8 @@ export function SpotForm(
                 onClick={() => toggleTrail(trail.id)}
                 className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                   trailIds.includes(trail.id)
-                    ? "bg-indigo-600 border-indigo-500 text-white"
-                    : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
+                    ? "bg-primary border-gray-500 text-white"
+                    : "bg-gray-100 border-gray-300 text-gray-300 hover:bg-gray-100"
                 }`}
               >
                 {trail.name}
@@ -213,14 +213,14 @@ export function SpotForm(
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 px-4 py-2 bg-indigo-600 rounded hover:bg-indigo-700 disabled:opacity-50"
+          className="flex-1 px-4 py-2 bg-primary text-onprimary rounded hover:bg-gray-700 disabled:opacity-50"
         >
           {loading ? "Saving..." : "Save"}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 px-4 py-2 bg-gray-700 rounded hover:bg-gray-600"
+          className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-300"
         >
           Cancel
         </button>

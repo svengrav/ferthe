@@ -81,7 +81,7 @@ function TextBlockEditor(
           onChange({ ...block, data: { ...block.data, text: e.target.value } })}
         placeholder="Enter text..."
         rows={4}
-        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:primary"
       />
     </div>
   );
@@ -105,7 +105,7 @@ function QuoteBlockEditor(
             })}
           placeholder="Enter quote..."
           rows={2}
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:primary"
         />
       </div>
       <div>
@@ -121,7 +121,7 @@ function QuoteBlockEditor(
               data: { ...block.data, author: e.target.value },
             })}
           placeholder="Author name"
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:primary"
         />
       </div>
     </div>
@@ -155,7 +155,7 @@ function ImageBlockEditor(
               data: { ...block.data, caption: e.target.value },
             })}
           placeholder="Image caption"
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:primary"
         />
       </div>
     </div>
@@ -180,7 +180,7 @@ function LinkBlockEditor(
               data: { ...block.data, url: e.target.value },
             })}
           placeholder="https://..."
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:primary"
         />
       </div>
       <div>
@@ -196,7 +196,7 @@ function LinkBlockEditor(
               data: { ...block.data, label: e.target.value },
             })}
           placeholder="Link label"
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:primary"
         />
       </div>
     </div>
@@ -233,10 +233,10 @@ const BLOCK_TYPE_LABELS: Record<ContentBlockType, string> = {
 };
 
 const BLOCK_TYPE_ICONS: Record<ContentBlockType, string> = {
-  text: "📝",
-  quote: "💬",
-  image: "🖼️",
-  link: "🔗",
+  text: "",
+  quote: "",
+  image: "",
+  link: "",
 };
 
 // --- Main list component ---
@@ -290,7 +290,7 @@ export function ContentBlockEditorList(
       {sorted.map((block, idx) => (
         <div
           key={block.id}
-          className="border border-gray-600 rounded bg-gray-800/50 p-3"
+          className="border border-gray-300 rounded bg-white/50 p-3"
         >
           {/* Block header with type label + controls */}
           <div className="flex items-center justify-between mb-2">
@@ -302,7 +302,7 @@ export function ContentBlockEditorList(
                 type="button"
                 onClick={() => moveBlock(block.id, -1)}
                 disabled={idx === 0}
-                className="px-1.5 py-0.5 text-xs bg-gray-700 rounded hover:bg-gray-600 disabled:opacity-30"
+                className="px-1.5 py-0.5 text-xs bg-gray-100 rounded hover:bg-gray-300 disabled:opacity-30"
                 title="Move up"
               >
                 ▲
@@ -311,7 +311,7 @@ export function ContentBlockEditorList(
                 type="button"
                 onClick={() => moveBlock(block.id, 1)}
                 disabled={idx === sorted.length - 1}
-                className="px-1.5 py-0.5 text-xs bg-gray-700 rounded hover:bg-gray-600 disabled:opacity-30"
+                className="px-1.5 py-0.5 text-xs bg-gray-100 rounded hover:bg-gray-300 disabled:opacity-30"
                 title="Move down"
               >
                 ▼
@@ -319,7 +319,7 @@ export function ContentBlockEditorList(
               <button
                 type="button"
                 onClick={() => removeBlock(block.id)}
-                className="px-1.5 py-0.5 text-xs bg-red-700 rounded hover:bg-red-600"
+                className="px-1.5 py-0.5 text-xs bg-red-300 rounded hover:bg-red-400 text-white"
                 title="Remove"
               >
                 ✕
@@ -343,7 +343,7 @@ export function ContentBlockEditorList(
             key={type}
             type="button"
             onClick={() => addBlock(type)}
-            className="px-3 py-1.5 text-xs bg-gray-700 border border-gray-600 rounded hover:bg-gray-600"
+            className="px-3 py-1.5 text-xs bg-gray-100 border border-gray-300 rounded hover:bg-gray-300"
           >
             + {BLOCK_TYPE_LABELS[type]}
           </button>

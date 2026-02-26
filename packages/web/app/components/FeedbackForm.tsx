@@ -7,7 +7,7 @@ interface FeedbackFormProps {
 type FeedbackType = "bug" | "feature" | "other";
 
 const INPUT_STYLE =
-  "w-full p-3 rounded-md border border-surface-divider text-white text-sm mt-2 focus:outline-none focus:ring-2 focus:ring-primary/10";
+  "w-full p-3 rounded-md border border-surface-divider text-white text-sm mt-2 focus:outline-none focus:ring-2 focus:ring-light/10";
 
 export function FeedbackForm({ onClose }: FeedbackFormProps) {
   const [name, setName] = useState("");
@@ -156,7 +156,7 @@ export function FeedbackForm({ onClose }: FeedbackFormProps) {
               className={`w-full p-3 rounded-md border-none text-onprimary text-base font-bold transition-colors ${
                 status === "submitting"
                   ? "bg-gray-600 cursor-not-allowed"
-                  : "bg-primary"
+                  : "bg-light"
               }`}
             >
               {status === "submitting" ? "Senden..." : "Feedback senden"}

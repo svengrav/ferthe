@@ -14,7 +14,7 @@ export function FeedbackButton({ className, children }: FeedbackButtonProps) {
     <button
       type="button"
       onClick={showFeedback}
-      className={`flex w-min whitespace-nowrap gap-2 bg-primary text-onprimary font-semibold cursor-pointer hover:bg-primary/90 rounded-4xl p-2 ${className}`}
+      className={`flex w-min whitespace-nowrap gap-2 bg-light text-onprimary font-semibold cursor-pointer hover:bg-light/90 rounded-4xl p-2 ${className}`}
       aria-label="Feedback senden"
       title="Feedback senden"
     >

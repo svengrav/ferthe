@@ -93,7 +93,7 @@ export function TrailForm(
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 flex flex-col">
       {/* Trail preview image */}
       <ImageUpload
         label="Trail Image"
@@ -115,7 +115,7 @@ export function TrailForm(
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded"
+          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded"
           placeholder="Enter trail name"
         />
       </div>
@@ -125,7 +125,7 @@ export function TrailForm(
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded"
+          className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded"
           placeholder="Enter description"
           rows={3}
         />
@@ -150,7 +150,7 @@ export function TrailForm(
                     lat: parseFloat(e.target.value),
                   },
                 })}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded"
+              className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded"
             />
           </div>
           <div>
@@ -167,7 +167,7 @@ export function TrailForm(
                     lon: parseFloat(e.target.value),
                   },
                 })}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded"
+              className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded"
             />
           </div>
         </div>
@@ -188,7 +188,7 @@ export function TrailForm(
                     lat: parseFloat(e.target.value),
                   },
                 })}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded"
+              className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded"
             />
           </div>
           <div>
@@ -205,7 +205,7 @@ export function TrailForm(
                     lon: parseFloat(e.target.value),
                   },
                 })}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded"
+              className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded"
             />
           </div>
         </div>
@@ -217,14 +217,14 @@ export function TrailForm(
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 px-4 py-2 bg-purple-600 rounded hover:bg-purple-700 disabled:opacity-50"
+          className="flex-1 px-4 py-2 bg-primary text-onprimary rounded hover:bg-primary-700 disabled:opacity-50"
         >
           {loading ? "Saving..." : "Save"}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 px-4 py-2 bg-gray-700 rounded hover:bg-gray-600"
+          className="flex-1 px-4 py-2 bg-gray-100 rounded hover:bg-gray-300"
         >
           Cancel
         </button>

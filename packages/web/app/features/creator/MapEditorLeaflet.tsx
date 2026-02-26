@@ -310,7 +310,7 @@ export function MapEditor() {
         <button
           type="button"
           onClick={loadData}
-          className="px-4 py-2 bg-indigo-600 rounded hover:bg-indigo-700"
+          className="px-4 py-2 bg-primary rounded hover:bg-gray-700"
         >
           Retry
         </button>
@@ -321,7 +321,7 @@ export function MapEditor() {
   return (
     <div className="flex h-full">
       {/* Sidebar */}
-      <div className="w-80 bg-gray-800 border-r border-gray-700 overflow-y-auto">
+      <div className="w-80 bg-white border-r border-gray-300 overflow-y-auto">
         <div className="p-4 space-y-4">
           {/* Mode Selection */}
           <div>
@@ -332,8 +332,8 @@ export function MapEditor() {
                 onClick={() => setMode("view")}
                 className={`flex-1 px-3 py-2 text-sm rounded ${
                   mode === "view"
-                    ? "bg-indigo-600"
-                    : "bg-gray-700 hover:bg-gray-600"
+                    ? "bg-primary text-onprimary"
+                    : "bg-gray-200 hover:bg-gray-300"
                 }`}
               >
                 View
@@ -343,8 +343,8 @@ export function MapEditor() {
                 onClick={() => setMode("create-spot")}
                 className={`flex-1 px-3 py-2 text-sm rounded ${
                   mode === "create-spot"
-                    ? "bg-indigo-600"
-                    : "bg-gray-700 hover:bg-gray-600"
+                    ? "bg-primary text-onprimary"
+                    : "bg-gray-200 hover:bg-gray-300"
                 }`}
               >
                 + Spot
@@ -357,8 +357,8 @@ export function MapEditor() {
                 }}
                 className={`flex-1 px-3 py-2 text-sm rounded ${
                   mode === "create-trail"
-                    ? "bg-purple-600"
-                    : "bg-gray-700 hover:bg-gray-600"
+                    ? "bg-primary text-onprimary"
+                    : "bg-gray-200 hover:bg-gray-300"
                 }`}
               >
                 + Trail
@@ -372,7 +372,7 @@ export function MapEditor() {
           </div>
 
           {/* Layers */}
-          <div className="border-t border-gray-700 pt-4">
+          <div className="border-t border-gray-300 pt-4">
             <h2 className="text-lg font-semibold mb-2">Layers</h2>
             <div className="space-y-2">
               <label className="flex items-center space-x-2">
@@ -380,7 +380,7 @@ export function MapEditor() {
                   type="checkbox"
                   checked={showSpots}
                   onChange={(e) => setShowSpots(e.target.checked)}
-                  className="rounded"
+                  className="rounded accent-primary"
                 />
                 <span>Spots ({spots.length})</span>
               </label>
@@ -389,7 +389,7 @@ export function MapEditor() {
                   type="checkbox"
                   checked={showTrails}
                   onChange={(e) => setShowTrails(e.target.checked)}
-                  className="rounded"
+                  className="rounded accent-primary"
                 />
                 <span>Trails ({trails.length})</span>
               </label>
@@ -398,7 +398,7 @@ export function MapEditor() {
 
           {/* Spot List */}
           {showSpots && spots.length > 0 && (
-            <div className="border-t border-gray-700 pt-4">
+            <div className="border-t border-gray-300 pt-4">
               <h3 className="font-semibold mb-2">Spots</h3>
               <div className="space-y-1 max-h-60 overflow-y-auto">
                 {spots.map((spot) => (
@@ -418,8 +418,8 @@ export function MapEditor() {
                     className={`w-full text-left px-3 py-2 rounded text-sm ${
                       selectedItem?.type === "spot" &&
                         selectedItem?.item.id === spot.id
-                        ? "bg-indigo-600"
-                        : "bg-gray-700 hover:bg-gray-600"
+                        ? "bg-primary"
+                        : "bg-gray-200 hover:bg-gray-300"
                     }`}
                   >
                     <div className="font-medium">{spot.name}</div>
@@ -435,7 +435,7 @@ export function MapEditor() {
 
           {/* Trail List */}
           {showTrails && trails.length > 0 && (
-            <div className="border-t border-gray-700 pt-4">
+            <div className="border-t border-gray-300 pt-4">
               <h3 className="font-semibold mb-2">Trails</h3>
               <div className="space-y-1 max-h-60 overflow-y-auto">
                 {trails.map((trail) => (
@@ -451,7 +451,7 @@ export function MapEditor() {
                       selectedItem?.type === "trail" &&
                         selectedItem?.item.id === trail.id
                         ? "bg-purple-600"
-                        : "bg-gray-700 hover:bg-gray-600"
+                        : "bg-gray-200 hover:bg-gray-300"
                     }`}
                   >
                     {trail.name}
@@ -602,7 +602,7 @@ export function MapEditor() {
         {(mode === "create-spot" && newSpotLocation) ||
             mode === "create-trail" || (mode === "view" && selectedItem)
           ? (
-            <div className="absolute top-4 right-4 w-96 bg-gray-800 rounded-lg shadow-xl p-4 max-h-[calc(100%-2rem)] overflow-y-auto">
+            <div className="absolute w-full max-w-md top-4 right-0 bg-white rounded-lg p-4 max-h-[calc(100%-2rem)] overflow-y-auto">
               {/* Create Spot Form */}
               {mode === "create-spot" && newSpotLocation && (
                 <div>
@@ -614,7 +614,7 @@ export function MapEditor() {
                         setMode("view");
                         setNewSpotLocation(null);
                       }}
-                      className="text-gray-400 hover:text-white"
+                      className="text-gray-400 hover:text-primary"
                     >
                       ✕
                     </button>
@@ -648,7 +648,7 @@ export function MapEditor() {
                         setMode("view");
                         setEditableBounds(null);
                       }}
-                      className="text-gray-400 hover:text-white"
+                      className="text-gray-400 hover:text-primary"
                     >
                       ✕
                     </button>
@@ -685,7 +685,7 @@ export function MapEditor() {
                     <button
                       type="button"
                       onClick={() => setSelectedItem(null)}
-                      className="text-gray-400 hover:text-white"
+                      className="text-gray-400 hover:text-primary"
                     >
                       ✕
                     </button>
@@ -727,7 +727,7 @@ export function MapEditor() {
                         setSelectedItem(null);
                         setEditableBounds(null);
                       }}
-                      className="text-gray-400 hover:text-white"
+                      className="text-gray-400 hover:text-primary"
                     >
                       ✕
                     </button>

@@ -36,7 +36,7 @@ function Markdown(
       </a>
     ),
     blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-gray-700 pl-4 italic my-4">
+      <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4">
         {children}
       </blockquote>
     ),

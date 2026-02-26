@@ -45,7 +45,15 @@
   ],
   "compounds": [
     {
-      "name": "🟩 Run All",
+      "name": "🟩 Run Web",
+      "configurations": [
+        "🟦 Run API",
+        "🟨 Run Web"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "🟩 Run App",
       "configurations": [
         "🟥 Run App",
         "🟦 Run API"

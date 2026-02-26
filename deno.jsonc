@@ -1,7 +1,7 @@
 {
   "tasks": {
     "start:core": "deno run -A --watch=packages/core/ packages/core/main.ts",    
-    "start:web": "deno run -A --watch=static/,routes/,packages/web/ dev.ts",
+    "start:web": "deno run -A --watch=packages/web/ packages/web/main.ts",
     "start:expo": "cd packages/app/ && npx expo start --dev-client",
     "build:web": "deno run -A build.ts",
     "lint": "deno lint",

@@ -4,7 +4,9 @@
 @theme {
   --color-surface: rgb(13, 17, 23);
   --color-surface-divider: rgb(33, 40, 48);
-  --color-primary: #fff;
+  --color-primary: #1a1a1b;
   --color-primary-200: #fff;
-  --color-onprimary: #000;
+  --color-light: #fff;
+  --color-onprimary: #f8f8f8;
+  --color-trail: #ec4899;
 }

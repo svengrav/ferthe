@@ -138,7 +138,7 @@ export function ImageUpload(
           <label className="block text-sm font-medium mb-1">{label}</label>
         )}
         <div
-          className="relative w-full rounded border border-gray-600 overflow-hidden"
+          className="relative w-full rounded border border-gray-200 overflow-hidden"
           style={{ height: 320 }}
         >
           <Cropper
@@ -155,14 +155,14 @@ export function ImageUpload(
           <button
             type="button"
             onClick={applyCrop}
-            className="flex-1 px-3 py-1.5 bg-indigo-600 rounded text-sm hover:bg-indigo-700"
+            className="flex-1 px-3 py-1.5 bg-primary rounded text-sm hover:bg-gray-700"
           >
             Apply Crop
           </button>
           <button
             type="button"
             onClick={cancelCrop}
-            className="flex-1 px-3 py-1.5 bg-gray-700 rounded text-sm hover:bg-gray-600"
+            className="flex-1 px-3 py-1.5 bg-gray-200 rounded text-sm hover:bg-gray-300"
           >
             Cancel
           </button>
@@ -183,7 +183,7 @@ export function ImageUpload(
           <img
             src={value}
             alt="Preview"
-            className="w-full rounded border border-gray-600 object-cover"
+            className="w-full rounded border border-gray-300 object-cover"
             style={aspectRatio
               ? { aspectRatio: String(aspectRatio) }
               : { maxHeight: 200 }}
@@ -192,7 +192,7 @@ export function ImageUpload(
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="px-3 py-1.5 bg-gray-700 rounded text-sm hover:bg-gray-600"
+              className="px-3 py-1.5 bg-gray-200 rounded text-sm hover:bg-gray-300"
             >
               Change
             </button>
@@ -230,8 +230,8 @@ export function ImageUpload(
         onClick={() => inputRef.current?.click()}
         className={`border-2 border-dashed rounded cursor-pointer transition-colors flex flex-col items-center justify-center py-8 px-4 ${
           dragging
-            ? "border-indigo-400 bg-indigo-900/20"
-            : "border-gray-600 hover:border-gray-500 bg-gray-800/50"
+            ? "border-gray-400 bg-gray-900/20"
+            : "border-gray-300 hover:border-gray-500 bg-white/50"
         }`}
       >
         <svg
