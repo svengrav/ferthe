@@ -1,6 +1,10 @@
+import type { GeoBoundary } from "@shared/geo/types.ts";
 import { create } from "zustand";
+import { ContentBlock } from "./ContentBlockEditorList.tsx";
 
 // --- Types ---
+
+export type Boundary = GeoBoundary;
 
 export interface Spot {
   id: string;
@@ -21,15 +25,8 @@ export interface Trail {
   map?: { image?: { id: string; url: string } };
   boundary: Boundary;
   spotIds?: string[];
+  options?: { discoveryMode?: 'free' | 'sequence' };
 }
-
-export interface Boundary {
-  northEast: { lat: number; lon: number };
-  southWest: { lat: number; lon: number };
-}
-
-// Re-export from ContentBlockEditorList for convenience
-export type ContentBlock = import("./ContentBlockEditorList.tsx").ContentBlock;
 
 export type EditorMode =
   | "view"
@@ -79,6 +76,7 @@ interface MapEditorActions {
   setEditableBounds: (bounds: Boundary | null) => void;
   setShowSpots: (show: boolean) => void;
   setShowTrails: (show: boolean) => void;
+  updateTrailSpotIds: (trailId: string, spotIds: string[]) => void;
 
   // Compound actions
   resetToView: () => void;
@@ -133,6 +131,17 @@ export const useMapEditorStore = create<MapEditorState & MapEditorActions>(
     setEditableBounds: (bounds) => set({ editableBounds: bounds }),
     setShowSpots: (show) => set({ showSpots: show }),
     setShowTrails: (show) => set({ showTrails: show }),
+    updateTrailSpotIds: (trailId, spotIds) =>
+      set((state) => ({
+        trails: state.trails.map((t) =>
+          t.id === trailId ? { ...t, spotIds } : t
+        ),
+        selectedItem:
+          state.selectedItem?.type === "trail" &&
+            state.selectedItem.item.id === trailId
+            ? { type: "trail", item: { ...state.selectedItem.item, spotIds } }
+            : state.selectedItem,
+      })),
 
     // Compound actions
     resetToView: () =>

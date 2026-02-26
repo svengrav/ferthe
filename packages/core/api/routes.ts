@@ -12,6 +12,7 @@ import { createAsyncRequestHandler } from '@core/api/oak/requestHandler.ts'
 import {
   Account,
   AccountPublicProfile,
+  AccountSession,
   ActivateTrailResult,
   APIContract,
   Clue,
@@ -617,6 +618,12 @@ const createRoutes = (ctx: APIContract): Route[] => {
       url: '/account/dev-session',
       config: { isPublic: true },
       handler: asyncRequestHandler<AccountSession, never, { accountId: string }>(async ({ body }) => {
+        // Only allow in development
+        const isDevelopment = Deno.env.get('PRODUCTION')?.toLowerCase() !== 'true'
+        if (!isDevelopment) {
+          return { success: false, error: { code: 'NOT_FOUND', message: 'Endpoint not available in production' } }
+        }
+
         if (!body?.accountId) {
           return { success: false, error: { code: 'MISSING_ACCOUNT_ID', message: 'accountId is required' } }
         }

@@ -65,6 +65,7 @@ interface CreateTrailData {
   name: string;
   description: string;
   boundary: Boundary;
+  discoveryMode: 'free' | 'sequence';
   imageBase64?: string;
   mapImageBase64?: string;
 }
@@ -73,6 +74,7 @@ interface UpdateTrailData {
   name: string;
   description: string;
   boundary: Boundary;
+  discoveryMode: 'free' | 'sequence';
   imageBase64?: string;
   mapImageBase64?: string;
 }
@@ -80,13 +82,12 @@ interface UpdateTrailData {
 const DEFAULT_TRAIL_OPTIONS = {
   scannerRadius: 200,
   snapRadius: 50,
-  discoveryMode: "free" as const,
   previewMode: "preview" as const,
 };
 
-interface TrailSpot { spotId: string }
+interface TrailSpot { spotId: string; order?: number }
 
-/** Load all trails from the API, enriched with their spot IDs */
+/** Load all trails from the API, enriched with their spot IDs sorted by order */
 export const fetchTrails = async (createdBy?: string): Promise<Trail[]> => {
   const result = await adminApi.getTrails(createdBy) as ApiListResponse<Trail>;
   const trails = result?.data ?? [];
@@ -95,11 +96,24 @@ export const fetchTrails = async (createdBy?: string): Promise<Trail[]> => {
   const trailsWithSpots = await Promise.all(
     trails.map(async (trail) => {
       const spotsResult = await adminApi.getTrailSpots(trail.id) as { data?: TrailSpot[] };
-      return { ...trail, spotIds: (spotsResult?.data ?? []).map((ts) => ts.spotId) };
+      const sorted = (spotsResult?.data ?? []).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      return { ...trail, spotIds: sorted.map((ts) => ts.spotId) };
     }),
   );
 
   return trailsWithSpots;
+};
+
+/**
+ * Reorder spots in a trail by sequentially removing and re-adding with new order indices.
+ * orderedSpotIds defines the desired order (index = new order value).
+ */
+export const reorderTrailSpots = async (trailId: string, orderedSpotIds: string[]) => {
+  for (let i = 0; i < orderedSpotIds.length; i++) {
+    const spotId = orderedSpotIds[i];
+    await adminApi.removeSpotFromTrail(trailId, spotId);
+    await adminApi.addSpotToTrail(trailId, spotId, i);
+  }
 };
 
 /** Create a new trail */
@@ -111,7 +125,7 @@ export const createTrail = async (data: CreateTrailData) => {
     map: {},
     imageBase64: data.imageBase64,
     mapImageBase64: data.mapImageBase64,
-    options: DEFAULT_TRAIL_OPTIONS,
+    options: { ...DEFAULT_TRAIL_OPTIONS, discoveryMode: data.discoveryMode },
   });
 };
 
@@ -123,6 +137,7 @@ export const updateTrail = async (id: string, data: UpdateTrailData) => {
     boundary: data.boundary,
     imageBase64: data.imageBase64,
     mapImageBase64: data.mapImageBase64,
+    options: { ...DEFAULT_TRAIL_OPTIONS, discoveryMode: data.discoveryMode },
   });
 };
 

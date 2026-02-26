@@ -11,6 +11,7 @@ import {
 interface TrailFormData {
   name: string;
   description: string;
+  discoveryMode: 'free' | 'sequence';
   imageBase64?: string;
   mapImageBase64?: string;
   boundary: {
@@ -27,6 +28,7 @@ interface TrailFormProps {
   existingMapImageUrl?: string;
   boundary?: TrailFormData["boundary"];
   onBoundaryChange?: (boundary: TrailFormData["boundary"]) => void;
+  onDiscoveryModeChange?: (mode: 'free' | 'sequence') => void;
   onSubmit: (data: TrailFormData) => Promise<void>;
   onCancel: () => void;
 }
@@ -38,6 +40,7 @@ export function TrailForm(
     existingMapImageUrl,
     boundary: externalBoundary,
     onBoundaryChange,
+    onDiscoveryModeChange,
     onSubmit,
     onCancel,
   }: TrailFormProps,
@@ -45,6 +48,9 @@ export function TrailForm(
   const [name, setName] = useState(initialData?.name ?? "");
   const [description, setDescription] = useState(
     initialData?.description ?? "",
+  );
+  const [discoveryMode, setDiscoveryMode] = useState<'free' | 'sequence'>(
+    initialData?.discoveryMode ?? "free",
   );
   const [imageBase64, setImageBase64] = useState<string | undefined>(
     initialData?.imageBase64,
@@ -103,6 +109,7 @@ export function TrailForm(
       await onSubmit({
         name,
         description,
+        discoveryMode,
         imageBase64,
         mapImageBase64,
         boundary,
@@ -150,6 +157,21 @@ export function TrailForm(
           placeholder="Enter description"
           rows={3}
         />
+      </FormField>
+
+      <FormField label="Discovery Mode">
+        <select
+          value={discoveryMode}
+          onChange={(e) => {
+            const m = e.target.value as 'free' | 'sequence';
+            setDiscoveryMode(m);
+            onDiscoveryModeChange?.(m);
+          }}
+          className={INPUT_CLASS}
+        >
+          <option value="free">Free</option>
+          <option value="sequence">Sequence</option>
+        </select>
       </FormField>
 
       <div className="space-y-2">

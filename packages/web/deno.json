@@ -5,6 +5,10 @@
     "server:start": "deno run -A --watch ./api/main.ts",
     "serve": "deno run build && deno run server:start"
   },
+  "exclude": [
+    ".vite",
+    "node_modules"
+  ],
   "imports": {
     "@/": "./",
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.4",

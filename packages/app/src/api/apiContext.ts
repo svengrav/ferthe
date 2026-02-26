@@ -193,6 +193,11 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
 
       createTrail: (_context: AccountContext, trail: any) => API.send<Trail>('/trail/trails', 'POST', trail),
 
+      updateTrail: (_context: AccountContext, trailId: string, trailData: Partial<Pick<Trail, 'name' | 'description' | 'boundary'>>) =>
+        API.send<Trail>(`/trail/trails/${trailId}`, 'PUT', trailData),
+
+      deleteTrail: (_context: AccountContext, trailId: string) => API.send<void>(`/trail/trails/${trailId}`, 'DELETE'),
+
       getTrailSpotIds: (_context: AccountContext, trailId: string) => API.send<string[]>(`/trail/trails/${trailId}/spot-ids`),
 
       getTrailSpots: (_context: AccountContext, trailId: string) => API.send<TrailSpot[]>(`/trail/trails/${trailId}/spots`),
@@ -262,6 +267,9 @@ export const createApiContext = (options: ApiContextOptions): APIContext => {
 
       removeDeviceToken: (_context: AccountContext, token: string) =>
         API.send<void>('/account/device-token', 'DELETE', { token }),
+
+      createDevSession: (accountId: string) =>
+        API.send<AccountSession>('/account/dev-session', 'POST', { accountId }),
     },
 
     /**

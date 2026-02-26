@@ -58,6 +58,31 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const adminApi = {
+  // Authentication
+  async requestSMSCode(phoneNumber: string) {
+    const response = await fetch('/admin/api/v1/account/actions/request-sms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phoneNumber }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to send SMS code');
+    }
+    return response.json();
+  },
+
+  async verifySMSCode(phoneNumber: string, code: string) {
+    const response = await fetch('/admin/api/v1/account/actions/verify-sms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phoneNumber, code }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to verify code');
+    }
+    return response.json();
+  },
+
   // Spots
   getSpots() {
     return request('/admin/api/v1/spot/spots');
@@ -124,9 +149,10 @@ export const adminApi = {
     return request(`/admin/api/v1/trail/trails/${trailId}/spots`);
   },
 
-  addSpotToTrail(trailId: string, spotId: string) {
+  addSpotToTrail(trailId: string, spotId: string, order?: number) {
     return request(`/admin/api/v1/trail/trails/${trailId}/spots/${spotId}`, {
       method: 'POST',
+      body: JSON.stringify({ order }),
     });
   },
 

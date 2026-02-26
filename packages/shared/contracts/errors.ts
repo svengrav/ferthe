@@ -115,6 +115,7 @@ export const ERROR_CODES = {
   UPDATE_ACCOUNT_ERROR: { code: 'UPDATE_ACCOUNT_ERROR', message: 'Failed to update account', httpStatus: 500 },
   CREATE_LOCAL_ACCOUNT_ERROR: { code: 'CREATE_LOCAL_ACCOUNT_ERROR', message: 'Failed to create local account', httpStatus: 500 },
   UPGRADE_ACCOUNT_ERROR: { code: 'UPGRADE_ACCOUNT_ERROR', message: 'Failed to upgrade account', httpStatus: 500 },
+  CREATE_DEV_SESSION_ERROR: { code: 'CREATE_DEV_SESSION_ERROR', message: 'Failed to create dev session', httpStatus: 500 },
 
   // Sensor & Scanning (400-500)
   TRAIL_ID_REQUIRED: { code: 'TRAIL_ID_REQUIRED', message: 'Trail ID is required', httpStatus: 400 },

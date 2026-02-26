@@ -6,6 +6,7 @@ import { BlogPost } from "./features/blog/BlogPost";
 import { ContentBoard } from "./features/creator/ContentBoard";
 import { FAQ } from "./features/faq/FAQ";
 import { About } from "./pages/About";
+import { CreatorLogin } from "./pages/CreatorLogin";
 import { Home } from "./pages/Home";
 import { Privacy } from "./pages/Privacy";
 
@@ -20,6 +21,7 @@ function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/blog" element={<BlogList />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/admin/login" element={<CreatorLogin />} />
           <Route path="/admin/content" element={<ContentBoard />} />
         </Routes>
       </Router>
