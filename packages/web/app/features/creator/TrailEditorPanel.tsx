@@ -31,16 +31,24 @@ export function TrailEditorPanel(props: TrailEditorPanelProps) {
   } = useMapEditorStore();
 
   const [error, setError] = useState("");
-  const [currentDiscoveryMode, setCurrentDiscoveryMode] = useState<'free' | 'sequence'>(
-    selectedItem?.type === 'trail' ? (selectedItem.item.options?.discoveryMode ?? 'free') : 'free'
+  const [currentDiscoveryMode, setCurrentDiscoveryMode] = useState<
+    "free" | "sequence"
+  >(
+    selectedItem?.type === "trail"
+      ? (selectedItem.item.options?.discoveryMode ?? "free")
+      : "free",
   );
   const { openDialog: openRemoveDialog } = useRemoveDialog();
 
   // Sync discoveryMode when a different trail is selected
-  const selectedTrailId = selectedItem?.type === 'trail' ? selectedItem.item.id : null;
+  const selectedTrailId = selectedItem?.type === "trail"
+    ? selectedItem.item.id
+    : null;
   useEffect(() => {
-    if (selectedItem?.type === 'trail') {
-      setCurrentDiscoveryMode(selectedItem.item.options?.discoveryMode ?? 'free');
+    if (selectedItem?.type === "trail") {
+      setCurrentDiscoveryMode(
+        selectedItem.item.options?.discoveryMode ?? "free",
+      );
     }
   }, [selectedTrailId]);
 
@@ -146,7 +154,7 @@ export function TrailEditorPanel(props: TrailEditorPanelProps) {
           initialData={{
             name: trail.name,
             description: trail.description,
-            discoveryMode: trail.options?.discoveryMode ?? 'free',
+            discoveryMode: trail.options?.discoveryMode ?? "free",
           }}
           existingImageUrl={trail.image?.url}
           existingMapImageUrl={trail.map?.image?.url}
@@ -158,7 +166,7 @@ export function TrailEditorPanel(props: TrailEditorPanelProps) {
         />
 
         {/* Spot order — only for sequence mode */}
-        {currentDiscoveryMode === 'sequence' && orderedSpots.length > 0 && (
+        {currentDiscoveryMode === "sequence" && orderedSpots.length > 0 && (
           <div className="mt-4 border-t border-gray-200 pt-4">
             <h4 className="text-sm font-semibold text-gray-700 mb-2">
               Spot Order ({orderedSpots.length})
