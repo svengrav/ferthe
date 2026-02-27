@@ -2,12 +2,12 @@
 @plugin "tailwind-scrollbar";
 
 @theme {
-  --color-surface: rgb(13, 17, 23);
+  --color-surface: rgb(22, 22, 30);
   --color-surface-divider: rgb(33, 40, 48);
-  --color-primary: #1a1a1b;
-  --color-primary-200: #fff;
-  --color-light: #fff;
-  --color-onprimary: #f8f8f8;
-  --color-trail: #ec4899;
-  --color-danger: #e24949;
+  --color-primary: rgb(26, 26, 27);
+  --color-secondary: rgb(22, 22, 28);
+  --color-dark: rgb(22, 22, 30);
+  --color-light: rgb(255, 255, 255);
+  --color-onprimary: rgb(248, 248, 248);
+  --color-danger: rgb(226, 73, 73);
 }

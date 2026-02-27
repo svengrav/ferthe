@@ -156,7 +156,7 @@ export function FeedbackForm({ onClose }: FeedbackFormProps) {
               className={`w-full p-3 rounded-md border-none text-onprimary text-base font-bold transition-colors ${
                 status === "submitting"
                   ? "bg-gray-600 cursor-not-allowed"
-                  : "bg-light"
+                  : "bg-light text-surface hover:bg-light/90"
               }`}
             >
               {status === "submitting" ? "Senden..." : "Feedback senden"}

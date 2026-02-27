@@ -42,7 +42,8 @@
     },
     "search.exclude": {
       "**/node_modules": true,
-      "**/dist": true
+      "**/dist": true,
+       "**/.vite": true
     },
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit",

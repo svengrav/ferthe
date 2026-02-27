@@ -9,7 +9,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ wide }: PageHeaderProps) {
   return (
-    <div className="flex items-center justify-center bg-surface text-center border-b border-b-surface-divider py-2 lg:py-6 px-4 ">
+    <div className="flex items-center justify-center bg-surface text-light text-center border-b border-b-surface-divider py-2 lg:py-6 px-4 ">
       <div
         className={clsx(
           `flex items-center w-full  mx-auto`,
