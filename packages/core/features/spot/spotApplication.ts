@@ -150,14 +150,19 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
 
     async getSpots(context?: AccountContext, options?: QueryOptions): Promise<Result<Spot[]>> {
       try {
-        const spotsResult = await spotStore.list(options)
+        // Admin with creator-app audience bypasses createdBy filter to see all spots
+        const isAdminCreator = context?.role === 'admin' && context?.client === 'creator'
+        const effectiveOptions = isAdminCreator && options?.filters?.['createdBy']
+          ? { ...options, filters: { ...options.filters, createdBy: undefined } }
+          : options
+        const spotsResult = await spotStore.list(effectiveOptions)
         if (!spotsResult.success) {
           return { success: false, error: { message: 'Failed to list spots', code: 'GET_SPOTS_ERROR' } }
         }
 
         let spots = (spotsResult.data || [])
-          // Filter by createdBy if context has accountId (exclude public/admin)
-          .filter(spot => !context || context.accountType === 'public' || spot.createdBy === context.accountId)
+          // Admin with creator-app audience sees all spots; others only see their own
+          .filter(spot => !context || context.accountType === 'public' || isAdminCreator || spot.createdBy === context.accountId)
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
         // Check if images should be enriched

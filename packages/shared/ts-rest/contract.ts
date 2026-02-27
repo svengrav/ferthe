@@ -429,7 +429,7 @@ export const apiContract = c.router({
     verifySMSCode: {
       method: 'POST',
       path: '/account/actions/verify-sms',
-      body: z.object({ phoneNumber: z.string().min(10), code: z.string().min(4).max(8) }),
+      body: z.object({ phoneNumber: z.string().min(10), code: z.string().min(4).max(8), client: z.enum(['app', 'creator']).optional() }),
       responses: { 200: successResponse(SMSVerificationResultSchema), 400: errorResponse() },
       summary: 'Verify SMS code',
     },

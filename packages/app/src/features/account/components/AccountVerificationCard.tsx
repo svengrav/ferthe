@@ -36,7 +36,7 @@ type CodeFormData = z.infer<typeof codeSchema>
  * Custom hook to handle account verification logic
  * Manages phone number verification and SMS code handling
  */
-const useAccountVerification = () => {
+const useAccountVerification = (onClose?: () => void) => {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [showCodeInput, setShowCodeInput] = useState(false)
@@ -57,7 +57,9 @@ const useAccountVerification = () => {
 
   const handleVerifyCode = async (data: CodeFormData) => {
     const result = await accountApplication.verifySMSCode(phoneNumber, data.verificationCode)
-    if (!result.success) {
+    if (result.success) {
+      onClose?.()
+    } else {
       setError(result.error?.message || 'Verification failed')
     }
   }
@@ -79,7 +81,7 @@ interface AccountVerificationCardProps {
 }
 
 function AccountVerificationCard({ onClose }: AccountVerificationCardProps) {
-  const { showCodeInput, error, handleRequestSmsCode, handleVerifyCode } = useAccountVerification()
+  const { showCodeInput, error, handleRequestSmsCode, handleVerifyCode } = useAccountVerification(onClose)
   const { styles } = useTheme(useStyles)
   const { locales } = useLocalization()
 

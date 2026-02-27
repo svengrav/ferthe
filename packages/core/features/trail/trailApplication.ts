@@ -260,12 +260,18 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
 
     listTrails: async (context: AccountContext, options?: QueryOptions): Promise<Result<Trail[]>> => {
       try {
-        const trailsResult = await trailStore.list(options)
+        // Admin with creator-app audience bypasses createdBy filter to see all trails
+        const isAdminCreator = context.role === 'admin' && context.client === 'creator'
+        const effectiveOptions = isAdminCreator && options?.filters?.['createdBy']
+          ? { ...options, filters: { ...options.filters, createdBy: undefined } }
+          : options
+        const createdByFilter = effectiveOptions?.filters?.['createdBy']
+
+        const trailsResult = await trailStore.list(effectiveOptions)
         if (!trailsResult.success) {
           return { success: false, error: { message: 'Failed to list trails', code: 'LIST_TRAILS_ERROR' } }
         }
 
-        const createdByFilter = options?.filters?.['createdBy']
         const trailEntities = createdByFilter
           ? (trailsResult.data || []).filter(t => t.createdBy === createdByFilter)
           : (trailsResult.data || [])

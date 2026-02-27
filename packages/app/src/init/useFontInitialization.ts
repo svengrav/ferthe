@@ -7,7 +7,7 @@ import {
 import * as Font from 'expo-font'
 import { useEffect } from 'react'
 import { logger } from '../shared/utils/logger'
-import { useInitStore } from './useInitializationPipeline'
+import { useInitStore } from './initStore'
 
 /**
  * Hook that loads all required fonts for the app.

@@ -1,82 +1,24 @@
-import {
-  api,
-  clearAdminToken,
-  getAdminAccountId,
-  getAdminToken,
-  setAdminAccountId,
-  setAdminToken,
-} from "@/app/api/adminClient.ts";
 import { Page } from "@/app/components";
-import { useEffect, useState } from "react";
+import { useCreatorAuth } from "@/app/hooks/useCreatorAuth.ts";
 import { MapEditor } from "./MapEditorLeaflet.tsx";
 
 export function ContentBoard() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [accountId, setAccountId] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [code, setCode] = useState("");
-  const [codeSent, setCodeSent] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const existingToken = getAdminToken();
-    const existingAccountId = getAdminAccountId();
-    if (existingToken && existingAccountId) {
-      setAccountId(existingAccountId);
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  const handleRequestCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const result = await api.account.requestSMSCode(phoneNumber);
-      if (!result.success) {
-        throw new Error("Failed to send code");
-      }
-      setCodeSent(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send code");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const result = await api.account.verifySMSCode(phoneNumber, code);
-      if (!result.success || !result.data?.context?.sessionToken) {
-        throw new Error(
-          (result as any).error?.message ?? "Verification failed",
-        );
-      }
-      const { sessionToken, accountId: verifiedAccountId } =
-        result.data.context;
-      setAdminToken(sessionToken);
-      setAdminAccountId(verifiedAccountId);
-      setAccountId(verifiedAccountId);
-      setIsAuthenticated(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Verification failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = () => {
-    clearAdminToken();
-    setIsAuthenticated(false);
-    setAccountId("");
-    setPhoneNumber("");
-    setCode("");
-    setCodeSent(false);
-  };
+  const {
+    isAuthenticated,
+    hasAccess,
+    accountId,
+    phoneNumber,
+    setPhoneNumber,
+    code,
+    setCode,
+    codeSent,
+    error,
+    loading,
+    handleRequestCode,
+    handleVerifyCode,
+    handleBack,
+    handleLogout,
+  } = useCreatorAuth();
 
   if (!isAuthenticated) {
     return (
@@ -141,11 +83,7 @@ export function ContentBoard() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setCodeSent(false);
-                      setError("");
-                      setCode("");
-                    }}
+                    onClick={handleBack}
                     className="w-full text-sm text-gray-400 hover:text-gray-200"
                   >
                     Back
@@ -153,6 +91,26 @@ export function ContentBoard() {
                 </form>
               )}
           </div>
+        </div>
+      </Page>
+    );
+  }
+
+  if (isAuthenticated && !hasAccess) {
+    return (
+      <Page title="Access Denied" wide>
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+          <h2 className="text-2xl font-bold text-danger">Access Denied</h2>
+          <p className="mt-2 text-gray-400">
+            Your account does not have creator or admin access.
+          </p>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="mt-6 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-700"
+          >
+            Logout
+          </button>
         </div>
       </Page>
     );

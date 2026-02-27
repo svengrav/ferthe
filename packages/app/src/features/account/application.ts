@@ -34,6 +34,7 @@ export interface AccountApplication {
   removeDeviceToken: (token: string) => Promise<Result<void>>
   uploadAvatar: (base64Data: string) => Promise<Result<Account>>
   getPublicProfile: (accountId: string) => Promise<Result<AccountPublicProfile>>
+  listPublicProfiles: (accountIds: string[]) => Promise<Result<AccountPublicProfile[]>>
 }
 
 interface AccountApplicationOptions {
@@ -53,6 +54,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
   if (initialSession) {
     storeActions.setSession(initialSession)
     storeActions.setAccountType(initialSession.accountType)
+    storeActions.setRole(initialSession.role ?? null)
     storeActions.setIsAuthenticated(true)
   }
 
@@ -60,6 +62,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     if (session) {
       storeActions.setSession(session)
       storeActions.setAccountType(session.accountType)
+      storeActions.setRole(session.role ?? null)
       storeActions.setIsAuthenticated(true)
 
       secureStore.write(AUTH_SESSION_KEY, session).catch(error => {
@@ -117,6 +120,10 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
   })
 
   return {
+    listPublicProfiles: (accountIds: string[]) => {
+      return api.account.getPublicProfiles(accountIds)
+    },
+
     initializeSession: () => loadStoredSession().then(() => undefined),
 
     requestSMSCode: (phoneNumber: string) =>

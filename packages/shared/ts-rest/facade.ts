@@ -4,7 +4,7 @@
  * Usable in both App and Web.
  */
 
-import type { AccountUpdateData } from '../contracts/accounts.ts'
+import type { AccountUpdateData, ClientAudience } from '../contracts/accounts.ts'
 import type { FeedbackRequest } from '../contracts/content.ts'
 import type { LocationWithDirection, UpsertDiscoveryContentRequest } from '../contracts/discoveries.ts'
 import type { DiscoveryProfileUpdateData } from '../contracts/discoveryProfile.ts'
@@ -186,8 +186,8 @@ export function createApiClient(config: TsRestClientConfig) {
       requestSMSCode: (phoneNumber: string) =>
         c.account.requestSMSCode({ body: { phoneNumber } }).then(toResult),
 
-      verifySMSCode: (phoneNumber: string, code: string) =>
-        c.account.verifySMSCode({ body: { phoneNumber, code } }).then(toResult),
+      verifySMSCode: (phoneNumber: string, code: string, client?: ClientAudience) =>
+        c.account.verifySMSCode({ body: { phoneNumber, code, client } }).then(toResult),
 
       getPublicProfile: (accountId: string) =>
         c.account.getPublicProfile({ params: { accountId } }).then(toResult),

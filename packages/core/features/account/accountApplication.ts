@@ -10,8 +10,10 @@ import {
   AccountContext,
   AccountDeviceInfo,
   AccountPublicProfile,
+  AccountRole,
   AccountSession,
   AccountUpdateData,
+  ClientAudience,
   DevicePlatform,
   DeviceToken,
   FirebaseConfig,
@@ -94,7 +96,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       return null
     }
   }
-  const createAuthSession = (accountId: string): AccountSession => {
+  const createAuthSession = (accountId: string, role: AccountRole = 'user', client?: ClientAudience): AccountSession => {
     const expiresAt = new Date()
     expiresAt.setFullYear(expiresAt.getFullYear() + 1) // 1 year expiry for verified accounts
 
@@ -104,6 +106,8 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       sessionToken: '', // Will be set below
       expiresAt: expiresAt,
       accountType: 'sms_verified',
+      role,
+      client: client ?? 'app',
     }
 
     // Create JWT Bearer token with session info
@@ -163,7 +167,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     }
   }
 
-  const verifySMSCode = async (phoneNumber: string, code: string): Promise<Result<SMSVerificationResult>> => {
+  const verifySMSCode = async (phoneNumber: string, code: string, client?: ClientAudience): Promise<Result<SMSVerificationResult>> => {
     try {
       if (!smsConnector) {
         return createErrorResult('SMS_CONNECTOR_NOT_CONFIGURED')
@@ -206,6 +210,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
           lastLoginAt: new Date(),
           accountType: 'sms_verified',
           isPhoneVerified: true,
+          role: 'user',
         }
 
         const createResult = await accountStore.create(newAccount)
@@ -218,7 +223,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         await accountStore.update(account.id!, account)
       }
 
-      const authSession = createAuthSession(account.id!)
+      const authSession = createAuthSession(account.id!, account.role ?? 'user', client)
       const result: SMSVerificationResult = {
         success: true,
         context: authSession,
@@ -244,6 +249,9 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       const result: SessionValidationResult = {
         accountId: jwtPayload.accountId,
         valid: true,
+        role: (jwtPayload.role as AccountRole) ?? 'user',
+        accountType: jwtPayload.accountType,
+        client: jwtPayload.client,
       }
       return Promise.resolve(createSuccessResult(result))
     } catch (error: unknown) {
@@ -305,6 +313,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         updatedAt: accountData.updatedAt,
         accountType: accountData.accountType,
         isPhoneVerified: accountData.isPhoneVerified,
+        role: accountData.role,
       }
 
       return createSuccessResult(account)
@@ -342,6 +351,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         lastLoginAt: account.lastLoginAt,
         accountType: account.accountType,
         isPhoneVerified: account.isPhoneVerified,
+        role: account.role,
         updatedAt: new Date(),
       }
 
@@ -367,6 +377,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         lastLoginAt: new Date(),
         accountType: 'local_unverified',
         isPhoneVerified: false,
+        role: 'user',
       }
 
       const createResult = await accountStore.create(account)
@@ -437,7 +448,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       await twilioVerificationStore.update(verification.id, { verified: true })
 
       // Create new session for upgraded account
-      const authSession = createAuthSession(accountId)
+      const authSession = createAuthSession(accountId, updatedAccount.role ?? 'user')
       return createSuccessResult(authSession)
     } catch (error: unknown) {
       return createErrorResult('UPGRADE_ACCOUNT_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
@@ -454,6 +465,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       sessionToken: '', // Will be set below
       expiresAt: expiresAt,
       accountType: 'local_unverified',
+      role: 'user',
     }
 
     // Create JWT Bearer token with session info
@@ -471,7 +483,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       }
 
       // Create session for this account
-      const authSession = createAuthSession(accountId)
+      const authSession = createAuthSession(accountId, accountResult.data.role ?? 'user')
       return createSuccessResult(authSession)
     } catch (error: unknown) {
       return createErrorResult('CREATE_DEV_SESSION_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
@@ -556,6 +568,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         updatedAt: updatedAccount.updatedAt,
         accountType: updatedAccount.accountType,
         isPhoneVerified: updatedAccount.isPhoneVerified,
+        role: updatedAccount.role,
       }
 
       return createSuccessResult(publicAccount)

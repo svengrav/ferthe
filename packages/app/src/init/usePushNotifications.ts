@@ -11,7 +11,7 @@ import { useEffect } from 'react'
 import { Platform } from 'react-native'
 import { registerForPushNotificationsAsync } from '../shared/messaging/registerNotificationHandler'
 import { appNavigator } from "../shared/navigation/navigationRef"
-import { useInitStore } from './useInitializationPipeline'
+import { useInitStore } from './initStore'
 
 // Request user permission for notifications
 // This is required for iOS and Android 13+ devices

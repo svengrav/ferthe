@@ -9,6 +9,7 @@ import { createApiClient } from '@shared/ts-rest'
 
 const ADMIN_TOKEN_KEY = 'ferthe_admin_token'
 const ADMIN_ACCOUNT_ID_KEY = 'ferthe_admin_account_id'
+const ADMIN_ROLE_KEY = 'ferthe_admin_role'
 
 export const setAdminToken = (token: string) =>
   localStorage.setItem(ADMIN_TOKEN_KEY, token)
@@ -19,6 +20,7 @@ export const getAdminToken = (): string | null =>
 export const clearAdminToken = () => {
   localStorage.removeItem(ADMIN_TOKEN_KEY)
   localStorage.removeItem(ADMIN_ACCOUNT_ID_KEY)
+  localStorage.removeItem(ADMIN_ROLE_KEY)
 }
 
 export const setAdminAccountId = (accountId: string) =>
@@ -26,6 +28,12 @@ export const setAdminAccountId = (accountId: string) =>
 
 export const getAdminAccountId = (): string | null =>
   localStorage.getItem(ADMIN_ACCOUNT_ID_KEY)
+
+export const setAdminRole = (role: string) =>
+  localStorage.setItem(ADMIN_ROLE_KEY, role)
+
+export const getAdminRole = (): string | null =>
+  localStorage.getItem(ADMIN_ROLE_KEY)
 
 // ── API clients ────────────────────────────────────────────────────────────────
 

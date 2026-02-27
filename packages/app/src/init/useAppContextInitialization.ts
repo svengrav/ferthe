@@ -5,8 +5,8 @@ import { getDeviceConnector } from '../features/sensor/device/deviceConnector'
 import { createStoreConnector } from '../shared/device'
 import { useAppContextStore } from '../shared/stores/appContextStore'
 import { logger } from '../shared/utils/logger'
+import { useInitStore } from './initStore'
 import { getBackendApiContext } from './useBackendInitialization'
-import { useInitStore } from './useInitializationPipeline'
 
 /**
  * Hook that configures the app context with all required connectors.

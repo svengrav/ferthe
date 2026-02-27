@@ -1,9 +1,9 @@
+import { useEffect } from 'react'
 import { APIContext, createApiContext } from '../api'
 import { config } from '../config'
 import { getSession } from '../features/account'
 import { logger } from '../shared/utils/logger'
-import { useInitStore } from './useInitializationPipeline'
-import { useEffect } from 'react'
+import { useInitStore } from './initStore'
 
 // Module-level ref so useAppContextInitialization can access the created context
 let _apiContext: APIContext | null = null

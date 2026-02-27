@@ -1,5 +1,5 @@
 import { Status, StoreActions, StoreState } from '@app/shared/stores/types'
-import { Account, AccountSession, AccountType } from '@shared/contracts'
+import { Account, AccountRole, AccountSession, AccountType } from '@shared/contracts'
 import { create } from 'zustand'
 
 interface AccountActions extends StoreActions {
@@ -7,6 +7,7 @@ interface AccountActions extends StoreActions {
   setAccount: (account: Account | null) => void
   setSession: (session: AccountSession | null) => void
   setAccountType: (accountType: AccountType | null) => void
+  setRole: (role: AccountRole | null) => void
   setIsAuthenticated: (isAuthenticated: boolean) => void
   clearAccount: () => void
 }
@@ -17,6 +18,7 @@ interface AccountState extends StoreState {
   account: Account | null
   session: AccountSession | null
   accountType: AccountType | null
+  role: AccountRole | null
   isAuthenticated: boolean
   isPhoneVerified: boolean
 }
@@ -32,6 +34,7 @@ export const accountStore = create<AccountState & AccountActions>(set => ({
   account: null,
   session: null,
   accountType: null,
+  role: null,
   isAuthenticated: false,
   isPhoneVerified: false,
 
@@ -67,6 +70,12 @@ export const accountStore = create<AccountState & AccountActions>(set => ({
       updatedAt: new Date()
     }),
 
+  setRole: role =>
+    set({
+      role,
+      updatedAt: new Date()
+    }),
+
   setIsAuthenticated: isAuthenticated =>
     set({
       isAuthenticated,
@@ -78,6 +87,7 @@ export const accountStore = create<AccountState & AccountActions>(set => ({
       account: null,
       session: null,
       accountType: null,
+      role: null,
       isAuthenticated: false,
       isPhoneVerified: false,
       updatedAt: new Date()
@@ -89,6 +99,7 @@ export const useAccountStatus = () => accountStore(state => state.status)
 export const useAccount = () => accountStore(state => state.account)
 export const useAccountId = () => accountStore(state => state.account?.id)
 export const useAccountType = () => accountStore(state => state.accountType)
+export const useAccountRole = () => accountStore(state => state.role)
 export const useIsAuthenticated = () => accountStore(state => state.isAuthenticated)
 export const useIsPhoneVerified = () => accountStore(state => state.isPhoneVerified)
 export const useSession = () => accountStore(state => state.session)
@@ -98,6 +109,7 @@ export const useAccountData = () => accountStore(state => state)
 export const getAccount = () => accountStore.getState().account
 export const getAccountId = () => accountStore.getState().accountId
 export const getAccountType = () => accountStore.getState().accountType
+export const getAccountRole = () => accountStore.getState().role
 export const getSession = () => accountStore.getState().session
 export const getIsAuthenticated = () => accountStore.getState().isAuthenticated
 export const getAccountData = () => accountStore.getState()
@@ -107,6 +119,7 @@ export const getAccountActions = () => ({
   setAccount: accountStore.getState().setAccount,
   setSession: accountStore.getState().setSession,
   setAccountType: accountStore.getState().setAccountType,
+  setRole: accountStore.getState().setRole,
   setIsAuthenticated: accountStore.getState().setIsAuthenticated,
   clearAccount: accountStore.getState().clearAccount,
   setStatus: accountStore.getState().setStatus,

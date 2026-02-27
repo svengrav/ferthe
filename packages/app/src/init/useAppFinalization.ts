@@ -2,7 +2,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import { useEffect } from 'react'
 import { LogBox } from 'react-native'
 import { logger } from '../shared/utils/logger'
-import { useInitStore } from './useInitializationPipeline'
+import { useInitStore } from './initStore'
 
 /**
  * Hook that manages the splash screen visibility.

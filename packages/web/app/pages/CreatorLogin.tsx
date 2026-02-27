@@ -1,126 +1,20 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { setAdminAccountId, setAdminToken } from "../api/adminClient";
-
-// Use proxy route that forwards to Core API
-const getCoreApiUrl = () => {
-  // In development, use direct Core API
-  if (window.location.hostname === "localhost") {
-    return "http://localhost:7000";
-  }
-  // In production, use relative path (will be proxied)
-  return "";
-};
-
-const CORE_API_URL = getCoreApiUrl();
-
-interface SMSCodeRequest {
-  requestId: string;
-  expiresAt: string;
-}
-
-interface SMSVerificationResult {
-  success: boolean;
-  context?: {
-    sessionToken: string;
-    accountId: string;
-  };
-  error?: string;
-  errorCode?: string;
-}
+import { useCreatorAuth } from "../hooks/useCreatorAuth";
 
 export function CreatorLogin() {
   const navigate = useNavigate();
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [showCodeInput, setShowCodeInput] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleRequestSMS = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(
-        `${CORE_API_URL}/core/api/v1/account/actions/request-sms`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phoneNumber: phoneNumber.trim() }),
-        },
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || "Failed to send SMS code");
-      }
-
-      const result: { success: boolean; data: SMSCodeRequest } = await response
-        .json();
-
-      if (result.success) {
-        setShowCodeInput(true);
-        setError(null);
-      } else {
-        setError("Failed to send SMS code");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send SMS code");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(
-        `${CORE_API_URL}/core/api/v1/account/actions/verify-sms`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            phoneNumber: phoneNumber.trim(),
-            code: verificationCode.trim(),
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || "Verification failed");
-      }
-
-      const result: { success: boolean; data: SMSVerificationResult } =
-        await response.json();
-
-      if (result.success && result.data.success && result.data.context) {
-        // Store session token and account ID
-        setAdminToken(result.data.context.sessionToken);
-        setAdminAccountId(result.data.context.accountId);
-
-        // Navigate to content board
-        navigate("/admin/content");
-      } else {
-        setError(result.data.error || "Verification failed");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Verification failed");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleBack = () => {
-    setShowCodeInput(false);
-    setVerificationCode("");
-    setError(null);
-  };
+  const {
+    phoneNumber,
+    setPhoneNumber,
+    code: verificationCode,
+    setCode: setVerificationCode,
+    codeSent: showCodeInput,
+    error,
+    loading: isLoading,
+    handleRequestCode,
+    handleVerifyCode,
+    handleBack,
+  } = useCreatorAuth();
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -145,7 +39,7 @@ export function CreatorLogin() {
 
           {!showCodeInput
             ? (
-              <form onSubmit={handleRequestSMS} className="space-y-6">
+              <form onSubmit={handleRequestCode} className="space-y-6">
                 <div>
                   <label
                     htmlFor="phone"
@@ -183,7 +77,11 @@ export function CreatorLogin() {
               </form>
             )
             : (
-              <form onSubmit={handleVerifyCode} className="space-y-6">
+              <form
+                onSubmit={(e) =>
+                  handleVerifyCode(e, () => navigate("/admin/content"))}
+                className="space-y-6"
+              >
                 <div>
                   <label
                     htmlFor="code"

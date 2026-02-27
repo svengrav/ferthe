@@ -97,6 +97,7 @@ const SMSRequestSchema = z.object({
 const SMSVerifySchema = z.object({
   phoneNumber: z.string().min(10),
   code: z.string().min(4).max(8),
+  client: z.enum(['app', 'creator']).optional(),
 })
 
 const AccountProfileUpdateSchema = AccountUpdateDataSchema
@@ -662,7 +663,7 @@ const createRoutes = (ctx: APIContract): Route[] => {
           },
         },
         async ({ body }) => {
-          return await accountApplication.verifySMSCode(body!.phoneNumber, body!.code)
+          return await accountApplication.verifySMSCode(body!.phoneNumber, body!.code, body!.client)
         }
       ),
     },

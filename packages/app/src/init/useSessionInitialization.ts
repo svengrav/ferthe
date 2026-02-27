@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useAppContextStore } from '../shared/stores/appContextStore'
 import { logger } from '../shared/utils/logger'
-import { useInitStore } from './useInitializationPipeline'
+import { useInitStore } from './initStore'
 
 /**
  * Hook that loads the session from storage.

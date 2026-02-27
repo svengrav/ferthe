@@ -13,6 +13,17 @@ import { Result } from './results.ts'
 export const AccountTypeSchema = z.enum(['sms_verified', 'local_unverified', 'public'])
 
 /**
+ * Client audience — which app the token was issued for
+ */
+export const ClientAudienceSchema = z.enum(['app', 'creator'])
+export type ClientAudience = z.infer<typeof ClientAudienceSchema>
+
+/**
+ * Account role enum
+ */
+export const AccountRoleSchema = z.enum(['user', 'creator', 'admin'])
+
+/**
  * Device platform enum
  */
 export const DevicePlatformSchema = z.enum(['ios', 'android'])
@@ -41,6 +52,7 @@ export const AccountSchema = z.object({
   updatedAt: z.date().optional(),
   accountType: AccountTypeSchema,
   isPhoneVerified: z.boolean(),
+  role: AccountRoleSchema.optional(),
 })
 
 /**
@@ -49,6 +61,8 @@ export const AccountSchema = z.object({
 export const AccountContextSchema = z.object({
   accountId: z.string(),
   accountType: AccountTypeSchema,
+  role: AccountRoleSchema.optional(),
+  client: ClientAudienceSchema.optional(),
 })
 
 /**
@@ -68,6 +82,7 @@ export const AccountSessionSchema = AccountContextSchema.extend({
   sessionToken: z.string(),
   expiresAt: z.date(),
   accountType: AccountTypeSchema,
+  role: AccountRoleSchema.optional(),
 })
 
 /**
@@ -121,6 +136,9 @@ export const SMSVerificationResultSchema = z.object({
 export const SessionValidationResultSchema = z.object({
   accountId: z.string(),
   valid: z.boolean(),
+  role: AccountRoleSchema.optional(),
+  accountType: AccountTypeSchema.optional(),
+  client: ClientAudienceSchema.optional(),
 })
 
 /**
@@ -139,6 +157,7 @@ export const DeviceTokenSchema = z.object({
 // ──────────────────────────────────────────────────────────────
 
 export type AccountType = z.infer<typeof AccountTypeSchema>
+export type AccountRole = z.infer<typeof AccountRoleSchema>
 export type DevicePlatform = z.infer<typeof DevicePlatformSchema>
 export type AccountPublicProfile = z.infer<typeof AccountPublicProfileSchema>
 export type Account = z.infer<typeof AccountSchema>
@@ -163,7 +182,7 @@ export type DeviceToken = z.infer<typeof DeviceTokenSchema>
 export interface AccountApplicationContract {
   // Authentication - No context needed (creating sessions)
   requestSMSCode: (phoneNumber: string, deviceInfo?: AccountDeviceInfo) => Promise<Result<SMSCodeRequest>>
-  verifySMSCode: (phoneNumber: string, code: string, deviceInfo?: AccountDeviceInfo) => Promise<Result<SMSVerificationResult>>
+  verifySMSCode: (phoneNumber: string, code: string, client?: ClientAudience, deviceInfo?: AccountDeviceInfo) => Promise<Result<SMSVerificationResult>>
   createLocalAccount: (deviceInfo?: AccountDeviceInfo) => Promise<Result<AccountSession>>
 
   // Session management - Token-based, no context needed

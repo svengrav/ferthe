@@ -31,6 +31,11 @@ export function createSpotAccessComposite(options: SpotAccessCompositeOptions): 
           return createErrorResult('ACCOUNT_ID_REQUIRED')
         }
 
+        // Admin sees all spots without discovery filter
+        if (context.role === 'admin') {
+          return spotApplication.getSpots(context, options)
+        }
+
         // Step 1: Get discovered spot IDs (access control via discovery domain)
         const discoveredIdsResult = await discoveryApplication.getDiscoveredSpotIds(context, trailId)
         if (!discoveredIdsResult.success || !discoveredIdsResult.data) {
@@ -70,6 +75,11 @@ export function createSpotAccessComposite(options: SpotAccessCompositeOptions): 
         const spot = spotResult.data
         if (!spot) {
           return createSuccessResult(undefined)
+        }
+
+        // Admin always has full access
+        if (context.role === 'admin') {
+          return createSuccessResult({ ...spot, source: 'created' as const })
         }
 
         // Creators always have access to their own spots

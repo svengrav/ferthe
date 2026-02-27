@@ -22,9 +22,11 @@ import { createFetchHandler, tsr } from '@ts-rest/serverless/fetch'
 interface AuthContext {
   accountId: string
   accountType: 'sms_verified' | 'local_unverified' | 'public'
+  role: 'user' | 'creator' | 'admin'
+  client?: 'app' | 'creator'
 }
 
-const PUBLIC_AUTH: AuthContext = { accountId: 'public', accountType: 'public' }
+const PUBLIC_AUTH: AuthContext = { accountId: 'public', accountType: 'public', role: 'user' }
 
 // Platform context injected as second handler argument by ts-rest
 interface Platform {
@@ -53,6 +55,13 @@ function respond<T>(result: Result<T>): any {
   const errorDef = ERROR_CODES[result.error!.code as keyof typeof ERROR_CODES]
   const status = errorDef?.httpStatus ?? 500
   return { status, body: { success: false, error: result.error } }
+}
+
+// Returns a 403 response if the auth role is not in the allowed list.
+const CREATOR_ROLES: AuthContext['role'][] = ['creator', 'admin']
+function requireRole(auth: AuthContext, allowed: AuthContext['role'][]): any | null {
+  if (allowed.includes(auth.role)) return null
+  return { status: 403, body: { success: false, error: { code: 'UNAUTHORIZED', message: 'Insufficient role' } } }
 }
 
 // ── Router ────────────────────────────────────────────────────────────────────
@@ -124,14 +133,20 @@ export function createApiRouter(ctx: CoreContext) {
       getTrail: async ({ params }, { request }: Platform) =>
         respond(await trailApplication.getTrail(request.auth, params.id)),
 
-      createTrail: async ({ body }, { request }: Platform) =>
-        respond(await trailApplication.createTrail(request.auth, body)),
+      createTrail: async ({ body }, { request }: Platform) => {
+        const deny = requireRole(request.auth, CREATOR_ROLES)
+        return deny ?? respond(await trailApplication.createTrail(request.auth, body))
+      },
 
-      updateTrail: async ({ params, body }, { request }: Platform) =>
-        respond(await trailApplication.updateTrail(request.auth, params.id, body)),
+      updateTrail: async ({ params, body }, { request }: Platform) => {
+        const deny = requireRole(request.auth, CREATOR_ROLES)
+        return deny ?? respond(await trailApplication.updateTrail(request.auth, params.id, body))
+      },
 
-      deleteTrail: async ({ params }, { request }: Platform) =>
-        respond(await trailApplication.deleteTrail(request.auth, params.id)),
+      deleteTrail: async ({ params }, { request }: Platform) => {
+        const deny = requireRole(request.auth, CREATOR_ROLES)
+        return deny ?? respond(await trailApplication.deleteTrail(request.auth, params.id))
+      },
 
       getTrailSpots: async ({ params }, { request }: Platform) =>
         respond(await trailApplication.getTrailSpots(request.auth, params.trailId)),
@@ -139,11 +154,15 @@ export function createApiRouter(ctx: CoreContext) {
       getTrailStats: async ({ params }, { request }: Platform) =>
         respond(await discoveryApplication.getDiscoveryTrailStats(request.auth, params.trailId)),
 
-      addSpotToTrail: async ({ params, body }, { request }: Platform) =>
-        respond(await trailApplication.addSpotToTrail(request.auth, params.trailId, body.spotId, body.order)),
+      addSpotToTrail: async ({ params, body }, { request }: Platform) => {
+        const deny = requireRole(request.auth, CREATOR_ROLES)
+        return deny ?? respond(await trailApplication.addSpotToTrail(request.auth, params.trailId, body.spotId, body.order))
+      },
 
-      removeSpotFromTrail: async ({ params }, { request }: Platform) =>
-        respond(await trailApplication.removeSpotFromTrail(request.auth, params.trailId, params.spotId)),
+      removeSpotFromTrail: async ({ params }, { request }: Platform) => {
+        const deny = requireRole(request.auth, CREATOR_ROLES)
+        return deny ?? respond(await trailApplication.removeSpotFromTrail(request.auth, params.trailId, params.spotId))
+      },
 
       getTrailRatingSummary: async ({ params }, { request }: Platform) =>
         respond(await trailApplication.getTrailRatingSummary(request.auth, params.trailId)),
@@ -204,7 +223,7 @@ export function createApiRouter(ctx: CoreContext) {
         respond(await accountApplication.requestSMSCode(body.phoneNumber)),
 
       verifySMSCode: async ({ body }) =>
-        respond(await accountApplication.verifySMSCode(body.phoneNumber, body.code)),
+        respond(await accountApplication.verifySMSCode(body.phoneNumber, body.code, body.client)),
 
       validateSession: async ({ body }) =>
         respond(await accountApplication.validateSession(body.sessionToken)),
@@ -315,7 +334,7 @@ export function createApiRouter(ctx: CoreContext) {
       activateTrail: async ({ body }, { request }: Platform) =>
         respond(await discoveryStateComposite.activateTrail(request.auth, body.trailId)),
     },
-  // ts-rest cannot infer the union return type of respond() per-route without this cast
+    // ts-rest cannot infer the union return type of respond() per-route without this cast
   } as any)
 }
 
@@ -345,7 +364,12 @@ export function createApiHandler(ctx: CoreContext, origins: string[]) {
         try {
           const result = await ctx.accountApplication.validateSession(token)
           if (result.success && result.data?.valid) {
-            request.auth = { accountId: result.data.accountId, accountType: 'local_unverified' }
+            request.auth = {
+              accountId: result.data.accountId,
+              accountType: result.data.accountType ?? 'sms_verified',
+              role: result.data.role ?? 'user',
+              client: result.data.client,
+            }
           } else {
             request.auth = PUBLIC_AUTH
           }

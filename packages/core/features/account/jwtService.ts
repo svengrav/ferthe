@@ -12,10 +12,12 @@ export interface JWTService {
 interface JWTPayload {
   accountId: string
   accountType: 'sms_verified' | 'local_unverified' | 'public'
+  role?: string
+  client?: 'app' | 'creator'
   iat: number
   exp: number
   iss: string
-  aud: string
+  aud: 'ferthe-app' | 'ferthe-creator'
 }
 
 export const createJWTService = (options?: { secret?: string }): JWTService => {
@@ -65,10 +67,12 @@ export const createJWTService = (options?: { secret?: string }): JWTService => {
     const payload: JWTPayload = {
       accountId: session.accountId,
       accountType: session.accountType,
+      role: session.role,
+      client: session.client ?? 'app',
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(new Date(session.expiresAt).getTime() / 1000),
       iss: 'ferthe-api',
-      aud: 'ferthe-app',
+      aud: session.client === 'creator' ? 'ferthe-creator' : 'ferthe-app',
     }
 
     // Create header and payload
