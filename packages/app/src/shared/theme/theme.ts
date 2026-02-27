@@ -8,6 +8,7 @@ import { ThemeBase } from './types'
 export const DARK_THEME = {
   white: '#FFFFFF',
   black: '#000000',
+  dark: 'rgb(10, 10, 15)',
   background: 'rgb(20, 20, 30)',
   onBackground: '#FFFFFF',
   primary: '#ffffff',

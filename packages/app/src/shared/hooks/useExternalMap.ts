@@ -1,11 +1,12 @@
-import { GeoLocation } from '@shared/geo'
-import { Linking, Platform } from 'react-native'
+import { GeoLocation } from '@shared/geo';
+import { Linking, Platform } from 'react-native';
 
 /**
  * Opens the device's default map app at the given coordinates.
  */
-export const useExternalMap = () => {
-  const openMap = (location: GeoLocation) => {
+export const useExternalMap = (inputLocation?: GeoLocation) => {
+  const openMap = (location: GeoLocation | undefined = inputLocation) => {
+    if (!location) return;
     const { lat, lon } = location
     const url = Platform.OS === 'ios'
       ? `maps://maps.apple.com/?q=${lat},${lon}`

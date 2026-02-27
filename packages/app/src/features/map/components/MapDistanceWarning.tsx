@@ -1,7 +1,10 @@
-import { Text } from '@app/shared/components'
+import { useDiscoveryTrail } from '@app/features/discovery'
+import { getTrail, getTrailCenter } from '@app/features/trail'
+import { Button, Text } from '@app/shared/components'
+import { useExternalMap } from '@app/shared/hooks'
 import { useLocalization } from '@app/shared/localization'
 import { Theme, useTheme } from '@app/shared/theme'
-import { StyleSheet, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import { useDeviceBoundaryStatus } from '../stores/mapStore'
 
 /**
@@ -21,7 +24,11 @@ const formatDistance = (meters: number): string => {
 function MapDistanceWarning() {
   const { styles } = useTheme(createStyles)
   const { locales } = useLocalization()
-  const { isOutsideBoundary, distanceFromBoundary } = useDeviceBoundaryStatus()
+  const { isOutsideBoundary, distanceFromBoundary, closestBoundaryPoint } = useDeviceBoundaryStatus()
+  const { } = useExternalMap()
+
+  const { trailId } = useDiscoveryTrail()
+  const { openMap } = useExternalMap(getTrailCenter(getTrail(trailId ?? '')))
 
   if (!isOutsideBoundary) {
     return null
@@ -31,12 +38,13 @@ function MapDistanceWarning() {
 
   return (
     <View style={styles.container} id="map-distance-warning">
-      <View style={styles.badge}>
+      <Pressable style={styles.badge} onPress={() => openMap()}>
+        <Button dense icon='pin-drop' />
         <View style={styles.textContainer}>
           <Text variant='caption'>{locales.map.outsideTrail}</Text>
-          <Text variant='caption'>{formattedDistance} {locales.map.distanceAway}</Text>
+          <Text variant='caption'>{formattedDistance} {locales.map.distanceAway} (tap)</Text>
         </View>
-      </View>
+      </Pressable>
     </View>
   )
 }
@@ -54,10 +62,10 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   badge: {
     flexDirection: 'row',
     justifyContent: 'center',
-
     alignItems: 'center',
+    gap: 10,
     minWidth: 150,
-    backgroundColor: theme.colors.black,
+    backgroundColor: theme.colors.dark,
     paddingVertical: theme.tokens.inset.sm,
     paddingHorizontal: theme.tokens.inset.lg,
     borderRadius: theme.tokens.borderRadius.md,

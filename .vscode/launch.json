@@ -46,11 +46,19 @@
   ],
   "compounds": [
     {
-      "name": "🟩 Run All",
+      "name": " Run App",
       "configurations": [
-        "🟥 Run App",
         "🟦 Run API",
-        "🟨 Run Web"
+        "🟥 Run App",
+      ],
+      "stopAll": true,
+      "preLaunchTask": "Kill: All Servers"
+    },
+    {
+      "name": "🟩 Run Web",
+      "configurations": [
+        "🟦 Run API",
+        "🟨 Run Web",
       ],
       "stopAll": true,
       "preLaunchTask": "Kill: All Servers"

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { GeoBoundarySchema } from "../geo/types.ts"
 import { AccountContext } from './accounts.ts'
 import { ImageReferenceSchema } from './images.ts'
 import { QueryOptions, Result } from './results.ts'
@@ -62,7 +63,7 @@ export const TrailSchema = z.object({
   viewport: TrailViewportSchema.optional(),
   overview: TrailOverviewSchema.optional(),
   image: ImageReferenceSchema.optional(),
-  boundary: z.any(), // GeoBoundary - complex type from geo package
+  boundary: GeoBoundarySchema, // GeoBoundary - complex type from geo package
   options: TrailOptionsSchema,
   createdBy: z.string().optional(),
   createdAt: z.date(),

@@ -43,7 +43,7 @@ function TrailPage(props: TrailPageProps) {
 
   // Load trail spots view model
   const trailSpots = useTrailSpotsViewModel(trail.id)
-  const { openMap } = useExternalMap()
+  const { openMap } = useExternalMap(getTrailCenter(trail))
 
   // Calculate image size - square format that fills screen width minus page padding
   const pageInset = theme.tokens.inset.md
