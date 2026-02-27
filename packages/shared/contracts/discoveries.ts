@@ -1,19 +1,173 @@
-import { GeoLocation } from '@shared/geo/index.ts'
+import type { GeoLocation } from '@shared/geo/index.ts'
+import { GeoLocationSchema } from '@shared/geo/types.ts'
+import { z } from 'zod'
 import { AccountContext } from './accounts.ts'
 import { DiscoveryProfile, DiscoveryProfileUpdateData } from './discoveryProfile.ts'
-import { ImageReference } from './images.ts'
+import { ImageReferenceSchema } from './images.ts'
 import { QueryOptions, Result } from './results.ts'
 import { RatingSummary, Spot, SpotRating } from "./spots.ts"
-import { Trail, TrailStats } from './trails.ts'
+import { TrailStats } from './trails.ts'
+
+// ──────────────────────────────────────────────────────────────
+// Zod Schemas (Source of Truth)
+// ──────────────────────────────────────────────────────────────
 
 /**
- * Result of creating a welcome discovery after onboarding.
- * Contains the auto-generated spot and the persisted discovery record.
+ * Location with direction schema
  */
-export interface WelcomeDiscoveryResult {
-  discovery: Discovery
-  spot: Spot
+export const LocationWithDirectionSchema = z.object({
+  location: GeoLocationSchema,
+  direction: z.number(),
+})
+
+/**
+ * Discovery snap schema
+ */
+export const DiscoverySnapSchema = z.object({
+  distance: z.number(),
+  intensity: z.number(),
+})
+
+/**
+ * Discovery schema
+ */
+export const DiscoverySchema = z.object({
+  id: z.string(),
+  accountId: z.string(),
+  spotId: z.string(),
+  trailId: z.string(),
+  discoveredAt: z.date(),
+  scanEventId: z.string().optional(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+})
+
+/**
+ * Discovery location record schema
+ */
+export const DiscoveryLocationRecordSchema = z.object({
+  createdAt: z.date(),
+  locationWithDirection: LocationWithDirectionSchema,
+  snap: DiscoverySnapSchema.optional(),
+  discoveries: z.array(DiscoverySchema),
+})
+
+/**
+ * Welcome discovery result schema
+ */
+export const WelcomeDiscoveryResultSchema = z.object({
+  discovery: DiscoverySchema,
+  spot: z.any(), // Spot - already migrated
+})
+
+/**
+ * Discovery stats schema
+ */
+export const DiscoveryStatsSchema = z.object({
+  discoveryId: z.string(),
+  rank: z.number().int(),
+  totalDiscoverers: z.number().int(),
+  trailPosition: z.number().int(),
+  trailTotal: z.number().int(),
+  timeSinceLastDiscovery: z.number().optional(),
+  distanceFromLastDiscovery: z.number().optional(),
+})
+
+/**
+ * Clue source enum
+ */
+export const ClueSourceSchema = z.enum(['preview', 'scanEvent'])
+
+/**
+ * Clue schema
+ */
+export const ClueSchema = z.object({
+  id: z.string(),
+  spotId: z.string(),
+  trailId: z.string().optional(),
+  location: GeoLocationSchema,
+  source: ClueSourceSchema,
+  discoveryRadius: z.number(),
+  image: z.object({
+    micro: ImageReferenceSchema.optional(),
+    blurred: ImageReferenceSchema.optional(),
+  }).optional(),
+})
+
+/**
+ * Discovery trail schema
+ */
+export const DiscoveryTrailSchema = z.object({
+  createdAt: z.date().optional(),
+  trail: z.any().optional(), // Trail - already migrated
+  clues: z.array(ClueSchema),
+  previewClues: z.array(ClueSchema).optional(),
+  spots: z.array(z.any()), // DiscoverySpot - extends Spot, use interface
+  discoveries: z.array(DiscoverySchema),
+})
+
+/**
+ * Discovery content visibility enum
+ */
+export const DiscoveryContentVisibilitySchema = z.enum(['private', 'public'])
+
+/**
+ * Discovery content schema
+ */
+export const DiscoveryContentSchema = z.object({
+  id: z.string(),
+  discoveryId: z.string(),
+  accountId: z.string(),
+  image: ImageReferenceSchema.optional(),
+  comment: z.string().optional(),
+  visibility: DiscoveryContentVisibilitySchema,
+  createdAt: z.date(),
+  updatedAt: z.date(),
+})
+
+// ──────────────────────────────────────────────────────────────
+// TypeScript Types (Inferred from Zod Schemas)
+// ──────────────────────────────────────────────────────────────
+
+export type LocationWithDirection = z.infer<typeof LocationWithDirectionSchema>
+export type DiscoverySnap = z.infer<typeof DiscoverySnapSchema>
+export type Discovery = z.infer<typeof DiscoverySchema>
+export type DiscoveryLocationRecord = z.infer<typeof DiscoveryLocationRecordSchema>
+export type WelcomeDiscoveryResult = z.infer<typeof WelcomeDiscoveryResultSchema>
+export type DiscoveryStats = z.infer<typeof DiscoveryStatsSchema>
+export type ClueSource = z.infer<typeof ClueSourceSchema>
+export type Clue = z.infer<typeof ClueSchema>
+export type DiscoveryTrail = z.infer<typeof DiscoveryTrailSchema>
+export type DiscoveryContentVisibility = z.infer<typeof DiscoveryContentVisibilitySchema>
+export type DiscoveryContent = z.infer<typeof DiscoveryContentSchema>
+
+/**
+ * Request schema for creating or updating discovery content
+ */
+export const UpsertDiscoveryContentRequestSchema = z.object({
+  imageUrl: z.string().optional(),
+  comment: z.string().optional(),
+  visibility: DiscoveryContentVisibilitySchema.optional(),
+})
+
+export type UpsertDiscoveryContentRequest = z.infer<typeof UpsertDiscoveryContentRequestSchema>
+
+/**
+ * Combines a Spot with its Discovery metadata.
+ * Extends Spot with discovery context (when/how it was discovered).
+ */
+export interface DiscoverySpot extends Spot {
+  discoveredAt?: Date
+  discoveryId: string
 }
+
+// ──────────────────────────────────────────────────────────────
+// Application Contract (unchanged)
+// ──────────────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────
+// Application Contract (unchanged)
+// ──────────────────────────────────────────────────────────────
 
 export interface DiscoveryApplicationContract {
   processLocation: (context: AccountContext, locationWithDirection: LocationWithDirection, trailId: string) => Promise<Result<DiscoveryLocationRecord>>
@@ -35,101 +189,4 @@ export interface DiscoveryApplicationContract {
   rateSpot: (context: AccountContext, spotId: string, rating: number) => Promise<Result<SpotRating>>
   removeSpotRating: (context: AccountContext, spotId: string) => Promise<Result<void>>
   getSpotRatingSummary: (context: AccountContext, spotId: string) => Promise<Result<RatingSummary>>
-}
-
-export interface LocationWithDirection {
-  location: GeoLocation
-  direction: number // Compass direction in degrees (0-360, where 0 = North)
-}
-
-export interface DiscoverySnap {
-  distance: number // Distance in meters
-  intensity: number // 0-1, where 1 = at target, 0 = at max distance or beyond
-}
-
-export interface DiscoveryLocationRecord {
-  createdAt: Date
-  locationWithDirection: LocationWithDirection
-  snap?: DiscoverySnap | undefined
-  discoveries: Discovery[]
-}
-
-export interface Discovery {
-  id: string
-  accountId: string
-  spotId: string
-  trailId: string
-  discoveredAt: Date
-  scanEventId?: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface DiscoveryStats {
-  discoveryId: string
-  rank: number // Which user number discovered this spot
-  totalDiscoverers: number // Total number of discoverers for this spot
-  trailPosition: number // Position in trail (e.g., 5 in 5/10)
-  trailTotal: number // Total number of spots in trail (e.g., 10 in 5/10)
-  timeSinceLastDiscovery?: number // Seconds since last own discovery
-  distanceFromLastDiscovery?: number // Meters to last own discovery
-}
-
-export interface DiscoveryTrail {
-  createdAt?: Date
-  trail: Trail | undefined
-  clues: Clue[]
-  previewClues?: Clue[]
-  spots: DiscoverySpot[]
-  discoveries: Discovery[]
-}
-
-
-/**
- * Combines a Spot with its Discovery metadata.
- * Extends Spot with discovery context (when/how it was discovered).
- */
-export interface DiscoverySpot extends Spot {
-  discoveredAt?: Date // Optional: undefined for undiscovered spots (e.g., public spots)
-  discoveryId: string // Empty string if not discovered
-}
-
-export type ClueSource = 'preview' | 'scanEvent'
-
-/**
- * Clue with optional image (micro + blurred variants for progressive loading).
- */
-export interface Clue {
-  id: string
-  spotId: string
-  trailId?: string
-  location: GeoLocation
-  source: ClueSource
-  discoveryRadius: number
-  image?: {
-    micro?: ImageReference   // 40x40px thumbnail (~1-2 KB, instant load)
-    blurred?: ImageReference // Full blurred image (lazy load on tap)
-  }
-}
-
-/**
- * Visibility level for discovery content.
- * - 'private': Only visible to the content owner
- * - 'public': Visible in public profiles
- */
-export type DiscoveryContentVisibility = 'private' | 'public'
-
-/**
- * User-generated content for a discovery (image + comment).
- * Each discovery can have at most one content entry.
- */
-export interface DiscoveryContent {
-  id: string
-  discoveryId: string
-  accountId: string
-  image?: ImageReference
-  comment?: string
-  visibility: DiscoveryContentVisibility
-  createdAt: Date
-  updatedAt: Date
 }

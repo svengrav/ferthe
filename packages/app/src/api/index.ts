@@ -1,3 +1,3 @@
-// Main API Context Factory
-export { APIContext, ApiContextOptions, createApiContext } from './apiContext';
+export { createApiContext } from './apiContext'
+export type { APIContext, ApiContextOptions } from './apiContext'
 

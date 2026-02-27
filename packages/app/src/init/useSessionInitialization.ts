@@ -23,7 +23,7 @@ export function useSessionInitialization() {
       try {
         logger.log('[SessionInit] Loading session from storage...')
 
-        await context?.accountApplication.getAccountContext()
+        await context?.accountApplication.initializeSession()
 
         logger.log('[SessionInit] Session loaded successfully')
         setSessionReady()

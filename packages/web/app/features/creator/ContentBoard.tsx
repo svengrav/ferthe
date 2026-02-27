@@ -1,5 +1,5 @@
 import {
-  adminApi,
+  api,
   clearAdminToken,
   getAdminAccountId,
   getAdminToken,
@@ -53,7 +53,7 @@ export function ContentBoard() {
       setAdminAccountId(accountId);
 
       // Test token by fetching trails
-      await adminApi.getTrails(accountId);
+      await api.trails.list({ createdBy: accountId });
       setIsAuthenticated(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed");

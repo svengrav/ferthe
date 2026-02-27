@@ -1,13 +1,17 @@
+import { z } from 'zod'
+
 /**
  * Standardized error codes and HTTP status mappings for API responses
  */
 
-export interface ApiError {
-  code: string
-  message: string
-  httpStatus: number
-  details?: any
-}
+export const ApiErrorSchema = z.object({
+  code: z.string(),
+  message: z.string(),
+  httpStatus: z.number(),
+  details: z.any().optional(),
+})
+
+export type ApiError = z.infer<typeof ApiErrorSchema>
 
 /**
  * Standardized API error codes with messages and HTTP status

@@ -5,6 +5,7 @@ import { getDeviceConnector } from '../features/sensor/device/deviceConnector'
 import { createStoreConnector } from '../shared/device'
 import { useAppContextStore } from '../shared/stores/appContextStore'
 import { logger } from '../shared/utils/logger'
+import { getBackendApiContext } from './useBackendInitialization'
 import { useInitStore } from './useInitializationPipeline'
 
 /**
@@ -14,13 +15,12 @@ import { useInitStore } from './useInitializationPipeline'
 export function useAppContextInitialization() {
   const { setAppContextReady } = useInitStore()
   const backendReady = useInitStore(state => state.backendReady)
-  const { api } = useAppContextStore()
 
   useEffect(() => {
-    // Wait for backend to be ready
-    if (!backendReady || !api) {
-      return
-    }
+    if (!backendReady) return
+
+    const apiContext = getBackendApiContext()
+    if (!apiContext) return
 
     async function configureContext() {
       try {
@@ -28,7 +28,7 @@ export function useAppContextInitialization() {
 
         const context = configureAppContext({
           environment: config.environment,
-          apiContext: api!, // We checked for null above
+          apiContext: apiContext!,
           connectors: {
             deviceConnector: getDeviceConnector(),
             secureStoreConnector: createStoreConnector({
@@ -48,5 +48,5 @@ export function useAppContextInitialization() {
     }
 
     configureContext()
-  }, [backendReady, api])
+  }, [backendReady])
 }

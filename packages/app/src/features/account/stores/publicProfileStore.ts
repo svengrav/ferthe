@@ -2,6 +2,7 @@ import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { AccountPublicProfile } from '@shared/contracts'
 import { useEffect } from 'react'
 import { create } from 'zustand'
+import { getBackendApiContext } from '../../../init/useBackendInitialization'
 
 interface PublicProfileStore {
   byId: Record<string, AccountPublicProfile>
@@ -45,8 +46,8 @@ export const usePublicProfiles = (accountIds: string[]): AccountPublicProfile[] 
   useEffect(() => {
     if (!missingIds.length) return
     // context is ignored by the API client implementation
-    getAppContextStore().accountProfileComposite.getPublicProfiles({} as never, missingIds)
-      .then(result => { if (result.success && result.data) setProfiles(result.data) })
+    getBackendApiContext()?.api.account.getPublicProfiles(missingIds)
+      .then(result => { if (result?.success && result?.data) setProfiles(result.data) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [missingIds.join(',')])
 

@@ -2,9 +2,10 @@ import { SensorApplication } from '@app/features/sensor'
 import { getSpotStoreActions as getSpotActions, getSpots, getSpotsById } from '@app/features/spot/stores/spotStore'
 import { getTrailsById } from '@app/features/trail/stores/trailStore'
 import { logger } from '@app/shared/utils/logger'
-import { AccountContext, Discovery, DiscoveryApplicationContract, DiscoveryContent, DiscoveryContentVisibility, DiscoveryStateCompositeContract, DiscoveryStats, RatingSummary, Result, SpotSummary } from '@shared/contracts'
+import { Discovery, DiscoveryContent, DiscoveryContentVisibility, DiscoveryStats, RatingSummary, Result, SpotSummary } from '@shared/contracts'
 import { Unsubscribe } from '@shared/events/eventHandler'
 import { GeoLocation, geoUtils } from '@shared/geo'
+import type { ApiClient } from '@shared/ts-rest'
 import { getTrails } from '../trail/stores/trailStore'
 import { emitDiscoveryTrailUpdated, emitNewDiscoveries, onDiscoveryTrailUpdated, onNewDiscoveries } from './events/discoveryEvents'
 import { discoveryService } from './services/discoveryService'
@@ -42,54 +43,38 @@ export interface DiscoveryApplication {
   requestSpotScreenData: () => Promise<void>
 }
 
-type DiscoveryApplicationOptions = {
-  getAccountContext: () => Promise<Result<AccountContext>>
+interface DiscoveryApplicationOptions {
+  api: ApiClient
   sensor?: SensorApplication
-  discoveryAPI: DiscoveryApplicationContract
-  discoveryStateAPI: DiscoveryStateCompositeContract
 }
 
 export function createDiscoveryApplication(options: DiscoveryApplicationOptions): DiscoveryApplication {
-  const { sensor, discoveryAPI, discoveryStateAPI, getAccountContext } = options
-  const { getDiscoveryTrail, getDiscoveredSpots, processLocation } = discoveryAPI
+  const { api, sensor } = options
   const { setDiscoveryTrail, setStatus, resetScannedClues } = getDiscoveryTrailActions()
 
   const thresholdState = {
-    distance: 5,  // Check every 5m for smoother snap updates
-    latestLocation: {
-      lat: 0,
-      lon: 0,
-    },
-  }
-
-  const getSession = async (): Promise<Result<AccountContext>> => {
-    const accountSession = await getAccountContext()
-    if (!accountSession.data) return { success: false, data: undefined }
-    return { success: true, data: accountSession.data }
+    distance: 5,
+    latestLocation: { lat: 0, lon: 0 },
   }
 
   sensor?.onScanEvent(async scanEvent => {
     if (scanEvent.clues.length > 0) {
-      const accountSession = await getAccountContext()
-
-      if (!accountSession.data) return
-
-      const result = await getDiscoveryTrail(accountSession.data, scanEvent.trailId!)
+      const result = await api.discovery.getTrail(scanEvent.trailId!)
       if (!result.data) return
 
-      // Filter scanned clues to exclude those that are already in preview clues
       const previewClues = result.data.clues || []
       const uniqueScannedClues = scanEvent.clues.filter(
         scannedClue =>
           !previewClues.some(
             previewClue =>
-              previewClue.spotId === scannedClue.spotId && previewClue.location.lat === scannedClue.location.lat && previewClue.location.lon === scannedClue.location.lon
+              previewClue.spotId === scannedClue.spotId &&
+              previewClue.location.lat === scannedClue.location.lat &&
+              previewClue.location.lon === scannedClue.location.lon
           )
       )
 
       const { trail, spots, discoveries, createdAt } = result.data
 
-      // Upsert spots and discoveries into their respective stores
       const { upsertSpot } = getSpotActions()
       spots.forEach(discoverySpot => {
         const { discoveryId, discoveredAt, ...spot } = discoverySpot
@@ -99,11 +84,9 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       const { upsertDiscoveries } = getDiscoveryActions()
       upsertDiscoveries(discoveries)
 
-      // Update store with normalized IDs
       const discovery = getDiscoveryTrailData()
       setDiscoveryTrail({ ...discovery, scannedClues: scanEvent.clues, updatedAt: createdAt })
 
-      // Emit event with full denormalized data
       emitDiscoveryTrailUpdated({
         trail,
         spots,
@@ -112,11 +95,9 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         createdAt,
       })
 
-      // Clear scanned clues after 4 seconds
       setTimeout(() => {
         const currentDiscovery = getDiscoveryTrailData()
         resetScannedClues()
-        // Emit event with current spots state
         const spotsById = getSpotsById()
         const discoveriesById = getDiscoveriesById()
         const discoverySpots = currentDiscovery.spotIds
@@ -161,24 +142,18 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
   const setActiveTrail = async (id: string) => {
     setStatus('loading')
-    const accountSession = await getSession()
-    if (!accountSession.data) throw new Error('Account session not found!')
-
     const trailsById = getTrailsById()
     const trail = trailsById[id]
     if (!trail) return
 
-    // Single composite call: updates profile + loads trail + spots
-    const result = await discoveryStateAPI.activateTrail(accountSession.data, id)
+    const result = await api.composite.activateTrail(id)
     if (!result.data) return
 
     const { activeTrail, spots, discoveries } = result.data
 
-    // Upsert spots into spotStore
     const { upsertSpot } = getSpotActions()
     spots.forEach(spot => upsertSpot(toSpot(spot)))
 
-    // Upsert discoveries into discoveryStore
     const { upsertDiscoveries } = getDiscoveryActions()
     upsertDiscoveries(discoveries as Discovery[])
 
@@ -191,7 +166,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       discoveryIds: activeTrail.discoveryIds,
       status: 'ready' as const,
     })
-    // Emit event with denormalized data from stores
+
     const spotsById = getSpotsById()
     const discoveriesById = getDiscoveriesById()
     const trailSpots = activeTrail.spotIds
@@ -212,8 +187,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     })
   }
 
-
-  // Convert SpotSummary to Spot shape for the store (fill defaults for backend-only fields)
+  // Convert SpotSummary to Spot shape for the store
   const toSpot = (summary: SpotSummary) => ({
     id: summary.id,
     slug: '',
@@ -229,11 +203,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   })
 
   const requestDiscoveryState = async () => {
-    const accountSession = await getSession()
-    if (!accountSession.data) throw new Error('Account session not found!')
-
-    // Single composite call: profile + discoveries + spots + active trail (normalized)
-    const stateResult = await discoveryStateAPI.getDiscoveryState(accountSession.data)
+    const stateResult = await api.composite.getDiscoveryState()
 
     if (stateResult.data) {
       const { lastActiveTrailId, discoveries, spots, activeTrail } = stateResult.data
@@ -245,7 +215,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       setDiscoveries(discoveries as Discovery[])
       setSpots(spots.map(toSpot))
 
-      // Set active trail from normalized ID references
       if (activeTrail) {
         const trailsById = getTrailsById()
         const trail = trailsById[activeTrail.trailId]
@@ -261,7 +230,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
             status: 'ready' as const,
           })
 
-          // Emit event with denormalized data from stores
           const spotsById = getSpotsById()
           const discoveriesById = getDiscoveriesById()
           const trailSpots = activeTrail.spotIds
@@ -293,7 +261,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         logger.log('Discovery state loaded, default trail set.')
       }
     } else {
-      // Fallback: composite failed, try default trail
       logger.error('Failed to load discovery state, falling back to default trail')
       await setDefaultTrail()
     }
@@ -301,14 +268,12 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     setStatus('ready')
   }
 
-  const getDiscoveryCards = () => {
-    return discoveryService.createDiscoveryCards(getDiscoveries(), getSpots())
-  }
+  const getDiscoveryCards = () =>
+    discoveryService.createDiscoveryCards(getDiscoveries(), getSpots())
 
   const handleNewDiscoveries = async (
     newDiscoveries: Discovery[],
     trailId: string,
-    accountContext: AccountContext,
     snap?: { distance: number; intensity: number }
   ) => {
     const { upsertDiscoveries, setDiscoveryEvent } = getDiscoveryActions()
@@ -325,7 +290,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
     setDiscoveryTrail({
       discoveryIds: allDiscoveryIds,
-      snap: snap,
+      snap,
       trailId: currentTrailData.trailId,
       scannedClues: filteredClues,
       previewClues: filteredPreviewClues,
@@ -335,9 +300,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
     await setActiveTrail(trailId)
 
-    const discoverySpots = await getDiscoveredSpots(accountContext)
+    const discoverySpots = await api.discovery.listSpots()
     if (discoverySpots.data) {
-      // Extract Spot data from DiscoverySpot and store in spotStore
       const spots = discoverySpots.data.map(({ discoveryId, discoveredAt, ...spot }) => spot)
       setSpots(spots)
     }
@@ -348,9 +312,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   const processLocationUpdate = async (position: { location: GeoLocation; heading: number }) => {
-    const accountSession = await getSession()
-    if (!accountSession.data) throw new Error('Account session not found!')
-
     const { setSnap } = getDiscoveryTrailActions()
     const { status } = getDiscoveryTrailData()
     const trailId = getDiscoveryTrailId()
@@ -365,7 +326,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       return
     }
 
-    // Update threshold location
     thresholdState.latestLocation = position.location
 
     const locationWithDirection = {
@@ -373,24 +333,23 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       direction: position.heading,
     }
 
-    const locationResult = await processLocation(accountSession.data, locationWithDirection, trailId)
+    const locationResult = await api.discovery.processLocation(trailId, locationWithDirection)
     if (!locationResult.data) return
 
-    // Update snap from backend
     locationResult.data.snap && setSnap(locationResult.data.snap)
 
     const newDiscoveries = locationResult.data.discoveries
     if (newDiscoveries.length > 0) {
-      await handleNewDiscoveries(newDiscoveries, trailId, accountSession.data, locationResult.data.snap)
+      await handleNewDiscoveries(newDiscoveries, trailId, locationResult.data.snap)
     }
   }
 
   // Content methods
-  const upsertDiscoveryContent = async (discoveryId: string, content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }): Promise<Result<DiscoveryContent>> => {
-    const session = await getSession()
-    if (!session.data) return { success: false, data: undefined as any }
-
-    const result = await discoveryAPI.upsertDiscoveryContent(session.data, discoveryId, content)
+  const upsertDiscoveryContent = async (
+    discoveryId: string,
+    content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }
+  ): Promise<Result<DiscoveryContent>> => {
+    const result = await api.discovery.upsertContent(discoveryId, content)
     if (result.data) {
       getDiscoveryContentActions().setContent(discoveryId, result.data)
     }
@@ -398,10 +357,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   const getDiscoveryContent = async (discoveryId: string): Promise<Result<DiscoveryContent | undefined>> => {
-    const session = await getSession()
-    if (!session.data) return { success: false, data: undefined }
-
-    const result = await discoveryAPI.getDiscoveryContent(session.data, discoveryId)
+    const result = await api.discovery.getContent(discoveryId)
     if (result.data) {
       getDiscoveryContentActions().setContent(discoveryId, result.data)
     }
@@ -409,10 +365,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   const deleteDiscoveryContent = async (discoveryId: string): Promise<Result<void>> => {
-    const session = await getSession()
-    if (!session.data) return { success: false, data: undefined }
-
-    const result = await discoveryAPI.deleteDiscoveryContent(session.data, discoveryId)
+    const result = await api.discovery.deleteContent(discoveryId)
     if (result.success) {
       getDiscoveryContentActions().clearContent(discoveryId)
     }
@@ -421,15 +374,11 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
   // Rating methods
   const rateSpot = async (spotId: string, rating: number): Promise<Result<void>> => {
-    const session = await getSession()
-    if (!session.data) return { success: false, data: undefined }
-
     logger.log('DiscoveryApplication: Rating spot', { spotId, rating })
-    const result = await discoveryAPI.rateSpot(session.data, spotId, rating)
+    const result = await api.spots.rate(spotId, rating)
     if (result.success) {
       logger.log('DiscoveryApplication: Rating successful, refreshing summary')
-      // Refresh rating summary
-      const summaryResult = await discoveryAPI.getSpotRatingSummary(session.data, spotId)
+      const summaryResult = await api.spots.getRatingSummary(spotId)
       if (summaryResult.data) {
         logger.log('DiscoveryApplication: Updated summary', summaryResult.data)
         getSpotRatingActions().setRatingSummary(spotId, summaryResult.data)
@@ -441,12 +390,9 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   const removeSpotRating = async (spotId: string): Promise<Result<void>> => {
-    const session = await getSession()
-    if (!session.data) return { success: false, data: undefined }
-
-    const result = await discoveryAPI.removeSpotRating(session.data, spotId)
+    const result = await api.spots.removeRating(spotId)
     if (result.success) {
-      const summaryResult = await discoveryAPI.getSpotRatingSummary(session.data, spotId)
+      const summaryResult = await api.spots.getRatingSummary(spotId)
       if (summaryResult.data) {
         getSpotRatingActions().setRatingSummary(spotId, summaryResult.data)
       }
@@ -455,38 +401,22 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   const getSpotRatingSummary = async (spotId: string): Promise<Result<RatingSummary>> => {
-    const session = await getSession()
-    if (!session.data) return { success: false, error: undefined as any }
-
-    const result = await discoveryAPI.getSpotRatingSummary(session.data, spotId)
+    const result = await api.spots.getRatingSummary(spotId)
     if (result.data) {
       getSpotRatingActions().setRatingSummary(spotId, result.data)
     }
     return result
   }
 
-  const getDiscoveryStats = async (discoveryId: string): Promise<Result<DiscoveryStats>> => {
-    const session = await getSession()
-    if (!session.data) return {
-      success: false, error: {
-        message: 'Account session not found',
-        code: ''
-      }
-    }
-
-    return await discoveryAPI.getDiscoveryStats(session.data, discoveryId)
-  }
+  const getDiscoveryStats = async (discoveryId: string): Promise<Result<DiscoveryStats>> =>
+    api.discovery.getStats(discoveryId)
 
   const createWelcomeDiscovery = async (location: GeoLocation): Promise<Result<DiscoveryEventState>> => {
-    const session = await getSession()
-    if (!session.data) return { success: false, error: { message: 'Account session not found', code: 'SESSION_NOT_FOUND' } }
-
-    const result = await discoveryAPI.createWelcomeDiscovery(session.data, location)
+    const result = await api.discovery.createWelcome(location)
     if (!result.success || !result.data) return { success: false, error: result.error }
 
     const { discovery, spot } = result.data
 
-    // Persist in local stores
     const { upsertSpot } = getSpotActions()
     const { upsertDiscoveries, setDiscoveryEvent } = getDiscoveryActions()
     upsertSpot(spot)
@@ -500,13 +430,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     return { success: true, data: card }
   }
 
-  // Single call that atomically populates both created and discovered spots.
-  // Uses getDiscoveryState so source priority (created > discovered) is enforced server-side.
   const requestSpotScreenData = async (): Promise<void> => {
-    const accountSession = await getSession()
-    if (!accountSession.data) return
-
-    const result = await discoveryStateAPI.getDiscoveryState(accountSession.data)
+    const result = await api.composite.getDiscoveryState()
     if (result.data?.spots) {
       const { upsertSpot } = getSpotActions()
       result.data.spots.forEach(spot => upsertSpot(toSpot(spot)))

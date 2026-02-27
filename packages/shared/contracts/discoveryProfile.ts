@@ -1,17 +1,22 @@
+import { z } from 'zod'
 import { AccountContext } from './accounts.ts'
 import { Result } from './results.ts'
 
-export interface DiscoveryProfile {
-  id: string // This will be the accountId for easy lookup
-  accountId: string
-  lastActiveTrailId?: string
-  createdAt: Date
-  updatedAt: Date
-}
+export const DiscoveryProfileSchema = z.object({
+  id: z.string(),
+  accountId: z.string(),
+  lastActiveTrailId: z.string().optional(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+})
 
-export interface DiscoveryProfileUpdateData {
-  lastActiveTrailId?: string
-}
+export type DiscoveryProfile = z.infer<typeof DiscoveryProfileSchema>
+
+export const DiscoveryProfileUpdateDataSchema = z.object({
+  lastActiveTrailId: z.string().optional(),
+})
+
+export type DiscoveryProfileUpdateData = z.infer<typeof DiscoveryProfileUpdateDataSchema>
 
 export interface DiscoveryProfileActions {
   getProfile: (context: AccountContext) => Promise<Result<DiscoveryProfile>>

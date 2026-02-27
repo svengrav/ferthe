@@ -37,7 +37,8 @@
     "path": "npm:path@^0.12.7",
     "fs": "node:fs/promises",
     "zod": "npm:zod@^4.3.6",
-    "jimp": "npm:jimp@0.22.12"
+    "jimp": "npm:jimp@0.22.12",
+    "@ts-rest/core": "npm:@ts-rest/core@^3.52.1"
   },
   "compilerOptions": {
     "lib": [

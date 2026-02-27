@@ -1,5 +1,5 @@
 import { APIContext } from '@app/api/apiContext'
-import { AccountProfileCompositeContract, AccountSession } from '@shared/contracts'
+import { AccountSession } from '@shared/contracts'
 import { StatusResult } from './api/utils'
 import { AccountApplication, createAccountApplication } from './features/account'
 import { CommunityApplication, createCommunityApplication } from './features/community/application'
@@ -15,7 +15,7 @@ import { logger } from './shared/utils/logger'
 export interface AppContext {
   readonly config: AppConfiguration
   system: {
-    isDevelopment: boolean,
+    isDevelopment: boolean
     checkStatus: () => Promise<StatusResult>
   }
   discoveryApplication: DiscoveryApplication
@@ -25,7 +25,6 @@ export interface AppContext {
   mapApplication: MapApplication
   accountApplication: AccountApplication
   communityApplication: CommunityApplication
-  accountProfileComposite: AccountProfileCompositeContract
 }
 
 interface AppConfiguration {
@@ -46,50 +45,37 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
   logger.log(`Initializing ferthe-app with environment: ${environment}`)
   if (!apiContext) throw new Error('Core context is required to initialize the app context')
 
+  const { api } = apiContext
+
   const accountApplication = createAccountApplication({
-    initialSession: initialSession,
-    accountAPI: apiContext.accountApplication,
+    initialSession,
+    api,
     secureStore: connectors?.secureStoreConnector,
   })
 
   const sensorApplication = createSensorApplication({
-    getAccountContext: accountApplication.getAccountContext,
+    api,
     deviceConnector: environment === 'test' ? undefined : connectors?.deviceConnector,
-    sensorApplication: apiContext.sensorApplication,
   })
 
   const discoveryApplication = createDiscoveryApplication({
-    getAccountContext: accountApplication.getAccountContext,
+    api,
     sensor: sensorApplication,
-    discoveryAPI: apiContext.discoveryApplication,
-    discoveryStateAPI: apiContext.discoveryStateComposite,
   })
 
-  const trailApplication = createTrailApplication({
-    getAccountContext: accountApplication.getAccountContext,
-    trailAPI: apiContext.trailApplication,
-    discoveryAPI: apiContext.discoveryApplication,
-  })
+  const trailApplication = createTrailApplication({ api })
 
-  const spotApplication = createSpotApplication({
-    getAccountContext: accountApplication.getAccountContext,
-    spotAPI: apiContext.spotApplication,
-    trailAPI: apiContext.trailApplication,
-  })
+  const spotApplication = createSpotApplication({ api })
 
   const mapApplication = createMapApplication({
     sensor: sensorApplication,
     discoveryApplication,
   })
 
-  const communityApplication = createCommunityApplication({
-    communityAPI: apiContext.communityApplication,
-  })
+  const communityApplication = createCommunityApplication({ api })
 
   return {
-    config: {
-      environment,
-    },
+    config: { environment },
     system: {
       isDevelopment: config.environment === 'development',
       checkStatus: apiContext.system.checkStatus,
@@ -101,7 +87,6 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
     mapApplication,
     accountApplication,
     communityApplication,
-    accountProfileComposite: apiContext.accountProfileComposite,
   }
 }
 

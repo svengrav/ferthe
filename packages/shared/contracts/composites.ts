@@ -1,7 +1,8 @@
-import { GeoLocation } from "../geo/types.ts";
+import { z } from 'zod';
+import { GeoLocationSchema } from "../geo/types.ts";
 import { AccountContext, AccountPublicProfile } from './accounts.ts';
-import { Clue } from './discoveries.ts';
-import { ImageReference } from "./images.ts";
+import { ClueSchema } from './discoveries.ts';
+import { ImageReferenceSchema } from "./images.ts";
 import { QueryOptions, Result } from './results.ts';
 import { Spot, SpotPreview } from './spots.ts';
 
@@ -9,62 +10,72 @@ import { Spot, SpotPreview } from './spots.ts';
  * Lightweight discovery summary for a single discovery.
  * Omits backend-only fields (trailId, scanEventId, updatedAt).
  */
-export interface DiscoverySummary {
-  id: string
-  spotId: string
-  discoveredAt: Date
-}
+export const DiscoverySummarySchema = z.object({
+  id: z.string(),
+  spotId: z.string(),
+  discoveredAt: z.date(),
+})
+
+export type DiscoverySummary = z.infer<typeof DiscoverySummarySchema>
 
 /**
  * Lightweight spot data for init. Omits backend-only fields
  * (slug, options, updatedAt, createdBy) and strips DiscoverySpot wrapper.
  */
-export interface SpotSummary {
-  id: string
-  name: string
-  description: string
-  image?: ImageReference
-  blurredImage?: ImageReference
-  location: GeoLocation
-  source?: string
-  createdAt: Date
-}
+export const SpotSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  image: ImageReferenceSchema.optional(),
+  blurredImage: ImageReferenceSchema.optional(),
+  location: GeoLocationSchema,
+  source: z.string().optional(),
+  createdAt: z.date(),
+})
+
+export type SpotSummary = z.infer<typeof SpotSummarySchema>
 
 /**
  * Normalized active trail reference. Uses IDs instead of
  * duplicated spot/discovery objects. Trail object is omitted
  * because the app already has it from requestTrailState().
  */
-export interface ActiveTrailRef {
-  trailId: string
-  spotIds: string[] // All spot IDs (discovered + created + public)
-  discoveryIds: string[]
-  clues: Clue[]
-  previewClues: Clue[]
-  createdAt?: Date
-}
+export const ActiveTrailRefSchema = z.object({
+  trailId: z.string(),
+  spotIds: z.array(z.string()),
+  discoveryIds: z.array(z.string()),
+  clues: z.array(ClueSchema),
+  previewClues: z.array(ClueSchema),
+  createdAt: z.date().optional(),
+})
+
+export type ActiveTrailRef = z.infer<typeof ActiveTrailRefSchema>
 
 /**
  * Aggregated discovery state returned in a single request.
  * Normalized: spots/discoveries only 1×, activeTrail as ID refs.
  */
-export interface DiscoveryState {
-  lastActiveTrailId?: string
-  discoveries: DiscoverySummary[]
-  spots: SpotSummary[]
-  activeTrail?: ActiveTrailRef
-}
+export const DiscoveryStateSchema = z.object({
+  lastActiveTrailId: z.string().optional(),
+  discoveries: z.array(DiscoverySummarySchema),
+  spots: z.array(SpotSummarySchema),
+  activeTrail: ActiveTrailRefSchema.optional(),
+})
+
+export type DiscoveryState = z.infer<typeof DiscoveryStateSchema>
 
 /**
  * Result of activating a trail.
  * Returns clues + ID refs. New spots/discoveries that the app
  * doesn't have yet are included as separate arrays.
  */
-export interface ActivateTrailResult {
-  activeTrail: ActiveTrailRef
-  spots: SpotSummary[]
-  discoveries: DiscoverySummary[]
-}
+export const ActivateTrailResultSchema = z.object({
+  activeTrail: ActiveTrailRefSchema,
+  spots: z.array(SpotSummarySchema),
+  discoveries: z.array(DiscoverySummarySchema),
+})
+
+export type ActivateTrailResult = z.infer<typeof ActivateTrailResultSchema>
 
 /**
  * Composite contract for cross-feature queries that require access control.

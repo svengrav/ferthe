@@ -1,4 +1,4 @@
-import { contentApi } from '../api/endpoints';
+import { contentApi } from '../api/adminClient';
 import type { ContentPage } from '../types/content';
 import { useFetch } from './useFetch';
 
@@ -6,7 +6,7 @@ export type Language = 'en' | 'de';
 
 export function useContent(contentType: string, language: Language) {
   const { data, loading, error } = useFetch<ContentPage>(
-    () => contentApi.get(language, contentType),
+    () => contentApi.content.getPage(language, contentType).then(r => { if (!r.success) throw new Error(r.error?.message); return r.data as ContentPage }),
     [contentType, language]
   );
 

@@ -1,4 +1,4 @@
-import { adminApi } from "../../api/adminClient.ts";
+import { api } from "../../api/adminClient.ts";
 import type { SpotFormData } from "./SpotForm.tsx";
 import type { Boundary, Spot, Trail } from "./mapEditorStore.ts";
 
@@ -12,19 +12,19 @@ interface ApiListResponse<T> {
 
 /** Load all spots from the API */
 export const fetchSpots = async (): Promise<Spot[]> => {
-  const result = await adminApi.getSpots() as ApiListResponse<Spot>;
+  const result = await api.spots.list() as ApiListResponse<Spot>;
   return result?.data ?? [];
 };
 
 /** Load a single spot with full detail (including contentBlocks) */
 export const fetchSpot = async (id: string): Promise<Spot | null> => {
-  const result = await adminApi.getSpot(id) as { data?: Spot };
+  const result = await api.spots.get(id) as { data?: Spot };
   return result?.data ?? null;
 };
 
 /** Create a new spot */
 export const createSpot = async (data: SpotFormData) => {
-  await adminApi.createSpot({
+  await api.spots.create({
     content: {
       name: data.name,
       description: data.description,
@@ -42,7 +42,7 @@ export const createSpot = async (data: SpotFormData) => {
 
 /** Update an existing spot */
 export const updateSpot = async (id: string, data: SpotFormData) => {
-  await adminApi.updateSpot(id, {
+  await api.spots.update(id, {
     content: {
       name: data.name,
       description: data.description,
@@ -56,7 +56,7 @@ export const updateSpot = async (id: string, data: SpotFormData) => {
 
 /** Delete a spot */
 export const deleteSpot = async (id: string) => {
-  await adminApi.deleteSpot(id);
+  await api.spots.delete(id);
 };
 
 // --- Trail operations ---
@@ -89,13 +89,13 @@ interface TrailSpot { spotId: string; order?: number }
 
 /** Load all trails from the API, enriched with their spot IDs sorted by order */
 export const fetchTrails = async (createdBy?: string): Promise<Trail[]> => {
-  const result = await adminApi.getTrails(createdBy) as ApiListResponse<Trail>;
+  const result = await api.trails.list({ createdBy }) as ApiListResponse<Trail>;
   const trails = result?.data ?? [];
 
   // Fetch spot IDs for each trail in parallel
   const trailsWithSpots = await Promise.all(
     trails.map(async (trail) => {
-      const spotsResult = await adminApi.getTrailSpots(trail.id) as { data?: TrailSpot[] };
+      const spotsResult = await api.trails.getSpots(trail.id) as { data?: TrailSpot[] };
       const sorted = (spotsResult?.data ?? []).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
       return { ...trail, spotIds: sorted.map((ts) => ts.spotId) };
     }),
@@ -111,14 +111,14 @@ export const fetchTrails = async (createdBy?: string): Promise<Trail[]> => {
 export const reorderTrailSpots = async (trailId: string, orderedSpotIds: string[]) => {
   for (let i = 0; i < orderedSpotIds.length; i++) {
     const spotId = orderedSpotIds[i];
-    await adminApi.removeSpotFromTrail(trailId, spotId);
-    await adminApi.addSpotToTrail(trailId, spotId, i);
+    await api.trails.removeSpot(trailId, spotId);
+    await api.trails.addSpot(trailId, spotId, i);
   }
 };
 
 /** Create a new trail */
 export const createTrail = async (data: CreateTrailData) => {
-  await adminApi.createTrail({
+  await api.trails.create({
     name: data.name,
     description: data.description,
     boundary: data.boundary,
@@ -131,7 +131,7 @@ export const createTrail = async (data: CreateTrailData) => {
 
 /** Update an existing trail */
 export const updateTrail = async (id: string, data: UpdateTrailData) => {
-  await adminApi.updateTrail(id, {
+  await api.trails.update(id, {
     name: data.name,
     description: data.description,
     boundary: data.boundary,
@@ -143,7 +143,7 @@ export const updateTrail = async (id: string, data: UpdateTrailData) => {
 
 /** Delete a trail */
 export const deleteTrail = async (id: string) => {
-  await adminApi.deleteTrail(id);
+  await api.trails.delete(id);
 };
 
 // --- Data loading ---

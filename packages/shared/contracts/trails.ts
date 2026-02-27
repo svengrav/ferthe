@@ -1,9 +1,172 @@
-import { GeoBoundary } from '@shared/geo/index.ts'
+import { z } from 'zod'
 import { AccountContext } from './accounts.ts'
-import { ImageReference } from './images.ts'
+import { ImageReferenceSchema } from './images.ts'
 import { QueryOptions, Result } from './results.ts'
 import { RatingSummary } from './spots.ts'
 import { StoredTrailSpot, TrailSpot } from './trailSpots.ts'
+
+// ──────────────────────────────────────────────────────────────
+// Zod Schemas (Source of Truth)
+// ──────────────────────────────────────────────────────────────
+
+/**
+ * Discovery mode enum
+ */
+export const DiscoveryModeSchema = z.enum(['free', 'sequence'])
+
+/**
+ * Preview mode enum
+ */
+export const PreviewModeSchema = z.enum(['hidden', 'preview', 'discovered'])
+
+/**
+ * Trail map configuration with optional background image
+ */
+export const TrailMapSchema = z.object({
+  image: ImageReferenceSchema.optional(),
+})
+
+/**
+ * Viewport configuration with optional background image
+ */
+export const TrailViewportSchema = z.object({
+  image: ImageReferenceSchema.optional(),
+})
+
+/**
+ * Overview configuration with optional background image
+ */
+export const TrailOverviewSchema = z.object({
+  image: ImageReferenceSchema.optional(),
+})
+
+/**
+ * Trail options schema
+ */
+export const TrailOptionsSchema = z.object({
+  scannerRadius: z.number(),
+  discoveryMode: DiscoveryModeSchema,
+  previewMode: PreviewModeSchema,
+  snapRadius: z.number().optional(),
+})
+
+/**
+ * Trail schema
+ */
+export const TrailSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  description: z.string(),
+  map: TrailMapSchema,
+  viewport: TrailViewportSchema.optional(),
+  overview: TrailOverviewSchema.optional(),
+  image: ImageReferenceSchema.optional(),
+  boundary: z.any(), // GeoBoundary - complex type from geo package
+  options: TrailOptionsSchema,
+  createdBy: z.string().optional(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+})
+
+/**
+ * Stored trail schema (with blob paths)
+ */
+export const StoredTrailSchema = TrailSchema.omit({ map: true, viewport: true, overview: true }).extend({
+  imageBlobPath: z.string().optional(),
+  map: TrailMapSchema.extend({
+    imageBlobPath: z.string().optional(),
+  }),
+  viewport: TrailViewportSchema.extend({
+    imageBlobPath: z.string().optional(),
+  }).optional(),
+  overview: TrailOverviewSchema.extend({
+    imageBlobPath: z.string().optional(),
+  }).optional(),
+})
+
+/**
+ * Trail rating schema
+ */
+export const TrailRatingSchema = z.object({
+  id: z.string(),
+  trailId: z.string(),
+  accountId: z.string(),
+  rating: z.number().int().min(1).max(5),
+  createdAt: z.date(),
+})
+
+/**
+ * Trail stats schema
+ */
+export const TrailStatsSchema = z.object({
+  trailId: z.string(),
+  totalSpots: z.number().int(),
+  discoveredSpots: z.number().int(),
+  discoveriesCount: z.number().int(),
+  progressPercentage: z.number(),
+  completionStatus: z.enum(['not_started', 'in_progress', 'completed']),
+  rank: z.number().int(),
+  totalDiscoverers: z.number().int(),
+  firstDiscoveredAt: z.date().optional(),
+  lastDiscoveredAt: z.date().optional(),
+  averageTimeBetweenDiscoveries: z.number().optional(),
+})
+
+// ──────────────────────────────────────────────────────────────
+// TypeScript Types (Inferred from Zod Schemas)
+// ──────────────────────────────────────────────────────────────
+
+/**
+ * Request schema for creating a new trail
+ */
+export const CreateTrailRequestSchema = TrailSchema.omit({
+  id: true,
+  slug: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true,
+}).extend({
+  imageBase64: z.string().optional(),
+  mapImageBase64: z.string().optional(),
+})
+
+/**
+ * Request schema for updating an existing trail
+ */
+export const UpdateTrailRequestSchema = TrailSchema.pick({
+  name: true,
+  description: true,
+  boundary: true,
+  options: true,
+  map: true,
+  viewport: true,
+  overview: true,
+  image: true,
+}).extend({
+  imageBase64: z.string().optional(),
+  mapImageBase64: z.string().optional(),
+}).partial()
+
+export type DiscoveryMode = z.infer<typeof DiscoveryModeSchema>
+export type PreviewMode = z.infer<typeof PreviewModeSchema>
+export type TrailMap = z.infer<typeof TrailMapSchema>
+export type TrailViewport = z.infer<typeof TrailViewportSchema>
+export type TrailOverview = z.infer<typeof TrailOverviewSchema>
+export type Trail = z.infer<typeof TrailSchema>
+export type StoredTrail = z.infer<typeof StoredTrailSchema>
+export type TrailRating = z.infer<typeof TrailRatingSchema>
+export type TrailStats = z.infer<typeof TrailStatsSchema>
+export type CreateTrailRequest = z.infer<typeof CreateTrailRequestSchema>
+export type UpdateTrailRequest = z.infer<typeof UpdateTrailRequestSchema>
+
+// ──────────────────────────────────────────────────────────────
+// Application Contract (unchanged)
+// ──────────────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────
+// Application Contract (unchanged)
+// ──────────────────────────────────────────────────────────────
 
 /**
  * Application contract for managing trails and their associated spots.
@@ -22,118 +185,4 @@ export interface TrailApplicationContract {
   rateTrail: (context: AccountContext, trailId: string, rating: number) => Promise<Result<TrailRating>>
   removeTrailRating: (context: AccountContext, trailId: string) => Promise<Result<void>>
   getTrailRatingSummary: (context: AccountContext, trailId: string) => Promise<Result<RatingSummary>>
-}
-
-/**
- * Trail map configuration with optional background image.
- */
-export interface TrailMap {
-  image?: ImageReference
-}
-
-/**
- * Viewport configuration with optional background image.
- * Viewport image is static and does not move with the surface.
- */
-export interface TrailViewport {
-  image?: ImageReference
-}
-
-/**
- * Overview configuration with optional background image.
- * Overview image covers the full trail boundary in overview mode.
- */
-export interface TrailOverview {
-  image?: ImageReference
-}
-
-/**
- * Represents a trail in the application.
- * A trail consists of multiple spots and has associated metadata such as name, description, and options.
- * Image URLs are generated at runtime with fresh SAS tokens.
- */
-export interface Trail {
-  id: string
-  slug: string
-  name: string
-  description: string
-  map: TrailMap
-  viewport?: TrailViewport
-  overview?: TrailOverview
-  image?: ImageReference
-  boundary: GeoBoundary
-  options: Options
-  createdBy?: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-/**
- * Internal trail entity as stored in database.
- * Extends Trail with additional blob path fields for image storage.
- */
-export interface StoredTrail extends Omit<Trail, 'map' | 'viewport' | 'overview'> {
-  imageBlobPath?: string
-  map: TrailMap & {
-    imageBlobPath?: string
-  }
-  viewport?: TrailViewport & {
-    imageBlobPath?: string
-  }
-  overview?: TrailOverview & {
-    imageBlobPath?: string
-  }
-}
-
-/**
- * Defines the discovery modes available for trails.
- * - 'free': Allows free exploration of the trail.
- * - 'sequence': Requires following a specific sequence of spots.
- */
-export type DiscoveryMode = 'free' | 'sequence'
-
-/**
- * Defines the preview modes available for trails.
- * - 'hidden': No preview is shown.
- * - 'preview': Shows a preview of the trail.
- * - 'discovered': Shows a preview of the discovered trail.
- */
-export type PreviewMode = 'hidden' | 'preview' | 'discovered'
-
-/**
- * User rating (1-5 stars) for a trail.
- */
-export interface TrailRating {
-  id: string
-  trailId: string
-  accountId: string
-  rating: number // 1-5 stars
-  createdAt: Date
-}
-
-/**
- * Defines the options for a trail.
- */
-interface Options {
-  scannerRadius: number
-  discoveryMode: DiscoveryMode
-  previewMode: PreviewMode
-  snapRadius?: number
-}
-
-/**
- * Statistics for a trail from the user's perspective.
- */
-export interface TrailStats {
-  trailId: string
-  totalSpots: number
-  discoveredSpots: number
-  discoveriesCount: number
-  progressPercentage: number
-  completionStatus: 'not_started' | 'in_progress' | 'completed'
-  rank: number // User's rank among all trail discoverers (0 if not started)
-  totalDiscoverers: number // Total users who discovered at least one spot
-  firstDiscoveredAt?: Date
-  lastDiscoveredAt?: Date
-  averageTimeBetweenDiscoveries?: number // In seconds
 }

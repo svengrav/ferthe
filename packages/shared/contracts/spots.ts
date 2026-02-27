@@ -1,60 +1,135 @@
-import { GeoLocation } from '@shared/geo/index.ts'
+import { GeoLocationSchema } from '@shared/geo/types.ts'
+import { z } from 'zod'
 import { AccountContext } from './accounts.ts'
-import { ContentBlock } from './contentBlocks.ts'
-import { ImageReference } from './images.ts'
+import { ContentBlockSchema } from './contentBlocks.ts'
+import { ImageReferenceSchema } from './images.ts'
 import { QueryOptions, Result } from './results.ts'
 
-/**
- * Separable content block for a spot.
- * Designed for future extensibility (e.g. rich media, tags, links).
- */
-export interface SpotContent {
-  name: string
-  description: string
-  imageBase64?: string // Base64-encoded image data for upload
-  contentBlocks?: ContentBlock[]
-}
+// ──────────────────────────────────────────────────────────────
+// Zod Schemas (Source of Truth)
+// ──────────────────────────────────────────────────────────────
 
 /**
- * Request payload for creating a new spot.
+ * Spot visibility modes
  */
-export interface CreateSpotRequest {
-  content: SpotContent
-  location: GeoLocation
-  visibility: SpotVisibility
-  trailIds?: string[]
-  consent: true // Must be explicitly true
-}
+export const SpotVisibilitySchema = z.enum(['hidden', 'preview', 'private', 'public'])
 
 /**
- * Request payload for updating an existing spot.
- * All fields are optional - only provided fields will be updated.
+ * Spot source/origin
  */
-export interface UpdateSpotRequest {
-  content?: Partial<SpotContent>
-  visibility?: SpotVisibility
-  trailIds?: string[] // Replaces all trail assignments
-}
+export const SpotSourceSchema = z.enum(['discovery', 'preview', 'created', 'public'])
 
 /**
- * Aggregated rating summary for a spot.
+ * Separable content block for a spot
  */
-export interface RatingSummary {
-  average: number // Average rating (0-5, 0 if no ratings)
-  count: number // Total number of ratings
-  userRating?: number // Current user's rating (1-5), if any
-}
+export const SpotContentSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().min(1).max(5000),
+  imageBase64: z.string().optional(), // Base64-encoded image data for upload
+  contentBlocks: z.array(ContentBlockSchema).optional(),
+})
 
 /**
- * User rating (1-5 stars) for a spot.
+ * Request payload for creating a new spot
  */
-export interface SpotRating {
-  id: string
-  spotId: string
-  accountId: string
-  rating: number // 1-5 stars
-  createdAt: Date
-}
+export const CreateSpotRequestSchema = z.object({
+  content: SpotContentSchema,
+  location: GeoLocationSchema,
+  visibility: SpotVisibilitySchema,
+  trailIds: z.array(z.string()).optional(),
+  consent: z.literal(true), // Must be explicitly true
+})
+
+/**
+ * Request payload for updating an existing spot
+ */
+export const UpdateSpotRequestSchema = z.object({
+  content: SpotContentSchema.partial().optional(),
+  visibility: SpotVisibilitySchema.optional(),
+  trailIds: z.array(z.string()).optional(),
+})
+
+/**
+ * Aggregated rating summary for a spot
+ */
+export const RatingSummarySchema = z.object({
+  average: z.number().min(0).max(5), // Average rating (0-5, 0 if no ratings)
+  count: z.number().int().min(0), // Total number of ratings
+  userRating: z.number().int().min(1).max(5).optional(), // Current user's rating (1-5), if any
+})
+
+/**
+ * User rating (1-5 stars) for a spot
+ */
+export const SpotRatingSchema = z.object({
+  id: z.string(),
+  spotId: z.string(),
+  accountId: z.string(),
+  rating: z.number().int().min(1).max(5), // 1-5 stars
+  createdAt: z.date(),
+})
+
+// ──────────────────────────────────────────────────────────────
+// TypeScript Types (Inferred from Zod Schemas)
+// ──────────────────────────────────────────────────────────────
+
+export type SpotVisibility = z.infer<typeof SpotVisibilitySchema>
+export type SpotSource = z.infer<typeof SpotSourceSchema>
+export type SpotContent = z.infer<typeof SpotContentSchema>
+export type CreateSpotRequest = z.infer<typeof CreateSpotRequestSchema>
+export type UpdateSpotRequest = z.infer<typeof UpdateSpotRequestSchema>
+export type RatingSummary = z.infer<typeof RatingSummarySchema>
+export type SpotRating = z.infer<typeof SpotRatingSchema>
+
+/**
+ * Public spot schema
+ */
+export const SpotSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  description: z.string(),
+  image: ImageReferenceSchema.optional(),
+  blurredImage: ImageReferenceSchema.optional(), // Blurred version for undiscovered spots
+  microImage: ImageReferenceSchema.optional(), // Micro thumbnail (~40px)
+  location: GeoLocationSchema,
+  contentBlocks: z.array(ContentBlockSchema).optional(),
+  options: z.object({
+    discoveryRadius: z.number(),
+    clueRadius: z.number(),
+    visibility: SpotVisibilitySchema.optional(),
+  }),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  createdBy: z.string().optional(), // Account ID of creator
+  source: SpotSourceSchema.optional(), // Source/origin of spot
+})
+
+/**
+ * Internal spot entity as stored in database
+ */
+export const StoredSpotSchema = SpotSchema.extend({
+  imageBlobPath: z.string().optional(),
+  blurredImageBlobPath: z.string().optional(),
+})
+
+/**
+ * Reduced spot representation for list views and previews
+ */
+export const SpotPreviewSchema = z.object({
+  id: z.string(),
+  blurredImage: ImageReferenceSchema.optional(),
+  rating: RatingSummarySchema, // Community rating (always included)
+})
+
+export type Spot = z.infer<typeof SpotSchema>
+export type StoredSpot = z.infer<typeof StoredSpotSchema>
+export type SpotPreview = z.infer<typeof SpotPreviewSchema>
+
+// ──────────────────────────────────────────────────────────────
+// Application Contract (unchanged - uses inferred types)
+// ──────────────────────────────────────────────────────────────
+
 
 export interface SpotApplicationContract {
   getSpotPreviews: (options?: QueryOptions) => Promise<Result<SpotPreview[]>>
@@ -68,66 +143,4 @@ export interface SpotApplicationContract {
   rateSpot: (context: AccountContext, spotId: string, rating: number) => Promise<Result<SpotRating>>
   removeSpotRating: (context: AccountContext, spotId: string) => Promise<Result<void>>
   getSpotRatingSummary: (context: AccountContext, spotId: string) => Promise<Result<RatingSummary>>
-}
-
-/**
- * Spot visibility modes:
- * - 'hidden': Not visible until discovered (default)
- * - 'preview': Shows clue with blurred image on map
- * - 'private': Only visible to creator (never shown to others)
- * - 'public': Always visible to everyone (discovery still possible)
- */
-export type SpotVisibility = 'hidden' | 'preview' | 'private' | 'public'
-
-/**
- * Source/origin indicating why this spot is visible and how it was loaded.
- * Determines data access level and UI presentation.
- * - 'discovery': User has discovered this spot (full access)
- * - 'preview': Spot visible as trail preview/clue (blurred, limited data)
- * - 'created': User created this spot (full access)
- * - 'public': Spot has visibility='public' (visible before discovery)
- */
-export type SpotSource = 'discovery' | 'preview' | 'created' | 'public'
-
-/**
- * Public spot interface with runtime-generated image URLs.
- */
-export interface Spot {
-  id: string
-  slug: string
-  name: string
-  description: string
-  image?: ImageReference
-  blurredImage?: ImageReference // Blurred version for undiscovered spots
-  microImage?: ImageReference  // Micro thumbnail (~40px) for instant preview
-  location: GeoLocation
-  contentBlocks?: ContentBlock[]
-  options: {
-    discoveryRadius: number
-    clueRadius: number
-    visibility?: SpotVisibility
-  }
-  createdAt: Date
-  updatedAt: Date
-  createdBy?: string // Account ID of creator
-  source?: SpotSource // Source/origin of spot (set by backend based on context)
-}
-
-/**
- * Internal spot entity as stored in database.
- * Extends Spot with additional blob path fields for image storage.
- */
-export interface StoredSpot extends Spot {
-  imageBlobPath?: string
-  blurredImageBlobPath?: string
-}
-
-/**
- * Reduced spot representation for list views and previews.
- * Contains minimal data to display spots before discovery.
- */
-export interface SpotPreview {
-  id: string
-  blurredImage?: ImageReference
-  rating: RatingSummary // Community rating (always included, batch-loaded)
 }

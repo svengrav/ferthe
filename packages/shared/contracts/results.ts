@@ -1,8 +1,61 @@
 /**
- * It defines the structure for standardized API results and error handling.
+ * Result and error handling types for API operations
  */
 
+import { z } from 'zod'
 import { ERROR_CODES, type ApiErrorCode } from './errors.ts'
+
+// ──────────────────────────────────────────────────────────────
+// Zod Schemas
+// ──────────────────────────────────────────────────────────────
+
+export const ErrorResultSchema = z.object({
+  message: z.string(),
+  code: z.string(),
+  context: z.string().optional(),
+  details: z.record(z.string(), z.any()).optional(),
+})
+
+export const ResultMetaSchema = z.object({
+  timestamp: z.string().optional(),
+  total: z.number().optional(), // Total count for pagination
+  hasMore: z.boolean().optional(), // More results available
+  limit: z.number().optional(),
+  offset: z.number().optional(),
+})
+
+export const ResultSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+  z.object({
+    success: z.boolean().optional(),
+    error: ErrorResultSchema.optional(),
+    message: z.string().optional(),
+    meta: ResultMetaSchema.optional(),
+    data: dataSchema.optional(),
+  })
+
+export const QueryOptionsSchema = z.object({
+  // Pagination
+  limit: z.number().int().positive().optional(),
+  offset: z.number().int().nonnegative().optional(),
+
+  // Sorting
+  sortBy: z.string().optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
+
+  // Filtering
+  filters: z.record(z.string(), z.any()).optional(),
+  search: z.string().optional(),
+
+  // Enrichment Groups
+  include: z.array(z.string()).optional(), // Enrichment groups to include (e.g., ['images', 'userStatus'])
+  exclude: z.array(z.string()).optional(), // Enrichment groups to exclude
+})
+
+// ──────────────────────────────────────────────────────────────
+// TypeScript Types (Inferred from Zod)
+// ──────────────────────────────────────────────────────────────
+
+export type ErrorResult = z.infer<typeof ErrorResultSchema>
 
 /**
  * Represents the result of an API operation.
@@ -12,21 +65,8 @@ export interface Result<T> {
   readonly success?: boolean
   readonly error?: ErrorResult
   readonly message?: string
-  readonly meta?: {
-    readonly timestamp?: string
-    readonly total?: number // Total count for pagination
-    readonly hasMore?: boolean // More results available
-    readonly limit?: number
-    readonly offset?: number
-  }
+  readonly meta?: z.infer<typeof ResultMetaSchema>
   data?: T
-}
-
-export interface ErrorResult {
-  message: string
-  code: string
-  context?: string
-  details?: Record<string, any>
 }
 
 /**
@@ -36,26 +76,7 @@ export interface ErrorResult {
  * - 'images': Generate fresh SAS-token URLs for all image fields (costly: ~50-200ms per image)
  * - 'userStatus': Add user-specific status and filter data accordingly (requires extra DB query)
  */
-export interface QueryOptions {
-  // Pagination
-  readonly limit?: number
-  readonly offset?: number
-
-  // Sorting
-  readonly sortBy?: string
-  readonly sortOrder?: 'asc' | 'desc'
-
-  // Filtering
-  readonly filters?: Record<string, any>
-  readonly search?: string
-
-  // Field selection (for enrichment control)
-  // - If not specified: all enrichments are applied (default)
-  // - If include is set: only specified enrichments are applied
-  // - If exclude is set: all except excluded enrichments are applied
-  readonly include?: string[]
-  readonly exclude?: string[]
-}
+export type QueryOptions = z.infer<typeof QueryOptionsSchema>
 
 /**
  * Create a successful result with data

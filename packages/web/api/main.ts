@@ -16,7 +16,7 @@ export const app = new Application();
 const router = new Router();
 
 // Unified Language-First API Routes
-router.get("/api/:language/content/:page", async (context) => {
+router.get("/content/:language/pages/:page", async (context) => {
   try {
     const { language, page } = context.params;
 
@@ -48,15 +48,18 @@ router.get("/api/:language/content/:page", async (context) => {
       }
 
       context.response.body = {
-        page,
-        title: metadata.title || 'Untitled',
-        date: metadata.date || '',
-        language: metadata.language || language,
-        author: metadata.author,
-        tags: metadata.tags || [],
-        summary: metadata.summary,
-        heroImage: metadata.heroImage,
-        content,
+        success: true,
+        data: {
+          page,
+          title: metadata.title || 'Untitled',
+          date: metadata.date || '',
+          language: metadata.language || language,
+          author: metadata.author,
+          tags: metadata.tags || [],
+          summary: metadata.summary,
+          heroImage: metadata.heroImage,
+          content,
+        },
       };
     } catch (error) {
       console.error(`Failed to read file: ${filePath}`, error);
@@ -70,7 +73,7 @@ router.get("/api/:language/content/:page", async (context) => {
   }
 });
 
-router.get("/api/:language/blog", async (context) => {
+router.get("/content/:language/blog", async (context) => {
   try {
     const { language } = context.params;
 
@@ -109,13 +112,13 @@ router.get("/api/:language/blog", async (context) => {
 
           posts.push({
             slug,
-            url: `/api/${language}/blog/${slug}`,
             title: metadata.title || 'Untitled',
             date: metadata.date || '',
             language: metadata.language,
             author: metadata.author,
             tags: metadata.tags || [],
             heroImage: metadata.heroImage,
+            content,
             preview
           });
         }
@@ -124,7 +127,7 @@ router.get("/api/:language/blog", async (context) => {
 
     posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    context.response.body = { posts };
+    context.response.body = { success: true, data: posts };
   } catch (error) {
     console.error("Blog listing error:", error);
     context.response.status = 500;
@@ -132,7 +135,7 @@ router.get("/api/:language/blog", async (context) => {
   }
 });
 
-router.get("/api/:language/blog/:slug", async (context) => {
+router.get("/content/:language/blog/:slug", async (context) => {
   try {
     const { language, slug } = context.params;
 
@@ -156,14 +159,17 @@ router.get("/api/:language/blog/:slug", async (context) => {
       }
 
       context.response.body = {
-        slug,
-        title: metadata.title || 'Untitled',
-        date: metadata.date || '',
-        language: metadata.language,
-        author: metadata.author,
-        tags: metadata.tags || [],
-        heroImage: metadata.heroImage,
-        content
+        success: true,
+        data: {
+          slug,
+          title: metadata.title || 'Untitled',
+          date: metadata.date || '',
+          language: metadata.language,
+          author: metadata.author,
+          tags: metadata.tags || [],
+          heroImage: metadata.heroImage,
+          content,
+        },
       };
     } catch (error) {
       console.error(`Failed to read blog post: ${filePath}`, error);

@@ -1,11 +1,9 @@
-import { DeviceConnector, DeviceLocation } from './device/types'
-import { getDeviceLocation, getSensorActions, sensorStore } from './stores/sensorStore'
-
+import { logger } from '@app/shared/utils/logger'
 import { Result, ScanEvent } from '@shared/contracts'
 import { createEventSystem, Unsubscribe } from '@shared/events/eventHandler'
-
-import { logger } from '@app/shared/utils/logger'
-import { AccountContext, SensorApplicationContract } from '@shared/contracts'
+import type { ApiClient } from '@shared/ts-rest'
+import { DeviceConnector, DeviceLocation } from './device/types'
+import { getDeviceLocation, getSensorActions, sensorStore } from './stores/sensorStore'
 
 type SensorEvents = {
   onScan: ScanEvent
@@ -21,16 +19,15 @@ export interface SensorApplication {
 }
 
 interface SensorApplicationOptions {
-  getAccountContext: () => Promise<Result<AccountContext>>
+  api?: ApiClient
   deviceConnector?: DeviceConnector
-  sensorApplication?: SensorApplicationContract
 }
 
 export const createSensorApplication = (options?: SensorApplicationOptions) => {
   const events = createEventSystem<SensorEvents>()
   const lastScanDate = new Date(0)
   const MINIMUM_SCAN_INTERVAL = 5000 // 5 seconds in milliseconds
-  const { deviceConnector, sensorApplication: core, getAccountContext: getAccountSession } = options || {}
+  const { deviceConnector, api } = options || {}
   const { setPermissionGranted, setStatusMessage, setStatus, setDeviceStateRequestHandler } = getSensorActions()
 
   // Initialize permission and location tracking
@@ -42,7 +39,6 @@ export const createSensorApplication = (options?: SensorApplicationOptions) => {
         return
       }
 
-      // Request permission
       const permissionResult = await deviceConnector.requestLocationPermission()
       setPermissionGranted(permissionResult.granted)
 
@@ -51,8 +47,6 @@ export const createSensorApplication = (options?: SensorApplicationOptions) => {
         setStatusMessage('Location permission is required to use this feature')
         return
       }
-
-      // Initialize location tracking
 
       await deviceConnector.initializeLocationTracking()
       setStatusMessage('Waiting for GPS signal...')
@@ -78,7 +72,6 @@ export const createSensorApplication = (options?: SensorApplicationOptions) => {
     }
   })
 
-  // Start initialization
   initializeDevice()
 
   let isFirstValidLocation = true
@@ -94,7 +87,6 @@ export const createSensorApplication = (options?: SensorApplicationOptions) => {
       },
     })
 
-    // Set status to ready on first valid location
     if (isValidLocation && isFirstValidLocation) {
       setStatus('ready')
       setStatusMessage(undefined)
@@ -119,17 +111,10 @@ export const createSensorApplication = (options?: SensorApplicationOptions) => {
     const { addScanRecord } = getSensorActions()
     const device = getDeviceLocation()
 
-    if (!core) throw new Error('Sensor application core is not initialized')
-    if (!getAccountSession) throw new Error('getAccountSession function is not provided')
+    if (!api) throw new Error('Sensor API is not initialized')
     if (!canScan()) return
 
-    const accountSession = await getAccountSession()
-    if (!accountSession.data) {
-      logger.error('Failed to get account session:', accountSession.error)
-      return
-    }
-
-    const scanEvent = await core?.createScanEvent(accountSession.data, device.location, trailId)
+    const scanEvent = await api.sensors.createScan({ userPosition: device.location, trailId })
     if (!scanEvent.data) {
       logger.error('Failed to create scan event:', scanEvent.error)
       return

@@ -45,6 +45,114 @@ import {
   UpdateSpotRequest,
   WelcomeDiscoveryResult
 } from '@shared/contracts/index.ts'
+
+// Import Zod schemas for validation
+import {
+  AccountUpdateDataSchema,
+} from '@shared/contracts/accounts.ts'
+import {
+  CreateSpotRequestSchema,
+  UpdateSpotRequestSchema
+} from '@shared/contracts/spots.ts'
+import {
+  TrailSchema,
+} from '@shared/contracts/trails.ts'
+import { GeoLocationSchema } from '@shared/geo/types.ts'
+import { z } from 'zod'
+
+// Common validation schemas
+const IdParamSchema = z.object({ id: z.string() })
+const SpotIdParamSchema = z.object({ spotId: z.string() })
+const TrailIdParamSchema = z.object({ trailId: z.string() })
+const DiscoveryIdParamSchema = z.object({ discoveryId: z.string() })
+const CommunityIdParamSchema = z.object({ communityId: z.string() })
+const AccountIdParamSchema = z.object({ accountId: z.string() })
+
+// Request body schemas
+const ProcessLocationSchema = z.object({
+  locationWithDirection: z.object({
+    location: GeoLocationSchema,
+    direction: z.number().optional(),
+  }),
+  trailId: z.string().optional(),
+})
+
+const CreateTrailBodySchema = TrailSchema.omit({ id: true, createdAt: true, updatedAt: true, slug: true }).passthrough()
+
+const UpdateTrailBodySchema = TrailSchema.pick({ name: true, description: true, boundary: true }).partial().passthrough()
+
+const AddSpotToTrailSchema = z.object({
+  order: z.number().int().optional(),
+})
+
+const TrailRatingBodySchema = z.object({
+  rating: z.number().int().min(1).max(5),
+})
+
+const CreateScanEventSchema = z.object({
+  userPosition: GeoLocationSchema.optional(),
+  trailId: z.string().optional(),
+})
+
+const SMSRequestSchema = z.object({
+  phoneNumber: z.string().min(10),
+})
+
+const SMSVerifySchema = z.object({
+  phoneNumber: z.string().min(10),
+  code: z.string().min(4).max(8),
+})
+
+const AccountProfileUpdateSchema = AccountUpdateDataSchema
+
+const AvatarUploadSchema = z.object({
+  base64Data: z.string(),
+})
+
+const SessionTokenSchema = z.object({
+  sessionToken: z.string(),
+})
+
+const UpgradeToPhoneSchema = z.object({
+  phoneNumber: z.string().min(10),
+  code: z.string().min(4).max(8),
+})
+
+const DeviceTokenBodySchema = z.object({
+  token: z.string(),
+  platform: z.enum(['ios', 'android', 'web']).optional(),
+})
+
+const CreateCommunitySchema = z.object({
+  name: z.string().min(1).max(200),
+  trailIds: z.array(z.string()).optional(),
+})
+
+const JoinCommunitySchema = z.object({
+  inviteCode: z.string(),
+})
+
+const UpdateCommunitySchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  trailIds: z.array(z.string()).optional(),
+}).passthrough()
+
+const GetSpotsByIdsSchema = z.object({
+  ids: z.array(z.string()),
+})
+
+const GetPublicProfilesSchema = z.object({
+  accountIds: z.array(z.string()),
+})
+
+const ActivateTrailSchema = z.object({
+  trailId: z.string(),
+})
+
+const WelcomeDiscoverySchema = z.object({
+  location: GeoLocationSchema,
+})
+
 import { manifest } from './manifest.ts'
 import { Route } from './oak/types.ts'
 
@@ -88,9 +196,16 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/discovery/actions/process-location',
-      handler: asyncRequestHandler<DiscoveryLocationRecord>(async ({ context: session, body }) => {
-        return await discoveryApplication.processLocation(session, body?.locationWithDirection, body?.trailId)
-      }),
+      handler: asyncRequestHandler<DiscoveryLocationRecord>(
+        {
+          schemas: {
+            body: ProcessLocationSchema,
+          },
+        },
+        async ({ context: session, body }) => {
+          return await discoveryApplication.processLocation(session, body!.locationWithDirection, body!.trailId)
+        }
+      ),
     },
     {
       method: 'GET',
@@ -144,9 +259,16 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'PUT',
       version: 'v1',
       url: '/discovery/profile',
-      handler: asyncRequestHandler<DiscoveryProfile>(async ({ context: session, body }) => {
-        return await discoveryApplication.updateDiscoveryProfile(session, body)
-      }),
+      handler: asyncRequestHandler<DiscoveryProfile>(
+        {
+          schemas: {
+            body: z.any(), // DiscoveryProfile update - partial
+          },
+        },
+        async ({ context: session, body }) => {
+          return await discoveryApplication.updateDiscoveryProfile(session, body!)
+        }
+      ),
     },
 
     // Welcome Discovery
@@ -154,9 +276,16 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/discovery/welcome',
-      handler: asyncRequestHandler<WelcomeDiscoveryResult>(async ({ context, body }) => {
-        return await discoveryApplication.createWelcomeDiscovery(context, body.location)
-      }),
+      handler: asyncRequestHandler<WelcomeDiscoveryResult>(
+        {
+          schemas: {
+            body: WelcomeDiscoverySchema,
+          },
+        },
+        async ({ context, body }) => {
+          return await discoveryApplication.createWelcomeDiscovery(context, body!.location)
+        }
+      ),
     },
 
     // Discovery Content Routes
@@ -172,17 +301,32 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'PUT',
       version: 'v1',
       url: '/discovery/discoveries/:discoveryId/content',
-      handler: asyncRequestHandler<DiscoveryContent, { discoveryId: string }>(async ({ context: session, params, body }) => {
-        return await discoveryApplication.upsertDiscoveryContent(session, params!.discoveryId, body)
-      }),
+      handler: asyncRequestHandler<DiscoveryContent, { discoveryId: string }>(
+        {
+          schemas: {
+            params: DiscoveryIdParamSchema,
+            body: z.any(), // DiscoveryContent - complex type
+          },
+        },
+        async ({ context: session, params, body }) => {
+          return await discoveryApplication.upsertDiscoveryContent(session, params!.discoveryId, body!)
+        }
+      ),
     },
     {
       method: 'DELETE',
       version: 'v1',
       url: '/discovery/discoveries/:discoveryId/content',
-      handler: asyncRequestHandler<void, { discoveryId: string }>(async ({ context: session, params }) => {
-        return await discoveryApplication.deleteDiscoveryContent(session, params!.discoveryId)
-      }),
+      handler: asyncRequestHandler<void, { discoveryId: string }>(
+        {
+          schemas: {
+            params: DiscoveryIdParamSchema,
+          },
+        },
+        async ({ context: session, params }) => {
+          return await discoveryApplication.deleteDiscoveryContent(session, params!.discoveryId)
+        }
+      ),
     },
 
     // Spot Rating Routes
@@ -198,17 +342,32 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/spot/spots/:spotId/ratings',
-      handler: asyncRequestHandler<SpotRating, { spotId: string }>(async ({ context: session, params, body }) => {
-        return await discoveryApplication.rateSpot(session, params!.spotId, body.rating)
-      }),
+      handler: asyncRequestHandler<SpotRating, { spotId: string }>(
+        {
+          schemas: {
+            params: z.object({ spotId: z.string() }),
+            body: z.object({ rating: z.number().int().min(1).max(5) }),
+          },
+        },
+        async ({ context: session, params, body }) => {
+          return await discoveryApplication.rateSpot(session, params!.spotId, body!.rating)
+        }
+      ),
     },
     {
       method: 'DELETE',
       version: 'v1',
       url: '/spot/spots/:spotId/ratings',
-      handler: asyncRequestHandler<void, { spotId: string }>(async ({ context: session, params }) => {
-        return await discoveryApplication.removeSpotRating(session, params!.spotId)
-      }),
+      handler: asyncRequestHandler<void, { spotId: string }>(
+        {
+          schemas: {
+            params: SpotIdParamSchema,
+          },
+        },
+        async ({ context: session, params }) => {
+          return await discoveryApplication.removeSpotRating(session, params!.spotId)
+        }
+      ),
     },
 
     // Trail Rating Routes
@@ -224,17 +383,32 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/trail/trails/:trailId/ratings',
-      handler: asyncRequestHandler<TrailRating, { trailId: string }>(async ({ context: session, params, body }) => {
-        return await trailApplication.rateTrail(session, params!.trailId, body.rating)
-      }),
+      handler: asyncRequestHandler<TrailRating, { trailId: string }>(
+        {
+          schemas: {
+            params: TrailIdParamSchema,
+            body: TrailRatingBodySchema,
+          },
+        },
+        async ({ context: session, params, body }) => {
+          return await trailApplication.rateTrail(session, params!.trailId, body!.rating)
+        }
+      ),
     },
     {
       method: 'DELETE',
       version: 'v1',
       url: '/trail/trails/:trailId/ratings',
-      handler: asyncRequestHandler<void, { trailId: string }>(async ({ context: session, params }) => {
-        return await trailApplication.removeTrailRating(session, params!.trailId)
-      }),
+      handler: asyncRequestHandler<void, { trailId: string }>(
+        {
+          schemas: {
+            params: TrailIdParamSchema,
+          },
+        },
+        async ({ context: session, params }) => {
+          return await trailApplication.removeTrailRating(session, params!.trailId)
+        }
+      ),
     },
 
     // Trail API Routes (Authenticated)
@@ -258,25 +432,47 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/trail/trails',
-      handler: asyncRequestHandler<Trail, never, Omit<Trail, 'id'>>(async ({ context, body }) => {
-        return await trailApplication.createTrail(context, body!)
-      }),
+      handler: asyncRequestHandler<Trail, never, Omit<Trail, 'id'>>(
+        {
+          schemas: {
+            body: z.any(), // Trail - complex nested type (map, viewport, overview)
+          },
+        },
+        async ({ context, body }) => {
+          return await trailApplication.createTrail(context, body!)
+        }
+      ),
     },
     {
       method: 'PUT',
       version: 'v1',
       url: '/trail/trails/:id',
-      handler: asyncRequestHandler<Trail, { id: string }, Partial<Trail>>(async ({ params, context, body }) => {
-        return await trailApplication.updateTrail(context, params!.id, body!)
-      }),
+      handler: asyncRequestHandler<Trail, { id: string }, Partial<Trail>>(
+        {
+          schemas: {
+            params: IdParamSchema,
+            body: z.any(), // Trail - complex nested type
+          },
+        },
+        async ({ params, context, body }) => {
+          return await trailApplication.updateTrail(context, params!.id, body!)
+        }
+      ),
     },
     {
       method: 'DELETE',
       version: 'v1',
       url: '/trail/trails/:id',
-      handler: asyncRequestHandler<void, { id: string }, never>(async ({ params, context }) => {
-        return await trailApplication.deleteTrail(context, params!.id)
-      }),
+      handler: asyncRequestHandler<void, { id: string }, never>(
+        {
+          schemas: {
+            params: IdParamSchema,
+          },
+        },
+        async ({ params, context }) => {
+          return await trailApplication.deleteTrail(context, params!.id)
+        }
+      ),
     },
     {
       method: 'GET',
@@ -309,17 +505,31 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/spot/spots/batch',
-      handler: asyncRequestHandler<Spot[], never, { ids: string[] }>(async ({ context, body }) => {
-        return await spotApplication.getSpotsByIds(context, body?.ids ?? [])
-      }),
+      handler: asyncRequestHandler<Spot[], never, { ids: string[] }>(
+        {
+          schemas: {
+            body: GetSpotsByIdsSchema,
+          },
+        },
+        async ({ context, body }) => {
+          return await spotApplication.getSpotsByIds(context, body?.ids ?? [])
+        }
+      ),
     },
     {
       method: 'POST',
       version: 'v1',
       url: '/spot/spots',
-      handler: asyncRequestHandler<Spot, never, CreateSpotRequest>(async ({ context, body }) => {
-        return await spotApplication.createSpot(context, body!)
-      }),
+      handler: asyncRequestHandler<Spot, never, CreateSpotRequest>(
+        {
+          schemas: {
+            body: CreateSpotRequestSchema,
+          },
+        },
+        async ({ context, body }) => {
+          return await spotApplication.createSpot(context, body!)
+        }
+      ),
     },
     {
       method: 'GET',
@@ -333,25 +543,32 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'DELETE',
       version: 'v1',
       url: '/spot/spots/:id',
-      handler: asyncRequestHandler<void, { id: string }, never>(async ({ params, context }) => {
-        return await spotApplication.deleteSpot(context, params!.id)
-      }),
+      handler: asyncRequestHandler<void, { id: string }, never>(
+        {
+          schemas: {
+            params: IdParamSchema,
+          },
+        },
+        async ({ params, context }) => {
+          return await spotApplication.deleteSpot(context, params!.id)
+        }
+      ),
     },
     {
       method: 'PUT',
       version: 'v1',
       url: '/spot/spots/:id',
-      handler: asyncRequestHandler<Spot, { id: string }, UpdateSpotRequest>(async ({ params, context, body }) => {
-        return await spotApplication.updateSpot(context, params!.id, body!)
-      }),
-    },
-    {
-      method: 'PUT',
-      version: 'v1',
-      url: '/spot/spots/:id',
-      handler: asyncRequestHandler<Spot, { id: string }, UpdateSpotRequest>(async ({ params, context, body }) => {
-        return await spotApplication.updateSpot(context, params!.id, body!)
-      }),
+      handler: asyncRequestHandler<Spot, { id: string }, UpdateSpotRequest>(
+        {
+          schemas: {
+            params: IdParamSchema,
+            body: UpdateSpotRequestSchema,
+          },
+        },
+        async ({ params, context, body }) => {
+          return await spotApplication.updateSpot(context, params!.id, body!)
+        }
+      ),
     },
     {
       method: 'GET',
@@ -365,17 +582,32 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/trail/trails/:trailId/spots/:spotId',
-      handler: asyncRequestHandler<StoredTrailSpot, { trailId: string; spotId: string }, { order?: number }>(async ({ params, context, body }) => {
-        return await trailApplication.addSpotToTrail(context, params!.trailId, params!.spotId, body?.order)
-      }),
+      handler: asyncRequestHandler<StoredTrailSpot, { trailId: string; spotId: string }, { order?: number }>(
+        {
+          schemas: {
+            params: z.object({ trailId: z.string(), spotId: z.string() }),
+            body: AddSpotToTrailSchema,
+          },
+        },
+        async ({ params, context, body }) => {
+          return await trailApplication.addSpotToTrail(context, params!.trailId, params!.spotId, body?.order)
+        }
+      ),
     },
     {
       method: 'DELETE',
       version: 'v1',
       url: '/trail/trails/:trailId/spots/:spotId',
-      handler: asyncRequestHandler<void, { trailId: string; spotId: string }, never>(async ({ params, context }) => {
-        return await trailApplication.removeSpotFromTrail(context, params!.trailId, params!.spotId)
-      }),
+      handler: asyncRequestHandler<void, { trailId: string; spotId: string }, never>(
+        {
+          schemas: {
+            params: z.object({ trailId: z.string(), spotId: z.string() }),
+          },
+        },
+        async ({ params, context }) => {
+          return await trailApplication.removeSpotFromTrail(context, params!.trailId, params!.spotId)
+        }
+      ),
     },
 
     // Sensor API Routes (Authenticated)
@@ -391,9 +623,16 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/sensor/scans',
-      handler: asyncRequestHandler<ScanEvent>(async ({ context: session, body }) => {
-        return await sensorApplication.createScanEvent(session, body?.userPosition, body?.trailId)
-      }),
+      handler: asyncRequestHandler<ScanEvent>(
+        {
+          schemas: {
+            body: CreateScanEventSchema,
+          },
+        },
+        async ({ context: session, body }) => {
+          return await sensorApplication.createScanEvent(session, body?.userPosition, body?.trailId)
+        }
+      ),
     },
 
     // Account API Routes (Mixed authentication requirements)
@@ -402,18 +641,32 @@ const createRoutes = (ctx: APIContract): Route[] => {
       version: 'v1',
       url: '/account/actions/request-sms',
       config: { isPublic: true },
-      handler: asyncRequestHandler<SMSCodeRequest>(async ({ body }) => {
-        return await accountApplication.requestSMSCode(body?.phoneNumber)
-      }),
+      handler: asyncRequestHandler<SMSCodeRequest>(
+        {
+          schemas: {
+            body: SMSRequestSchema,
+          },
+        },
+        async ({ body }) => {
+          return await accountApplication.requestSMSCode(body!.phoneNumber)
+        }
+      ),
     },
     {
       method: 'POST',
       version: 'v1',
       url: '/account/actions/verify-sms',
       config: { isPublic: true },
-      handler: asyncRequestHandler<SMSVerificationResult>(async ({ body }) => {
-        return await accountApplication.verifySMSCode(body?.phoneNumber, body?.code)
-      }),
+      handler: asyncRequestHandler<SMSVerificationResult>(
+        {
+          schemas: {
+            body: SMSVerifySchema,
+          },
+        },
+        async ({ body }) => {
+          return await accountApplication.verifySMSCode(body!.phoneNumber, body!.code)
+        }
+      ),
     },
     {
       method: 'GET',
@@ -427,9 +680,16 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/account/public/profiles',
-      handler: asyncRequestHandler<AccountPublicProfile[], never, { accountIds: string[] }>(async ({ context, body }) => {
-        return await accountProfileComposite.getPublicProfiles(context, body!.accountIds)
-      }),
+      handler: asyncRequestHandler<AccountPublicProfile[], never, { accountIds: string[] }>(
+        {
+          schemas: {
+            body: GetPublicProfilesSchema,
+          },
+        },
+        async ({ context, body }) => {
+          return await accountProfileComposite.getPublicProfiles(context, body!.accountIds)
+        }
+      ),
     },
     {
       method: 'GET',
@@ -451,35 +711,63 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'PUT',
       version: 'v1',
       url: '/account/profile',
-      handler: asyncRequestHandler<Account>(async ({ context, body }) => {
-        return await accountApplication.updateAccount(context, body)
-      }),
+      handler: asyncRequestHandler<Account>(
+        {
+          schemas: {
+            body: AccountProfileUpdateSchema,
+          },
+        },
+        async ({ context, body }) => {
+          return await accountApplication.updateAccount(context, body!)
+        }
+      ),
     },
     {
       method: 'POST',
       version: 'v1',
       url: '/account/profile/avatar',
-      handler: asyncRequestHandler<Account>(async ({ context, body }) => {
-        return await accountApplication.uploadAvatar(context, body?.base64Data)
-      }),
+      handler: asyncRequestHandler<Account>(
+        {
+          schemas: {
+            body: AvatarUploadSchema,
+          },
+        },
+        async ({ context, body }) => {
+          return await accountApplication.uploadAvatar(context, body!.base64Data)
+        }
+      ),
     },
     {
       method: 'POST',
       version: 'v1',
       url: '/account/actions/validate-session',
       config: { isPublic: true },
-      handler: asyncRequestHandler(async ({ body }) => {
-        return await accountApplication.validateSession(body?.sessionToken)
-      }),
+      handler: asyncRequestHandler(
+        {
+          schemas: {
+            body: SessionTokenSchema,
+          },
+        },
+        async ({ body }) => {
+          return await accountApplication.validateSession(body!.sessionToken)
+        }
+      ),
     },
     {
       method: 'POST',
       version: 'v1',
       url: '/account/actions/revoke-session',
       config: { isPublic: true },
-      handler: asyncRequestHandler(async ({ body }) => {
-        return await accountApplication.revokeSession(body?.sessionToken)
-      }),
+      handler: asyncRequestHandler(
+        {
+          schemas: {
+            body: SessionTokenSchema,
+          },
+        },
+        async ({ body }) => {
+          return await accountApplication.revokeSession(body!.sessionToken)
+        }
+      ),
     },
     {
       method: 'POST',
@@ -494,9 +782,16 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/account/actions/upgrade-to-phone',
-      handler: asyncRequestHandler(async ({ context, body }) => {
-        return await accountApplication.upgradeToPhoneAccount(context, body?.phoneNumber, body?.code)
-      }),
+      handler: asyncRequestHandler(
+        {
+          schemas: {
+            body: UpgradeToPhoneSchema,
+          },
+        },
+        async ({ context, body }) => {
+          return await accountApplication.upgradeToPhoneAccount(context, body!.phoneNumber, body!.code)
+        }
+      ),
     },
     {
       method: 'GET',
@@ -510,33 +805,61 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/account/device-token',
-      handler: asyncRequestHandler<DeviceToken>(async ({ context, body }) => {
-        return await accountApplication.registerDeviceToken(context, body?.token, body?.platform)
-      }),
+      handler: asyncRequestHandler<DeviceToken>(
+        {
+          schemas: {
+            body: DeviceTokenBodySchema,
+          },
+        },
+        async ({ context, body }) => {
+          return await accountApplication.registerDeviceToken(context, body!.token, body!.platform)
+        }
+      ),
     },
     {
       method: 'DELETE',
       version: 'v1',
       url: '/account/device-token',
-      handler: asyncRequestHandler<void>(async ({ context, body }) => {
-        return await accountApplication.removeDeviceToken(context, body?.token)
-      }),
+      handler: asyncRequestHandler<void>(
+        {
+          schemas: {
+            body: z.object({ token: z.string() }),
+          },
+        },
+        async ({ context, body }) => {
+          return await accountApplication.removeDeviceToken(context, body!.token)
+        }
+      ),
     },
     {
       method: 'POST',
       version: 'v1',
       url: '/community/communities',
-      handler: asyncRequestHandler<Community>(async ({ context, body }) => {
-        return await communityApplication.createCommunity(context, { name: body?.name || '', trailIds: body?.trailIds || [] })
-      }),
+      handler: asyncRequestHandler<Community>(
+        {
+          schemas: {
+            body: CreateCommunitySchema,
+          },
+        },
+        async ({ context, body }) => {
+          return await communityApplication.createCommunity(context, { name: body!.name, trailIds: body!.trailIds || [] })
+        }
+      ),
     },
     {
       method: 'POST',
       version: 'v1',
       url: '/community/actions/join',
-      handler: asyncRequestHandler<Community>(async ({ context, body }) => {
-        return await communityApplication.joinCommunity(context, body?.inviteCode)
-      }),
+      handler: asyncRequestHandler<Community>(
+        {
+          schemas: {
+            body: JoinCommunitySchema,
+          },
+        },
+        async ({ context, body }) => {
+          return await communityApplication.joinCommunity(context, body!.inviteCode)
+        }
+      ),
     },
     {
       method: 'GET',
@@ -558,25 +881,47 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'PUT',
       version: 'v1',
       url: '/community/communities/:communityId',
-      handler: asyncRequestHandler<Community, { communityId: string }>(async ({ context, params, body }) => {
-        return await communityApplication.updateCommunity(context, params!.communityId, body!)
-      }),
+      handler: asyncRequestHandler<Community, { communityId: string }>(
+        {
+          schemas: {
+            params: CommunityIdParamSchema,
+            body: UpdateCommunitySchema,
+          },
+        },
+        async ({ context, params, body }) => {
+          return await communityApplication.updateCommunity(context, params!.communityId, body!)
+        }
+      ),
     },
     {
       method: 'POST',
       version: 'v1',
       url: '/community/communities/:communityId/actions/leave',
-      handler: asyncRequestHandler<void, { communityId: string }>(async ({ context, params }) => {
-        return await communityApplication.leaveCommunity(context, params!.communityId)
-      }),
+      handler: asyncRequestHandler<void, { communityId: string }>(
+        {
+          schemas: {
+            params: CommunityIdParamSchema,
+          },
+        },
+        async ({ context, params }) => {
+          return await communityApplication.leaveCommunity(context, params!.communityId)
+        }
+      ),
     },
     {
       method: 'DELETE',
       version: 'v1',
       url: '/community/communities/:communityId',
-      handler: asyncRequestHandler<void, { communityId: string }>(async ({ context, params }) => {
-        return await communityApplication.removeCommunity(context, params!.communityId)
-      }),
+      handler: asyncRequestHandler<void, { communityId: string }>(
+        {
+          schemas: {
+            params: CommunityIdParamSchema,
+          },
+        },
+        async ({ context, params }) => {
+          return await communityApplication.removeCommunity(context, params!.communityId)
+        }
+      ),
     },
     {
       method: 'GET',
@@ -590,17 +935,31 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/community/communities/:communityId/discoveries/:discoveryId/share',
-      handler: asyncRequestHandler<SharedDiscovery, { communityId: string; discoveryId: string }>(async ({ context, params }) => {
-        return await communityApplication.shareDiscovery(context, params!.discoveryId, params!.communityId)
-      }),
+      handler: asyncRequestHandler<SharedDiscovery, { communityId: string; discoveryId: string }>(
+        {
+          schemas: {
+            params: z.object({ communityId: z.string(), discoveryId: z.string() }),
+          },
+        },
+        async ({ context, params }) => {
+          return await communityApplication.shareDiscovery(context, params!.discoveryId, params!.communityId)
+        }
+      ),
     },
     {
       method: 'DELETE',
       version: 'v1',
       url: '/community/communities/:communityId/discoveries/:discoveryId/share',
-      handler: asyncRequestHandler<void, { communityId: string; discoveryId: string }>(async ({ context, params }) => {
-        return await communityApplication.unshareDiscovery(context, params!.discoveryId, params!.communityId)
-      }),
+      handler: asyncRequestHandler<void, { communityId: string; discoveryId: string }>(
+        {
+          schemas: {
+            params: z.object({ communityId: z.string(), discoveryId: z.string() }),
+          },
+        },
+        async ({ context, params }) => {
+          return await communityApplication.unshareDiscovery(context, params!.discoveryId, params!.communityId)
+        }
+      ),
     },
     {
       method: 'GET',
@@ -617,18 +976,25 @@ const createRoutes = (ctx: APIContract): Route[] => {
       version: 'v1',
       url: '/account/dev-session',
       config: { isPublic: true },
-      handler: asyncRequestHandler<AccountSession, never, { accountId: string }>(async ({ body }) => {
-        // Only allow in development
-        const isDevelopment = Deno.env.get('PRODUCTION')?.toLowerCase() !== 'true'
-        if (!isDevelopment) {
-          return { success: false, error: { code: 'NOT_FOUND', message: 'Endpoint not available in production' } }
-        }
+      handler: asyncRequestHandler<AccountSession, never, { accountId: string }>(
+        {
+          schemas: {
+            body: z.object({ accountId: z.string() }),
+          },
+        },
+        async ({ body }) => {
+          // Only allow in development
+          const isDevelopment = Deno.env.get('PRODUCTION')?.toLowerCase() !== 'true'
+          if (!isDevelopment) {
+            return { success: false, error: { code: 'NOT_FOUND', message: 'Endpoint not available in production' } }
+          }
 
-        if (!body?.accountId) {
-          return { success: false, error: { code: 'MISSING_ACCOUNT_ID', message: 'accountId is required' } }
+          if (!body?.accountId) {
+            return { success: false, error: { code: 'MISSING_ACCOUNT_ID', message: 'accountId is required' } }
+          }
+          return await accountApplication.createDevSession(body.accountId)
         }
-        return await accountApplication.createDevSession(body.accountId)
-      }),
+      ),
     },
 
     // ── Composite Routes ─────────────────────────────────────────
@@ -655,10 +1021,16 @@ const createRoutes = (ctx: APIContract): Route[] => {
       method: 'POST',
       version: 'v1',
       url: '/composite/discovery/actions/activate-trail',
-      handler: asyncRequestHandler<ActivateTrailResult>(async ({ context, body }) => {
-        const { trailId } = body as { trailId: string }
-        return await discoveryStateComposite.activateTrail(context, trailId)
-      }),
+      handler: asyncRequestHandler<ActivateTrailResult>(
+        {
+          schemas: {
+            body: ActivateTrailSchema,
+          },
+        },
+        async ({ context, body }) => {
+          return await discoveryStateComposite.activateTrail(context, body!.trailId)
+        }
+      ),
     },
   ]
 }

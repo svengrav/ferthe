@@ -1,27 +1,42 @@
-export interface GeoLocation {
-  lat: number
-  lon: number
-}
+import { z } from 'zod'
 
-export interface GeoRegion {
-  center: GeoLocation
-  radius: number
-}
+// ──────────────────────────────────────────────────────────────
+// Zod Schemas
+// ──────────────────────────────────────────────────────────────
 
-export interface GeoBoundary {
-  northEast: GeoLocation
-  southWest: GeoLocation
-}
+export const GeoLocationSchema = z.object({
+  lat: z.number().min(-90).max(90),
+  lon: z.number().min(-180).max(180),
+})
 
-export interface GeoDirection {
-  bearing: number
-  direction: number // Changed from bearingNomalized
-  directionShort: GeoCardinalDirection
-  directionLong: GeoCardinalDirectionName
-}
+export const GeoRegionSchema = z.object({
+  center: GeoLocationSchema,
+  radius: z.number().positive(),
+})
 
-export type GeoCardinalDirection = keyof typeof CARDINAL_DEGREES
-export type GeoCardinalDirectionName = 'north' | 'northeast' | 'east' | 'southeast' | 'south' | 'southwest' | 'west' | 'northwest'
+export const GeoBoundarySchema = z.object({
+  northEast: GeoLocationSchema,
+  southWest: GeoLocationSchema,
+})
+
+export const GeoDirectionSchema = z.object({
+  bearing: z.number(),
+  direction: z.number(),
+  directionShort: z.enum(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']),
+  directionLong: z.enum(['north', 'northeast', 'east', 'southeast', 'south', 'southwest', 'west', 'northwest']),
+})
+
+// ──────────────────────────────────────────────────────────────
+// TypeScript Types (Inferred from Zod)
+// ──────────────────────────────────────────────────────────────
+
+export type GeoLocation = z.infer<typeof GeoLocationSchema>
+export type GeoRegion = z.infer<typeof GeoRegionSchema>
+export type GeoBoundary = z.infer<typeof GeoBoundarySchema>
+export type GeoDirection = z.infer<typeof GeoDirectionSchema>
+
+export type GeoCardinalDirection = GeoDirection['directionShort']
+export type GeoCardinalDirectionName = GeoDirection['directionLong']
 
 export const CARDINAL_DEGREES = {
   N: 0,

@@ -3,6 +3,7 @@ import { ERROR_CODES, Result } from '@shared/contracts/'
 import { Context } from 'oak'
 import { AuthContext, createAuthMiddleware, createPublicContext } from './authMiddleware.ts'
 import type { OakRouteHandler } from './types.ts'
+import { validateRequest, type RouteSchemas } from './validation.ts'
 
 type RequestOptions<Params, Body, Query> = {
   context: AuthContext
@@ -14,19 +15,40 @@ type RequestOptions<Params, Body, Query> = {
 type HandlerFunction<T, Params, Body, Query> = (request: RequestOptions<Params, Body, Query>) => Promise<Result<T>>
 
 /**
+ * Options for request handler with optional Zod validation
+ */
+interface RequestHandlerOptions<TBody = any, TParams = any, TQuery = any> {
+  /** Zod schemas for validation */
+  schemas?: RouteSchemas<TBody, TParams, TQuery>
+}
+
+/**
  * Factory to create request handler with account application access
  */
 export const createAsyncRequestHandler = (accountApplication: AccountApplicationActions) => {
   const authMiddleware = createAuthMiddleware(accountApplication)
 
   /**
-   * Creates an async request handler for Oak routes.
+   * Creates an async request handler for Oak routes with optional Zod validation.
    * - <T = Result Type, TParams = Request Parameters, TBody = Request Body, TQuery = Request Query>
    */
   // deno-lint-ignore no-explicit-any
   return <T = any, TParams = any, TBody = any, TQuery = any>(
-    handler: HandlerFunction<T, TParams, TBody, TQuery>
+    handlerOrOptions: HandlerFunction<T, TParams, TBody, TQuery> | RequestHandlerOptions<TBody, TParams, TQuery>,
+    maybeHandler?: HandlerFunction<T, TParams, TBody, TQuery>
   ): OakRouteHandler => {
+    // Determine if using validation or not
+    let handler: HandlerFunction<T, TParams, TBody, TQuery>
+    let options: RequestHandlerOptions<TBody, TParams, TQuery> | undefined
+
+    if (typeof handlerOrOptions === 'function') {
+      handler = handlerOrOptions
+      options = undefined
+    } else {
+      handler = maybeHandler!
+      options = handlerOrOptions
+    }
+
     return async (ctx: Context, params: Record<string, string>, isPublic: boolean) => {
       try {
         let authContext: AuthContext
@@ -59,7 +81,32 @@ export const createAsyncRequestHandler = (accountApplication: AccountApplication
         ctx.request.url.searchParams.forEach((value, key) => {
           queryParams[key] = value
         })
-        const query = queryParams as TQuery
+        let query = queryParams as TQuery
+
+        // Validate request if schemas provided
+        if (options?.schemas) {
+          const validationResult = validateRequest(
+            { body, params, query },
+            options.schemas
+          )
+
+          if (!validationResult.success) {
+            ctx.response.status = 400
+            ctx.response.body = {
+              success: false,
+              error: validationResult.error,
+              timestamp: new Date().toISOString(),
+            }
+            return
+          }
+
+          // Use validated data
+          if (validationResult.data) {
+            body = validationResult.data.body as TBody
+            params = validationResult.data.params as any ?? params
+            query = validationResult.data.query as TQuery ?? query
+          }
+        }
 
         const result = await handler({
           context: authContext,

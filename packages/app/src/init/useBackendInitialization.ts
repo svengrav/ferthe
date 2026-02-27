@@ -1,10 +1,16 @@
-import { useEffect } from 'react'
-import { createApiContext } from '../api'
+import { APIContext, createApiContext } from '../api'
 import { config } from '../config'
 import { getSession } from '../features/account'
-import { useAppContextStore } from '../shared/stores/appContextStore'
 import { logger } from '../shared/utils/logger'
 import { useInitStore } from './useInitializationPipeline'
+import { useEffect } from 'react'
+
+// Module-level ref so useAppContextInitialization can access the created context
+let _apiContext: APIContext | null = null
+
+export function getBackendApiContext(): APIContext | null {
+  return _apiContext
+}
 
 /**
  * Hook that creates the API context and performs backend health check.
@@ -18,15 +24,13 @@ export function useBackendInitialization() {
       try {
         logger.log('[BackendInit] Creating API context...')
 
-        // Create API Context
         const api = createApiContext({
           getAccountSession: getSession,
           apiEndpoint: config.api.endpoint,
           timeout: config.api.timeout,
         })
 
-        // Store API context globally
-        useAppContextStore.getState().setApi(api)
+        _apiContext = api
 
         // Backend Health Check - wait until available
         logger.log('[BackendInit] Checking backend status...')

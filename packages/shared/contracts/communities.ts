@@ -1,7 +1,92 @@
-import { z } from 'zod';
-import { AccountContext, AccountPublicProfile } from './accounts.ts';
-import { Discovery } from './discoveries.ts';
-import { Result } from './results.ts';
+import { z } from 'zod'
+import { AccountContext } from './accounts.ts'
+import { Discovery } from './discoveries.ts'
+import { Result } from './results.ts'
+
+// ──────────────────────────────────────────────────────────────
+// Zod Schemas (Source of Truth)
+// ──────────────────────────────────────────────────────────────
+
+/**
+ * Community schema
+ */
+export const CommunitySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  trailIds: z.array(z.string()),
+  createdBy: z.string(),
+  inviteCode: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+})
+
+/**
+ * Community member schema
+ */
+export const CommunityMemberSchema = z.object({
+  id: z.string(),
+  communityId: z.string(),
+  accountId: z.string(),
+  joinedAt: z.date(),
+})
+
+/**
+ * Community member with profile schema
+ */
+export const CommunityMemberWithProfileSchema = CommunityMemberSchema.extend({
+  profile: z.any(), // AccountPublicProfile - already migrated
+})
+
+/**
+ * Shared discovery schema
+ */
+export const SharedDiscoverySchema = z.object({
+  id: z.string(),
+  discoveryId: z.string(),
+  communityId: z.string(),
+  sharedBy: z.string(),
+  sharedAt: z.date(),
+})
+
+/**
+ * Community discovery stats schema
+ */
+export const CommunityDiscoveryStatsSchema = z.object({
+  discoveryId: z.string(),
+  communityId: z.string(),
+  discoveredBy: z.string(),
+  rank: z.number().int(),
+  totalDiscoverers: z.number().int(),
+  averageRating: z.number(),
+  ratingCount: z.number().int(),
+})
+
+/**
+ * Validation schema for creating a community
+ */
+export const createCommunitySchema = z.object({
+  name: z.string().min(3, 'Name must be at least 3 characters').max(50, 'Name must be at most 50 characters'),
+  trailId: z.string().min(1, 'Trail selection is required'),
+})
+
+// ──────────────────────────────────────────────────────────────
+// TypeScript Types (Inferred from Zod Schemas)
+// ──────────────────────────────────────────────────────────────
+
+export type Community = z.infer<typeof CommunitySchema>
+export type CommunityMember = z.infer<typeof CommunityMemberSchema>
+export type CommunityMemberWithProfile = z.infer<typeof CommunityMemberWithProfileSchema>
+export type SharedDiscovery = z.infer<typeof SharedDiscoverySchema>
+export type CommunityDiscoveryStats = z.infer<typeof CommunityDiscoveryStatsSchema>
+export type CreateCommunityInput = z.infer<typeof createCommunitySchema>
+
+// ──────────────────────────────────────────────────────────────
+// Application Contract (unchanged)
+// ──────────────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────
+// Application Contract (unchanged)
+// ──────────────────────────────────────────────────────────────
 
 /**
  * Application contract for managing communities.
@@ -20,69 +105,3 @@ export interface CommunityApplicationContract {
   unshareDiscovery: (context: AccountContext, discoveryId: string, communityId: string) => Promise<Result<void>>
   getSharedDiscoveries: (context: AccountContext, communityId: string) => Promise<Result<Discovery[]>>
 }
-
-/**
- * Represents a community in the application.
- * A community is a group of users who share discoveries.
- */
-export interface Community {
-  id: string
-  name: string
-  trailIds: string[] // Trails that belong to this community (initially max 1)
-  createdBy: string
-  inviteCode: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-/**
- * Represents a member of a community.
- */
-export interface CommunityMember {
-  id: string // Composite key: communityId-accountId
-  communityId: string
-  accountId: string
-  joinedAt: Date
-}
-
-/**
- * Community member enriched with public profile data.
- */
-export interface CommunityMemberWithProfile extends CommunityMember {
-  profile: AccountPublicProfile
-}
-
-/**
- * Represents a discovery shared within a community.
- * Separates private discoveries from community-shared ones.
- */
-export interface SharedDiscovery {
-  id: string // Composite key: communityId-discoveryId
-  discoveryId: string
-  communityId: string
-  sharedBy: string // accountId who shared it
-  sharedAt: Date
-}
-
-/**
- * Statistics for a discovery within a community context.
- */
-export interface CommunityDiscoveryStats {
-  discoveryId: string
-  communityId: string
-  discoveredBy: string // accountId
-  rank: number // Which user number discovered this spot in the community
-  totalDiscoverers: number // Total number of community members who discovered this
-  averageRating: number // Average rating (0-5, 0 if no ratings)
-  ratingCount: number // Total number of ratings
-}
-
-/**
- * Validation schema for creating a community.
- */
-export const createCommunitySchema = z.object({
-  name: z.string().min(3, 'Name must be at least 3 characters').max(50, 'Name must be at most 50 characters'),
-  trailId: z.string().min(1, 'Trail selection is required'),
-})
-
-export type CreateCommunityInput = z.infer<typeof createCommunitySchema>

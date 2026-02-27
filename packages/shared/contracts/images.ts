@@ -1,5 +1,41 @@
+import { z } from 'zod'
 import { AccountContext } from './accounts.ts'
 import { Result } from './results.ts'
+
+// ──────────────────────────────────────────────────────────────
+// Zod Schemas
+// ──────────────────────────────────────────────────────────────
+
+/**
+ * Types of images used in the application
+ */
+export const ImageTypeSchema = z.enum([
+  'discovery',
+  'spot',
+  'trail',
+  'trail-preview',
+  'trail-surface',
+  'trail-viewport',
+  'trail-overview',
+  'account-avatar',
+])
+
+/**
+ * Image reference used in domain entities
+ */
+export const ImageReferenceSchema = z.object({
+  id: z.string(), // The blob hash (CUID2)
+  url: z.string().url(), // SAS-signed URL for read access
+  label: z.string().optional(), // Optional label for text fallback (first 2 chars displayed)
+})
+
+export const ImageUploadResultSchema = z.object({
+  blobPath: z.string(),
+})
+
+// ──────────────────────────────────────────────────────────────
+// TypeScript Types (Inferred from Zod)
+// ──────────────────────────────────────────────────────────────
 
 /**
  * Types of images used in the application.
@@ -11,29 +47,15 @@ import { Result } from './results.ts'
  *  - trail-viewport: Viewport background (static, does not move in Canvas mode)
  *  - trail-overview: Overview mode background (full trail boundary in Overview mode)
  */
-export type ImageType =
-  | 'discovery'
-  | 'spot'
-  | 'trail'
-  | 'trail-preview'
-  | 'trail-surface'
-  | 'trail-viewport'
-  | 'trail-overview'
-  | 'account-avatar'
+export type ImageType = z.infer<typeof ImageTypeSchema>
 
 /**
  * Image reference used in domain entities.
  * Contains the unique identifier and the signed URL for accessing the image.
  */
-export interface ImageReference {
-  id: string // The blob hash (CUID2)
-  url: string // SAS-signed URL for read access
-  label?: string // Optional label for text fallback (first 2 chars displayed)
-}
+export type ImageReference = z.infer<typeof ImageReferenceSchema>
 
-export interface ImageUploadResult {
-  blobPath: string
-}
+export type ImageUploadResult = z.infer<typeof ImageUploadResultSchema>
 
 /**
  * Application contract for managing image uploads and deletions.
