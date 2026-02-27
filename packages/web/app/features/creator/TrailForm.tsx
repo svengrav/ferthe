@@ -62,7 +62,9 @@ export function TrailForm(
   const [mapImageBase64, setMapImageBase64] = useState<string | undefined>(
     initialData?.mapImageBase64,
   );
-  const [canvasImageBase64, setCanvasImageBase64] = useState<string | undefined>(
+  const [canvasImageBase64, setCanvasImageBase64] = useState<
+    string | undefined
+  >(
     initialData?.canvasImageBase64,
   );
   const [boundary, setBoundary] = useState(
