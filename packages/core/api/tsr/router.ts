@@ -84,8 +84,8 @@ export function createApiRouter(ctx: CoreContext) {
 
     // ── System (public) ──────────────────────────────────────────────────────
     system: {
-      getManifest: async () => ({ status: 200 as const, body: { success: true as const, data: manifest } }),
-      getStatus: async () => ({ status: 200 as const, body: { success: true as const, data: { status: 'ok', message: 'Ferthe Core API is running' } } }),
+      getManifest: () => ({ status: 200 as const, body: { success: true as const, data: manifest } }),
+      getStatus: () => ({ status: 200 as const, body: { success: true as const, data: { status: 'ok', message: 'Ferthe Core API is running' } } }),
     },
 
     // ── Spots ────────────────────────────────────────────────────────────────
@@ -348,7 +348,7 @@ export function createApiHandler(ctx: CoreContext, origins: string[]) {
       origin: origins.length > 0 ? origins : '*',
       credentials: true,
     },
-    errorHandler: async (error: unknown) => {
+    errorHandler: (error: unknown) => {
       logger.error('[router] Unhandled error in route handler:', error instanceof Error ? error.stack : error)
       return undefined // let ts-rest return the default 500
     },

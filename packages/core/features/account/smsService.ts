@@ -1,5 +1,6 @@
 // Phone hash service for secure phone number storage
 // Using SHA-256 with hex encoding for simple, portable hash storage
+import { z } from 'zod'
 
 const DEVELOPER_HASH_SALT = 'ferthe-developer-salt'
 
@@ -14,8 +15,29 @@ interface SMSServiceOptions {
   phoneSalt?: string
 }
 
+const phoneNumberSchema = z.string().trim().min(1, 'Phone number is required').refine(
+  (phone) => {
+    const digits = phone.replace(/\D/g, '')
+    if (digits.length < 7 || digits.length > 15) return false
+    if (phone.startsWith('+')) return /^\+[1-9]\d{6,14}$/.test(phone)
+    return (
+      /^01[5-9]\d{8,9}$/.test(digits) ||   // German mobile
+      /^0[2-9]\d{7,11}$/.test(digits) ||   // German landline
+      /^[2-9]\d{9}$/.test(digits)           // North America
+    )
+  },
+  { message: 'Invalid phone number format' }
+)
+
 export function createSMSService(options: SMSServiceOptions = {}): SMSService {
   const { phoneSalt = DEVELOPER_HASH_SALT } = options
+
+  const validatePhoneNumber = (phoneNumber: string): { valid: boolean; error?: string } => {
+    const result = phoneNumberSchema.safeParse(phoneNumber)
+    return result.success
+      ? { valid: true }
+      : { valid: false, error: result.error.issues[0]?.message }
+  }
 
   const createPhoneHash = async (phoneNumber: string): Promise<string> => {
     try {
@@ -55,55 +77,6 @@ export function createSMSService(options: SMSServiceOptions = {}): SMSService {
       console.error('Error verifying phone hash:', error)
       return false
     }
-  }
-
-  const validatePhoneNumber = (phoneNumber: string): { valid: boolean; error?: string } => {
-    // Remove all non-digit characters for validation
-    const cleanPhone = phoneNumber.replace(/\D/g, '')
-
-    // Check if phone number is empty
-    if (!phoneNumber.trim()) {
-      return { valid: false, error: 'Phone number is required' }
-    }
-
-    // Check for minimum length (at least 7 digits for local numbers)
-    if (cleanPhone.length < 7) {
-      return { valid: false, error: 'Phone number too short (minimum 7 digits)' }
-    }
-
-    // Check for maximum length (max 15 digits per E.164 standard)
-    if (cleanPhone.length > 15) {
-      return { valid: false, error: 'Phone number too long (maximum 15 digits)' }
-    }
-
-    // Check for valid international format (starts with +)
-    const internationalFormat = /^\+[1-9]\d{6,14}$/
-    if (phoneNumber.startsWith('+')) {
-      if (!internationalFormat.test(phoneNumber)) {
-        return { valid: false, error: 'Invalid international format (use +[country code][number])' }
-      }
-      return { valid: true }
-    }
-
-    // Check for German mobile format (starts with 01)
-    const germanMobileFormat = /^01[5-9]\d{8,9}$/
-    if (germanMobileFormat.test(cleanPhone)) {
-      return { valid: true }
-    }
-
-    // Check for German landline format (area code + number)
-    const germanLandlineFormat = /^0[2-9]\d{7,11}$/
-    if (germanLandlineFormat.test(cleanPhone)) {
-      return { valid: true }
-    }
-
-    // Check for US/Canada format (10 digits)
-    const northAmericaFormat = /^[2-9]\d{9}$/
-    if (northAmericaFormat.test(cleanPhone)) {
-      return { valid: true }
-    }
-
-    return { valid: false, error: 'Invalid phone number format' }
   }
 
   const normalizePhoneNumber = (phoneNumber: string, defaultCountryCode: string = '+49'): string => {
