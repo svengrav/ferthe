@@ -129,6 +129,7 @@ export const CreateTrailRequestSchema = TrailSchema.omit({
 }).extend({
   imageBase64: z.string().optional(),
   mapImageBase64: z.string().optional(),
+  canvasImageBase64: z.string().optional(),
 })
 
 /**
@@ -146,6 +147,7 @@ export const UpdateTrailRequestSchema = TrailSchema.pick({
 }).extend({
   imageBase64: z.string().optional(),
   mapImageBase64: z.string().optional(),
+  canvasImageBase64: z.string().optional(),
 }).partial()
 
 export type DiscoveryMode = z.infer<typeof DiscoveryModeSchema>

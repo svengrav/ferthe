@@ -317,7 +317,7 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
       try {
         const id = createCuid2()
         const slug = createSlug(trailData.name)
-        const extra = trailData as unknown as { imageBase64?: string; mapImageBase64?: string }
+        const extra = trailData as unknown as { imageBase64?: string; mapImageBase64?: string; canvasImageBase64?: string }
 
         // Process base64 trail image if provided
         let imageBlobPath: string | undefined
@@ -337,6 +337,15 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
           mapImageBlobPath = trailData.map.image?.url ? extractBlobPathFromUrl(trailData.map.image.url) : undefined
         }
 
+        // Process base64 canvas (viewport) image if provided
+        let canvasImageBlobPath: string | undefined
+        if (extra.canvasImageBase64) {
+          const result = await imageApplication.processAndStore(context, 'trail-canvas', 'pending', extra.canvasImageBase64, {})
+          if (result.success && result.data) canvasImageBlobPath = result.data.blobPath
+        } else {
+          canvasImageBlobPath = trailData.viewport?.image?.url ? extractBlobPathFromUrl(trailData.viewport.image.url) : undefined
+        }
+
         // Convert Trail input to StoredTrail (extract blob paths from URLs)
         const trailEntity: StoredTrail = {
           id,
@@ -344,7 +353,9 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
           name: trailData.name,
           description: trailData.description,
           map: { imageBlobPath: mapImageBlobPath },
-          viewport: trailData.viewport ? {
+          viewport: canvasImageBlobPath ? {
+            imageBlobPath: canvasImageBlobPath,
+          } : trailData.viewport ? {
             imageBlobPath: trailData.viewport.image?.url ? extractBlobPathFromUrl(trailData.viewport.image.url) : undefined,
           } : undefined,
           overview: trailData.overview ? {
@@ -378,7 +389,7 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
         if (!existingResult.success || !existingResult.data) {
           return { success: false, error: { message: 'Trail not found', code: 'TRAIL_NOT_FOUND' } }
         }
-        const extra = trailData as unknown as { imageBase64?: string; mapImageBase64?: string }
+        const extra = trailData as unknown as { imageBase64?: string; mapImageBase64?: string; canvasImageBase64?: string }
 
         const updates: Partial<StoredTrail> = {
           name: trailData.name,
@@ -398,6 +409,14 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
           const result = await imageApplication.processAndStore(context, 'trail-surface', trailId, extra.mapImageBase64, {})
           if (result.success && result.data) {
             updates.map = { ...(existingResult.data.map ?? {}), imageBlobPath: result.data.blobPath }
+          }
+        }
+
+        // Process base64 canvas (viewport) image if provided
+        if (extra.canvasImageBase64) {
+          const result = await imageApplication.processAndStore(context, 'trail-canvas', trailId, extra.canvasImageBase64, {})
+          if (result.success && result.data) {
+            updates.viewport = { ...(existingResult.data.viewport ?? {}), imageBlobPath: result.data.blobPath }
           }
         }
 

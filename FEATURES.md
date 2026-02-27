@@ -1,3 +1,5 @@
+> Feature specifications have moved to [docs/features/](docs/features/).
+
 ## UX
 
 - UX Feedback like vibrations, sounds, and visual effects are used to enhance the user experience and provide feedback on interactions. For example, when you discover a spot, you might feel a vibration and see a visual effect to celebrate the achievement.

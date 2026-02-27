@@ -23,6 +23,7 @@ export interface Trail {
   description?: string;
   image?: { id: string; url: string };
   map?: { image?: { id: string; url: string } };
+  viewport?: { image?: { id: string; url: string } };
   boundary: Boundary;
   spotIds?: string[];
   options?: { discoveryMode?: 'free' | 'sequence' };

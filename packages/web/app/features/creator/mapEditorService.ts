@@ -68,6 +68,7 @@ interface CreateTrailData {
   discoveryMode: 'free' | 'sequence';
   imageBase64?: string;
   mapImageBase64?: string;
+  canvasImageBase64?: string;
 }
 
 interface UpdateTrailData {
@@ -77,6 +78,7 @@ interface UpdateTrailData {
   discoveryMode: 'free' | 'sequence';
   imageBase64?: string;
   mapImageBase64?: string;
+  canvasImageBase64?: string;
 }
 
 const DEFAULT_TRAIL_OPTIONS = {
@@ -125,6 +127,7 @@ export const createTrail = async (data: CreateTrailData) => {
     map: {},
     imageBase64: data.imageBase64,
     mapImageBase64: data.mapImageBase64,
+    canvasImageBase64: data.canvasImageBase64,
     options: { ...DEFAULT_TRAIL_OPTIONS, discoveryMode: data.discoveryMode },
   });
 };
@@ -137,6 +140,7 @@ export const updateTrail = async (id: string, data: UpdateTrailData) => {
     boundary: data.boundary,
     imageBase64: data.imageBase64,
     mapImageBase64: data.mapImageBase64,
+    canvasImageBase64: data.canvasImageBase64,
     options: { ...DEFAULT_TRAIL_OPTIONS, discoveryMode: data.discoveryMode },
   });
 };

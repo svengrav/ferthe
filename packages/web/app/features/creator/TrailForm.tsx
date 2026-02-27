@@ -14,6 +14,7 @@ interface TrailFormData {
   discoveryMode: "free" | "sequence";
   imageBase64?: string;
   mapImageBase64?: string;
+  canvasImageBase64?: string;
   boundary: {
     northEast: { lat: number; lon: number };
     southWest: { lat: number; lon: number };
@@ -26,6 +27,8 @@ interface TrailFormProps {
   existingImageUrl?: string;
   /** Existing map image URL (edit mode) */
   existingMapImageUrl?: string;
+  /** Existing canvas background image URL (edit mode) */
+  existingCanvasImageUrl?: string;
   boundary?: TrailFormData["boundary"];
   onBoundaryChange?: (boundary: TrailFormData["boundary"]) => void;
   onDiscoveryModeChange?: (mode: "free" | "sequence") => void;
@@ -38,6 +41,7 @@ export function TrailForm(
     initialData,
     existingImageUrl,
     existingMapImageUrl,
+    existingCanvasImageUrl,
     boundary: externalBoundary,
     onBoundaryChange,
     onDiscoveryModeChange,
@@ -57,6 +61,9 @@ export function TrailForm(
   );
   const [mapImageBase64, setMapImageBase64] = useState<string | undefined>(
     initialData?.mapImageBase64,
+  );
+  const [canvasImageBase64, setCanvasImageBase64] = useState<string | undefined>(
+    initialData?.canvasImageBase64,
   );
   const [boundary, setBoundary] = useState(
     externalBoundary ?? initialData?.boundary ?? {
@@ -79,6 +86,7 @@ export function TrailForm(
 
   const displayImage = imageBase64 ?? existingImageUrl;
   const displayMapImage = mapImageBase64 ?? existingMapImageUrl;
+  const displayCanvasImage = canvasImageBase64 ?? existingCanvasImageUrl;
 
   // Aspect ratio of map image must match the visual rectangle on the Mercator map.
   // Longitude degrees are shorter than latitude degrees by factor cos(lat),
@@ -112,6 +120,7 @@ export function TrailForm(
         discoveryMode,
         imageBase64,
         mapImageBase64,
+        canvasImageBase64,
         boundary,
       });
     } catch (err) {
@@ -137,6 +146,14 @@ export function TrailForm(
         value={displayMapImage}
         onChange={setMapImageBase64}
         aspectRatio={mapImageAspectRatio}
+      />
+
+      {/* Canvas background image — shown behind the navigation canvas */}
+      <ImageUpload
+        label="Canvas Image"
+        value={displayCanvasImage}
+        onChange={setCanvasImageBase64}
+        aspectRatio={1}
       />
 
       <FormField label="Name">

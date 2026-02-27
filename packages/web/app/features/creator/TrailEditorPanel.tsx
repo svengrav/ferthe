@@ -158,6 +158,7 @@ export function TrailEditorPanel(props: TrailEditorPanelProps) {
           }}
           existingImageUrl={trail.image?.url}
           existingMapImageUrl={trail.map?.image?.url}
+          existingCanvasImageUrl={trail.viewport?.image?.url}
           boundary={editableBounds ?? trail.boundary}
           onBoundaryChange={handleBoundaryChange}
           onDiscoveryModeChange={setCurrentDiscoveryMode}
