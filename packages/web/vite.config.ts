@@ -16,12 +16,12 @@ export default defineConfig({
   server: {
     port: 7002,
     proxy: {
-      '/api': {
-        target: 'http://localhost:7001',
+      '/core/api': {
+        target: 'http://localhost:7000',
         changeOrigin: true,
       },
-      '/admin/api': {
-        target: 'http://localhost:7001',
+      '/content': {
+        target: 'http://localhost:7000',
         changeOrigin: true,
       },
       '/blog/images': {

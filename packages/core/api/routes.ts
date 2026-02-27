@@ -81,10 +81,6 @@ const CreateTrailBodySchema = TrailSchema.omit({ id: true, createdAt: true, upda
 
 const UpdateTrailBodySchema = TrailSchema.pick({ name: true, description: true, boundary: true }).partial().passthrough()
 
-const AddSpotToTrailSchema = z.object({
-  order: z.number().int().optional(),
-})
-
 const TrailRatingBodySchema = z.object({
   rating: z.number().int().min(1).max(5),
 })
@@ -185,8 +181,10 @@ const createRoutes = (ctx: APIContract): Route[] => {
       handler: asyncRequestHandler(async () => {
         return {
           success: true,
-          status: 'ok',
-          message: 'Ferthe Core API is running',
+          data: {
+            status: 'ok',
+            message: 'Ferthe Core API is running',
+          },
         }
       }),
     },
@@ -581,16 +579,16 @@ const createRoutes = (ctx: APIContract): Route[] => {
     {
       method: 'POST',
       version: 'v1',
-      url: '/trail/trails/:trailId/spots/:spotId',
-      handler: asyncRequestHandler<StoredTrailSpot, { trailId: string; spotId: string }, { order?: number }>(
+      url: '/trail/trails/:trailId/spots',
+      handler: asyncRequestHandler<StoredTrailSpot, { trailId: string }, { spotId: string; order?: number }>(
         {
           schemas: {
-            params: z.object({ trailId: z.string(), spotId: z.string() }),
-            body: AddSpotToTrailSchema,
+            params: z.object({ trailId: z.string() }),
+            body: z.object({ spotId: z.string(), order: z.number().int().optional() }),
           },
         },
         async ({ params, context, body }) => {
-          return await trailApplication.addSpotToTrail(context, params!.trailId, params!.spotId, body?.order)
+          return await trailApplication.addSpotToTrail(context, params!.trailId, body!.spotId, body?.order)
         }
       ),
     },

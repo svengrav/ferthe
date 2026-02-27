@@ -8,6 +8,7 @@ import {
   DeviceToken,
   FirebaseConfig,
   Result,
+  SessionValidationResult,
   SMSCodeRequest,
   SMSVerificationResult,
 } from '@shared/contracts'

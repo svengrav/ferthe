@@ -1,10 +1,10 @@
-import { createOakServer } from '@core/api/oak/server.ts'
+import { createApiHandler } from '@core/api/tsr/router.ts'
 import { createConfig } from '@core/config/index.ts'
 import { createTwilioSMSConnector } from '@core/connectors/smsConnector.ts'
 import { createAzureStorageConnector } from '@core/connectors/storageConnector.ts'
 import { createCoreContext } from '@core/index.ts'
+import { logger } from '@core/shared/logger.ts'
 import { createStoreConnector } from '@core/store/storeFactory.ts'
-import createRoutes from './api/routes.ts'
 
 /**
  * Main entry point for ferthe-core server
@@ -31,23 +31,20 @@ const run = async () => {
       {
         sasExpiryMinutes: constants.storage.sasExpiryMinutes,
         storageVersion: 'v1',
-        imageFolder: 'images'
+        imageFolder: 'images',
       }
     ),
   }
 
   const context = createCoreContext(config, connectors)
+  const handler = createApiHandler(context, constants.api.origins)
 
-  const server = createOakServer({
-    host: constants.api.host,
-    port: constants.api.port,
-    prefix: constants.api.prefix,
-    logger: true,
-    origins: constants.api.origins,
-    routes: createRoutes(context),
-  })
+  logger.info(`Starting server on ${constants.api.host}:${constants.api.port}`)
 
-  await server.start()
+  Deno.serve(
+    { port: constants.api.port, hostname: constants.api.host },
+    handler,
+  )
 }
 
 run()

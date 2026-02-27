@@ -67,232 +67,231 @@ export function createApiClient(config: TsRestClientConfig) {
 
   return {
     system: {
-      getManifest: () => c.getManifest({}).then(toResult),
-      // Returns raw response (shape: { success, status, message } — no `data` field)
-      getStatus: () => c.getStatus({}),
+      getManifest: () => c.system.getManifest({}).then(toResult),
+      getStatus: () => c.system.getStatus({}).then(toResult),
     },
 
     spots: {
       list: (query?: { limit?: number; offset?: number; orderBy?: string }) =>
-        c.listSpots({ query: query ?? {} }).then(r => toPaginatedResult(r, query)),
+        c.spots.listSpots({ query: query ?? {} }).then(r => toPaginatedResult(r, query)),
 
       listPreviews: (query?: { limit?: number; offset?: number; ids?: string }) =>
-        c.listSpotPreviews({ query: query ?? {} }).then(r => toPaginatedResult(r, query)),
+        c.spots.listSpotPreviews({ query: query ?? {} }).then(r => toPaginatedResult(r, query)),
 
       get: (id: string) =>
-        c.getSpot({ params: { id } }).then(toResult),
+        c.spots.getSpot({ params: { id } }).then(toResult),
 
       create: (body: CreateSpotRequest) =>
-        c.createSpot({ body }).then(toResult),
+        c.spots.createSpot({ body }).then(toResult),
 
       update: (id: string, body: UpdateSpotRequest) =>
-        c.updateSpot({ params: { id }, body }).then(toResult),
+        c.spots.updateSpot({ params: { id }, body }).then(toResult),
 
       delete: (id: string) =>
-        c.deleteSpot({ params: { id } }).then(toResult),
+        c.spots.deleteSpot({ params: { id } }).then(toResult),
 
       rate: (id: string, rating: number) =>
-        c.rateSpot({ params: { id }, body: { rating } }).then(toResult),
+        c.spots.rateSpot({ params: { id }, body: { rating } }).then(toResult),
 
       removeRating: (spotId: string) =>
-        c.removeSpotRating({ params: { spotId } }).then(toResult),
+        c.spots.removeSpotRating({ params: { spotId } }).then(toResult),
 
       getRatingSummary: (id: string) =>
-        c.getSpotRatingSummary({ params: { id } }).then(toResult),
+        c.spots.getSpotRatingSummary({ params: { id } }).then(toResult),
 
       getByIds: (ids: string[]) =>
-        c.getSpotsByIds({ body: { ids } }).then(toResult),
+        c.spots.getSpotsByIds({ body: { ids } }).then(toResult),
     },
 
     trails: {
       list: (query?: { limit?: number; offset?: number; createdBy?: string }) =>
-        c.listTrails({ query: query ?? {} }).then(r => toPaginatedResult(r, query)),
+        c.trails.listTrails({ query: query ?? {} }).then(r => toPaginatedResult(r, query)),
 
       get: (id: string) =>
-        c.getTrail({ params: { id } }).then(toResult),
+        c.trails.getTrail({ params: { id } }).then(toResult),
 
       create: (body: CreateTrailRequest) =>
-        c.createTrail({ body }).then(toResult),
+        c.trails.createTrail({ body }).then(toResult),
 
       update: (id: string, body: UpdateTrailRequest) =>
-        c.updateTrail({ params: { id }, body }).then(toResult),
+        c.trails.updateTrail({ params: { id }, body }).then(toResult),
 
       delete: (id: string) =>
-        c.deleteTrail({ params: { id } }).then(toResult),
+        c.trails.deleteTrail({ params: { id } }).then(toResult),
 
       getSpots: (trailId: string) =>
-        c.getTrailSpots({ params: { trailId } }).then(toResult),
+        c.trails.getTrailSpots({ params: { trailId } }).then(toResult),
 
       getStats: (trailId: string) =>
-        c.getTrailStats({ params: { trailId } }).then(toResult),
+        c.trails.getTrailStats({ params: { trailId } }).then(toResult),
 
       addSpot: (trailId: string, spotId: string, order?: number) =>
-        c.addSpotToTrail({ params: { trailId, spotId }, body: { order } }).then(toResult),
+        c.trails.addSpotToTrail({ params: { trailId }, body: { spotId, order } }).then(toResult),
 
       removeSpot: (trailId: string, spotId: string) =>
-        c.removeSpotFromTrail({ params: { trailId, spotId } }).then(toResult),
+        c.trails.removeSpotFromTrail({ params: { trailId, spotId } }).then(toResult),
 
       getRatingSummary: (trailId: string) =>
-        c.getTrailRatingSummary({ params: { trailId } }).then(toResult),
+        c.trails.getTrailRatingSummary({ params: { trailId } }).then(toResult),
 
       rate: (trailId: string, rating: number) =>
-        c.rateTrail({ params: { trailId }, body: { rating } }).then(toResult),
+        c.trails.rateTrail({ params: { trailId }, body: { rating } }).then(toResult),
 
       removeRating: (trailId: string) =>
-        c.removeTrailRating({ params: { trailId } }).then(toResult),
+        c.trails.removeTrailRating({ params: { trailId } }).then(toResult),
     },
 
     discovery: {
       processLocation: (trailId: string, locationWithDirection: LocationWithDirection) =>
-        c.processLocation({ body: { trailId, locationWithDirection } }).then(toResult),
+        c.discovery.processLocation({ body: { trailId, locationWithDirection } }).then(toResult),
 
       list: (query?: { trailId?: string; limit?: number; offset?: number }) =>
-        c.listDiscoveries({ query: query ?? {} }).then(r => toPaginatedResult(r, query)),
+        c.discovery.listDiscoveries({ query: query ?? {} }).then(r => toPaginatedResult(r, query)),
 
       get: (id: string) =>
-        c.getDiscovery({ params: { id } }).then(toResult),
+        c.discovery.getDiscovery({ params: { id } }).then(toResult),
 
       listSpots: (query?: { trailId?: string; limit?: number; offset?: number }) =>
-        c.listDiscoveredSpots({ query: query ?? {} }).then(r => toPaginatedResult(r, query)),
+        c.discovery.listDiscoveredSpots({ query: query ?? {} }).then(r => toPaginatedResult(r, query)),
 
       getPreviewClues: (trailId: string) =>
-        c.getDiscoveredPreviewClues({ params: { trailId } }).then(toResult),
+        c.discovery.getDiscoveredPreviewClues({ params: { trailId } }).then(toResult),
 
       getTrail: (trailId: string) =>
-        c.getDiscoveryTrail({ params: { trailId } }).then(toResult),
+        c.discovery.getDiscoveryTrail({ params: { trailId } }).then(toResult),
 
       getProfile: () =>
-        c.getDiscoveryProfile({}).then(toResult),
+        c.discovery.getDiscoveryProfile({}).then(toResult),
 
       updateProfile: (body: DiscoveryProfileUpdateData) =>
-        c.updateDiscoveryProfile({ body }).then(toResult),
+        c.discovery.updateDiscoveryProfile({ body }).then(toResult),
 
       getStats: (discoveryId: string) =>
-        c.getDiscoveryStats({ params: { discoveryId } }).then(toResult),
+        c.discovery.getDiscoveryStats({ params: { discoveryId } }).then(toResult),
 
       getContent: (discoveryId: string) =>
-        c.getDiscoveryContent({ params: { discoveryId } }).then(toResult),
+        c.discovery.getDiscoveryContent({ params: { discoveryId } }).then(toResult),
 
       upsertContent: (discoveryId: string, body: UpsertDiscoveryContentRequest) =>
-        c.upsertDiscoveryContent({ params: { discoveryId }, body }).then(toResult),
+        c.discovery.upsertDiscoveryContent({ params: { discoveryId }, body }).then(toResult),
 
       deleteContent: (discoveryId: string) =>
-        c.deleteDiscoveryContent({ params: { discoveryId } }).then(toResult),
+        c.discovery.deleteDiscoveryContent({ params: { discoveryId } }).then(toResult),
 
       createWelcome: (location: GeoLocation) =>
-        c.createWelcomeDiscovery({ body: { location } }).then(toResult),
+        c.discovery.createWelcomeDiscovery({ body: { location } }).then(toResult),
     },
 
     account: {
       requestSMSCode: (phoneNumber: string) =>
-        c.requestSMSCode({ body: { phoneNumber } }).then(toResult),
+        c.account.requestSMSCode({ body: { phoneNumber } }).then(toResult),
 
       verifySMSCode: (phoneNumber: string, code: string) =>
-        c.verifySMSCode({ body: { phoneNumber, code } }).then(toResult),
+        c.account.verifySMSCode({ body: { phoneNumber, code } }).then(toResult),
 
       getPublicProfile: (accountId: string) =>
-        c.getPublicProfile({ params: { accountId } }).then(toResult),
+        c.account.getPublicProfile({ params: { accountId } }).then(toResult),
 
       getPublicProfiles: (accountIds: string[]) =>
-        c.getPublicProfiles({ body: { accountIds } }).then(toResult),
+        c.account.getPublicProfiles({ body: { accountIds } }).then(toResult),
 
       getProfile: () =>
-        c.getAccountProfile({}).then(toResult),
+        c.account.getAccountProfile({}).then(toResult),
 
       updateProfile: (body: AccountUpdateData) =>
-        c.updateAccountProfile({ body }).then(toResult),
+        c.account.updateAccountProfile({ body }).then(toResult),
 
       uploadAvatar: (base64Data: string) =>
-        c.uploadAvatar({ body: { base64Data } }).then(toResult),
+        c.account.uploadAvatar({ body: { base64Data } }).then(toResult),
 
       validateSession: (sessionToken: string) =>
-        c.validateSession({ body: { sessionToken } }).then(toResult),
+        c.account.validateSession({ body: { sessionToken } }).then(toResult),
 
       revokeSession: (sessionToken: string) =>
-        c.revokeSession({ body: { sessionToken } }).then(toResult),
+        c.account.revokeSession({ body: { sessionToken } }).then(toResult),
 
       createLocalAccount: () =>
-        c.createLocalAccount({}).then(toResult),
+        c.account.createLocalAccount({}).then(toResult),
 
       upgradeToPhoneAccount: (phoneNumber: string, code: string) =>
-        c.upgradeToPhoneAccount({ body: { phoneNumber, code } }).then(toResult),
+        c.account.upgradeToPhoneAccount({ body: { phoneNumber, code } }).then(toResult),
 
       getFirebaseConfig: () =>
-        c.getFirebaseConfig({}).then(toResult),
+        c.account.getFirebaseConfig({}).then(toResult),
 
       registerDeviceToken: (token: string, platform?: 'ios' | 'android' | 'web') =>
-        c.registerDeviceToken({ body: { token, platform } }).then(toResult),
+        c.account.registerDeviceToken({ body: { token, platform } }).then(toResult),
 
       removeDeviceToken: (token: string) =>
-        c.removeDeviceToken({ body: { token } }).then(toResult),
+        c.account.removeDeviceToken({ body: { token } }).then(toResult),
     },
 
     community: {
       create: (name: string, trailIds?: string[]) =>
-        c.createCommunity({ body: { name, trailIds } }).then(toResult),
+        c.community.createCommunity({ body: { name, trailIds } }).then(toResult),
 
       join: (inviteCode: string) =>
-        c.joinCommunity({ body: { inviteCode } }).then(toResult),
+        c.community.joinCommunity({ body: { inviteCode } }).then(toResult),
 
       list: () =>
-        c.listCommunities({}).then(toResult),
+        c.community.listCommunities({}).then(toResult),
 
       get: (communityId: string) =>
-        c.getCommunity({ params: { communityId } }).then(toResult),
+        c.community.getCommunity({ params: { communityId } }).then(toResult),
 
       update: (communityId: string, body: { name?: string; trailIds?: string[] }) =>
-        c.updateCommunity({ params: { communityId }, body }).then(toResult),
+        c.community.updateCommunity({ params: { communityId }, body }).then(toResult),
 
       leave: (communityId: string) =>
-        c.leaveCommunity({ params: { communityId } }).then(toResult),
+        c.community.leaveCommunity({ params: { communityId } }).then(toResult),
 
       delete: (communityId: string) =>
-        c.removeCommunity({ params: { communityId } }).then(toResult),
+        c.community.removeCommunity({ params: { communityId } }).then(toResult),
 
       listMembers: (communityId: string) =>
-        c.listCommunityMembers({ params: { communityId } }).then(toResult),
+        c.community.listCommunityMembers({ params: { communityId } }).then(toResult),
 
       shareDiscovery: (communityId: string, discoveryId: string) =>
-        c.shareDiscovery({ params: { communityId, discoveryId } }).then(toResult),
+        c.community.shareDiscovery({ params: { communityId, discoveryId } }).then(toResult),
 
       unshareDiscovery: (communityId: string, discoveryId: string) =>
-        c.unshareDiscovery({ params: { communityId, discoveryId } }).then(toResult),
+        c.community.unshareDiscovery({ params: { communityId, discoveryId } }).then(toResult),
 
       getSharedDiscoveries: (communityId: string) =>
-        c.getSharedDiscoveries({ params: { communityId } }).then(toResult),
+        c.community.getSharedDiscoveries({ params: { communityId } }).then(toResult),
     },
 
     sensors: {
       listScans: (trailId?: string) =>
-        c.listScanEvents({ query: { trailId } }).then(r => toPaginatedResult(r)),
+        c.sensor.listScanEvents({ query: { trailId } }).then(r => toPaginatedResult(r)),
 
       createScan: (body?: { userPosition?: GeoLocation; trailId?: string }) =>
-        c.createScanEvent({ body: body ?? {} }).then(toResult),
+        c.sensor.createScanEvent({ body: body ?? {} }).then(toResult),
     },
 
     content: {
       getPage: (language: 'en' | 'de', page: string) =>
-        c.getContentPage({ params: { language, page } }).then(toResult),
+        c.content.getContentPage({ params: { language, page } }).then(toResult),
 
       listBlogPosts: (language: 'en' | 'de') =>
-        c.listBlogPosts({ params: { language } }).then(toResult),
+        c.content.listBlogPosts({ params: { language } }).then(toResult),
 
       getBlogPost: (language: 'en' | 'de', slug: string) =>
-        c.getBlogPost({ params: { language, slug } }).then(toResult),
+        c.content.getBlogPost({ params: { language, slug } }).then(toResult),
 
       submitFeedback: (body: FeedbackRequest) =>
-        c.submitFeedback({ body }).then(toResult),
+        c.content.submitFeedback({ body }).then(toResult),
     },
 
     composite: {
       getAccessibleSpots: (query?: { trailId?: string; limit?: number; offset?: number }) =>
-        c.getAccessibleSpots({ query: query ?? {} }).then(toResult),
+        c.composite.getAccessibleSpots({ query: query ?? {} }).then(toResult),
 
       getDiscoveryState: () =>
-        c.getDiscoveryState({}).then(toResult),
+        c.composite.getDiscoveryState({}).then(toResult),
 
       activateTrail: (trailId: string) =>
-        c.activateTrail({ body: { trailId } }).then(toResult),
+        c.composite.activateTrail({ body: { trailId } }).then(toResult),
     },
   }
 }

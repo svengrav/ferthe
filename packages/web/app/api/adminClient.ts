@@ -30,8 +30,8 @@ export const getAdminAccountId = (): string | null =>
 // ── API clients ────────────────────────────────────────────────────────────────
 
 export const api = createApiClient({
-  baseUrl: '/admin/api/v1',
+  baseUrl: '/core/api/v1',
   getAuthToken: getAdminToken,
 })
 
-export const contentApi = createApiClient({ baseUrl: '' })
+export const contentApi = createApiClient({ baseUrl: '/core/api/v1' })

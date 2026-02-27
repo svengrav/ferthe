@@ -10,6 +10,7 @@
   },
   "workspace": [
     "packages/web",
+    "packages/shared",
     "packages/core"
   ],
   "exclude": [

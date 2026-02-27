@@ -30,6 +30,9 @@ export function createConstants() {
     images: {
       maxSizeBytes: 3 * 1024 * 1024,
     },
+    content: {
+      dir: Deno.env.get('CONTENT_DIR') ?? '../web/content',
+    },
   }
 }
 

@@ -10,6 +10,7 @@ import { createCommunityApplication } from './features/community/communityApplic
 import { createAccountProfileComposite } from './features/composites/accountProfileComposite.ts'
 import { createDiscoveryStateComposite } from './features/composites/discoveryStateComposite.ts'
 import { createSpotAccessComposite } from './features/composites/spotAccessComposite.ts'
+import { ContentApplicationActions, createContentApplication } from './features/content/contentApplication.ts'
 import { createDiscoveryApplication } from './features/discovery/discoveryApplication.ts'
 import { createDiscoveryService } from './features/discovery/discoveryService.ts'
 import { createNotificationService, NotificationService } from './features/notification/notificationService.ts'
@@ -42,6 +43,7 @@ export interface CoreContext extends APIContract {
   communityApplication: any
   imageApplication?: ImageApplicationContract
   notificationService: NotificationService
+  contentApplication: ContentApplicationActions
 }
 
 export function createCoreContext(config: Config, connectors: CoreConnectors): CoreContext {
@@ -154,5 +156,6 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     spotAccessComposite,
     discoveryStateComposite,
     accountProfileComposite,
+    contentApplication: createContentApplication(config.constants.content.dir),
   }
 }

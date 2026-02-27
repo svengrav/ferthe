@@ -13,6 +13,9 @@ import { MapEditor } from "./MapEditorLeaflet.tsx";
 export function ContentBoard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accountId, setAccountId] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [code, setCode] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -25,39 +28,42 @@ export function ContentBoard() {
     }
   }, []);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleRequestCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
-      // Call dev-login endpoint with accountId
-      const response = await fetch("/api/admin/dev-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accountId }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Login failed");
+      const result = await api.account.requestSMSCode(phoneNumber);
+      if (!result.success) {
+        throw new Error("Failed to send code");
       }
+      setCodeSent(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send code");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      const result = await response.json();
-      if (!result.success || !result.data?.sessionToken) {
-        throw new Error("No session token received");
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const result = await api.account.verifySMSCode(phoneNumber, code);
+      if (!result.success || !result.data?.context?.sessionToken) {
+        throw new Error(
+          (result as any).error?.message ?? "Verification failed",
+        );
       }
-
-      // Store session token
-      setAdminToken(result.data.sessionToken);
-      setAdminAccountId(accountId);
-
-      // Test token by fetching trails
-      await api.trails.list({ createdBy: accountId });
+      const { sessionToken, accountId: verifiedAccountId } =
+        result.data.context;
+      setAdminToken(sessionToken);
+      setAdminAccountId(verifiedAccountId);
+      setAccountId(verifiedAccountId);
       setIsAuthenticated(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Authentication failed");
-      clearAdminToken();
+      setError(err instanceof Error ? err.message : "Verification failed");
     } finally {
       setLoading(false);
     }
@@ -67,6 +73,9 @@ export function ContentBoard() {
     clearAdminToken();
     setIsAuthenticated(false);
     setAccountId("");
+    setPhoneNumber("");
+    setCode("");
+    setCodeSent(false);
   };
 
   if (!isAuthenticated) {
@@ -77,39 +86,72 @@ export function ContentBoard() {
             <div>
               <h2 className="text-3xl font-bold text-center">Admin Login</h2>
               <p className="mt-2 text-center text-gray-400">
-                Enter your Account ID to access your content
+                {codeSent
+                  ? "Enter the code sent to your phone"
+                  : "Enter your phone number to receive a code"}
               </p>
             </div>
 
-            <form onSubmit={handleLogin} className="mt-8 space-y-6">
-              <div>
-                <label htmlFor="accountId" className="sr-only">
-                  Account ID
-                </label>
-                <input
-                  id="accountId"
-                  name="accountId"
-                  type="text"
-                  required
-                  value={accountId}
-                  onChange={(e) => setAccountId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-white text-white focus:outline-none focus:ring-2 focus:primary"
-                  placeholder="Account ID (e.g., cm6abc123...)"
-                />
-              </div>
-
-              {error && (
-                <div className="text-danger text-sm text-center">{error}</div>
+            {!codeSent
+              ? (
+                <form onSubmit={handleRequestCode} className="mt-8 space-y-6">
+                  <input
+                    type="tel"
+                    required
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-white focus:outline-none focus:ring-2"
+                    placeholder="+49 123 456789"
+                  />
+                  {error && (
+                    <div className="text-danger text-sm text-center">
+                      {error}
+                    </div>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-gray-700 focus:outline-none disabled:opacity-50"
+                  >
+                    {loading ? "Sending..." : "Send Code"}
+                  </button>
+                </form>
+              )
+              : (
+                <form onSubmit={handleVerifyCode} className="mt-8 space-y-6">
+                  <input
+                    type="text"
+                    required
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-white focus:outline-none focus:ring-2"
+                    placeholder="Verification code"
+                  />
+                  {error && (
+                    <div className="text-danger text-sm text-center">
+                      {error}
+                    </div>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-gray-700 focus:outline-none disabled:opacity-50"
+                  >
+                    {loading ? "Verifying..." : "Verify"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCodeSent(false);
+                      setError("");
+                      setCode("");
+                    }}
+                    className="w-full text-sm text-gray-400 hover:text-gray-200"
+                  >
+                    Back
+                  </button>
+                </form>
               )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:primary disabled:opacity-50"
-              >
-                {loading ? "Authenticating..." : "Login"}
-              </button>
-            </form>
           </div>
         </div>
       </Page>
