@@ -1,6 +1,7 @@
 // JWT utility for secure Bearer token authentication
 import { AccountSession } from '@shared/contracts/index.ts'
 import { createHmac } from 'node:crypto'
+import { z } from 'zod'
 
 const JWT_DEVELOPMENT_SECRET = 'development'
 
@@ -9,15 +10,21 @@ export interface JWTService {
   verifyJWT: (token: string) => JWTPayload | null
 }
 
-interface JWTPayload {
-  accountId: string
-  accountType: 'sms_verified' | 'local_unverified' | 'public'
-  role?: string
-  client?: 'app' | 'creator'
-  iat: number
-  exp: number
-  iss: string
-  aud: 'ferthe-app' | 'ferthe-creator'
+const JWTPayloadSchema = z.object({
+  accountId: z.string().min(1),
+  accountType: z.enum(['sms_verified', 'local_unverified', 'public']),
+  role: z.string().optional(),
+  client: z.enum(['app', 'creator']).optional(),
+  iat: z.number().int().positive(),
+  exp: z.number().int().positive(),
+  iss: z.literal('ferthe-api'),
+  aud: z.enum(['ferthe-app', 'ferthe-creator']),
+})
+
+type JWTPayload = z.infer<typeof JWTPayloadSchema>
+
+function isValidJWTPayload(value: unknown): value is JWTPayload {
+  return JWTPayloadSchema.safeParse(value).success
 }
 
 export const createJWTService = (options?: { secret?: string }): JWTService => {
@@ -42,17 +49,16 @@ export const createJWTService = (options?: { secret?: string }): JWTService => {
       }
 
       // Decode and validate payload
-      const decoded = JSON.parse(base64UrlDecode(payload))
+      const decoded: unknown = JSON.parse(base64UrlDecode(payload))
 
       // Check expiration
-      if (decoded.exp < Math.floor(Date.now() / 1000)) {
-        console.warn('JWT token expired')
+      if (!isValidJWTPayload(decoded)) {
+        console.warn('JWT payload failed schema validation')
         return null
       }
 
-      // Validate required fields
-      if (!decoded.accountId || !decoded.accountType || !decoded.iat || !decoded.exp) {
-        console.warn('JWT payload missing required fields')
+      if (decoded.exp < Math.floor(Date.now() / 1000)) {
+        console.warn('JWT token expired')
         return null
       }
 
