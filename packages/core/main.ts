@@ -1,4 +1,5 @@
-import { createApiHandler } from '@core/api/orpc/router.ts'
+import { createOakServer } from '@core/api/oak/server.ts'
+import createRoutes from '@core/api/routes.ts'
 import { createConfig } from '@core/config/index.ts'
 import { createTwilioSMSConnector } from '@core/connectors/smsConnector.ts'
 import { createAzureStorageConnector } from '@core/connectors/storageConnector.ts'
@@ -37,14 +38,19 @@ const run = async () => {
   }
 
   const context = createCoreContext(config, connectors)
-  const handler = createApiHandler(context, constants.api.origins)
+  const routes = createRoutes(context)
 
   logger.info(`Starting server on ${constants.api.host}:${constants.api.port}`)
 
-  Deno.serve(
-    { port: constants.api.port, hostname: constants.api.host },
-    handler,
-  )
+  const server = createOakServer({
+    routes,
+    origins: constants.api.origins,
+    host: constants.api.host,
+    port: constants.api.port,
+    prefix: '/core/api',
+  })
+
+  await server.start()
 }
 
 run()

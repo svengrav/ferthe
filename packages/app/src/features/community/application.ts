@@ -1,6 +1,6 @@
 import { logger } from '@app/shared/utils/logger'
+import type { ApiClient } from '@shared/api'
 import { Community, CommunityMember, Discovery, Result, SharedDiscovery } from '@shared/contracts'
-import type { ApiClient } from '@shared/orpc'
 import { getCommunityActions } from './stores/communityStore'
 
 export interface CommunityApplicationOptions {

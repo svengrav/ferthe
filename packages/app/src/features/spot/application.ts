@@ -1,6 +1,6 @@
 import { logger } from '@app/shared/utils/logger'
+import type { ApiClient } from '@shared/api'
 import { CreateSpotRequest, Result, Spot, UpdateSpotRequest } from '@shared/contracts'
-import type { ApiClient } from '@shared/orpc'
 import { getSpotStoreActions } from './stores/spotStore'
 
 export interface SpotApplication {
@@ -62,9 +62,12 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
     logger.log('SpotApplication: Getting spot', spotId)
     const result = await api.spots.get(spotId)
     if (result.success && result.data) {
-      upsertSpot(result.data)
+      // Only upsert if it's a full Spot, not a SpotPreview
+      if ('name' in result.data) {
+        upsertSpot(result.data)
+      }
     }
-    return result
+    return result as Result<Spot | undefined>
   }
 
   const createSpot = async (request: CreateSpotRequest): Promise<Result<Spot>> => {

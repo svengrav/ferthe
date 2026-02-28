@@ -12,11 +12,7 @@
   },
   "imports": {
     "@/": "./",
-    "@orpc/server": "npm:@orpc/server@^1.0.0",
-    "@orpc/server/fetch": "npm:@orpc/server@^1.0.0/fetch",
-    "@orpc/server/plugins": "npm:@orpc/server@^1.0.0/plugins",
-    "@orpc/openapi": "npm:@orpc/openapi@^1.0.0",
-    "@orpc/openapi/fetch": "npm:@orpc/openapi@^1.0.0/fetch",
+    "@std/assert": "jsr:@std/assert@^1.0.19",
     "gray-matter": "npm:gray-matter@^4.0.3",
     "sharp": "npm:sharp@^0.34.5",
     "zod": "npm:zod@^4.3.6"

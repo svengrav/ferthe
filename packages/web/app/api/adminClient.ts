@@ -1,9 +1,9 @@
 /**
- * Admin API client — backed by the shared ts-rest facade.
+ * Admin API client
  * Auth token management is kept here; the facade handles all HTTP calls.
  */
 
-import { createApiClient } from '@shared/orpc'
+import { createApiClient } from '@shared/api'
 
 // ── Token management ───────────────────────────────────────────────────────────
 

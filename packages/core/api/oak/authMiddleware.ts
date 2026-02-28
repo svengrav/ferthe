@@ -1,19 +1,17 @@
 import { AccountApplicationActions } from '@core/features/account/accountApplication.ts'
+import { AccountContext } from '@shared/contracts/accounts.ts'
 
 const extractBearerToken = (authHeader?: string | null): string | null => {
   if (!authHeader?.startsWith('Bearer ')) return null
   return authHeader.slice(7)
 }
 
-export interface AuthContext {
-  accountId: string
-  accountType: 'sms_verified' | 'local_unverified' | 'public'
-}
+export type { AccountContext as AuthContext }
 
 /**
  * Creates a public context for unauthenticated routes
  */
-export function createPublicContext(): AuthContext {
+export function createPublicContext(): AccountContext {
   return {
     accountId: 'public',
     accountType: 'public',
@@ -28,7 +26,7 @@ export function createAuthMiddleware(accountApplication: AccountApplicationActio
     /**
      * Minimal Bearer token authentication using accountApplication's JWT validation
      */
-    async authenticateBearer(authHeader?: string | null): Promise<{ isValid: boolean; authContext?: AuthContext; error?: string }> {
+    async authenticateBearer(authHeader?: string | null): Promise<{ isValid: boolean; authContext?: AccountContext; error?: string }> {
       const token = extractBearerToken(authHeader)
 
       if (!token) {
@@ -47,11 +45,14 @@ export function createAuthMiddleware(accountApplication: AccountApplicationActio
         }
       }
 
+      const session = validationResult.data
       return {
         isValid: true,
         authContext: {
-          accountId: validationResult.data.accountId,
-          accountType: 'local_unverified',
+          accountId: session.accountId,
+          accountType: session.accountType || 'local_unverified',
+          role: session.role,
+          client: session.client,
         },
       }
     },

@@ -5,7 +5,7 @@ import { AccountContext } from './accounts.ts'
 import { DiscoveryProfile, DiscoveryProfileUpdateData } from './discoveryProfile.ts'
 import { ImageReferenceSchema } from './images.ts'
 import { QueryOptions, Result } from './results.ts'
-import { RatingSummary, Spot, SpotRating } from "./spots.ts"
+import { RatingSummary, SpotRating, SpotSchema } from "./spots.ts"
 import { TrailStats } from './trails.ts'
 
 // ──────────────────────────────────────────────────────────────
@@ -40,6 +40,14 @@ export const DiscoverySchema = z.object({
   scanEventId: z.string().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
+})
+
+/**
+ * Discovery spot (Spot with discovery metadata)
+ */
+export const DiscoverySpotSchema = SpotSchema.extend({
+  discoveryId: z.string(),
+  discoveredAt: z.date().optional(),
 })
 
 /**
@@ -132,6 +140,7 @@ export const DiscoveryContentSchema = z.object({
 export type LocationWithDirection = z.infer<typeof LocationWithDirectionSchema>
 export type DiscoverySnap = z.infer<typeof DiscoverySnapSchema>
 export type Discovery = z.infer<typeof DiscoverySchema>
+export type DiscoverySpot = z.infer<typeof DiscoverySpotSchema>
 export type DiscoveryLocationRecord = z.infer<typeof DiscoveryLocationRecordSchema>
 export type WelcomeDiscoveryResult = z.infer<typeof WelcomeDiscoveryResultSchema>
 export type DiscoveryStats = z.infer<typeof DiscoveryStatsSchema>
@@ -151,15 +160,6 @@ export const UpsertDiscoveryContentRequestSchema = z.object({
 })
 
 export type UpsertDiscoveryContentRequest = z.infer<typeof UpsertDiscoveryContentRequestSchema>
-
-/**
- * Combines a Spot with its Discovery metadata.
- * Extends Spot with discovery context (when/how it was discovered).
- */
-export interface DiscoverySpot extends Spot {
-  discoveredAt?: Date
-  discoveryId: string
-}
 
 // ──────────────────────────────────────────────────────────────
 // Application Contract (unchanged)

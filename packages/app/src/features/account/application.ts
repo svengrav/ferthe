@@ -1,4 +1,5 @@
 import { logger } from '@app/shared/utils/logger'
+import type { ApiClient } from '@shared/api'
 import {
   Account,
   AccountPublicProfile,
@@ -12,7 +13,6 @@ import {
   SMSCodeRequest,
   SMSVerificationResult,
 } from '@shared/contracts'
-import type { ApiClient } from '@shared/orpc'
 import { SecureStoreConnector } from '../../shared/device/secureStoreConnector'
 import { AccountServiceActions } from './services/accountService'
 import { getAccountActions, getSession } from './stores/accountStore'
@@ -148,7 +148,21 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     },
 
     validateSession: async () => {
-      return api.account.validateSession(getSession()?.sessionToken || '')
+      const result = await api.account.validateSession(getSession()?.sessionToken || '')
+      if (!result.success || !result.data) {
+        return { success: false, error: result.error }
+      }
+      // Map AccountSession to SessionValidationResult
+      return {
+        success: true,
+        data: {
+          accountId: result.data.accountId,
+          valid: true,
+          role: result.data.role,
+          accountType: result.data.accountType,
+          client: result.data.client,
+        },
+      }
     },
 
     revokeSession: async () => {

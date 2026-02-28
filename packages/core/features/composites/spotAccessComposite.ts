@@ -8,7 +8,6 @@ import {
   Spot,
   SpotAccessCompositeContract,
   SpotApplicationContract,
-  SpotPreview,
 } from '@shared/contracts/index.ts'
 
 export interface SpotAccessCompositeOptions {
@@ -62,7 +61,7 @@ export function createSpotAccessComposite(options: SpotAccessCompositeOptions): 
       }
     },
 
-    async getAccessibleSpot(context: AccountContext, spotId: string): Promise<Result<Spot | SpotPreview | undefined>> {
+    async getAccessibleSpot(context: AccountContext, spotId: string): Promise<Result<Spot | undefined>> {
       try {
         const accountId = context.accountId
         if (!accountId) {
@@ -100,13 +99,8 @@ export function createSpotAccessComposite(options: SpotAccessCompositeOptions): 
           return createSuccessResult({ ...spot, source: 'discovery' })
         }
 
-        // Not discovered — return preview data only (no name, location, or description)
-        const previewResult = await spotApplication.getSpotPreviewsByIds(context, [spotId])
-        if (!previewResult.success || !previewResult.data?.length) {
-          return createSuccessResult(undefined)
-        }
-
-        return createSuccessResult(previewResult.data[0])
+        // Not discovered — return error (client should use preview endpoint)
+        return createErrorResult('DISCOVERY_REQUIRED', { spotId })
       } catch (error: any) {
         return createErrorResult('GET_SPOTS_ERROR', { originalError: error.message })
       }

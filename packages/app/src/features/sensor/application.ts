@@ -1,7 +1,7 @@
 import { logger } from '@app/shared/utils/logger'
+import type { ApiClient } from '@shared/api'
 import { ScanEvent } from '@shared/contracts'
 import { createEventSystem, Unsubscribe } from '@shared/events/eventHandler'
-import type { ApiClient } from '@shared/orpc'
 import { DeviceConnector, DeviceLocation } from './device/types'
 import { getDeviceLocation, getSensorActions, sensorStore } from './stores/sensorStore'
 

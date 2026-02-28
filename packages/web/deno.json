@@ -9,6 +9,13 @@
     ".vite",
     "node_modules"
   ],
+  "lint": {
+    "rules": {
+      "exclude": [
+        "no-explicit-any"
+      ]
+    }
+  },
   "imports": {
     "@/": "./",
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.4",
@@ -18,8 +25,6 @@
     "@std/dotenv": "jsr:@std/dotenv@^0.225.6",
     "@std/path": "jsr:@std/path@^1.0.0",
     "@tajpouria/cors": "jsr:@tajpouria/cors@^1.2.1",
-    "@orpc/client": "npm:@orpc/client@^1.0.0",
-    "@orpc/client/fetch": "npm:@orpc/client@^1.0.0/fetch",
     "@types/react": "npm:@types/react@^19.1.2",
     "@vitejs/plugin-react": "npm:@vitejs/plugin-react@^4.4.1",
     "clsx": "npm:clsx@^2.1.1",

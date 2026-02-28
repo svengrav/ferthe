@@ -19,7 +19,7 @@
         "NODE_ENV": "development"
       },
       "console": "integratedTerminal",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
     },
     {
       "name": "🟥 Run App",
@@ -50,7 +50,7 @@
         "🟥 Run App",
       ],
       "stopAll": true,
-      "preLaunchTask": "kill:all"
+      // "preLaunchTask": "kill:all"
     },
     {
       "name": "🟩 Run Web",

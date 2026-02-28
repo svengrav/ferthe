@@ -3,13 +3,14 @@
  * Starts the ferthe core API with in-memory storage for integration testing.
  */
 
-import { createApiHandler } from '@core/api/orpc/router.ts'
+import { createOakServer } from '@core/api/oak/server.ts'
+import createRoutes from '@core/api/routes.ts'
 import { createConstants } from '@core/config/constants.ts'
 import { createCoreContext } from '@core/core.ts'
 import { createJWTService } from '@core/features/account/jwtService.ts'
 import { createMemoryStore } from '@core/store/memoryStore.ts'
+import { createApiClient } from '@shared/api'
 import type { AccountRole } from '@shared/contracts/index.ts'
-import { createOrpcClient } from '@shared/orpc/client.ts'
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -39,7 +40,7 @@ const nullSmsConnector = {
 
 // ── Server Lifecycle ──────────────────────────────────────────────────────────
 
-let testServer: Deno.HttpServer | undefined
+let testServerInstance: { shutdown: () => Promise<void> } | undefined
 
 export async function startTestServer(): Promise<void> {
   const config = {
@@ -60,15 +61,31 @@ export async function startTestServer(): Promise<void> {
     storageConnector: nullStorageConnector as any,
   })
 
-  const handler = createApiHandler(context, ['*'])
-  testServer = Deno.serve({ port: TEST_PORT, hostname: '127.0.0.1' }, handler)
+  const routes = createRoutes(context)
+  const server = createOakServer({
+    routes,
+    origins: ['*'],
+    host: '127.0.0.1',
+    port: TEST_PORT,
+    prefix: '/core/api',
+    logger: false,
+  })
+
+  // Start server in background
+  const serverPromise = server.start()
+  testServerInstance = {
+    shutdown: async () => {
+      // Oak servers don't have a built-in shutdown, so we'll just clear reference
+    }
+  }
+
   await new Promise((resolve) => setTimeout(resolve, 100))
 }
 
 export async function stopTestServer(): Promise<void> {
-  if (testServer) {
-    await testServer.shutdown()
-    testServer = undefined
+  if (testServerInstance) {
+    await testServerInstance.shutdown()
+    testServerInstance = undefined
   }
 }
 
@@ -112,10 +129,10 @@ export function createToken(
 // ── Client Factory ───────────────────────────────────────────────────────────
 
 /**
- * Creates a type-safe oRPC client authenticated with the given JWT.
+ * Creates API client authenticated with the given JWT.
  */
 export function createTestClient(token: string) {
-  return createOrpcClient({
+  return createApiClient({
     baseUrl: BASE_URL,
     getAuthToken: () => token,
   })

@@ -1,7 +1,7 @@
 import { getSpotStoreActions } from '@app/features/spot/stores/spotStore'
 import { logger } from '@app/shared/utils/logger'
+import type { ApiClient } from '@shared/api'
 import { RatingSummary, Result, TrailStats } from '@shared/contracts'
-import type { ApiClient } from '@shared/orpc'
 import { getTrailRatingActions } from './stores/trailRatingStore'
 import { getTrailStoreActions } from './stores/trailStore'
 

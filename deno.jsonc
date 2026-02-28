@@ -39,12 +39,7 @@
     "path": "npm:path@^0.12.7",
     "fs": "node:fs/promises",
     "zod": "npm:zod@^4.3.6",
-    "jimp": "npm:jimp@0.22.12",
-    "@orpc/contract": "npm:@orpc/contract@^1.0.0",
-    "@orpc/client": "npm:@orpc/client@^1.0.0",
-    "@orpc/client/fetch": "npm:@orpc/client@^1.0.0/fetch",
-    "@orpc/openapi": "npm:@orpc/openapi@^1.0.0",
-    "@orpc/openapi/fetch": "npm:@orpc/openapi@^1.0.0/fetch",
+    "jimp": "npm:jimp@0.22.12"
   },
   "compilerOptions": {
     "lib": [

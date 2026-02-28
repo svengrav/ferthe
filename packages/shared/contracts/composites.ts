@@ -4,7 +4,7 @@ import { AccountContext, AccountPublicProfile } from './accounts.ts';
 import { ClueSchema } from './discoveries.ts';
 import { ImageReferenceSchema } from "./images.ts";
 import { QueryOptions, Result } from './results.ts';
-import { Spot, SpotPreview } from './spots.ts';
+import { Spot } from './spots.ts';
 
 /**
  * Lightweight discovery summary for a single discovery.
@@ -84,8 +84,8 @@ export type ActivateTrailResult = z.infer<typeof ActivateTrailResultSchema>
 export interface SpotAccessCompositeContract {
   /** Returns only spots the user has discovered */
   getAccessibleSpots: (context: AccountContext, trailId?: string, options?: QueryOptions) => Promise<Result<Spot[]>>
-  /** Returns full Spot if discovered/creator, SpotPreview (blurred, no sensitive data) otherwise */
-  getAccessibleSpot: (context: AccountContext, spotId: string) => Promise<Result<Spot | SpotPreview | undefined>>
+  /** Returns full Spot if discovered/creator, error (DISCOVERY_REQUIRED) otherwise. Use preview endpoint for public access. */
+  getAccessibleSpot: (context: AccountContext, spotId: string) => Promise<Result<Spot | undefined>>
 }
 
 /**

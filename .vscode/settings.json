@@ -1,5 +1,10 @@
  {
   "workbench.colorCustomizations": {
     "titleBar.activeBackground": "#0b2263"
-  }
+  },
+  // "deno.config": "./deno.json",
+  // "deno.codeLens.test": true,
+  // "deno.codeLens.testArgs": [
+  //   "-A"
+  // ],
  }
