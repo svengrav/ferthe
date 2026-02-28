@@ -19,7 +19,9 @@
 - Members can view shared discoveries from other members.
 - Community has a creator and a list of members.
 
-## Future
+--- 
+
+## Futures
 
 - Multiple trails per community.
 - Push notification when someone shares a discovery in a community you are part of.

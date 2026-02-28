@@ -88,7 +88,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       setDiscoveryTrail({ ...discovery, scannedClues: scanEvent.clues, updatedAt: createdAt })
 
       emitDiscoveryTrailUpdated({
-        trail,
+        trail: trail as any,
         spots,
         scannedClues: [...uniqueScannedClues],
         previewClues: [...previewClues],

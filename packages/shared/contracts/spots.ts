@@ -4,6 +4,7 @@ import { AccountContext } from './accounts.ts'
 import { ContentBlockSchema } from './contentBlocks.ts'
 import { ImageReferenceSchema } from './images.ts'
 import { QueryOptions, Result } from './results.ts'
+import { guard } from './strings.ts'
 
 // ──────────────────────────────────────────────────────────────
 // Zod Schemas (Source of Truth)
@@ -23,10 +24,10 @@ export const SpotSourceSchema = z.enum(['discovery', 'preview', 'created', 'publ
  * Separable content block for a spot
  */
 export const SpotContentSchema = z.object({
-  name: z.string().min(1).max(200),
-  description: z.string().min(1).max(5000),
-  imageBase64: z.string().optional(), // Base64-encoded image data for upload
-  contentBlocks: z.array(ContentBlockSchema).optional(),
+  name: guard.shortText,
+  description: guard.mediumText,
+  imageBase64: guard.base64String.optional(), // Base64-encoded image data for upload
+  contentBlocks: z.array(ContentBlockSchema).max(20).optional(),
 })
 
 /**
@@ -36,7 +37,7 @@ export const CreateSpotRequestSchema = z.object({
   content: SpotContentSchema,
   location: GeoLocationSchema,
   visibility: SpotVisibilitySchema,
-  trailIds: z.array(z.string()).optional(),
+  trailIds: z.array(guard.idString).max(1000).optional(),
   consent: z.literal(true), // Must be explicitly true
 })
 
@@ -46,26 +47,27 @@ export const CreateSpotRequestSchema = z.object({
 export const UpdateSpotRequestSchema = z.object({
   content: SpotContentSchema.partial().optional(),
   visibility: SpotVisibilitySchema.optional(),
-  trailIds: z.array(z.string()).optional(),
+  trailIds: z.array(guard.idString).max(1000).optional(),
 })
 
 /**
- * Aggregated rating summary for a spot
+ * Aggregated guard.rating summary for a spot
  */
 export const RatingSummarySchema = z.object({
-  average: z.number().min(0).max(5), // Average rating (0-5, 0 if no ratings)
-  count: z.number().int().min(0), // Total number of ratings
-  userRating: z.number().int().min(1).max(5).optional(), // Current user's rating (1-5), if any
+  average: z.number().min(0).max(5), // Average guard.rating (0-5, 0 if no ratings)
+  count: guard.nonNegativeInt
+  , // Total number of ratings
+  userRating: guard.rating.optional(), // Current user's guard.rating (1-5), if any
 })
 
 /**
- * User rating (1-5 stars) for a spot
+ * User guard.rating (1-5 stars) for a spot
  */
 export const SpotRatingSchema = z.object({
-  id: z.string(),
-  spotId: z.string(),
-  accountId: z.string(),
-  rating: z.number().int().min(1).max(5), // 1-5 stars
+  id: guard.idString,
+  spotId: guard.idString,
+  accountId: guard.idString,
+  rating: guard.rating, // 1-5 stars
   createdAt: z.date(),
 })
 
@@ -85,23 +87,23 @@ export type SpotRating = z.infer<typeof SpotRatingSchema>
  * Public spot schema
  */
 export const SpotSchema = z.object({
-  id: z.string(),
-  slug: z.string(),
-  name: z.string(),
-  description: z.string(),
+  id: guard.idString,
+  slug: guard.slug,
+  name: guard.shortText,
+  description: guard.mediumText,
   image: ImageReferenceSchema.optional(),
   blurredImage: ImageReferenceSchema.optional(), // Blurred version for undiscovered spots
   microImage: ImageReferenceSchema.optional(), // Micro thumbnail (~40px)
   location: GeoLocationSchema,
-  contentBlocks: z.array(ContentBlockSchema).optional(),
+  contentBlocks: z.array(ContentBlockSchema).max(20).optional(),
   options: z.object({
-    discoveryRadius: z.number(),
-    clueRadius: z.number(),
+    discoveryRadius: guard.positiveInt,
+    clueRadius: guard.positiveInt,
     visibility: SpotVisibilitySchema.optional(),
   }),
   createdAt: z.date(),
   updatedAt: z.date(),
-  createdBy: z.string().optional(), // Account ID of creator
+  createdBy: guard.idString.optional(), // Account ID of creator
   source: SpotSourceSchema.optional(), // Source/origin of spot
 })
 
@@ -117,9 +119,9 @@ export const StoredSpotSchema = SpotSchema.extend({
  * Reduced spot representation for list views and previews
  */
 export const SpotPreviewSchema = z.object({
-  id: z.string(),
+  id: guard.idString,
   blurredImage: ImageReferenceSchema.optional(),
-  rating: RatingSummarySchema, // Community rating (always included)
+  rating: RatingSummarySchema, // Community guard.rating (always included)
 })
 
 export type Spot = z.infer<typeof SpotSchema>

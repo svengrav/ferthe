@@ -12,6 +12,7 @@ export * from './images.ts'
 export * from './results.ts'
 export * from './sensors.ts'
 export * from './spots.ts'
+export * from './strings.ts'
 export * from './trails.ts'
 export * from './trailSpots.ts'
 

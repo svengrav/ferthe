@@ -3,6 +3,7 @@ import { GeoLocationSchema } from '@shared/geo/types.ts'
 import { z } from 'zod'
 import { AccountContext } from './accounts.ts'
 import { Result } from './results.ts'
+import { guard } from './strings.ts'
 
 // ──────────────────────────────────────────────────────────────
 // Zod Schemas (Source of Truth)
@@ -12,11 +13,11 @@ import { Result } from './results.ts'
  * Scan event schema
  */
 export const ScanEventSchema = z.object({
-  id: z.string(),
-  accountId: z.string(),
-  trailId: z.string().optional(),
+  id: guard.idString,
+  accountId: guard.idString,
+  trailId: guard.idString.optional(),
   scannedAt: z.date(),
-  radiusUsed: z.number(),
+  radiusUsed: guard.positiveInt,
   successful: z.boolean(),
   clues: z.array(z.any()), // Clue schema not migrated yet
   createdAt: z.date(),

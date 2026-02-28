@@ -3,16 +3,17 @@ import { AccountContext } from './accounts.ts'
 import { ImageReferenceSchema } from './images.ts'
 import { Result } from './results.ts'
 import { RatingSummarySchema } from './spots.ts'
+import { guard } from './strings.ts'
 
 /**
  * Internal junction table entity for many-to-many relationship between Trails and Spots.
  * Represents the database record of a spot-trail association.
  */
 export const StoredTrailSpotSchema = z.object({
-  id: z.string(),
-  trailId: z.string(),
-  spotId: z.string(),
-  order: z.number().optional(),
+  id: guard.idString,
+  trailId: guard.idString,
+  spotId: guard.idString,
+  order: guard.nonNegativeInt.optional(),
   createdAt: z.date(),
 })
 
@@ -24,8 +25,8 @@ export type StoredTrailSpot = z.infer<typeof StoredTrailSpotSchema>
  * Does NOT include full spot data (location, description) for undiscovered spots.
  */
 export const TrailSpotSchema = z.object({
-  spotId: z.string(),
-  order: z.number(),
+  spotId: guard.idString,
+  order: guard.nonNegativeInt,
   preview: z.object({
     blurredImage: ImageReferenceSchema.optional(),
     rating: RatingSummarySchema,

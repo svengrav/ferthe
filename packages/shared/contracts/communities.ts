@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { AccountContext, AccountPublicProfileSchema } from './accounts.ts'
 import { Discovery } from './discoveries.ts'
 import { Result } from './results.ts'
+import { guard } from './strings.ts'
 
 // ──────────────────────────────────────────────────────────────
 // Zod Schemas (Source of Truth)
@@ -11,11 +12,11 @@ import { Result } from './results.ts'
  * Community schema
  */
 export const CommunitySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  trailIds: z.array(z.string()),
-  createdBy: z.string(),
-  inviteCode: z.string(),
+  id: guard.idString,
+  name: guard.shortText,
+  trailIds: z.array(guard.idString).max(10),
+  createdBy: guard.idString,
+  inviteCode: guard.inviteCode,
   createdAt: z.date(),
   updatedAt: z.date(),
 })
@@ -24,9 +25,9 @@ export const CommunitySchema = z.object({
  * Community member schema
  */
 export const CommunityMemberSchema = z.object({
-  id: z.string(),
-  communityId: z.string(),
-  accountId: z.string(),
+  id: guard.idString,
+  communityId: guard.idString,
+  accountId: guard.idString,
   joinedAt: z.date(),
   profile: AccountPublicProfileSchema.optional()
 
@@ -36,10 +37,10 @@ export const CommunityMemberSchema = z.object({
  * Shared discovery schema
  */
 export const SharedDiscoverySchema = z.object({
-  id: z.string(),
-  discoveryId: z.string(),
-  communityId: z.string(),
-  sharedBy: z.string(),
+  id: guard.idString,
+  discoveryId: guard.idString,
+  communityId: guard.idString,
+  sharedBy: guard.idString,
   sharedAt: z.date(),
 })
 
@@ -47,20 +48,20 @@ export const SharedDiscoverySchema = z.object({
  * Community discovery stats schema
  */
 export const CommunityDiscoveryStatsSchema = z.object({
-  discoveryId: z.string(),
-  communityId: z.string(),
-  discoveredBy: z.string(),
-  rank: z.number().int(),
-  totalDiscoverers: z.number().int(),
-  averageRating: z.number(),
-  ratingCount: z.number().int(),
+  discoveryId: guard.idString,
+  communityId: guard.idString,
+  discoveredBy: guard.idString,
+  rank: z.number().int().positive(),
+  totalDiscoverers: z.number().int().positive(),
+  averageRating: z.number().min(0).max(5),
+  ratingCount: z.number().int().min(0),
 })
 
 /**
  * Validation schema for creating a community
  */
 export const createCommunitySchema = z.object({
-  name: z.string().min(3, 'Name must be at least 3 characters').max(50, 'Name must be at most 50 characters'),
+  name: guard.shortText.min(3, 'Name must be at least 3 characters'),
   trailId: z.string().min(1, 'Trail selection is required'),
 })
 

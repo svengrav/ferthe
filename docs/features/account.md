@@ -20,3 +20,10 @@
 - Avatar can be uploaded and changed.
 - User Share ID: 6-digit code for sharing the account profile with others.
 - Account data is cached locally for offline access.
+
+--- 
+
+## Futures
+
+- User can delete account and all associated data.
+- User can change phone number (requires re-authentication) (Not prioritized).

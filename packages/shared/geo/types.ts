@@ -20,8 +20,8 @@ export const GeoBoundarySchema = z.object({
 })
 
 export const GeoDirectionSchema = z.object({
-  bearing: z.number(),
-  direction: z.number(),
+  bearing: z.number().min(0).max(360),
+  direction: z.number().min(0).max(360),
   directionShort: z.enum(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']),
   directionLong: z.enum(['north', 'northeast', 'east', 'southeast', 'south', 'southwest', 'west', 'northwest']),
 })

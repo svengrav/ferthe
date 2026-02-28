@@ -6,6 +6,7 @@ import { DiscoveryProfile, DiscoveryProfileUpdateData } from './discoveryProfile
 import { ImageReferenceSchema } from './images.ts'
 import { QueryOptions, Result } from './results.ts'
 import { RatingSummary, SpotRating, SpotSchema } from "./spots.ts"
+import { guard } from './strings.ts'
 import { TrailStats } from './trails.ts'
 
 // ──────────────────────────────────────────────────────────────
@@ -17,27 +18,27 @@ import { TrailStats } from './trails.ts'
  */
 export const LocationWithDirectionSchema = z.object({
   location: GeoLocationSchema,
-  direction: z.number().optional(),
+  direction: z.number().min(0).max(360).optional(),
 })
 
 /**
  * Discovery snap schema
  */
 export const DiscoverySnapSchema = z.object({
-  distance: z.number(),
-  intensity: z.number(),
+  distance: guard.nonNegativeInt,
+  intensity: z.number().min(0).max(100),
 })
 
 /**
  * Discovery schema
  */
 export const DiscoverySchema = z.object({
-  id: z.string(),
-  accountId: z.string(),
-  spotId: z.string(),
-  trailId: z.string(),
+  id: guard.idString,
+  accountId: guard.idString,
+  spotId: guard.idString,
+  trailId: guard.idString,
   discoveredAt: z.date(),
-  scanEventId: z.string().optional(),
+  scanEventId: guard.idString.optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 })
@@ -65,18 +66,18 @@ export const DiscoveryLocationRecordSchema = z.object({
  */
 export const WelcomeDiscoveryResultSchema = z.object({
   discovery: DiscoverySchema,
-  spot: z.any(), // Spot - already migrated
+  spot: SpotSchema,
 })
 
 /**
  * Discovery stats schema
  */
 export const DiscoveryStatsSchema = z.object({
-  discoveryId: z.string(),
-  rank: z.number().int(),
-  totalDiscoverers: z.number().int(),
-  trailPosition: z.number().int(),
-  trailTotal: z.number().int(),
+  discoveryId: guard.idString,
+  rank: guard.positiveInt,
+  totalDiscoverers: guard.positiveInt,
+  trailPosition: guard.nonNegativeInt,
+  trailTotal: guard.positiveInt,
   timeSinceLastDiscovery: z.number().optional(),
   distanceFromLastDiscovery: z.number().optional(),
 })
@@ -90,12 +91,12 @@ export const ClueSourceSchema = z.enum(['preview', 'scanEvent'])
  * Clue schema
  */
 export const ClueSchema = z.object({
-  id: z.string(),
-  spotId: z.string(),
-  trailId: z.string().optional(),
+  id: guard.idString,
+  spotId: guard.idString,
+  trailId: guard.idString.optional(),
   location: GeoLocationSchema,
   source: ClueSourceSchema,
-  discoveryRadius: z.number(),
+  discoveryRadius: guard.positiveInt,
   image: z.object({
     micro: ImageReferenceSchema.optional(),
     blurred: ImageReferenceSchema.optional(),
@@ -104,14 +105,16 @@ export const ClueSchema = z.object({
 
 /**
  * Discovery trail schema
+ * Note: trail field is omitted due to circular dependency with trails.ts.
+ * Validation is done at the application layer.
  */
 export const DiscoveryTrailSchema = z.object({
   createdAt: z.date().optional(),
-  trail: z.any().optional(), // Trail - already migrated
   clues: z.array(ClueSchema),
   previewClues: z.array(ClueSchema).optional(),
-  spots: z.array(z.any()), // DiscoverySpot - extends Spot, use interface
+  spots: z.array(DiscoverySpotSchema),
   discoveries: z.array(DiscoverySchema),
+  trail: z.unknown().optional(), // Trail field: validated at app layer (can't import due to circular dependency)
 })
 
 /**
@@ -123,11 +126,11 @@ export const DiscoveryContentVisibilitySchema = z.enum(['private', 'public'])
  * Discovery content schema
  */
 export const DiscoveryContentSchema = z.object({
-  id: z.string(),
-  discoveryId: z.string(),
-  accountId: z.string(),
+  id: guard.idString,
+  discoveryId: guard.idString,
+  accountId: guard.idString,
   image: ImageReferenceSchema.optional(),
-  comment: z.string().optional(),
+  comment: z.string().max(10000).optional(),
   visibility: DiscoveryContentVisibilitySchema,
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -154,8 +157,8 @@ export type DiscoveryContent = z.infer<typeof DiscoveryContentSchema>
  * Request schema for creating or updating discovery content
  */
 export const UpsertDiscoveryContentRequestSchema = z.object({
-  imageUrl: z.string().optional(),
-  comment: z.string().optional(),
+  imageUrl: z.string().url().optional(),
+  comment: z.string().max(10000).optional(),
   visibility: DiscoveryContentVisibilitySchema.optional(),
 })
 

@@ -36,10 +36,9 @@
   "settings": {
     "deno.enable": true,
     "deno.lint": true,
-    "deno.config": "./deno.json",
     "deno.codeLens.test": true,
     "deno.codeLens.testArgs": [
-      "-A"
+      "-A",
     ],
     "files.exclude": {
       "**/.git": true,

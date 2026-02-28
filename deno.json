@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "start:core": "deno run -A --watch=packages/core/ packages/core/main.ts",    
+    "start:core": "deno run -A --watch=packages/core/ packages/core/main.ts",
     "start:web": "deno run -A --watch=packages/web/ packages/web/main.ts",
     "start:expo": "cd packages/app/ && npx expo start --dev-client",
     "build:web": "deno run -A build.ts",
@@ -11,7 +11,8 @@
   "workspace": [
     "packages/web",
     "packages/shared",
-    "packages/core"
+    "packages/core",
+    "packages/test"
   ],
   "exclude": [
     "packages/app/**",
@@ -20,7 +21,8 @@
     "docs/**",
     "**/dist/**",
     "**/build/**",
-    "**/.expo/**"
+    "**/.expo/**",
+    "**/.vite/**"
   ],
   "nodeModulesDir": "auto",
   "imports": {
@@ -54,9 +56,7 @@
     "checkJs": false,
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "types": [
-      "vite/client"
-    ]
+    "types": []
   },
   "lint": {
     "rules": {

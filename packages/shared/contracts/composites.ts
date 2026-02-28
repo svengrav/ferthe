@@ -5,14 +5,15 @@ import { ClueSchema } from './discoveries.ts';
 import { ImageReferenceSchema } from "./images.ts";
 import { QueryOptions, Result } from './results.ts';
 import { Spot } from './spots.ts';
+import { guard } from './strings.ts';
 
 /**
  * Lightweight discovery summary for a single discovery.
  * Omits backend-only fields (trailId, scanEventId, updatedAt).
  */
 export const DiscoverySummarySchema = z.object({
-  id: z.string(),
-  spotId: z.string(),
+  id: guard.idString,
+  spotId: guard.idString,
   discoveredAt: z.date(),
 })
 
@@ -20,12 +21,12 @@ export type DiscoverySummary = z.infer<typeof DiscoverySummarySchema>
 
 /**
  * Lightweight spot data for init. Omits backend-only fields
- * (slug, options, updatedAt, createdBy) and strips DiscoverySpot wrapper.
+ * (guard.slug, options, updatedAt, createdBy) and strips DiscoverySpot wrapper.
  */
 export const SpotSummarySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
+  id: guard.idString,
+  name: guard.shortText,
+  description: guard.shortText,
   image: ImageReferenceSchema.optional(),
   blurredImage: ImageReferenceSchema.optional(),
   location: GeoLocationSchema,
@@ -41,9 +42,9 @@ export type SpotSummary = z.infer<typeof SpotSummarySchema>
  * because the app already has it from requestTrailState().
  */
 export const ActiveTrailRefSchema = z.object({
-  trailId: z.string(),
-  spotIds: z.array(z.string()),
-  discoveryIds: z.array(z.string()),
+  trailId: guard.idString,
+  spotIds: z.array(guard.idString).max(100),
+  discoveryIds: z.array(guard.idString).max(100),
   clues: z.array(ClueSchema),
   previewClues: z.array(ClueSchema),
   createdAt: z.date().optional(),
@@ -56,7 +57,7 @@ export type ActiveTrailRef = z.infer<typeof ActiveTrailRefSchema>
  * Normalized: spots/discoveries only 1×, activeTrail as ID refs.
  */
 export const DiscoveryStateSchema = z.object({
-  lastActiveTrailId: z.string().optional(),
+  lastActiveTrailId: guard.idString.optional(),
   discoveries: z.array(DiscoverySummarySchema),
   spots: z.array(SpotSummarySchema),
   activeTrail: ActiveTrailRefSchema.optional(),

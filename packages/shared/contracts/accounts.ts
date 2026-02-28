@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { FirebaseConfig } from './config.ts'
 import { ImageReferenceSchema } from './images.ts'
 import { Result } from './results.ts'
+import { guard } from './strings.ts'
 
 // ──────────────────────────────────────────────────────────────
 // Zod Schemas (Source of Truth)
@@ -32,20 +33,20 @@ export const DevicePlatformSchema = z.enum(['ios', 'android'])
  * Account public profile schema
  */
 export const AccountPublicProfileSchema = z.object({
-  accountId: z.string(),
-  displayName: z.string().optional(),
+  accountId: guard.idString,
+  displayName: guard.shortTextOptional,
   avatar: ImageReferenceSchema.optional(),
-  spotCount: z.number().int(),
+  spotCount: guard.nonNegativeInt,
 })
 
 /**
  * Account schema
  */
 export const AccountSchema = z.object({
-  id: z.string(),
-  phoneHash: z.string().optional(),
-  displayName: z.string().optional(),
-  description: z.string().optional(),
+  id: guard.idString,
+  phoneHash: guard.phoneHash.optional(),
+  displayName: guard.shortTextOptional,
+  description: guard.mediumTextOptional,
   avatar: ImageReferenceSchema.optional(),
   createdAt: z.date(),
   lastLoginAt: z.date().optional(),
@@ -59,7 +60,7 @@ export const AccountSchema = z.object({
  * Account context schema
  */
 export const AccountContextSchema = z.object({
-  accountId: z.string(),
+  accountId: guard.idString,
   accountType: AccountTypeSchema,
   role: AccountRoleSchema.optional(),
   client: ClientAudienceSchema.optional(),
@@ -69,17 +70,17 @@ export const AccountContextSchema = z.object({
  * Account update data schema
  */
 export const AccountUpdateDataSchema = z.object({
-  displayName: z.string().optional(),
-  description: z.string().optional(),
+  displayName: guard.shortTextOptional,
+  description: guard.mediumTextOptional,
 })
 
 /**
  * Account session schema
  */
 export const AccountSessionSchema = AccountContextSchema.extend({
-  id: z.string(),
-  accountId: z.string(),
-  sessionToken: z.string(),
+  id: guard.idString,
+  accountId: guard.idString,
+  sessionToken: guard.token,
   expiresAt: z.date(),
   accountType: AccountTypeSchema,
   role: AccountRoleSchema.optional(),
@@ -89,13 +90,13 @@ export const AccountSessionSchema = AccountContextSchema.extend({
  * Account device info schema
  */
 export const AccountDeviceInfoSchema = z.object({
-  deviceId: z.string(),
+  deviceId: guard.idString,
   platform: z.enum(['ios', 'android', 'web']).optional(),
-  osVersion: z.string().optional(),
-  ipAddress: z.string().optional(),
+  osVersion: guard.osVersion,
+  ipAddress: guard.ipAddress,
   geolocation: z.object({
-    latitude: z.number(),
-    longitude: z.number(),
+    latitude: guard.latitude,
+    longitude: guard.longitude,
     accuracy: z.number().optional(),
   }).optional(),
 })
@@ -104,9 +105,9 @@ export const AccountDeviceInfoSchema = z.object({
  * Twilio verification schema
  */
 export const TwilioVerificationSchema = z.object({
-  id: z.string(),
-  phoneHash: z.string(),
-  verificationSid: z.string(),
+  id: guard.idString,
+  phoneHash: guard.phoneHash,
+  verificationSid: guard.idString,
   expiresAt: z.date(),
   createdAt: z.date(),
   verified: z.boolean(),
@@ -116,7 +117,7 @@ export const TwilioVerificationSchema = z.object({
  * SMS code request schema
  */
 export const SMSCodeRequestSchema = z.object({
-  requestId: z.string(),
+  requestId: guard.idString,
   expiresAt: z.date(),
 })
 
@@ -134,7 +135,7 @@ export const SMSVerificationResultSchema = z.object({
  * Session validation result schema
  */
 export const SessionValidationResultSchema = z.object({
-  accountId: z.string(),
+  accountId: guard.idString,
   valid: z.boolean(),
   role: AccountRoleSchema.optional(),
   accountType: AccountTypeSchema.optional(),
@@ -145,9 +146,9 @@ export const SessionValidationResultSchema = z.object({
  * Device token schema
  */
 export const DeviceTokenSchema = z.object({
-  id: z.string(),
-  accountId: z.string(),
-  token: z.string(),
+  id: guard.idString,
+  accountId: guard.idString,
+  token: guard.token,
   platform: DevicePlatformSchema,
   updatedAt: z.date(),
 })

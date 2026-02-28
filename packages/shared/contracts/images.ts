@@ -24,9 +24,9 @@ export const ImageTypeSchema = z.enum([
  * Image reference used in domain entities
  */
 export const ImageReferenceSchema = z.object({
-  id: z.string(), // The blob hash (CUID2)
+  id: z.string().min(1).max(50), // blob hash (CUID2 or similar)
   url: z.string().url(), // SAS-signed URL for read access
-  label: z.string().optional(), // Optional label for text fallback (first 2 chars displayed)
+  label: z.string().max(10).optional(), // Optional label for text fallback
 })
 
 export const ImageUploadResultSchema = z.object({

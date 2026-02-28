@@ -4,21 +4,22 @@
  */
 
 import { z } from 'zod'
+import { guard } from './strings.ts'
 
 export const LanguageSchema = z.enum(['en', 'de'])
 
 // ── Content Page ─────────────────────────────────────────────
 
 export const ContentPageSchema = z.object({
-  page: z.string(),
-  title: z.string(),
+  page: guard.shortText,
+  title: guard.shortText,
   date: z.string(),
   language: LanguageSchema,
-  author: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  summary: z.string().optional(),
-  heroImage: z.string().optional(),
-  content: z.string(),
+  author: guard.shortTextOptional,
+  tags: z.array(guard.shortText).max(10).optional(),
+  summary: guard.mediumTextOptional,
+  heroImage: z.string().url().optional(),
+  content: guard.longText,
 })
 
 export type ContentPage = z.infer<typeof ContentPageSchema>
@@ -27,14 +28,14 @@ export type ContentPage = z.infer<typeof ContentPageSchema>
 
 export const BlogPostSchema = z.object({
   slug: z.string(),
-  title: z.string(),
+  title: guard.shortText,
   date: z.string(),
   language: LanguageSchema,
-  author: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  heroImage: z.string().optional(),
-  preview: z.string().optional(),
-  content: z.string(),
+  author: guard.shortTextOptional,
+  tags: z.array(guard.shortText).max(10).optional(),
+  heroImage: z.string().url().optional(),
+  preview: guard.mediumTextOptional,
+  content: guard.longText,
 })
 
 export type BlogPost = z.infer<typeof BlogPostSchema>
@@ -42,8 +43,8 @@ export type BlogPost = z.infer<typeof BlogPostSchema>
 // ── Feedback ─────────────────────────────────────────────────
 
 export const FeedbackRequestSchema = z.object({
-  message: z.string().min(1),
-  name: z.string().optional(),
+  message: guard.mediumText.min(1),
+  name: guard.shortTextOptional,
   email: z.string().email().optional(),
   type: z.enum(['bug', 'feature', 'general', 'other']).optional(),
 })

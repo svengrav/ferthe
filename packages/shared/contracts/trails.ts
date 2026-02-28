@@ -4,6 +4,7 @@ import { AccountContext } from './accounts.ts'
 import { ImageReferenceSchema } from './images.ts'
 import { QueryOptions, Result } from './results.ts'
 import { RatingSummary } from './spots.ts'
+import { guard } from './strings.ts'
 import { StoredTrailSpot, TrailSpot } from './trailSpots.ts'
 
 // ──────────────────────────────────────────────────────────────
@@ -45,27 +46,27 @@ export const TrailOverviewSchema = z.object({
  * Trail options schema
  */
 export const TrailOptionsSchema = z.object({
-  scannerRadius: z.number(),
+  scannerRadius: guard.positiveInt,
   discoveryMode: DiscoveryModeSchema,
   previewMode: PreviewModeSchema,
-  snapRadius: z.number().optional(),
+  snapRadius: guard.positiveInt.optional(),
 })
 
 /**
  * Trail schema
  */
 export const TrailSchema = z.object({
-  id: z.string(),
-  slug: z.string(),
-  name: z.string(),
-  description: z.string(),
+  id: guard.idString,
+  slug: guard.slug,
+  name: guard.shortText,
+  description: guard.mediumText,
   map: TrailMapSchema,
   viewport: TrailViewportSchema.optional(),
   overview: TrailOverviewSchema.optional(),
   image: ImageReferenceSchema.optional(),
   boundary: GeoBoundarySchema, // GeoBoundary - complex type from geo package
   options: TrailOptionsSchema,
-  createdBy: z.string().optional(),
+  createdBy: guard.idString.optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 })
@@ -74,25 +75,25 @@ export const TrailSchema = z.object({
  * Stored trail schema (with blob paths)
  */
 export const StoredTrailSchema = TrailSchema.omit({ map: true, viewport: true, overview: true }).extend({
-  imageBlobPath: z.string().optional(),
+  imageBlobPath: guard.idString.optional(),
   map: TrailMapSchema.extend({
-    imageBlobPath: z.string().optional(),
+    imageBlobPath: guard.idString.optional(),
   }),
   viewport: TrailViewportSchema.extend({
-    imageBlobPath: z.string().optional(),
+    imageBlobPath: guard.idString.optional(),
   }).optional(),
   overview: TrailOverviewSchema.extend({
-    imageBlobPath: z.string().optional(),
+    imageBlobPath: guard.idString.optional(),
   }).optional(),
 })
 
 /**
- * Trail rating schema
+ * Trail guard.rating schema
  */
 export const TrailRatingSchema = z.object({
-  id: z.string(),
-  trailId: z.string(),
-  accountId: z.string(),
+  id: guard.idString,
+  trailId: guard.idString,
+  accountId: guard.idString,
   rating: z.number().int().min(1).max(5),
   createdAt: z.date(),
 })
@@ -101,17 +102,17 @@ export const TrailRatingSchema = z.object({
  * Trail stats schema
  */
 export const TrailStatsSchema = z.object({
-  trailId: z.string(),
-  totalSpots: z.number().int(),
-  discoveredSpots: z.number().int(),
-  discoveriesCount: z.number().int(),
-  progressPercentage: z.number(),
+  trailId: guard.idString,
+  totalSpots: guard.nonNegativeInt,
+  discoveredSpots: guard.nonNegativeInt,
+  discoveriesCount: guard.nonNegativeInt,
+  progressPercentage: z.number().min(0).max(100),
   completionStatus: z.enum(['not_started', 'in_progress', 'completed']),
-  rank: z.number().int(),
-  totalDiscoverers: z.number().int(),
+  rank: guard.positiveInt,
+  totalDiscoverers: guard.positiveInt,
   firstDiscoveredAt: z.date().optional(),
   lastDiscoveredAt: z.date().optional(),
-  averageTimeBetweenDiscoveries: z.number().optional(),
+  averageTimeBetweenDiscoveries: guard.nonNegativeInt.optional(),
 })
 
 // ──────────────────────────────────────────────────────────────
@@ -128,9 +129,9 @@ export const CreateTrailRequestSchema = TrailSchema.omit({
   updatedAt: true,
   createdBy: true,
 }).extend({
-  imageBase64: z.string().optional(),
-  mapImageBase64: z.string().optional(),
-  canvasImageBase64: z.string().optional(),
+  imageBase64: guard.base64String.optional(),
+  mapImageBase64: guard.base64String.optional(),
+  canvasImageBase64: guard.base64String.optional(),
 })
 
 /**
@@ -146,9 +147,9 @@ export const UpdateTrailRequestSchema = TrailSchema.pick({
   overview: true,
   image: true,
 }).extend({
-  imageBase64: z.string().optional(),
-  mapImageBase64: z.string().optional(),
-  canvasImageBase64: z.string().optional(),
+  imageBase64: guard.base64String.optional(),
+  mapImageBase64: guard.base64String.optional(),
+  canvasImageBase64: guard.base64String.optional(),
 }).partial()
 
 export type DiscoveryMode = z.infer<typeof DiscoveryModeSchema>

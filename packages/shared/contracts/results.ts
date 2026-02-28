@@ -4,6 +4,7 @@
 
 import { z } from 'zod'
 import { ERROR_CODES, type ApiErrorCode } from './errors.ts'
+import { guard } from './strings.ts'
 
 // ──────────────────────────────────────────────────────────────
 // Zod Schemas
@@ -35,20 +36,20 @@ export const ResultSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 
 export const QueryOptionsSchema = z.object({
   // Pagination
-  limit: z.number().int().positive().optional(),
-  offset: z.number().int().nonnegative().optional(),
+  limit: guard.nonNegativeInt.optional(),
+  offset: guard.nonNegativeInt.optional(),
 
   // Sorting
-  sortBy: z.string().optional(),
+  sortBy: guard.shortText.optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
 
   // Filtering
   filters: z.record(z.string(), z.any()).optional(),
-  search: z.string().optional(),
+  search: guard.shortText.optional(),
 
   // Enrichment Groups
-  include: z.array(z.string()).optional(), // Enrichment groups to include (e.g., ['images', 'userStatus'])
-  exclude: z.array(z.string()).optional(), // Enrichment groups to exclude
+  include: z.array(guard.shortText).optional(), // Enrichment groups to include (e.g., ['images', 'userStatus'])
+  exclude: z.array(guard.shortText).optional(), // Enrichment groups to exclude
 })
 
 // ──────────────────────────────────────────────────────────────
@@ -73,7 +74,7 @@ export interface Result<T> {
  * Query options for list operations
  * 
  * Enrichment Groups (for include/exclude):
- * - 'images': Generate fresh SAS-token URLs for all image fields (costly: ~50-200ms per image)
+ * - 'images': Generate fresh SAS-guard.token URLs for all image fields (costly: ~50-200ms per image)
  * - 'userStatus': Add user-specific status and filter data accordingly (requires extra DB query)
  */
 export type QueryOptions = z.infer<typeof QueryOptionsSchema>
