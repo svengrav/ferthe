@@ -66,7 +66,7 @@ const toOakRoute = (httpRoute: HttpRoute, handler: HandlerFn): Route => ({
  * Create handler registry: domain → routeId → handler function
  */
 const createHandlers = (ctx: APIContract): Record<string, Record<string, HandlerFn>> => {
-  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication, spotAccessComposite, discoveryStateComposite, accountProfileComposite } = ctx
+  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication, contentApplication, spotAccessComposite, discoveryStateComposite, accountProfileComposite } = ctx
 
   // Create the request handler with account application access
   const asyncRequestHandler = createAsyncRequestHandler(accountApplication)
@@ -330,6 +330,24 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       }),
       createScan: asyncRequestHandler<ScanEvent>(async ({ context: session, body }) => {
         return await sensorApplication.createScanEvent(session, body?.userPosition, body?.trailId)
+      }),
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // Content Handlers
+    // ─────────────────────────────────────────────────────────────
+    content: {
+      getPage: asyncRequestHandler(async ({ params }) => {
+        return await contentApplication.getPage(params!.language, params!.page)
+      }),
+      listBlogPosts: asyncRequestHandler(async ({ params }) => {
+        return await contentApplication.listBlogPosts(params!.language)
+      }),
+      getBlogPost: asyncRequestHandler(async ({ params }) => {
+        return await contentApplication.getBlogPost(params!.language, params!.slug)
+      }),
+      submitFeedback: asyncRequestHandler(async ({ body }) => {
+        return await contentApplication.submitFeedback(body?.name, body?.email, body?.type, body?.message)
       }),
     },
 

@@ -41,6 +41,7 @@
     "npm:tailwind-scrollbar@^4.0.2": "4.0.2_tailwindcss@4.1.18_react@19.2.4",
     "npm:tailwindcss@^4.1.17": "4.1.18",
     "npm:twilio@^5.11.2": "5.12.1",
+    "npm:vite@*": "5.4.21",
     "npm:vite@5.4.21": "5.4.21",
     "npm:zod@^4.3.6": "4.3.6",
     "npm:zustand@^5.0.11": "5.0.11_@types+react@19.2.14_react@19.2.4"

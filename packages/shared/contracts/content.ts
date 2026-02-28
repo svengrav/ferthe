@@ -50,3 +50,10 @@ export const FeedbackRequestSchema = z.object({
 })
 
 export type FeedbackRequest = z.infer<typeof FeedbackRequestSchema>
+
+export interface ContentApplicationContract {
+  getPage(language: string, page: string): Promise<import('./results.ts').Result<ContentPage>>
+  listBlogPosts(language: string): Promise<import('./results.ts').Result<BlogPost[]>>
+  getBlogPost(language: string, slug: string): Promise<import('./results.ts').Result<BlogPost>>
+  submitFeedback(name: string | undefined, email: string | undefined, type: string | undefined, message: string | undefined): Promise<import('./results.ts').Result<{ received: true }>>
+}

@@ -40,6 +40,7 @@
       "request": "launch",
       "url": "http://localhost:7002",
       "webRoot": "${workspaceFolder}/packages/web/app",
+      "preLaunchTask": "web:start"
     }
   ],
   "compounds": [
