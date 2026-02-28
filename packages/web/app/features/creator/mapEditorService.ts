@@ -97,7 +97,7 @@ export const fetchTrails = async (createdBy?: string): Promise<Trail[]> => {
   // Fetch spot IDs for each trail in parallel
   const trailsWithSpots = await Promise.all(
     trails.map(async (trail) => {
-      const spotsResult = await api.trails.getSpots(trail.id) as { data?: TrailSpot[] };
+      const spotsResult = await api.trails.listSpots(trail.id) as { data?: TrailSpot[] };
       const sorted = (spotsResult?.data ?? []).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
       return { ...trail, spotIds: sorted.map((ts) => ts.spotId) };
     }),

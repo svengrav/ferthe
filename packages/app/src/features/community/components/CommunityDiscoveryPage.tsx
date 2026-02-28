@@ -7,7 +7,7 @@ import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
 import { Theme, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
-import { CommunityMemberWithProfile, Discovery, Spot } from '@shared/contracts'
+import { CommunityMember, Discovery, Spot } from '@shared/contracts'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { useCommunityData } from '../stores/communityStore'
@@ -93,7 +93,7 @@ const useSharedDiscoveries = (communityId: string) => {
  */
 const useCommunityMembers = (communityId: string) => {
   const { communityApplication } = getAppContextStore()
-  const [members, setMembers] = useState<CommunityMemberWithProfile[]>([])
+  const [members, setMembers] = useState<CommunityMember[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
@@ -213,12 +213,12 @@ function CommunityDiscoveryPage({ communityId, communityName, onBack }: Communit
             <View style={styles.memberInfo}>
               <Avatar
                 size={48}
-                avatar={item.profile.avatar}
-                label={item.profile.displayName}
+                avatar={item.profile?.avatar}
+                label={item.profile?.displayName}
               />
               <View style={styles.memberDetails}>
-                <Text variant='label'>{item.profile.displayName || 'Unknown User'}</Text>
-                <Text variant='body'>{item.profile.spotCount} spots created</Text>
+                <Text variant='label'>{item.profile?.displayName || 'Unknown User'}</Text>
+                <Text variant='body'>{item.profile?.spotCount} spots created</Text>
                 <Text variant='caption'>Joined: {item.joinedAt.toLocaleDateString()}</Text>
               </View>
             </View>

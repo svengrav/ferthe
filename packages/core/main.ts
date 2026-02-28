@@ -1,4 +1,4 @@
-import { createApiHandler } from '@core/api/tsr/router.ts'
+import { createApiHandler } from '@core/api/orpc/router.ts'
 import { createConfig } from '@core/config/index.ts'
 import { createTwilioSMSConnector } from '@core/connectors/smsConnector.ts'
 import { createAzureStorageConnector } from '@core/connectors/storageConnector.ts'

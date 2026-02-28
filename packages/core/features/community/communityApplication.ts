@@ -1,5 +1,5 @@
 import { Store } from '@core/store/storeFactory.ts'
-import { AccountContext, AccountProfileCompositeContract, Community, CommunityApplicationContract, CommunityMemberWithProfile, createErrorResult, createSuccessResult, Discovery, Result, SharedDiscovery, StoredTrailSpot } from '@shared/contracts'
+import { AccountContext, AccountProfileCompositeContract, Community, CommunityApplicationContract, CommunityMember, createErrorResult, createSuccessResult, Discovery, Result, SharedDiscovery, StoredTrailSpot } from '@shared/contracts'
 import { CommunityServiceActions, createCommunityService } from './communityService.ts'
 import { CommunityStore } from './communityStore.ts'
 
@@ -223,7 +223,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     }
   }
 
-  const listCommunityMembers = async (context: AccountContext, communityId: string): Promise<Result<CommunityMemberWithProfile[]>> => {
+  const listCommunityMembers = async (context: AccountContext, communityId: string): Promise<Result<CommunityMember[]>> => {
     try {
       const membersResult = await communityStore.members.list()
       if (!membersResult.success) {
@@ -245,7 +245,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
 
       // Enrich members with profiles
       const profileMap = new Map(profilesResult.data!.map(p => [p.accountId, p]))
-      const enrichedMembers: CommunityMemberWithProfile[] = members.map(member => ({
+      const enrichedMembers: CommunityMember[] = members.map(member => ({
         ...member,
         profile: profileMap.get(member.accountId)!,
       }))

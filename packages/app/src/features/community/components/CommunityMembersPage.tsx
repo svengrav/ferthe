@@ -3,7 +3,7 @@ import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
-import { CommunityMemberWithProfile } from '@shared/contracts'
+import { CommunityMember } from '@shared/contracts'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, FlatList, View } from 'react-native'
 
@@ -26,7 +26,7 @@ interface CommunityMembersScreenProps {
 function CommunityMembersPage({ communityId, onBack }: CommunityMembersScreenProps) {
   const { styles, theme } = useTheme(useStyles)
   const { communityApplication } = getAppContextStore()
-  const [members, setMembers] = useState<CommunityMemberWithProfile[]>([])
+  const [members, setMembers] = useState<CommunityMember[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -65,12 +65,12 @@ function CommunityMembersPage({ communityId, onBack }: CommunityMembersScreenPro
                 <View style={styles.memberInfo}>
                   <Avatar
                     size={48}
-                    avatar={item.profile.avatar}
-                    label={item.profile.displayName}
+                    avatar={item.profile?.avatar}
+                    label={item.profile?.displayName}
                   />
                   <View style={styles.memberDetails}>
-                    <Text variant='label'>{item.profile.displayName || 'Unknown User'}</Text>
-                    <Text variant='body'>{item.profile.spotCount} spots created</Text>
+                    <Text variant='label'>{item.profile?.displayName || 'Unknown User'}</Text>
+                    <Text variant='body'>{item.profile?.spotCount} spots created</Text>
                     <Text variant='caption'>Joined: {item.joinedAt.toLocaleDateString()}</Text>
                   </View>
                 </View>

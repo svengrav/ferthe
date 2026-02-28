@@ -3,7 +3,7 @@
  * Auth token management is kept here; the facade handles all HTTP calls.
  */
 
-import { createApiClient } from '@shared/ts-rest'
+import { createApiClient } from '@shared/orpc'
 
 // ── Token management ───────────────────────────────────────────────────────────
 

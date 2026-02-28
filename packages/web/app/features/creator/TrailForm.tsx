@@ -139,7 +139,7 @@ export function TrailForm(
         label="Trail Image"
         value={displayImage}
         onChange={setImageBase64}
-        aspectRatio={16 / 9}
+        aspectRatio={1}
       />
 
       {/* Map background image — aspect ratio matches the trail boundary */}

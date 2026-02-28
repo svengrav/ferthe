@@ -11,7 +11,7 @@
  *   deno run --allow-all tools/upload-image.ts <image-path> [options]
  * 
  * Options:
- *   --type <type>      Image type: account-avatar | discovery | spot | trail | trail-preview | trail-surface | trail-viewport | trail-overview (default: discovery)
+ *   --type <type>      Image type: account-avatar | discovery | spot | trail | trail-preview | trail-surface | trail-canvas | trail-overview (default: discovery)
  *   --owner <id>       Owner account ID (default: system)
  *   --entity <id>      Entity ID (default: auto-generated)
  *   --id <id>          Specific blob path ID for updates (default: auto-generated CUID2)
@@ -40,7 +40,7 @@ dotenv.config({ path: envPath })
 
 interface UploadOptions {
   imagePath: string
-  imageType: 'account-avatar' | 'discovery' | 'spot' | 'trail' | 'trail-preview' | 'trail-surface' | 'trail-viewport' | 'trail-overview'
+  imageType: 'account-avatar' | 'discovery' | 'spot' | 'trail' | 'trail-preview' | 'trail-surface' | 'trail-canvas' | 'trail-overview'
   ownerId: string
   entityId: string
   customId?: string

@@ -1,7 +1,7 @@
 import { getSpotStoreActions } from '@app/features/spot/stores/spotStore'
 import { logger } from '@app/shared/utils/logger'
 import { RatingSummary, Result, TrailStats } from '@shared/contracts'
-import type { ApiClient } from '@shared/ts-rest'
+import type { ApiClient } from '@shared/orpc'
 import { getTrailRatingActions } from './stores/trailRatingStore'
 import { getTrailStoreActions } from './stores/trailStore'
 
@@ -36,7 +36,7 @@ export function createTrailApplication(options: TrailApplicationOptions) {
 
   const requestTrailSpotPreviews = async (trailId: string) => {
     setStatus('loading')
-    const trailSpotsResult = await api.trails.getSpots(trailId)
+    const trailSpotsResult = await api.trails.listSpots(trailId)
     if (!trailSpotsResult.success) {
       logger.error('Failed to fetch trail spots:', trailSpotsResult.error)
       setStatus('error')

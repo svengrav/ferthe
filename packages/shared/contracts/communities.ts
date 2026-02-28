@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { AccountContext } from './accounts.ts'
+import { AccountContext, AccountPublicProfileSchema } from './accounts.ts'
 import { Discovery } from './discoveries.ts'
 import { Result } from './results.ts'
 
@@ -28,13 +28,8 @@ export const CommunityMemberSchema = z.object({
   communityId: z.string(),
   accountId: z.string(),
   joinedAt: z.date(),
-})
+  profile: AccountPublicProfileSchema.optional()
 
-/**
- * Community member with profile schema
- */
-export const CommunityMemberWithProfileSchema = CommunityMemberSchema.extend({
-  profile: z.any(), // AccountPublicProfile - already migrated
 })
 
 /**
@@ -75,7 +70,6 @@ export const createCommunitySchema = z.object({
 
 export type Community = z.infer<typeof CommunitySchema>
 export type CommunityMember = z.infer<typeof CommunityMemberSchema>
-export type CommunityMemberWithProfile = z.infer<typeof CommunityMemberWithProfileSchema>
 export type SharedDiscovery = z.infer<typeof SharedDiscoverySchema>
 export type CommunityDiscoveryStats = z.infer<typeof CommunityDiscoveryStatsSchema>
 export type CreateCommunityInput = z.infer<typeof createCommunitySchema>
@@ -100,7 +94,7 @@ export interface CommunityApplicationContract {
   removeCommunity: (context: AccountContext, communityId: string) => Promise<Result<void>>
   getCommunity: (context: AccountContext, communityId: string) => Promise<Result<Community | undefined>>
   listCommunities: (context: AccountContext) => Promise<Result<Community[]>>
-  listCommunityMembers: (context: AccountContext, communityId: string) => Promise<Result<CommunityMemberWithProfile[]>>
+  listCommunityMembers: (context: AccountContext, communityId: string) => Promise<Result<CommunityMember[]>>
   shareDiscovery: (context: AccountContext, discoveryId: string, communityId: string) => Promise<Result<SharedDiscovery>>
   unshareDiscovery: (context: AccountContext, discoveryId: string, communityId: string) => Promise<Result<void>>
   getSharedDiscoveries: (context: AccountContext, communityId: string) => Promise<Result<Discovery[]>>

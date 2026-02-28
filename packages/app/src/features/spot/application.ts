@@ -1,6 +1,6 @@
 import { logger } from '@app/shared/utils/logger'
 import { CreateSpotRequest, Result, Spot, UpdateSpotRequest } from '@shared/contracts'
-import type { ApiClient } from '@shared/ts-rest'
+import type { ApiClient } from '@shared/orpc'
 import { getSpotStoreActions } from './stores/spotStore'
 
 export interface SpotApplication {
@@ -25,7 +25,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
     setStatus('loading')
     logger.log('SpotApplication: Requesting spots by trail', trailId)
 
-    const trailSpotsResult = await api.trails.getSpots(trailId)
+    const trailSpotsResult = await api.trails.listSpots(trailId)
     if (!trailSpotsResult.success || !trailSpotsResult.data) {
       logger.error('Failed to fetch trail spots:', trailSpotsResult.error)
       setStatus('error')

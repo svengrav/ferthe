@@ -14,6 +14,15 @@ interface UniqueItem {
   id: string
 }
 
+// Reviver that converts ISO 8601 date strings back to Date objects
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/
+function dateReviver(_key: string, value: unknown): unknown {
+  if (typeof value === 'string' && ISO_DATE_RE.test(value)) {
+    return new Date(value)
+  }
+  return value
+}
+
 export function createJsonStore(options: JsonStoreOptions = {}): StoreInterface {
   const baseDir = options.baseDirectory || './data'
 
@@ -29,7 +38,7 @@ export function createJsonStore(options: JsonStoreOptions = {}): StoreInterface 
       await ensureDirectoryExists()
       const filePath = path.join(baseDir, `${container}.json`)
       const content = await fs.readFile(filePath, 'utf-8')
-      const parsed = JSON.parse(content)
+      const parsed = JSON.parse(content, dateReviver)
 
       return parsed || []
     } catch (_error) {

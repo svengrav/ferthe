@@ -31,8 +31,8 @@ export function createSpotAccessComposite(options: SpotAccessCompositeOptions): 
           return createErrorResult('ACCOUNT_ID_REQUIRED')
         }
 
-        // Admin sees all spots without discovery filter
-        if (context.role === 'admin') {
+        // Admin in creator context sees all spots; app context follows normal discovery rules
+        if (context.role === 'admin' && context.client === 'creator') {
           return spotApplication.getSpots(context, options)
         }
 
@@ -48,7 +48,10 @@ export function createSpotAccessComposite(options: SpotAccessCompositeOptions): 
         }
 
         // Step 2: Fetch full spot data (data access via spot domain)
-        const spotsResult = await spotApplication.getSpotsByIds(context, spotIds, options)
+        // Strip trailId from filters — spots have no trailId field; trailId was only needed above
+        const { trailId: _trailId, ...spotFilters } = (options?.filters ?? {}) as Record<string, unknown>
+        const spotQueryOptions = options ? { ...options, filters: spotFilters } : undefined
+        const spotsResult = await spotApplication.getSpotsByIds(context, spotIds, spotQueryOptions)
         if (!spotsResult.success) {
           return createErrorResult('GET_SPOTS_ERROR', { reason: 'Failed to fetch spots' })
         }
@@ -77,8 +80,8 @@ export function createSpotAccessComposite(options: SpotAccessCompositeOptions): 
           return createSuccessResult(undefined)
         }
 
-        // Admin always has full access
-        if (context.role === 'admin') {
+        // Admin in creator context has full access; app context follows normal discovery rules
+        if (context.role === 'admin' && context.client === 'creator') {
           return createSuccessResult({ ...spot, source: 'created' as const })
         }
 

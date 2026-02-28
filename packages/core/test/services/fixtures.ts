@@ -40,7 +40,7 @@ export const makeTrail = (overrides: Partial<Trail> = {}): Trail => ({
   name: 'Test Trail',
   description: 'A test trail',
   map: {},
-  boundary: null,
+  boundary: { northEast: { lat: 51.6, lon: 7.6 }, southWest: { lat: 51.4, lon: 7.4 } },
   options: {
     scannerRadius: 100,
     discoveryMode: 'free',

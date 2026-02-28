@@ -5,14 +5,13 @@
       "name": "🟦 Run API",
       "request": "launch",
       "type": "node",
-      "preLaunchTask": "Kill: All Servers",
       "cwd": "${workspaceFolder}/packages/core",
       "runtimeExecutable": "deno",
       "runtimeArgs": [
         "run",
         "-A",
         "--watch",
-        "--inspect",
+        "--inspect=127.0.0.1:7009",
         "main.ts"
       ],
       "attachSimplePort": 7009,
@@ -28,7 +27,7 @@
       "request": "launch",
       "url": "http://localhost:7004",
       "webRoot": "${workspaceFolder}/packages/app",
-      "preLaunchTask": "Start Expo Web Server",
+      "preLaunchTask": "app:start",
       "sourceMapPathOverrides": {
         "webpack:///./src/*": "${webRoot}/src/*",
         "webpack:///src/*": "${webRoot}/src/*",
@@ -41,18 +40,17 @@
       "request": "launch",
       "url": "http://localhost:7002",
       "webRoot": "${workspaceFolder}/packages/web/app",
-      "preLaunchTask": "Start Web Server"
     }
   ],
   "compounds": [
     {
-      "name": " Run App",
+      "name": "🟩 Run App",
       "configurations": [
         "🟦 Run API",
         "🟥 Run App",
       ],
       "stopAll": true,
-      "preLaunchTask": "Kill: All Servers"
+      "preLaunchTask": "kill:all"
     },
     {
       "name": "🟩 Run Web",
@@ -61,7 +59,7 @@
         "🟨 Run Web",
       ],
       "stopAll": true,
-      "preLaunchTask": "Kill: All Servers"
+      // "preLaunchTask": "kill:all"
     }
   ]
 }

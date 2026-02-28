@@ -17,7 +17,7 @@ import { TrailStats } from './trails.ts'
  */
 export const LocationWithDirectionSchema = z.object({
   location: GeoLocationSchema,
-  direction: z.number(),
+  direction: z.number().optional(),
 })
 
 /**

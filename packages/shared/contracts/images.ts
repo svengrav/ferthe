@@ -15,7 +15,7 @@ export const ImageTypeSchema = z.enum([
   'trail',
   'trail-preview',
   'trail-surface',
-  'trail-viewport',
+  'trail-canvas',
   'trail-overview',
   'account-avatar',
 ])
@@ -44,7 +44,7 @@ export const ImageUploadResultSchema = z.object({
  * Trail images:
  *  - trail-preview: Trail card/header image
  *  - trail-surface: Map surface background (moves with trail boundary in Canvas mode)
- *  - trail-viewport: Viewport background (static, does not move in Canvas mode)
+ *  - trail-canvas: Viewport background (static, does not move in Canvas mode)
  *  - trail-overview: Overview mode background (full trail boundary in Overview mode)
  */
 export type ImageType = z.infer<typeof ImageTypeSchema>

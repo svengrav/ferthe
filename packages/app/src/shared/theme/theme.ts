@@ -29,6 +29,7 @@ export const DARK_THEME = {
 export const LIGHT_THEME = {
   white: '#FFFFFF',
   black: '#000000',
+  dark: 'rgb(10, 10, 15)',
   background: '#F5F5F5',
   onBackground: '#121214',
   primary: '#000000',

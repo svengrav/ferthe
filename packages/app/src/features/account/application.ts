@@ -12,7 +12,7 @@ import {
   SMSCodeRequest,
   SMSVerificationResult,
 } from '@shared/contracts'
-import type { ApiClient } from '@shared/ts-rest'
+import type { ApiClient } from '@shared/orpc'
 import { SecureStoreConnector } from '../../shared/device/secureStoreConnector'
 import { AccountServiceActions } from './services/accountService'
 import { getAccountActions, getSession } from './stores/accountStore'

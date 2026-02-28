@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Kill: All Servers",
+      "label": "kill:all",
       "type": "shell",
       "command": "fuser -k 7000/tcp 7001/tcp 7002/tcp 7003/tcp 7004/tcp 7009/tcp 2>/dev/null; pkill -f 'deno.*main.ts' 2>/dev/null; pkill -f 'deno.*--inspect' 2>/dev/null; pkill -f 'metro' 2>/dev/null; exit 0",
       "presentation": {
@@ -12,14 +12,14 @@
       "problemMatcher": []
     },
     {
-      "label": "Start Expo Web Server",
+      "label": "app:start",
       "type": "shell",
       "command": "npm run dev",
       "options": {
         "cwd": "${workspaceFolder}/packages/app"
       },
       "dependsOn": [
-        "Start Storage Server"
+        "storage:start"
       ],
       "dependsOrder": "sequence",
       "isBackground": true,
@@ -35,7 +35,7 @@
       }
     },
     {
-      "label": "Start Storage Server",
+      "label": "storage:start",
       "type": "shell",
       "command": "deno run --allow-all ${workspaceFolder}/tools/start-localstorage.ts",
       "group": "build",
@@ -55,7 +55,7 @@
       }
     },
     {
-      "label": "Start Dev Environment",
+      "label": "dev:start",
       "type": "shell",
       "command": "deno run --allow-all ${workspaceFolder}/tools/startDev.ts",
       "isBackground": true,
@@ -71,7 +71,7 @@
       }
     },
     {
-      "label": "Export Sandboxdata",
+      "label": "sandbox:export",
       "type": "shell",
       "command": "deno run -A ${workspaceFolder}/packages/test/src/sandbox/export.ts",
       "isBackground": true,
@@ -87,12 +87,52 @@
       }
     },
     {
-      "label": "Start Web Server",
+      "label": "tsc:app",
+      "type": "shell",
+      "command": "npx tsc --noEmit",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/app"
+      },
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "tsc:core",
+      "type": "shell",
+      "command": "deno check",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/core"
+      },
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "tsc:web",
+      "type": "shell",
+      "command": "deno check",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/web"
+      },
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "tsc:all",
+      "dependsOn": [
+        "tsc:app",
+        "tsc:core",
+        "tsc:web"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "web:start",
       "type": "shell",
       "command": "deno run dev",
-      "dependsOn": [
-        "Kill: All Servers"
-      ],
       "dependsOrder": "sequence",
       "options": {
         "cwd": "${workspaceFolder}/packages/web"
@@ -108,49 +148,6 @@
           "endsPattern": "ready in|Local:|http://localhost"
         }
       }
-    },
-    {
-      "label": "TypeScript Check: App",
-      "type": "shell",
-      "command": "npx tsc --noEmit",
-      "options": {
-        "cwd": "${workspaceFolder}/packages/app"
-      },
-      "group": "build",
-      "problemMatcher": "$tsc"
-    },
-    {
-      "label": "TypeScript Check: Core",
-      "type": "shell",
-      "command": "deno check",
-      "options": {
-        "cwd": "${workspaceFolder}/packages/core"
-      },
-      "group": "build",
-      "problemMatcher": "$tsc"
-    },
-    {
-      "label": "TypeScript Check: Web",
-      "type": "shell",
-      "command": "deno check",
-      "options": {
-        "cwd": "${workspaceFolder}/packages/web"
-      },
-      "group": "build",
-      "problemMatcher": "$tsc"
-    },
-    {
-      "label": "TypeScript Check: All",
-      "dependsOn": [
-        "TypeScript Check: App",
-        "TypeScript Check: Core",
-        "TypeScript Check: Web"
-      ],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "problemMatcher": []
     },
     {
       "label": "web:deploy",

@@ -1,6 +1,6 @@
 import { logger } from '@app/shared/utils/logger'
-import { Community, CommunityMemberWithProfile, Discovery, Result, SharedDiscovery } from '@shared/contracts'
-import type { ApiClient } from '@shared/ts-rest'
+import { Community, CommunityMember, Discovery, Result, SharedDiscovery } from '@shared/contracts'
+import type { ApiClient } from '@shared/orpc'
 import { getCommunityActions } from './stores/communityStore'
 
 export interface CommunityApplicationOptions {
@@ -15,7 +15,7 @@ export interface CommunityApplication {
   leaveCommunity: (communityId: string) => Promise<Result<void>>
   removeCommunity: (communityId: string) => Promise<Result<void>>
   setActiveCommunity: (communityId: string | undefined) => void
-  getCommunityMembers: (communityId: string) => Promise<Result<CommunityMemberWithProfile[]>>
+  getCommunityMembers: (communityId: string) => Promise<Result<CommunityMember[]>>
   shareDiscovery: (discoveryId: string, communityId: string) => Promise<Result<SharedDiscovery>>
   unshareDiscovery: (discoveryId: string, communityId: string) => Promise<Result<void>>
   getSharedDiscoveries: (communityId: string) => Promise<Result<Discovery[]>>
@@ -129,7 +129,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     logger.log(`Active community set: ${communityId || 'none'}`)
   }
 
-  const getCommunityMembers = async (communityId: string): Promise<Result<CommunityMemberWithProfile[]>> => {
+  const getCommunityMembers = async (communityId: string): Promise<Result<CommunityMember[]>> => {
     try {
       return await api.community.listMembers(communityId)
     } catch (error: unknown) {
@@ -166,7 +166,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
 
   const getSharedDiscoveries = async (communityId: string): Promise<Result<Discovery[]>> => {
     try {
-      return await api.community.getSharedDiscoveries(communityId)
+      return await api.community.listSharedDiscoveries(communityId)
     } catch (error: unknown) {
       logger.error('Error getting shared discoveries:', error)
       return { success: false, error: { code: 'GET_SHARED_ERROR', message: error instanceof Error ? error.message : 'Unknown error' } }

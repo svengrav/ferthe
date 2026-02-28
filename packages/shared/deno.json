@@ -1,6 +1,8 @@
 {
   "imports": {
-    "@ts-rest/core": "npm:@ts-rest/core@^3.52.0",
+    "@orpc/contract": "npm:@orpc/contract@^1.0.0",
+    "@orpc/client": "npm:@orpc/client@^1.0.0",
+    "@orpc/client/fetch": "npm:@orpc/client@^1.0.0/fetch",
     "@shared/contracts": "../contracts/index.ts"
   }
 }

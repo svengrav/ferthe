@@ -1,5 +1,5 @@
 import { AccountSession } from '@shared/contracts'
-import { createApiClient, type ApiClient } from '@shared/ts-rest'
+import { createApiClient, type ApiClient } from '@shared/orpc'
 import { checkStatus, type StatusResult } from './utils'
 
 export interface ApiContextOptions {

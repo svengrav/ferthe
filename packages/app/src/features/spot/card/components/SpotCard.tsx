@@ -41,7 +41,7 @@ function SpotCard({
       height={height}
       borderRadius={borderRadius}
       withShadow={true}
-      onPress={onPress}
+      onPress={isLocked ? undefined : onPress}
       style={style}
     >
       <SpotGradientFrame colors={['#a341fffd', 'rgba(65, 73, 185, 0.767)']} padding={4}>
