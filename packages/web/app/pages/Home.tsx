@@ -24,7 +24,7 @@ export function Home() {
         id="head-wide"
         className="flex flex-1  bg-surface bg-linear-to-t to-slate-900/10 text-gray-100 justify-center items-center w-full"
       >
-        <div className="flex-col px-8 lg:px-0 lg:flex-row  flex py-30 max-w-7xl w-full">
+        <div className="flex-col px-8 lg:px-0 lg:flex-row  flex py-30 max-w-350 w-full">
           <div
             id="col-left"
             className="flex flex-1 justify-center items-center"
@@ -52,19 +52,19 @@ export function Home() {
 
           <div
             id="col-right"
-            className=" flex-1 items-center justify-center p-4 rounded-xl  "
+            className=" flex-1 items-center justify-center p-4  "
           >
-            <TrailCanvas className="bg-linear-to-tl  flex flex-1 justify-center  overflow-hidden w-full bg-indigo-900/20 to-indigo-900/50 p-4">
+            <TrailCanvas className="bg-linear-to-tl  flex flex-1 justify-center   rounded-2xl! overflow-hidden w-full bg-amber-500 to-indigo-700/50 p-4">
               <div
                 id="phone"
-                className=" flex-col align-top gap-2 relative max-w-90 w-full aspect-1/2"
+                className=" flex-col align-top gap-2 relative max-w-100 w-full aspect-1/2"
               >
                 {/* App screenshot */}
-                <div className="absolute inset-0 overflow-hidden bg-pink-600 z-1 rounded-3xl shadow-2xl ">
+                <div className="absolute inset-0 overflow-hidden  z-1 rounded-3xl shadow-2xl ">
                 </div>
                 {/* Phone frame overlay */}
                 <img
-                  src="/phone-transparent.png"
+                  src="/phone-mock-2.png"
                   className="absolute inset-0 w-full h-full object-contain z-2 pointer-events-none"
                   alt=""
                 />
