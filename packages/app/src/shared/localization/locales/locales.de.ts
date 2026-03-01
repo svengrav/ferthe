@@ -319,6 +319,22 @@ const de: LocalizationSet = {
     linkLabelPlaceholder: 'Linktext...',
     contentBlocks: 'Inhalt',
   },
+  feedback: {
+    title: 'Feedback',
+    namePlaceholder: 'Dein Name',
+    emailPlaceholder: 'deine@email.com',
+    typeLabel: 'Typ',
+    typeGeneral: 'Allgemein',
+    typeBug: 'Fehler',
+    typeReport: 'Meldung',
+    typeFeedback: 'Feedback',
+    messagePlaceholder: 'Erzähle uns, was du denkst...',
+    messageRequired: 'Nachricht ist erforderlich',
+    submit: 'Feedback senden',
+    submitting: 'Senden...',
+    successMessage: 'Danke für dein Feedback!',
+    errorMessage: 'Feedback konnte nicht gesendet werden',
+  },
 }
 
 export default de

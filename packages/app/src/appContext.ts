@@ -1,4 +1,5 @@
 import { APIContext } from '@app/api/apiContext'
+import { ApiClient } from '@shared/api'
 import { AccountSession } from '@shared/contracts'
 import { StatusResult } from './api/utils'
 import { AccountApplication, createAccountApplication } from './features/account'
@@ -14,6 +15,7 @@ import { logger } from './shared/utils/logger'
 
 export interface AppContext {
   readonly config: AppConfiguration
+  readonly api: ApiClient
   system: {
     isDevelopment: boolean
     checkStatus: () => Promise<StatusResult>
@@ -76,6 +78,7 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
 
   return {
     config: { environment },
+    api,
     system: {
       isDevelopment: config.environment === 'development',
       checkStatus: apiContext.system.checkStatus,

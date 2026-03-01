@@ -122,7 +122,7 @@ export function FeedbackForm({ onClose }: FeedbackFormProps) {
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as FeedbackType)}
-                className={`${INPUT_STYLE} cursor-pointer`}
+                className={`${INPUT_STYLE} cursor-pointer bg-surface`}
                 disabled={status === "submitting"}
               >
                 <option value="other">Allgemeines Feedback</option>

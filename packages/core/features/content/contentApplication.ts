@@ -20,6 +20,7 @@ export interface ContentApplicationActions {
     email: string | undefined,
     type: string | undefined,
     message: string | undefined,
+    accountId?: string,
   ): Promise<Result<{ received: true }>>
 }
 
@@ -97,7 +98,7 @@ export function createContentApplication(contentDir: string): ContentApplication
       }
     },
 
-    async submitFeedback(name, email, type, message) {
+    async submitFeedback(name, email, type, message, accountId) {
       if (!message?.trim()) {
         return { success: false, error: { code: 'VALIDATION_ERROR', message: 'Message is required' } }
       }
@@ -108,6 +109,7 @@ export function createContentApplication(contentDir: string): ContentApplication
         email: email ?? 'Not provided',
         type: type ?? 'other',
         message: message.trim(),
+        accountId: accountId ?? undefined,
       }
 
       logger.info('Feedback received', feedback)

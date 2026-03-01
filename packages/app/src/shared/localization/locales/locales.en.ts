@@ -320,6 +320,22 @@ const en = {
     linkLabelPlaceholder: 'Link text...',
     contentBlocks: 'Content',
   },
+  feedback: {
+    title: 'Feedback',
+    namePlaceholder: 'Your name',
+    emailPlaceholder: 'your@email.com',
+    typeLabel: 'Type',
+    typeGeneral: 'General',
+    typeBug: 'Bug',
+    typeReport: 'Report',
+    typeFeedback: 'Feedback',
+    messagePlaceholder: 'Tell us what you think...',
+    messageRequired: 'Message is required',
+    submit: 'Send Feedback',
+    submitting: 'Sending...',
+    successMessage: 'Thank you for your feedback!',
+    errorMessage: 'Failed to submit feedback',
+  },
 }
 
 export type LocalizationSet = typeof en

@@ -347,7 +347,7 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
         return await contentApplication.getBlogPost(params!.language, params!.slug)
       }),
       submitFeedback: asyncRequestHandler(async ({ body }) => {
-        return await contentApplication.submitFeedback(body?.name, body?.email, body?.type, body?.message)
+        return await contentApplication.submitFeedback(body?.name, body?.email, body?.type, body?.message, body?.accountId)
       }),
     },
 

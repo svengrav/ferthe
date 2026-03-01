@@ -46,7 +46,8 @@ export const FeedbackRequestSchema = z.object({
   message: guard.mediumText.min(1),
   name: guard.shortTextOptional,
   email: z.string().email().optional(),
-  type: z.enum(['bug', 'feature', 'general', 'other']).optional(),
+  type: z.enum(['bug', 'report', 'feedback', 'other']).optional(),
+  accountId: z.string().optional(),
 })
 
 export type FeedbackRequest = z.infer<typeof FeedbackRequestSchema>
@@ -55,5 +56,5 @@ export interface ContentApplicationContract {
   getPage(language: string, page: string): Promise<import('./results.ts').Result<ContentPage>>
   listBlogPosts(language: string): Promise<import('./results.ts').Result<BlogPost[]>>
   getBlogPost(language: string, slug: string): Promise<import('./results.ts').Result<BlogPost>>
-  submitFeedback(name: string | undefined, email: string | undefined, type: string | undefined, message: string | undefined): Promise<import('./results.ts').Result<{ received: true }>>
+  submitFeedback(name: string | undefined, email: string | undefined, type: string | undefined, message: string | undefined, accountId?: string): Promise<import('./results.ts').Result<{ received: true }>>
 }
