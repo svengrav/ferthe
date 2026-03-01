@@ -20,11 +20,14 @@ export function Home() {
 
   return (
     <Page loading={loadingGerman} wide>
-      <div className="flex flex-1 bg-surface bg-linear-to-t to-slate-900/10 text-gray-100 justify-center items-center w-full">
-        <div className="flex-row flex py-30 max-w-7xl w-full">
+      <div
+        id="head-wide"
+        className="flex flex-1  bg-surface bg-linear-to-t to-slate-900/10 text-gray-100 justify-center items-center w-full"
+      >
+        <div className="flex-col px-8 lg:px-0 lg:flex-row  flex py-30 max-w-7xl w-full">
           <div
             id="col-left"
-            className="flex flex-1 justify-center items-center px-8"
+            className="flex flex-1 justify-center items-center"
           >
             <div className="flex flex-col">
               <Logo
@@ -49,12 +52,12 @@ export function Home() {
 
           <div
             id="col-right"
-            className="flex-1 flex-row items-center justify-center p-4 rounded-xl hidden lg:flex bg-white/3"
+            className=" flex-1 items-center justify-center p-4 rounded-xl  "
           >
-            <TrailCanvas className="bg-linear-to-tl  flex flex-1 justify-center  overflow-hidden w-full">
+            <TrailCanvas className="bg-linear-to-tl  flex flex-1 justify-center  overflow-hidden w-full bg-indigo-900/20 to-indigo-900/50 p-4">
               <div
                 id="phone"
-                className="hidden lg:flex flex-col align-top gap-2 relative max-w-90 w-full aspect-1/2"
+                className=" flex-col align-top gap-2 relative max-w-90 w-full aspect-1/2"
               >
                 {/* App screenshot */}
                 <div className="absolute inset-0 overflow-hidden bg-pink-600 z-1 rounded-3xl shadow-2xl ">
