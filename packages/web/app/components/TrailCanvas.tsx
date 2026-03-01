@@ -160,13 +160,11 @@ export function TrailCanvas({
     <div
       ref={containerRef}
       className={clsx(
-        "overflow-hidden rounded-md relative flex justify-center items-center w-full flex-1",
+        "overflow-hidden rounded-md relative",
         className,
       )}
     >
-      <div className="z-10 flex justify-center items-center">
-        {children}
-      </div>
+      {children}
 
       <canvas
         id="canvas"
