@@ -54,8 +54,14 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     maxImageSizeBytes: config.constants.images.maxSizeBytes
   })
 
+  const spotStore = createStore<StoredSpot>(storeConnector, STORE_IDS.SPOTS)
+  const discoveryStore = createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES)
+  const communityMemberStore = createStore<CommunityMember>(storeConnector, STORE_IDS.COMMUNITY_MEMBERS)
+  const discoveryContentStore = createStore<DiscoveryContent>(storeConnector, STORE_IDS.DISCOVERY_CONTENTS)
+  const discoveryProfileStore = createStore<DiscoveryProfile>(storeConnector, STORE_IDS.DISCOVERY_PROFILES)
+
   const spotApplication = createSpotApplication({
-    spotStore: createStore<StoredSpot>(storeConnector, STORE_IDS.SPOTS),
+    spotStore,
     ratingStore: createStore<SpotRating>(storeConnector, STORE_IDS.SPOT_RATINGS),
     imageApplication,
   })
@@ -79,7 +85,12 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     smsConnector,
     jwtService: createJWTService({ secret: config.secrets.jwtSecret }),
     smsService: createSMSService({ phoneSalt: config.secrets.phoneHashSalt }),
-    imageApplication: imageApplication
+    imageApplication: imageApplication,
+    discoveryStore,
+    spotStore,
+    communityMemberStore,
+    discoveryContentStore,
+    discoveryProfileStore,
   })
 
   const sensorApplication = createSensorApplication({
@@ -87,7 +98,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     spotApplication: spotApplication,
     scanStore: createStore(storeConnector, STORE_IDS.SENSOR_SCANS),
     sensorService: createSensorService(),
-    discoveryStore: createStore(storeConnector, STORE_IDS.DISCOVERIES),
+    discoveryStore,
   })
 
   const discoveryApplication = createDiscoveryApplication({
@@ -95,9 +106,9 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     trailApplication: trailApplication,
     spotApplication: spotApplication,
     discoveryService: createDiscoveryService(),
-    discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
-    profileStore: createStore<DiscoveryProfile>(storeConnector, STORE_IDS.DISCOVERY_PROFILES),
-    contentStore: createStore<DiscoveryContent>(storeConnector, STORE_IDS.DISCOVERY_CONTENTS),
+    discoveryStore,
+    profileStore: discoveryProfileStore,
+    contentStore: discoveryContentStore,
     imageApplication: imageApplication
   })
 
@@ -120,11 +131,11 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
   const communityApplication = createCommunityApplication({
     communityStore: {
       communities: createStore<Community>(storeConnector, STORE_IDS.COMMUNITIES),
-      members: createStore<CommunityMember>(storeConnector, STORE_IDS.COMMUNITY_MEMBERS),
+      members: communityMemberStore,
       ratings: createStore<SpotRating>(storeConnector, STORE_IDS.SPOT_RATINGS),
       discoveries: createStore<SharedDiscovery>(storeConnector, STORE_IDS.COMMUNITY_DISCOVERIES),
     },
-    discoveryStore: createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES),
+    discoveryStore,
     trailSpotStore: createStore<StoredTrailSpot>(storeConnector, STORE_IDS.TRAIL_SPOTS),
     accountProfileComposite,
   })

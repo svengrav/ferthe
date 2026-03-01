@@ -36,7 +36,7 @@ type CodeFormData = z.infer<typeof codeSchema>
  * Custom hook to handle account verification logic
  * Manages phone number verification and SMS code handling
  */
-const useAccountVerification = (onClose?: () => void) => {
+const useAccountVerification = (onClose?: () => void, mode: 'login' | 'upgrade' = 'login') => {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [showCodeInput, setShowCodeInput] = useState(false)
@@ -56,11 +56,20 @@ const useAccountVerification = (onClose?: () => void) => {
   }
 
   const handleVerifyCode = async (data: CodeFormData) => {
-    const result = await accountApplication.verifySMSCode(phoneNumber, data.verificationCode)
-    if (result.success) {
-      onClose?.()
+    if (mode === 'upgrade') {
+      const result = await accountApplication.upgradeToPhoneAccount(phoneNumber, data.verificationCode)
+      if (result.success) {
+        onClose?.()
+      } else {
+        setError(result.error?.message || 'Verification failed')
+      }
     } else {
-      setError(result.error?.message || 'Verification failed')
+      const result = await accountApplication.verifySMSCode(phoneNumber, data.verificationCode)
+      if (result.success && result.data?.success) {
+        onClose?.()
+      } else {
+        setError(result.data?.error || result.error?.message || 'Verification failed')
+      }
     }
   }
 
@@ -78,15 +87,16 @@ const useAccountVerification = (onClose?: () => void) => {
  */
 interface AccountVerificationCardProps {
   onClose?: () => void
+  mode?: 'login' | 'upgrade'
 }
 
-function AccountVerificationCard({ onClose }: AccountVerificationCardProps) {
-  const { showCodeInput, error, handleRequestSmsCode, handleVerifyCode } = useAccountVerification(onClose)
+function AccountVerificationCard({ onClose, mode = 'login' }: AccountVerificationCardProps) {
+  const { showCodeInput, error, handleRequestSmsCode, handleVerifyCode } = useAccountVerification(onClose, mode)
   const { styles } = useTheme(useStyles)
   const { locales } = useLocalization()
 
   return (
-    <OverlayCard title='Verify your account' onClose={onClose}>
+    <OverlayCard title='Verify your account' onClose={onClose} keyboardAware={true}>
       <Stack>
 
         {!showCodeInput && (

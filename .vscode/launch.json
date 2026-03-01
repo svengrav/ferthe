@@ -25,7 +25,7 @@
       "name": "🟥 Run App",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:7004",
+      "url": "http://localhost:8081",
       "webRoot": "${workspaceFolder}/packages/app",
       "preLaunchTask": "app:start",
       "sourceMapPathOverrides": {

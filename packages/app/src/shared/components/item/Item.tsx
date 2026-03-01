@@ -54,7 +54,7 @@ function Item(props: ItemProps) {
     } else if (onSubmitEdit) {
       const close = setOverlay(
         'edit-item',
-        <OverlayCard title={`Edit ${label}`} onClose={() => close()}>
+        <OverlayCard title={`Edit ${label}`} onClose={() => close()} keyboardAware={true}>
           <ItemTextEditor
             value={value || ''}
             multiline={type === 'multiline'}

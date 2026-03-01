@@ -15,7 +15,7 @@
 
 const STORAGE_DIR = `${Deno.cwd()}/_data/app`
 const PORT = 7003
-const ALLOWED_ORIGINS = ['http://localhost:7004', 'http://localhost:7000', 'http://localhost:19006']
+const ALLOWED_ORIGINS = ['http://localhost:8081', 'http://localhost:7000', 'http://localhost:19006']
 
 // Ensure storage directory exists
 try {

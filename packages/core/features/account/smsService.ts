@@ -62,8 +62,13 @@ export function createSMSService(options: SMSServiceOptions = {}): SMSService {
 
   const verifyPhoneHash = async (phoneNumber: string, phoneHash: string): Promise<boolean> => {
     try {
-      // Check if phoneHash is in valid hex format
-      if (!phoneHash || !/^[a-f0-9]{64}$/i.test(phoneHash)) {
+      if (!phoneHash) return false
+
+      // Legacy argon2id hashes from old data — SHA-256 is the only supported format now
+      if (phoneHash.startsWith('$argon2')) return false
+
+      // Reject unexpected formats
+      if (!/^[a-f0-9]{64}$/i.test(phoneHash)) {
         console.warn('Invalid phoneHash format - expected 64-character hex string')
         return false
       }

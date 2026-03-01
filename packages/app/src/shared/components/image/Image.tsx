@@ -74,7 +74,7 @@ export function Image({
     return <View style={[containerStyle, style]} id="image-container">
       <View style={styles.fallbackContainer} id="image-fallback">
         <Text style={[styles.fallbackText, { fontSize: dynamicLabelFontSize }]}>
-          {labelText || placeholder}
+          {placeholder}
         </Text>
       </View>
     </View>

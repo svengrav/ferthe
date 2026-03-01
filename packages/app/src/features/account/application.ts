@@ -58,12 +58,14 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     storeActions.setIsAuthenticated(true)
   }
 
-  const syncStoreWithSession = async (session: AccountSession | undefined) => {
+  const syncStoreWithSession = async (session: AccountSession | undefined, invalidateOnMissingAccount = false) => {
+    logger.log('[AccountApp] syncStoreWithSession called', { hasSession: !!session, accountId: session?.accountId })
     if (session) {
       storeActions.setSession(session)
       storeActions.setAccountType(session.accountType)
       storeActions.setRole(session.role ?? null)
       storeActions.setIsAuthenticated(true)
+      logger.log('[AccountApp] Store updated with session', { accountType: session.accountType, isAuthenticated: true })
 
       secureStore.write(AUTH_SESSION_KEY, session).catch(error => {
         logger.error('Failed to save session to secure store:', error)
@@ -71,10 +73,15 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
 
       try {
         const accountResult = await api.account.getProfile()
+        logger.log('[AccountApp] getProfile result', { success: accountResult.success, hasData: !!accountResult.data, error: accountResult.error })
         if (!accountResult.data) {
-          logger.warn(`[AccountApp] Session exists but account not found. Invalidating session.`)
-          await secureStore.delete(AUTH_SESSION_KEY)
-          storeActions.clearAccount()
+          if (invalidateOnMissingAccount) {
+            logger.warn(`[AccountApp] Session exists but account not found. Invalidating session.`)
+            await secureStore.delete(AUTH_SESSION_KEY)
+            storeActions.clearAccount()
+          } else {
+            logger.warn(`[AccountApp] Could not load profile after login — keeping session.`)
+          }
           return
         }
         storeActions.setAccount(accountResult.data)
@@ -82,6 +89,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         logger.error('Failed to load account data for store sync:', error)
       }
     } else {
+      logger.log('[AccountApp] syncStoreWithSession: clearing account (no session)')
       storeActions.clearAccount()
     }
   }
@@ -97,7 +105,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         if (session) {
           const expiresAt = new Date(session.expiresAt)
           if (!accountService?.isSessionExpired(expiresAt)) {
-            await syncStoreWithSession(session)
+            await syncStoreWithSession(session, true)
             return session
           } else {
             await secureStore.delete(AUTH_SESSION_KEY)
@@ -131,8 +139,11 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
 
     verifySMSCode: async (phoneNumber: string, code: string) => {
       const result = await api.account.verifySMSCode(phoneNumber, code)
-      if (result.success && result.data) {
+      logger.log('[AccountApp] verifySMSCode result', { outerSuccess: result.success, innerSuccess: result.data?.success, hasContext: !!result.data?.context, error: result.error })
+      if (result.success && result.data?.context) {
         await syncStoreWithSession(result.data.context)
+      } else if (result.success && result.data && !result.data.success) {
+        logger.warn('[AccountApp] verifySMSCode: inner failure', result.data.errorCode, result.data.error)
       } else {
         logger.error('SMS code verification failed:', result.error)
       }
@@ -185,10 +196,14 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       return result
     },
 
-    upgradeToPhoneAccount: (phoneNumber: string, code: string) => {
+    upgradeToPhoneAccount: async (phoneNumber: string, code: string) => {
       const session = getSession()
       if (!session) return Promise.resolve({ success: false, data: undefined })
-      return api.account.upgradeToPhoneAccount(phoneNumber, code)
+      const result = await api.account.upgradeToPhoneAccount(phoneNumber, code)
+      if (result.success && result.data) {
+        await syncStoreWithSession(result.data)
+      }
+      return result
     },
 
     getFirebaseConfig: () => {

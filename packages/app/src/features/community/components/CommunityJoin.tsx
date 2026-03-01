@@ -64,7 +64,7 @@ function CommunityJoinCard(props: CommunityJoinCardProps) {
   const { code, handleCodeChange, handleJoin, isJoining, isValid } = useCommunityJoin(onClose)
 
   return (
-    <OverlayCard title={locales.community.joinCommunity} onClose={onClose}>
+    <OverlayCard title={locales.community.joinCommunity} onClose={onClose} keyboardAware={true}>
       <Stack spacing="lg">
         <Field
           style={{ flex: 1 }}

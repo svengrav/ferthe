@@ -46,7 +46,7 @@ function AccountPage(props: AccountPageProps) {
   const showAccountRegistration = () => {
     const close = setOverlay(
       'accountVerification',
-      <AccountVerification onClose={() => close()} />,
+      <AccountVerification mode="upgrade" onClose={() => close()} />,
     )
   }
 
@@ -62,13 +62,8 @@ function AccountPage(props: AccountPageProps) {
     <Page
       title={locales.account.myAccount}
       leading={<Button icon="arrow-back" variant='outlined' onPress={onBack} />}
-      trailing={<Button
-        icon="more-vert"
-        variant="outlined"
-        options={[]}
-      />}
     >
-      <Stack style={{ paddingVertical: theme.tokens.spacing.lg }} >
+      <Stack style={{ paddingVertical: theme.tokens.spacing.lg, }} >
         {/* Profile Avatar */}
         <Avatar
           avatar={account?.avatar}
@@ -144,7 +139,8 @@ function AccountPage(props: AccountPageProps) {
 
 const createStyles = (theme: Theme) => StyleSheet.create({
   upgradeContainer: {
-    flex: 1,
+    borderRadius: theme.tokens.borderRadius.md,
+    padding: theme.tokens.inset.md,
   },
   upgradeHint: {
     textAlign: 'center',

@@ -46,7 +46,7 @@ function Avatar(props: AvatarProps) {
       <Pressable onPress={onPress} disabled={!onPress} >
         {showEditIcon && onPress && (
           <View style={styles.editBadge}>
-            <Icon name="edit" size='md' />
+            <Icon name="edit" color={theme.colors.onPrimary} />
           </View>
         )}
         <View style={styles.avatarContainer}>
@@ -58,7 +58,7 @@ function Avatar(props: AvatarProps) {
             style={styles.avatar}
             placeholder={
               <View style={styles.placeholder}>
-                <Icon name="person" size='md' color="#999" />
+                <Icon name="person" color={theme.colors.onPrimary} style={{ fontSize: size / 3 }} />
               </View>
             }
           />
@@ -94,7 +94,8 @@ const createStyles = (theme: Theme, size: number) => {
       position: 'absolute',
       bottom: 0,
       right: 0,
-      backgroundColor: theme.colors.primary,
+      backgroundColor: theme.deriveColor(theme.colors.primary, 0.1),
+      color: theme.colors.onPrimary,
       borderRadius: 12,
       width: 24,
       height: 24,

@@ -12,7 +12,7 @@ export function createConstants() {
       host: Deno.env.get('HOST') || '0.0.0.0',
       port: Number(Deno.env.get('PORT')) || 7000,
       prefix: '/core/api',
-      origins: ['http://localhost:7004', 'http://localhost:7000', 'https://ferthe.eu'],
+      origins: ['http://localhost:8081', 'http://localhost:7000', 'https://ferthe.eu'],
     },
     store: {
       type: isProduction ? 'cosmos' : 'json' as StoreType,

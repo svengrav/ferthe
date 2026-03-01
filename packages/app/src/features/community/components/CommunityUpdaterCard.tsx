@@ -60,7 +60,7 @@ export function CommunityUpdaterCard({ communityId, initialData, onClose }: Comm
   const { handleUpdate } = useCommunityUpdater(communityId)
 
   return (
-    <OverlayCard onClose={onClose}>
+    <OverlayCard onClose={onClose} keyboardAware={true}>
       <Stack spacing="lg">
         <Text variant="heading">{locales.community.editCommunity}</Text>
         <CommunityEditor

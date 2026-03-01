@@ -128,7 +128,7 @@ function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
   }
 
   return (
-    <OverlayCard title={title} onClose={onClose}>
+    <OverlayCard title={title} onClose={onClose} keyboardAware={true}>
       <View style={styles.container}>
         {renderImageSection()}
 

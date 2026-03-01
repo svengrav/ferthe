@@ -2,7 +2,7 @@ import Button from '@app/shared/components/button/Button'
 import Text from '@app/shared/components/text/Text'
 import { Theme, useTheme } from '@app/shared/theme'
 import React from 'react'
-import { ScrollView, StyleSheet, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native'
 
 
 interface OverlayCardProps {
@@ -11,6 +11,7 @@ interface OverlayCardProps {
   onClose?: () => void
   scrollable?: boolean
   inset?: 'none' | 'sm' | 'md' | 'lg'
+  keyboardAware?: boolean
 }
 
 /**
@@ -18,16 +19,16 @@ interface OverlayCardProps {
  * Use this for small, focused interactions like forms, confirmations, or settings.
  */
 function OverlayCard(props: OverlayCardProps) {
-  const { children, title, onClose, scrollable = false, inset = 'md' } = props
+  const { children, title, onClose, scrollable = false, inset = 'md', keyboardAware = false } = props
   const { styles, theme } = useTheme(createStyles)
 
   const insetValue = theme.tokens.inset[inset]
   const ContentContainer = scrollable ? ScrollView : View
   const contentProps = scrollable
-    ? { contentContainerStyle: [styles.scrollContent, { paddingHorizontal: insetValue }] }
+    ? { contentContainerStyle: [styles.scrollContent, { paddingHorizontal: insetValue }], keyboardShouldPersistTaps: 'handled' as const }
     : { style: [styles.content, { paddingHorizontal: insetValue }] }
 
-  return (
+  const cardContent = (
     <View style={styles.container}>
       {(title || onClose) && (
         <View style={styles.header}>
@@ -45,9 +46,27 @@ function OverlayCard(props: OverlayCardProps) {
       </ContentContainer>
     </View>
   )
+
+  if (keyboardAware) {
+    return (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardContainer}
+      >
+        {cardContent}
+      </KeyboardAvoidingView>
+    )
+  }
+
+  return cardContent
 }
 
+
 const createStyles = (theme: Theme) => StyleSheet.create({
+  keyboardContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
   container: {
     marginHorizontal: theme.tokens.inset.md,
     borderRadius: theme.tokens.borderRadius.md,

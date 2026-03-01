@@ -4,7 +4,7 @@
     {
       "label": "kill:all",
       "type": "shell",
-      "command": "fuser -k 7000/tcp 7001/tcp 7002/tcp 7003/tcp 7004/tcp 7009/tcp 2>/dev/null; pkill -f 'deno.*main.ts' 2>/dev/null; pkill -f 'deno.*--inspect' 2>/dev/null; pkill -f 'metro' 2>/dev/null; exit 0",
+      "command": "fuser -k 7000/tcp 7001/tcp 7002/tcp 7003/tcp 8081/tcp 7009/tcp 2>/dev/null; pkill -f 'deno.*main.ts' 2>/dev/null; pkill -f 'deno.*--inspect' 2>/dev/null; pkill -f 'metro' 2>/dev/null; exit 0",
       "presentation": {
         "reveal": "silent",
         "panel": "shared"
