@@ -13,7 +13,7 @@ import { useViewportGestures } from '../../hooks/useViewportGestures.ts'
 import { mapUtils } from '../../services/geoToScreenTransform.ts'
 import { getMapCanvasActions, getMapState, useMapCanvas, useMapSurfaceBoundary } from '../../stores/mapStore.ts'
 import { MapCanvasDebug } from './MapCanvasDebug.tsx'
-import { MapCompensatedScaleContext } from './MapCompensatedScale.tsx'
+import { MapCompensatedScaleContext, MapScaleProvider } from './MapCompensatedScale.tsx'
 import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
 
 interface MapCanvasViewportProps {
@@ -53,7 +53,7 @@ function MapCanvasViewport(props: MapCanvasViewportProps) {
 
   const { scale: viewportScale } = useMapCanvas()  // Reactive hook for scale updates
 
-  const { gesture, animatedStyles, compensatedScale } = useViewportGestures({
+  const { gesture, animatedStyles, compensatedScale, scale } = useViewportGestures({
     width: size.width,
     height: size.height,
     initialScale: viewportScale.init,
@@ -72,30 +72,32 @@ function MapCanvasViewport(props: MapCanvasViewportProps) {
 
   return (
     <MapCompensatedScaleContext.Provider value={compensatedScale}>
-      <View style={styles?.container} onLayout={handleLayout} id='device-viewport-content'>
-        {/* Static viewport background image */}
-        {image && (
-          <View style={styles?.backgroundContainer}>
-            <Image
-              source={{ uri: image }}
-              width={size.width}
-              height={size.height}
-              style={styles?.backgroundImage}
-              showLoader={false}
-            />
-          </View>
-        )}
+      <MapScaleProvider value={scale}>
+        <View style={styles?.container} onLayout={handleLayout} id='device-viewport-content'>
+          {/* Static viewport background image */}
+          {image && (
+            <View style={styles?.backgroundContainer}>
+              <Image
+                source={{ uri: image }}
+                width={size.width}
+                height={size.height}
+                style={styles?.backgroundImage}
+                showLoader={false}
+              />
+            </View>
+          )}
 
-        <GestureHandlerRootView style={size}>
-          <GestureDetector gesture={gesture}>
-            <Animated.View style={[size, animatedStyles, { overflow: 'hidden' }]}>
-              {children}
-            </Animated.View>
-          </GestureDetector>
-        </GestureHandlerRootView>
+          <GestureHandlerRootView style={size}>
+            <GestureDetector gesture={gesture}>
+              <Animated.View style={[size, animatedStyles, { overflow: 'hidden' }]}>
+                {children}
+              </Animated.View>
+            </GestureDetector>
+          </GestureHandlerRootView>
 
-        {config.debug.enableMapDebug && <MapCanvasDebug animatedStyles={animatedStyles} />}
-      </View>
+          {config.debug.enableMapDebug && <MapCanvasDebug animatedStyles={animatedStyles} />}
+        </View>
+      </MapScaleProvider>
     </MapCompensatedScaleContext.Provider>
   )
 }

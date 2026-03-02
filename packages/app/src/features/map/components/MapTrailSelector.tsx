@@ -1,5 +1,6 @@
 import { FlatList, StyleSheet, View } from 'react-native'
 import { GestureDetector } from 'react-native-gesture-handler'
+import { useLocalization } from '@app/shared/localization'
 
 import { useDiscoveryTrail } from '@app/features/discovery'
 import { useTrails } from '@app/features/trail'
@@ -51,6 +52,7 @@ interface MapTrailListCardProps {
 function MapTrailListCard(props: MapTrailListCardProps) {
   const { trails, onSelectTrail, onClose } = props
   const { styles } = useTheme(createStyles)
+  const { locales } = useLocalization()
 
   const renderTrailItem = ({ item }: { item: Trail }) => (
     <TrailItem
@@ -60,7 +62,7 @@ function MapTrailListCard(props: MapTrailListCardProps) {
   )
 
   return (
-    <OverlayCard title='Select card' onClose={onClose} inset='none'>
+    <OverlayCard title={locales.map.selectTrail} onClose={onClose} inset='none'>
       <FlatList
         data={trails}
         renderItem={renderTrailItem}

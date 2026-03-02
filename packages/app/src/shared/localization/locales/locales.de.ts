@@ -259,6 +259,7 @@ const de: LocalizationSet = {
     },
   },
   map: {
+    selectTrail: 'Pfad auswählen',
     outsideTrail: 'Außerhalb des Trails',
     distanceAway: 'entfernt',
   },

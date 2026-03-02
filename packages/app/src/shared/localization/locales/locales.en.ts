@@ -259,6 +259,7 @@ const en = {
     },
   },
   map: {
+    selectTrail: 'Select Trail',
     outsideTrail: 'Outside the trail',
     distanceAway: 'away',
   },

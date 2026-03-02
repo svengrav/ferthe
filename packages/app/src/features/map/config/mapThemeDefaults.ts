@@ -6,7 +6,7 @@
  */
 const MAP_THEME_DEFAULT = {
   radius: {
-    strokeColor: '#000',
+    strokeColor: 'transparent',
     fill: 'rgba(0, 0, 0, 0.2)',
     strokeWidth: 2,
   },
@@ -20,7 +20,7 @@ const MAP_THEME_DEFAULT = {
     circleBackground: '#4e4e4e48',
   },
   spot: {
-    strokeColor: '#000000',
+    strokeColor: 'transparent',
     fill: '#ffffff',
     strokeWidth: 1.5,
     size: 15,
@@ -34,7 +34,7 @@ const MAP_THEME_DEFAULT = {
     offsetY: 13.5,
   },
   discovery: {
-    strokeColor: '#000000',
+    strokeColor: 'transparent',
     fill: '#ffffff',
     strokeWidth: 1.5,
   },
@@ -50,7 +50,6 @@ const MAP_THEME_DEFAULT = {
   snap: {
     strokeColor: '#ffffff',
     strokeWidth: 1,
-    strokeDash: [1, 2] as number[]
   },
   scanner: {
     strokeColor: '#ffffff',
@@ -61,7 +60,15 @@ const MAP_THEME_DEFAULT = {
     imageOpacity: 1
   },
   surface: {
-    imageOpacity: 1
+    imageOpacity: 1,
+    noise: {
+      scaleThreshold: 1.5,
+      scaleRange: 1.5,
+      maxOpacity: 0.3,
+      baseFrequency: 0.65,
+      // How strongly turbulence displaces image pixels — higher = more abstract color bleed
+      displacementScale: 50,
+    },
   },
   compass: {
     color: '#ffffff',

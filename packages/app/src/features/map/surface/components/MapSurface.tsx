@@ -3,6 +3,7 @@ import { createThemedStyles, useTheme } from "@app/shared/theme"
 import { View } from "react-native"
 import { getMapThemeDefaults } from "../../config/mapThemeDefaults"
 import { useMapCanvasDimensions, useMapSurface } from "../../stores/mapStore"
+import MapSurfaceNoiseOverlay from "./MapSurfaceNoiseOverlay"
 
 /**
  * MapSurface renders the trail map background image.
@@ -11,7 +12,7 @@ import { useMapCanvasDimensions, useMapSurface } from "../../stores/mapStore"
  * matching exactly the trail boundary — avoiding oversized layout trees.
  */
 function MapSurface() {
-  const { styles } = useTheme(useStyles)
+  const { styles, theme } = useTheme(useStyles)
   const { image, imageLayout } = useMapSurface()
   const canvasSize = useMapCanvasDimensions()
 
@@ -29,9 +30,17 @@ function MapSurface() {
             position: 'absolute',
             left: imageLayout.left,
             top: imageLayout.top,
+            backgroundColor: theme.colors.background
           }]}
         />
       )}
+      <MapSurfaceNoiseOverlay
+        width={imageLayout.width}
+        height={imageLayout.height}
+        left={imageLayout.left}
+        top={imageLayout.top}
+        imageUrl={image}
+      />
     </View>
   )
 }
@@ -42,7 +51,7 @@ const useStyles = createThemedStyles(theme => ({
     zIndex: 0,
     position: 'absolute',
     overflow: 'hidden',
-    backgroundColor: theme.colors.background,
+    // backgroundColor: theme.colors.background,
   },
   image: {
     opacity: surface.imageOpacity,

@@ -120,7 +120,7 @@ const ClueDiscoveryRadius = memo(({ clue, boundary, size, scale, theme, clueSize
           left: (clueSize - circle.width) / 2,
           top: (clueSize - circle.height) / 2,
           borderRadius: circle.width / 2,
-          backgroundColor: 'gray'
+          backgroundColor: 'white'
         }
       ]}
     />
