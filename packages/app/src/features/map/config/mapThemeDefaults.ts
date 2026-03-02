@@ -13,11 +13,12 @@ const MAP_THEME_DEFAULT = {
   device: {
     strokeColor: '#ffffff',
     fill: '#ffffff',
-    strokeWidth: 1.5,
+    strokeWidth: 1,
     arrowSize: 18,
     markerSize: 50,
     markerBorderRadius: 25,
-    circleBackground: '#4e4e4e48',
+    circleBackground: '#4e4e4e00',
+
   },
   spot: {
     strokeColor: 'transparent',
@@ -50,6 +51,11 @@ const MAP_THEME_DEFAULT = {
   snap: {
     strokeColor: '#ffffff',
     strokeWidth: 1,
+    shadowColor: 'black',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 3,
   },
   scanner: {
     strokeColor: '#ffffff',

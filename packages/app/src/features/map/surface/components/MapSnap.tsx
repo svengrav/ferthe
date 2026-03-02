@@ -30,7 +30,6 @@ function MapSnap({ boundary, size }: MapSnapProps) {
     style={{
       strokeColor: color,
       strokeWidth: mapTheme.snap.strokeWidth,
-      strokeDash: mapTheme.snap.strokeDash
     }}
     scale={scale}
   />

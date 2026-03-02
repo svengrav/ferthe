@@ -250,6 +250,39 @@ Deno.test({
       console.log(`✓ Stats: rank=${result.data?.rank}, total=${result.data?.totalDiscoverers}`)
     })
 
+    await t.step('getStats: rank=1 as first discoverer, trailPosition=1, trailTotal=1', async () => {
+      const result = await userAClient.discovery.getDiscoveryStats(discoveryId)
+
+      assertEquals(result.success, true)
+      assertEquals(result.data?.rank, 1, 'User A is the first (and only) discoverer → rank 1')
+      assertEquals(result.data?.totalDiscoverers, 1, 'Only one discoverer so far')
+      assertEquals(result.data?.trailPosition, 1, 'First spot discovered in this trail → position 1')
+      assertEquals(result.data?.trailTotal, 1, 'Trail has exactly 1 spot')
+      console.log(`✓ rank=1, trailPosition=1/1`)
+    })
+
+    await t.step('getStats: user B discovers same spot → user A rank stays 1, user B rank=2', async () => {
+      // User B discovers the same spot
+      const discoverResult = await userBClient.discovery.processLocation(trailId, {
+        location: SPOT_LOCATION,
+      })
+      assertEquals(discoverResult.success, true)
+      const userBDiscoveryId = discoverResult.data!.discoveries[0].id
+
+      // User A should now be rank 1 (discovered first)
+      const statsA = await userAClient.discovery.getDiscoveryStats(discoveryId)
+      assertEquals(statsA.data?.rank, 1, 'User A stays rank 1 (discovered first)')
+      assertEquals(statsA.data?.totalDiscoverers, 2, 'Now 2 discoverers')
+
+      // User B should be rank 2 (discovered second)
+      const statsB = await userBClient.discovery.getDiscoveryStats(userBDiscoveryId)
+      assertEquals(statsB.data?.rank, 2, 'User B is rank 2 (discovered second)')
+      assertEquals(statsB.data?.totalDiscoverers, 2, 'Also sees 2 discoverers')
+      assertEquals(statsB.data?.trailPosition, 1, 'User B also at trail position 1')
+
+      console.log(`✓ rank ordering correct after second discoverer`)
+    })
+
     // ── Content lifecycle ─────────────────────────────────────────────────────
 
     await t.step('getContent returns undefined before upsert', async () => {

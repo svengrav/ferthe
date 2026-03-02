@@ -14,7 +14,13 @@ const createMarkerContainerStyle = (theme: MapTheme) => ({
   borderRadius: theme.spot.borderRadius,
   width: theme.spot.size,
   height: theme.spot.size + theme.spot.heightOffset,
-  borderWidth: theme.spot.borderWidth,
+  // borderWidth: theme.spot.borderWidth * 0.2,
+  // borderColor: theme.spot.backgroundColor,
+  shadowColor: 'black',
+  shadowOffset: { width: 1, height: 2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 4,
+  elevation: 3,
   backgroundColor: theme.spot.backgroundColor,
   overflow: 'hidden' as const,
   justifyContent: 'center' as const,
@@ -79,6 +85,7 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
 
     return (
       <Animated.View
+        id={'map-spot'}
         key={spot.id || index}
         style={[
           {

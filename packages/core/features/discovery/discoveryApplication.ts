@@ -373,12 +373,16 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       const spotsResult = await spotApplication.getSpotsByIds(context, trailSpotIdsResult.data)
       const spots = spotsResult.data || []
 
+      // Filter trail spot IDs to only existing spots (stale junction-table entries may reference deleted spots)
+      const existingSpotIdSet = new Set(spots.map(s => s.id))
+      const existingTrailSpotIds = trailSpotIdsResult.data.filter(id => existingSpotIdSet.has(id))
+
       // Calculate stats using service
       const stats = discoveryService.getDiscoveryStats(
         discovery,
         allDiscoveriesForSpot,
         userDiscoveries,
-        trailSpotIdsResult.data,
+        existingTrailSpotIds,
         spots
       )
 

@@ -22,7 +22,6 @@ interface ArrowProps {
   size?: number
 }
 
-
 /**
  * Arrow component for displaying directional indicator with rotation
  */
@@ -42,7 +41,7 @@ function Arrow({ rotation = 0, fill, strokeColor, circleBackground, size = 18 }:
           r={CIRCLE_RADIUS}
           fill={circleBackground}
           stroke={strokeColor}
-          strokeWidth={1.5}
+          strokeWidth={1.1}
         />
         <Polygon fill={fill} points={ARROW_POINTS} />
       </Svg>

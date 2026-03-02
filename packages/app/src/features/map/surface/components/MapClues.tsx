@@ -65,6 +65,11 @@ const createClueStyles = (theme: MapTheme, clueSize: number, scaleValue: number)
     backgroundColor: theme.clue.fill,
     borderWidth: theme.clue.strokeWidth * scaleValue,
     borderColor: theme.clue.strokeColor,
+    shadowColor: 'black',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   clueImage: {
     width: clueSize,
@@ -72,6 +77,11 @@ const createClueStyles = (theme: MapTheme, clueSize: number, scaleValue: number)
     borderRadius: clueSize / 2,
     borderWidth: theme.clue.strokeWidth * scaleValue,
     borderColor: theme.clue.strokeColor,
+    shadowColor: 'black',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
 })
 
