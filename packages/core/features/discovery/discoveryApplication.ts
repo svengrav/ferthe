@@ -180,7 +180,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       }
       const discoveries = discoveriesResult.data || []
 
-      // Fetch spots: use trail spot IDs if trailId provided, otherwise all spots
+      // Fetch spots: use trail spot IDs if trailId provided, otherwise fetch by discovery spot IDs
       let spotsResult
       if (trailId) {
         const trailSpotIdsResult = await trailApplication.getTrailSpotIds(context, trailId)
@@ -189,7 +189,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         }
         spotsResult = await spotApplication.getSpotsByIds(context, trailSpotIdsResult.data, options)
       } else {
-        spotsResult = await spotApplication.getSpots(context, options)
+        const discoveredSpotIds = discoveries.map(d => d.spotId)
+        spotsResult = await spotApplication.getSpotsByIds(context, discoveredSpotIds, options)
       }
 
       const result = discoveryService.getDiscoveredSpots(accountId, discoveries, spotsResult.data || [], trailId)
