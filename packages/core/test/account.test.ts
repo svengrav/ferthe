@@ -108,6 +108,30 @@ Deno.test({
       console.log('SMS code requested')
     })
 
+    await t.step('verifySMSCode returns success and a valid session', async () => {
+      // Null SMS connector accepts any code — request first to create a verification entry
+      await publicClient.account.requestSMSCode('+49151987654321')
+      const result = await publicClient.account.verifySMSCode('+49151987654321', '000000')
+
+      assertEquals(result.success, true, 'outer Result must succeed')
+      assertEquals(result.data?.success, true, 'inner SMSVerificationResult.success must be true')
+      assertExists(result.data?.context?.sessionToken, 'session token must be present')
+      assertExists(result.data?.context?.accountId, 'accountId must be present')
+      assertEquals(result.data?.context?.accountType, 'sms_verified', 'accountType must be sms_verified')
+      console.log('verifySMSCode returned valid session')
+    })
+
+    await t.step('verifySMSCode with wrong code returns inner failure', async () => {
+      await publicClient.account.requestSMSCode('+49151111222333')
+      // Override: the null connector always succeeds, so test NO_REQUEST path instead
+      const result = await publicClient.account.verifySMSCode('+49151000000000', '000000')
+
+      assertEquals(result.success, true, 'outer Result must still succeed (HTTP 200)')
+      assertEquals(result.data?.success, false, 'inner result must be false for unknown number')
+      assertExists(result.data?.errorCode, 'errorCode must be present')
+      console.log(`verifySMSCode inner failure: ${result.data?.errorCode}`)
+    })
+
     await t.step('upgradeToPhoneAccount upgrades local → sms_verified', async () => {
       // Null SMS connector always returns { success: true } for verifyCode
       const result = await userClient.account.upgradeToPhoneAccount('+49151123456789', '000000')

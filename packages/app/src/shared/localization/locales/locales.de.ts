@@ -184,6 +184,8 @@ const de: LocalizationSet = {
     spots: 'Spots',
     deleteAccount: 'Konto löschen',
     deleteAccountConfirm: 'Bist du sicher? Dein Konto und alle deine Daten werden dauerhaft gelöscht.',
+    logoutConfirm: 'Möchtest du dich wirklich abmelden?',
+    logoutConfirmUnverified: 'Möchtest du dich wirklich abmelden? Da dein Konto nicht verifiziert ist, werden alle deine Daten auf diesem Gerät dauerhaft entfernt.',
   },
   community: {
     communities: 'Communities',

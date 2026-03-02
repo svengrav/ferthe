@@ -3,6 +3,8 @@
  * Simple fetch wrapper for Oak REST API
  */
 
+import type { Result } from '../contracts/results.ts'
+
 export interface HttpClientConfig {
   baseUrl: string
   getAuthToken?: () => string | null | undefined
@@ -17,7 +19,7 @@ export interface HttpRequestOptions {
 export class HttpClient {
   constructor(private config: HttpClientConfig) { }
 
-  async request<T = any>(path: string, options: HttpRequestOptions = {}): Promise<T> {
+  async request<T = any>(path: string, options: HttpRequestOptions = {}): Promise<Result<T>> {
     const { method = 'GET', body, query } = options
     const { baseUrl, getAuthToken } = this.config
 
@@ -53,30 +55,24 @@ export class HttpClient {
       body: body ? JSON.stringify(body) : undefined,
     })
 
-    // Parse response
+    // Parse response — server always returns Result<T> envelope
     const json = await response.json()
-
-    if (!response.ok) {
-      // Return the error object from the server (already in Result format)
-      return json as T
-    }
-
-    return json.data as T
+    return json as Result<T>
   }
 
-  get<T = any>(path: string, query?: Record<string, string | number | boolean | undefined>): Promise<T> {
+  get<T = any>(path: string, query?: Record<string, string | number | boolean | undefined>): Promise<Result<T>> {
     return this.request<T>(path, { method: 'GET', query })
   }
 
-  post<T = any>(path: string, body?: unknown): Promise<T> {
+  post<T = any>(path: string, body?: unknown): Promise<Result<T>> {
     return this.request<T>(path, { method: 'POST', body })
   }
 
-  put<T = any>(path: string, body?: unknown): Promise<T> {
+  put<T = any>(path: string, body?: unknown): Promise<Result<T>> {
     return this.request<T>(path, { method: 'PUT', body })
   }
 
-  delete<T = any>(path: string, body?: unknown): Promise<T> {
+  delete<T = any>(path: string, body?: unknown): Promise<Result<T>> {
     return this.request<T>(path, { method: 'DELETE', body })
   }
 }

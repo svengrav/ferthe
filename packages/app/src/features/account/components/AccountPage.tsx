@@ -57,9 +57,20 @@ function AccountPage(props: AccountPageProps) {
     })
   }
 
-  const handleLogout = async () => {
-    await accountApplication.logout()
-    onBack?.()
+  const handleLogout = () => {
+    const isUnverified = accountType === 'local_unverified'
+    const message = isUnverified
+      ? locales.account.logoutConfirmUnverified
+      : locales.account.logoutConfirm
+    openDialog({
+      message,
+      onConfirm: async () => {
+        await accountApplication.logout()
+        closeDialog()
+        onBack?.()
+      },
+      onCancel: closeDialog,
+    })
   }
 
   // Open account verification overlay

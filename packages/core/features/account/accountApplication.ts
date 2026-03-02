@@ -60,15 +60,24 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         return null
       }
       const allVerifications = allVerificationsResult.data || []
+      const now = new Date()
 
+      // Collect all matching entries that are not yet consumed and not expired
+      const candidates: TwilioVerification[] = []
       for (const verification of allVerifications) {
+        if (verification.verified) continue
+        if (verification.expiresAt && new Date(verification.expiresAt) < now) continue
         const isMatch = await smsService.verifyPhoneHash(phoneNumber, verification.phoneHash)
         if (isMatch) {
-          return verification
+          candidates.push(verification)
         }
       }
 
-      return null
+      if (candidates.length === 0) return null
+
+      // Return the most recently created entry
+      candidates.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      return candidates[0]
     } catch (error) {
       logger.error('Error finding verification by phone:', error)
       return null
@@ -147,10 +156,16 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         return createErrorResult('SMS_CONNECTOR_NOT_CONFIGURED')
       }
 
-      // Delete existing verification for this phone number
-      const existingVerification = await findVerificationByPhone(phoneNumber)
-      if (existingVerification) {
-        await twilioVerificationStore.delete(existingVerification.id)
+      // Delete ALL existing verifications for this phone number (including stale/consumed ones)
+      const allVerificationsResult = await twilioVerificationStore.list()
+      if (allVerificationsResult.success) {
+        const toDelete = await Promise.all(
+          (allVerificationsResult.data ?? []).map(async v => {
+            const isMatch = await smsService.verifyPhoneHash(phoneNumber, v.phoneHash)
+            return isMatch ? v : null
+          })
+        )
+        await Promise.all(toDelete.filter(Boolean).map(v => twilioVerificationStore.delete(v!.id)))
       }
 
       // Normalize phone number to international format for Twilio

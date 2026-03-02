@@ -24,40 +24,20 @@ export interface PageMeta {
   limit?: number
 }
 
-// Wraps an HTTP call in Result<T>
-async function call<T>(fn: () => Promise<T>): Promise<Result<T>> {
+// Passes through the server Result<T> envelope; catches network/parse errors
+async function call<T>(fn: () => Promise<Result<T>>): Promise<Result<T>> {
   try {
-    const result = await fn()
-    // If the server returned a Result object (e.g., error response), return it as-is
-    if (result && typeof result === 'object' && 'success' in result) {
-      return result as unknown as Result<T>
-    }
-    // Otherwise wrap data in success result
-    return { success: true, data: result }
+    return await fn()
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     return { success: false, error: { code: 'HTTP_ERROR', message } }
   }
 }
 
-// Wraps a paged HTTP call
-async function callPaged<T>(
-  fn: () => Promise<T[]>,
-  _query?: { limit?: number },
-): Promise<Result<T[]>> {
+// Same as call() — Result<T[]> from server is passed through directly
+async function callPaged<T>(fn: () => Promise<Result<T[]>>, _query?: { limit?: number }): Promise<Result<T[]>> {
   try {
-    const result = await fn()
-    // If the server returned a Result object (e.g., error response), return it as-is
-    if (result && typeof result === 'object' && 'success' in result) {
-      return result as unknown as Result<T[]>
-    }
-    // Otherwise wrap data in success result with pagination meta
-    const meta: PageMeta = {
-      hasMore: false,
-      nextCursor: undefined,
-      limit: _query?.limit,
-    }
-    return { success: true, data: result as T[], meta }
+    return await fn()
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     return { success: false, error: { code: 'HTTP_ERROR', message } }

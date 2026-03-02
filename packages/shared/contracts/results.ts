@@ -85,7 +85,7 @@ export type QueryOptions = z.infer<typeof QueryOptionsSchema>
 export function createSuccessResult<T>(data: T): Result<T> {
   return {
     success: true,
-    data,
+    data: data,
   }
 }
 

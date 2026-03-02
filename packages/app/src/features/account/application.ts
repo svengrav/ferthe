@@ -141,11 +141,9 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
 
     verifySMSCode: async (phoneNumber: string, code: string) => {
       const result = await api.account.verifySMSCode(phoneNumber, code)
-      logger.log('[AccountApp] verifySMSCode result', { outerSuccess: result.success, innerSuccess: result.data?.success, hasContext: !!result.data?.context, error: result.error })
+
       if (result.success && result.data?.context) {
         await syncStoreWithSession(result.data.context)
-      } else if (result.success && result.data && !result.data.success) {
-        logger.warn('[AccountApp] verifySMSCode: inner failure', result.data.errorCode, result.data.error)
       } else {
         logger.error('SMS code verification failed:', result.error)
       }

@@ -124,6 +124,7 @@ function AccountVerificationCard({ onClose, mode = 'login' }: AccountVerificatio
         {showCodeInput && (
           <View style={styles!.section}>
             <Text style={styles!.sectionTitle}>Enter Code</Text>
+            {error && <Text style={styles!.error}>{error}</Text>}
             <Form<CodeFormData>
               schema={codeSchema}
               defaultValues={{ verificationCode: '' }}
