@@ -196,12 +196,15 @@ const calculateAdaptiveViewportRadius = (
 }
 
 /**
- * Calculate surface layout position and dimensions within a viewport
- * @param surfaceBoundary The boundary of the surface/trail
- * @param viewportBoundary The viewport boundary
- * @param viewportSize The viewport pixel dimensions
+ * Calculate the pixel rect of a trail image within a canvas viewport.
+ * The result describes where the trail image should be positioned (left/top)
+ * and how large it should be (width/height) in canvas pixel space.
+ * Values may be negative or exceed canvas size — clip with overflow:hidden on the parent.
+ * @param trailBoundary Geographic boundary of the trail (= image extent)
+ * @param canvasBoundary Geographic boundary currently visible on canvas
+ * @param canvasSize Canvas pixel dimensions
  */
-const calculateSurfaceLayout = (
+const calculateSurfaceImageLayout = (
   surfaceBoundary: GeoBoundary,
   viewportBoundary: GeoBoundary,
   viewportSize: ScreenSize
@@ -323,7 +326,7 @@ export const mapUtils = {
   metersToPixels,
   calculateDeviceViewportBoundary,
   calculateAdaptiveViewportRadius,
-  calculateSurfaceLayout,
+  calculateSurfaceImageLayout,
   calculateMetersPerPixel,
   calculateZoomLimits,
   projectBearingToBorder,

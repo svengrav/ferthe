@@ -17,7 +17,7 @@ export {
   useMapStatus,
   useMapSurface,
   useMapSurfaceBoundary,
-  useMapSurfaceLayout
+  useMapSurfaceImageLayout
 } from './stores/mapStore'
 
 // Hooks - Derived (from Context)

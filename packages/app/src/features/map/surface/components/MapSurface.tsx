@@ -2,30 +2,34 @@ import { Image } from "@app/shared/components"
 import { createThemedStyles, useTheme } from "@app/shared/theme"
 import { View } from "react-native"
 import { getMapThemeDefaults } from "../../config/mapThemeDefaults"
-import { useMapSurface } from "../../stores/mapStore"
+import { useMapCanvasDimensions, useMapSurface } from "../../stores/mapStore"
 
 /**
- * MapSurface component renders the map background image with dynamic positioning.
- * Surface layout is calculated in mapApplication and stored in store.
- * Layout position updates automatically when device moves.
+ * MapSurface renders the trail map background image.
+ * The outer View is clipped to canvas size (overflow hidden).
+ * The inner Image is positioned absolutely within canvas pixel space,
+ * matching exactly the trail boundary — avoiding oversized layout trees.
  */
 function MapSurface() {
   const { styles } = useTheme(useStyles)
-  const { image, layout } = useMapSurface()
+  const { image, imageLayout } = useMapSurface()
+  const canvasSize = useMapCanvasDimensions()
 
   return (
-    <View style={[styles?.inner, {
-      left: layout.left,
-      top: layout.top,
-      width: layout.width,
-      height: layout.height,
-    }]} id="map-surface-image">
+    <View
+      style={[styles.container, { width: canvasSize.width, height: canvasSize.height }]}
+      id="map-surface-image"
+    >
       {image && (
         <Image
           source={{ uri: image }}
-          width={layout.width}
-          height={layout.height}
-          style={styles?.image}
+          width={imageLayout.width}
+          height={imageLayout.height}
+          style={[styles.image, {
+            position: 'absolute',
+            left: imageLayout.left,
+            top: imageLayout.top,
+          }]}
         />
       )}
     </View>
@@ -34,9 +38,10 @@ function MapSurface() {
 
 const { surface } = getMapThemeDefaults()
 const useStyles = createThemedStyles(theme => ({
-  inner: {
+  container: {
     zIndex: 0,
     position: 'absolute',
+    overflow: 'hidden',
     backgroundColor: theme.colors.background,
   },
   image: {

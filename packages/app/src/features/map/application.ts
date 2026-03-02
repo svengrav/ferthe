@@ -41,14 +41,14 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
 
     // Update canvas boundary based on device location with current adaptive radius
     const newCanvasBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, currentState.canvas.radius)
-    const surfaceLayout = mapUtils.calculateSurfaceLayout(
+    const imageLayout = mapUtils.calculateSurfaceImageLayout(
       currentState.surface.boundary,
       newCanvasBoundary,
       currentState.canvas.size
     )
 
     setSnap(snapState)
-    setSurface({ boundary: trail?.boundary, layout: surfaceLayout })
+    setSurface({ boundary: trail?.boundary, imageLayout })
     setCanvas({ boundary: newCanvasBoundary })
     setDevice({
       location: device.location,
@@ -96,7 +96,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     const adaptiveRadius = mapUtils.calculateAdaptiveViewportRadius(trail.boundary)
 
     const initialCanvasBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, adaptiveRadius)
-    const initialSurfaceLayout = mapUtils.calculateSurfaceLayout(
+    const initialImageLayout = mapUtils.calculateSurfaceImageLayout(
       trail.boundary,
       initialCanvasBoundary,
       currentCanvas.size
@@ -120,7 +120,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
       surface: {
         boundary: trail.boundary,
         image: trail?.map?.image?.url,
-        layout: initialSurfaceLayout,
+        imageLayout: initialImageLayout,
       },
 
       canvas: {

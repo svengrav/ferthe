@@ -2,7 +2,7 @@ import { useDiscoveryTrailId } from '@app/features/discovery/stores/discoveryTra
 import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { View } from 'react-native'
-import { useMapCanvas, useMapSurface } from '../stores/mapStore.ts'
+import { useMapCanvas } from '../stores/mapStore.ts'
 import { MapTheme, useMapTheme } from '../stores/mapThemeStore.ts'
 import { MapCanvasViewport } from '../surface/components/MapCanvasViewport.tsx'
 import MapCenterMarker from '../surface/components/MapCenterMarker.tsx'
@@ -20,12 +20,11 @@ import { MapScanner, MapScannerControl } from './MapScanner.tsx'
 
 export function MapCanvas() {
   const { sensorApplication } = getAppContextStore()
-  const surface = useMapSurface()
   const { size, boundary } = useMapCanvas()
   const trailId = useDiscoveryTrailId()
   const mapTheme = useMapTheme()
   const theme = useThemeStore()
-  const styles = createStyles(theme, mapTheme, surface.layout)
+  const styles = createStyles(theme, mapTheme)
 
   return (
     <>
@@ -49,7 +48,7 @@ export function MapCanvas() {
   )
 }
 
-const createStyles = (theme: Theme, mapTheme: MapTheme, size: { width: number; height: number }) => ({
+const createStyles = (theme: Theme, mapTheme: MapTheme) => ({
   coordinates: {
     zIndex: 10,
     padding: 8,
@@ -62,8 +61,6 @@ const createStyles = (theme: Theme, mapTheme: MapTheme, size: { width: number; h
   },
   map: {
     borderRadius: 10,
-    width: size.width,
-    height: size.height,
     backgroundColor: theme.deriveColor(theme.colors.surface, 0.2),
     position: 'relative' as const,
   },
