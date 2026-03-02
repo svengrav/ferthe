@@ -8,9 +8,11 @@ import { MapCanvasViewport } from '../surface/components/MapCanvasViewport.tsx'
 import MapCenterMarker from '../surface/components/MapCenterMarker.tsx'
 import MapClues from '../surface/components/MapClues.tsx'
 import MapDeviceMarker from '../surface/components/MapDeviceMarker.tsx'
+import MapDiscoveryBorderIndicators from '../surface/components/MapDiscoveryBorderIndicators.tsx'
 import MapSnap from '../surface/components/MapSnap.tsx'
 import MapSpots from '../surface/components/MapSpots.tsx'
 import MapSurface from '../surface/components/MapSurface.tsx'
+import MapTrailBorderIndicator from '../surface/components/MapTrailBorderIndicator.tsx'
 import MapTrailPath from '../surface/components/MapTrailPath.tsx'
 import MapDeviceCords from './MapDeviceCords.tsx'
 import { MapScanner, MapScannerControl } from './MapScanner.tsx'
@@ -39,6 +41,8 @@ export function MapCanvas() {
           <MapScanner />
           <MapDeviceMarker mode="canvas" canvasSize={size} />
         </MapCanvasViewport>
+        <MapTrailBorderIndicator />
+        <MapDiscoveryBorderIndicators />
         <MapScannerControl startScan={() => trailId && sensorApplication.startScan(trailId)} />
       </View>
     </>

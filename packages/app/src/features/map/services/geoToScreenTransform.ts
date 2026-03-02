@@ -282,6 +282,39 @@ const calculateZoomLimits = (
   }
 }
 
+/**
+ * Projects a compass bearing from the container center to the container edge.
+ * Useful for rendering off-screen indicators at the map border.
+ * @param bearing Geographic bearing in degrees (0 = North/Up, 90 = East/Right)
+ * @param size Container size in pixels
+ * @param margin Distance from the edge in pixels
+ */
+const projectBearingToBorder = (
+  bearing: number,
+  size: ScreenSize,
+  margin = 24
+): ScreenPosition => {
+  const cx = size.width / 2
+  const cy = size.height / 2
+
+  // Convert geographic bearing (0=North=Up) to standard math angle (0=East=Right)
+  const angle = ((bearing - 90 + 360) % 360) * (Math.PI / 180)
+  const dx = Math.cos(angle)
+  const dy = Math.sin(angle)
+
+  const halfW = size.width / 2 - margin
+  const halfH = size.height / 2 - margin
+
+  const tx = dx !== 0 ? halfW / Math.abs(dx) : Infinity
+  const ty = dy !== 0 ? halfH / Math.abs(dy) : Infinity
+  const t = Math.min(tx, ty)
+
+  return {
+    x: Math.round(cx + dx * t),
+    y: Math.round(cy + dy * t),
+  }
+}
+
 export const mapUtils = {
   coordinatesToPosition,
   positionToCoordinates,
@@ -293,4 +326,5 @@ export const mapUtils = {
   calculateSurfaceLayout,
   calculateMetersPerPixel,
   calculateZoomLimits,
+  projectBearingToBorder,
 }

@@ -56,10 +56,10 @@
       "**/dist": true,
       "**/.vite": true
     },
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit",
-      "source.organizeImports": "explicit"
-    },
+    // "editor.codeActionsOnSave": {
+    //   "source.fixAll.eslint": "explicit",
+    //   "source.organizeImports": "explicit"
+    // },
     "files.watcherExclude": {
       "**/node_modules/**": true,
       "**/.git/**": true,
