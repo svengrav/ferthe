@@ -1,5 +1,6 @@
 // Account application for SMS-based phone authentication
 import { SMSConnector } from '@core/connectors/smsConnector.ts'
+import { logger } from '@core/shared/logger.ts'
 import { Store } from '@core/store/storeFactory.ts'
 import { createCuid2 } from '@core/utils/idGenerator.ts'
 import { ERROR_CODES } from '@shared/contracts/errors.ts'
@@ -33,8 +34,6 @@ interface StoredAccount extends Account {
   avatarBlobPath?: string
 }
 
-export interface AccountApplicationActions extends AccountApplicationContract { }
-
 interface AccountApplicationOptions {
   accountStore: Store<StoredAccount>
   accountSessionStore: Store<AccountSession>
@@ -44,10 +43,13 @@ interface AccountApplicationOptions {
   smsService?: SMSService
   jwtService?: JWTService
   imageApplication?: ImageApplicationContract
+  firebaseConfig?: FirebaseConfig
+  onDelete?: (accountId: string) => Promise<void>
+  onMerge?: (localAccountId: string, phoneAccountId: string) => Promise<void>
 }
 
-export function createAccountApplication(options: AccountApplicationOptions): AccountApplicationActions {
-  const { accountStore, accountSessionStore, twilioVerificationStore, deviceTokenStore, smsConnector, smsService = createSMSService(), jwtService, imageApplication } = options
+export function createAccountApplication(options: AccountApplicationOptions): AccountApplicationContract {
+  const { accountStore, accountSessionStore, twilioVerificationStore, deviceTokenStore, smsConnector, smsService = createSMSService(), jwtService, imageApplication, firebaseConfig, onDelete, onMerge } = options
   const { createJWT, verifyJWT } = jwtService || createJWTService()
 
   // Helper functions
@@ -68,7 +70,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
 
       return null
     } catch (error) {
-      console.error('Error finding verification by phone:', error)
+      logger.error('Error finding verification by phone:', error)
       return null
     }
   }
@@ -92,29 +94,46 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       }
       return null
     } catch (error) {
-      console.error('Error finding user account by phone hash:', error)
+      logger.error('Error finding user account by phone hash:', error)
       return null
     }
   }
-  const createAuthSession = (accountId: string, role: AccountRole = 'user', client?: ClientAudience): AccountSession => {
+  const createAuthSession = (accountId: string, role: AccountRole = 'user', client?: ClientAudience, local = false): AccountSession => {
     const expiresAt = new Date()
-    expiresAt.setFullYear(expiresAt.getFullYear() + 1) // 1 year expiry for verified accounts
+    if (local) {
+      expiresAt.setDate(expiresAt.getDate() + 30) // 30 days for local accounts
+    } else {
+      expiresAt.setFullYear(expiresAt.getFullYear() + 1) // 1 year for verified accounts
+    }
 
     const authSession: AccountSession = {
       id: createCuid2(),
       accountId,
-      sessionToken: '', // Will be set below
-      expiresAt: expiresAt,
-      accountType: 'sms_verified',
+      sessionToken: '',
+      expiresAt,
+      accountType: local ? 'local_unverified' : 'sms_verified',
       role,
       client: client ?? 'app',
     }
 
-    // Create JWT Bearer token with session info
     authSession.sessionToken = createJWT(authSession)
-
     return authSession
   }
+
+  // Map stored account to public Account (strips internal fields)
+  const toPublicAccount = (data: StoredAccount, avatar?: { id: string; url: string }): Account => ({
+    id: data.id,
+    phoneHash: data.phoneHash,
+    displayName: data.displayName,
+    description: data.description,
+    avatar,
+    createdAt: data.createdAt,
+    lastLoginAt: data.lastLoginAt,
+    updatedAt: data.updatedAt,
+    accountType: data.accountType,
+    isPhoneVerified: data.isPhoneVerified,
+    role: data.role,
+  })
 
   // API methods
   const requestSMSCode = async (phoneNumber: string, _deviceInfo?: AccountDeviceInfo): Promise<Result<SMSCodeRequest>> => {
@@ -301,22 +320,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         }
       }
 
-      // Return public Account (without internal avatarBlobPath)
-      const account: Account = {
-        id: accountData.id,
-        phoneHash: accountData.phoneHash,
-        displayName: accountData.displayName,
-        description: accountData.description,
-        avatar,
-        createdAt: accountData.createdAt,
-        lastLoginAt: accountData.lastLoginAt,
-        updatedAt: accountData.updatedAt,
-        accountType: accountData.accountType,
-        isPhoneVerified: accountData.isPhoneVerified,
-        role: accountData.role,
-      }
-
-      return createSuccessResult(account)
+      return createSuccessResult(toPublicAccount(accountData, avatar))
     } catch (error: unknown) {
       return createErrorResult('GET_ACCOUNT_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
@@ -329,29 +333,16 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
-      const accountsResult = await accountStore.list()
-      if (!accountsResult.success) {
-        return createErrorResult('GET_ACCOUNT_ERROR')
-      }
-      const accounts = accountsResult.data || []
-      const account = accounts.find(a => a.id === accountId)
-
-      if (!account) {
+      const accountResult = await accountStore.get(accountId)
+      if (!accountResult.success || !accountResult.data) {
         return createErrorResult('ACCOUNT_NOT_FOUND')
       }
+      const account = accountResult.data
 
-      // Update only provided fields, preserve all existing fields explicitly
       const updatedAccount: Account = {
-        id: account.id,
-        phoneHash: account.phoneHash,
+        ...account,
         displayName: data.displayName ?? account.displayName,
         description: data.description ?? account.description,
-        avatar: account.avatar,
-        createdAt: account.createdAt,
-        lastLoginAt: account.lastLoginAt,
-        accountType: account.accountType,
-        isPhoneVerified: account.isPhoneVerified,
-        role: account.role,
         updatedAt: new Date(),
       }
 
@@ -385,13 +376,19 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         return createErrorResult('CREATE_LOCAL_ACCOUNT_ERROR')
       }
 
-      // Create session for local account with longer expiry
-      const authSession = createLocalAuthSession(createResult.data!.id!)
+      const authSession = createAuthSession(createResult.data!.id!, 'user', undefined, true)
       return createSuccessResult(authSession)
     } catch (error: unknown) {
       return createErrorResult('CREATE_LOCAL_ACCOUNT_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
+  // Migrate all data from a local account into an existing phone account.
+  // Domain migration is delegated to AccountMergeComposite (wired in core.ts).
+  const mergeLocalIntoPhoneAccount = async (localAccountId: string, phoneAccountId: string): Promise<void> => {
+    await onMerge?.(localAccountId, phoneAccountId)
+    await accountStore.delete(localAccountId)
+  }
+
   const upgradeToPhoneAccount = async (context: AccountContext, phoneNumber: string, code: string): Promise<Result<AccountSession>> => {
     try {
       const accountId = context.accountId
@@ -417,10 +414,13 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         return createErrorResult('INVALID_SMS_CODE')
       }
 
-      // Check if phone number is already used by another account
+      // If phone is already registered: merge local account data into the existing phone account
       const existingPhoneAccount = await findAccountByPhoneHash(phoneNumber)
       if (existingPhoneAccount) {
-        return createErrorResult('PHONE_ALREADY_USED')
+        await mergeLocalIntoPhoneAccount(accountId, existingPhoneAccount.id!)
+        await twilioVerificationStore.update(verification.id, { verified: true })
+        const authSession = createAuthSession(existingPhoneAccount.id!, existingPhoneAccount.role ?? 'user')
+        return createSuccessResult(authSession)
       }
 
       // Get the local account
@@ -454,26 +454,6 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       return createErrorResult('UPGRADE_ACCOUNT_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
-  const createLocalAuthSession = (accountId: string): AccountSession => {
-    // Local accounts get longer session duration (30 days)
-    const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 30)
-
-    const authSession: AccountSession = {
-      id: createCuid2(),
-      accountId,
-      sessionToken: '', // Will be set below
-      expiresAt: expiresAt,
-      accountType: 'local_unverified',
-      role: 'user',
-    }
-
-    // Create JWT Bearer token with session info
-    authSession.sessionToken = createJWT(authSession)
-
-    return authSession
-  }
-
   const createDevSession = async (accountId: string): Promise<Result<AccountSession>> => {
     try {
       // Check if account exists
@@ -492,20 +472,13 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
 
   const getFirebaseConfig = async (context: AccountContext): Promise<Result<FirebaseConfig>> => {
     try {
-      // Verify the account exists
-      const accountResult = await getAccount(context)
-      if (!accountResult.success || !accountResult.data) {
+      if (!firebaseConfig) {
         return createErrorResult('ACCOUNT_NOT_FOUND')
       }
 
-      // Return Firebase configuration for authenticated users
-      const firebaseConfig: FirebaseConfig = {
-        apiKey: 'AIzaSyA31rLlneDZSnzYl6_tvfKfJ4wFIDUg07I',
-        appId: '1:162900310838:android:ec813ad13b68873f879197',
-        projectId: 'ferthe-app',
-        messagingSenderId: '162900310838',
-        storageBucket: 'ferthe-app.firebasestorage.app',
-        databaseURL: 'https://ferthe-app-default-rtdb.europe-west1.firebasedatabase.app',
+      const accountResult = await getAccount(context)
+      if (!accountResult.success || !accountResult.data) {
+        return createErrorResult('ACCOUNT_NOT_FOUND')
       }
 
       return createSuccessResult(firebaseConfig)
@@ -556,22 +529,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         url: urlResult.data,
       } : undefined
 
-      // Return public Account with fresh avatar ImageReference
-      const publicAccount: Account = {
-        id: updatedAccount.id,
-        phoneHash: updatedAccount.phoneHash,
-        displayName: updatedAccount.displayName,
-        description: updatedAccount.description,
-        avatar,
-        createdAt: updatedAccount.createdAt,
-        lastLoginAt: updatedAccount.lastLoginAt,
-        updatedAt: updatedAccount.updatedAt,
-        accountType: updatedAccount.accountType,
-        isPhoneVerified: updatedAccount.isPhoneVerified,
-        role: updatedAccount.role,
-      }
-
-      return createSuccessResult(publicAccount)
+      return createSuccessResult(toPublicAccount(updatedAccount, avatar))
     } catch (error: unknown) {
       return createErrorResult(ERROR_CODES.AVATAR_UPLOAD_ERROR.code, { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
@@ -625,6 +583,35 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     }
   }
 
+  const deleteAccount = async (context: AccountContext): Promise<Result<void>> => {
+    try {
+      const accountId = context.accountId
+      if (!accountId) return createErrorResult('ACCOUNT_ID_REQUIRED')
+
+      // Delete sessions and device tokens
+      const [sessionsResult, tokensResult, verificationsResult] = await Promise.all([
+        accountSessionStore.list(),
+        deviceTokenStore.list(),
+        twilioVerificationStore.list(),
+      ])
+
+      await Promise.all([
+        ...(sessionsResult.data ?? []).filter(s => s.accountId === accountId).map(s => accountSessionStore.delete(s.id)),
+        ...(tokensResult.data ?? []).filter(t => t.accountId === accountId).map(t => deviceTokenStore.delete(t.id)),
+      ])
+
+      // Delete twilio verifications (matched by phone hash — delegate via onDelete)
+      // Domain data (spots, discoveries, etc.) deleted via composite
+      await onDelete?.(accountId)
+
+      await accountStore.delete(accountId)
+
+      return createSuccessResult(undefined)
+    } catch (error: unknown) {
+      return createErrorResult('DELETE_ACCOUNT_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
   return {
     requestSMSCode,
     verifySMSCode,
@@ -639,6 +626,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     getPublicProfile,
     registerDeviceToken,
     removeDeviceToken,
+    deleteAccount,
     createDevSession,
   }
 }

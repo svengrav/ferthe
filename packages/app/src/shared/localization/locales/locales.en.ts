@@ -181,6 +181,8 @@ const en = {
     notSet: 'Not set',
     profile: 'Profile',
     spots: 'Spots',
+    deleteAccount: 'Delete Account',
+    deleteAccountConfirm: 'Are you sure? This will permanently delete your account and all your data.',
   },
   community: {
     communities: 'Communities',

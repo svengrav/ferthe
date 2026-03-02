@@ -35,6 +35,7 @@ export const ERROR_CODES = {
   // Account Management (404-409)
   ACCOUNT_NOT_FOUND: { code: 'ACCOUNT_NOT_FOUND', message: 'Account not found', httpStatus: 404 },
   ALREADY_VERIFIED: { code: 'ALREADY_VERIFIED', message: 'Account is already phone verified', httpStatus: 409 },
+  DELETE_ACCOUNT_ERROR: { code: 'DELETE_ACCOUNT_ERROR', message: 'Failed to delete account', httpStatus: 500 },
   // Discovery & Trail Management (404-500)
   TRAIL_NOT_FOUND: { code: 'TRAIL_NOT_FOUND', message: 'Trail not found', httpStatus: 404 },
   TRAIL_HAS_NO_SPOTS: { code: 'TRAIL_HAS_NO_SPOTS', message: 'Trail has no spots', httpStatus: 404 },

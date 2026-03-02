@@ -1,5 +1,4 @@
-import { AccountApplicationActions } from '@core/features/account/accountApplication.ts'
-import { AccountContext } from '@shared/contracts/accounts.ts'
+import { AccountApplicationContract, AccountContext } from '@shared/contracts/accounts.ts'
 
 const extractBearerToken = (authHeader?: string | null): string | null => {
   if (!authHeader?.startsWith('Bearer ')) return null
@@ -21,7 +20,7 @@ export function createPublicContext(): AccountContext {
 /**
  * Factory function to create auth middleware with account application
  */
-export function createAuthMiddleware(accountApplication: AccountApplicationActions) {
+export function createAuthMiddleware(accountApplication: AccountApplicationContract) {
   return {
     /**
      * Minimal Bearer token authentication using accountApplication's JWT validation

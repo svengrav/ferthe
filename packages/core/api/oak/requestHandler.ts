@@ -1,5 +1,5 @@
-import { AccountApplicationActions } from '@core/features/account/accountApplication.ts'
 import { ERROR_CODES, Result } from '@shared/contracts/'
+import { AccountApplicationContract } from '@shared/contracts/accounts.ts'
 import { Context } from 'oak'
 import { AuthContext, createAuthMiddleware, createPublicContext } from './authMiddleware.ts'
 import type { OakRouteHandler } from './types.ts'
@@ -16,7 +16,7 @@ type HandlerFunction<T, Params, Body, Query> = (request: RequestOptions<Params, 
 /**
  * Factory to create request handler with account application access
  */
-export const createAsyncRequestHandler = (accountApplication: AccountApplicationActions) => {
+export const createAsyncRequestHandler = (accountApplication: AccountApplicationContract) => {
   const authMiddleware = createAuthMiddleware(accountApplication)
 
   /**

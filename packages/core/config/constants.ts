@@ -33,6 +33,14 @@ export function createConstants() {
     content: {
       dir: Deno.env.get('CONTENT_DIR') ?? '../web/content',
     },
+    firebase: {
+      apiKey: Deno.env.get('FIREBASE_API_KEY') || '',
+      appId: Deno.env.get('FIREBASE_APP_ID') || '',
+      projectId: Deno.env.get('FIREBASE_PROJECT_ID') || '',
+      messagingSenderId: Deno.env.get('FIREBASE_MESSAGING_SENDER_ID') || '',
+      storageBucket: Deno.env.get('FIREBASE_STORAGE_BUCKET') || '',
+      databaseURL: Deno.env.get('FIREBASE_DATABASE_URL') || '',
+    },
   }
 }
 

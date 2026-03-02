@@ -1,12 +1,14 @@
-import { Account, AccountSession, APIContract, Community, CommunityMember, DeviceToken, Discovery, DiscoveryContent, DiscoveryProfile, ImageApplicationContract, SharedDiscovery, SpotRating, StoredSpot, StoredTrail, StoredTrailSpot, TrailRating, TwilioVerification } from '@shared/contracts/index.ts'
+import { Account, AccountApplicationContract, AccountSession, APIContract, Community, CommunityMember, DeviceToken, Discovery, DiscoveryContent, DiscoveryProfile, ImageApplicationContract, SharedDiscovery, SpotRating, StoredSpot, StoredTrail, StoredTrailSpot, TrailRating, TwilioVerification } from '@shared/contracts/index.ts'
 import { Buffer } from "node:buffer"
 import { Config, STORE_IDS } from './config/index.ts'
 import { createFirebaseConnector, FirebaseConnector } from './connectors/firebaseConnector.ts'
 import { SMSConnector } from './connectors/smsConnector.ts'
-import { AccountApplicationActions, createAccountApplication } from './features/account/accountApplication.ts'
+import { createAccountApplication } from './features/account/accountApplication.ts'
 import { createJWTService } from './features/account/jwtService.ts'
 import { createSMSService } from './features/account/smsService.ts'
 import { createCommunityApplication } from './features/community/communityApplication.ts'
+import { createAccountDeleteComposite } from './features/composites/accountDeleteComposite.ts'
+import { createAccountMergeComposite } from './features/composites/accountMergeComposite.ts'
 import { createAccountProfileComposite } from './features/composites/accountProfileComposite.ts'
 import { createDiscoveryStateComposite } from './features/composites/discoveryStateComposite.ts'
 import { createSpotAccessComposite } from './features/composites/spotAccessComposite.ts'
@@ -39,7 +41,7 @@ export interface CoreContext extends APIContract {
   readonly config: Config
   spotApplication: SpotApplicationActions
   sensorApplication: SensorApplicationActions
-  accountApplication: AccountApplicationActions
+  accountApplication: AccountApplicationContract
   communityApplication: any
   imageApplication?: ImageApplicationContract
   notificationService: NotificationService
@@ -86,11 +88,9 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     jwtService: createJWTService({ secret: config.secrets.jwtSecret }),
     smsService: createSMSService({ phoneSalt: config.secrets.phoneHashSalt }),
     imageApplication: imageApplication,
-    discoveryStore,
-    spotStore,
-    communityMemberStore,
-    discoveryContentStore,
-    discoveryProfileStore,
+    firebaseConfig: config.constants.firebase,
+    onDelete: createAccountDeleteComposite({ discoveryStore, spotStore, communityMemberStore, discoveryContentStore, discoveryProfileStore }).delete,
+    onMerge: createAccountMergeComposite({ discoveryStore, spotStore, communityMemberStore, discoveryContentStore, discoveryProfileStore }).merge,
   })
 
   const sensorApplication = createSensorApplication({

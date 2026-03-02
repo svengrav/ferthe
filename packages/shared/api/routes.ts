@@ -627,6 +627,13 @@ export const routes: RouteRegistry = {
       output: ResultSchema(z.void()),
     },
     {
+      id: 'deleteAccount',
+      version: 'v1',
+      method: 'DELETE',
+      path: '/account/profile',
+      output: ResultSchema(z.void()),
+    },
+    {
       id: 'createDevSession',
       version: 'v1',
       method: 'POST',

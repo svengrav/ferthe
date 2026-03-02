@@ -1,5 +1,5 @@
-import { CommunityMember, Discovery, DiscoveryContent, DiscoveryProfile, StoredSpot } from '@shared/contracts/index.ts'
 import { Store } from '@core/store/storeFactory.ts'
+import { CommunityMember, Discovery, DiscoveryContent, DiscoveryProfile, StoredSpot } from '@shared/contracts/index.ts'
 
 export interface AccountMergeCompositeOptions {
   discoveryStore: Store<Discovery>

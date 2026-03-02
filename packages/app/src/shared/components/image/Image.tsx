@@ -103,7 +103,7 @@ export function Image({
 
 const useStyles = createThemedStyles(theme => ({
   container: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
@@ -113,6 +113,7 @@ const useStyles = createThemedStyles(theme => ({
     height: '100%',
   },
   fallbackContainer: {
+    backgroundColor: theme.colors.primary,
     width: '100%',
     height: '100%',
     justifyContent: 'center',

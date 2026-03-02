@@ -270,6 +270,9 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       removeDeviceToken: asyncRequestHandler<void>(async ({ context, body }) => {
         return await accountApplication.removeDeviceToken(context, body?.token)
       }),
+      deleteAccount: asyncRequestHandler<void>(async ({ context }) => {
+        return await accountApplication.deleteAccount(context)
+      }),
       createDevSession: asyncRequestHandler<AccountSession, never, { accountId: string }>(async ({ body }) => {
         const isDevelopment = Deno.env.get('PRODUCTION')?.toLowerCase() !== 'true'
         if (!isDevelopment) {

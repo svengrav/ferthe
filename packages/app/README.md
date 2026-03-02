@@ -2,10 +2,16 @@
 
 # Setup
 
+```
+cd /packages/app 
+npm install
+npx expo start --dev-client  --port 8081 -c
+```
+
 - This project uses [EXPO](https://expo.dev/) to build a React Native application for Android and iOS.
 - Make sure you have the [EXPO CLI](https://docs.expo.dev/workflow/expo-cli/) installed globally: `npm install -g expo-cli`
 - Install dependencies: `npm install`
-- Start the development server: `npx expo start --dev-client -c`
+- Start the development server: `npx expo start --dev-client  --port 8081 -c`
 
 ## Debug
 - Use VS Code Launch Cmd (Run All) to debug the Project. This works best in the web version of the app.

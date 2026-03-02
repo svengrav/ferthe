@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native'
 
 import { Avatar, Button, Page, Stack, Text } from '@app/shared/components'
+import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import Item from '@app/shared/components/item/Item'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
@@ -42,6 +43,20 @@ function AccountPage(props: AccountPageProps) {
     await accountApplication.updateAccount({ [field]: value })
   }
 
+  const { openDialog, closeDialog } = useRemoveDialog()
+
+  const handleDeleteAccount = () => {
+    openDialog({
+      message: locales.account.deleteAccountConfirm,
+      onConfirm: async () => {
+        await accountApplication.deleteAccount()
+        closeDialog()
+        onBack?.()
+      },
+      onCancel: closeDialog,
+    })
+  }
+
   // Open account verification overlay
   const showAccountRegistration = () => {
     const close = setOverlay(
@@ -68,7 +83,6 @@ function AccountPage(props: AccountPageProps) {
         <Avatar
           avatar={account?.avatar}
           label={account?.displayName}
-          size={100}
           showEditIcon={true}
           onPress={handleAvatarPress}
         />
@@ -132,6 +146,15 @@ function AccountPage(props: AccountPageProps) {
             </Text>
           </View>
         )}
+
+        {/* Delete Account */}
+        <View style={styles.deleteContainer}>
+          <Button
+            label={locales.account.deleteAccount}
+            variant="outlined"
+            onPress={handleDeleteAccount}
+          />
+        </View>
       </Stack>
     </Page>
   )
@@ -145,6 +168,10 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   upgradeHint: {
     textAlign: 'center',
     paddingTop: 8,
+  },
+  deleteContainer: {
+    marginTop: theme.tokens.spacing.xl,
+    paddingHorizontal: theme.tokens.inset.md,
   },
 })
 

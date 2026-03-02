@@ -33,7 +33,7 @@ const ringVariants = themedVariants<ViewStyle>({
  * Displays user avatar with label fallback or placeholder icon
  */
 function Avatar(props: AvatarProps) {
-  const { avatarUrl, avatar, label, onPress, size = 100, showEditIcon = false, variant, style } = props
+  const { avatarUrl, avatar, label, onPress, size = 180, showEditIcon = false, variant, style } = props
   const theme = useThemeStore()
   const styles = createStyles(theme, size)
   const ringStyle = variant ? useVariants(ringVariants, { variant }) : undefined

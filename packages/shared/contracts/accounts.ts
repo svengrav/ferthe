@@ -208,6 +208,9 @@ export interface AccountApplicationContract {
   registerDeviceToken: (context: AccountContext, token: string, platform: DevicePlatform) => Promise<Result<DeviceToken>>
   removeDeviceToken: (context: AccountContext, token: string) => Promise<Result<void>>
 
+  // Account deletion
+  deleteAccount: (context: AccountContext) => Promise<Result<void>>
+
   // Dev tools
   createDevSession: (accountId: string) => Promise<Result<AccountSession>>
 }

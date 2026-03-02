@@ -35,6 +35,7 @@ export interface AccountApplication {
   uploadAvatar: (base64Data: string) => Promise<Result<Account>>
   getPublicProfile: (accountId: string) => Promise<Result<AccountPublicProfile>>
   listPublicProfiles: (accountIds: string[]) => Promise<Result<AccountPublicProfile[]>>
+  deleteAccount: () => Promise<Result<void>>
 }
 
 interface AccountApplicationOptions {
@@ -238,6 +239,19 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       const session = getSession()
       if (!session) return Promise.resolve({ success: false, data: undefined })
       return api.account.getPublicProfile(accountId)
+    },
+
+    deleteAccount: async () => {
+      const session = getSession()
+      if (!session) return Promise.resolve({ success: false, data: undefined })
+      const result = await api.account.deleteAccount()
+      if (result.success) {
+        await secureStore.delete(AUTH_SESSION_KEY)
+        storeActions.setSession(null)
+        storeActions.setAccount(null)
+        storeActions.setIsAuthenticated(false)
+      }
+      return result
     },
   }
 }

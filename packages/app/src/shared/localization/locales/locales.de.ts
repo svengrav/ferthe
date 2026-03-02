@@ -182,6 +182,8 @@ const de: LocalizationSet = {
     notSet: 'Nicht gesetzt',
     profile: 'Profil',
     spots: 'Spots',
+    deleteAccount: 'Konto löschen',
+    deleteAccountConfirm: 'Bist du sicher? Dein Konto und alle deine Daten werden dauerhaft gelöscht.',
   },
   community: {
     communities: 'Communities',

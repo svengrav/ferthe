@@ -3,7 +3,7 @@
  * Domain-grouped, Result<T>-returning interface for Oak REST API
  */
 
-import type { Account, AccountPublicProfile, AccountSession, AccountUpdateData, ClientAudience, DeviceToken, SMSCodeRequest, SMSVerificationResult } from '../contracts/accounts.ts'
+import type { Account, AccountPublicProfile, AccountSession, AccountUpdateData, ClientAudience, DeviceToken, SessionValidationResult, SMSCodeRequest, SMSVerificationResult } from '../contracts/accounts.ts'
 import type { Community, CommunityMember, SharedDiscovery } from '../contracts/communities.ts'
 import type { ActivateTrailResult, DiscoveryState } from '../contracts/composites.ts'
 import type { FirebaseConfig } from '../contracts/config.ts'
@@ -212,7 +212,7 @@ export function createApiClient(config: HttpClientConfig) {
         call<Account>(() => client.post('/account/profile/avatar', { base64Data })),
 
       validateSession: (sessionToken: string) =>
-        call<AccountSession>(() => client.post('/account/actions/validate-session', { sessionToken })),
+        call<SessionValidationResult>(() => client.post('/account/actions/validate-session', { sessionToken })),
 
       revokeSession: (sessionToken: string) =>
         call<void>(() => client.post('/account/actions/revoke-session', { sessionToken })),
@@ -231,6 +231,9 @@ export function createApiClient(config: HttpClientConfig) {
 
       removeDeviceToken: (token: string) =>
         call<void>(() => client.delete('/account/device-token', { token })),
+
+      deleteAccount: () =>
+        call<void>(() => client.delete('/account/profile')),
     },
 
     community: {

@@ -21,8 +21,8 @@ export { createSpotApplication } from './features/spot/spotApplication.ts'
 export type { SpotApplicationActions } from './features/spot/spotApplication.ts'
 
 // Account feature
+export type { AccountApplicationContract } from '@shared/contracts/accounts.ts'
 export { createAccountApplication } from './features/account/accountApplication.ts'
-export type { AccountApplicationActions } from './features/account/accountApplication.ts'
 export { createSMSService } from './features/account/smsService.ts'
 export type { SMSService } from './features/account/smsService.ts'
 
