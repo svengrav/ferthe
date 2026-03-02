@@ -1,6 +1,6 @@
 {
   "deno.enable": false,
-  "jest.enable": true,
+  "jest.enable": false,
   "jest.rootPath": "./",
   "editor.defaultFormatter": "vscode.typescript-language-features",
   "[typescriptreact]": {
