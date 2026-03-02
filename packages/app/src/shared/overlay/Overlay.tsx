@@ -9,12 +9,9 @@ import { useOverlayStore } from './useOverlayStore'
 const FADE_IN_DURATION = 300
 const FADE_OUT_DURATION = 200
 const SCALE_DURATION = 250
-const INITIAL_SCALE = 0.95
+const INITIAL_SCALE = 1
 const FINAL_SCALE = 1
 const OVERLAY_Z_INDEX = 1000
-
-// Content styling constants
-const BORDER_RADIUS = 12
 
 /**
  * Hook to manage overlay animation logic
