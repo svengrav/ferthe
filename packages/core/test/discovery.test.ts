@@ -42,7 +42,7 @@ Deno.test({
     // ── Setup ─────────────────────────────────────────────────────────────────
 
     await t.step('Setup: create spot as creator', async () => {
-      const result = await creatorClient.spots.create({
+      const result = await creatorClient.spot.createSpot({
         content: { name: 'Discovery Spot', description: 'Found it!' },
         location: SPOT_LOCATION,
         visibility: 'public',
@@ -55,7 +55,7 @@ Deno.test({
     })
 
     await t.step('Setup: create trail and add spot', async () => {
-      const result = await creatorClient.trails.create({
+      const result = await creatorClient.trail.createTrail({
         name: 'Discovery Trail',
         description: 'Trail for discovery tests',
         boundary: {
@@ -73,7 +73,7 @@ Deno.test({
       assertExists(result.data?.id)
       trailId = result.data.id
 
-      await creatorClient.trails.addSpot(trailId, spotId, 0)
+      await creatorClient.trail.addSpotToTrail(trailId, spotId, 0)
       console.log(`✓ Trail created: ${trailId}, spot added`)
     })
 
@@ -98,7 +98,7 @@ Deno.test({
     // ── Pre-discovery state ───────────────────────────────────────────────────
 
     await t.step('list returns empty before any discovery', async () => {
-      const result = await userAClient.discovery.list()
+      const result = await userAClient.discovery.listDiscoveries()
 
       assertEquals(result.success, true)
       assertEquals(result.data?.length, 0, 'No discoveries yet')
@@ -106,7 +106,7 @@ Deno.test({
     })
 
     await t.step('listSpots returns empty before any discovery', async () => {
-      const result = await userAClient.discovery.listSpots()
+      const result = await userAClient.discovery.listDiscoveredSpots()
 
       assertEquals(result.success, true)
       assertEquals(result.data?.length, 0, 'No discovered spots yet')
@@ -150,7 +150,7 @@ Deno.test({
     // ── Discovery list / get ──────────────────────────────────────────────────
 
     await t.step('list returns the new discovery', async () => {
-      const result = await userAClient.discovery.list()
+      const result = await userAClient.discovery.listDiscoveries()
 
       assertEquals(result.success, true)
       assertEquals(result.data?.length, 1)
@@ -160,7 +160,7 @@ Deno.test({
     })
 
     await t.step('list filtered by trailId returns the discovery', async () => {
-      const result = await userAClient.discovery.list({ trailId })
+      const result = await userAClient.discovery.listDiscoveries({ trailId })
 
       assertEquals(result.success, true)
       assertEquals(result.data?.length, 1)
@@ -169,7 +169,7 @@ Deno.test({
     })
 
     await t.step('get returns the single discovery by id', async () => {
-      const result = await userAClient.discovery.get(discoveryId)
+      const result = await userAClient.discovery.getDiscovery(discoveryId)
 
       assertEquals(result.success, true)
       assertEquals(result.data?.id, discoveryId)
@@ -180,7 +180,7 @@ Deno.test({
     // ── Discovered spots ──────────────────────────────────────────────────────
 
     await t.step('listSpots returns the discovered spot with correct source', async () => {
-      const result = await userAClient.discovery.listSpots()
+      const result = await userAClient.discovery.listDiscoveredSpots()
 
       assertEquals(result.success, true)
       assertEquals(result.data?.length, 1)
@@ -190,7 +190,7 @@ Deno.test({
     })
 
     await t.step('listSpots filtered by trailId returns the spot', async () => {
-      const result = await userAClient.discovery.listSpots({ trailId })
+      const result = await userAClient.discovery.listDiscoveredSpots({ trailId })
 
       assertEquals(result.success, true)
       assertEquals(result.data?.length, 1)
@@ -226,7 +226,7 @@ Deno.test({
     // ── Discovery trail ───────────────────────────────────────────────────────
 
     await t.step('getTrail returns trail with discovered spot and discovery', async () => {
-      const result = await userAClient.discovery.getTrail(trailId)
+      const result = await userAClient.discovery.getDiscoveryTrail(trailId)
 
       assertEquals(result.success, true)
       assertExists(result.data?.spots, 'Trail must contain spots')
@@ -240,7 +240,7 @@ Deno.test({
     // ── Stats ─────────────────────────────────────────────────────────────────
 
     await t.step('getStats returns ranked stats for the discovery', async () => {
-      const result = await userAClient.discovery.getStats(discoveryId)
+      const result = await userAClient.discovery.getDiscoveryStats(discoveryId)
 
       assertEquals(result.success, true)
       assertEquals(result.data?.discoveryId, discoveryId)
@@ -253,7 +253,7 @@ Deno.test({
     // ── Content lifecycle ─────────────────────────────────────────────────────
 
     await t.step('getContent returns undefined before upsert', async () => {
-      const result = await userAClient.discovery.getContent(discoveryId)
+      const result = await userAClient.discovery.getDiscoveryContent(discoveryId)
 
       assertEquals(result.success, true)
       assertEquals(result.data, undefined, 'No content before upsert')
@@ -261,7 +261,7 @@ Deno.test({
     })
 
     await t.step('upsertContent creates content with comment', async () => {
-      const result = await userAClient.discovery.upsertContent(discoveryId, {
+      const result = await userAClient.discovery.upsertDiscoveryContent(discoveryId, {
         comment: 'Amazing spot!',
         visibility: 'public',
       })
@@ -274,7 +274,7 @@ Deno.test({
     })
 
     await t.step('upsertContent updates existing content', async () => {
-      const result = await userAClient.discovery.upsertContent(discoveryId, {
+      const result = await userAClient.discovery.upsertDiscoveryContent(discoveryId, {
         comment: 'Updated comment',
         visibility: 'private',
       })
@@ -286,7 +286,7 @@ Deno.test({
     })
 
     await t.step('getContent returns updated content', async () => {
-      const result = await userAClient.discovery.getContent(discoveryId)
+      const result = await userAClient.discovery.getDiscoveryContent(discoveryId)
 
       assertEquals(result.success, true)
       assertEquals(result.data?.comment, 'Updated comment')
@@ -295,14 +295,14 @@ Deno.test({
     })
 
     await t.step('deleteContent removes the content', async () => {
-      const result = await userAClient.discovery.deleteContent(discoveryId)
+      const result = await userAClient.discovery.deleteDiscoveryContent(discoveryId)
 
       assertEquals(result.success, true)
       console.log('✓ Content deleted')
     })
 
     await t.step('getContent returns undefined after delete', async () => {
-      const result = await userAClient.discovery.getContent(discoveryId)
+      const result = await userAClient.discovery.getDiscoveryContent(discoveryId)
 
       assertEquals(result.success, true)
       assertEquals(result.data, undefined, 'Content must be gone after delete')

@@ -2,6 +2,7 @@ import type { GeoLocation } from '@shared/geo/index.ts'
 import { GeoLocationSchema } from '@shared/geo/types.ts'
 import { z } from 'zod'
 import { AccountContext } from './accounts.ts'
+import { ClueSchema } from './discoveries.ts'
 import { Result } from './results.ts'
 import { guard } from './strings.ts'
 
@@ -19,7 +20,7 @@ export const ScanEventSchema = z.object({
   scannedAt: z.date(),
   radiusUsed: guard.positiveInt,
   successful: z.boolean(),
-  clues: z.array(z.any()), // Clue schema not migrated yet
+  clues: z.array(ClueSchema),
   createdAt: z.date(),
   location: GeoLocationSchema,
   silent: z.boolean().optional(),

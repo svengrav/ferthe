@@ -34,6 +34,7 @@
     }
   ],
   "settings": {
+    "deno.codeLens.references": true,
     "deno.enable": true,
     "deno.lint": true,
     "deno.codeLens.test": true,
@@ -53,7 +54,7 @@
     "search.exclude": {
       "**/node_modules": true,
       "**/dist": true,
-       "**/.vite": true
+      "**/.vite": true
     },
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit",
@@ -67,6 +68,7 @@
       "**/.next/**": true
     },
     "workbench.editor.enablePreview": true,
+    "jest.enable": false,
     "github.copilot.chat.codesearch.enabled": true,
     "editor.tabSize": 2,
     "editor.detectIndentation": false,
@@ -76,16 +78,14 @@
     "workbench.colorCustomizations": {
       "titleBar.activeBackground": "#032e8a"
     },
-    "[jsonc]": {
-      "editor.defaultFormatter": "denoland.vscode-deno",
-      "editor.formatOnSave": false
-    },
     "powershell.cwd": "🛠️ settings",
     "[powershell]": {
       "editor.defaultFormatter": "ms-vscode.powershell"
     }
   },
   "extensions": {
-    "recommendations": ["denoland.vscode-deno"]
+    "recommendations": [
+      "denoland.vscode-deno"
+    ]
   }
 }

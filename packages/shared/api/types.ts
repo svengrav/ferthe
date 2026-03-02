@@ -44,11 +44,8 @@ export interface HttpRoute<
   /** Route configuration */
   config?: RouteConfig
 
-  /** Unique identifier for this route (e.g., 'getSpot', 'createTrail') */
-  id: string
-
   /** Output schema - API returns Result<TData> */
-  output?: z.ZodTypeAny
+  output?: z.ZodType
 
   /** Input type (request body for POST/PUT) */
   input?: z.ZodType<TInput>
@@ -63,14 +60,4 @@ export interface HttpRoute<
 /**
  * Type-safe route definition helper
  */
-export interface RouteRegistry {
-  system: HttpRoute[]
-  spot: HttpRoute[]
-  trail: HttpRoute[]
-  discovery: HttpRoute[]
-  account: HttpRoute[]
-  community: HttpRoute[]
-  sensor: HttpRoute[]
-  content: HttpRoute[]
-  composite: HttpRoute[]
-}
+export type RouteRegistry<D extends string = string, K extends string = string> = Record<D, Record<K, HttpRoute>>;

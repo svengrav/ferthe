@@ -59,7 +59,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
   sensor?.onScanEvent(async scanEvent => {
     if (scanEvent.clues.length > 0) {
-      const result = await api.discovery.getTrail(scanEvent.trailId!)
+      const result = await api.discovery.getDiscoveryTrail(scanEvent.trailId!)
       if (!result.data) return
 
       const previewClues = result.data.clues || []
@@ -300,7 +300,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
     await setActiveTrail(trailId)
 
-    const discoverySpots = await api.discovery.listSpots()
+    const discoverySpots = await api.discovery.listDiscoveredSpots()
     if (discoverySpots.data) {
       const spots = discoverySpots.data.map(({ discoveryId, discoveredAt, ...spot }) => spot)
       setSpots(spots)
@@ -349,7 +349,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     discoveryId: string,
     content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }
   ): Promise<Result<DiscoveryContent>> => {
-    const result = await api.discovery.upsertContent(discoveryId, content)
+    const result = await api.discovery.upsertDiscoveryContent(discoveryId, content)
     if (result.data) {
       getDiscoveryContentActions().setContent(discoveryId, result.data)
     }
@@ -357,7 +357,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   const getDiscoveryContent = async (discoveryId: string): Promise<Result<DiscoveryContent | undefined>> => {
-    const result = await api.discovery.getContent(discoveryId)
+    const result = await api.discovery.getDiscoveryContent(discoveryId)
     if (result.data) {
       getDiscoveryContentActions().setContent(discoveryId, result.data)
     }
@@ -365,7 +365,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   const deleteDiscoveryContent = async (discoveryId: string): Promise<Result<void>> => {
-    const result = await api.discovery.deleteContent(discoveryId)
+    const result = await api.discovery.deleteDiscoveryContent(discoveryId)
     if (result.success) {
       getDiscoveryContentActions().clearContent(discoveryId)
     }
@@ -375,10 +375,10 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   // Rating methods
   const rateSpot = async (spotId: string, rating: number): Promise<Result<void>> => {
     logger.log('DiscoveryApplication: Rating spot', { spotId, rating })
-    const result = await api.spots.rate(spotId, rating)
+    const result = await api.spot.rateSpot(spotId, rating)
     if (result.success) {
       logger.log('DiscoveryApplication: Rating successful, refreshing summary')
-      const summaryResult = await api.spots.getRatingSummary(spotId)
+      const summaryResult = await api.spot.getSpotRatings(spotId)
       if (summaryResult.data) {
         logger.log('DiscoveryApplication: Updated summary', summaryResult.data)
         getSpotRatingActions().setRatingSummary(spotId, summaryResult.data)
@@ -390,9 +390,9 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   const removeSpotRating = async (spotId: string): Promise<Result<void>> => {
-    const result = await api.spots.removeRating(spotId)
+    const result = await api.spot.removeSpotRating(spotId)
     if (result.success) {
-      const summaryResult = await api.spots.getRatingSummary(spotId)
+      const summaryResult = await api.spot.getSpotRatings(spotId)
       if (summaryResult.data) {
         getSpotRatingActions().setRatingSummary(spotId, summaryResult.data)
       }
@@ -401,7 +401,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   const getSpotRatingSummary = async (spotId: string): Promise<Result<RatingSummary>> => {
-    const result = await api.spots.getRatingSummary(spotId)
+    const result = await api.spot.getSpotRatings(spotId)
     if (result.data) {
       getSpotRatingActions().setRatingSummary(spotId, result.data)
     }
@@ -409,7 +409,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
   }
 
   const getDiscoveryStats = async (discoveryId: string): Promise<Result<DiscoveryStats>> =>
-    api.discovery.getStats(discoveryId)
+    api.discovery.getDiscoveryStats(discoveryId)
 
   const createWelcomeDiscovery = async (location: GeoLocation): Promise<Result<DiscoveryEventState>> => {
     const result = await api.discovery.createWelcome(location)

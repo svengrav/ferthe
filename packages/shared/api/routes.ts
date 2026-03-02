@@ -165,59 +165,53 @@ const DiscoverySpotSchema = SpotSchema.extend({
 /**
  * Central route registry - all API endpoints defined here
  */
-export const routes: RouteRegistry = {
+export const routes = {
   // ─────────────────────────────────────────────────────────────
   // System Routes
   // ─────────────────────────────────────────────────────────────
-  system: [
-    {
-      id: 'getManifest',
+  system: {
+    getManifest: {
       version: 'v1',
       method: 'GET',
       path: '/',
       config: { isPublic: true },
       output: ResultSchema(ManifestSchema),
     },
-    {
-      id: 'getStatus',
+    getStatus: {
       version: 'v1',
       method: 'GET',
       path: '/status',
       config: { isPublic: true },
       output: ResultSchema(StatusSchema),
     },
-  ],
+  },
 
   // ─────────────────────────────────────────────────────────────
   // Spot Routes
   // ─────────────────────────────────────────────────────────────
-  spot: [
-    {
-      id: 'listSpots',
+  spot: {
+    listSpots: {
       version: 'v1',
       method: 'GET',
       path: '/spot/spots',
       query: ListQuerySchema,
       output: ResultSchema(z.array(SpotSchema)),
     },
-    {
-      id: 'listPreviews',
+    listPreviews: {
       version: 'v1',
       method: 'GET',
       path: '/spot/previews',
       query: SpotPreviewQuerySchema,
       output: ResultSchema(z.array(SpotPreviewSchema)),
     },
-    {
-      id: 'getSpot',
+    getSpot: {
       version: 'v1',
       method: 'GET',
       path: '/spot/spots/:id',
       params: z.object({ id: z.string() }),
       output: ResultSchema(SpotSchema.optional()),
     },
-    {
-      id: 'getSpotPreview',
+    getSpotPreview: {
       version: 'v1',
       method: 'GET',
       path: '/spot/spots/:id/preview',
@@ -225,24 +219,21 @@ export const routes: RouteRegistry = {
       params: z.object({ id: z.string() }),
       output: ResultSchema(SpotPreviewSchema.optional()),
     },
-    {
-      id: 'getSpotsByIds',
+    getSpotsByIds: {
       version: 'v1',
       method: 'POST',
       path: '/spot/spots/batch',
       input: z.object({ ids: z.array(z.string()) }),
       output: ResultSchema(z.array(SpotSchema)),
     },
-    {
-      id: 'createSpot',
+    createSpot: {
       version: 'v1',
       method: 'POST',
       path: '/spot/spots',
       input: CreateSpotRequestSchema,
       output: ResultSchema(SpotSchema),
     },
-    {
-      id: 'updateSpot',
+    updateSpot: {
       version: 'v1',
       method: 'PUT',
       path: '/spot/spots/:id',
@@ -250,24 +241,21 @@ export const routes: RouteRegistry = {
       input: UpdateSpotRequestSchema,
       output: ResultSchema(SpotSchema),
     },
-    {
-      id: 'deleteSpot',
+    deleteSpot: {
       version: 'v1',
       method: 'DELETE',
       path: '/spot/spots/:id',
       params: z.object({ id: z.string() }),
       output: ResultSchema(z.void()),
     },
-    {
-      id: 'getSpotRatings',
+    getSpotRatings: {
       version: 'v1',
       method: 'GET',
       path: '/spot/spots/:spotId/ratings',
       params: z.object({ spotId: z.string() }),
       output: ResultSchema(RatingSummarySchema),
     },
-    {
-      id: 'rateSpot',
+    rateSpot: {
       version: 'v1',
       method: 'POST',
       path: '/spot/spots/:spotId/ratings',
@@ -275,46 +263,41 @@ export const routes: RouteRegistry = {
       input: z.object({ rating: z.number().int().min(1).max(5) }),
       output: ResultSchema(SpotRatingSchema),
     },
-    {
-      id: 'removeSpotRating',
+    removeSpotRating: {
       version: 'v1',
       method: 'DELETE',
       path: '/spot/spots/:spotId/ratings',
       params: z.object({ spotId: z.string() }),
       output: ResultSchema(z.void()),
     },
-  ],
+  },
 
   // ─────────────────────────────────────────────────────────────
   // Trail Routes
   // ─────────────────────────────────────────────────────────────
-  trail: [
-    {
-      id: 'listTrails',
+  trail: {
+    listTrails: {
       version: 'v1',
       method: 'GET',
       path: '/trail/trails',
       query: TrailListQuerySchema,
       output: ResultSchema(z.array(TrailSchema)),
     },
-    {
-      id: 'getTrail',
+    getTrail: {
       version: 'v1',
       method: 'GET',
       path: '/trail/trails/:id',
       params: z.object({ id: z.string() }),
       output: ResultSchema(TrailSchema.optional()),
     },
-    {
-      id: 'createTrail',
+    createTrail: {
       version: 'v1',
       method: 'POST',
       path: '/trail/trails',
       input: CreateTrailRequestSchema,
       output: ResultSchema(TrailSchema),
     },
-    {
-      id: 'updateTrail',
+    updateTrail: {
       version: 'v1',
       method: 'PUT',
       path: '/trail/trails/:id',
@@ -322,32 +305,28 @@ export const routes: RouteRegistry = {
       input: UpdateTrailRequestSchema,
       output: ResultSchema(TrailSchema),
     },
-    {
-      id: 'deleteTrail',
+    deleteTrail: {
       version: 'v1',
       method: 'DELETE',
       path: '/trail/trails/:id',
       params: z.object({ id: z.string() }),
       output: ResultSchema(z.void()),
     },
-    {
-      id: 'getTrailSpots',
+    getTrailSpots: {
       version: 'v1',
       method: 'GET',
       path: '/trail/trails/:trailId/spots',
       params: z.object({ trailId: z.string() }),
       output: ResultSchema(z.array(TrailSpotSchema)),
     },
-    {
-      id: 'getTrailStats',
+    getTrailStats: {
       version: 'v1',
       method: 'GET',
       path: '/trail/trails/:trailId/stats',
       params: z.object({ trailId: z.string() }),
       output: ResultSchema(TrailStatsSchema),
     },
-    {
-      id: 'addSpotToTrail',
+    addSpotToTrail: {
       version: 'v1',
       method: 'POST',
       path: '/trail/trails/:trailId/spots/:spotId',
@@ -355,24 +334,21 @@ export const routes: RouteRegistry = {
       input: z.object({ order: z.number().int().optional() }),
       output: ResultSchema(TrailSpotSchema),
     },
-    {
-      id: 'removeSpotFromTrail',
+    removeSpotFromTrail: {
       version: 'v1',
       method: 'DELETE',
       path: '/trail/trails/:trailId/spots/:spotId',
       params: z.object({ trailId: z.string(), spotId: z.string() }),
       output: ResultSchema(z.void()),
     },
-    {
-      id: 'getTrailRatings',
+    getTrailRatings: {
       version: 'v1',
       method: 'GET',
       path: '/trail/trails/:trailId/ratings',
       params: z.object({ trailId: z.string() }),
       output: ResultSchema(RatingSummarySchema),
     },
-    {
-      id: 'rateTrail',
+    rateTrail: {
       version: 'v1',
       method: 'POST',
       path: '/trail/trails/:trailId/ratings',
@@ -380,22 +356,20 @@ export const routes: RouteRegistry = {
       input: z.object({ rating: z.number().int().min(1).max(5) }),
       output: ResultSchema(TrailRatingSchema),
     },
-    {
-      id: 'removeTrailRating',
+    removeTrailRating: {
       version: 'v1',
       method: 'DELETE',
       path: '/trail/trails/:trailId/ratings',
       params: z.object({ trailId: z.string() }),
       output: ResultSchema(z.void()),
     },
-  ],
+  },
 
   // ─────────────────────────────────────────────────────────────
   // Discovery Routes
   // ─────────────────────────────────────────────────────────────
-  discovery: [
-    {
-      id: 'processLocation',
+  discovery: {
+    processLocation: {
       version: 'v1',
       method: 'POST',
       path: '/discovery/actions/process-location',
@@ -405,79 +379,69 @@ export const routes: RouteRegistry = {
       }),
       output: ResultSchema(DiscoveryLocationRecordSchema),
     },
-    {
-      id: 'listDiscoveries',
+    listDiscoveries: {
       version: 'v1',
       method: 'GET',
       path: '/discovery/discoveries',
       query: DiscoveryListQuerySchema,
       output: ResultSchema(z.array(DiscoverySchema)),
     },
-    {
-      id: 'getDiscovery',
+    getDiscovery: {
       version: 'v1',
       method: 'GET',
       path: '/discovery/discoveries/:id',
       params: z.object({ id: z.string() }),
       output: ResultSchema(DiscoverySchema.optional()),
     },
-    {
-      id: 'listDiscoveredSpots',
+    listDiscoveredSpots: {
       version: 'v1',
       method: 'GET',
       path: '/discovery/spots',
       query: DiscoveryListQuerySchema,
       output: ResultSchema(z.array(DiscoverySpotSchema)),
     },
-    {
-      id: 'listPreviewClues',
+    listPreviewClues: {
       version: 'v1',
       method: 'GET',
       path: '/discovery/trails/:trailId/clues',
       params: z.object({ trailId: z.string() }),
       output: ResultSchema(z.array(ClueSchema)),
     },
-    {
-      id: 'getDiscoveryTrail',
+    getDiscoveryTrail: {
       version: 'v1',
       method: 'GET',
       path: '/discovery/trails/:trailId',
       params: z.object({ trailId: z.string() }),
       output: ResultSchema(DiscoveryTrailSchema),
     },
-    {
-      id: 'getProfile',
+    getProfile: {
       version: 'v1',
       method: 'GET',
       path: '/discovery/profile',
       output: ResultSchema(DiscoveryProfileSchema),
     },
-    {
-      id: 'updateProfile',
+    updateProfile: {
       version: 'v1',
       method: 'PUT',
       path: '/discovery/profile',
       input: DiscoveryProfileUpdateDataSchema,
       output: ResultSchema(DiscoveryProfileSchema),
     },
-    {
-      id: 'getDiscoveryStats',
+    getDiscoveryStats: {
       version: 'v1',
       method: 'GET',
       path: '/discovery/discoveries/:discoveryId/stats',
       params: z.object({ discoveryId: z.string() }),
       output: ResultSchema(DiscoveryStatsSchema),
     },
-    {
-      id: 'getDiscoveryContent',
+    getDiscoveryContent: {
       version: 'v1',
       method: 'GET',
       path: '/discovery/discoveries/:discoveryId/content',
       params: z.object({ discoveryId: z.string() }),
       output: ResultSchema(DiscoveryContentSchema.optional()),
     },
-    {
-      id: 'upsertDiscoveryContent',
+    upsertDiscoveryContent: {
       version: 'v1',
       method: 'PUT',
       path: '/discovery/discoveries/:discoveryId/content',
@@ -485,30 +449,27 @@ export const routes: RouteRegistry = {
       input: UpsertDiscoveryContentRequestSchema,
       output: ResultSchema(DiscoveryContentSchema),
     },
-    {
-      id: 'deleteDiscoveryContent',
+    deleteDiscoveryContent: {
       version: 'v1',
       method: 'DELETE',
       path: '/discovery/discoveries/:discoveryId/content',
       params: z.object({ discoveryId: z.string() }),
       output: ResultSchema(z.void()),
     },
-    {
-      id: 'createWelcome',
+    createWelcome: {
       version: 'v1',
       method: 'POST',
       path: '/discovery/welcome',
       input: z.object({ location: GeoLocationSchema }),
       output: ResultSchema(WelcomeDiscoveryResultSchema),
     },
-  ],
+  },
 
   // ─────────────────────────────────────────────────────────────
   // Account Routes
   // ─────────────────────────────────────────────────────────────
-  account: [
-    {
-      id: 'requestSMSCode',
+  account: {
+    requestSMSCode: {
       version: 'v1',
       method: 'POST',
       path: '/account/actions/request-sms',
@@ -516,8 +477,7 @@ export const routes: RouteRegistry = {
       input: z.object({ phoneNumber: z.string() }),
       output: ResultSchema(SuccessSchema),
     },
-    {
-      id: 'verifySMSCode',
+    verifySMSCode: {
       version: 'v1',
       method: 'POST',
       path: '/account/actions/verify-sms',
@@ -529,86 +489,75 @@ export const routes: RouteRegistry = {
       }),
       output: ResultSchema(AccountSessionSchema),
     },
-    {
-      id: 'getPublicProfile',
+    getPublicProfile: {
       version: 'v1',
       method: 'GET',
       path: '/account/public/profiles/:accountId',
       params: z.object({ accountId: z.string() }),
       output: ResultSchema(AccountPublicProfileSchema),
     },
-    {
-      id: 'getPublicProfiles',
+    getPublicProfiles: {
       version: 'v1',
       method: 'POST',
       path: '/account/public/profiles',
       input: z.object({ accountIds: z.array(z.string()) }),
       output: ResultSchema(z.array(AccountPublicProfileSchema)),
     },
-    {
-      id: 'getProfile',
+    getProfile: {
       version: 'v1',
       method: 'GET',
       path: '/account/profile',
       output: ResultSchema(AccountSchema),
     },
-    {
-      id: 'updateProfile',
+    updateProfile: {
       version: 'v1',
       method: 'PUT',
       path: '/account/profile',
       input: AccountUpdateDataSchema,
       output: ResultSchema(AccountSchema),
     },
-    {
-      id: 'uploadAvatar',
+    uploadAvatar: {
       version: 'v1',
       method: 'POST',
       path: '/account/profile/avatar',
       input: z.object({ base64Data: z.string() }),
       output: ResultSchema(AccountSchema),
     },
-    {
-      id: 'validateSession',
+    validateSession: {
       version: 'v1',
       method: 'POST',
       path: '/account/actions/validate-session',
       input: z.object({ sessionToken: z.string() }),
       output: ResultSchema(AccountSessionSchema),
     },
-    {
-      id: 'revokeSession',
+    revokeSession: {
       version: 'v1',
       method: 'POST',
       path: '/account/actions/revoke-session',
       input: z.object({ sessionToken: z.string() }),
       output: ResultSchema(z.void()),
     },
-    {
-      id: 'createLocalAccount',
+    createLocalAccount: {
       version: 'v1',
       method: 'POST',
       path: '/account/actions/create-local',
       config: { isPublic: true },
       output: ResultSchema(AccountSessionSchema),
     },
-    {
-      id: 'upgradeToPhoneAccount',
+    upgradeToPhoneAccount: {
       version: 'v1',
       method: 'POST',
       path: '/account/actions/upgrade-to-phone',
       input: z.object({ phoneNumber: z.string(), code: z.string() }),
       output: ResultSchema(AccountSessionSchema),
     },
-    {
-      id: 'getFirebaseConfig',
+    getFirebaseConfig: {
       version: 'v1',
       method: 'GET',
       path: '/account/config/firebase',
       output: ResultSchema(FirebaseConfigSchema),
     },
-    {
-      id: 'registerDeviceToken',
+    registerDeviceToken: {
       version: 'v1',
       method: 'POST',
       path: '/account/device-token',
@@ -618,23 +567,20 @@ export const routes: RouteRegistry = {
       }),
       output: ResultSchema(DeviceTokenSchema),
     },
-    {
-      id: 'removeDeviceToken',
+    removeDeviceToken: {
       version: 'v1',
       method: 'DELETE',
       path: '/account/device-token',
       input: z.object({ token: z.string() }),
       output: ResultSchema(z.void()),
     },
-    {
-      id: 'deleteAccount',
+    deleteAccount: {
       version: 'v1',
       method: 'DELETE',
       path: '/account/profile',
       output: ResultSchema(z.void()),
     },
-    {
-      id: 'createDevSession',
+    createDevSession: {
       version: 'v1',
       method: 'POST',
       path: '/account/dev-session',
@@ -642,14 +588,13 @@ export const routes: RouteRegistry = {
       input: z.object({ accountId: z.string() }),
       output: ResultSchema(AccountSessionSchema),
     },
-  ],
+  },
 
   // ─────────────────────────────────────────────────────────────
   // Community Routes
   // ─────────────────────────────────────────────────────────────
-  community: [
-    {
-      id: 'createCommunity',
+  community: {
+    createCommunity: {
       version: 'v1',
       method: 'POST',
       path: '/community/communities',
@@ -659,32 +604,28 @@ export const routes: RouteRegistry = {
       }),
       output: ResultSchema(CommunitySchema),
     },
-    {
-      id: 'joinCommunity',
+    joinCommunity: {
       version: 'v1',
       method: 'POST',
       path: '/community/actions/join',
       input: z.object({ inviteCode: z.string() }),
       output: ResultSchema(CommunitySchema),
     },
-    {
-      id: 'listCommunities',
+    listCommunities: {
       version: 'v1',
       method: 'GET',
       path: '/community/communities',
       query: ListQuerySchema,
       output: ResultSchema(z.array(CommunitySchema)),
     },
-    {
-      id: 'getCommunity',
+    getCommunity: {
       version: 'v1',
       method: 'GET',
       path: '/community/communities/:communityId',
       params: z.object({ communityId: z.string() }),
       output: ResultSchema(CommunitySchema),
     },
-    {
-      id: 'updateCommunity',
+    updateCommunity: {
       version: 'v1',
       method: 'PUT',
       path: '/community/communities/:communityId',
@@ -695,24 +636,21 @@ export const routes: RouteRegistry = {
       }),
       output: ResultSchema(CommunitySchema),
     },
-    {
-      id: 'leaveCommunity',
+    leaveCommunity: {
       version: 'v1',
       method: 'POST',
       path: '/community/communities/:communityId/actions/leave',
       params: z.object({ communityId: z.string() }),
       output: ResultSchema(z.void()),
     },
-    {
-      id: 'deleteCommunity',
+    deleteCommunity: {
       version: 'v1',
       method: 'DELETE',
       path: '/community/communities/:communityId',
       params: z.object({ communityId: z.string() }),
       output: ResultSchema(z.void()),
     },
-    {
-      id: 'listMembers',
+    listMembers: {
       version: 'v1',
       method: 'GET',
       path: '/community/communities/:communityId/members',
@@ -720,24 +658,21 @@ export const routes: RouteRegistry = {
       query: ListQuerySchema,
       output: ResultSchema(z.array(CommunityMemberSchema)),
     },
-    {
-      id: 'shareDiscovery',
+    shareDiscovery: {
       version: 'v1',
       method: 'POST',
       path: '/community/communities/:communityId/discoveries/:discoveryId/share',
       params: z.object({ communityId: z.string(), discoveryId: z.string() }),
       output: ResultSchema(SharedDiscoverySchema),
     },
-    {
-      id: 'unshareDiscovery',
+    unshareDiscovery: {
       version: 'v1',
       method: 'DELETE',
       path: '/community/communities/:communityId/discoveries/:discoveryId/share',
       params: z.object({ communityId: z.string(), discoveryId: z.string() }),
       output: ResultSchema(z.void()),
     },
-    {
-      id: 'listSharedDiscoveries',
+    listSharedDiscoveries: {
       version: 'v1',
       method: 'GET',
       path: '/community/communities/:communityId/discoveries',
@@ -745,22 +680,20 @@ export const routes: RouteRegistry = {
       query: ListQuerySchema,
       output: ResultSchema(z.array(DiscoverySchema)),
     },
-  ],
+  },
 
   // ─────────────────────────────────────────────────────────────
   // Sensor Routes
   // ─────────────────────────────────────────────────────────────
-  sensor: [
-    {
-      id: 'listScans',
+  sensor: {
+    listScans: {
       version: 'v1',
       method: 'GET',
       path: '/sensor/scans',
       query: DiscoveryListQuerySchema,
       output: ResultSchema(z.array(ScanEventSchema)),
     },
-    {
-      id: 'createScan',
+    createScan: {
       version: 'v1',
       method: 'POST',
       path: '/sensor/scans',
@@ -770,14 +703,13 @@ export const routes: RouteRegistry = {
       }),
       output: ResultSchema(ScanEventSchema),
     },
-  ],
+  },
 
   // ─────────────────────────────────────────────────────────────
   // Content Routes
   // ─────────────────────────────────────────────────────────────
-  content: [
-    {
-      id: 'getPage',
+  content: {
+    getPage: {
       version: 'v1',
       method: 'GET',
       path: '/content/pages/:language/:page',
@@ -785,8 +717,7 @@ export const routes: RouteRegistry = {
       config: { isPublic: true },
       output: ResultSchema(ContentPageResponseSchema),
     },
-    {
-      id: 'listBlogPosts',
+    listBlogPosts: {
       version: 'v1',
       method: 'GET',
       path: '/content/blog/:language',
@@ -795,8 +726,7 @@ export const routes: RouteRegistry = {
       config: { isPublic: true },
       output: ResultSchema(z.array(BlogPostPreviewSchema)),
     },
-    {
-      id: 'getBlogPost',
+    getBlogPost: {
       version: 'v1',
       method: 'GET',
       path: '/content/blog/:language/:slug',
@@ -804,42 +734,38 @@ export const routes: RouteRegistry = {
       config: { isPublic: true },
       output: ResultSchema(BlogPostDetailSchema),
     },
-    {
-      id: 'submitFeedback',
+    submitFeedback: {
       version: 'v1',
       method: 'POST',
       path: '/content/feedback',
       input: FeedbackRequestSchema,
       output: ResultSchema(SuccessSchema),
     },
-  ],
+  },
 
   // ─────────────────────────────────────────────────────────────
   // Composite Routes
   // ─────────────────────────────────────────────────────────────
-  composite: [
-    {
-      id: 'listAccessibleSpots',
+  composite: {
+    listAccessibleSpots: {
       version: 'v1',
       method: 'GET',
       path: '/composite/spots/accessible',
       query: AccessibleSpotsQuerySchema,
       output: ResultSchema(z.array(SpotSchema)),
     },
-    {
-      id: 'getDiscoveryState',
+    getDiscoveryState: {
       version: 'v1',
       method: 'GET',
       path: '/composite/discovery/state',
       output: ResultSchema(DiscoveryStateSchema),
     },
-    {
-      id: 'activateTrail',
+    activateTrail: {
       version: 'v1',
       method: 'POST',
       path: '/composite/discovery/actions/activate-trail',
       input: z.object({ trailId: z.string() }),
       output: ResultSchema(ActivateTrailResultSchema),
     },
-  ],
-}
+  },
+} satisfies RouteRegistry

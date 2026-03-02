@@ -24,7 +24,7 @@ export function createTrailApplication(options: TrailApplicationOptions) {
 
   const requestTrailState = async () => {
     setStatus('loading')
-    const trails = await api.trails.list()
+    const trails = await api.trail.listTrails()
     if (!trails.success || !trails.data) {
       logger.error('Failed to fetch trails:', trails.error)
       setStatus('error')
@@ -36,7 +36,7 @@ export function createTrailApplication(options: TrailApplicationOptions) {
 
   const requestTrailSpotPreviews = async (trailId: string) => {
     setStatus('loading')
-    const trailSpotsResult = await api.trails.listSpots(trailId)
+    const trailSpotsResult = await api.trail.getTrailSpots(trailId)
     if (!trailSpotsResult.success) {
       logger.error('Failed to fetch trail spots:', trailSpotsResult.error)
       setStatus('error')
@@ -59,13 +59,13 @@ export function createTrailApplication(options: TrailApplicationOptions) {
   }
 
   const getTrailStats = async (trailId: string): Promise<Result<TrailStats>> =>
-    api.trails.getStats(trailId)
+    api.trail.getTrailStats(trailId)
 
   const rateTrail = async (trailId: string, rating: number): Promise<Result<void>> => {
     logger.log('TrailApplication: Rating trail', { trailId, rating })
-    const result = await api.trails.rate(trailId, rating)
+    const result = await api.trail.rateTrail(trailId, rating)
     if (result.success) {
-      const summaryResult = await api.trails.getRatingSummary(trailId)
+      const summaryResult = await api.trail.getTrailRatings(trailId)
       if (summaryResult.data) {
         getTrailRatingActions().setRatingSummary(trailId, summaryResult.data)
       }
@@ -76,9 +76,9 @@ export function createTrailApplication(options: TrailApplicationOptions) {
   }
 
   const removeTrailRating = async (trailId: string): Promise<Result<void>> => {
-    const result = await api.trails.removeRating(trailId)
+    const result = await api.trail.removeTrailRating(trailId)
     if (result.success) {
-      const summaryResult = await api.trails.getRatingSummary(trailId)
+      const summaryResult = await api.trail.getTrailRatings(trailId)
       if (summaryResult.data) {
         getTrailRatingActions().setRatingSummary(trailId, summaryResult.data)
       }
@@ -87,7 +87,7 @@ export function createTrailApplication(options: TrailApplicationOptions) {
   }
 
   const getTrailRatingSummary = async (trailId: string): Promise<Result<RatingSummary>> => {
-    const result = await api.trails.getRatingSummary(trailId)
+    const result = await api.trail.getTrailRatings(trailId)
     if (result.data) {
       getTrailRatingActions().setRatingSummary(trailId, result.data)
     }

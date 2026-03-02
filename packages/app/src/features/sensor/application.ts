@@ -114,7 +114,7 @@ export const createSensorApplication = (options?: SensorApplicationOptions) => {
     if (!api) throw new Error('Sensor API is not initialized')
     if (!canScan()) return
 
-    const scanEvent = await api.sensors.createScan({ userPosition: device.location, trailId })
+    const scanEvent = await api.sensor.createScan({ userPosition: device.location, trailId })
     if (!scanEvent.data) {
       logger.error('Failed to create scan event:', scanEvent.error)
       return

@@ -12,19 +12,19 @@ interface ApiListResponse<T> {
 
 /** Load all spots from the API */
 export const fetchSpots = async (): Promise<Spot[]> => {
-  const result = await api.spots.list() as ApiListResponse<Spot>;
+  const result = await api.spot.listSpots() as ApiListResponse<Spot>;
   return result?.data ?? [];
 };
 
 /** Load a single spot with full detail (including contentBlocks) */
 export const fetchSpot = async (id: string): Promise<Spot | null> => {
-  const result = await api.spots.get(id) as { data?: Spot };
+  const result = await api.spot.getSpot(id) as { data?: Spot };
   return result?.data ?? null;
 };
 
 /** Create a new spot */
 export const createSpot = async (data: SpotFormData) => {
-  await api.spots.create({
+  await api.spot.createSpot({
     content: {
       name: data.name,
       description: data.description,
@@ -42,7 +42,7 @@ export const createSpot = async (data: SpotFormData) => {
 
 /** Update an existing spot */
 export const updateSpot = async (id: string, data: SpotFormData) => {
-  await api.spots.update(id, {
+  await api.spot.updateSpot(id, {
     content: {
       name: data.name,
       description: data.description,
@@ -56,7 +56,7 @@ export const updateSpot = async (id: string, data: SpotFormData) => {
 
 /** Delete a spot */
 export const deleteSpot = async (id: string) => {
-  await api.spots.delete(id);
+  await api.spot.deleteSpot(id);
 };
 
 // --- Trail operations ---
@@ -91,13 +91,13 @@ interface TrailSpot { spotId: string; order?: number }
 
 /** Load all trails from the API, enriched with their spot IDs sorted by order */
 export const fetchTrails = async (createdBy?: string): Promise<Trail[]> => {
-  const result = await api.trails.list({ createdBy }) as ApiListResponse<Trail>;
+  const result = await api.trail.listTrails({ createdBy }) as ApiListResponse<Trail>;
   const trails = result?.data ?? [];
 
   // Fetch spot IDs for each trail in parallel
   const trailsWithSpots = await Promise.all(
     trails.map(async (trail) => {
-      const spotsResult = await api.trails.listSpots(trail.id) as { data?: TrailSpot[] };
+      const spotsResult = await api.trail.getTrailSpots(trail.id) as { data?: TrailSpot[] };
       const sorted = (spotsResult?.data ?? []).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
       return { ...trail, spotIds: sorted.map((ts) => ts.spotId) };
     }),
@@ -113,14 +113,14 @@ export const fetchTrails = async (createdBy?: string): Promise<Trail[]> => {
 export const reorderTrailSpots = async (trailId: string, orderedSpotIds: string[]) => {
   for (let i = 0; i < orderedSpotIds.length; i++) {
     const spotId = orderedSpotIds[i];
-    await api.trails.removeSpot(trailId, spotId);
-    await api.trails.addSpot(trailId, spotId, i);
+    await api.trail.removeSpotFromTrail(trailId, spotId);
+    await api.trail.addSpotToTrail(trailId, spotId, i);
   }
 };
 
 /** Create a new trail */
 export const createTrail = async (data: CreateTrailData) => {
-  await api.trails.create({
+  await api.trail.createTrail({
     name: data.name,
     description: data.description,
     boundary: data.boundary,
@@ -134,7 +134,7 @@ export const createTrail = async (data: CreateTrailData) => {
 
 /** Update an existing trail */
 export const updateTrail = async (id: string, data: UpdateTrailData) => {
-  await api.trails.update(id, {
+  await api.trail.updateTrail(id, {
     name: data.name,
     description: data.description,
     boundary: data.boundary,
@@ -147,7 +147,7 @@ export const updateTrail = async (id: string, data: UpdateTrailData) => {
 
 /** Delete a trail */
 export const deleteTrail = async (id: string) => {
-  await api.trails.delete(id);
+  await api.trail.deleteTrail(id);
 };
 
 // --- Data loading ---

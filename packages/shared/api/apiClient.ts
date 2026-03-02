@@ -17,6 +17,13 @@ import type { CreateTrailRequest, Trail, TrailRating, TrailStats, UpdateTrailReq
 import type { StoredTrailSpot, TrailSpot } from '../contracts/trailSpots.ts'
 import type { GeoLocation } from '../geo/index.ts'
 import { HttpClient, type HttpClientConfig } from './httpClient.ts'
+import { routes } from './routes.ts'
+
+/** Replaces :param segments with values from the params record */
+const buildPath = (template: string, params?: Record<string, string>): string =>
+  params
+    ? Object.entries(params).reduce((path, [k, v]) => path.replace(`:${k}`, v), template)
+    : template
 
 export interface PageMeta {
   hasMore: boolean
@@ -51,237 +58,240 @@ export function createApiClient(config: HttpClientConfig) {
 
   return {
     system: {
-      getManifest: () => call<{ name: string; version: string; description?: string }>(() => client.get('/')),
-      getStatus: () => call<{ status: string; message: string }>(() => client.get('/status')),
+      getManifest: () => call<{ name: string; version: string; description?: string }>(() => client.get(routes.system.getManifest.path)),
+      getStatus: () => call<{ status: string; message: string }>(() => client.get(routes.system.getStatus.path)),
     },
 
-    spots: {
-      list: (query?: { limit?: number; cursor?: string | null; orderBy?: string }) =>
-        callPaged<Spot>(() => client.get<Spot[]>('/spot/spots', query as any), query),
+    spot: {
+      listSpots: (query?: { limit?: number; cursor?: string | null; orderBy?: string }) =>
+        callPaged<Spot>(() => client.get<Spot[]>(routes.spot.listSpots.path, query as any), query),
 
       listPreviews: (query?: { limit?: number; cursor?: string | null; ids?: string }) =>
-        callPaged<SpotPreview>(() => client.get<SpotPreview[]>('/spot/previews', query as any), query),
+        callPaged<SpotPreview>(() => client.get<SpotPreview[]>(routes.spot.listPreviews.path, query as any), query),
 
-      get: (id: string) =>
-        call<Spot | undefined>(() => client.get(`/spot/spots/${id}`)),
+      getSpot: (id: string) =>
+        call<Spot | undefined>(() => client.get(buildPath(routes.spot.getSpot.path, { id }))),
 
-      getPreview: (id: string) =>
-        call<SpotPreview | undefined>(() => client.get(`/spot/spots/${id}/preview`)),
+      getSpotPreview: (id: string) =>
+        call<SpotPreview | undefined>(() => client.get(buildPath(routes.spot.getSpotPreview.path, { id }))),
 
-      create: (body: CreateSpotRequest) =>
-        call<Spot>(() => client.post('/spot/spots', body)),
+      getSpotsByIds: (ids: string[]) =>
+        call<Spot[]>(() => client.post<Spot[]>(routes.spot.getSpotsByIds.path, { ids })),
 
-      update: (id: string, body: UpdateSpotRequest) =>
-        call<Spot>(() => client.put(`/spot/spots/${id}`, body)),
+      createSpot: (body: CreateSpotRequest) =>
+        call<Spot>(() => client.post(routes.spot.createSpot.path, body)),
 
-      delete: (id: string) =>
-        call<void>(() => client.delete(`/spot/spots/${id}`)),
+      updateSpot: (id: string, body: UpdateSpotRequest) =>
+        call<Spot>(() => client.put(buildPath(routes.spot.updateSpot.path, { id }), body)),
 
-      rate: (id: string, rating: number) =>
-        call<SpotRating>(() => client.post(`/spot/spots/${id}/ratings`, { rating })),
+      deleteSpot: (id: string) =>
+        call<void>(() => client.delete(buildPath(routes.spot.deleteSpot.path, { id }))),
 
-      getRatingSummary: (id: string) =>
-        call<RatingSummary>(() => client.get(`/spot/spots/${id}/ratings`)),
+      getSpotRatings: (id: string) =>
+        call<RatingSummary>(() => client.get(buildPath(routes.spot.getSpotRatings.path, { spotId: id }))),
 
-      removeRating: (spotId: string) =>
-        call<void>(() => client.delete(`/spot/spots/${spotId}/ratings`)),
+      rateSpot: (id: string, rating: number) =>
+        call<SpotRating>(() => client.post(buildPath(routes.spot.rateSpot.path, { spotId: id }), { rating })),
 
-      getByIds: (ids: string[]) =>
-        call<Spot[]>(() => client.post<Spot[]>('/spot/spots/batch', { ids })),
+      removeSpotRating: (spotId: string) =>
+        call<void>(() => client.delete(buildPath(routes.spot.removeSpotRating.path, { spotId }))),
     },
 
-    trails: {
-      list: (query?: { limit?: number; cursor?: string | null; createdBy?: string }) =>
-        callPaged<Trail>(() => client.get<Trail[]>('/trail/trails', query as any), query),
+    trail: {
+      listTrails: (query?: { limit?: number; cursor?: string | null; createdBy?: string }) =>
+        callPaged<Trail>(() => client.get<Trail[]>(routes.trail.listTrails.path, query as any), query),
 
-      get: (id: string) =>
-        call<Trail | undefined>(() => client.get(`/trail/trails/${id}`)),
+      getTrail: (id: string) =>
+        call<Trail | undefined>(() => client.get(buildPath(routes.trail.getTrail.path, { id }))),
 
-      create: (body: CreateTrailRequest) =>
-        call<Trail>(() => client.post('/trail/trails', body)),
+      createTrail: (body: CreateTrailRequest) =>
+        call<Trail>(() => client.post(routes.trail.createTrail.path, body)),
 
-      update: (id: string, body: UpdateTrailRequest) =>
-        call<Trail>(() => client.put(`/trail/trails/${id}`, body)),
+      updateTrail: (id: string, body: UpdateTrailRequest) =>
+        call<Trail>(() => client.put(buildPath(routes.trail.updateTrail.path, { id }), body)),
 
-      delete: (id: string) =>
-        call<void>(() => client.delete(`/trail/trails/${id}`)),
+      deleteTrail: (id: string) =>
+        call<void>(() => client.delete(buildPath(routes.trail.deleteTrail.path, { id }))),
 
-      listSpots: (trailId: string, _query?: { limit?: number; cursor?: string | null }) =>
-        callPaged<TrailSpot>(() => client.get<TrailSpot[]>(`/trail/trails/${trailId}/spots`)),
+      getTrailSpots: (trailId: string, _query?: { limit?: number; cursor?: string | null }) =>
+        callPaged<TrailSpot>(() => client.get<TrailSpot[]>(buildPath(routes.trail.getTrailSpots.path, { trailId }))),
 
-      getStats: (trailId: string) =>
-        call<TrailStats>(() => client.get(`/trail/trails/${trailId}/stats`)),
+      getTrailStats: (trailId: string) =>
+        call<TrailStats>(() => client.get(buildPath(routes.trail.getTrailStats.path, { trailId }))),
 
-      addSpot: (trailId: string, spotId: string, order?: number) =>
-        call<StoredTrailSpot>(() => client.post(`/trail/trails/${trailId}/spots/${spotId}`, { order })),
+      addSpotToTrail: (trailId: string, spotId: string, order?: number) =>
+        call<StoredTrailSpot>(() => client.post(buildPath(routes.trail.addSpotToTrail.path, { trailId, spotId }), { order })),
 
-      removeSpot: (trailId: string, spotId: string) =>
-        call<void>(() => client.delete(`/trail/trails/${trailId}/spots/${spotId}`)),
+      removeSpotFromTrail: (trailId: string, spotId: string) =>
+        call<void>(() => client.delete(buildPath(routes.trail.removeSpotFromTrail.path, { trailId, spotId }))),
 
-      getRatingSummary: (trailId: string) =>
-        call<RatingSummary>(() => client.get(`/trail/trails/${trailId}/ratings`)),
+      getTrailRatings: (trailId: string) =>
+        call<RatingSummary>(() => client.get(buildPath(routes.trail.getTrailRatings.path, { trailId }))),
 
-      rate: (trailId: string, rating: number) =>
-        call<TrailRating>(() => client.post(`/trail/trails/${trailId}/ratings`, { rating })),
+      rateTrail: (trailId: string, rating: number) =>
+        call<TrailRating>(() => client.post(buildPath(routes.trail.rateTrail.path, { trailId }), { rating })),
 
-      removeRating: (trailId: string) =>
-        call<void>(() => client.delete(`/trail/trails/${trailId}/ratings`)),
+      removeTrailRating: (trailId: string) =>
+        call<void>(() => client.delete(buildPath(routes.trail.removeTrailRating.path, { trailId }))),
     },
 
     discovery: {
       processLocation: (trailId: string, locationWithDirection: LocationWithDirection) =>
-        call<DiscoveryLocationRecord>(() => client.post('/discovery/actions/process-location', { trailId, locationWithDirection })),
+        call<DiscoveryLocationRecord>(() => client.post(routes.discovery.processLocation.path, { trailId, locationWithDirection })),
 
-      list: (query?: { trailId?: string; limit?: number; cursor?: string | null }) =>
-        callPaged<Discovery>(() => client.get<Discovery[]>('/discovery/discoveries', query as any), query),
+      listDiscoveries: (query?: { trailId?: string; limit?: number; cursor?: string | null }) =>
+        callPaged<Discovery>(() => client.get<Discovery[]>(routes.discovery.listDiscoveries.path, query as any), query),
 
-      get: (id: string) =>
-        call<Discovery | undefined>(() => client.get(`/discovery/discoveries/${id}`)),
+      getDiscovery: (id: string) =>
+        call<Discovery | undefined>(() => client.get(buildPath(routes.discovery.getDiscovery.path, { id }))),
 
-      listSpots: (query?: { trailId?: string; limit?: number; cursor?: string | null }) =>
-        callPaged<DiscoverySpot>(() => client.get<DiscoverySpot[]>('/discovery/spots', query as any), query),
+      listDiscoveredSpots: (query?: { trailId?: string; limit?: number; cursor?: string | null }) =>
+        callPaged<DiscoverySpot>(() => client.get<DiscoverySpot[]>(routes.discovery.listDiscoveredSpots.path, query as any), query),
 
       listPreviewClues: (trailId: string, _query?: { limit?: number; cursor?: string | null }) =>
-        callPaged<Clue>(() => client.get<Clue[]>(`/discovery/trails/${trailId}/clues`)),
+        callPaged<Clue>(() => client.get<Clue[]>(buildPath(routes.discovery.listPreviewClues.path, { trailId }))),
 
-      getTrail: (trailId: string) =>
-        call<DiscoveryTrail>(() => client.get(`/discovery/trails/${trailId}`)),
+      getDiscoveryTrail: (trailId: string) =>
+        call<DiscoveryTrail>(() => client.get(buildPath(routes.discovery.getDiscoveryTrail.path, { trailId }))),
 
       getProfile: () =>
-        call<DiscoveryProfile>(() => client.get('/discovery/profile')),
+        call<DiscoveryProfile>(() => client.get(routes.discovery.getProfile.path)),
 
       updateProfile: (body: DiscoveryProfileUpdateData) =>
-        call<DiscoveryProfile>(() => client.put('/discovery/profile', body)),
+        call<DiscoveryProfile>(() => client.put(routes.discovery.updateProfile.path, body)),
 
-      getStats: (discoveryId: string) =>
-        call<DiscoveryStats>(() => client.get(`/discovery/discoveries/${discoveryId}/stats`)),
+      getDiscoveryStats: (discoveryId: string) =>
+        call<DiscoveryStats>(() => client.get(buildPath(routes.discovery.getDiscoveryStats.path, { discoveryId }))),
 
-      getContent: (discoveryId: string) =>
-        call<DiscoveryContent | undefined>(() => client.get(`/discovery/discoveries/${discoveryId}/content`)),
+      getDiscoveryContent: (discoveryId: string) =>
+        call<DiscoveryContent | undefined>(() => client.get(buildPath(routes.discovery.getDiscoveryContent.path, { discoveryId }))),
 
-      upsertContent: (discoveryId: string, body: UpsertDiscoveryContentRequest) =>
-        call<DiscoveryContent>(() => client.put(`/discovery/discoveries/${discoveryId}/content`, body)),
+      upsertDiscoveryContent: (discoveryId: string, body: UpsertDiscoveryContentRequest) =>
+        call<DiscoveryContent>(() => client.put(buildPath(routes.discovery.upsertDiscoveryContent.path, { discoveryId }), body)),
 
-      deleteContent: (discoveryId: string) =>
-        call<void>(() => client.delete(`/discovery/discoveries/${discoveryId}/content`)),
+      deleteDiscoveryContent: (discoveryId: string) =>
+        call<void>(() => client.delete(buildPath(routes.discovery.deleteDiscoveryContent.path, { discoveryId }))),
 
       createWelcome: (location: GeoLocation) =>
-        call<WelcomeDiscoveryResult>(() => client.post('/discovery/welcome', { location })),
+        call<WelcomeDiscoveryResult>(() => client.post(routes.discovery.createWelcome.path, { location })),
     },
 
     account: {
       requestSMSCode: (phoneNumber: string) =>
-        call<SMSCodeRequest>(() => client.post('/account/actions/request-sms', { phoneNumber })),
+        call<SMSCodeRequest>(() => client.post(routes.account.requestSMSCode.path, { phoneNumber })),
 
       verifySMSCode: (phoneNumber: string, code: string, clientAudience?: ClientAudience) =>
-        call<SMSVerificationResult>(() => client.post('/account/actions/verify-sms', { phoneNumber, code, client: clientAudience })),
+        call<SMSVerificationResult>(() => client.post(routes.account.verifySMSCode.path, { phoneNumber, code, client: clientAudience })),
 
       getPublicProfile: (accountId: string) =>
-        call<AccountPublicProfile>(() => client.get(`/account/public/profiles/${accountId}`)),
+        call<AccountPublicProfile>(() => client.get(buildPath(routes.account.getPublicProfile.path, { accountId }))),
 
       getPublicProfiles: (accountIds: string[]) =>
-        call<AccountPublicProfile[]>(() => client.post('/account/public/profiles', { accountIds })),
+        call<AccountPublicProfile[]>(() => client.post(routes.account.getPublicProfiles.path, { accountIds })),
 
       getProfile: () =>
-        call<Account | null>(() => client.get('/account/profile')),
+        call<Account | null>(() => client.get(routes.account.getProfile.path)),
 
       updateProfile: (body: AccountUpdateData) =>
-        call<Account>(() => client.put('/account/profile', body)),
+        call<Account>(() => client.put(routes.account.updateProfile.path, body)),
 
       uploadAvatar: (base64Data: string) =>
-        call<Account>(() => client.post('/account/profile/avatar', { base64Data })),
+        call<Account>(() => client.post(routes.account.uploadAvatar.path, { base64Data })),
 
       validateSession: (sessionToken: string) =>
-        call<SessionValidationResult>(() => client.post('/account/actions/validate-session', { sessionToken })),
+        call<SessionValidationResult>(() => client.post(routes.account.validateSession.path, { sessionToken })),
 
       revokeSession: (sessionToken: string) =>
-        call<void>(() => client.post('/account/actions/revoke-session', { sessionToken })),
+        call<void>(() => client.post(routes.account.revokeSession.path, { sessionToken })),
 
       createLocalAccount: () =>
-        call<AccountSession>(() => client.post('/account/actions/create-local')),
+        call<AccountSession>(() => client.post(routes.account.createLocalAccount.path)),
 
       upgradeToPhoneAccount: (phoneNumber: string, code: string) =>
-        call<AccountSession>(() => client.post('/account/actions/upgrade-to-phone', { phoneNumber, code })),
+        call<AccountSession>(() => client.post(routes.account.upgradeToPhoneAccount.path, { phoneNumber, code })),
 
       getFirebaseConfig: () =>
-        call<FirebaseConfig>(() => client.get('/account/config/firebase')),
+        call<FirebaseConfig>(() => client.get(routes.account.getFirebaseConfig.path)),
 
       registerDeviceToken: (token: string, platform?: 'ios' | 'android' | 'web') =>
-        call<DeviceToken>(() => client.post('/account/device-token', { token, platform })),
+        call<DeviceToken>(() => client.post(routes.account.registerDeviceToken.path, { token, platform })),
 
       removeDeviceToken: (token: string) =>
-        call<void>(() => client.delete('/account/device-token', { token })),
+        call<void>(() => client.delete(routes.account.removeDeviceToken.path, { token })),
 
       deleteAccount: () =>
-        call<void>(() => client.delete('/account/profile')),
+        call<void>(() => client.delete(routes.account.deleteAccount.path)),
+
+      createDevSession: (accountId: string) =>
+        call<AccountSession>(() => client.post(routes.account.createDevSession.path, { accountId })),
     },
 
     community: {
-      create: (name: string, trailIds?: string[]) =>
-        call<Community>(() => client.post('/community/communities', { name, trailIds })),
+      createCommunity: (name: string, trailIds?: string[]) =>
+        call<Community>(() => client.post(routes.community.createCommunity.path, { name, trailIds })),
 
-      join: (inviteCode: string) =>
-        call<Community>(() => client.post('/community/actions/join', { inviteCode })),
+      joinCommunity: (inviteCode: string) =>
+        call<Community>(() => client.post(routes.community.joinCommunity.path, { inviteCode })),
 
-      list: (_query?: { limit?: number; cursor?: string | null }) =>
-        callPaged<Community>(() => client.get<Community[]>('/community/communities')),
+      listCommunities: (_query?: { limit?: number; cursor?: string | null }) =>
+        callPaged<Community>(() => client.get<Community[]>(routes.community.listCommunities.path)),
 
-      get: (communityId: string) =>
-        call<Community | undefined>(() => client.get(`/community/communities/${communityId}`)),
+      getCommunity: (communityId: string) =>
+        call<Community | undefined>(() => client.get(buildPath(routes.community.getCommunity.path, { communityId }))),
 
-      update: (communityId: string, body: { name?: string; trailIds?: string[] }) =>
-        call<Community>(() => client.put(`/community/communities/${communityId}`, body)),
+      updateCommunity: (communityId: string, body: { name?: string; trailIds?: string[] }) =>
+        call<Community>(() => client.put(buildPath(routes.community.updateCommunity.path, { communityId }), body)),
 
-      leave: (communityId: string) =>
-        call<void>(() => client.post(`/community/communities/${communityId}/actions/leave`)),
+      leaveCommunity: (communityId: string) =>
+        call<void>(() => client.post(buildPath(routes.community.leaveCommunity.path, { communityId }))),
 
-      delete: (communityId: string) =>
-        call<void>(() => client.delete(`/community/communities/${communityId}`)),
+      deleteCommunity: (communityId: string) =>
+        call<void>(() => client.delete(buildPath(routes.community.deleteCommunity.path, { communityId }))),
 
       listMembers: (communityId: string, _query?: { limit?: number; cursor?: string | null }) =>
-        callPaged<CommunityMember>(() => client.get<CommunityMember[]>(`/community/communities/${communityId}/members`)),
+        callPaged<CommunityMember>(() => client.get<CommunityMember[]>(buildPath(routes.community.listMembers.path, { communityId }))),
 
       shareDiscovery: (communityId: string, discoveryId: string) =>
-        call<SharedDiscovery>(() => client.post(`/community/communities/${communityId}/discoveries/${discoveryId}/share`)),
+        call<SharedDiscovery>(() => client.post(buildPath(routes.community.shareDiscovery.path, { communityId, discoveryId }))),
 
       unshareDiscovery: (communityId: string, discoveryId: string) =>
-        call<void>(() => client.delete(`/community/communities/${communityId}/discoveries/${discoveryId}/share`)),
+        call<void>(() => client.delete(buildPath(routes.community.unshareDiscovery.path, { communityId, discoveryId }))),
 
       listSharedDiscoveries: (communityId: string, _query?: { limit?: number; cursor?: string | null }) =>
-        callPaged<Discovery>(() => client.get<Discovery[]>(`/community/communities/${communityId}/discoveries`)),
+        callPaged<Discovery>(() => client.get<Discovery[]>(buildPath(routes.community.listSharedDiscoveries.path, { communityId }))),
     },
 
-    sensors: {
+    sensor: {
       listScans: (query?: { trailId?: string; limit?: number; cursor?: string | null }) =>
-        callPaged<ScanEvent>(() => client.get<ScanEvent[]>('/sensor/scans', query as any), query),
+        callPaged<ScanEvent>(() => client.get<ScanEvent[]>(routes.sensor.listScans.path, query as any), query),
 
       createScan: (body?: { userPosition?: GeoLocation; trailId?: string }) =>
-        call<ScanEvent>(() => client.post('/sensor/scans', body)),
+        call<ScanEvent>(() => client.post(routes.sensor.createScan.path, body)),
     },
 
     content: {
       getPage: (language: 'en' | 'de', page: string) =>
-        call<{ content: string }>(() => client.get(`/content/pages/${language}/${page}`)),
+        call<{ content: string }>(() => client.get(buildPath(routes.content.getPage.path, { language, page }))),
 
       listBlogPosts: (language: 'en' | 'de', _query?: { limit?: number; cursor?: string | null }) =>
-        callPaged<{ slug: string; title: string; date: string; excerpt?: string }>(() => client.get<{ slug: string; title: string; date: string; excerpt?: string }[]>(`/content/blog/${language}`)),
+        callPaged<{ slug: string; title: string; date: string; excerpt?: string }>(() => client.get<{ slug: string; title: string; date: string; excerpt?: string }[]>(buildPath(routes.content.listBlogPosts.path, { language }))),
 
       getBlogPost: (language: 'en' | 'de', slug: string) =>
-        call<{ slug: string; title: string; content: string; date: string }>(() => client.get(`/content/blog/${language}/${slug}`)),
+        call<{ slug: string; title: string; content: string; date: string }>(() => client.get(buildPath(routes.content.getBlogPost.path, { language, slug }))),
 
       submitFeedback: (body: FeedbackRequest) =>
-        call<{ success: boolean }>(() => client.post('/content/feedback', body)),
+        call<{ success: boolean }>(() => client.post(routes.content.submitFeedback.path, body)),
     },
 
     composite: {
       listAccessibleSpots: (query?: { trailId?: string; limit?: number; cursor?: string | null }) =>
-        callPaged<Spot>(() => client.get<Spot[]>('/composite/spots/accessible', query as any), query),
+        callPaged<Spot>(() => client.get<Spot[]>(routes.composite.listAccessibleSpots.path, query as any), query),
 
       getDiscoveryState: () =>
-        call<DiscoveryState>(() => client.get('/composite/discovery/state')),
+        call<DiscoveryState>(() => client.get(routes.composite.getDiscoveryState.path)),
 
       activateTrail: (trailId: string) =>
-        call<ActivateTrailResult>(() => client.post('/composite/discovery/actions/activate-trail', { trailId })),
+        call<ActivateTrailResult>(() => client.post(routes.composite.activateTrail.path, { trailId })),
     },
   }
 }

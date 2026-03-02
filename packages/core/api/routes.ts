@@ -383,12 +383,12 @@ const createRoutes = (ctx: APIContract): Route[] => {
 
   // Iterate over all domains in shared routes
   for (const [domain, domainRoutes] of Object.entries(sharedRoutes)) {
-    for (const route of domainRoutes) {
-      const handler = (handlers as Record<string, Record<string, HandlerFn>>)[domain]?.[route.id]
+    for (const [routeId, route] of Object.entries(domainRoutes as Record<string, HttpRoute>)) {
+      const handler = (handlers as Record<string, Record<string, HandlerFn>>)[domain]?.[routeId]
       if (handler) {
         oakRoutes.push(toOakRoute(route, handler))
       } else {
-        console.warn(`Warning: No handler found for ${domain}.${route.id}`)
+        console.warn(`Warning: No handler found for ${domain}.${routeId}`)
       }
     }
   }

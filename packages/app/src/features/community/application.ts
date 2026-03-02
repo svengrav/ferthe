@@ -29,7 +29,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     setStatus('loading')
 
     try {
-      const result = await api.community.list()
+      const result = await api.community.listCommunities()
       if (result.success && result.data) {
         setCommunities(result.data)
         logger.log(`Communities loaded: ${result.data.length}`)
@@ -47,7 +47,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     const { addCommunity } = getCommunityActions()
 
     try {
-      const result = await api.community.create(input.name, input.trailIds)
+      const result = await api.community.createCommunity(input.name, input.trailIds)
       if (result.success && result.data) {
         addCommunity(result.data)
         logger.log(`Community created: ${result.data.name}`)
@@ -63,7 +63,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     const { replaceCommunity } = getCommunityActions()
 
     try {
-      const result = await api.community.update(communityId, input)
+      const result = await api.community.updateCommunity(communityId, input)
       if (result.success && result.data) {
         replaceCommunity(result.data)
         logger.log(`Community updated: ${result.data.name}`)
@@ -79,7 +79,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     const { addCommunity } = getCommunityActions()
 
     try {
-      const result = await api.community.join(inviteCode)
+      const result = await api.community.joinCommunity(inviteCode)
       if (result.success && result.data) {
         addCommunity(result.data)
         logger.log(`Joined community: ${result.data.name}`)
@@ -95,7 +95,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     const { removeCommunity: removeFromStore } = getCommunityActions()
 
     try {
-      const result = await api.community.leave(communityId)
+      const result = await api.community.leaveCommunity(communityId)
       if (result.success) {
         removeFromStore(communityId)
         logger.log(`Left community: ${communityId}`)
@@ -111,7 +111,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     const { removeCommunity: removeFromStore } = getCommunityActions()
 
     try {
-      const result = await api.community.delete(communityId)
+      const result = await api.community.deleteCommunity(communityId)
       if (result.success) {
         removeFromStore(communityId)
         logger.log(`Removed community: ${communityId}`)

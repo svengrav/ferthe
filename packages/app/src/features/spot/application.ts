@@ -25,7 +25,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
     setStatus('loading')
     logger.log('SpotApplication: Requesting spots by trail', trailId)
 
-    const trailSpotsResult = await api.trails.listSpots(trailId)
+    const trailSpotsResult = await api.trail.getTrailSpots(trailId)
     if (!trailSpotsResult.success || !trailSpotsResult.data) {
       logger.error('Failed to fetch trail spots:', trailSpotsResult.error)
       setStatus('error')
@@ -33,7 +33,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
     }
 
     const spotIds = trailSpotsResult.data.map(ts => ts.spotId)
-    const spots = await api.spots.getByIds(spotIds)
+    const spots = await api.spot.getSpotsByIds(spotIds)
     if (!spots.success || !spots.data) {
       logger.error('Failed to fetch spots by trail:', spots.error)
       setStatus('error')
@@ -51,7 +51,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
 
   const getSpotsByIds = async (spotIds: string[]): Promise<Result<Spot[]>> => {
     if (spotIds.length === 0) return { success: true, data: [] }
-    const result = await api.spots.getByIds(spotIds)
+    const result = await api.spot.getSpotsByIds(spotIds)
     if (result.success && result.data) {
       result.data.forEach(spot => upsertSpot(spot))
     }
@@ -60,7 +60,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
 
   const getSpot = async (spotId: string): Promise<Result<Spot | undefined>> => {
     logger.log('SpotApplication: Getting spot', spotId)
-    const result = await api.spots.get(spotId)
+    const result = await api.spot.getSpot(spotId)
     if (result.success && result.data) {
       // Only upsert if it's a full Spot, not a SpotPreview
       if ('name' in result.data) {
@@ -72,7 +72,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
 
   const createSpot = async (request: CreateSpotRequest): Promise<Result<Spot>> => {
     logger.log('SpotApplication: Creating spot', request.content.name)
-    const result = await api.spots.create(request)
+    const result = await api.spot.createSpot(request)
     if (result.success && result.data) {
       upsertSpot(result.data)
       logger.log('SpotApplication: Spot created', result.data.id)
@@ -82,7 +82,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
 
   const deleteSpot = async (spotId: string): Promise<Result<void>> => {
     logger.log('SpotApplication: Deleting spot', spotId)
-    const result = await api.spots.delete(spotId)
+    const result = await api.spot.deleteSpot(spotId)
     if (result.success) {
       removeSpot(spotId)
       logger.log('SpotApplication: Spot deleted', spotId)
@@ -92,7 +92,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
 
   const updateSpot = async (spotId: string, updates: UpdateSpotRequest): Promise<Result<Spot>> => {
     logger.log('SpotApplication: Updating spot', spotId)
-    const result = await api.spots.update(spotId, updates)
+    const result = await api.spot.updateSpot(spotId, updates)
     if (result.success && result.data) {
       upsertSpot(result.data)
       logger.log('SpotApplication: Spot updated', result.data.id)

@@ -38,7 +38,7 @@ Deno.test({
     // ── Setup ─────────────────────────────────────────────────────────────────
 
     await t.step('Setup: create spot as creator', async () => {
-      const result = await creatorClient.spots.create({
+      const result = await creatorClient.spot.createSpot({
         content: { name: 'Hidden Spot', description: 'A spot to discover' },
         location: SPOT_LOCATION,
         visibility: 'public',
@@ -51,7 +51,7 @@ Deno.test({
     })
 
     await t.step('Setup: create trail and add spot', async () => {
-      const result = await creatorClient.trails.create({
+      const result = await creatorClient.trail.createTrail({
         name: 'Test Trail',
         description: 'Trail for access control tests',
         boundary: {
@@ -69,7 +69,7 @@ Deno.test({
       assertExists(result.data?.id)
       trailId = result.data.id
 
-      await creatorClient.trails.addSpot(trailId, spotId, 0)
+      await creatorClient.trail.addSpotToTrail(trailId, spotId, 0)
 
       console.log(`   ✓ Trail created: ${trailId}, spot added`)
     })
@@ -77,7 +77,7 @@ Deno.test({
     // ── Access control: before discovery ──────────────────────────────────────
 
     await t.step('1. Regular user gets error for undiscovered spot', async () => {
-      const result = await userClient.spots.get(spotId)
+      const result = await userClient.spot.getSpot(spotId)
 
       assertEquals(result.success, false, 'Undiscovered spot must return error')
       assertEquals(result.error?.code, 'DISCOVERY_REQUIRED', 'Error code must be DISCOVERY_REQUIRED')
@@ -85,7 +85,7 @@ Deno.test({
     })
 
     await t.step('1b. Public preview endpoint always returns preview data', async () => {
-      const result = await userClient.spots.getPreview(spotId)
+      const result = await userClient.spot.getSpotPreview(spotId)
 
       assertExists(result.data?.id, 'Preview must contain id')
       assertExists(result.data?.rating, 'Preview must contain rating summary')
@@ -94,7 +94,7 @@ Deno.test({
     })
 
     await t.step('2. Admin + creator client sees full spot without any discovery', async () => {
-      const result = await adminCreatorClient.spots.get(spotId)
+      const result = await adminCreatorClient.spot.getSpot(spotId)
 
       assertEquals(result.success, true, 'Admin+creator must have access')
       assertEquals(result.data?.name, 'Hidden Spot', 'Admin+creator must see full spot name')
@@ -103,7 +103,7 @@ Deno.test({
     })
 
     await t.step('3. Admin + app client gets error (follows discovery rules)', async () => {
-      const result = await adminAppClient.spots.get(spotId)
+      const result = await adminAppClient.spot.getSpot(spotId)
 
       assertEquals(result.success, false, 'Admin+app must get error without discovery')
       assertEquals(result.error?.code, 'DISCOVERY_REQUIRED', 'Error code must be DISCOVERY_REQUIRED')
@@ -111,7 +111,7 @@ Deno.test({
     })
 
     await t.step('4. Creator of the spot always sees own spot in full', async () => {
-      const result = await creatorClient.spots.get(spotId)
+      const result = await creatorClient.spot.getSpot(spotId)
 
       assertEquals(result.success, true, 'Creator must have access to own spot')
       assertEquals(result.data?.name, 'Hidden Spot', 'Creator must always see own spot in full')
@@ -138,7 +138,7 @@ Deno.test({
     // ── Access control: after discovery ───────────────────────────────────────
 
     await t.step('7. User sees full spot after discovery', async () => {
-      const result = await userClient.spots.get(spotId)
+      const result = await userClient.spot.getSpot(spotId)
 
       assertEquals(result.success, true, 'User must have access after discovery')
       assertEquals(result.data?.name, 'Hidden Spot', 'Discovered spot must expose full name')
@@ -158,7 +158,7 @@ Deno.test({
     // ── Admin + app is still gated ────────────────────────────────────────────
 
     await t.step('9. Admin + app still gets error (has no discovery)', async () => {
-      const result = await adminAppClient.spots.get(spotId)
+      const result = await adminAppClient.spot.getSpot(spotId)
 
       assertEquals(result.success, false, 'Admin+app (no discovery) must get error')
       assertEquals(result.error?.code, 'DISCOVERY_REQUIRED', 'Error code must be DISCOVERY_REQUIRED')
