@@ -18,7 +18,14 @@ const MAP_THEME_DEFAULT = {
     markerSize: 50,
     markerBorderRadius: 25,
     circleBackground: '#4e4e4e00',
-
+    circleBorderRadius: 999,
+    shadow: {
+      color: 'black',
+      offset: { width: 0, height: 0 },
+      opacity: 0.5,
+      radius: 4,
+      elevation: 0,
+    },
   },
   spot: {
     strokeColor: 'transparent',
