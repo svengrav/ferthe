@@ -57,6 +57,11 @@ function AccountPage(props: AccountPageProps) {
     })
   }
 
+  const handleLogout = async () => {
+    await accountApplication.logout()
+    onBack?.()
+  }
+
   // Open account verification overlay
   const showAccountRegistration = () => {
     const close = setOverlay(
@@ -147,14 +152,20 @@ function AccountPage(props: AccountPageProps) {
           </View>
         )}
 
-        {/* Delete Account */}
-        <View style={styles.deleteContainer}>
+        {/* Logout */}
+        <View style={styles.actionsContainer}>
+          <Button
+            label={locales.account.logout}
+            variant="outlined"
+            onPress={handleLogout}
+          />
           <Button
             label={locales.account.deleteAccount}
             variant="outlined"
             onPress={handleDeleteAccount}
           />
         </View>
+
       </Stack>
     </Page>
   )
@@ -169,7 +180,10 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     textAlign: 'center',
     paddingTop: 8,
   },
-  deleteContainer: {
+  actionsContainer: {
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: theme.tokens.inset.md,
     marginTop: theme.tokens.spacing.xl,
     paddingHorizontal: theme.tokens.inset.md,
   },

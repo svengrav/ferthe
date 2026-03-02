@@ -26,6 +26,7 @@ export interface AccountApplication {
   createLocalAccount: () => Promise<Result<AccountSession>>
   validateSession: () => Promise<Result<SessionValidationResult>>
   revokeSession: () => Promise<Result<void>>
+  logout: () => Promise<void>
   getAccount: () => Promise<Result<Account | null>>
   updateAccount: (data: AccountUpdateData) => Promise<Result<Account>>
   upgradeToPhoneAccount: (phoneNumber: string, code: string) => Promise<Result<AccountSession>>
@@ -179,6 +180,15 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
 
     revokeSession: async () => {
       return api.account.revokeSession(getSession()?.sessionToken || '')
+    },
+
+    logout: async () => {
+      const token = getSession()?.sessionToken
+      if (token) await api.account.revokeSession(token)
+      await secureStore.delete(AUTH_SESSION_KEY)
+      storeActions.setSession(null)
+      storeActions.setAccount(null)
+      storeActions.setIsAuthenticated(false)
     },
 
     getAccount: async () => {
