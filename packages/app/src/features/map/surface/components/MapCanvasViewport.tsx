@@ -13,8 +13,9 @@ import { useViewportGestures } from '../../hooks/useViewportGestures.ts'
 import { mapUtils } from '../../services/geoToScreenTransform.ts'
 import { getMapCanvasActions, getMapState, useMapCanvas, useMapSurfaceBoundary } from '../../stores/mapStore.ts'
 import { MapCanvasDebug } from './MapCanvasDebug.tsx'
-import { MapCompensatedScaleContext, MapScaleProvider } from './MapCompensatedScale.tsx'
+import { MapCompensatedScaleContext, MapScaleProvider, useMapScale } from './MapCompensatedScale.tsx'
 import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
+import MapScaleBar from './MapScaleBar.tsx'
 
 interface MapCanvasViewportProps {
   children: ReactNode
@@ -95,11 +96,21 @@ function MapCanvasViewport(props: MapCanvasViewportProps) {
             </GestureDetector>
           </GestureHandlerRootView>
 
+          <MapCanvasScaleBar />
           {config.debug.enableMapDebug && <MapCanvasDebug animatedStyles={animatedStyles} />}
         </View>
       </MapScaleProvider>
     </MapCompensatedScaleContext.Provider>
   )
+}
+
+/** Scale bar for canvas mode — reads scale + radius from context/store */
+function MapCanvasScaleBar() {
+  const scale = useMapScale()
+  const { radius, size } = useMapCanvas()
+  if (!scale) return null
+  const metersPerPixelAtScale1 = (2 * radius) / size.width
+  return <MapScaleBar scale={scale} metersPerPixelAtScale1={metersPerPixelAtScale1} />
 }
 
 const { canvas } = getMapThemeDefaults()

@@ -14,7 +14,6 @@ import MapSpots from '../surface/components/MapSpots.tsx'
 import MapSurface from '../surface/components/MapSurface.tsx'
 import MapTrailBorderIndicator from '../surface/components/MapTrailBorderIndicator.tsx'
 import MapTrailPath from '../surface/components/MapTrailPath.tsx'
-import MapDeviceCords from './MapDeviceCords.tsx'
 import { MapScanner, MapScannerControl } from './MapScanner.tsx'
 
 
@@ -29,7 +28,6 @@ export function MapCanvas() {
   return (
     <>
       <View style={[styles.contentContainer]} id='map-content' >
-        <MapDeviceCords />
         <MapCanvasViewport>
           <MapSurface />
           <MapTrailPath boundary={boundary} size={size} />

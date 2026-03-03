@@ -1,6 +1,6 @@
 import { Image } from "@app/shared/components"
 import { createThemedStyles, useTheme } from "@app/shared/theme"
-import { View } from "react-native"
+import { Platform, View } from "react-native"
 import { getMapThemeDefaults } from "../../config/mapThemeDefaults"
 import { useMapCanvasDimensions, useMapSurface } from "../../stores/mapStore"
 import MapSurfaceNoiseOverlay from "./MapSurfaceNoiseOverlay"
@@ -34,13 +34,15 @@ function MapSurface() {
           }]}
         />
       )}
-      <MapSurfaceNoiseOverlay
-        width={imageLayout.width}
-        height={imageLayout.height}
-        left={imageLayout.left}
-        top={imageLayout.top}
-        imageUrl={image}
-      />
+      {Platform.OS !== 'web' && (
+        <MapSurfaceNoiseOverlay
+          width={imageLayout.width}
+          height={imageLayout.height}
+          left={imageLayout.left}
+          top={imageLayout.top}
+          imageUrl={image}
+        />
+      )}
     </View>
   )
 }

@@ -1,23 +1,35 @@
-import { getMapThemeDefaults } from '@app/features/map/config/mapThemeDefaults'
+import {
+  Canvas,
+  ColorMatrix,
+  DisplacementMap,
+  FractalNoise,
+  Group,
+  Image as SkiaImage,
+  useImage,
+} from '@shopify/react-native-skia'
 import Animated, { useAnimatedStyle, useDerivedValue } from 'react-native-reanimated'
-import { Defs, FeColorMatrix, FeComposite, FeDisplacementMap, FeGaussianBlur, FeImage, FeTurbulence, Filter, Rect, Svg } from 'react-native-svg'
+import { getMapThemeDefaults } from '@app/features/map/config/mapThemeDefaults'
 import { useMapScale } from './MapCompensatedScale'
 
 const { surface } = getMapThemeDefaults()
 const { scaleThreshold, scaleRange, maxOpacity, baseFrequency, displacementScale } = surface.noise
 
-/**
- * MapSurfaceNoiseOverlay
- *
- * Renders a GPU-rasterized color-aware noise texture over the trail surface image.
- * Uses feImage + feDisplacementMap to warp the image's own colors into organic grain.
- * The SVG is static and rasterized once — opacity animation runs on the UI thread.
- *
- * Performance:
- * - shouldRasterizeIOS / renderToHardwareTextureAndroid → rasterized once to GPU texture
- * - Image URL is static (same as trail image) — no movement, no invalidation
- * - Opacity driven by Reanimated SharedValue → 0 JS re-renders
- */
+// SVG FeColorMatrix type="saturate" values="0.5" equivalent
+const SATURATE_MATRIX = [
+  0.6063, 0.3576, 0.0361, 0, 0,
+  0.1063, 0.8576, 0.0361, 0, 0,
+  0.1063, 0.3576, 0.5361, 0, 0,
+  0, 0, 0, 1, 0,
+]
+
+// Contrast boost — mirrors the final FeColorMatrix from the SVG pipeline
+const CONTRAST_MATRIX = [
+  1.6, 0, 0, 0, -0.3,
+  0, 1.6, 0, 0, -0.3,
+  0, 0, 1.6, 0, -0.3,
+  0, 0, 0, 1, 0,
+]
+
 interface MapSurfaceNoiseOverlayProps {
   width: number
   height: number
@@ -26,68 +38,56 @@ interface MapSurfaceNoiseOverlayProps {
   imageUrl?: string
 }
 
+/**
+ * MapSurfaceNoiseOverlay — Skia GPU noise overlay
+ *
+ * Replaces react-native-svg filter pipeline with Skia GPU shaders:
+ * FractalNoise → DisplacementMap → ColorMatrix (saturate + contrast)
+ *
+ * Performance:
+ * - All rendering on GPU (Metal/Vulkan) via Skia render thread
+ * - Opacity via Reanimated SharedValue directly on <Group> — 0 JS re-renders
+ * - blendMode="overlay" applied at GPU level
+ */
 function MapSurfaceNoiseOverlay({ width, height, left, top, imageUrl }: MapSurfaceNoiseOverlayProps) {
   const scale = useMapScale()
+  const image = useImage(imageUrl ?? null)
 
-  const noiseOpacity = useDerivedValue(() => {
+  const opacity = useDerivedValue(() => {
     if (!scale) return 0
     const t = (scale.value - scaleThreshold) / scaleRange
     return Math.min(Math.max(t, 0), 1) * maxOpacity
   })
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: noiseOpacity.value,
-  }))
+  const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }))
 
   if (!scale) return null
 
   return (
     <Animated.View
-      style={[{ position: 'absolute', left, top, width, height, experimental_blendMode: 'overlay' } as any, animatedStyle]}
+      style={[{ position: 'absolute', left, top, width, height }, animatedStyle]}
       pointerEvents="none"
-      shouldRasterizeIOS
-      renderToHardwareTextureAndroid
     >
-      <Svg width={width} height={height}>
-        <Defs>
-
-          <Filter id="colorNoise" x="0%" y="0%" width="100%" height="100%">
-            {/* Warp image pixels with turbulence — high displacement = abstract color smear */}
-            <FeTurbulence
-              type="fractalNoise"
-              baseFrequency={baseFrequency}
-              numOctaves={4}
-              stitchTiles="stitch"
-              result="noise"
-            />
-
-            <FeTurbulence type="fractalNoise" baseFrequency={0.50} numOctaves={1} result="noise2" />
-            <FeComposite in="noise" in2="noise2" operator="arithmetic" k1="0" k2="1" k3="0.6" k4="0" result="noiseMix" />
-            {imageUrl ? (
-              <>
-                <FeImage href={imageUrl} width={width} height={height} result="src" preserveAspectRatio="xMidYMid slice" />
-                <FeDisplacementMap in="src" in2="noiseMix" scale={displacementScale} xChannelSelector="R" yChannelSelector="G" result="displaced" />
-                {/* Reduce saturation to blend naturally */}
-                <FeColorMatrix type="saturate" values="0.5" in="displaced" />
-              </>
-            ) : (
-              // Fallback: plain grayscale noise if no image
-              <FeColorMatrix type="saturate" values="0" in="noise" />
-            )}
-            <FeColorMatrix
-              in="hue"
-              type="matrix"
-              values="
-              1.6 0 0 0 -0.3
-              0 1.6 0 0 -0.3
-              0 0 1.6 0 -0.3
-              0 0 0 1 0"
-              result="final"
-            />
-          </Filter>
-        </Defs>
-        <Rect width={width} height={height} filter="url(#colorNoise)" />
-      </Svg>
+      <Canvas style={{ width, height }}>
+        <Group blendMode="overlay">
+          {image && (
+            <SkiaImage image={image} x={0} y={0} width={width} height={height} fit="cover">
+              <ColorMatrix matrix={CONTRAST_MATRIX} />
+              <ColorMatrix matrix={SATURATE_MATRIX} />
+              <DisplacementMap channelX="r" channelY="g" scale={displacementScale}>
+                <FractalNoise
+                  freqX={baseFrequency}
+                  freqY={baseFrequency}
+                  octaves={4}
+                  seed={0}
+                  tileWidth={width}
+                  tileHeight={height}
+                />
+              </DisplacementMap>
+            </SkiaImage>
+          )}
+        </Group>
+      </Canvas>
     </Animated.View>
   )
 }

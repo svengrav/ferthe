@@ -12,6 +12,7 @@ import { getMapStoreActions, useMapContainerSize, useMapOverview, useMapSurfaceB
 import MapClues from '../surface/components/MapClues'
 import { MapCompensatedScaleProvider } from '../surface/components/MapCompensatedScale'
 import MapDeviceMarker from '../surface/components/MapDeviceMarker'
+import MapScaleBar from '../surface/components/MapScaleBar'
 import MapSpots from '../surface/components/MapSpots'
 import MapTrailPath from '../surface/components/MapTrailPath'
 
@@ -55,7 +56,7 @@ function MapOverview() {
   }
 
   // Setup gestures with calculated zoom limits and compensated scale
-  const { gesture, animatedStyle, containerRef, compensatedScale } = useOverlayGestures({
+  const { gesture, animatedStyle, containerRef, compensatedScale, scale } = useOverlayGestures({
     canvasSize,
     screenSize,
     zoomLimits,
@@ -96,6 +97,7 @@ function MapOverview() {
           </Animated.View>
         </GestureDetector>
       </GestureHandlerRootView>
+      <MapScaleBar scale={scale} metersPerPixelAtScale1={mapUtils.calculateMetersPerPixel(trailBoundary, canvasSize)} />
     </View>
   )
 }
