@@ -445,7 +445,9 @@ const createDiscoveryTrail = (accountId: string, trail: Trail, discoveries: Disc
   let filteredClues = allClues
   if (userLocation) {
     const mapBoundary = trail.boundary
-    filteredClues = allClues.filter(clue => geoUtils.isCoordinateInBounds(clue.location, mapBoundary))
+    if (mapBoundary) {
+      filteredClues = allClues.filter(clue => geoUtils.isCoordinateInBounds(clue.location, mapBoundary))
+    }
   }
 
   return {

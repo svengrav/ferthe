@@ -39,6 +39,19 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
     const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
 
+    // Stumble trails have no fixed boundary — keep canvas centered on device
+    if (!trail.boundary) {
+      const canvasBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, currentState.canvas.radius)
+      setSurface({ boundary: canvasBoundary })
+      setCanvas({ boundary: canvasBoundary })
+      setDevice({
+        location: device.location,
+        heading: device.heading,
+        direction: getCompass(device.heading).direction,
+      })
+      return
+    }
+
     // Update canvas boundary based on device location with current adaptive radius
     const newCanvasBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, currentState.canvas.radius)
     const imageLayout = mapUtils.calculateSurfaceImageLayout(
@@ -86,6 +99,47 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     if (!device?.location || (device.location.lat === 0 && device.location.lon === 0)) {
       logger.log('Device location not available yet, cannot update map state')
       requestDeviceState()
+      return
+    }
+
+    // Stumble trails have no fixed boundary — initialize a device-centered viewport
+    if (!trail.boundary) {
+      const stumbleRadius = trail.options?.scannerRadius || defaults.initialViewRadius
+      const canvasBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, stumbleRadius)
+      const imageLayout = mapUtils.calculateSurfaceImageLayout(canvasBoundary, canvasBoundary, currentCanvas.size)
+      const canvasZoomLimits = mapUtils.calculateZoomLimits(
+        canvasBoundary,
+        { width: defaults.canvas.width, height: defaults.canvas.height },
+        currentCanvas.size,
+        defaults.zoom.maxMeters
+      )
+      setState({
+        status: 'ready',
+        snap: { startPoint: device.location, endPoint: device.location, intensity: 0 },
+        surface: { boundary: canvasBoundary, image: undefined, imageLayout },
+        canvas: {
+          ...currentCanvas,
+          radius: stumbleRadius,
+          boundary: canvasBoundary,
+          image: trail?.viewport?.image?.url,
+          scale: {
+            init: calculateScaleForRadius(stumbleRadius, defaults.initialViewRadius),
+            min: canvasZoomLimits.min,
+            max: canvasZoomLimits.max,
+          },
+        },
+        overview: {
+          scale: { init: 1, min: defaults.overview.scale.min, max: defaults.overview.scale.max },
+          offset: { x: 0, y: 0 },
+          image: trail?.overview?.image?.url,
+        },
+        device: {
+          location: device.location,
+          heading: device.heading ?? 0,
+          direction: getCompass(device.heading ?? 0).direction,
+        },
+        scanner: { radius: stumbleRadius },
+      })
       return
     }
 

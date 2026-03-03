@@ -141,15 +141,3 @@ export const ERROR_CODES = {
 } as const
 
 export type ApiErrorCode = keyof typeof ERROR_CODES
-
-/**
- * Create a standardized API error
- */
-export function createApiError(code: ApiErrorCode, details?: any): ApiError {
-  const errorDef = ERROR_CODES[code]
-  return {
-    ...errorDef,
-    details,
-  }
-}
-

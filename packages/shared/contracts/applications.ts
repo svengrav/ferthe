@@ -5,6 +5,7 @@ import { ContentApplicationContract } from "./content.ts"
 import { DiscoveryApplicationContract } from "./discoveries.ts"
 import { SensorApplicationContract } from "./sensors.ts"
 import { SpotApplicationContract } from "./spots.ts"
+import { StumbleApplicationContract } from "./stumble.ts"
 import { TrailApplicationContract } from "./trails.ts"
 
 export interface ApplicationContract {
@@ -15,6 +16,7 @@ export interface ApplicationContract {
   accountApplication: AccountApplicationContract
   communityApplication: CommunityApplicationContract
   contentApplication: ContentApplicationContract
+  stumbleApplication: StumbleApplicationContract
 }
 
 /**

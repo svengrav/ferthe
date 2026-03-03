@@ -2,6 +2,8 @@
  * This file maps shared API contracts to Oak route handlers.
  * The route definitions (method, path, version, config) come from @shared/api/routes
  * This file only adds the handler implementation.
+ * 
+ * - DO NOT ADD ANY BUSINESS LOGIC HERE!
  */
 
 import { parseQueryOptions } from '@core/api/oak/queryOptions.ts'
@@ -38,6 +40,8 @@ import {
   SpotPreview,
   SpotRating,
   StoredTrailSpot,
+  StumblePreference,
+  StumbleSuggestion,
   Trail,
   TrailRating,
   TrailSpot,
@@ -66,7 +70,7 @@ const toOakRoute = (httpRoute: HttpRoute, handler: HandlerFn): Route => ({
  * Create handler registry: domain → routeId → handler function
  */
 const createHandlers = (ctx: APIContract): Record<string, Record<string, HandlerFn>> => {
-  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication, contentApplication, spotAccessComposite, discoveryStateComposite, accountProfileComposite } = ctx
+  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication, contentApplication, spotAccessComposite, discoveryStateComposite, accountProfileComposite, stumbleApplication } = ctx
 
   // Create the request handler with account application access
   const asyncRequestHandler = createAsyncRequestHandler(accountApplication)
@@ -369,6 +373,19 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       activateTrail: asyncRequestHandler<ActivateTrailResult>(async ({ context, body }) => {
         const { trailId } = body as { trailId: string }
         return await discoveryStateComposite.activateTrail(context, trailId)
+      }),
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // Stumble Handlers
+    // ─────────────────────────────────────────────────────────────
+    stumble: {
+      getSuggestions: asyncRequestHandler<StumbleSuggestion[]>(async ({ query }) => {
+        const lat = Number(query?.lat)
+        const lon = Number(query?.lon)
+        const radius = Number(query?.radius) || 800
+        const preferences = (query?.preferences as string ?? '').split(',').filter(Boolean) as StumblePreference[]
+        return await stumbleApplication.getSuggestions(lat, lon, radius, preferences)
       }),
     },
   }

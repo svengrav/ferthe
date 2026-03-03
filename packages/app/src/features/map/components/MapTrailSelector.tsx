@@ -12,6 +12,8 @@ import { Theme, useTheme } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
 
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
+import { isStumbleTrail, StumblePreferencePicker } from '@app/features/stumble'
+import { sensorStore } from '@app/features/sensor/stores/sensorStore'
 import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
 
 /**
@@ -19,7 +21,7 @@ import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
  */
 export const useMapTrailListCard = () => {
   const trails = useTrails()
-  const { discoveryApplication } = getAppContextStore()
+  const { discoveryApplication, stumbleApplication } = getAppContextStore()
 
   return {
     showTrailListCard: () => {
@@ -27,16 +29,34 @@ export const useMapTrailListCard = () => {
       return setOverlay(
         cardId,
         <MapTrailListCard
-          onClose={() => closeOverlay('map-trail-list-card')}
+          onClose={() => closeOverlay(cardId)}
           trails={trails}
           onSelectTrail={(trail) => {
-            discoveryApplication.setActiveTrail(trail.id)
             closeOverlay(cardId)
+
+            if (isStumbleTrail(trail)) {
+              const pickerId = 'stumble-preferences'
+              setOverlay(
+                pickerId,
+                <StumblePreferencePicker
+                  onStart={() => {
+                    // Read location at call time to avoid stale closure
+                    const { location } = sensorStore.getState().device
+                    closeOverlay(pickerId)
+                    discoveryApplication.setActiveTrail(trail.id)
+                    stumbleApplication.toggleMode(location.lat, location.lon)
+                  }}
+                  onClose={() => closeOverlay(pickerId)}
+                />
+              )
+            } else {
+              stumbleApplication.deactivate()
+              discoveryApplication.setActiveTrail(trail.id)
+            }
           }}
         />,
       )
     },
-    closeTrailListCard: () => closeOverlay('map-trail-list-card'),
   }
 }
 
@@ -47,25 +67,19 @@ interface MapTrailListCardProps {
 }
 
 /**
- * Overlay card displaying a list of available trails for selection.
+ * Overlay card displaying all available trails for selection.
+ * Stumble trails (kind='stumble') are managed in the backend like any other trail.
  */
-function MapTrailListCard(props: MapTrailListCardProps) {
-  const { trails, onSelectTrail, onClose } = props
-  const { styles } = useTheme(createStyles)
+function MapTrailListCard({ trails, onSelectTrail, onClose }: MapTrailListCardProps) {
   const { locales } = useLocalization()
-
-  const renderTrailItem = ({ item }: { item: Trail }) => (
-    <TrailItem
-      trail={item}
-      onPress={() => onSelectTrail(item)}
-    />
-  )
 
   return (
     <OverlayCard title={locales.map.selectTrail} onClose={onClose} inset='none'>
       <FlatList
         data={trails}
-        renderItem={renderTrailItem}
+        renderItem={({ item }) => (
+          <TrailItem trail={item} onPress={() => onSelectTrail(item)} />
+        )}
         keyExtractor={item => item.id}
       />
     </OverlayCard>
@@ -88,7 +102,7 @@ const useMapTrailSelector = () => {
 
 /**
  * Bottom sheet selector for switching between trails on the map.
- * Displays the currently active trail and allows swipe-up gesture to open trail list.
+ * Supports swipe-up gesture to open the trail list.
  */
 export const MapTrailSelector = () => {
   const { styles } = useTheme(createStyles)
@@ -96,7 +110,7 @@ export const MapTrailSelector = () => {
   const swipeGesture = useSwipeUpGesture(openTrailSelector)
 
   return (
-    <GestureDetector gesture={swipeGesture} >
+    <GestureDetector gesture={swipeGesture}>
       <View style={styles.selector} id="map">
         {selectedTrail && (
           <TrailItem
@@ -123,6 +137,5 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     borderTopColor: theme.colors.divider,
     backgroundColor: theme.colors.surface,
     borderTopWidth: 1,
-
   },
 })

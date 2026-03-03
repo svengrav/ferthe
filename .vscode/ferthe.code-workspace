@@ -34,6 +34,7 @@
     }
   ],
   "settings": {
+    "typescript.referencesCodeLens.enabled": true,
     "deno.codeLens.references": true,
     "deno.enable": true,
     "deno.lint": true,

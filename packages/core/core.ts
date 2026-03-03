@@ -19,6 +19,7 @@ import { createNotificationService, NotificationService } from './features/notif
 import { createSensorApplication, SensorApplicationActions } from './features/sensor/sensorApplication.ts'
 import { createSensorService } from './features/sensor/sensorService.ts'
 import { createSpotApplication, SpotApplicationActions } from './features/spot/spotApplication.ts'
+import { createStumbleApplication, StumbleApplicationActions } from './features/stumble/stumbleApplication.ts'
 import { createTrailApplication } from './features/trail/trailApplication.ts'
 import { createImageApplication } from "./shared/images/imageApplication.ts"
 import { createStore } from './store/storeFactory.ts'
@@ -46,6 +47,7 @@ export interface CoreContext extends APIContract {
   imageApplication?: ImageApplicationContract
   notificationService: NotificationService
   contentApplication: ContentApplicationActions
+  stumbleApplication: StumbleApplicationActions
 }
 
 export function createCoreContext(config: Config, connectors: CoreConnectors): CoreContext {
@@ -168,5 +170,6 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     discoveryStateComposite,
     accountProfileComposite,
     contentApplication: createContentApplication(config.constants.content.dir),
+    stumbleApplication: createStumbleApplication(),
   }
 }

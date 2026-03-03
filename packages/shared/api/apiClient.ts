@@ -13,6 +13,7 @@ import type { DiscoveryProfile, DiscoveryProfileUpdateData } from '../contracts/
 import type { Result } from '../contracts/results.ts'
 import type { ScanEvent } from '../contracts/sensors.ts'
 import type { CreateSpotRequest, RatingSummary, Spot, SpotPreview, SpotRating, UpdateSpotRequest } from '../contracts/spots.ts'
+import type { StumblePreference, StumbleSuggestion } from '../contracts/stumble.ts'
 import type { CreateTrailRequest, Trail, TrailRating, TrailStats, UpdateTrailRequest } from '../contracts/trails.ts'
 import type { StoredTrailSpot, TrailSpot } from '../contracts/trailSpots.ts'
 import type { GeoLocation } from '../geo/index.ts'
@@ -292,6 +293,18 @@ export function createApiClient(config: HttpClientConfig) {
 
       activateTrail: (trailId: string) =>
         call<ActivateTrailResult>(() => client.post(routes.composite.activateTrail.path, { trailId })),
+    },
+
+    stumble: {
+      getSuggestions: (lat: number, lon: number, radiusMeters: number, preferences: StumblePreference[]) =>
+        call<StumbleSuggestion[]>(() =>
+          client.get(routes.stumble.getSuggestions.path, {
+            lat,
+            lon,
+            radius: radiusMeters,
+            preferences: preferences.join(','),
+          } as any)
+        ),
     },
   }
 }

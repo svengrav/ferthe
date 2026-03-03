@@ -9,6 +9,7 @@ import { createMapApplication, MapApplication } from './features/map/application
 import { createSensorApplication, SensorApplication } from './features/sensor/application'
 import { DeviceConnector } from './features/sensor/device/types'
 import { createSpotApplication, SpotApplication } from './features/spot/application'
+import { createStumbleApplication, StumbleApplication } from './features/stumble/stumbleApplication'
 import { createTrailApplication, TrailApplication } from './features/trail/application'
 import { SecureStoreConnector } from './shared/device/secureStoreConnector'
 import { logger } from './shared/utils/logger'
@@ -27,6 +28,7 @@ export interface AppContext {
   mapApplication: MapApplication
   accountApplication: AccountApplication
   communityApplication: CommunityApplication
+  stumbleApplication: StumbleApplication
 }
 
 interface AppConfiguration {
@@ -90,6 +92,7 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
     mapApplication,
     accountApplication,
     communityApplication,
+    stumbleApplication: createStumbleApplication({ api }),
   }
 }
 

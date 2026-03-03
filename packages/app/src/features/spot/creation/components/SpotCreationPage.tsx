@@ -11,6 +11,7 @@ import { Theme, useTheme } from '@app/shared/theme'
 
 import { useLocalization } from '@app/shared/localization'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
+import { GeoLocation } from '@shared/geo'
 import { Spot } from '@shared/contracts'
 import { SpotContentFormValues, SpotOptionsFormValues } from '../services/spotFormSchema'
 import { buildCreateRequest, buildUpdateRequest, getSpotTrailIds } from '../services/spotFormService'
@@ -26,8 +27,8 @@ const EDIT_STEPS: SpotFormStep[] = ['content', 'options']
 const CREATE_OVERLAY_KEY = 'spot-creation'
 
 export const useCreateSpotPage = () => ({
-  showCreateSpotPage: () =>
-    setOverlay(CREATE_OVERLAY_KEY, <SpotFormPage onClose={() => closeOverlay(CREATE_OVERLAY_KEY)} />),
+  showCreateSpotPage: (initialLocation?: GeoLocation) =>
+    setOverlay(CREATE_OVERLAY_KEY, <SpotFormPage initialLocation={initialLocation} onClose={() => closeOverlay(CREATE_OVERLAY_KEY)} />),
   closeCreateSpotPage: () => closeOverlay(CREATE_OVERLAY_KEY),
 })
 
@@ -45,6 +46,8 @@ export const useEditSpotPage = () => ({
 interface SpotFormPageProps {
   /** Pass a spot to enter edit mode. Omit for create mode. */
   spot?: Spot
+  /** Pre-fill location (e.g. from Stumble Mode). Skips GPS check when provided. */
+  initialLocation?: GeoLocation
   onClose: () => void
 }
 
@@ -57,7 +60,7 @@ interface SpotFormPageProps {
  * Navigation/submit logic lives here; field logic is in step components.
  */
 function SpotFormPage(props: SpotFormPageProps) {
-  const { spot, onClose } = props
+  const { spot, initialLocation, onClose } = props
   const isEditMode = !!spot
   const context = getAppContextStore()
 
@@ -144,7 +147,9 @@ function SpotFormPage(props: SpotFormPageProps) {
 
     try {
       const device = getDeviceLocation()
-      if (!device.location || (device.location.lat === 0 && device.location.lon === 0)) {
+      const location = initialLocation ?? device.location
+
+      if (!location || (location.lat === 0 && location.lon === 0)) {
         setError(locales.spotCreation.locationRequired)
         setIsSubmitting(false)
         return
@@ -166,7 +171,7 @@ function SpotFormPage(props: SpotFormPageProps) {
         })
       )
 
-      const request = buildCreateRequest({ ...content, contentBlocks: processedBlocks }, options, device.location, imageBase64)
+      const request = buildCreateRequest({ ...content, contentBlocks: processedBlocks }, options, location, imageBase64)
       const result = await context.spotApplication.createSpot(request)
 
       if (result.success) {

@@ -43,6 +43,13 @@ export const TrailOverviewSchema = z.object({
 })
 
 /**
+ * Trail kind — controls which interaction flow the app uses.
+ * 'stumble' trails trigger the POI-suggestion flow instead of the normal scanner.
+ */
+export const TrailKindSchema = z.enum(['discovery', 'stumble'])
+export type TrailKind = z.infer<typeof TrailKindSchema>
+
+/**
  * Trail options schema
  */
 export const TrailOptionsSchema = z.object({
@@ -58,13 +65,14 @@ export const TrailOptionsSchema = z.object({
 export const TrailSchema = z.object({
   id: guard.idString,
   slug: guard.slug,
+  kind: TrailKindSchema.optional().default('discovery'),
   name: guard.shortText,
   description: guard.mediumText,
   map: TrailMapSchema,
   viewport: TrailViewportSchema.optional(),
   overview: TrailOverviewSchema.optional(),
   image: ImageReferenceSchema.optional(),
-  boundary: GeoBoundarySchema, // GeoBoundary - complex type from geo package
+  boundary: GeoBoundarySchema.optional(), // absent for stumble trails (boundary = user location)
   options: TrailOptionsSchema,
   createdBy: guard.idString.optional(),
   createdAt: z.date(),

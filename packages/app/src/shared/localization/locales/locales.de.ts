@@ -340,6 +340,24 @@ const de: LocalizationSet = {
     successMessage: 'Danke für dein Feedback!',
     errorMessage: 'Feedback konnte nicht gesendet werden',
   },
+  stumble: {
+    title: 'Stumble-Modus',
+    subtitle: 'Finde interessante Orte in deiner Nähe zum Dokumentieren',
+    activating: 'Suche interessante Orte...',
+    noSuggestions: 'Keine Vorschläge in der Nähe. Versuche andere Präferenzen.',
+    preferencesTitle: 'Was interessiert dich?',
+    start: 'Stumble starten',
+    stop: 'Stumble beenden',
+    createSpot: 'Spot hier erstellen',
+    categories: {
+      historical: 'Historisch',
+      cafe: 'Café',
+      art: 'Kunst',
+      architecture: 'Architektur',
+      nature: 'Natur',
+      street_art: 'Street Art',
+    },
+  },
 }
 
 export default de

@@ -15,12 +15,15 @@ import MapSurface from '../surface/components/MapSurface.tsx'
 import MapTrailBorderIndicator from '../surface/components/MapTrailBorderIndicator.tsx'
 import MapTrailPath from '../surface/components/MapTrailPath.tsx'
 import { MapScanner, MapScannerControl } from './MapScanner.tsx'
+import { MapStumbleOverlay } from '../surface/components/MapStumbleOverlay'
+import { useStumbleActive } from '@app/features/stumble'
 
 
 export function MapCanvas() {
   const { sensorApplication } = getAppContextStore()
   const { size, boundary } = useMapCanvas()
   const trailId = useDiscoveryTrailId()
+  const isStumbleActive = useStumbleActive()
   const mapTheme = useMapTheme()
   const theme = useThemeStore()
   const styles = createStyles(theme, mapTheme)
@@ -35,12 +38,13 @@ export function MapCanvas() {
           <MapSnap boundary={boundary} size={size} />
           <MapCenterMarker />
           <MapSpots boundary={boundary} size={size} />
-          <MapScanner />
+          {!isStumbleActive && <MapScanner />}
+          <MapStumbleOverlay />
           <MapDeviceMarker mode="canvas" canvasSize={size} />
         </MapCanvasViewport>
         <MapTrailBorderIndicator />
         <MapDiscoveryBorderIndicators />
-        <MapScannerControl startScan={() => trailId && sensorApplication.startScan(trailId)} />
+        {!isStumbleActive && <MapScannerControl startScan={() => trailId && sensorApplication.startScan(trailId)} />}
       </View>
     </>
   )

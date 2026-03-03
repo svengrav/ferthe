@@ -46,6 +46,7 @@ Deno.test({
 
     await t.step('Setup: create trail and add spot', async () => {
       const result = await creatorClient.trail.createTrail({
+        kind: 'discovery',
         name: 'Sensor Trail',
         description: 'Trail for sensor tests',
         boundary: {

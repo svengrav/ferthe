@@ -26,6 +26,8 @@ function MapTrailBorderIndicator() {
   if (!trail) return null
 
   const trailCenter = getTrailCenter(trail)
+  if (!trailCenter) return null  // stumble trails have no fixed boundary
+
   const bearing = geoUtils.calculateBearing(device.location, trailCenter)
   const pos = mapUtils.projectBearingToBorder(bearing, containerSize)
 

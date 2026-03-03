@@ -37,6 +37,7 @@ export const makeDiscovery = (overrides: Partial<Discovery> = {}): Discovery => 
 export const makeTrail = (overrides: Partial<Trail> = {}): Trail => ({
   id: 'trail-1',
   slug: 'trail-1',
+  kind: 'discovery',
   name: 'Test Trail',
   description: 'A test trail',
   map: {},
