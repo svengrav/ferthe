@@ -14,6 +14,7 @@ import { getTrailCenter } from '../services/trailService'
 import TrailMetaCard from './TrailMetaCard'
 import TrailSpots from './TrailSpots'
 import TrailStats from './TrailStats'
+import { TrailAvatar } from './TrailAvatar'
 
 export const useTrailPage = () => ({
   showTrailPage: (trail: Trail) => {
@@ -64,14 +65,7 @@ function TrailPage(props: TrailPageProps) {
       <PageTabs variant="chips" defaultTab="overview">
         <PageTab id="overview" label={locales.trails.overview}>
           <Stack spacing='md'>
-            <Image
-              style={styles.image}
-              source={trail.image}
-              height={imageSize}
-              width={imageSize}
-              resizeMode="cover"
-              placeholder={<Text style={{ color: theme.colors.onPrimary }}>Trail Image</Text>}
-            />
+            <TrailAvatar trail={trail} />
             <TrailMetaCard trailId={trail.id} createdAt={trail.createdAt} createdBy={trail.createdBy} />
             <LocationChip location={getTrailCenter(trail)} style={{ alignSelf: 'center' }} onPress={() => { const center = getTrailCenter(trail); if (center) openMap(center) }} />
             <Text variant="section">{locales.trails.description}</Text>

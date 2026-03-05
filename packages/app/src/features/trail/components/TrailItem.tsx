@@ -4,11 +4,9 @@ import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
 import { useRef, useState } from 'react'
 import { Pressable, View } from 'react-native'
+import { TrailAvatar } from './TrailAvatar'
 
 // Avatar constants
-const AVATAR_SIZE = 50
-const AVATAR_BORDER_RADIUS = 4
-const AVATAR_LINE_HEIGHT = 50
 const DESCRIPTION_MAX_LINES = 1
 
 /**
@@ -31,25 +29,6 @@ const useTrailItem = (trail: Trail) => {
   }
 }
 
-/**
- * Avatar component for displaying trail initial
- */
-export function TrailAvatar({ trail }: { trail: Trail }) {
-  const { styles } = useTheme(useAvatarStyles)
-
-  if (!styles) return null
-
-  return (
-    <Image
-      width={AVATAR_SIZE}
-      height={AVATAR_SIZE}
-      source={trail.image}
-      label={trail.name}
-      style={styles.avatar}
-    />
-  )
-}
-
 interface TrailCardProps {
   onPress?: (trail: Trail) => void
   actions?: React.ReactNode
@@ -68,57 +47,32 @@ function TrailItem({ trail, actions, onPress }: TrailCardProps) {
   } = useTrailItem(trail)
   const itemTap = onPress
 
-  if (!styles) return null
-
-  const renderCardContent = () => (
-    <View style={styles.content} id="trail-card-content">
-      <TrailAvatar trail={trail} />
-      <View style={styles.textContainer}>
-        <Text variant='label'>{trail.name} </Text>
-        <Text
-          variant='body'
-          size='sm'
-          ellipsizeMode="tail"
-          numberOfLines={DESCRIPTION_MAX_LINES}
-        >
-          {trail?.description || locales.trails.noDescription}
-        </Text>
-      </View>
-      <View>
-        {actions}
-      </View>
-    </View>
-  )
-
   return (
-    <View id="trail-item-container" style={styles.container}>
-      <Pressable onPress={() => itemTap?.(trail)} onLongPress={openContextMenu}>
-        <Card ref={cardRef}>
-          {renderCardContent()}
-        </Card>
-      </Pressable>
-    </View>
+    <Pressable onPress={() => itemTap?.(trail)} onLongPress={openContextMenu} id="trail-item-container" style={styles.container} ref={cardRef}>
+      <View style={styles.content} id="trail-card-content">
+        <TrailAvatar trail={trail} />
+        <View style={styles.textContainer}>
+          <Text variant='label'>{trail.name} </Text>
+          <Text
+            variant='body'
+            size='sm'
+            ellipsizeMode="tail"
+            numberOfLines={DESCRIPTION_MAX_LINES}
+          >
+            {trail?.description || locales.trails.noDescription}
+          </Text>
+        </View>
+        <View>
+          {actions}
+        </View>
+      </View>
+    </Pressable>
   )
 }
 
-const useAvatarStyles = createThemedStyles(theme => ({
-  avatar: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_BORDER_RADIUS,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: theme.colors.primary,
-  },
-  avatarText: {
-    textAlign: 'center',
-    lineHeight: AVATAR_LINE_HEIGHT,
-    color: theme.colors.onPrimary,
-  },
-}))
-
 const useStyles = createThemedStyles(theme => ({
   container: {
+    padding: theme.tokens.spacing.md,
     flex: 1,
     alignItems: 'stretch',
     justifyContent: 'center',

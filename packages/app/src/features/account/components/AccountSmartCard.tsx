@@ -7,7 +7,7 @@ import { usePublicProfilePage } from './PublicProfilePage'
 const AVATAR_SIZE = 44
 
 interface AccountSmartCardProps {
-  accountId: string
+  accountId?: string
   style?: StyleProp<ViewStyle>
   onPress?: () => void
 }
