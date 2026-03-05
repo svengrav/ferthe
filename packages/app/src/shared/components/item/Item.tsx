@@ -69,7 +69,7 @@ function Item(props: ItemProps) {
   }
 
   return (
-    <Field style={styles.fieldContainer}>
+    <View style={styles.fieldContainer}>
       <View style={styles.iconContainer}>
         {icon && (
           <Icon
@@ -92,7 +92,7 @@ function Item(props: ItemProps) {
           onPress={handleOnEdit}
         />
       )}
-    </Field>
+    </View>
   )
 }
 

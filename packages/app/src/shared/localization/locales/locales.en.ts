@@ -178,6 +178,8 @@ const en = {
     selectImage: 'Select Image',
     addDescription: 'Add a description...',
     uploadAvatar: 'Upload Avatar',
+    avatarUploadSuccess: 'Avatar updated successfully',
+    avatarUploadFailed: 'Failed to update avatar',
     notSet: 'Not set',
     profile: 'Profile',
     spots: 'Spots',

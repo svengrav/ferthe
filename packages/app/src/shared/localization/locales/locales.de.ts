@@ -179,6 +179,8 @@ const de: LocalizationSet = {
     selectImage: 'Bild auswählen',
     addDescription: 'Beschreibung hinzufügen...',
     uploadAvatar: 'Avatar hochladen',
+    avatarUploadSuccess: 'Avatar erfolgreich aktualisiert',
+    avatarUploadFailed: 'Avatar konnte nicht aktualisiert werden',
     notSet: 'Nicht gesetzt',
     profile: 'Profil',
     spots: 'Spots',

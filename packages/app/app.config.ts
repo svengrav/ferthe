@@ -8,7 +8,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   icon: './assets/icon.png',
   userInterfaceStyle: 'dark',
   newArchEnabled: true,
-  backgroundColor: '#12121e',
+  backgroundColor: 'rgb(18, 18, 20)',
   plugins: [
     "expo-asset",
     "expo-secure-store",
@@ -36,7 +36,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   splash: {
     image: './assets/splash-icon.png',
     resizeMode: 'contain',
-    backgroundColor: '#12121e',
+    backgroundColor: 'rgb(18, 18, 20)',
   },
   ios: {
     bundleIdentifier: 'de.ferthe.app',
@@ -52,7 +52,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#12121e',
+      backgroundColor: 'rgb(18, 18, 20)',
     },
     package: 'de.ferthe.app',
     googleServicesFile: './google-services.json',

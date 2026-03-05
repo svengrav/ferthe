@@ -54,10 +54,10 @@ export function showSnackbar(config: SnackbarConfig | string) {
 }
 
 const VARIANT_CONFIG: Record<SnackbarVariant, { icon: IconName; color: string }> = {
-  success: { icon: 'check-circle' as IconName, color: '#4caf50' },
-  error: { icon: 'error' as IconName, color: '#dd4c4c' },
-  info: { icon: 'info' as IconName, color: '#7c21f3' },
-  warning: { icon: 'warning' as IconName, color: '#ff9800' },
+  success: { icon: 'check-circle' as IconName, color: '#8fe186' },
+  error: { icon: 'error' as IconName, color: '#f07373' },
+  info: { icon: 'info' as IconName, color: '#ffffff' },
+  warning: { icon: 'warning' as IconName, color: '#e7b873' },
 }
 
 /**
@@ -151,7 +151,7 @@ const useStyles = createThemedStyles(theme => ({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: theme.colors.black,
+    backgroundColor: theme.colors.dark,
     borderRadius: theme.tokens.borderRadius.md,
     padding: 16,
     paddingVertical: 12,

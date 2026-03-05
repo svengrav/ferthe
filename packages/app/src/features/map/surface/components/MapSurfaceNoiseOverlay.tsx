@@ -7,7 +7,8 @@ import {
   Image as SkiaImage,
   useImage,
 } from '@shopify/react-native-skia'
-import Animated, { useAnimatedStyle, useDerivedValue } from 'react-native-reanimated'
+import { useDerivedValue } from 'react-native-reanimated'
+import { View } from 'react-native'
 import { getMapThemeDefaults } from '@app/features/map/config/mapThemeDefaults'
 import { useMapScale } from './MapCompensatedScale'
 
@@ -59,17 +60,15 @@ function MapSurfaceNoiseOverlay({ width, height, left, top, imageUrl }: MapSurfa
     return Math.min(Math.max(t, 0), 1) * maxOpacity
   })
 
-  const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }))
-
   if (!scale) return null
 
   return (
-    <Animated.View
-      style={[{ position: 'absolute', left, top, width, height }, animatedStyle]}
+    <View
+      style={{ position: 'absolute', left, top, width, height }}
       pointerEvents="none"
     >
       <Canvas style={{ width, height }}>
-        <Group blendMode="overlay">
+        <Group blendMode="overlay" opacity={opacity}>
           {image && (
             <SkiaImage image={image} x={0} y={0} width={width} height={height} fit="cover">
               <ColorMatrix matrix={CONTRAST_MATRIX} />
@@ -88,7 +87,7 @@ function MapSurfaceNoiseOverlay({ width, height, left, top, imageUrl }: MapSurfa
           )}
         </Group>
       </Canvas>
-    </Animated.View>
+    </View>
   )
 }
 

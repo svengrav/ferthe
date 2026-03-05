@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 
-import { Avatar, Button, Card } from '@app/shared/components'
+import { Avatar, Button, Card, showSnackbar } from '@app/shared/components'
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
 import { useLocalization } from '@app/shared/localization'
@@ -38,7 +38,7 @@ function AvatarUploadCard(props: AvatarUploadCardProps) {
   const { locales } = useLocalization()
   const { account } = useAccountData()
   const { accountApplication } = getAppContextStore()
-  const { selectedImageUri, pickImage, isLoading: isPickingImage } = useImagePicker()
+  const { selectedImageUri, pickImage, isLoading: isPickingImage } = useImagePicker({ aspect: [1, 1] })
   const { convertToBase64, isConverting } = useImageToBase64()
   const [isUploading, setIsUploading] = useState(false)
 
@@ -57,14 +57,17 @@ function AvatarUploadCard(props: AvatarUploadCardProps) {
 
       if (uploadResult.success && uploadResult.data) {
         logger.log('Avatar uploaded successfully:', uploadResult.data.avatar?.url)
+        showSnackbar({ message: locales.account.avatarUploadSuccess })
         onSubmit()
       } else {
+        showSnackbar({ message: locales.account.avatarUploadFailed })
         logger.error('Failed to upload avatar:', uploadResult.error)
       }
     } catch (error) {
       logger.error('Error uploading avatar:', error)
     } finally {
       setIsUploading(false)
+
     }
   }
 
@@ -74,7 +77,6 @@ function AvatarUploadCard(props: AvatarUploadCardProps) {
         <View style={styles.container}>
           <Avatar
             avatarUrl={currentAvatar}
-            size={100}
             onPress={pickImage}
           />
 

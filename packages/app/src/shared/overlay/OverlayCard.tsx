@@ -23,7 +23,7 @@ function OverlayCard(props: OverlayCardProps) {
 
   const cardContent =
     <View style={styles.wrapper}>
-      <View style={[styles.container, { paddingHorizontal: theme.tokens.inset[inset] }]} id='overlay-card'>
+      <View style={[styles.container, { paddingHorizontal: theme.tokens.inset[inset], paddingBottom: theme.tokens.inset[inset] }]} id='overlay-card'>
         {(title || onClose) && (
           <View style={[styles.header]} id='overlay-card-header'>
             {/* <View style={styles.headerLeading} /> */}

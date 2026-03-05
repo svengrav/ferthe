@@ -94,7 +94,7 @@ function AccountPage(props: AccountPageProps) {
       title={locales.account.myAccount}
       leading={<Button icon="arrow-back" variant='outlined' onPress={onBack} />}
     >
-      <Stack style={{ paddingVertical: theme.tokens.spacing.lg, }} >
+      <Stack style={{ paddingVertical: theme.tokens.spacing.lg }} >
         {/* Profile Avatar */}
         <Avatar
           avatar={account?.avatar}
