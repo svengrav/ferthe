@@ -9,6 +9,8 @@ import { createConstants } from '@core/config/constants.ts'
 import { createCoreContext } from '@core/core.ts'
 import { createJWTService } from '@core/features/account/jwtService.ts'
 import { createMemoryStore } from '@core/store/memoryStore.ts'
+import { PoiConnector } from '@core/connectors/poiConnector.ts'
+import { mockPoiConnector } from './mocks/poiConnector.mock.ts'
 import { createApiClient } from '@shared/api'
 import type { AccountRole } from '@shared/contracts/index.ts'
 
@@ -29,6 +31,7 @@ const nullStorageConnector = {
   getMetadata: async (_path: string) => ({} as Record<string, string>),
 }
 
+
 /** No-op SMS connector */
 const nullSmsConnector = {
   requestVerification: async (_phone: string) => ({
@@ -40,9 +43,13 @@ const nullSmsConnector = {
 
 // ── Server Lifecycle ──────────────────────────────────────────────────────────
 
+export interface TestServerOptions {
+  poiConnector?: PoiConnector
+}
+
 let testServerInstance: { shutdown: () => Promise<void> } | undefined
 
-export async function startTestServer(): Promise<void> {
+export async function startTestServer(options: TestServerOptions = {}): Promise<void> {
   const config = {
     secrets: {
       jwtSecret: TEST_JWT_SECRET,
@@ -51,6 +58,7 @@ export async function startTestServer(): Promise<void> {
       storageConnectionString: '',
       twilioAuthToken: '',
       firebaseServiceAccount: null,
+      azureMapsKey: '',
     },
     constants: createConstants(),
   }
@@ -59,6 +67,7 @@ export async function startTestServer(): Promise<void> {
     storeConnector: createMemoryStore(),
     smsConnector: nullSmsConnector,
     storageConnector: nullStorageConnector as any,
+    poiConnector: options.poiConnector ?? mockPoiConnector,
   })
 
   const routes = createRoutes(context)
@@ -72,11 +81,12 @@ export async function startTestServer(): Promise<void> {
   })
 
   // Start server in background
-  const serverPromise = server.start()
+  server.start().catch(() => { /* aborted on shutdown */ })
   testServerInstance = {
     shutdown: async () => {
-      // Oak servers don't have a built-in shutdown, so we'll just clear reference
-    }
+      server.stop()
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    },
   }
 
   await new Promise((resolve) => setTimeout(resolve, 100))
@@ -91,9 +101,10 @@ export async function stopTestServer(): Promise<void> {
 
 export function useTestServer(
   fn: (t: Deno.TestContext) => Promise<void>,
+  options: TestServerOptions = {},
 ): (t: Deno.TestContext) => Promise<void> {
   return async (t: Deno.TestContext) => {
-    await startTestServer()
+    await startTestServer(options)
     try {
       await fn(t)
     } finally {

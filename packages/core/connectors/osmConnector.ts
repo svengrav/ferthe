@@ -1,15 +1,17 @@
-import { StumblePreference, STUMBLE_OSM_FILTERS } from '@shared/contracts/stumble.ts'
+import { StumblePreference, STUMBLE_OSM_FILTERS, detectStumbleCategory } from '@shared/contracts/stumble.ts'
+import { Poi, PoiConnector } from './poiConnector.ts'
 
 // ──────────────────────────────────────────────────────────────
-// OSM Tag Mapping
+// Internal OSM raw element type
 // ──────────────────────────────────────────────────────────────
 
-export interface OsmPoi {
-  id: string
-  lat: number
-  lon: number
-  name?: string
-  tags: Record<string, string>
+interface OsmRawElement {
+  type: string
+  id: number
+  lat?: number
+  lon?: number
+  center?: { lat: number; lon: number }
+  tags?: Record<string, string>
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -38,9 +40,10 @@ out body ${50};`
 // Overpass API Connector
 // ──────────────────────────────────────────────────────────────
 
-const OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
+/** Configurable via OVERPASS_URL env var — defaults to public instance */
+const OVERPASS_URL = Deno.env.get('OVERPASS_URL') ?? 'https://overpass-api.de/api/interpreter'
 
-export const osmConnector = {
+export const osmConnector: PoiConnector = {
   /**
    * Fetches POIs from OpenStreetMap Overpass API based on location and preferences.
    */
@@ -49,7 +52,7 @@ export const osmConnector = {
     lon: number,
     radiusMeters: number,
     preferences: StumblePreference[],
-  ): Promise<OsmPoi[]> => {
+  ): Promise<Poi[]> => {
     const query = buildQuery(lat, lon, radiusMeters, preferences)
 
     const response = await fetch(OVERPASS_URL, {
@@ -63,23 +66,18 @@ export const osmConnector = {
     }
 
     const json = await response.json()
-    const elements: { type: string; id: number; lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }[] = json.elements ?? []
+    const elements: OsmRawElement[] = json.elements ?? []
 
     return elements
-      .filter(el => {
-        const lat = el.lat ?? el.center?.lat
-        const lon = el.lon ?? el.center?.lon
-        return lat !== undefined && lon !== undefined
-      })
+      .filter(el => (el.lat ?? el.center?.lat) !== undefined)
       .map(el => {
-        const lat = (el.lat ?? el.center?.lat) as number
-        const lon = (el.lon ?? el.center?.lon) as number
+        const tags = el.tags ?? {}
         return {
           id: String(el.id),
-          lat,
-          lon,
-          name: el.tags?.name,
-          tags: el.tags ?? {},
+          lat: (el.lat ?? el.center!.lat) as number,
+          lon: (el.lon ?? el.center!.lon) as number,
+          name: tags.name,
+          category: detectStumbleCategory(tags),
         }
       })
   },

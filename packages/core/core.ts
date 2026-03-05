@@ -20,6 +20,9 @@ import { createSensorApplication, SensorApplicationActions } from './features/se
 import { createSensorService } from './features/sensor/sensorService.ts'
 import { createSpotApplication, SpotApplicationActions } from './features/spot/spotApplication.ts'
 import { createStumbleApplication, StumbleApplicationActions } from './features/stumble/stumbleApplication.ts'
+import { osmConnector } from './connectors/osmConnector.ts'
+import { createAzureMapsConnector } from './connectors/azureMapsConnector.ts'
+import { PoiConnector } from './connectors/poiConnector.ts'
 import { createTrailApplication } from './features/trail/trailApplication.ts'
 import { createImageApplication } from "./shared/images/imageApplication.ts"
 import { createStore } from './store/storeFactory.ts'
@@ -36,6 +39,7 @@ export interface CoreConnectors {
   storeConnector: StoreInterface
   smsConnector: SMSConnector
   storageConnector: StorageConnector
+  poiConnector?: PoiConnector
 }
 
 export interface CoreContext extends APIContract {
@@ -51,7 +55,7 @@ export interface CoreContext extends APIContract {
 }
 
 export function createCoreContext(config: Config, connectors: CoreConnectors): CoreContext {
-  const { storeConnector, smsConnector, storageConnector } = connectors
+  const { storeConnector, smsConnector, storageConnector, poiConnector } = connectors
 
   const imageApplication = createImageApplication({
     storageConnector,
@@ -156,6 +160,16 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     firebaseConnector,
   })
 
+  const contentApplication = createContentApplication(config.constants.content.dir)
+
+  const stumbleApplication = createStumbleApplication(
+    poiConnector ?? (
+      config.secrets.azureMapsKey
+        ? createAzureMapsConnector(config.secrets.azureMapsKey)
+        : osmConnector
+    )
+  )
+
   return {
     config: config,
     discoveryApplication,
@@ -169,7 +183,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     spotAccessComposite,
     discoveryStateComposite,
     accountProfileComposite,
-    contentApplication: createContentApplication(config.constants.content.dir),
-    stumbleApplication: createStumbleApplication(),
+    contentApplication,
+    stumbleApplication,
   }
 }

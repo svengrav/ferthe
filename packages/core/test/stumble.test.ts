@@ -9,22 +9,29 @@
  *   - suggestions contain required fields (id, location, category, name)
  *   - Custom radius is respected
  */
-
 import { assert, assertEquals, assertExists } from '@std/assert'
+import * as dotenv from 'dotenv'
 import { createTestClient, createToken, useTestServer } from './helpers/testServer.ts'
+import { mockPoiConnector } from './helpers/mocks/poiConnector.mock.ts'
+import { createAzureMapsConnector } from '../connectors/azureMapsConnector.ts'
+
+dotenv.config({ path: new URL('../.env', import.meta.url).pathname })
 
 // Munich city center — dense OSM data, reliable for integration tests
 const MUNICH_CENTER = { lat: 48.1351, lon: 11.582 }
 
 const userClient = createTestClient(createToken('stumble-user-a', 'user', 'app'))
 
+const azureMapsKey = Deno.env.get('AZURE_MAPS_KEY')
+const poiConnector = azureMapsKey ? createAzureMapsConnector(azureMapsKey) : mockPoiConnector
+
 // ── Tests ─────────────────────────────────────────────────────────────────────
+
+console.log(`Using POI Connector: ${azureMapsKey ? 'Azure Maps' : 'Mock Data'}`)
 
 Deno.test({
   name: 'Stumble Contract — Integration',
   fn: useTestServer(async (t) => {
-
-    // ── getSuggestions basic ───────────────────────────────────────────────────
 
     await t.step('getSuggestions returns success for valid location', async () => {
       const result = await userClient.stumble.getSuggestions(
@@ -119,5 +126,5 @@ Deno.test({
       console.log(`✓ All suggestions match requested categories (${result.data?.length ?? 0} items)`)
     })
 
-  }),
+  }, { poiConnector }),
 })
