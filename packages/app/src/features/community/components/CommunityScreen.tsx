@@ -1,6 +1,6 @@
 import AccountPage from '@app/features/account/components/AccountPage'
 import { useAccountData } from '@app/features/account/stores/accountStore'
-import { Avatar, Button, Page, Stack } from '@app/shared/components'
+import { Avatar, Button, Page, SectionHeader, Stack } from '@app/shared/components'
 import { Header } from '@app/shared/components/'
 import { useLocalization } from '@app/shared/localization'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
@@ -9,8 +9,9 @@ import { useEffect } from 'react'
 import { useCommunityData, useCommunityStatus } from '../stores/communityStore'
 import { useCommunityJoinCard } from './CommunityJoin'
 import { CommunityList } from './CommunityList'
+import { useCommunityCreatorCard } from './CommunityCreatorCard'
 
-const AVATAR_SIZE = 80
+const AVATAR_SIZE = 160
 
 /**
  * Screen for managing communities: creating new communities, joining with invite codes, and viewing existing communities.
@@ -22,6 +23,7 @@ function CommunitiesScreen() {
   const status = useCommunityStatus()
   const { communityApplication } = getAppContextStore()
   const { showCommunityJoinCard } = useCommunityJoinCard()
+  const { showCommunityCreatorCard } = useCommunityCreatorCard()
 
   // Initialize communities on mount
   useEffect(() => {
@@ -47,7 +49,14 @@ function CommunitiesScreen() {
       <Stack>
         <Header title={greeting} />
         <Avatar size={AVATAR_SIZE} avatar={account?.avatar} label={account?.displayName} />
-        <Header title={locales.community.communities} />
+        <SectionHeader
+          title={locales.community.communities}
+          subtitle={locales.community.yourCommunities}
+          trailing={<>
+            <Button icon="person-add" onPress={showCommunityJoinCard} />
+            <Button icon="add" onPress={showCommunityCreatorCard} />
+          </>}
+        />
         <CommunityList
           communities={communities}
           isLoading={status === 'loading'}

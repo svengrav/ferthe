@@ -38,14 +38,14 @@ function Page(props: PageProps) {
   // Dynamic content container based on scrollable prop
   const ContentContainer = scrollable ? ScrollView : View
   const contentProps = scrollable
-    ? { contentContainerStyle: [{ flexGrow: 1 }] }
+    ? { contentContainerStyle: [{ flexGrow: 1, paddingBottom: 12 }] }
     : {}
 
   const pageContent = (
-    <View style={[styles.page, { paddingTop: insets.top, paddingBottom: inset !== 'none' ? insets.bottom : 0 }, style]}>
+    <View style={[styles.page, { paddingTop: insets.top }, style]}>
       <PageHeader title={title} options={options} trailing={trailing} leading={resolvedLeading} />
 
-      <ContentContainer style={[styles.container, { paddingHorizontal: insetValue }]} {...contentProps}>
+      <ContentContainer style={[styles.container, { paddingHorizontal: insetValue, paddingBottom: inset === 'none' ? 0 : insets.bottom }]} {...contentProps}>
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -80,7 +80,6 @@ const createStyles = (theme: Theme) =>
     container: {
       flex: 1,
       width: '100%',
-      backgroundColor: theme.colors.background,
     },
     loadingContainer: {
       flex: 1,

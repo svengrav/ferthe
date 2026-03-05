@@ -35,7 +35,6 @@ function TrailMetaCard({ trailId, createdAt, createdBy }: TrailMetaCardProps) {
             <Text variant="caption">{locales.spot.creator}</Text>
             <AccountSmartCard
               accountId={createdBy}
-              variant="secondary"
               style={styles.accountCard}
             />
           </View>
@@ -53,7 +52,7 @@ function TrailMetaCard({ trailId, createdAt, createdBy }: TrailMetaCardProps) {
         </View>
         <View style={styles.cell}>
           <Text variant="caption">{locales.spot.created}</Text>
-          <Text variant="body">{formatDate(createdAt)}</Text>
+          <Text variant="body">{formatDate(createdAt) ?? '-'}</Text>
         </View>
       </View>
     </View>

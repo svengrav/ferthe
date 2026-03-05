@@ -6,6 +6,7 @@ import SpotGradientFrame from './SpotGradientFrame'
 import SpotImage from './SpotImage'
 import SpotLockIcon from './SpotLockIcon'
 import SpotTitle from './SpotTitle'
+import { LinearGradient } from 'expo-linear-gradient'
 
 interface SpotCardProps {
   title?: string
@@ -44,7 +45,11 @@ function SpotCard({
       onPress={isLocked ? undefined : onPress}
       style={style}
     >
-      <SpotGradientFrame colors={['#a341fffd', 'rgba(65, 73, 185, 0.767)']} padding={4}>
+      <SpotGradientFrame padding={1}>
+        <LinearGradient
+          colors={['rgba(69, 69, 69, 0)', 'rgba(0, 0, 0, 0.347)']}
+          style={{ height: 60, position: 'absolute', bottom: 0, zIndex: 1, width: '100%' }}
+        />
         <SpotTitle title={title} scale={Math.max(0.6, width / SPOT_CARD_BASE_WIDTH)} />
         {isLocked ? (
           <>

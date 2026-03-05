@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native'
 
-import { Avatar, Button, Page, Stack, Text } from '@app/shared/components'
+import { Avatar, Button, Divider, Page, Stack, Text } from '@app/shared/components'
 import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import Item from '@app/shared/components/item/Item'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
@@ -164,6 +164,7 @@ function AccountPage(props: AccountPageProps) {
         )}
 
         {/* Logout */}
+        <Divider />
         <View style={styles.actionsContainer}>
           <Button
             label={locales.account.logout}
@@ -195,8 +196,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
     gap: theme.tokens.inset.md,
-    marginTop: theme.tokens.spacing.xl,
-    paddingHorizontal: theme.tokens.inset.md,
   },
 })
 

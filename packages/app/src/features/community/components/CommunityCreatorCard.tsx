@@ -56,10 +56,7 @@ export function CommunityCreatorCard({ onClose }: CommunityCreatorCardProps) {
 
   return (
     <OverlayCard title='Create Community' onClose={onClose} keyboardAware={true}>
-      <Stack spacing="lg">
-        <Text variant="heading">{locales.community.createNewCommunity}</Text>
-        <CommunityEditor trails={trails} onSubmit={handleCreate} />
-      </Stack>
+      <CommunityEditor trails={trails} onSubmit={handleCreate} />
     </OverlayCard>
   )
 }

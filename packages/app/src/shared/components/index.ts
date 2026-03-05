@@ -41,6 +41,7 @@ export { default as PressableWithActions } from './pressableWithActions/Pressabl
 export { default as StarRating } from './reaction/StarRating'
 export { showSnackbar, default as Snackbar } from './snackbar/Snackbar'
 export { default as Spacer } from './spacer/Spacer'
+export { default as SectionHeader } from './sectionHeader/SectionHeader'
 export { default as Stack } from './stack/Stack'
 export { default as StepIndicator } from './stepIndicator/StepIndicator'
 export { default as Text } from './text/Text'

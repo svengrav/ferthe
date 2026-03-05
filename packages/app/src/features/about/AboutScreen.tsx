@@ -1,4 +1,4 @@
-import { Button, Divider, FertheLogo, LoadingSpinner, Page, PulseAnimation, Stack, Text } from '@app/shared/components'
+import { Button, Divider, FertheLogo, LoadingSpinner, Page, PulseAnimation, SectionHeader, Stack, Text } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { Linking, StyleSheet } from 'react-native'
@@ -16,17 +16,17 @@ export default function AboutScreen() {
   }
 
   return (
-    <Page scrollable>
-      <Stack style={styles.container}>
-        <PulseAnimation>
+    <Page scrollable >
+      <Stack>
+        <PulseAnimation style={{ alignSelf: 'center', paddingVertical: 20 }}>
           <FertheLogo style={styles.logo} fill={theme.colors.primary} />
         </PulseAnimation>
         <Text variant='body'>{locales.about.storyIntro}</Text>
         <Text variant='body'>{locales.about.aboutText}</Text>
         <Text variant='body'>{locales.about.followYourTrail}</Text>
-        <Button label={locales.about.fertheWebsite} variant='primary' onPress={handleOpenLink} />
+        <Button label={locales.about.fertheWebsite} variant='primary' onPress={handleOpenLink} style={{ alignSelf: 'center' }} />
         <Divider />
-        <Text variant='heading' style={styles.sectionTitle}>{locales.about.latestPosts}</Text>
+        <SectionHeader title={locales.about.latestPosts} />
         {loading ? (
           <LoadingSpinner />
         ) : (
@@ -39,17 +39,9 @@ export default function AboutScreen() {
 
 function createStyles(theme: Theme) {
   return StyleSheet.create({
-    container: {
-      marginTop: 24,
-      paddingHorizontal: 12,
-      flex: 1,
-      gap: 10,
-      alignItems: 'center',
-    },
     logo: {
-      width: 120,
-      height: 120,
-      marginBottom: 20,
+      width: 140,
+      height: 140,
     },
     sectionTitle: {
       marginTop: 12,

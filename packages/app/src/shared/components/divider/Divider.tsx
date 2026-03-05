@@ -17,12 +17,12 @@ const sizeVariants = themedVariants<ViewStyle>(sizeConfig)
 type DividerSize = VariantOf<typeof sizeConfig, 'size'>
 
 interface DividerProps {
-  text?: string
+  label?: string
   size?: DividerSize
   style?: StyleProp<ViewStyle>
 }
 
-export default function Divider({ text, size = 'md', style }: DividerProps) {
+export default function Divider({ label, size = 'md', style }: DividerProps) {
   const theme = useThemeStore()
   const styles = createStyles(theme)
   const sizeStyle = useVariants(sizeVariants, { size })
@@ -30,7 +30,7 @@ export default function Divider({ text, size = 'md', style }: DividerProps) {
   return (
     <View style={[styles.divider, sizeStyle, style]} id="divider">
       <View style={styles.dividerLine} />
-      {text && <Text style={styles.dividerText}>{text}</Text>}
+      {label && <Text style={styles.dividerText}>{label}</Text>}
       <View style={styles.dividerLine} />
     </View>
   )

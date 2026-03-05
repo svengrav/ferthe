@@ -1,8 +1,10 @@
+import { useTheme } from '@app/shared/theme'
 import { LinearGradient } from 'expo-linear-gradient'
 import { ReactNode } from 'react'
 import { StyleSheet, View } from 'react-native'
 
-const DEFAULT_GRADIENT_COLORS = ['#a341fffd', 'rgba(65, 73, 185, 0.767)'] as const
+// const DEFAULT_GRADIENT_COLORS = ['#a341fffd', 'rgba(65, 73, 185, 0.767)'] as const
+const DEFAULT_GRADIENT_COLORS = ['rgba(69, 69, 69, 0.66)', 'rgba(46, 46, 46, 0.767)'] as const
 
 interface SpotGradientFrameProps {
   colors?: readonly [string, string, ...string[]]
@@ -23,6 +25,7 @@ interface SpotGradientFrameProps {
  * </SpotContainer>
  */
 function SpotGradientFrame({ colors = DEFAULT_GRADIENT_COLORS, children, padding = 0 }: SpotGradientFrameProps) {
+  const { theme } = useTheme()
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -30,7 +33,9 @@ function SpotGradientFrame({ colors = DEFAULT_GRADIENT_COLORS, children, padding
         style={styles.gradient}
       />
       <View style={{ padding, flex: 1 }}>
-        {children}
+        <View style={{ flex: 1, borderRadius: 10, overflow: 'hidden', backgroundColor: theme.colors.background }}>
+          {children}
+        </View>
       </View>
     </View>
   )

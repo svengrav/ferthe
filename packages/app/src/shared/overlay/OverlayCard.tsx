@@ -26,7 +26,7 @@ function OverlayCard(props: OverlayCardProps) {
       <View style={[styles.container, { paddingHorizontal: theme.tokens.inset[inset] }]} id='overlay-card'>
         {(title || onClose) && (
           <View style={[styles.header]} id='overlay-card-header'>
-            <View style={styles.headerLeading} />
+            {/* <View style={styles.headerLeading} /> */}
             <View style={styles.headerTitle}>
               {title && <Text variant='title'>{title}</Text>}
             </View>
@@ -81,7 +81,8 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: theme.dimensions.HEADER_HEIGHT - 10,
+    paddingVertical: theme.tokens.spacing.lg,
+    marginBottom: theme.tokens.spacing.sm,
   },
   headerLeading: {
     minWidth: 44,
@@ -89,7 +90,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   headerTitle: {
     flex: 1,
-    alignItems: 'center',
   },
   headerTrailing: {
     minWidth: 44,

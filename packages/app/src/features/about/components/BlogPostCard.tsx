@@ -21,7 +21,7 @@ function BlogPostCard({ post }: BlogPostCardProps) {
   }
 
   return (
-    <Card variant='secondary' onPress={handlePress} style={styles.card}>
+    <Card variant='secondary' onPress={handlePress} style={styles.card} size='lg'>
       <View style={{ flexDirection: 'row' }}>
 
         <Text variant='hint' style={styles.date}>
@@ -44,7 +44,7 @@ function BlogPostCard({ post }: BlogPostCardProps) {
 const useStyles = createThemedStyles(theme => ({
   card: {
     width: '100%',
-    gap: theme.tokens.spacing.xs,
+    gap: theme.tokens.spacing.md,
   },
   date: {
     color: theme.deriveColor(theme.colors.onSurface, 0.6),

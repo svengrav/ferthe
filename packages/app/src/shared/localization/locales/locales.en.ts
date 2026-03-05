@@ -46,7 +46,7 @@ const en = {
     socials: 'Socials',
   },
   trails: {
-    yourTrails: 'Your Trails',
+    yourTrails: 'Trails',
     startTrail: 'Start Trail',
     everyJourney: 'Every journey begins with a single step',
     createTrail: 'Create a Trail',
@@ -80,7 +80,7 @@ const en = {
     allSpotsDiscovered: 'All spots discovered!',
     rating: 'Trail Rating',
     stats: {
-      name: 'Stats',
+      name: 'Your Stats',
       progress: 'Progress',
       status: 'Status',
       rank: 'Rank',
@@ -188,6 +188,7 @@ const en = {
   },
   community: {
     communities: 'Communities',
+    yourCommunities: 'Your communities',
     greeting: 'Hi',
     defaultName: 'Fox',
     createNewCommunity: 'Create New Community',

@@ -189,6 +189,7 @@ const de: LocalizationSet = {
   },
   community: {
     communities: 'Communities',
+    yourCommunities: 'Deine Communities',
     greeting: 'Hallo',
     defaultName: 'Fuchs',
     createNewCommunity: 'Neue Community erstellen',

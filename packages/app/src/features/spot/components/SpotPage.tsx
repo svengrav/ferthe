@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 import { useAccountId } from '@app/features/account'
-import { Button, ContentBlockList, Page, PageTab, PageTabs, Stack, Text } from '@app/shared/components'
+import { Button, ContentBlockList, Page, PageTab, PageTabs, SectionHeader, Spacer, Stack, Text } from '@app/shared/components'
 import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
@@ -110,14 +110,14 @@ function SpotPage(props: SpotPageProps) {
                 createdAt={spot.createdAt}
                 discoveredAt={discovery?.discoveredAt}
               />
+              <Spacer />
+              <SectionHeader title={'Description'} />
 
-              <Text variant='section'>Description</Text>
-              <Text variant='body'>{spot.description}</Text>
+              <Text variant='body'>{spot.description === "" ? '-' : spot.description}</Text>
 
               {spot.contentBlocks && spot.contentBlocks.length > 0 && (
                 <ContentBlockList blocks={spot.contentBlocks} />
               )}
-
 
               {discovery && <DiscoveryUserContentSection id={discovery.id} />}
 

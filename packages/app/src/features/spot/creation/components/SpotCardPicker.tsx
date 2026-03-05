@@ -11,6 +11,8 @@ import SpotGradientFrame from '../../card/components/SpotGradientFrame'
 import SpotImage from '../../card/components/SpotImage'
 import SpotTitle from '../../card/components/SpotTitle'
 import { useSpotCardDimensions } from '../../card/hooks/useSpotCardDimensions'
+import { Theme } from '@app/shared/theme/types'
+import { useTheme } from '@app/shared/theme'
 
 interface SpotCardPickerProps {
   name?: string
@@ -25,6 +27,7 @@ interface SpotCardPickerProps {
  */
 function SpotCardPicker({ name, imageUri, onChange }: SpotCardPickerProps) {
   const { locales } = useLocalization()
+  const { styles } = useTheme(createStyles)
   const { selectedImageUri, pickImage } = useImagePicker()
   const { width, height } = useSpotCardDimensions({ variant: 'card' })
 
@@ -81,15 +84,15 @@ function SpotCardPicker({ name, imageUri, onChange }: SpotCardPickerProps) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
     alignItems: 'center',
-    gap: 8,
+    gap: theme.tokens.spacing.md,
   },
   placeholder: {
     flex: 1,
-    borderRadius: 8,
-    backgroundColor: 'rgba(4, 2, 23, 0.603)',
+    borderRadius: theme.tokens.borderRadius.md,
+    backgroundColor: theme.colors.surface,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -101,7 +104,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignContent: 'center',
     flexDirection: 'row',
-    gap: 8,
+    gap: theme.tokens.spacing.sm,
   },
 })
 

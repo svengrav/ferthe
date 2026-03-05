@@ -42,7 +42,7 @@ function SpotTitle({ title, position = 'bottom', top, animated = false, scale = 
 
   return (
     <Animated.View style={[styles.container, positionStyle, animated && animatedStyle]} pointerEvents="none">
-      {title && <Text style={[styles.title, { transform: [{ scale }] }]} numberOfLines={1}>{title}</Text>}
+      <Text style={[styles.title, { transform: [{ scale }] }]} numberOfLines={1}>{title}</Text>
     </Animated.View>
   )
 }
@@ -74,7 +74,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     fontWeight: 'semibold',
     color: 'white',
     textAlign: 'center',
-    backgroundColor: theme.opacity(theme.colors.background, 10),
   }
 })
 
