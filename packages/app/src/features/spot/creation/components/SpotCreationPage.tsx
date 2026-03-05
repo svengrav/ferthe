@@ -6,7 +6,7 @@ import { getTrailSpotIds } from '@app/features/trail'
 import { Button, Page, showSnackbar, Stack, StepIndicator, Text } from '@app/shared/components'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
 import { useStepNavigation } from '@app/shared/hooks/useStepNavigation'
-import { closeOverlay, setOverlay } from '@app/shared/overlay'
+import { closeOverlay, OverlayCard, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 
 import { useLocalization } from '@app/shared/localization'
@@ -19,12 +19,13 @@ import SpotConsentForm from './SpotConsentForm'
 import SpotContentForm from './SpotContentForm'
 import SpotOptionsForm from './SpotOptionsForm'
 
-type SpotFormStep = 'content' | 'options' | 'consent'
+type SpotFormStep = 'content' | 'options'
 
-const CREATE_STEPS: SpotFormStep[] = ['content', 'options', 'consent']
+const CREATE_STEPS: SpotFormStep[] = ['content', 'options']
 const EDIT_STEPS: SpotFormStep[] = ['content', 'options']
 
 const CREATE_OVERLAY_KEY = 'spot-creation'
+const CONSENT_OVERLAY_KEY = 'spot-creation-consent'
 
 export const useCreateSpotPage = () => ({
   showCreateSpotPage: (initialLocation?: GeoLocation) =>
@@ -53,11 +54,9 @@ interface SpotFormPageProps {
 
 /**
  * Multi-step spot form for create and edit.
- * Create: Content → Options → Consent → Submit
+ * Create: Content → (Options, optional) → Consent overlay → Submit
+ *   - ✓ button skips Options and opens Consent directly from any step
  * Edit:   Content → Options → Submit (no consent)
- *
- * Each step uses its own Form + zod schema for validation.
- * Navigation/submit logic lives here; field logic is in step components.
  */
 function SpotFormPage(props: SpotFormPageProps) {
   const { spot, initialLocation, onClose } = props
@@ -75,13 +74,20 @@ function SpotFormPage(props: SpotFormPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string>()
 
-  // Refs to trigger form submission from outside (StepIndicator forward/step press)
+  // Refs to trigger form submission from outside
   const contentSubmitRef = useRef<(() => void) | undefined>(undefined)
   const optionsSubmitRef = useRef<(() => void) | undefined>(undefined)
+  // When true, next step completion opens consent overlay instead of advancing
+  const skipToConsentRef = useRef(false)
 
   const triggerCurrentStepSubmit = () => {
     if (nav.currentStep === 'content') contentSubmitRef.current?.()
     else if (nav.currentStep === 'options') optionsSubmitRef.current?.()
+  }
+
+  const handleConfirmPress = () => {
+    skipToConsentRef.current = true
+    triggerCurrentStepSubmit()
   }
 
   const handleStepPress = (step: SpotFormStep) => {
@@ -89,11 +95,6 @@ function SpotFormPage(props: SpotFormPageProps) {
     if (targetIndex < nav.stepIndex) nav.goToStep(step)
     else if (targetIndex > nav.stepIndex) triggerCurrentStepSubmit()
   }
-
-  // Consent state — single confirm checkbox
-  const [consent, setConsent] = useState(false)
-
-  // --- Default values ---
 
   const contentDefaults: SpotContentFormValues = {
     name: spot?.name ?? '',
@@ -114,33 +115,50 @@ function SpotFormPage(props: SpotFormPageProps) {
   const stepLabels: Record<SpotFormStep, string> = {
     content: locales.spotCreation.stepContent,
     options: locales.spotCreation.stepOptions,
-    consent: locales.spotCreation.stepConsent,
   }
 
   // --- Step completion handlers ---
 
+  const openConsentOverlay = (content: SpotContentFormValues, options: SpotOptionsFormValues) => {
+    setOverlay(
+      CONSENT_OVERLAY_KEY,
+      <OverlayCard onClose={() => closeOverlay(CONSENT_OVERLAY_KEY)} title={locales.spotCreation.createSpot} >
+        <SpotConsentOverlay
+          onConfirm={async () => {
+            closeOverlay(CONSENT_OVERLAY_KEY)
+            await handleCreateSubmit(content, options)
+          }}
+        />
+      </OverlayCard>
+    )
+  }
+
   const handleContentComplete = (data: SpotContentFormValues) => {
     setContentData(data)
     setError(undefined)
-    nav.goNext()
+    if (skipToConsentRef.current) {
+      skipToConsentRef.current = false
+      openConsentOverlay(data, optionsData ?? optionsDefaults)
+    } else {
+      nav.goNext()
+    }
   }
 
   const handleOptionsComplete = async (data: SpotOptionsFormValues) => {
+    skipToConsentRef.current = false
     setOptionsData(data)
     setError(undefined)
 
     if (isEditMode) {
       await handleEditSubmit(contentData ?? contentDefaults, data)
     } else {
-      nav.goNext()
+      openConsentOverlay(contentData ?? contentDefaults, data)
     }
   }
 
   // --- Submit handlers ---
 
-  const handleCreateSubmit = async () => {
-    const content = contentData ?? contentDefaults
-    const options = optionsData ?? optionsDefaults
+  const handleCreateSubmit = async (content: SpotContentFormValues, options: SpotOptionsFormValues) => {
 
     setIsSubmitting(true)
     setError(undefined)
@@ -233,12 +251,16 @@ function SpotFormPage(props: SpotFormPageProps) {
   return (
     <Page
       title={isEditMode ? locales.spotCreation.editTitle : locales.spotCreation.title}
+      keyboardAware
       leading={
         <Button
           icon={nav.isFirstStep ? "close" : "arrow-back"}
           variant="outlined"
           onPress={nav.isFirstStep ? onClose : nav.goBack}
         />
+      }
+      trailing={
+        <Button icon='check' variant="primary" onPress={handleConfirmPress} disabled={isSubmitting} />
       }
       scrollable
     >
@@ -273,34 +295,42 @@ function SpotFormPage(props: SpotFormPageProps) {
           />
         )}
 
-        {nav.currentStep === 'consent' && (
-          <SpotConsentForm
-            consent={consent}
-            onConsentChange={setConsent}
-            onSubmit={handleCreateSubmit}
-            isSubmitting={isSubmitting}
-          />
-        )}
-
-        {isEditMode && nav.isLastStep && (
-          <Button
-            label={isSubmitting ? locales.spotCreation.creating : locales.common.save}
-            variant="primary"
-            onPress={triggerCurrentStepSubmit}
-            disabled={isSubmitting}
-          />
-        )}
-
         {error && <Text variant="caption" style={styles.error}>{error}</Text>}
       </Stack>
     </Page>
   )
 }
 
-const createStyles = (theme: Theme) => StyleSheet.create({
+const createStyles = (_theme: Theme) => StyleSheet.create({
   error: {
-    color: theme.colors.error,
+    color: _theme.colors.error,
   },
 })
 
 export default SpotFormPage
+
+// --- Consent overlay (self-contained, opened via overlay system) ---
+
+interface SpotConsentOverlayProps {
+  onConfirm: () => Promise<void>
+}
+
+function SpotConsentOverlay({ onConfirm }: SpotConsentOverlayProps) {
+  const [consent, setConsent] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
+    await onConfirm()
+    setIsSubmitting(false)
+  }
+
+  return (
+    <SpotConsentForm
+      consent={consent}
+      onConsentChange={setConsent}
+      onSubmit={handleSubmit}
+      isSubmitting={isSubmitting}
+    />
+  )
+}

@@ -1,5 +1,5 @@
 import { Theme, useTheme } from '@app/shared/theme'
-import { ActivityIndicator, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
+import { ActivityIndicator, KeyboardAvoidingView, Platform, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Button from '../button/Button'
@@ -17,6 +17,7 @@ interface PageProps {
   inset?: Inset
   loading?: boolean
   onBack?: () => void
+  keyboardAware?: boolean
 }
 
 /**
@@ -26,7 +27,7 @@ interface PageProps {
  * Shows loading indicator when loading=true.
  */
 function Page(props: PageProps) {
-  const { children, title, style, options, scrollable = false, trailing, leading, inset = 'md', loading = false, onBack } = props
+  const { children, title, style, options, scrollable = false, trailing, leading, inset = 'md', loading = false, onBack, keyboardAware = false } = props
   const { styles, theme } = useTheme(createStyles)
   const insets = useSafeAreaInsets()
 
@@ -40,7 +41,7 @@ function Page(props: PageProps) {
     ? { contentContainerStyle: [{ flexGrow: 1 }] }
     : {}
 
-  return (
+  const pageContent = (
     <View style={[styles.page, { paddingTop: insets.top, paddingBottom: inset !== 'none' ? insets.bottom : 0 }, style]}>
       <PageHeader title={title} options={options} trailing={trailing} leading={resolvedLeading} />
 
@@ -55,6 +56,19 @@ function Page(props: PageProps) {
       </ContentContainer>
     </View>
   )
+
+  if (keyboardAware) {
+    return (
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        {pageContent}
+      </KeyboardAvoidingView>
+    )
+  }
+
+  return pageContent
 }
 
 const createStyles = (theme: Theme) =>

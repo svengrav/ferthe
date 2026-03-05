@@ -1,6 +1,13 @@
 # TODO & BUGS
 
-- Trailspots doesn't use FlatList, cannot update or load more spots.
+- Smart Card bei Creator in hat Border Background (unnötig)
+- Spot Page hat kein Inset und Android ACtion bar überlagert "add Note" 
+- Map Screen hat be Hintergurnd bild starken FPS Drop (SKIA?)
+- Dropdown "Pickler" bei z.B. Visibilit yin Spot Creation page liegt nicht richtig unterhal von inbput field. 
+
+
+# Fehlende Features
+- User kann zu jedem Trail nach belieben Spots hinzuifügenb (Soltle nicht sein, )
 
 ## Bugs
 

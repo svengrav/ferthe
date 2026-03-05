@@ -223,7 +223,9 @@ const de: LocalizationSet = {
     created: 'Erstellt',
   },
   discovery: {
-    discoveries: 'Entdeckungen',
+    discoveries: 'Deine Entdeckungen',
+    noDiscoveries: 'Noch keine Entdeckungen',
+    discoveriesSubtitle: 'Alle deine Entdeckungen',
     editYourDiscovery: 'Entdeckung bearbeiten',
     documentYourDiscovery: 'Entdeckung dokumentieren',
     pickingImage: 'Bild wird ausgewählt...',
@@ -296,7 +298,9 @@ const de: LocalizationSet = {
     created: 'Spot erstellt!',
     error: 'Spot konnte nicht erstellt werden',
     locationRequired: 'Standort wird benötigt, um einen Spot zu erstellen',
-    mySpots: 'Deine Spots',
+    yourSpots: 'Deine Spots',
+    noSpots: 'Noch keine Spots',
+    yourSpotsSubtitle: 'Alle deine Spots',
   },
   spot: {
     rating: 'Spot Bewertung',

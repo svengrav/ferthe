@@ -12,8 +12,7 @@ import { Theme, useTheme } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
 
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
-import { isStumbleTrail, StumblePreferencePicker } from '@app/features/stumble'
-import { sensorStore } from '@app/features/sensor/stores/sensorStore'
+import { isStumbleTrail, useStumbleTrailPicker } from '@app/features/stumble'
 import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
 
 /**
@@ -22,39 +21,30 @@ import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
 export const useMapTrailListCard = () => {
   const trails = useTrails()
   const { discoveryApplication, stumbleApplication } = getAppContextStore()
+  const { locales } = useLocalization()
+  const { openForTrail } = useStumbleTrailPicker()
 
   return {
     showTrailListCard: () => {
       const cardId = 'map-trail-list-card'
       return setOverlay(
         cardId,
-        <MapTrailListCard
-          onClose={() => closeOverlay(cardId)}
-          trails={trails}
-          onSelectTrail={(trail) => {
-            closeOverlay(cardId)
+        <OverlayCard title={locales.map.selectTrail} onClose={() => closeOverlay(cardId)} inset='none'>
+          <MapTrailListCard
+            onClose={() => closeOverlay(cardId)}
+            trails={trails}
+            onSelectTrail={(trail) => {
+              closeOverlay(cardId)
 
-            if (isStumbleTrail(trail)) {
-              const pickerId = 'stumble-preferences'
-              setOverlay(
-                pickerId,
-                <StumblePreferencePicker
-                  onStart={() => {
-                    // Read location at call time to avoid stale closure
-                    const { location } = sensorStore.getState().device
-                    closeOverlay(pickerId)
-                    discoveryApplication.setActiveTrail(trail.id)
-                    stumbleApplication.toggleMode(location.lat, location.lon)
-                  }}
-                  onClose={() => closeOverlay(pickerId)}
-                />
-              )
-            } else {
-              stumbleApplication.deactivate()
-              discoveryApplication.setActiveTrail(trail.id)
-            }
-          }}
-        />,
+              if (isStumbleTrail(trail)) {
+                openForTrail(trail, () => discoveryApplication.setActiveTrail(trail.id))
+              } else {
+                stumbleApplication.deactivate()
+                discoveryApplication.setActiveTrail(trail.id)
+              }
+            }}
+          />
+        </OverlayCard>
       )
     },
   }
@@ -71,18 +61,15 @@ interface MapTrailListCardProps {
  * Stumble trails (kind='stumble') are managed in the backend like any other trail.
  */
 function MapTrailListCard({ trails, onSelectTrail, onClose }: MapTrailListCardProps) {
-  const { locales } = useLocalization()
 
   return (
-    <OverlayCard title={locales.map.selectTrail} onClose={onClose} inset='none'>
-      <FlatList
-        data={trails}
-        renderItem={({ item }) => (
-          <TrailItem trail={item} onPress={() => onSelectTrail(item)} />
-        )}
-        keyExtractor={item => item.id}
-      />
-    </OverlayCard>
+    <FlatList
+      data={trails}
+      renderItem={({ item }) => (
+        <TrailItem trail={item} onPress={() => onSelectTrail(item)} />
+      )}
+      keyExtractor={item => item.id}
+    />
   )
 }
 

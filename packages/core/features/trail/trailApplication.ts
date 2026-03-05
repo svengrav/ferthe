@@ -447,8 +447,20 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
       }
     },
 
-    addSpotToTrail: async (_context: AccountContext, trailId: string, spotId: string, order?: number): Promise<Result<StoredTrailSpot>> => {
+    addSpotToTrail: async (context: AccountContext, trailId: string, spotId: string, order?: number): Promise<Result<StoredTrailSpot>> => {
       try {
+        // Enforce spotAccess policy
+        const trailResult = await trailStore.get(trailId)
+        if (!trailResult.success || !trailResult.data) {
+          return { success: false, error: { message: 'Trail not found', code: 'TRAIL_NOT_FOUND' } }
+        }
+        const spotAccess = trailResult.data.options.spotAccess ?? 'open'
+        const isOwner = trailResult.data.createdBy === context.accountId
+        const isAdmin = context.role === 'admin'
+        if (spotAccess !== 'open' && !isOwner && !isAdmin) {
+          return { success: false, error: { message: 'Not allowed to add spots to this trail', code: 'SPOT_ACCESS_DENIED' } }
+        }
+
         // Check if relationship already exists
         const existingResult = await trailSpotStore.list()
         if (existingResult.success) {

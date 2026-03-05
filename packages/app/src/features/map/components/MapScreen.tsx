@@ -1,10 +1,12 @@
-import { LoadingSpinner, Page } from '@app/shared/components'
+import { Button, LoadingSpinner, Page } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
 import { useEffect, useRef } from 'react'
 import { Animated, View } from 'react-native'
 import { useSettingsPage } from '../../settings/components/SettingsPage'
+import { useCreateSpotPage } from '../../spot/creation/components/SpotCreationPage'
+import { useDeviceLocation } from '../../sensor/stores/sensorStore'
 import { getMapStoreActions, useMapLayer, useMapStatus } from '../stores/mapStore'
 import { MapCanvas } from './MapCanvas.tsx'
 import MapCompass from './MapCompass'
@@ -59,11 +61,17 @@ function MapScreen() {
   }
 
   const { showSettings } = useSettingsPage()
+  const { showCreateSpotPage } = useCreateSpotPage()
+  const device = useDeviceLocation()
 
   return (
     <Page inset='none' options={[{ label: locales.navigation.settings, onPress: () => showSettings() }]}>
       <View style={styles?.container} >
-        <MapToolbar center={<MapCompass />} trailing={<MapLayerSwitch />} />
+        <MapToolbar
+          leading={<Button icon="add" onPress={() => showCreateSpotPage(device.location)} />}
+          center={<MapCompass />}
+          trailing={<MapLayerSwitch />}
+        />
         <MapDistanceWarning />
         <View style={styles?.map} onLayout={onLayout}>
           {status !== 'ready' ? (

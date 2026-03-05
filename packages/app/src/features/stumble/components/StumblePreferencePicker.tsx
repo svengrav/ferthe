@@ -1,4 +1,4 @@
-import { Button, Page, Stack, Text } from '@app/shared/components'
+import { Button, Chip, ChipMultiSelect, Page, Stack, Text } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization'
 import { Theme, useTheme } from '@app/shared/theme'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
@@ -38,47 +38,33 @@ export function StumblePreferencePicker({ onStart, onClose }: StumblePreferenceP
   }
 
   return (
-    <Page
-      title={locales.stumble.title}
-      scrollable
-    >
+    <View>
       <Stack spacing="lg">
         <Text variant="body">{locales.stumble.preferencesTitle}</Text>
 
         <View style={styles.grid}>
-          {ALL_PREFERENCES.map(pref => {
-            const isSelected = selected.includes(pref)
-            return (
-              <TouchableOpacity
-                key={pref}
-                style={[styles.chip, isSelected && styles.chipSelected]}
-                onPress={() => togglePreference(pref)}
-              >
-                <Text
-                  variant="label"
-                  style={isSelected ? styles.chipTextSelected : styles.chipText}
-                >
-                  {locales.stumble.categories[pref]}
-                </Text>
-              </TouchableOpacity>
-            )
-          })}
+          <ChipMultiSelect
+            options={ALL_PREFERENCES.map(p => ({ value: p, label: locales.stumble.categories[p] }))}
+            selected={selected}
+            onChange={(selected) => setSelectedPreferences(selected as StumblePreference[])}
+          />
         </View>
 
-        <Stack spacing="sm">
+        <Stack spacing="lg" direction='horizontal' style={{ justifyContent: 'center' }}>
+          <Button
+            label={locales.common.cancel}
+            onPress={onClose}
+            variant='secondary'
+          />
           <Button
             label={locales.stumble.start}
             variant="primary"
             onPress={onStart}
             disabled={selected.length === 0}
           />
-          <Button
-            label={locales.common.cancel}
-            onPress={onClose}
-          />
         </Stack>
       </Stack>
-    </Page>
+    </View>
   )
 }
 
@@ -86,7 +72,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: theme.tokens.spacing.sm,
+    gap: theme.tokens.spacing.md,
   },
   chip: {
     paddingVertical: theme.tokens.spacing.sm,

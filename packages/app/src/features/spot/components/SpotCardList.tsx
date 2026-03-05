@@ -1,3 +1,4 @@
+import { Text } from '@app/shared/components'
 import { ReactElement, useState } from 'react'
 import { FlatList, LayoutChangeEvent, StyleSheet, View } from 'react-native'
 import SpotCard from '../card/components/SpotCard'
@@ -59,6 +60,7 @@ interface SpotCardListProps<T extends SpotCardListItem> {
   scrollEnabled?: boolean
   horizontal?: boolean
   style?: object
+  emptyLabel?: string
   renderItem?: (item: T, width: number, height: number) => ReactElement
 }
 
@@ -72,6 +74,7 @@ function SpotCardList<T extends SpotCardListItem>({
   scrollEnabled = true,
   horizontal = false,
   style,
+  emptyLabel,
   renderItem,
 }: SpotCardListProps<T>) {
   const [cardSize, setCardSize] = useState({ width: 0, height: 0 })
@@ -111,6 +114,17 @@ function SpotCardList<T extends SpotCardListItem>({
     />
   )
 
+  if (items.length === 0 && emptyLabel) {
+    return (
+      <View style={{ position: 'relative', width: fixedWidth, height: fixedHeight }}>
+        <SpotCard width={fixedWidth} height={fixedHeight} />
+        <View style={[StyleSheet.absoluteFill, styles.emptyOverlay]}>
+          <Text variant="subtitle">{emptyLabel}</Text>
+        </View>
+      </View>
+    )
+  }
+
   if (horizontal) {
     return (
       <FlatList
@@ -129,7 +143,22 @@ function SpotCardList<T extends SpotCardListItem>({
 
   return (
     <View onLayout={handleLayout} style={[styles.container, style]}>
-      {cardSize.width > 0 && (scrollEnabled ? (
+      {cardSize.width > 0 && (items.length === 0 && emptyLabel ? (
+        chunk([null, null], columns).map((row, rowIndex) => (
+          <View key={rowIndex} style={[styles.row, { gap, marginTop: rowIndex > 0 ? gap : 0 }]}>
+            {row.map((_, i) => (
+              <View key={i} style={{ position: 'relative' }}>
+                <SpotCard width={resolvedWidth} height={resolvedHeight} />
+                {i === 0 && (
+                  <View style={[StyleSheet.absoluteFill, styles.emptyOverlay]}>
+                    <Text variant="subtitle">{emptyLabel}</Text>
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        ))
+      ) : scrollEnabled ? (
         <FlatList
           data={items}
           renderItem={({ item }) =>
@@ -164,6 +193,10 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+  },
+  emptyOverlay: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 })
 

@@ -93,7 +93,7 @@ function SpotPage(props: SpotPageProps) {
       {spot && (
         <PageTabs variant="chips" defaultTab="overview">
           <PageTab id="overview" label={locales.trails.overview}>
-            <Stack spacing='lg'>
+            <Stack spacing='lg' style={styles.tabContent}>
               <SpotCard
                 style={{ alignSelf: 'center' }}
                 width={width}
@@ -111,7 +111,6 @@ function SpotPage(props: SpotPageProps) {
                 discoveredAt={discovery?.discoveredAt}
               />
 
-
               <Text variant='section'>Description</Text>
               <Text variant='body'>{spot.description}</Text>
 
@@ -125,7 +124,9 @@ function SpotPage(props: SpotPageProps) {
             </Stack>
           </PageTab>
           <PageTab id="stats" label={locales.trails.stats.name}>
-            {discovery && <DiscoveryStats discoveryId={discovery?.id} />}
+            <View style={styles.tabContent}>
+              {discovery && <DiscoveryStats discoveryId={discovery?.id} />}
+            </View>
           </PageTab>
         </PageTabs>
       )}
@@ -136,8 +137,9 @@ function SpotPage(props: SpotPageProps) {
 const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    gap: theme.tokens.spacing.sm,
-    paddingBottom: theme.tokens.spacing.lg
+  },
+  tabContent: {
+    paddingBottom: theme.tokens.spacing.xl,
   },
   image: {
     borderRadius: theme.tokens.borderRadius.md,

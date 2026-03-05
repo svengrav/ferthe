@@ -84,7 +84,6 @@ function CommunityShareDialog(props: CommunityShareDialogProps) {
     <OverlayCard
       title={locales.community.shareDiscovery}
       onClose={onClose}
-      scrollable={false}
     >
       <View style={styles.container}>
         <Text variant="caption" style={styles.subtitle}>

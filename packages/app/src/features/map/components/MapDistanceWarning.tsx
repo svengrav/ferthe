@@ -56,7 +56,7 @@ function MapDistanceWarning() {
 const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
     position: 'absolute',
-    top: 80,
+    top: 130,
     left: 0,
     right: 0,
     alignItems: 'center',

@@ -351,6 +351,7 @@ export function MapEditor({ accountId }: MapEditorProps) {
             const b = isEditing && editableBounds
               ? editableBounds
               : trail.boundary;
+            if (!b) return null;
             return (
               <NativeGroundOverlay
                 key={`mapimg-${trail.id}`}
@@ -399,12 +400,14 @@ export function MapEditor({ accountId }: MapEditorProps) {
                       visible: showTrails && activeTrailIds.has(trail.id),
                     });
                     const b = editableBounds ?? trail.boundary;
-                    rect.setBounds({
-                      north: b.northEast.lat,
-                      south: b.southWest.lat,
-                      east: b.northEast.lon,
-                      west: b.southWest.lon,
-                    });
+                    if (b) {
+                      rect.setBounds({
+                        north: b.northEast.lat,
+                        south: b.southWest.lat,
+                        east: b.northEast.lon,
+                        west: b.southWest.lon,
+                      });
+                    }
                   }}
                   onUnmount={() => {
                     editableRectRef.current = null;
@@ -415,6 +418,7 @@ export function MapEditor({ accountId }: MapEditorProps) {
               );
             }
 
+            if (!trail.boundary) return null;
             return (
               <Rectangle
                 key={trail.id}

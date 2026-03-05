@@ -50,6 +50,15 @@ export const TrailKindSchema = z.enum(['discovery', 'stumble'])
 export type TrailKind = z.infer<typeof TrailKindSchema>
 
 /**
+ * Spot access mode — controls who can add spots to a trail.
+ * - 'open': anyone can add spots
+ * - 'requestable': access must be requested (reserved for future enforcement)
+ * - 'closed': only the trail owner can add spots
+ */
+export const SpotAccessModeSchema = z.enum(['open', 'requestable', 'closed'])
+export type SpotAccessMode = z.infer<typeof SpotAccessModeSchema>
+
+/**
  * Trail options schema
  */
 export const TrailOptionsSchema = z.object({
@@ -57,6 +66,7 @@ export const TrailOptionsSchema = z.object({
   discoveryMode: DiscoveryModeSchema,
   previewMode: PreviewModeSchema,
   snapRadius: guard.positiveInt.optional(),
+  spotAccess: SpotAccessModeSchema.optional().default('open'),
 })
 
 /**

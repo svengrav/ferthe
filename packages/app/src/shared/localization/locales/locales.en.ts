@@ -222,7 +222,9 @@ const en = {
     created: 'Created',
   },
   discovery: {
-    discoveries: 'Discoveries',
+    discoveries: 'Your Discoveries',
+    noDiscoveries: 'No discoveries yet',
+    discoveriesSubtitle: 'All your Discoveries',
     editYourDiscovery: 'Edit your discovery',
     documentYourDiscovery: 'Document your discovery',
     pickingImage: 'Picking image...',
@@ -296,7 +298,9 @@ const en = {
     created: 'Spot created!',
     error: 'Failed to create spot',
     locationRequired: 'Location is required to create a spot',
-    mySpots: 'My Spots',
+    yourSpots: 'Your Spots',
+    noSpots: 'No spots yet',
+    yourSpotsSubtitle: 'All your Spots',
   },
   spot: {
     rating: 'Spot Rating',

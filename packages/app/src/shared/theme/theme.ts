@@ -110,6 +110,13 @@ export const createTypography = (theme: ThemeBase) => {
       color: theme.colors.onBackground,
       paddingVertical: 8,
     },
+    subtitle: {
+      fontSize: 14,
+      lineHeight: 18,
+      fontWeight: '400' as const,
+      fontFamily: 'Inter_400Regular',
+      color: theme.deriveColor(theme.colors.onBackground, 0.4),
+    },
     section: {
       fontSize: 14,
       paddingVertical: 8,
@@ -118,16 +125,9 @@ export const createTypography = (theme: ThemeBase) => {
       fontFamily: 'Inter_400Regular',
       color: theme.colors.onBackground,
     },
-    subtitle: {
-      fontSize: 16,
-      lineHeight: 22,
-      fontWeight: '400' as const,
-      fontFamily: 'Inter_400Regular',
-      color: theme.colors.onSurface,
-    },
     body: {
-      fontSize: 15,
-      lineHeight: 22,
+      fontSize: 14,
+      lineHeight: 22, // 1.5 line height for better readability
       fontWeight: '400' as const,
       fontFamily: 'Inter_400Regular',
       color: theme.colors.onSurface,

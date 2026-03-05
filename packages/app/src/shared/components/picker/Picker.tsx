@@ -1,5 +1,5 @@
 import { ReactNode, useRef, useState } from 'react'
-import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native'
+import { Modal, Platform, Pressable, StatusBar, StyleSheet, useWindowDimensions, View } from 'react-native'
 
 import { useLocalization } from '@app/shared/localization/'
 import { Theme, useTheme } from '@app/shared/theme'
@@ -54,12 +54,14 @@ function Picker(props: PickerProps) {
   const handleTogglePicker = () => {
     if (!isMenuVisible) {
       buttonRef.current?.measureInWindow((x, y, w, h) => {
-        const spaceBelow = screenHeight - (y + h)
+        const statusBarOffset = Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0
+        const adjustedY = y + statusBarOffset
+        const spaceBelow = screenHeight - (adjustedY + h)
         const shouldOpenUp = spaceBelow < DROPDOWN_MIN_SPACE
 
         setDropdownPosition({
           x,
-          y: shouldOpenUp ? y - DROPDOWN_APPROXIMATE_HEIGHT : y + h,
+          y: shouldOpenUp ? adjustedY - DROPDOWN_APPROXIMATE_HEIGHT : adjustedY + h,
           width: w,
         })
         setMenuVisible(true)

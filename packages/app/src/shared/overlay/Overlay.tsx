@@ -91,7 +91,6 @@ function Overlay(props: OverlayProps) {
   const { visible, onClose, showBackdrop = true, closeOnBackdropPress = false, children, style } = props
   const { styles } = useTheme(useStyles)
   const { animatedContainerStyle, shouldRender } = useOverlayAnimation(visible ?? true)
-  const insets = useSafeAreaInsets()
 
   if (!shouldRender || !styles) {
     return null
