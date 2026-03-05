@@ -1,25 +1,29 @@
 import { createThemedStyles, useTheme } from "@app/shared/theme"
-import { Trail } from "@shared/contracts"
+import { ImageReference, Trail } from "@shared/contracts"
 import { Image, Text } from "@app/shared/components"
 
 const AVATAR_SIZE = 50
 const AVATAR_BORDER_RADIUS = 4
 const AVATAR_LINE_HEIGHT = 50
 
+interface TrailAvatarProps {
+  label?: string,
+  source?: ImageReference
+  size?: number
+}
+
 /**
  * Avatar component for displaying trail initial
  */
-export function TrailAvatar({ trail }: { trail: Trail }) {
+export function TrailAvatar(props: TrailAvatarProps) {
+  const { label, source, size = AVATAR_SIZE } = props
   const { styles } = useTheme(useAvatarStyles)
   return (
-
     <Image
-
-      source={trail.image}
-      label={trail.name}
-      style={styles.avatar}
-      placeholder={<Text>Trail Image</Text>}
-
+      source={source}
+      label={label}
+      style={[styles.avatar, { width: size, height: size }]}
+      placeholder={<Text>{label} </Text>}
     />
   )
 }

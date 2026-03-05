@@ -51,7 +51,6 @@ interface CommunityCreatorCardProps {
 
 export function CommunityCreatorCard({ onClose }: CommunityCreatorCardProps) {
   const trails = useTrails()
-  const { locales } = useLocalization()
   const { handleCreate } = useCommunityCreator()
 
   return (

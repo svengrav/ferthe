@@ -28,43 +28,27 @@ export function StumblePreferencePicker({ onStart, onClose }: StumblePreferenceP
   const selected = useStumblePreferences()
   const { setSelectedPreferences } = getStumbleActions()
 
-  const togglePreference = (pref: StumblePreference) => {
-    if (selected.includes(pref)) {
-      if (selected.length === 1) return // Always keep at least one
-      setSelectedPreferences(selected.filter(p => p !== pref))
-    } else {
-      setSelectedPreferences([...selected, pref])
-    }
-  }
-
   return (
-    <View>
-      <Stack spacing="lg">
-        <Text variant="body">{locales.stumble.preferencesTitle}</Text>
+    <Stack spacing="lg">
+      <Text variant="body">{locales.stumble.preferencesTitle}</Text>
 
-        <View style={styles.grid}>
-          <ChipMultiSelect
-            options={ALL_PREFERENCES.map(p => ({ value: p, label: locales.stumble.categories[p] }))}
-            selected={selected}
-            onChange={(selected) => setSelectedPreferences(selected as StumblePreference[])}
-          />
-        </View>
+      <View style={styles.grid}>
+        <ChipMultiSelect
+          options={ALL_PREFERENCES.map(p => ({ value: p, label: locales.stumble.categories[p] }))}
+          selected={selected}
+          onChange={(selected) => setSelectedPreferences(selected as StumblePreference[])}
+        />
+      </View>
 
-        <Stack spacing="lg" direction='horizontal' style={{ justifyContent: 'center' }}>
-          <Button
-            label={locales.common.cancel}
-            onPress={onClose}
-            variant='secondary'
-          />
-          <Button
-            label={locales.stumble.start}
-            variant="primary"
-            onPress={onStart}
-            disabled={selected.length === 0}
-          />
-        </Stack>
+      <Stack spacing="lg" direction='horizontal' style={{ justifyContent: 'center' }}>
+        <Button
+          label={locales.stumble.start}
+          variant="primary"
+          onPress={onStart}
+          disabled={selected.length === 0}
+        />
       </Stack>
-    </View>
+    </Stack>
   )
 }
 

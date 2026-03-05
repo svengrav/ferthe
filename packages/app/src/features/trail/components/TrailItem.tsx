@@ -1,4 +1,4 @@
-import { Card, Image, Text } from '@app/shared/components'
+import { Card, Divider, Image, Text } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
@@ -50,11 +50,11 @@ function TrailItem({ trail, actions, onPress }: TrailCardProps) {
   return (
     <Pressable onPress={() => itemTap?.(trail)} onLongPress={openContextMenu} id="trail-item-container" style={styles.container} ref={cardRef}>
       <View style={styles.content} id="trail-card-content">
-        <TrailAvatar trail={trail} />
+        <TrailAvatar source={trail.image} label={trail.name} />
         <View style={styles.textContainer}>
           <Text variant='label'>{trail.name} </Text>
           <Text
-            variant='body'
+            variant='subtitle'
             size='sm'
             ellipsizeMode="tail"
             numberOfLines={DESCRIPTION_MAX_LINES}

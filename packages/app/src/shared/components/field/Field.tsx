@@ -3,6 +3,7 @@ import { StyleSheet, View, ViewStyle } from 'react-native'
 
 import Text from '@app/shared/components/text/Text'
 import { Theme, useTheme } from '@app/shared/theme'
+import Stack from '../stack/Stack'
 
 interface FieldProps {
   /** Label displayed above the input */
@@ -29,11 +30,11 @@ function Field(props: FieldProps) {
   const helper = typeof error === 'string' ? error : helperText
 
   return (
-    <View style={[styles.container, style]} id="field-container">
+    <Stack id="field-container">
       {label && <Text variant="label" style={styles.label}>{label}</Text>}
       {children}
       {helper && <Text style={[styles.helper, isError && styles.helperError]}>{helper}</Text>}
-    </View>
+    </Stack>
   )
 }
 
@@ -45,7 +46,7 @@ const createStyles = (theme: Theme) =>
       gap: 6,
     },
     label: {
-      color: theme.deriveColor(theme.colors.onBackground, 0.7),
+      color: theme.deriveColor(theme.colors.onBackground, 0.3),
     },
     helper: {
       fontSize: 12,

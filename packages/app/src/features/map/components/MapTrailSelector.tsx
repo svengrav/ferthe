@@ -14,6 +14,7 @@ import { Trail } from '@shared/contracts'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { isStumbleTrail, useStumbleTrailPicker } from '@app/features/stumble'
 import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
+import TrailList from '@app/features/trail/components/TrailList'
 
 /**
  * Hook to open/close the trail list card overlay.
@@ -29,7 +30,7 @@ export const useMapTrailListCard = () => {
       const cardId = 'map-trail-list-card'
       return setOverlay(
         cardId,
-        <OverlayCard title={locales.map.selectTrail} onClose={() => closeOverlay(cardId)} inset='none'>
+        <OverlayCard title={locales.map.selectTrail} onClose={() => closeOverlay(cardId)} >
           <MapTrailListCard
             onClose={() => closeOverlay(cardId)}
             trails={trails}
@@ -63,12 +64,9 @@ interface MapTrailListCardProps {
 function MapTrailListCard({ trails, onSelectTrail, onClose }: MapTrailListCardProps) {
 
   return (
-    <FlatList
-      data={trails}
-      renderItem={({ item }) => (
-        <TrailItem trail={item} onPress={() => onSelectTrail(item)} />
-      )}
-      keyExtractor={item => item.id}
+    <TrailList
+      trails={trails}
+      onOpenTrail={(item) => onSelectTrail(item)}
     />
   )
 }
@@ -122,7 +120,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     borderTopColor: theme.colors.divider,
-    backgroundColor: theme.colors.surface,
     borderTopWidth: 1,
   },
 })

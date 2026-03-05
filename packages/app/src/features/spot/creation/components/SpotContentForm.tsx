@@ -71,31 +71,35 @@ function SpotContentFormFields() {
 
       <LocationChip location={location} style={{ alignSelf: 'center' }} />
 
-      <FormInput
-        name="name"
-        label={locales.spotCreation.name}
-        placeholder={locales.spotCreation.namePlaceholder}
-      />
+      <Stack spacing='lg'>
 
-      <FormInput
-        name="description"
-        label={locales.spotCreation.description}
-        placeholder={locales.spotCreation.descriptionPlaceholder}
-        multiline
-      />
 
-      <Controller
-        control={control}
-        name="contentBlocks"
-        render={({ field: { value, onChange }, fieldState: { error } }) => (
-          <Field label={locales.contentBlocks.contentBlocks} error={error?.message}>
-            <ContentBlockEditorList
-              blocks={(value as ContentBlock[]) ?? []}
-              onChange={onChange}
-            />
-          </Field>
-        )}
-      />
+        <FormInput
+          name="name"
+          label={locales.spotCreation.name}
+          placeholder={locales.spotCreation.namePlaceholder}
+        />
+
+        <FormInput
+          name="description"
+          label={locales.spotCreation.description}
+          placeholder={locales.spotCreation.descriptionPlaceholder}
+          multiline
+        />
+
+        <Controller
+          control={control}
+          name="contentBlocks"
+          render={({ field: { value, onChange }, fieldState: { error } }) => (
+            <Field label={locales.contentBlocks.contentBlocks} error={error?.message}>
+              <ContentBlockEditorList
+                blocks={(value as ContentBlock[]) ?? []}
+                onChange={onChange}
+              />
+            </Field>
+          )}
+        />
+      </Stack>
     </Stack>
   )
 }

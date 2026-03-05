@@ -1,6 +1,6 @@
 import { StyleSheet, useWindowDimensions } from 'react-native'
 
-import { Button, Image, LocationChip, Page, PageTab, PageTabs, Stack, Text } from '@app/shared/components'
+import { Button, Image, LocationChip, Page, PageTab, PageTabs, SectionHeader, Spacer, Stack, Text } from '@app/shared/components'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 
@@ -64,12 +64,14 @@ function TrailPage(props: TrailPageProps) {
     >
       <PageTabs variant="chips" defaultTab="overview">
         <PageTab id="overview" label={locales.trails.overview}>
-          <Stack spacing='md'>
-            <TrailAvatar trail={trail} />
+          <Stack spacing='lg'>
+            <TrailAvatar source={trail.image} label={trail.name} />
             <TrailMetaCard trailId={trail.id} createdAt={trail.createdAt} createdBy={trail.createdBy} />
             <LocationChip location={getTrailCenter(trail)} style={{ alignSelf: 'center' }} onPress={() => { const center = getTrailCenter(trail); if (center) openMap(center) }} />
-            <Text variant="section">{locales.trails.description}</Text>
+            <SectionHeader title={locales.trails.description} />
+
             <Text variant="body">{trail.description}</Text>
+            <Spacer />
           </Stack>
         </PageTab>
         <PageTab id="spots" label={locales.trails.spots}>

@@ -5,6 +5,7 @@ import Text from "../text/Text";
 const sizeConfig = {
   variants: {
     size: {
+      none: () => ({ paddingVertical: 0 }),
       sm: (t: any) => ({ paddingVertical: t.tokens.spacing.sm }),
       md: (t: any) => ({ paddingVertical: t.tokens.spacing.md }),
       lg: (t: any) => ({ paddingVertical: t.tokens.spacing.lg }),
