@@ -15,6 +15,7 @@ export interface Secrets {
   twilioAuthToken: string
   firebaseServiceAccount: FirebaseServiceAccount | null
   azureMapsKey: string
+  googleMapsApiKey: string
 }
 
 interface SecretSource {
@@ -37,13 +38,14 @@ export async function loadSecrets(): Promise<Secrets> {
     console.log('Loading secrets from Azure Key Vault...')
     const keyVault = createKeyVaultConnector(source.keyVaultName)
 
-    const [jwt, phone, cosmos, storage, twilio, azureMaps] = await Promise.all([
+    const [jwt, phone, cosmos, storage, twilio, azureMaps, googlePlaces] = await Promise.all([
       keyVault.getSecret('api-jwt-sign-key'),
       keyVault.getSecret('api-phone-hash-salt-key'),
       keyVault.getSecret('cstr-cdb-ferthe-core'),
       keyVault.getSecret('key-stferthecore'),
       keyVault.getSecret('key-twilio-phone-verify'),
       keyVault.getSecret('key-azure-maps'),
+      keyVault.getSecret('key-google-places'),
     ])
 
     // Firebase service account from Key Vault (JSON string)
@@ -61,6 +63,7 @@ export async function loadSecrets(): Promise<Secrets> {
       twilioAuthToken: twilio.value || '',
       firebaseServiceAccount,
       azureMapsKey: azureMaps.value || '',
+      googleMapsApiKey: googlePlaces.value || '',
     }
   }
 
@@ -80,5 +83,6 @@ export async function loadSecrets(): Promise<Secrets> {
     twilioAuthToken: Deno.env.get('TWILIO_AUTH_TOKEN') || '',
     firebaseServiceAccount,
     azureMapsKey: Deno.env.get('AZURE_MAPS_KEY') || '',
+    googleMapsApiKey: Deno.env.get('GOOGLE_MAPS_API_KEY') || '',
   }
 }

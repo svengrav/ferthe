@@ -1,7 +1,7 @@
 import { PoiConnector } from '@core/connectors/poiConnector.ts'
 import { osmConnector } from '@core/connectors/osmConnector.ts'
-import { toSuggestions } from './stumbleService.ts'
-import { Result, StumbleApplicationContract, StumblePreference, StumbleSuggestion } from '@shared/contracts/index.ts'
+import { toSuggestionResults } from './stumbleService.ts'
+import { Result, StumbleApplicationContract, StumblePreference, StumbleSuggestionResult } from '@shared/contracts/index.ts'
 
 const DEFAULT_RADIUS_METERS = 800
 
@@ -17,11 +17,11 @@ export function createStumbleApplication(connector: PoiConnector = osmConnector)
     lon: number,
     radiusMeters: number,
     preferences: StumblePreference[],
-  ): Promise<Result<StumbleSuggestion[]>> => {
+  ): Promise<Result<StumbleSuggestionResult[]>> => {
     try {
       const radius = radiusMeters > 0 ? radiusMeters : DEFAULT_RADIUS_METERS
       const pois = await connector.fetchPois(lat, lon, radius, preferences)
-      const suggestions = toSuggestions(pois)
+      const suggestions = toSuggestionResults(pois)
       return { success: true, data: suggestions }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch stumble suggestions'

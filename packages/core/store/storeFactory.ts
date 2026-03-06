@@ -41,20 +41,10 @@ export function createStore<T extends StoreItem>(connector: StoreInterface, cont
   const enhancedStore = createEnhancedStore(connector)
 
   return {
-    async create(item: T): Promise<StoreOperationResult<T>> {
-      return enhancedStore.create<T>(container, item)
-    },
-    async get(id: string): Promise<StoreOperationResult<T>> {
-      return enhancedStore.get<T>(container, id)
-    },
-    async update(id: string, item: T): Promise<StoreOperationResult<T>> {
-      return enhancedStore.update<T>(container, id, item)
-    },
-    async delete(id: string): Promise<StoreOperationResult<void>> {
-      return enhancedStore.delete(container, id)
-    },
-    async list(options?: QueryOptions): Promise<StoreOperationResult<T[]>> {
-      return enhancedStore.list<T>(container, options)
-    },
+    create: (item: T) => enhancedStore.create<T>(container, item),
+    get: (id: string) => enhancedStore.get<T>(container, id),
+    update: (id: string, item: T) => enhancedStore.update<T>(container, id, item),
+    delete: (id: string) => enhancedStore.delete(container, id),
+    list: (options?: QueryOptions) => enhancedStore.list<T>(container, options),
   }
 }

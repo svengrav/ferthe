@@ -19,8 +19,17 @@ export const StumbleSuggestionSchema = z.object({
   id: z.string(),
   location: GeoLocationSchema,
   name: z.string(),
-  category: StumblePreferenceSchema,
-  hint: z.string().optional(),
+  /** Raw OSM/provider tags for multi-categorization or future filtering */
+  tags: z.array(z.string()).optional(),
+  /** Provider-specific ID for deduplication and deep-linking */
+  osmId: z.string().optional(),
+  /** Human-readable address or locality */
+  address: z.string().optional(),
+})
+
+/** API response type — extends stored suggestion with request context */
+export const StumbleSuggestionResultSchema = StumbleSuggestionSchema.extend({
+  matchedPreference: StumblePreferenceSchema,
 })
 
 // ──────────────────────────────────────────────────────────────
@@ -29,6 +38,7 @@ export const StumbleSuggestionSchema = z.object({
 
 export type StumblePreference = z.infer<typeof StumblePreferenceSchema>
 export type StumbleSuggestion = z.infer<typeof StumbleSuggestionSchema>
+export type StumbleSuggestionResult = z.infer<typeof StumbleSuggestionResultSchema>
 
 // ──────────────────────────────────────────────────────────────
 // Domain constants — single source of truth for OSM mappings
@@ -58,16 +68,6 @@ export const detectStumbleCategory = (tags: Record<string, string>): StumblePref
   return 'historical'
 }
 
-/** Human-readable hint per preference */
-export const STUMBLE_HINTS: Record<StumblePreference, string> = {
-  historical: 'Historical place worth documenting',
-  cafe: 'Local café to explore',
-  art: 'Artwork or cultural space',
-  architecture: 'Notable building or structure',
-  nature: 'Natural feature or park',
-  street_art: 'Street art or mural',
-}
-
 // ──────────────────────────────────────────────────────────────
 // Application Contract
 // ──────────────────────────────────────────────────────────────
@@ -78,5 +78,5 @@ export interface StumbleApplicationContract {
     lon: number,
     radiusMeters: number,
     preferences: StumblePreference[],
-  ) => Promise<Result<StumbleSuggestion[]>>
+  ) => Promise<Result<StumbleSuggestionResult[]>>
 }

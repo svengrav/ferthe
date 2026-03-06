@@ -72,7 +72,7 @@ export const useViewportGestures = (config: ViewportGestureConfig): ViewportGest
     const baseCompensation = (1 / scale.value) * 2
     const dampening = 0.7
     const compensated = 1 + (baseCompensation - 1) * dampening
-    return Math.max(0.6, Math.min(1.8, compensated))
+    return Math.max(0.5, Math.min(4.0, compensated))
   }, [scale])
 
   // Update scale constraints when minScale or maxScale change

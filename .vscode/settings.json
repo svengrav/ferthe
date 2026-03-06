@@ -2,4 +2,5 @@
   "workbench.colorCustomizations": {
     "titleBar.activeBackground": "#0b2263"
   },
+  "deno.codeLens.test": true,
 }

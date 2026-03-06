@@ -57,10 +57,15 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
   const scale = useMapCompensatedScale()
   const { showDiscoveryEventCard } = useDiscoveryEventCardOverlay()
 
+  console.log('🎯 MapSpots - Got scale from context:', scale)
+
   // Create animated style for scale transform
-  const scaleStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }]
-  }), [scale])
+  const scaleStyle = useAnimatedStyle(() => {
+    console.log('📊 useAnimatedStyle running - scale.value:', scale.value)
+    return {
+      transform: [{ scale: scale.value }]
+    }
+  }, [scale])
 
   // Pre-calculate spot positions
   const spotPositions = useMemo(() => {

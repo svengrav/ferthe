@@ -20,8 +20,7 @@ import { createSensorApplication, SensorApplicationActions } from './features/se
 import { createSensorService } from './features/sensor/sensorService.ts'
 import { createSpotApplication, SpotApplicationActions } from './features/spot/spotApplication.ts'
 import { createStumbleApplication, StumbleApplicationActions } from './features/stumble/stumbleApplication.ts'
-import { osmConnector } from './connectors/osmConnector.ts'
-import { createAzureMapsConnector } from './connectors/azureMapsConnector.ts'
+import { createGooglePlacesConnector } from './connectors/googlePlacesConnector.ts'
 import { PoiConnector } from './connectors/poiConnector.ts'
 import { createTrailApplication } from './features/trail/trailApplication.ts'
 import { createImageApplication } from "./shared/images/imageApplication.ts"
@@ -162,13 +161,8 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
 
   const contentApplication = createContentApplication(config.constants.content.dir)
 
-  const stumbleApplication = createStumbleApplication(
-    poiConnector ?? (
-      config.secrets.azureMapsKey
-        ? createAzureMapsConnector(config.secrets.azureMapsKey)
-        : osmConnector
-    )
-  )
+  const stumbleApplication = createStumbleApplication(createGooglePlacesConnector(config.secrets.googleMapsApiKey))
+
 
   return {
     config: config,

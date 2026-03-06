@@ -110,7 +110,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
       const canvasZoomLimits = mapUtils.calculateZoomLimits(
         canvasBoundary,
         { width: defaults.canvas.width, height: defaults.canvas.height },
-        currentCanvas.size,
+        getMapState().container.size,
         defaults.zoom.maxMeters
       )
       setState({
@@ -163,7 +163,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     const canvasZoomLimits = mapUtils.calculateZoomLimits(
       initialCanvasBoundary,
       { width: defaults.canvas.width, height: defaults.canvas.height },
-      currentCanvas.size,
+      getMapState().container.size,
       defaults.zoom.maxMeters
     )
 

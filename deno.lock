@@ -16,6 +16,7 @@
     "jsr:@std/internal@^1.0.12": "1.0.12",
     "jsr:@std/media-types@1": "1.1.0",
     "jsr:@std/path@1": "1.1.4",
+    "jsr:@std/path@^1.1.4": "1.1.4",
     "jsr:@tajpouria/cors@^1.2.1": "1.2.1",
     "npm:@azure/cosmos@4": "4.9.1",
     "npm:@azure/identity@4": "4.13.0",
@@ -67,7 +68,7 @@
         "jsr:@std/bytes",
         "jsr:@std/http",
         "jsr:@std/media-types",
-        "jsr:@std/path",
+        "jsr:@std/path@1",
         "npm:path-to-regexp"
       ]
     },

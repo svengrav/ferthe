@@ -55,6 +55,7 @@ Deno.test({
         },
         map: {},
         options: {
+          spotAccess: 'open',
           scannerRadius: 500,
           discoveryMode: 'free',
           previewMode: 'hidden',
