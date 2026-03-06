@@ -81,7 +81,7 @@ Deno.test('getTrailCompletionPercentage: 0 when no spots in trail', () => {
 
 Deno.test('processScanEvent: returns null for unsuccessful scan', () => {
   const scanEvent = makeScanEvent({ successful: false, clues: [{ spotId: 'spot-1' }] as any })
-  const trail = makeTrail({ options: { scannerRadius: 100, discoveryMode: 'free', previewMode: 'hidden' } })
+  const trail = makeTrail({ options: { scannerRadius: 100, discoveryMode: 'free', previewMode: 'hidden', spotAccess: 'open' as const } })
   const result = svc.processScanEvent(scanEvent, trail, [], ['spot-1'])
   assertEquals(result, null)
 })
@@ -96,7 +96,7 @@ Deno.test('processScanEvent: returns null when clues empty', () => {
 Deno.test('processScanEvent: free mode discovers all new spots from clues', () => {
   const clue = { spotId: 'spot-1', id: 'c1', trailId: 'trail-1', location: { lat: 51.5, lon: 7.5 }, source: 'scanEvent', discoveryRadius: 50 } as any
   const scanEvent = makeScanEvent({ accountId: 'user-1', trailId: 'trail-1', successful: true, clues: [clue] })
-  const trail = makeTrail({ options: { scannerRadius: 100, discoveryMode: 'free', previewMode: 'hidden' } })
+  const trail = makeTrail({ options: { scannerRadius: 100, discoveryMode: 'free', previewMode: 'hidden', spotAccess: 'open' as const } })
 
   const result = svc.processScanEvent(scanEvent, trail, [], ['spot-1'])
   assertEquals(result?.length, 1)
@@ -107,7 +107,7 @@ Deno.test('processScanEvent: free mode discovers all new spots from clues', () =
 Deno.test('processScanEvent: free mode skips already discovered spots', () => {
   const clue = { spotId: 'spot-1', id: 'c1', trailId: 'trail-1', location: { lat: 51.5, lon: 7.5 }, source: 'scanEvent', discoveryRadius: 50 } as any
   const scanEvent = makeScanEvent({ accountId: 'user-1', trailId: 'trail-1', successful: true, clues: [clue] })
-  const trail = makeTrail({ options: { scannerRadius: 100, discoveryMode: 'free', previewMode: 'hidden' } })
+  const trail = makeTrail({ options: { scannerRadius: 100, discoveryMode: 'free', previewMode: 'hidden', spotAccess: 'open' as const } })
   const existing = makeDiscovery({ accountId: 'user-1', spotId: 'spot-1', trailId: 'trail-1' })
 
   const result = svc.processScanEvent(scanEvent, trail, [existing], ['spot-1'])
@@ -120,7 +120,7 @@ Deno.test('processScanEvent: sequence mode only discovers next spot in order', (
     { spotId: 'spot-2', id: 'c2', trailId: 'trail-1', location: { lat: 51.5, lon: 7.5 }, source: 'scanEvent', discoveryRadius: 50 },
   ] as any[]
   const scanEvent = makeScanEvent({ accountId: 'user-1', trailId: 'trail-1', successful: true, clues })
-  const trail = makeTrail({ options: { scannerRadius: 100, discoveryMode: 'sequence', previewMode: 'hidden' } })
+  const trail = makeTrail({ options: { scannerRadius: 100, discoveryMode: 'sequence', previewMode: 'hidden', spotAccess: 'open' as const } })
 
   const result = svc.processScanEvent(scanEvent, trail, [], ['spot-1', 'spot-2'])
   // Only first spot should be discovered

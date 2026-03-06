@@ -46,6 +46,7 @@ export const makeTrail = (overrides: Partial<Trail> = {}): Trail => ({
     scannerRadius: 100,
     discoveryMode: 'free',
     previewMode: 'hidden',
+    spotAccess: 'open' as const,
   },
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),

@@ -65,4 +65,5 @@ export const STORE_IDS = {
   COMMUNITY_DISCOVERIES: 'community-discoveries',
   DEVICE_TOKENS: 'device-tokens',
   STUMBLE_POIS: 'stumble-pois',
+  STUMBLE_VISITS: 'stumble-visits',
 } as const

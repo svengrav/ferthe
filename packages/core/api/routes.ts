@@ -41,7 +41,8 @@ import {
   SpotRating,
   StoredTrailSpot,
   StumblePreference,
-  StumbleSuggestion,
+  StumbleSuggestionResult,
+  StumbleVisit,
   Trail,
   TrailRating,
   TrailSpot,
@@ -76,9 +77,7 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
   const asyncRequestHandler = createAsyncRequestHandler(accountApplication)
 
   return {
-    // ─────────────────────────────────────────────────────────────
-    // System Handlers
-    // ─────────────────────────────────────────────────────────────
+    /** System Handlers */
     system: {
       // deno-lint-ignore require-await
       getManifest: asyncRequestHandler(async () => ({
@@ -95,9 +94,7 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       })),
     },
 
-    // ─────────────────────────────────────────────────────────────
-    // Spot Handlers
-    // ─────────────────────────────────────────────────────────────
+    /** Spot Handlers */
     spot: {
       listSpots: asyncRequestHandler<Spot[]>(async ({ context, query }) => {
         return await spotApplication.getSpots(context, parseQueryOptions(query))
@@ -141,9 +138,7 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       }),
     },
 
-    // ─────────────────────────────────────────────────────────────
-    // Trail Handlers
-    // ─────────────────────────────────────────────────────────────
+    /** Trail Handlers */
     trail: {
       listTrails: asyncRequestHandler<Trail[]>(async ({ context, query }) => {
         return await trailApplication.listTrails(context, parseQueryOptions(query))
@@ -183,9 +178,7 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       }),
     },
 
-    // ─────────────────────────────────────────────────────────────
-    // Discovery Handlers
-    // ─────────────────────────────────────────────────────────────
+    /** Discovery Handlers */
     discovery: {
       processLocation: asyncRequestHandler<DiscoveryLocationRecord>(async ({ context: session, body }) => {
         return await discoveryApplication.processLocation(session, body?.locationWithDirection, body?.trailId)
@@ -228,9 +221,7 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       }),
     },
 
-    // ─────────────────────────────────────────────────────────────
-    // Account Handlers
-    // ─────────────────────────────────────────────────────────────
+    /** Account Handlers */
     account: {
       requestSMSCode: asyncRequestHandler<SMSCodeRequest>(async ({ body }) => {
         return await accountApplication.requestSMSCode(body?.phoneNumber)
@@ -289,9 +280,7 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       }),
     },
 
-    // ─────────────────────────────────────────────────────────────
-    // Community Handlers
-    // ─────────────────────────────────────────────────────────────
+    /** Community Handlers */
     community: {
       createCommunity: asyncRequestHandler<Community>(async ({ context, body }) => {
         return await communityApplication.createCommunity(context, { name: body?.name || '', trailIds: body?.trailIds || [] })
@@ -328,9 +317,7 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       }),
     },
 
-    // ─────────────────────────────────────────────────────────────
-    // Sensor Handlers
-    // ─────────────────────────────────────────────────────────────
+    /** Sensor Handlers */
     sensor: {
       listScans: asyncRequestHandler(async ({ context, query }) => {
         return await sensorApplication.listScanEvents(context, query?.trailId)
@@ -340,9 +327,7 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       }),
     },
 
-    // ─────────────────────────────────────────────────────────────
-    // Content Handlers
-    // ─────────────────────────────────────────────────────────────
+    /** Content Handlers */
     content: {
       getPage: asyncRequestHandler(async ({ params }) => {
         return await contentApplication.getPage(params!.language, params!.page)
@@ -358,9 +343,7 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       }),
     },
 
-    // ─────────────────────────────────────────────────────────────
-    // Composite Handlers
-    // ─────────────────────────────────────────────────────────────
+    /** Composite Handlers */
     composite: {
       listAccessibleSpots: asyncRequestHandler<Spot[]>(async ({ context, query }) => {
         const options = parseQueryOptions(query)
@@ -376,16 +359,21 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       }),
     },
 
-    // ─────────────────────────────────────────────────────────────
-    // Stumble Handlers
-    // ─────────────────────────────────────────────────────────────
+    /** Stumble Handlers */
     stumble: {
-      getSuggestions: asyncRequestHandler<StumbleSuggestion[]>(async ({ query }) => {
+      getSuggestions: asyncRequestHandler<StumbleSuggestionResult[]>(async ({ query }) => {
         const lat = Number(query?.lat)
         const lon = Number(query?.lon)
         const radius = Number(query?.radius) || 800
         const preferences = (query?.preferences as string ?? '').split(',').filter(Boolean) as StumblePreference[]
         return await stumbleApplication.getSuggestions(lat, lon, radius, preferences)
+      }),
+      recordVisit: asyncRequestHandler<StumbleVisit>(async ({ context, body }) => {
+        const { poiId, spotId } = body as { poiId: string; spotId?: string }
+        return await stumbleApplication.recordVisit(context.accountId!, poiId, spotId)
+      }),
+      getVisits: asyncRequestHandler<StumbleVisit[]>(async ({ context }) => {
+        return await stumbleApplication.getVisits(context.accountId!)
       }),
     },
   }

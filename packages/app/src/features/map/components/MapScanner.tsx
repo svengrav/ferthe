@@ -26,7 +26,6 @@ const useMapScannerControl = (startScan: () => void, derivedColor: string, prima
     const backgroundColor = interpolateColor(colorProgress.value, [0, 1], [derivedColor, primaryColor])
     return {
       backgroundColor,
-      padding: 8,
       borderRadius: 8,
       transform: [{ scale: 0.95 + colorProgress.value * 0.05 }],
     }
@@ -93,23 +92,21 @@ function MapScannerControl(props: MapScannerControlProps) {
   const { isOnCooldown, animatedButtonStyle, handleStartScan } = useMapScannerControl(startScan, derivedColor, theme.colors.primary)
 
   return (
-    <View style={styles.controlsContainer}>
-      <Animated.View style={animatedButtonStyle}>
-        <Pressable onPress={handleStartScan} disabled={isOnCooldown}>
-          <Icon size='md' name="sensors" color={derivedColor} />
-        </Pressable>
-      </Animated.View>
-    </View>
+    <Animated.View style={[{ alignSelf: 'center', padding: 2 }, animatedButtonStyle]}>
+      <Pressable onPress={handleStartScan} disabled={isOnCooldown} style={styles.scannerIcon}>
+        <Icon size='md' name="sensors" color={derivedColor} />
+      </Pressable>
+    </Animated.View>
   )
 }
 
 const createStyles = (theme: Theme) => StyleSheet.create({
   controlsContainer: {
-    zIndex: 100,
-    position: 'absolute',
-    bottom: 20,
+    zIndex: 5,
   },
+  scannerIcon: { width: theme.tokens.spacing.xl, height: theme.tokens.spacing.xl, justifyContent: 'center', alignItems: 'center' },
 })
 
 const MemoizedMapScanner = memo(MapScanner)
 export { MemoizedMapScanner as MapScanner, MapScannerControl }
+

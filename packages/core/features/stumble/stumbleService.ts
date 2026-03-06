@@ -13,7 +13,7 @@ export const toSuggestionResults = (pois: Poi[]): StumbleSuggestionResult[] =>
       id: `poi-${poi.id}`,
       location: { lat: poi.lat, lon: poi.lon },
       name: poi.name!,
-      matchedPreference: poi.category,
+      category: poi.category,
       ...(poi.tags?.length ? { tags: poi.tags } : {}),
       ...(poi.osmId ? { osmId: poi.osmId } : {}),
       ...(poi.address ? { address: poi.address } : {}),

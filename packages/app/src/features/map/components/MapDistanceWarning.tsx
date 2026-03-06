@@ -6,7 +6,7 @@ import { useLocalization } from '@app/shared/localization'
 import { Theme, useTheme } from '@app/shared/theme'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { useDeviceBoundaryStatus } from '../stores/mapStore'
-import { useStumbleActive } from '@app/features/stumble'
+import { useIsStumbleTrail } from '@app/features/stumble'
 
 /**
  * Format distance in meters to human readable string
@@ -25,9 +25,8 @@ const formatDistance = (meters: number): string => {
 function MapDistanceWarning() {
   const { styles } = useTheme(createStyles)
   const { locales } = useLocalization()
-  const { isOutsideBoundary, distanceFromBoundary, closestBoundaryPoint } = useDeviceBoundaryStatus()
-  const { } = useExternalMap()
-  const isStumbleActive = useStumbleActive()
+  const { isOutsideBoundary, distanceFromBoundary } = useDeviceBoundaryStatus()
+  const isStumbleActive = useIsStumbleTrail()
 
   const { trailId } = useDiscoveryTrail()
   const trail = getTrail(trailId ?? '')

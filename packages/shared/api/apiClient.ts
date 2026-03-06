@@ -13,7 +13,7 @@ import type { DiscoveryProfile, DiscoveryProfileUpdateData } from '../contracts/
 import type { Result } from '../contracts/results.ts'
 import type { ScanEvent } from '../contracts/sensors.ts'
 import type { CreateSpotRequest, RatingSummary, Spot, SpotPreview, SpotRating, UpdateSpotRequest } from '../contracts/spots.ts'
-import type { StumblePreference, StumbleSuggestion } from '../contracts/stumble.ts'
+import type { StumbleSuggestionResult, StumbleSuggestionsQuery, StumbleVisit } from '../contracts/stumble.ts'
 import type { CreateTrailRequest, Trail, TrailRating, TrailStats, UpdateTrailRequest } from '../contracts/trails.ts'
 import type { StoredTrailSpot, TrailSpot } from '../contracts/trailSpots.ts'
 import type { GeoLocation } from '../geo/index.ts'
@@ -296,15 +296,14 @@ export function createApiClient(config: HttpClientConfig) {
     },
 
     stumble: {
-      getSuggestions: (lat: number, lon: number, radiusMeters: number, preferences: StumblePreference[]) =>
-        call<StumbleSuggestion[]>(() =>
-          client.get(routes.stumble.getSuggestions.path, {
-            lat,
-            lon,
-            radius: radiusMeters,
-            preferences: preferences.join(','),
-          } as any)
-        ),
+      getSuggestions: (query: StumbleSuggestionsQuery) =>
+        call<StumbleSuggestionResult[]>(() => client.get<StumbleSuggestionResult[]>(routes.stumble.getSuggestions.path, query)),
+
+      recordVisit: (poiId: string, spotId?: string) =>
+        call<StumbleVisit>(() => client.post(routes.stumble.recordVisit.path, { poiId, spotId })),
+
+      getVisits: () =>
+        call<StumbleVisit[]>(() => client.get<StumbleVisit[]>(routes.stumble.getVisits.path)),
     },
   }
 }

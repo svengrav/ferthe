@@ -54,7 +54,7 @@ import {
   UpdateTrailRequestSchema,
 } from '@shared/contracts/trails.ts'
 import { TrailSpotSchema } from '@shared/contracts/trailSpots.ts'
-import { StumbleSuggestionSchema } from '@shared/contracts/stumble.ts'
+import { StumbleSuggestionSchema, StumbleVisitSchema } from '@shared/contracts/stumble.ts'
 import { GeoLocationSchema } from '@shared/geo/types.ts'
 import { z } from 'zod'
 import type { RouteRegistry } from './types.ts'
@@ -759,6 +759,22 @@ export const routes = {
         preferences: z.string(), // comma-separated StumblePreference values
       }),
       output: ResultSchema(z.array(StumbleSuggestionSchema)),
+    },
+    recordVisit: {
+      version: 'v1',
+      method: 'POST',
+      path: '/stumble/visits',
+      input: z.object({
+        poiId: z.string(),
+        spotId: z.string().optional(),
+      }),
+      output: ResultSchema(StumbleVisitSchema),
+    },
+    getVisits: {
+      version: 'v1',
+      method: 'GET',
+      path: '/stumble/visits',
+      output: ResultSchema(z.array(StumbleVisitSchema)),
     },
   },
 

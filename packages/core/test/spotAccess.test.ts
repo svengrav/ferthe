@@ -64,6 +64,7 @@ Deno.test({
           scannerRadius: 100,
           discoveryMode: 'free',
           previewMode: 'hidden',
+          spotAccess: 'open' as const,
         },
       })
 

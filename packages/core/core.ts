@@ -1,4 +1,4 @@
-import { Account, AccountApplicationContract, AccountSession, APIContract, Community, CommunityMember, DeviceToken, Discovery, DiscoveryContent, DiscoveryProfile, ImageApplicationContract, SharedDiscovery, SpotRating, StoredSpot, StoredTrail, StoredTrailSpot, TrailRating, TwilioVerification } from '@shared/contracts/index.ts'
+import { Account, AccountApplicationContract, AccountSession, APIContract, Community, CommunityMember, DeviceToken, Discovery, DiscoveryContent, DiscoveryProfile, ImageApplicationContract, SharedDiscovery, SpotRating, StoredSpot, StoredTrail, StoredTrailSpot, StumbleVisit, TrailRating, TwilioVerification } from '@shared/contracts/index.ts'
 import { Buffer } from "node:buffer"
 import { Config, STORE_IDS } from './config/index.ts'
 import { createFirebaseConnector, FirebaseConnector } from './connectors/firebaseConnector.ts'
@@ -20,7 +20,6 @@ import { createSensorApplication, SensorApplicationActions } from './features/se
 import { createSensorService } from './features/sensor/sensorService.ts'
 import { createSpotApplication, SpotApplicationActions } from './features/spot/spotApplication.ts'
 import { createStumbleApplication, StumbleApplicationActions } from './features/stumble/stumbleApplication.ts'
-import { createGooglePlacesConnector } from './connectors/googlePlacesConnector.ts'
 import { PoiConnector } from './connectors/poiConnector.ts'
 import { createTrailApplication } from './features/trail/trailApplication.ts'
 import { createImageApplication } from "./shared/images/imageApplication.ts"
@@ -161,7 +160,11 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
 
   const contentApplication = createContentApplication(config.constants.content.dir)
 
-  const stumbleApplication = createStumbleApplication(createGooglePlacesConnector(config.secrets.googleMapsApiKey))
+  const stumbleVisitStore = createStore<StumbleVisit>(storeConnector, STORE_IDS.STUMBLE_VISITS)
+  const stumbleApplication = createStumbleApplication({
+    poiConnector: poiConnector,
+    visitStore: stumbleVisitStore,
+  })
 
 
   return {

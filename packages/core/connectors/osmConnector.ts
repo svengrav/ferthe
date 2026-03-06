@@ -1,10 +1,19 @@
-import { StumblePreference, STUMBLE_OSM_FILTERS, detectStumbleCategory } from '@shared/contracts/stumble.ts'
+import { StumblePreference, detectStumbleCategory } from '@shared/contracts/stumble.ts'
 import { Poi, PoiConnector } from './poiConnector.ts'
 
-// ──────────────────────────────────────────────────────────────
-// Internal OSM raw element type
-// ──────────────────────────────────────────────────────────────
 
+/** Overpass QL filter fragments per preference (placeholders: {lat} {lon} {radius}) */
+export const STUMBLE_OSM_FILTERS: Record<StumblePreference, string> = {
+  historical: `node["historic"](around:{radius},{lat},{lon});
+    way["historic"](around:{radius},{lat},{lon});`,
+  cafe: `node["amenity"="cafe"](around:{radius},{lat},{lon});`,
+  art: `node["tourism"="artwork"](around:{radius},{lat},{lon});
+    node["amenity"="arts_centre"](around:{radius},{lat},{lon});`,
+  architecture: `way["building"]["name"](around:{radius},{lat},{lon});`,
+  nature: `node["natural"](around:{radius},{lat},{lon});
+    way["leisure"="park"](around:{radius},{lat},{lon});`,
+  street_art: `node["tourism"="artwork"]["artwork_type"="mural"](around:{radius},{lat},{lon});`,
+}
 interface OsmRawElement {
   type: string
   id: number
@@ -13,10 +22,6 @@ interface OsmRawElement {
   center?: { lat: number; lon: number }
   tags?: Record<string, string>
 }
-
-// ──────────────────────────────────────────────────────────────
-// Overpass Query Builder
-// ──────────────────────────────────────────────────────────────
 
 const buildQuery = (lat: number, lon: number, radiusMeters: number, preferences: StumblePreference[]): string => {
   const filters = preferences
@@ -35,10 +40,6 @@ const buildQuery = (lat: number, lon: number, radiusMeters: number, preferences:
 );
 out body ${50};`
 }
-
-// ──────────────────────────────────────────────────────────────
-// Overpass API Connector
-// ──────────────────────────────────────────────────────────────
 
 /** Configurable via OVERPASS_URL env var — defaults to public instance */
 const OVERPASS_URL = Deno.env.get('OVERPASS_URL') ?? 'https://overpass-api.de/api/interpreter'

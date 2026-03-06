@@ -12,7 +12,7 @@ import { Theme, useTheme } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
 
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
-import { isStumbleTrail, useStumbleTrailPicker } from '@app/features/stumble'
+import { isStumbleTrail } from '@app/features/stumble'
 import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
 import TrailList from '@app/features/trail/components/TrailList'
 
@@ -23,7 +23,6 @@ export const useMapTrailListCard = () => {
   const trails = useTrails()
   const { discoveryApplication, stumbleApplication } = getAppContextStore()
   const { locales } = useLocalization()
-  const { openForTrail } = useStumbleTrailPicker()
 
   return {
     showTrailListCard: () => {
@@ -36,13 +35,8 @@ export const useMapTrailListCard = () => {
             trails={trails}
             onSelectTrail={(trail) => {
               closeOverlay(cardId)
+              discoveryApplication.setActiveTrail(trail.id)
 
-              if (isStumbleTrail(trail)) {
-                openForTrail(trail, () => discoveryApplication.setActiveTrail(trail.id))
-              } else {
-                stumbleApplication.deactivate()
-                discoveryApplication.setActiveTrail(trail.id)
-              }
             }}
           />
         </OverlayCard>
@@ -119,7 +113,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   selector: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    borderTopColor: theme.colors.divider,
-    borderTopWidth: 1,
+    backgroundColor: theme.colors.background
   },
 })

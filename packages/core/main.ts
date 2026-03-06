@@ -3,9 +3,10 @@ import createRoutes from '@core/api/routes.ts'
 import { createConfig } from '@core/config/index.ts'
 import { createTwilioSMSConnector } from '@core/connectors/smsConnector.ts'
 import { createAzureStorageConnector } from '@core/connectors/storageConnector.ts'
-import { createCoreContext } from '@core/index.ts'
+import { CoreConnectors, createCoreContext } from '@core/index.ts'
 import { logger } from '@core/shared/logger.ts'
 import { createStoreConnector } from '@core/store/storeFactory.ts'
+import { createGooglePlacesConnector } from "./connectors/googlePlacesConnector.ts";
 
 /**
  * Main entry point for ferthe-core server
@@ -15,7 +16,8 @@ const run = async () => {
   const { secrets, constants } = config
 
   // Create runtime connector instances
-  const connectors = {
+  const connectors: CoreConnectors = {
+    poiConnector: createGooglePlacesConnector(config.secrets.googleMapsApiKey),
     storeConnector: createStoreConnector(constants.store.type, {
       connectionString: secrets.cosmosConnectionString,
       database: constants.store.cosmosDatabase,

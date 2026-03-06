@@ -2,18 +2,16 @@ import { GeoLocationSchema } from '@shared/geo/types.ts'
 import { z } from 'zod'
 import { Result } from './results.ts'
 
-// ──────────────────────────────────────────────────────────────
-// Schemas
-// ──────────────────────────────────────────────────────────────
-
-export const StumblePreferenceSchema = z.enum([
+export const StumblePreferenceSet = [
   'historical',
   'cafe',
   'art',
   'architecture',
   'nature',
   'street_art',
-])
+]
+
+export const StumblePreferenceSchema = z.enum(StumblePreferenceSet)
 
 export const StumbleSuggestionSchema = z.object({
   id: z.string(),
@@ -29,33 +27,32 @@ export const StumbleSuggestionSchema = z.object({
 
 /** API response type — extends stored suggestion with request context */
 export const StumbleSuggestionResultSchema = StumbleSuggestionSchema.extend({
-  matchedPreference: StumblePreferenceSchema,
+  category: StumblePreferenceSchema,
 })
-
-// ──────────────────────────────────────────────────────────────
-// Types
-// ──────────────────────────────────────────────────────────────
 
 export type StumblePreference = z.infer<typeof StumblePreferenceSchema>
 export type StumbleSuggestion = z.infer<typeof StumbleSuggestionSchema>
 export type StumbleSuggestionResult = z.infer<typeof StumbleSuggestionResultSchema>
 
-// ──────────────────────────────────────────────────────────────
-// Domain constants — single source of truth for OSM mappings
-// ──────────────────────────────────────────────────────────────
-
-/** Overpass QL filter fragments per preference (placeholders: {lat} {lon} {radius}) */
-export const STUMBLE_OSM_FILTERS: Record<StumblePreference, string> = {
-  historical: `node["historic"](around:{radius},{lat},{lon});
-    way["historic"](around:{radius},{lat},{lon});`,
-  cafe: `node["amenity"="cafe"](around:{radius},{lat},{lon});`,
-  art: `node["tourism"="artwork"](around:{radius},{lat},{lon});
-    node["amenity"="arts_centre"](around:{radius},{lat},{lon});`,
-  architecture: `way["building"]["name"](around:{radius},{lat},{lon});`,
-  nature: `node["natural"](around:{radius},{lat},{lon});
-    way["leisure"="park"](around:{radius},{lat},{lon});`,
-  street_art: `node["tourism"="artwork"]["artwork_type"="mural"](around:{radius},{lat},{lon});`,
+export type StumbleSuggestionsQuery = {
+  [key: string]: string | number | boolean | undefined
+  lat: number
+  lon: number
+  radius: number
+  preferences: string
 }
+
+
+export const StumbleVisitSchema = z.object({
+  id: z.string(),
+  poiId: z.string(),
+  accountId: z.string(),
+  visitedAt: z.number(),
+  /** Optional: Spot created from this POI */
+  spotId: z.string().optional(),
+})
+
+export type StumbleVisit = z.infer<typeof StumbleVisitSchema>
 
 /** Detect preference from OSM tags — ordered by specificity */
 export const detectStumbleCategory = (tags: Record<string, string>): StumblePreference => {
@@ -68,10 +65,6 @@ export const detectStumbleCategory = (tags: Record<string, string>): StumblePref
   return 'historical'
 }
 
-// ──────────────────────────────────────────────────────────────
-// Application Contract
-// ──────────────────────────────────────────────────────────────
-
 export interface StumbleApplicationContract {
   getSuggestions: (
     lat: number,
@@ -79,4 +72,10 @@ export interface StumbleApplicationContract {
     radiusMeters: number,
     preferences: StumblePreference[],
   ) => Promise<Result<StumbleSuggestionResult[]>>
+
+  /** Record a POI visit for the user */
+  recordVisit: (accountId: string, poiId: string, spotId?: string) => Promise<Result<StumbleVisit>>
+
+  /** Get all visits for a user */
+  getVisits: (accountId: string) => Promise<Result<StumbleVisit[]>>
 }

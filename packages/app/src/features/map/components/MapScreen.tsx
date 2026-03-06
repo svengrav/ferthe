@@ -5,8 +5,6 @@ import { logger } from '@app/shared/utils/logger'
 import { useEffect, useRef } from 'react'
 import { Animated, View } from 'react-native'
 import { useSettingsPage } from '../../settings/components/SettingsPage'
-import { useCreateSpotPage } from '../../spot/creation/components/SpotCreationPage'
-import { useDeviceLocation } from '../../sensor/stores/sensorStore'
 import { getMapStoreActions, useMapLayer, useMapStatus } from '../stores/mapStore'
 import { MapCanvas } from './MapCanvas.tsx'
 import MapCompass from './MapCompass'
@@ -15,7 +13,10 @@ import MapLayerSwitch from './MapLayerSwitch'
 import MapOverview from './MapOverview'
 import MapToolbar from './MapToolbar'
 import { MapTrailSelector } from './MapTrailSelector'
+import { MapBottomBar } from './MapBottomBar'
 import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
+import { useCreateSpotPage } from '@app/features/spot/creation/components/SpotCreationPage'
+import { useDeviceLocation } from '@app/features/sensor/stores/sensorStore'
 
 function MapScreen() {
   const { styles } = useTheme(useStyles)
@@ -68,7 +69,7 @@ function MapScreen() {
     <Page inset='none' options={[{ label: locales.navigation.settings, onPress: () => showSettings() }]}>
       <View style={styles?.container} >
         <MapToolbar
-          leading={<Button icon="add" onPress={() => showCreateSpotPage(device.location)} />}
+          leading={<Button icon='add' onPress={() => showCreateSpotPage(device.location)} />}
           center={<MapCompass />}
           trailing={<MapLayerSwitch />}
         />
@@ -82,8 +83,9 @@ function MapScreen() {
             </Animated.View>
           )}
         </View>
-        <MapTrailSelector />
+        <MapBottomBar />
       </View>
+      <MapTrailSelector />
     </Page>
   )
 }

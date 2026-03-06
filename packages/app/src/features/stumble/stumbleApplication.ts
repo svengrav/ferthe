@@ -5,6 +5,8 @@ import { getStumbleActions, stumbleStore } from './stumbleStore'
 export interface StumbleApplication {
   fetchSuggestions: (lat: number, lon: number, radiusMeters?: number) => Promise<void>
   toggleMode: (lat: number, lon: number) => Promise<void>
+  recordVisit: (poiId: string, spotId?: string) => Promise<void>
+  syncVisits: () => Promise<void>
   deactivate: () => void
 }
 
@@ -24,7 +26,7 @@ export function createStumbleApplication(options: StumbleApplicationOptions): St
 
     logger.log('[Stumble] Fetching suggestions', { lat, lon, radiusMeters, preferences: selectedPreferences })
 
-    const result = await api.stumble.getSuggestions(lat, lon, radiusMeters, selectedPreferences)
+    const result = await api.stumble.getSuggestions({ lat, lon, radius: radiusMeters, preferences: selectedPreferences.join(',') })
 
     if (result.success && result.data) {
       setSuggestions(result.data)
@@ -45,7 +47,33 @@ export function createStumbleApplication(options: StumbleApplicationOptions): St
       reset()
     } else {
       setActive(true)
+      await syncVisits()
       await fetchSuggestions(lat, lon)
+    }
+  }
+
+  const recordVisit = async (poiId: string, spotId?: string): Promise<void> => {
+    const { markVisited } = getStumbleActions()
+
+    // Optimistic UI update
+    markVisited(poiId)
+
+    const result = await api.stumble.recordVisit(poiId, spotId)
+    if (!result.success) {
+      logger.error('[Stumble] Failed to record visit', result.error)
+    } else {
+      logger.log('[Stumble] Visit recorded', { poiId, spotId })
+    }
+  }
+
+  const syncVisits = async (): Promise<void> => {
+    const { setVisitedPoiIds } = getStumbleActions()
+
+    const result = await api.stumble.getVisits()
+    if (result.success && result.data) {
+      const poiIds = result.data.map(v => v.poiId)
+      setVisitedPoiIds(poiIds)
+      logger.log(`[Stumble] Synced ${poiIds.length} visits`)
     }
   }
 
@@ -53,6 +81,6 @@ export function createStumbleApplication(options: StumbleApplicationOptions): St
     getStumbleActions().reset()
   }
 
-  return { fetchSuggestions, toggleMode, deactivate }
+  return { fetchSuggestions, toggleMode, recordVisit, syncVisits, deactivate }
 }
 

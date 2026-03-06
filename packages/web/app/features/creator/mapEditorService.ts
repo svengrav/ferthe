@@ -85,7 +85,8 @@ interface UpdateTrailData {
 const DEFAULT_TRAIL_OPTIONS = {
   scannerRadius: 200,
   snapRadius: 50,
-  previewMode: "preview" as const,
+  previewMode: 'preview' as const,
+  spotAccess: 'open' as const,
 };
 
 interface TrailSpot { spotId: string; order?: number }

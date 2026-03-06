@@ -34,12 +34,7 @@ Deno.test({
   fn: useTestServer(async (t) => {
 
     await t.step('getSuggestions returns success for valid location', async () => {
-      const result = await userClient.stumble.getSuggestions(
-        MUNICH_CENTER.lat,
-        MUNICH_CENTER.lon,
-        500,
-        ['cafe'],
-      )
+      const result = await userClient.stumble.getSuggestions({ lat: MUNICH_CENTER.lat, lon: MUNICH_CENTER.lon, radius: 500, preferences: 'cafe' })
 
       assertEquals(result.success, true, 'Expected success response')
       assertExists(result.data, 'Expected data in response')
@@ -50,12 +45,7 @@ Deno.test({
     // ── Suggestion shape ───────────────────────────────────────────────────────
 
     await t.step('suggestions contain required fields', async () => {
-      const result = await userClient.stumble.getSuggestions(
-        MUNICH_CENTER.lat,
-        MUNICH_CENTER.lon,
-        500,
-        ['historical'],
-      )
+      const result = await userClient.stumble.getSuggestions({ lat: MUNICH_CENTER.lat, lon: MUNICH_CENTER.lon, radius: 500, preferences: 'historical' })
 
       assertEquals(result.success, true)
 
@@ -74,12 +64,7 @@ Deno.test({
     // ── Multiple preferences ───────────────────────────────────────────────────
 
     await t.step('getSuggestions works with multiple preferences', async () => {
-      const result = await userClient.stumble.getSuggestions(
-        MUNICH_CENTER.lat,
-        MUNICH_CENTER.lon,
-        600,
-        ['cafe', 'art', 'architecture'],
-      )
+      const result = await userClient.stumble.getSuggestions({ lat: MUNICH_CENTER.lat, lon: MUNICH_CENTER.lon, radius: 600, preferences: 'cafe,art,architecture' })
 
       assertEquals(result.success, true)
       assert(Array.isArray(result.data), 'Expected array')
@@ -90,8 +75,8 @@ Deno.test({
 
     await t.step('smaller radius returns fewer or equal suggestions than larger radius', async () => {
       const [smallResult, largeResult] = await Promise.all([
-        userClient.stumble.getSuggestions(MUNICH_CENTER.lat, MUNICH_CENTER.lon, 100, ['cafe']),
-        userClient.stumble.getSuggestions(MUNICH_CENTER.lat, MUNICH_CENTER.lon, 800, ['cafe']),
+        userClient.stumble.getSuggestions({ lat: MUNICH_CENTER.lat, lon: MUNICH_CENTER.lon, radius: 100, preferences: 'cafe' }),
+        userClient.stumble.getSuggestions({ lat: MUNICH_CENTER.lat, lon: MUNICH_CENTER.lon, radius: 800, preferences: 'cafe' }),
       ])
 
       assertEquals(smallResult.success, true)
@@ -109,12 +94,7 @@ Deno.test({
 
     await t.step('suggestions only contain categories matching requested preferences', async () => {
       const preferences = ['nature', 'street_art'] as const
-      const result = await userClient.stumble.getSuggestions(
-        MUNICH_CENTER.lat,
-        MUNICH_CENTER.lon,
-        500,
-        [...preferences],
-      )
+      const result = await userClient.stumble.getSuggestions({ lat: MUNICH_CENTER.lat, lon: MUNICH_CENTER.lon, radius: 500, preferences: [...preferences].join(',') })
 
       assertEquals(result.success, true)
 
