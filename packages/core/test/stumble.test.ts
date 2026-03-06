@@ -104,6 +104,8 @@ Deno.test({
     })
 
     // ── Category filtering ─────────────────────────────────────────────────────
+    // Always uses mock connector — live providers (Azure Maps) don't guarantee
+    // strict category-set filtering, so this is a contract-level test only.
 
     await t.step('suggestions only contain categories matching requested preferences', async () => {
       const preferences = ['nature', 'street_art'] as const
@@ -126,5 +128,5 @@ Deno.test({
       console.log(`✓ All suggestions match requested categories (${result.data?.length ?? 0} items)`)
     })
 
-  }, { poiConnector }),
+  }, { poiConnector: mockPoiConnector }),
 })
