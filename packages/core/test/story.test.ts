@@ -26,6 +26,13 @@
  *   Authorization:
  *   - User B cannot delete User A's story
  *
+ *   Like / Unlike:
+ *   - likeStory adds accountId to likedByAccountIds
+ *   - likeStory is idempotent
+ *   - likedByAccountIds visible in public list
+ *   - unlikeStory removes accountId
+ *   - unlikeStory is idempotent
+ *
  *   removeImage flag:
  *   - Story with comment replaces existing one; removeImage clears the image field
  */
@@ -341,6 +348,57 @@ Deno.test({
       const del = await userAClient.story.deleteStory(get.data!.id)
       assertEquals(del.success, true)
       console.log('✓ User A deleted own story')
+    })
+
+    // ── Like / Unlike ─────────────────────────────────────────────────────────
+
+    await t.step('Like: setup — User A creates a public trail story', async () => {
+      const result = await userAClient.story.upsertTrailStory(trailId, {
+        comment: 'Likeable story',
+        visibility: 'public',
+      })
+      assertEquals(result.success, true)
+      storyId = result.data!.id
+      assertEquals(result.data?.likedByAccountIds?.length, 0, 'No likes on creation')
+      console.log(`✓ Public trail story for like tests: ${storyId}`)
+    })
+
+    await t.step('Like: User B likes User A\'s story', async () => {
+      const result = await userBClient.story.likeStory(storyId)
+      assertEquals(result.success, true)
+      assertEquals(result.data?.likedByAccountIds?.includes('story-user-b'), true, 'User B must be in likedByAccountIds')
+      console.log('✓ User B liked the story')
+    })
+
+    await t.step('Like: likeStory is idempotent (double like)', async () => {
+      const result = await userBClient.story.likeStory(storyId)
+      assertEquals(result.success, true)
+      const count = result.data?.likedByAccountIds?.filter(id => id === 'story-user-b').length
+      assertEquals(count, 1, 'accountId must appear exactly once despite double like')
+      console.log('✓ Double like is idempotent')
+    })
+
+    await t.step('Like: likedByAccountIds visible in public list', async () => {
+      const list = await userAClient.story.listPublicStoriesByTrail(trailId)
+      assertEquals(list.success, true)
+      const story = list.data?.find(s => s.id === storyId)
+      assertExists(story, 'Story must be in public list')
+      assertEquals(story?.likedByAccountIds?.includes('story-user-b'), true, 'Like must be visible in list')
+      console.log('✓ likedByAccountIds propagated in public list')
+    })
+
+    await t.step('Unlike: User B unlikes the story', async () => {
+      const result = await userBClient.story.unlikeStory(storyId)
+      assertEquals(result.success, true)
+      assertEquals(result.data?.likedByAccountIds?.includes('story-user-b'), false, 'User B must be removed from likedByAccountIds')
+      console.log('✓ User B unliked the story')
+    })
+
+    await t.step('Unlike: unlikeStory is idempotent (double unlike)', async () => {
+      const result = await userBClient.story.unlikeStory(storyId)
+      assertEquals(result.success, true)
+      assertEquals(result.data?.likedByAccountIds?.includes('story-user-b'), false, 'Still not liked after double unlike')
+      console.log('✓ Double unlike is idempotent')
     })
 
     // ── removeImage ───────────────────────────────────────────────────────────
