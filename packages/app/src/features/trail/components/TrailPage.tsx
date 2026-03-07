@@ -65,7 +65,7 @@ function TrailPage(props: TrailPageProps) {
       <PageTabs variant="chips" defaultTab="overview">
         <PageTab id="overview" label={locales.trails.overview}>
           <Stack spacing='lg'>
-            <TrailAvatar source={trail.image} label={trail.name} />
+            <TrailAvatar source={trail.image} label={trail.name} size={imageSize} />
             <TrailMetaCard trailId={trail.id} createdAt={trail.createdAt} createdBy={trail.createdBy} />
             <LocationChip location={getTrailCenter(trail)} style={{ alignSelf: 'center' }} onPress={() => { const center = getTrailCenter(trail); if (center) openMap(center) }} />
             <SectionHeader title={locales.trails.description} />

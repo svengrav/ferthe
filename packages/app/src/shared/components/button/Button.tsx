@@ -1,6 +1,7 @@
 import { Theme, useTheme } from '@app/shared/theme'
+import * as Haptics from 'expo-haptics'
 import { useRef, useState } from 'react'
-import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native'
+import { Platform, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native'
 import Dropdown from '../dropdown/Dropdown.tsx'
 import { Icon, IconSymbolName } from '../icon/Icon'
 import { DisableableProps, Option, SizeableProps, VariantableProps } from '../types'
@@ -10,6 +11,7 @@ interface ButtonProps extends DisableableProps, SizeableProps, VariantableProps 
   icon?: IconSymbolName
   onPress?: () => void
   dense?: boolean
+  haptic?: boolean
   options?: Option[]
   style?: StyleProp<ViewStyle>
 }
@@ -28,6 +30,7 @@ function Button(props: ButtonProps) {
     dense = false,
     options,
     disabled = false,
+    haptic = false,
     style,
   } = props
 
@@ -45,6 +48,9 @@ function Button(props: ButtonProps) {
   }[size]
 
   const handlePress = () => {
+    if (haptic && Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    }
     if (options) {
       setMenuVisible(true)
     } else if (onPress) {

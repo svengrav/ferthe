@@ -167,10 +167,9 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   nameTag: {
     position: 'absolute',
     transform: [{ translateX: "-50%" }],
-
     alignItems: 'center',
     backgroundColor: theme.deriveColor(theme.colors.surface, 0.9),
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
     paddingVertical: 2,
     borderRadius: 4,
   },

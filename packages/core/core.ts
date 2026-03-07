@@ -130,6 +130,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
   const accountProfileComposite = createAccountProfileComposite({
     accountApplication,
     spotApplication,
+    trailApplication,
   })
 
   const communityApplication = createCommunityApplication({

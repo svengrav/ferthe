@@ -184,6 +184,8 @@ const de: LocalizationSet = {
     notSet: 'Nicht gesetzt',
     profile: 'Profil',
     spots: 'Spots',
+    trails: 'Trails',
+    ratings: 'Bewertungen',
     deleteAccount: 'Konto löschen',
     deleteAccountConfirm: 'Bist du sicher? Dein Konto und alle deine Daten werden dauerhaft gelöscht.',
     logoutConfirm: 'Möchtest du dich wirklich abmelden?',

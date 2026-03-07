@@ -183,6 +183,8 @@ const en = {
     notSet: 'Not set',
     profile: 'Profile',
     spots: 'Spots',
+    trails: 'Trails',
+    ratings: 'Ratings',
     deleteAccount: 'Delete Account',
     deleteAccountConfirm: 'Are you sure? This will permanently delete your account and all your data.',
     logoutConfirm: 'Are you sure you want to logout?',

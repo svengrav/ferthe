@@ -35,8 +35,12 @@ export const DevicePlatformSchema = z.enum(['ios', 'android'])
 export const AccountPublicProfileSchema = z.object({
   accountId: guard.idString,
   displayName: guard.shortTextOptional,
+  description: guard.mediumTextOptional,
   avatar: ImageReferenceSchema.optional(),
   spotCount: guard.nonNegativeInt,
+  trailCount: guard.nonNegativeInt,
+  avgRating: z.number().min(0).max(5),
+  ratingCount: guard.nonNegativeInt,
 })
 
 /**
