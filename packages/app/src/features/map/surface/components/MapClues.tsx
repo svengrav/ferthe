@@ -272,15 +272,17 @@ const useScanCluesWithLifecycle = (scanClues: Clue[], deviceLocation: { lat: num
 /**
  * Hook to sync SharedValue to React state for style calculations
  */
-const useSharedValueAsNumber = (sharedValue: any): number => {
+const useSharedValueAsNumber = (sharedValue: any, precision = 20): number => {
   const [value, setValue] = useState(1)
 
   useAnimatedReaction(
-    () => sharedValue.value,
-    (current) => {
-      scheduleOnRN(setValue, current)
+    () => Math.round(sharedValue.value * precision) / precision,
+    (current, previous) => {
+      if (current !== previous) {
+        scheduleOnRN(setValue, current)
+      }
     },
-    [sharedValue]
+    [sharedValue, precision]
   )
 
   return value

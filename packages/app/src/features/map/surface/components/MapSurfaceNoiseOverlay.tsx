@@ -1,16 +1,22 @@
 import {
+  Blend,
   Canvas,
   ColorMatrix,
   DisplacementMap,
-  FractalNoise,
   Group,
+  ImageShader,
+  Rect,
   Image as SkiaImage,
+  Shader,
   useImage,
 } from '@shopify/react-native-skia'
 import { useDerivedValue } from 'react-native-reanimated'
 import { View } from 'react-native'
 import { getMapThemeDefaults } from '@app/features/map/config/mapThemeDefaults'
 import { useMapScale } from './MapCompensatedScale'
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const GRAIN_TEXTURE = require('@app/../assets/grain-1.png')
 
 const { surface } = getMapThemeDefaults()
 const { scaleThreshold, scaleRange, maxOpacity, baseFrequency, displacementScale } = surface.noise
@@ -53,6 +59,7 @@ interface MapSurfaceNoiseOverlayProps {
 function MapSurfaceNoiseOverlay({ width, height, left, top, imageUrl }: MapSurfaceNoiseOverlayProps) {
   const scale = useMapScale()
   const image = useImage(imageUrl ?? null)
+  const grainImage = useImage(GRAIN_TEXTURE)
 
   const opacity = useDerivedValue(() => {
     if (!scale) return 0
@@ -60,32 +67,26 @@ function MapSurfaceNoiseOverlay({ width, height, left, top, imageUrl }: MapSurfa
     return Math.min(Math.max(t, 0), 1) * maxOpacity
   })
 
-  if (!scale) return null
+  if (!scale || !imageUrl) return null
 
   return (
     <View
       style={{ position: 'absolute', left, top, width, height }}
       pointerEvents="none"
     >
-      <Canvas style={{ width, height }}>
-        <Group blendMode="overlay" opacity={opacity}>
-          {image && (
-            <SkiaImage image={image} x={0} y={0} width={width} height={height} fit="cover">
-              <ColorMatrix matrix={CONTRAST_MATRIX} />
-              <ColorMatrix matrix={SATURATE_MATRIX} />
-              <DisplacementMap channelX="r" channelY="g" scale={displacementScale}>
-                <FractalNoise
-                  freqX={baseFrequency}
-                  freqY={baseFrequency}
-                  octaves={4}
-                  seed={0}
-                  tileWidth={width}
-                  tileHeight={height}
-                />
-              </DisplacementMap>
-            </SkiaImage>
-          )}
-        </Group>
+      <Canvas style={{ width, height, opacity: opacity.value }}>
+        <Rect x={0} y={0} width={width} height={height}>
+          <Blend mode="softLight">
+            <ImageShader image={image} fit="cover" rect={{ x: 0, y: 0, width, height }} />
+            <ImageShader
+              image={grainImage}
+              fit="cover"
+              rect={{ x: 0, y: 0, width: 200, height: 200 }}
+              tx={'repeat'}
+              ty={'repeat'}
+            />
+          </Blend>
+        </Rect>
       </Canvas>
     </View>
   )

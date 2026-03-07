@@ -106,6 +106,8 @@ function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCa
 
   if (!styles) return null
 
+  const hasDiscovery = !!card.discoveryId
+
   // Dynamic styles that depend on dimensions
   const cardContainerStyles = {
     width,
@@ -132,7 +134,7 @@ function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCa
             variant='secondary'
             onPress={() => showDiscoveryCardDetails(card)}
           />
-          {card.discoveryId && (
+          {hasDiscovery && (
             <Button
               icon='share'
               variant='secondary'
@@ -182,14 +184,14 @@ function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCa
         <SpotGradientFrame padding={6}>
           {/* Close and view details buttons */}
           <View style={styles.buttonContainer}>
-            {card.discoveryId && (
+            {hasDiscovery && (
               <Button
                 icon='zoom-out-map'
                 variant='secondary'
                 onPress={() => showDiscoveryCardDetails(card)}
               />
             )}
-            {card.discoveryId && (
+            {hasDiscovery && (
               <Button
                 icon='share'
                 variant='secondary'

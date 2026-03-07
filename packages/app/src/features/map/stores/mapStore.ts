@@ -129,8 +129,12 @@ export const useMapSurfaceImageLayout = () => useMapStore(useShallow(state => st
 
 // Canvas (device-centered canvas mode)
 export const useMapCanvas = () => useMapStore(useShallow(state => state.canvas))
+export const useMapCanvasBoundary = () => useMapStore(useShallow(state => state.canvas.boundary))
 export const useMapCanvasDimensions = () => useMapStore(useShallow(state => state.canvas.size))
 export const useMapCanvasScale = () => useMapStore(state => state.canvas.scale.init)
+export const useMapCanvasScaleConfig = () => useMapStore(useShallow(state => state.canvas.scale))
+export const useMapCanvasImage = () => useMapStore(state => state.canvas.image)
+export const useMapCanvasRadius = () => useMapStore(state => state.canvas.radius)
 
 // Overview (full trail overview mode)
 export const useMapOverview = () => useMapStore(useShallow(state => state.overview))

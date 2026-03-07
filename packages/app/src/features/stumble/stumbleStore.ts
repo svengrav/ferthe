@@ -1,11 +1,11 @@
-import { StumblePreference, StumbleSuggestion } from '@shared/contracts'
+import { StumblePreference, StumbleSuggestion, StumbleSuggestionResult } from '@shared/contracts'
 import { create } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
 interface StumbleState {
   isActive: boolean
   isLoading: boolean
-  suggestions: StumbleSuggestion[]
+  suggestions: StumbleSuggestionResult[]
   selectedPreferences: StumblePreference[]
   visitedPoiIds: Set<string>
   error: string | undefined
@@ -14,7 +14,7 @@ interface StumbleState {
 interface StumbleActions {
   setActive: (active: boolean) => void
   setLoading: (loading: boolean) => void
-  setSuggestions: (suggestions: StumbleSuggestion[]) => void
+  setSuggestions: (suggestions: StumbleSuggestionResult[]) => void
   setSelectedPreferences: (preferences: StumblePreference[]) => void
   markVisited: (poiId: string) => void
   setVisitedPoiIds: (ids: string[]) => void

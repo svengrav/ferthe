@@ -34,7 +34,7 @@ const MAP_THEME_DEFAULT = {
     size: 15,
     borderRadius: 4,
     borderWidth: 0.5,
-    backgroundColor: '#000000ff',
+    backgroundColor: '#e0e0e0ff',
     imageBorderRadius: 2,
     imageBackgroundColor: '#000',
     heightOffset: 7,

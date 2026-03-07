@@ -5,7 +5,7 @@ import { memo, useMemo } from 'react'
 import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 import { mapUtils } from '../../services/geoToScreenTransform'
-import { useDeviceBoundaryStatus, useMapCanvas, useMapContainerSize, useMapDevice } from '../../stores/mapStore'
+import { useDeviceBoundaryStatus, useMapCanvasBoundary, useMapContainerSize, useMapDevice } from '../../stores/mapStore'
 import { useMapTheme } from '../../stores/mapThemeStore'
 
 const DOT_SIZE = 8
@@ -17,7 +17,7 @@ const MAX_DISCOVERIES = 5
  */
 function MapDiscoveryBorderIndicators() {
   const { isOutsideBoundary } = useDeviceBoundaryStatus()
-  const { boundary: canvasBoundary } = useMapCanvas()
+  const canvasBoundary = useMapCanvasBoundary()
   const containerSize = useMapContainerSize()
   const device = useMapDevice()
   const discoveries = useDiscoveries()

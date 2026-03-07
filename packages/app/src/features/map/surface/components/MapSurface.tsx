@@ -38,7 +38,7 @@ function MapSurface() {
         />
       )}
 
-      {/* {Platform.OS !== 'web' && (
+      {Platform.OS !== 'web' && (
         <MapSurfaceNoiseOverlay
           width={imageLayout.width}
           height={imageLayout.height}
@@ -46,7 +46,7 @@ function MapSurface() {
           top={imageLayout.top}
           imageUrl={image}
         />
-      )} */}
+      )}
     </View>
   )
 }
