@@ -247,7 +247,7 @@ const en = {
     update: 'Update',
     save: 'Save',
     share: 'Share',
-    addNote: 'Add note',
+    addNote: 'Share your story',
     discovered: 'Discovered',
     deleteImage: 'Delete Image',
     deleteImageConfirm: 'Are you sure you want to delete this image?',

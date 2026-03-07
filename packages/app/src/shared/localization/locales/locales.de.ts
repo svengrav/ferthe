@@ -248,7 +248,8 @@ const de: LocalizationSet = {
     update: 'Aktualisieren',
     save: 'Speichern',
     share: 'Teilen',
-    addNote: 'Notiz hinzufügen', discovered: 'Entdeckt',
+    addNote: 'Teile deine Geschichte',
+    discovered: 'Entdeckt',
     deleteImage: 'Bild entfernen',
     deleteImageConfirm: 'Bild wird entfernt',
     stats: {
