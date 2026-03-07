@@ -41,6 +41,15 @@ function TrailStats(props: TrailStatsProps) {
   }
 
   if (!stats) {
+    if (!loading && !error) {
+      return (
+        <View style={[styles?.emptyContainer, style]}>
+          <Text variant="body" style={styles.emptyText}>
+            {locales.trails.noStatsAvailable}
+          </Text>
+        </View>
+      )
+    }
     return null
   }
 
@@ -138,6 +147,13 @@ const formatDuration = (seconds: number): string => {
 }
 
 const createStyles = (theme: Theme) => StyleSheet.create({
+  emptyContainer: {
+    padding: theme.tokens.inset.lg,
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: theme.deriveColor(theme.colors.onSurface, 0.3),
+  },
   container: {
     flex: 1,
   },

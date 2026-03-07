@@ -81,6 +81,7 @@ const de: LocalizationSet = {
     toDiscover: 'noch zu entdecken',
     allSpotsDiscovered: 'Alle Spots wurden entdeckt!',
     rating: 'Trail Bewertung',
+    noStatsAvailable: 'Noch keine Statistiken für diesen Trail vorhanden.',
     stats: {
       name: 'Statistik',
       progress: 'Fortschritt',

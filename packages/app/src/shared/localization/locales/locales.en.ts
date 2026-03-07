@@ -79,6 +79,7 @@ const en = {
     toDiscover: 'to discover',
     allSpotsDiscovered: 'All spots discovered!',
     rating: 'Trail Rating',
+    noStatsAvailable: 'No stats available for this trail yet.',
     stats: {
       name: 'Your Stats',
       progress: 'Progress',
