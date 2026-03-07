@@ -24,6 +24,7 @@ const en = {
     confirmRemove: 'Are you sure you want to remove this?',
     status: 'Status',
     created: 'Created',
+    saved: 'Saved',
   },
   errors: {
     generic: 'An error has occurred.',

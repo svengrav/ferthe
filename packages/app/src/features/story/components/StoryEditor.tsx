@@ -70,7 +70,7 @@ function StoryEditorCard({ existingStory, onSubmit, onClose }: StoryEditorCardPr
         visibility,
       })
       clearImage()
-      showSnackbar(locales.spotCreation.created)
+      showSnackbar(locales.common.saved)
     } catch (error) {
       logger.error('Error submitting story:', error)
     } finally {

@@ -26,6 +26,7 @@ const de: LocalizationSet = {
     confirmRemove: 'Entfernen bestätigen',
     status: 'Status',
     created: 'Erstellt',
+    saved: 'Gespeichert',
   },
   errors: {
     generic: 'Ein Fehler ist aufgetreten.',
