@@ -11,7 +11,7 @@ import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import SpotRating from '../../spot/components/SpotRating.tsx'
 import { DiscoveryEventState } from '../services/types'
 import DiscoveryShareSection from './DiscoveryShareSection'
-import DiscoveryUserContentSection from './DiscoveryUserContentSection'
+import StoryUserContentSection from '@app/features/story/components/StoryUserContentSection'
 
 const PAGE_PADDING = 16
 const RESERVED_UI_SPACE = 200
@@ -106,22 +106,15 @@ function DiscoveryCardContent(props: DiscoveryCardContentProps) {
   const { card } = props
   const { styles } = useTheme(createStyles)
   const { locales } = useLocalization()
-  const { discoveryApplication } = getAppContextStore()
+  const { storyApplication } = getAppContextStore()
   const { title, image, description, discoveryId } = card
   const { width, height, borderRadius } = useSpotCardDimensions()
   const { scrollHandler, titleOpacityStyle } = useCardAnimations(height)
 
-  // Load content on mount
+  // Load story on mount
   useEffect(() => {
-    discoveryApplication.getDiscoveryContent(discoveryId)
-  }, [discoveryId, discoveryApplication])
-
-  if (!styles) return null
-
-  const cardStyle = { width, height }
-  const imageStyle = { width, height }
-  const titleContainerStyle = { width, top: height - 70 }
-  const imageSpacerStyle = { height }
+    storyApplication.getSpotStory(discoveryId)
+  }, [discoveryId, storyApplication])
 
   return (
     <View style={styles.wrapper} id='discovery-wrapper'>
@@ -163,7 +156,17 @@ function DiscoveryCardContent(props: DiscoveryCardContentProps) {
           )}
 
           {/* User content section */}
-          <DiscoveryUserContentSection id={discoveryId} />
+          <StoryUserContentSection
+            storyContextId={discoveryId}
+            onSave={async (data) => {
+              const result = await storyApplication.upsertSpotStory(discoveryId, data)
+              return result.success ?? false
+            }}
+            onDelete={async (storyId) => {
+              const result = await storyApplication.deleteStory(storyId, discoveryId)
+              return result.success ?? false
+            }}
+          />
         </View>
       </Animated.ScrollView>
     </View>

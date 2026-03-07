@@ -288,7 +288,7 @@ Deno.test({
     // ── Content lifecycle ─────────────────────────────────────────────────────
 
     await t.step('getContent returns undefined before upsert', async () => {
-      const result = await userAClient.discovery.getDiscoveryContent(discoveryId)
+      const result = await userAClient.story.getSpotStory(discoveryId)
 
       assertEquals(result.success, true)
       assertEquals(result.data, undefined, 'No content before upsert')
@@ -296,7 +296,7 @@ Deno.test({
     })
 
     await t.step('upsertContent creates content with comment', async () => {
-      const result = await userAClient.discovery.upsertDiscoveryContent(discoveryId, {
+      const result = await userAClient.story.upsertSpotStory(discoveryId, {
         comment: 'Amazing spot!',
         visibility: 'public',
       })
@@ -309,7 +309,7 @@ Deno.test({
     })
 
     await t.step('upsertContent updates existing content', async () => {
-      const result = await userAClient.discovery.upsertDiscoveryContent(discoveryId, {
+      const result = await userAClient.story.upsertSpotStory(discoveryId, {
         comment: 'Updated comment',
         visibility: 'private',
       })
@@ -321,7 +321,7 @@ Deno.test({
     })
 
     await t.step('getContent returns updated content', async () => {
-      const result = await userAClient.discovery.getDiscoveryContent(discoveryId)
+      const result = await userAClient.story.getSpotStory(discoveryId)
 
       assertEquals(result.success, true)
       assertEquals(result.data?.comment, 'Updated comment')
@@ -330,14 +330,15 @@ Deno.test({
     })
 
     await t.step('deleteContent removes the content', async () => {
-      const result = await userAClient.discovery.deleteDiscoveryContent(discoveryId)
+      const story = await userAClient.story.getSpotStory(discoveryId)
+      const result = await userAClient.story.deleteStory(story.data!.id)
 
       assertEquals(result.success, true)
       console.log('✓ Content deleted')
     })
 
     await t.step('getContent returns undefined after delete', async () => {
-      const result = await userAClient.discovery.getDiscoveryContent(discoveryId)
+      const result = await userAClient.story.getSpotStory(discoveryId)
 
       assertEquals(result.success, true)
       assertEquals(result.data, undefined, 'Content must be gone after delete')

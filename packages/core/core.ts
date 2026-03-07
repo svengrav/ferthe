@@ -1,4 +1,4 @@
-import { Account, AccountApplicationContract, AccountSession, APIContract, Community, CommunityMember, DeviceToken, Discovery, DiscoveryContent, DiscoveryProfile, ImageApplicationContract, SharedDiscovery, SpotRating, StoredSpot, StoredTrail, StoredTrailSpot, StumbleVisit, TrailRating, TwilioVerification } from '@shared/contracts/index.ts'
+import { Account, AccountApplicationContract, AccountSession, APIContract, Community, CommunityMember, DeviceToken, Discovery, DiscoveryProfile, ImageApplicationContract, SharedDiscovery, SpotRating, StoredSpot, StoredTrail, StoredTrailSpot, Story, StumbleVisit, TrailRating, TwilioVerification } from '@shared/contracts/index.ts'
 import { Buffer } from "node:buffer"
 import { Config, STORE_IDS } from './config/index.ts'
 import { createFirebaseConnector, FirebaseConnector } from './connectors/firebaseConnector.ts'
@@ -13,6 +13,7 @@ import { createAccountProfileComposite } from './features/composites/accountProf
 import { createDiscoveryStateComposite } from './features/composites/discoveryStateComposite.ts'
 import { createSpotAccessComposite } from './features/composites/spotAccessComposite.ts'
 import { ContentApplicationActions, createContentApplication } from './features/content/contentApplication.ts'
+import { createStoryApplication } from './features/story/storyApplication.ts'
 import { createDiscoveryApplication } from './features/discovery/discoveryApplication.ts'
 import { createDiscoveryService } from './features/discovery/discoveryService.ts'
 import { createNotificationService, NotificationService } from './features/notification/notificationService.ts'
@@ -63,8 +64,8 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
   const spotStore = createStore<StoredSpot>(storeConnector, STORE_IDS.SPOTS)
   const discoveryStore = createStore<Discovery>(storeConnector, STORE_IDS.DISCOVERIES)
   const communityMemberStore = createStore<CommunityMember>(storeConnector, STORE_IDS.COMMUNITY_MEMBERS)
-  const discoveryContentStore = createStore<DiscoveryContent>(storeConnector, STORE_IDS.DISCOVERY_CONTENTS)
   const discoveryProfileStore = createStore<DiscoveryProfile>(storeConnector, STORE_IDS.DISCOVERY_PROFILES)
+  const storyStore = createStore<Story>(storeConnector, STORE_IDS.STORIES)
 
   const spotApplication = createSpotApplication({
     spotStore,
@@ -93,8 +94,8 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     smsService: createSMSService({ phoneSalt: config.secrets.phoneHashSalt }),
     imageApplication: imageApplication,
     firebaseConfig: config.constants.firebase,
-    onDelete: createAccountDeleteComposite({ discoveryStore, spotStore, communityMemberStore, discoveryContentStore, discoveryProfileStore }).delete,
-    onMerge: createAccountMergeComposite({ discoveryStore, spotStore, communityMemberStore, discoveryContentStore, discoveryProfileStore }).merge,
+    onDelete: createAccountDeleteComposite({ discoveryStore, spotStore, communityMemberStore, storyStore, discoveryProfileStore }).delete,
+    onMerge: createAccountMergeComposite({ discoveryStore, spotStore, communityMemberStore, storyStore, discoveryProfileStore }).merge,
   })
 
   const sensorApplication = createSensorApplication({
@@ -105,6 +106,12 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     discoveryStore,
   })
 
+  const storyApplication = createStoryApplication({
+    storyStore,
+    discoveryStore,
+    imageApplication,
+  })
+
   const discoveryApplication = createDiscoveryApplication({
     sensorApplication: sensorApplication,
     trailApplication: trailApplication,
@@ -112,8 +119,6 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     discoveryService: createDiscoveryService(),
     discoveryStore,
     profileStore: discoveryProfileStore,
-    contentStore: discoveryContentStore,
-    imageApplication: imageApplication
   })
 
   // Composites: cross-feature aggregation, created after all applications
@@ -171,6 +176,7 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
   return {
     config: config,
     discoveryApplication,
+    storyApplication,
     trailApplication,
     spotApplication,
     sensorApplication,

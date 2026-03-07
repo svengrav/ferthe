@@ -12,6 +12,7 @@ import { Result } from './results.ts'
 export const ImageTypeSchema = z.enum([
   'discovery',
   'spot',
+  'story',
   'trail',
   'trail-preview',
   'trail-surface',

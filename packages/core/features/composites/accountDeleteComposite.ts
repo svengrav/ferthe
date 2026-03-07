@@ -1,11 +1,11 @@
 import { Store } from '@core/store/storeFactory.ts'
-import { CommunityMember, Discovery, DiscoveryContent, DiscoveryProfile, StoredSpot } from '@shared/contracts/index.ts'
+import { CommunityMember, Discovery, DiscoveryProfile, Story, StoredSpot } from '@shared/contracts/index.ts'
 
 interface AccountDeleteCompositeOptions {
   discoveryStore: Store<Discovery>
   spotStore: Store<StoredSpot>
   communityMemberStore: Store<CommunityMember>
-  discoveryContentStore: Store<DiscoveryContent>
+  storyStore: Store<Story>
   discoveryProfileStore: Store<DiscoveryProfile>
 }
 
@@ -18,15 +18,15 @@ export interface AccountDeleteComposite {
  * Called by accountApplication.deleteAccount before removing the account record.
  */
 export function createAccountDeleteComposite(options: AccountDeleteCompositeOptions): AccountDeleteComposite {
-  const { discoveryStore, spotStore, communityMemberStore, discoveryContentStore, discoveryProfileStore } = options
+  const { discoveryStore, spotStore, communityMemberStore, storyStore, discoveryProfileStore } = options
 
   return {
     async delete(accountId) {
-      const [discoveries, spots, members, contents, profiles] = await Promise.all([
+      const [discoveries, spots, members, stories, profiles] = await Promise.all([
         discoveryStore.list(),
         spotStore.list(),
         communityMemberStore.list(),
-        discoveryContentStore.list(),
+        storyStore.list(),
         discoveryProfileStore.list(),
       ])
 
@@ -34,7 +34,7 @@ export function createAccountDeleteComposite(options: AccountDeleteCompositeOpti
         ...(discoveries.data ?? []).filter(d => d.accountId === accountId).map(d => discoveryStore.delete(d.id)),
         ...(spots.data ?? []).filter(s => s.createdBy === accountId).map(s => spotStore.delete(s.id!)),
         ...(members.data ?? []).filter(m => m.accountId === accountId).map(m => communityMemberStore.delete(m.id)),
-        ...(contents.data ?? []).filter(c => c.accountId === accountId).map(c => discoveryContentStore.delete(c.id)),
+        ...(stories.data ?? []).filter(s => s.accountId === accountId).map(s => storyStore.delete(s.id)),
         ...(profiles.data ?? []).filter(p => p.accountId === accountId).map(p => discoveryProfileStore.delete(p.id)),
       ])
     },

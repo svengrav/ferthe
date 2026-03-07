@@ -9,15 +9,12 @@ import {
   createSuccessResult,
   Discovery,
   DiscoveryApplicationContract,
-  DiscoveryContent,
-  DiscoveryContentVisibility,
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoveryProfileUpdateData,
   DiscoverySpot,
   DiscoveryStats,
   DiscoveryTrail,
-  ImageApplicationContract,
   LocationWithDirection,
   QueryOptions,
   RatingSummary,
@@ -27,10 +24,8 @@ import {
   TrailStats,
   WelcomeDiscoveryResult
 } from '@shared/contracts'
-import { ERROR_CODES } from '@shared/contracts/errors.ts'
 import { GeoLocation } from '@shared/geo'
 import { createDiscoveryService, DiscoveryServiceActions } from './discoveryService.ts'
-
 /**
  * Default discovery trail ID used when creating new profiles
  */
@@ -47,15 +42,13 @@ interface DiscoveryApplicationOptions {
   discoveryService: DiscoveryServiceActions
   discoveryStore: Store<Discovery>
   profileStore: Store<DiscoveryProfile>
-  contentStore: Store<DiscoveryContent>
   sensorApplication: SensorApplicationActions
   trailApplication: TrailApplicationContract
   spotApplication: SpotApplicationActions
-  imageApplication?: ImageApplicationContract
 }
 
 export function createDiscoveryApplication(options: DiscoveryApplicationOptions): DiscoveryApplicationContract {
-  const { discoveryService = createDiscoveryService(), discoveryStore, profileStore, contentStore, trailApplication, spotApplication, imageApplication } = options
+  const { discoveryService = createDiscoveryService(), discoveryStore, profileStore, trailApplication, spotApplication } = options
 
   const getDiscoveryTrail = async (context: AccountContext, trailId: string, userLocation?: GeoLocation): Promise<Result<DiscoveryTrail>> => {
     try {
@@ -392,143 +385,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     }
   }
 
-  // Content methods (image + comment)
-
-  const getDiscoveryContent = async (
-    _context: AccountContext,
-    discoveryId: string
-  ): Promise<Result<DiscoveryContent | undefined>> => {
-    try {
-      const contentResult = await contentStore.list()
-      if (!contentResult.success) {
-        return createErrorResult('GET_CONTENT_ERROR')
-      }
-
-      const content = contentResult.data?.find(c => c.discoveryId === discoveryId)
-      return createSuccessResult(content)
-    } catch (error: any) {
-      return createErrorResult('GET_CONTENT_ERROR', { originalError: error.message })
-    }
-  }
-
-  const upsertDiscoveryContent = async (
-    context: AccountContext,
-    discoveryId: string,
-    content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }
-  ): Promise<Result<DiscoveryContent>> => {
-    try {
-      const accountId = context.accountId
-      if (!accountId) {
-        return createErrorResult('ACCOUNT_ID_REQUIRED')
-      }
-
-      // Verify discovery exists and belongs to user
-      const discoveryResult = await getDiscovery(context, discoveryId)
-      if (!discoveryResult.data) {
-        return createErrorResult('DISCOVERY_NOT_FOUND')
-      }
-
-      // Get existing content
-      const existingResult = await getDiscoveryContent(context, discoveryId)
-      const existing = existingResult.data
-
-      // Verify ownership if content exists
-      if (existing && existing.accountId !== accountId) {
-        return createErrorResult('NOT_AUTHORIZED')
-      }
-
-      // Handle image upload if base64 data provided
-      let finalImageUrl = content.imageUrl
-      if (content.imageUrl && content.imageUrl.startsWith('data:image')) {
-        if (!imageApplication) {
-          return createErrorResult(ERROR_CODES.STORAGE_CONNECTOR_NOT_CONFIGURED.code)
-        }
-
-        const uploadResult = await imageApplication.processAndStore(context, 'discovery', discoveryId, content.imageUrl, { processImage: true, blur: false })
-        if (!uploadResult.success || !uploadResult.data) {
-          return createErrorResult(ERROR_CODES.IMAGE_UPLOAD_ERROR.code)
-        }
-
-        const { blobPath } = uploadResult.data
-
-        // Generate URL from blob path
-        const urlResult = await imageApplication.refreshImageUrl(context, blobPath)
-        if (urlResult.success && urlResult.data) {
-          finalImageUrl = urlResult.data
-        }
-      }
-
-      // Upsert: Create or Update
-      if (existing) {
-        // Update existing content
-        const updated = discoveryService.updateDiscoveryContent(existing, {
-          ...content,
-          imageUrl: finalImageUrl,
-        })
-        const saveResult = await contentStore.update(updated.id, updated)
-        if (!saveResult.success) {
-          return createErrorResult('UPDATE_CONTENT_ERROR')
-        }
-        return createSuccessResult(updated)
-      } else {
-        // Create new content
-        const newContent = discoveryService.createDiscoveryContent(accountId, discoveryId, {
-          ...content,
-          imageUrl: finalImageUrl,
-        })
-        const saveResult = await contentStore.create(newContent)
-        if (!saveResult.success) {
-          return createErrorResult('SAVE_CONTENT_ERROR')
-        }
-        return createSuccessResult(newContent)
-      }
-    } catch (error: any) {
-      return createErrorResult('UPDATE_CONTENT_ERROR', { originalError: error.message })
-    }
-  }
-
-  const deleteDiscoveryContent = async (
-    context: AccountContext,
-    discoveryId: string
-  ): Promise<Result<void>> => {
-    try {
-      const accountId = context.accountId
-      if (!accountId) {
-        return createErrorResult('ACCOUNT_ID_REQUIRED')
-      }
-
-      // Get existing content
-      const existingResult = await getDiscoveryContent(context, discoveryId)
-      if (!existingResult.data) {
-        return createErrorResult('CONTENT_NOT_FOUND')
-      }
-
-      // Verify ownership
-      if (existingResult.data.accountId !== accountId) {
-        return createErrorResult('NOT_AUTHORIZED')
-      }
-
-      // Delete associated image if exists
-      if (existingResult.data.image?.url && imageApplication) {
-        const deleteImageResult = await imageApplication.deleteImage(context, existingResult.data.image.url)
-        if (!deleteImageResult.success) {
-          // Log error but continue with content deletion
-          console.warn('Failed to delete associated image:', deleteImageResult.error)
-        }
-      }
-
-      // Delete the content
-      const deleteResult = await contentStore.delete(existingResult.data.id)
-      if (!deleteResult.success) {
-        return createErrorResult('DELETE_CONTENT_ERROR')
-      }
-
-      return createSuccessResult(undefined)
-    } catch (error: any) {
-      return createErrorResult('DELETE_CONTENT_ERROR', { originalError: error.message })
-    }
-  }
-
   // Rating methods (delegated to SpotApplication with access control)
   const rateSpot = async (
     context: AccountContext,
@@ -717,9 +573,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     updateDiscoveryProfile,
     getDiscoveryStats,
     getDiscoveryTrailStats,
-    getDiscoveryContent,
-    upsertDiscoveryContent,
-    deleteDiscoveryContent,
     rateSpot,
     removeSpotRating,
     getSpotRatingSummary,

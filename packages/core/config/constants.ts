@@ -57,6 +57,7 @@ export const STORE_IDS = {
   DISCOVERIES: 'discovery-collection',
   DISCOVERY_PROFILES: 'discovery-profile-collection',
   DISCOVERY_CONTENTS: 'discovery-content-collection',
+  STORIES: 'story-collection',
   SPOT_RATINGS: 'spot-ratings',
   TRAIL_RATINGS: 'trail-ratings',
   SENSOR_SCANS: 'sensor-scans',

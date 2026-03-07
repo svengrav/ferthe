@@ -46,11 +46,10 @@ export function createTrailApplication(options: TrailApplicationOptions) {
     const trailSpots = trailSpotsResult.data || []
     const spotIds = trailSpots.map(ts => ts.spotId)
     const spotPreviews = trailSpots
-      .filter(ts => ts.preview)
       .map(ts => ({
         id: ts.spotId,
-        blurredImage: ts.preview!.blurredImage,
-        rating: ts.preview!.rating,
+        blurredImage: ts.preview?.blurredImage,
+        rating: ts.preview?.rating ?? { average: 0, count: 0 },
       }))
 
     getSpotStoreActions().setSpotPreviews(spotPreviews)

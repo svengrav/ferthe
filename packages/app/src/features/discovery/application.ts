@@ -3,14 +3,13 @@ import { getSpotStoreActions as getSpotActions, getSpots, getSpotsById } from '@
 import { getTrailsById } from '@app/features/trail/stores/trailStore'
 import { logger } from '@app/shared/utils/logger'
 import type { ApiClient } from '@shared/api'
-import { Discovery, DiscoveryContent, DiscoveryContentVisibility, DiscoveryStats, RatingSummary, Result, SpotSummary } from '@shared/contracts'
+import { Discovery, DiscoveryStats, RatingSummary, Result, SpotSummary } from '@shared/contracts'
 import { Unsubscribe } from '@shared/events/eventHandler'
 import { GeoLocation, geoUtils } from '@shared/geo'
 import { getTrails } from '../trail/stores/trailStore'
 import { emitDiscoveryTrailUpdated, emitNewDiscoveries, onDiscoveryTrailUpdated, onNewDiscoveries } from './events/discoveryEvents'
 import { discoveryService } from './services/discoveryService'
 import { DiscoveryEventState } from './services/types'
-import { getDiscoveryContentActions } from './stores/discoveryContentStore'
 import { getDiscoveries, getDiscoveriesById, getDiscoveryActions } from './stores/discoveryStore'
 import { getDiscoveryTrailActions, getDiscoveryTrailData, getDiscoveryTrailId } from './stores/discoveryTrailStore'
 import { getSpotRatingActions } from './stores/spotRatingStore'
@@ -27,19 +26,11 @@ export interface DiscoveryApplication {
   onDiscoveryTrailUpdate: (handler: (state: any) => void) => Unsubscribe
   onNewDiscoveries: (handler: (discoveries: DiscoveryEventState[]) => void) => Unsubscribe
   getDiscoveryCards: () => DiscoveryEventState[]
-  // Stats method
   getDiscoveryStats: (discoveryId: string) => Promise<Result<DiscoveryStats>>
-  // Content methods
-  upsertDiscoveryContent: (discoveryId: string, content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }) => Promise<Result<DiscoveryContent>>
-  deleteDiscoveryContent: (discoveryId: string) => Promise<Result<void>>
-  getDiscoveryContent: (discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
-  // Rating methods
   rateSpot: (spotId: string, rating: number) => Promise<Result<void>>
   removeSpotRating: (spotId: string) => Promise<Result<void>>
   getSpotRatingSummary: (spotId: string) => Promise<Result<RatingSummary>>
-  // Welcome Discovery
   createWelcomeDiscovery: (location: GeoLocation) => Promise<Result<DiscoveryEventState>>
-  // Spot Screen
   requestSpotScreenData: () => Promise<void>
 }
 
@@ -344,34 +335,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     }
   }
 
-  // Content methods
-  const upsertDiscoveryContent = async (
-    discoveryId: string,
-    content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }
-  ): Promise<Result<DiscoveryContent>> => {
-    const result = await api.discovery.upsertDiscoveryContent(discoveryId, content)
-    if (result.data) {
-      getDiscoveryContentActions().setContent(discoveryId, result.data)
-    }
-    return result
-  }
-
-  const getDiscoveryContent = async (discoveryId: string): Promise<Result<DiscoveryContent | undefined>> => {
-    const result = await api.discovery.getDiscoveryContent(discoveryId)
-    if (result.data) {
-      getDiscoveryContentActions().setContent(discoveryId, result.data)
-    }
-    return result
-  }
-
-  const deleteDiscoveryContent = async (discoveryId: string): Promise<Result<void>> => {
-    const result = await api.discovery.deleteDiscoveryContent(discoveryId)
-    if (result.success) {
-      getDiscoveryContentActions().clearContent(discoveryId)
-    }
-    return result
-  }
-
   // Rating methods
   const rateSpot = async (spotId: string, rating: number): Promise<Result<void>> => {
     logger.log('DiscoveryApplication: Rating spot', { spotId, rating })
@@ -445,9 +408,6 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     onDiscoveryTrailUpdate: onDiscoveryTrailUpdated,
     onNewDiscoveries,
     getDiscoveryStats,
-    upsertDiscoveryContent,
-    deleteDiscoveryContent,
-    getDiscoveryContent,
     rateSpot,
     removeSpotRating,
     getSpotRatingSummary,

@@ -8,54 +8,46 @@ import { useLocalization } from '@app/shared/localization'
 import { closeOverlay, OverlayCard, setOverlay } from '@app/shared/overlay'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
-import { DiscoveryContent, DiscoveryContentVisibility } from '@shared/contracts'
+import { Story, StoryVisibility, UpsertStoryRequest } from '@shared/contracts'
 import { useState } from 'react'
 import { Image, View } from 'react-native'
 
-/**
- * Hook to open/close the discovery content editor card.
- */
-export function useDiscoveryContentEditorCard() {
+export function useStoryEditor() {
   return {
-    showDiscoveryContentEditorCard: (
-      id: string,
-      content: DiscoveryContent | undefined,
-      onSubmit: (data: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }) => Promise<void>
+    showStoryEditor: (
+      contextId: string,
+      story: Story | undefined,
+      onSubmit: (data: UpsertStoryRequest) => Promise<void>,
     ) => {
-      const cardId = 'discovery-content-editor-card-' + id
+      const cardId = 'story-editor-' + contextId
       return setOverlay(
         cardId,
-        <DiscoveryContentEditorCard
-          existingContent={content}
+        <StoryEditorCard
+          existingStory={story}
           onSubmit={onSubmit}
           onClose={() => closeOverlay(cardId)}
         />,
       )
     },
-    closeDiscoveryContentEditorCard: (id: string) => closeOverlay('discovery-content-editor-card-' + id)
+    closeStoryEditor: (contextId: string) => closeOverlay('story-editor-' + contextId),
   }
 }
 
-interface DiscoveryContentEditorCardProps {
-  existingContent?: DiscoveryContent
-  onSubmit: (data: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }) => Promise<void>
+interface StoryEditorCardProps {
+  existingStory?: Story
+  onSubmit: (data: UpsertStoryRequest) => Promise<void>
   onClose: () => void
 }
 
-/**
- * Card wrapper for discovery content editor.
- * Form to add or edit discovery content (device photo + comment) in overlay mode.
- */
-function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
-  const { existingContent, onSubmit, onClose } = props
+function StoryEditorCard({ existingStory, onSubmit, onClose }: StoryEditorCardProps) {
   const { styles, theme } = useTheme(useStyles)
   const { locales } = useLocalization()
   const { selectedImageUri, pickImage, clearImage, isLoading: isPickingImage } = useImagePicker()
   const { convertToBase64, isConverting } = useImageToBase64()
 
-  const [comment, setComment] = useState(existingContent?.comment ?? '')
-  const [visibility, setVisibility] = useState<DiscoveryContentVisibility>(existingContent?.visibility ?? 'private')
-  const [hasExistingImage, setHasExistingImage] = useState(!!existingContent?.image)
+  const [comment, setComment] = useState(existingStory?.comment ?? '')
+  const [visibility, setVisibility] = useState<StoryVisibility>(existingStory?.visibility ?? 'private')
+  const [hasExistingImage, setHasExistingImage] = useState(!!existingStory?.image)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { closeDialog, openDialog } = useRemoveDialog()
 
@@ -67,21 +59,22 @@ function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
       if (selectedImageUri) {
         imageDataToSubmit = await convertToBase64(selectedImageUri)
       } else if (hasExistingImage) {
-        imageDataToSubmit = existingContent?.image?.url
+        imageDataToSubmit = existingStory?.image?.url
       }
 
+      const imageWasRemoved = !!existingStory?.image && !hasExistingImage && !selectedImageUri
       await onSubmit({
         imageUrl: imageDataToSubmit,
+        removeImage: imageWasRemoved || undefined,
         comment: comment.trim() || undefined,
         visibility,
       })
       clearImage()
+      showSnackbar(locales.spotCreation.created)
     } catch (error) {
-      logger.error('Error submitting content:', error)
+      logger.error('Error submitting story:', error)
     } finally {
       setIsSubmitting(false)
-      showSnackbar(locales.spotCreation.created)
-
     }
   }
 
@@ -90,47 +83,32 @@ function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
       onConfirm: () => {
         clearImage()
         setHasExistingImage(false)
-      }
+      },
     })
   }
 
-  const displayImageUrl = selectedImageUri || (hasExistingImage ? existingContent?.image?.url : undefined)
-  const isEditing = !!existingContent
-  const commentChanged = comment !== (existingContent?.comment ?? '')
-  const visibilityChanged = visibility !== (existingContent?.visibility ?? 'private')
-  const imageChanged = selectedImageUri || !hasExistingImage
+  const displayImageUrl = selectedImageUri || (hasExistingImage ? existingStory?.image?.url : undefined)
+  const isEditing = !!existingStory
+  const commentChanged = comment !== (existingStory?.comment ?? '')
+  const visibilityChanged = visibility !== (existingStory?.visibility ?? 'private')
+  const imageChanged = !!selectedImageUri || (!hasExistingImage && !!existingStory?.image)
   const isLoading = isSubmitting || isConverting
 
   if (!styles) return null
 
   const title = isEditing ? locales.discovery.editYourDiscovery : locales.discovery.documentYourDiscovery
 
-  const renderImageSection = () => {
-    if (!displayImageUrl) return null
-
-    return (
-      <View style={styles.imagePreviewContainer}>
-        <Image
-          source={{ uri: displayImageUrl }}
-          style={styles.imagePreview}
-          resizeMode="cover"
-        />
-        <View style={styles.imageActions}>
-          <Button
-            icon="delete"
-            variant="outlined"
-            onPress={handleDeleteImage}
-            disabled={isLoading}
-          />
-        </View>
-      </View>
-    )
-  }
-
   return (
     <OverlayCard title={title} onClose={onClose} keyboardAware={true}>
       <View style={styles.container}>
-        {renderImageSection()}
+        {displayImageUrl && (
+          <View style={styles.imagePreviewContainer}>
+            <Image source={{ uri: displayImageUrl }} style={styles.imagePreview} resizeMode="cover" />
+            <View style={styles.imageActions}>
+              <Button icon="delete" variant="outlined" onPress={handleDeleteImage} disabled={isLoading} />
+            </View>
+          </View>
+        )}
 
         <Button
           label={isPickingImage ? locales.discovery.pickingImage : locales.discovery.pickImageFromDevice}
@@ -157,18 +135,13 @@ function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
               { icon: 'public', value: 'public', label: locales.discovery.visibilityPublic },
             ]}
             selected={visibility}
-            onValueChange={(value) => setVisibility(value as DiscoveryContentVisibility)}
+            onValueChange={(value) => setVisibility(value as StoryVisibility)}
             variant="outlined"
           />
         </Field>
 
         <View style={styles.buttonRow}>
-          <Button
-            label={locales.discovery.cancel}
-            variant="outlined"
-            onPress={onClose}
-            disabled={isLoading}
-          />
+          <Button label={locales.discovery.cancel} variant="outlined" onPress={onClose} disabled={isLoading} />
           <Button
             label={isConverting ? locales.discovery.processing : isSubmitting ? locales.discovery.saving : isEditing ? locales.discovery.update : locales.discovery.save}
             variant="primary"
@@ -182,23 +155,15 @@ function DiscoveryContentEditorCard(props: DiscoveryContentEditorCardProps) {
 }
 
 const useStyles = createThemedStyles(theme => ({
-  container: {
-    gap: 12,
-  },
-  imagePreviewContainer: {
-    gap: 8,
-    alignItems: 'center',
-  },
+  container: { gap: 12 },
+  imagePreviewContainer: { gap: 8, alignItems: 'center' },
   imagePreview: {
     width: '100%',
     height: 200,
     borderRadius: 8,
     backgroundColor: theme.colors.surface,
   },
-  imageActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
+  imageActions: { flexDirection: 'row', gap: 8 },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -207,4 +172,4 @@ const useStyles = createThemedStyles(theme => ({
   },
 }))
 
-export default DiscoveryContentEditorCard
+export default StoryEditorCard

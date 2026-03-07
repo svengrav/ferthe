@@ -252,6 +252,8 @@ const en = {
     discovered: 'Discovered',
     deleteImage: 'Delete Image',
     deleteImageConfirm: 'Are you sure you want to delete this image?',
+    stories: 'Stories',
+    noStories: 'No stories shared yet.',
     stats: {
       name: 'Stats',
       rank: 'Discovery Rank',

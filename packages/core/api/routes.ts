@@ -23,7 +23,6 @@ import {
   CreateSpotRequest,
   DeviceToken,
   Discovery,
-  DiscoveryContent,
   DiscoveryLocationRecord,
   DiscoveryProfile,
   DiscoverySpot,
@@ -40,6 +39,7 @@ import {
   SpotPreview,
   SpotRating,
   StoredTrailSpot,
+  Story,
   StumblePreference,
   StumbleSuggestionResult,
   StumbleVisit,
@@ -71,7 +71,7 @@ const toOakRoute = (httpRoute: HttpRoute, handler: HandlerFn): Route => ({
  * Create handler registry: domain → routeId → handler function
  */
 const createHandlers = (ctx: APIContract): Record<string, Record<string, HandlerFn>> => {
-  const { discoveryApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication, contentApplication, spotAccessComposite, discoveryStateComposite, accountProfileComposite, stumbleApplication } = ctx
+  const { discoveryApplication, storyApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication, contentApplication, spotAccessComposite, discoveryStateComposite, accountProfileComposite, stumbleApplication } = ctx
 
   // Create the request handler with account application access
   const asyncRequestHandler = createAsyncRequestHandler(accountApplication)
@@ -207,17 +207,39 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       getDiscoveryStats: asyncRequestHandler<DiscoveryStats, { discoveryId: string }>(async ({ context: session, params }) => {
         return await discoveryApplication.getDiscoveryStats(session, params!.discoveryId)
       }),
-      getDiscoveryContent: asyncRequestHandler<DiscoveryContent | undefined, { discoveryId: string }>(async ({ context: session, params }) => {
-        return await discoveryApplication.getDiscoveryContent(session, params!.discoveryId)
-      }),
-      upsertDiscoveryContent: asyncRequestHandler<DiscoveryContent, { discoveryId: string }>(async ({ context: session, params, body }) => {
-        return await discoveryApplication.upsertDiscoveryContent(session, params!.discoveryId, body)
-      }),
-      deleteDiscoveryContent: asyncRequestHandler<void, { discoveryId: string }>(async ({ context: session, params }) => {
-        return await discoveryApplication.deleteDiscoveryContent(session, params!.discoveryId)
-      }),
       createWelcome: asyncRequestHandler<WelcomeDiscoveryResult>(async ({ context, body }) => {
         return await discoveryApplication.createWelcomeDiscovery(context, body.location)
+      }),
+    },
+
+    /** Story Handlers */
+    story: {
+      getSpotStory: asyncRequestHandler<Story | undefined, { discoveryId: string }>(async ({ context: session, params }) => {
+        return await storyApplication.getSpotStory(session, params!.discoveryId)
+      }),
+      getTrailStory: asyncRequestHandler<Story | undefined, { trailId: string }>(async ({ context: session, params }) => {
+        return await storyApplication.getTrailStory(session, params!.trailId)
+      }),
+      upsertSpotStory: asyncRequestHandler<Story, { discoveryId: string }>(async ({ context: session, params, body }) => {
+        return await storyApplication.upsertSpotStory(session, params!.discoveryId, body)
+      }),
+      upsertTrailStory: asyncRequestHandler<Story, { trailId: string }>(async ({ context: session, params, body }) => {
+        return await storyApplication.upsertTrailStory(session, params!.trailId, body)
+      }),
+      deleteStory: asyncRequestHandler<void, { storyId: string }>(async ({ context: session, params }) => {
+        return await storyApplication.deleteStory(session, params!.storyId)
+      }),
+      listPublicStoriesBySpot: asyncRequestHandler<Story[], { spotId: string }>(async ({ context, params }) => {
+        return await storyApplication.listPublicStoriesBySpot(context, params!.spotId)
+      }),
+      listPublicStoriesByTrail: asyncRequestHandler<Story[], { trailId: string }>(async ({ context, params }) => {
+        return await storyApplication.listPublicStoriesByTrail(context, params!.trailId)
+      }),
+      likeStory: asyncRequestHandler<Story, { storyId: string }>(async ({ context: session, params }) => {
+        return await storyApplication.likeStory(session, params!.storyId)
+      }),
+      unlikeStory: asyncRequestHandler<Story, { storyId: string }>(async ({ context: session, params }) => {
+        return await storyApplication.unlikeStory(session, params!.storyId)
       }),
     },
 

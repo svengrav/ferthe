@@ -253,6 +253,8 @@ const de: LocalizationSet = {
     discovered: 'Entdeckt',
     deleteImage: 'Bild entfernen',
     deleteImageConfirm: 'Bild wird entfernt',
+    stories: 'Stories',
+    noStories: 'Noch keine Stories geteilt.',
     stats: {
       name: 'Statistik',
       rank: 'Entdeckerrang',

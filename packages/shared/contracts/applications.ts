@@ -1,15 +1,17 @@
-import { AccountApplicationContract } from "./accounts.ts"
-import { CommunityApplicationContract } from "./communities.ts"
-import { CompositeContract } from "./composites.ts"
-import { ContentApplicationContract } from "./content.ts"
-import { DiscoveryApplicationContract } from "./discoveries.ts"
-import { SensorApplicationContract } from "./sensors.ts"
-import { SpotApplicationContract } from "./spots.ts"
-import { StumbleApplicationContract } from "./stumble.ts"
-import { TrailApplicationContract } from "./trails.ts"
+import { AccountApplicationContract } from './accounts.ts'
+import { CommunityApplicationContract } from './communities.ts'
+import { CompositeContract } from './composites.ts'
+import { ContentApplicationContract } from './content.ts'
+import { DiscoveryApplicationContract } from './discoveries.ts'
+import { SensorApplicationContract } from './sensors.ts'
+import { SpotApplicationContract } from './spots.ts'
+import { StoryApplicationContract } from './stories.ts'
+import { StumbleApplicationContract } from './stumble.ts'
+import { TrailApplicationContract } from './trails.ts'
 
 export interface ApplicationContract {
   discoveryApplication: DiscoveryApplicationContract
+  storyApplication: StoryApplicationContract
   trailApplication: TrailApplicationContract
   spotApplication: SpotApplicationContract
   sensorApplication: SensorApplicationContract

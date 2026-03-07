@@ -9,6 +9,7 @@ import { createMapApplication, MapApplication } from './features/map/application
 import { createSensorApplication, SensorApplication } from './features/sensor/application'
 import { DeviceConnector } from './features/sensor/device/types'
 import { createSpotApplication, SpotApplication } from './features/spot/application'
+import { createStoryApplication, StoryApplication } from './features/story/application'
 import { createStumbleApplication, StumbleApplication } from './features/stumble/stumbleApplication'
 import { createTrailApplication, TrailApplication } from './features/trail/application'
 import { SecureStoreConnector } from './shared/device/secureStoreConnector'
@@ -22,6 +23,7 @@ export interface AppContext {
     checkStatus: () => Promise<StatusResult>
   }
   discoveryApplication: DiscoveryApplication
+  storyApplication: StoryApplication
   trailApplication: TrailApplication
   sensorApplication: SensorApplication
   spotApplication: SpotApplication
@@ -71,6 +73,8 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
 
   const spotApplication = createSpotApplication({ api })
 
+  const storyApplication = createStoryApplication({ api })
+
   const mapApplication = createMapApplication({
     sensor: sensorApplication,
     discoveryApplication,
@@ -86,6 +90,7 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
       checkStatus: apiContext.system.checkStatus,
     },
     discoveryApplication,
+    storyApplication,
     trailApplication,
     sensorApplication,
     spotApplication,
