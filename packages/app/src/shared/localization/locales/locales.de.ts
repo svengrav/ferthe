@@ -362,7 +362,7 @@ const de: LocalizationSet = {
     preferencesTitle: 'Was interessiert dich?',
     start: 'Stumble starten',
     stop: 'Stumble beenden',
-    createSpot: 'Spot hier erstellen',
+    createSpot: 'Spot erstellen',
     categories: {
       historical: 'Historisch',
       cafe: 'Café',

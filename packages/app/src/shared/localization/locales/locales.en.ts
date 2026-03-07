@@ -325,7 +325,7 @@ const en = {
     preferencesTitle: 'What are you interested in?',
     start: 'Start Stumbling',
     stop: 'Stop Stumbling',
-    createSpot: 'Create Spot here',
+    createSpot: 'Create Spot',
     categories: {
       historical: 'Historical',
       cafe: 'Café',

@@ -1,5 +1,6 @@
-import { Button, Text } from '@app/shared/components'
+import { Button, Stack, Text } from '@app/shared/components'
 import { SpotContainer, SpotGradientFrame, useSpotCardDimensions } from '@app/features/spot/components'
+import { SpotCircleIcon } from './SpotCircleIcon'
 import { useCreateSpotPage } from '@app/features/spot/creation/components/SpotCreationPage'
 import { useLocalization } from '@app/shared/localization'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
@@ -31,7 +32,7 @@ interface Props {
 
 function StumbleReachedCard({ suggestion, onClose }: Props) {
   const { width, height, padding } = useSpotCardDimensions({ variant: 'card' })
-  const { styles } = useTheme(createStyles)
+  const { styles, theme } = useTheme(createStyles)
   const { locales } = useLocalization()
   const { showCreateSpotPage } = useCreateSpotPage()
   const { stumbleApplication } = getAppContextStore()
@@ -44,13 +45,14 @@ function StumbleReachedCard({ suggestion, onClose }: Props) {
 
   return (
     <SpotContainer width={width} height={height} withShadow>
-      <SpotGradientFrame padding={padding}>
-        <View style={styles.content}>
-
+      <SpotGradientFrame padding={4} colors={[theme.colors.surface, theme.colors.surface]}>
+        <Stack spacing='lg' style={styles.content}>
           {/* Close button */}
           <View style={styles.closeButton}>
             <Button icon='close' variant='secondary' onPress={onClose} />
           </View>
+
+          <SpotCircleIcon size={200} />
 
           {/* POI details + actions */}
           <ScrollView style={styles.scroll}>
@@ -61,12 +63,12 @@ function StumbleReachedCard({ suggestion, onClose }: Props) {
             {suggestion.tags && suggestion.tags.length > 0 && (
               <Text variant='caption' style={styles.tags}>{suggestion.tags.join(' · ')}</Text>
             )}
-            <View style={styles.actions}>
-              <Button label={locales.stumble.createSpot} variant='primary' onPress={handleCreateSpot} />
-            </View>
-          </ScrollView>
 
-        </View>
+          </ScrollView>
+          <View style={styles.actions}>
+            <Button label={locales.stumble.createSpot} variant='primary' onPress={handleCreateSpot} />
+          </View>
+        </Stack>
       </SpotGradientFrame>
     </SpotContainer>
   )
@@ -80,7 +82,6 @@ const createStyles = (_theme: Theme) => StyleSheet.create({
   content: {
     padding: 24,
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
   },
   closeButton: {
@@ -91,7 +92,7 @@ const createStyles = (_theme: Theme) => StyleSheet.create({
   },
   scroll: {
     width: '100%',
-    flexGrow: 0,
+
     alignSelf: 'center',
     paddingBottom: 80,
     paddingHorizontal: 20,
@@ -106,6 +107,7 @@ const createStyles = (_theme: Theme) => StyleSheet.create({
     textAlign: 'center',
   },
   actions: {
+    alignItems: 'center',
     gap: 8,
   },
 })
