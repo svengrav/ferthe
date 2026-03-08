@@ -11,7 +11,7 @@ import {
   useMapCanvasValues,
   useMapSurface,
   useMapSurfaceBoundary,
-  useMapSurfaceLayout
+  useMapSurfaceImageLayout
 } from '../../stores/mapStore'
 
 interface DebugMetrics {
@@ -35,7 +35,7 @@ interface DebugMetrics {
     inViewport: number
   }
   surface: {
-    layout: { left: number; top: number; width: number; height: number } | null
+    imageLayout: { left: number; top: number; width: number; height: number } | null
   }
 }
 
@@ -47,7 +47,7 @@ const useDebugMetrics = (): DebugMetrics => {
   const { boundary: viewportBoundary, radiusMeters, deviceLocation } = useMapCanvasContext()
   const viewportSize = useMapCanvasDimensions()
   const { scale, translationX, translationY } = useMapCanvasValues()
-  const surfaceLayout = useMapSurfaceLayout()
+  const surfaceLayout = useMapSurfaceImageLayout()
   const spots = useDiscoverySpotsViewModel()
   const trailBoundary = useMapSurfaceBoundary()
 
@@ -131,7 +131,7 @@ const useDebugMetrics = (): DebugMetrics => {
       inViewport: spotsInViewport,
     },
     surface: {
-      layout: surfaceLayout,
+      imageLayout: surfaceLayout,
     },
   }
 }
@@ -157,7 +157,7 @@ export function MapCanvasDebug({ animatedStyles }: { animatedStyles: any }) {
   const viewRef = useRef<View>(null)
   const centerX = viewportSize.width / 2
   const centerY = viewportSize.height / 2
-  const { layout } = useMapSurface()
+  const { imageLayout } = useMapSurface()
 
   // Spot screen positions
   const spotPositions = useMemo(() =>
@@ -218,10 +218,10 @@ export function MapCanvasDebug({ animatedStyles }: { animatedStyles: any }) {
         {/* Trail boundary box */}
         {surfaceBoundary && trailBoundaryBox && (
           <View style={[styles.trailBoundaryBox, {
-            top: layout.top,
-            left: layout.left,
-            width: layout.width,
-            height: layout.height,
+            top: imageLayout.top,
+            left: imageLayout.left,
+            width: imageLayout.width,
+            height: imageLayout.height,
 
           }]}>
             <Text style={styles.trailBoundaryLabel}>Trail Boundary</Text>
@@ -279,7 +279,7 @@ export function MapCanvasDebug({ animatedStyles }: { animatedStyles: any }) {
       </View>
 
       {/* Map Info Box (bottom-left) */}
-      {surfaceBoundary && metrics.surface.layout && (
+      {surfaceBoundary && metrics.surface.imageLayout && (
         <View style={styles.mapInfoBox} pointerEvents="none">
           <Text style={styles.infoTitle}>MAP/TRAIL</Text>
           <Text style={styles.infoText}>
@@ -290,7 +290,7 @@ export function MapCanvasDebug({ animatedStyles }: { animatedStyles: any }) {
             Boundary: {metrics.trail.meters?.width.toFixed(0)}m × {metrics.trail.meters?.height.toFixed(0)}m
           </Text>
           <Text style={styles.infoText}>
-            Surface: {metrics.surface.layout.width.toFixed(0)}×{metrics.surface.layout.height.toFixed(0)}px
+            Image: {metrics.surface.imageLayout.width.toFixed(0)}×{metrics.surface.imageLayout.height.toFixed(0)}px
           </Text>
           <Text style={styles.infoText}>
             Spots: {metrics.spots.total} (in view: {metrics.spots.inViewport})

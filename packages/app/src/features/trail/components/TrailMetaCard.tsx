@@ -30,16 +30,13 @@ function TrailMetaCard({ trailId, createdAt, createdBy }: TrailMetaCardProps) {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        {createdBy && (
-          <View style={styles.cell}>
-            <Text variant="caption">{locales.spot.creator}</Text>
-            <AccountSmartCard
-              accountId={createdBy}
-              variant="secondary"
-              style={styles.accountCard}
-            />
-          </View>
-        )}
+        <View style={styles.cell}>
+          <Text variant="caption">{locales.spot.creator}</Text>
+          <AccountSmartCard
+            accountId={createdBy}
+            style={styles.accountCard}
+          />
+        </View>
         <View style={styles.cell}>
           <Text variant="caption">{locales.trails.rating}</Text>
           <TrailRating trailId={trailId} style={styles.rating} />
@@ -53,7 +50,7 @@ function TrailMetaCard({ trailId, createdAt, createdBy }: TrailMetaCardProps) {
         </View>
         <View style={styles.cell}>
           <Text variant="caption">{locales.spot.created}</Text>
-          <Text variant="body">{formatDate(createdAt)}</Text>
+          <Text variant="body">{formatDate(createdAt) ?? '-'}</Text>
         </View>
       </View>
     </View>
@@ -70,7 +67,7 @@ const useStyles = createThemedStyles(theme => ({
   },
   rating: {
     alignSelf: 'flex-start',
-    paddingVertical: theme.tokens.spacing.sm,
+
   },
   row: {
     flexDirection: 'row',
@@ -78,6 +75,7 @@ const useStyles = createThemedStyles(theme => ({
   },
   cell: {
     flex: 1,
+    gap: theme.tokens.spacing.sm,
   },
   accountCard: {
     paddingHorizontal: 0,

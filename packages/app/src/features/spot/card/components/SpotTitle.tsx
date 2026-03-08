@@ -1,7 +1,7 @@
 import { Text } from '@app/shared/components'
 import { Theme, useTheme } from '@app/shared/theme'
 import { useEffect } from 'react'
-import { StyleSheet } from 'react-native'
+import { StyleProp, StyleSheet, ViewStyle } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 
 const ANIMATION_DURATION = 400
@@ -12,13 +12,16 @@ interface SpotTitleProps {
   top?: number
   animated?: boolean
   scale?: number
+
+  style?: StyleProp<ViewStyle>
 }
 
 /**
  * Title overlay for spot images.
  * Positioned absolutely over the image with drop shadow for readability.
  */
-function SpotTitle({ title, position = 'bottom', top, animated = false, scale = 1 }: SpotTitleProps) {
+function SpotTitle(props: SpotTitleProps) {
+  const { title, position = 'bottom', top, animated = false, scale = 1, style } = props
   const opacity = useSharedValue(animated ? 0 : 1)
   const { styles } = useTheme(createStyles)
 
@@ -41,8 +44,8 @@ function SpotTitle({ title, position = 'bottom', top, animated = false, scale = 
         : styles.positionBottom
 
   return (
-    <Animated.View style={[styles.container, positionStyle, animated && animatedStyle]} pointerEvents="none">
-      {title && <Text style={[styles.title, { transform: [{ scale }] }]} numberOfLines={1}>{title}</Text>}
+    <Animated.View style={[styles.container, positionStyle, animated && animatedStyle, style]} pointerEvents="none">
+      <Text style={[styles.title, { transform: [{ scale }] }]} numberOfLines={1}>{title}</Text>
     </Animated.View>
   )
 }
@@ -74,7 +77,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     fontWeight: 'semibold',
     color: 'white',
     textAlign: 'center',
-    backgroundColor: theme.opacity(theme.colors.background, 10),
   }
 })
 

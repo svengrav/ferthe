@@ -1,9 +1,9 @@
 import { useSettingsPage } from '@app/features/settings/components/SettingsPage'
-import { Button, Page, Text } from '@app/shared/components'
+import { Button, Page, Spacer, Stack, Text } from '@app/shared/components'
 import Header from '@app/shared/components/header/Header'
 import { useLocalization } from '@app/shared/localization'
 import { Theme, useTheme } from '@app/shared/theme'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { useCreateSpotPage } from '../creation/components/SpotCreationPage.tsx'
 import { useSpotScreenViewModel } from '../hooks/useSpotScreenViewModel'
 import SpotCardList from './SpotCardList'
@@ -20,7 +20,7 @@ function SpotScreen() {
   const { showSpotPage } = useSpotPage()
   const { showCreateSpotPage } = useCreateSpotPage()
 
-  const { mySpots, discoveredSpots, isLoading, refresh } = useSpotScreenViewModel()
+  const { mySpots, discoveredSpots } = useSpotScreenViewModel()
 
   const handleSpotPress = (item: { id: string }) => showSpotPage(item.id)
 
@@ -33,35 +33,39 @@ function SpotScreen() {
         title={locales.navigation.feed}
         trailing={<Button icon="add" onPress={showCreateSpotPage} />}
       />
-      {mySpots.length > 0 && (
-        <View style={styles.section} id="my-spots">
-          <Text variant="section" style={styles.sectionTitle}>{locales.spotCreation.mySpots}</Text>
-          <SpotCardList
-            items={mySpots}
-            onPress={handleSpotPress}
-            horizontal
-          />
-        </View>
-      )}
-      {discoveredSpots.length > 0 && (
-        <View style={styles.section} id="my-discoveries">
-          <Text variant="section" style={styles.sectionTitle}>{locales.discovery.discoveries}</Text>
-          <SpotCardList
-            items={discoveredSpots}
-            onPress={handleSpotPress}
-            scrollEnabled={false}
-            style={styles.grid}
-          />
-        </View>
-      )}
+
+      <Stack testID="my-spots" spacing='lg'>
+        <Stack spacing='xs'>
+          <Text variant="title" style={styles.sectionTitle}>{locales.spotCreation.yourSpots}</Text>
+          <Text variant="subtitle" style={styles.sectionTitle}>{locales.spotCreation.yourSpotsSubtitle}</Text>
+        </Stack>
+        <SpotCardList
+          items={mySpots}
+          onPress={handleSpotPress}
+          emptyLabel={locales.spotCreation.noSpots}
+          horizontal
+        />
+      </Stack>
+      <Spacer size="xl" />
+      <Stack testID="my-discoveries" spacing='lg'>
+        <Stack spacing='xs'>
+          <Text variant="title" style={styles.sectionTitle}>{locales.discovery.discoveries}</Text>
+          <Text variant="subtitle" style={styles.sectionTitle}>{locales.discovery.discoveriesSubtitle}</Text>
+        </Stack>
+
+        <SpotCardList
+          items={discoveredSpots}
+          onPress={handleSpotPress}
+          emptyLabel={locales.discovery.noDiscoveries}
+          scrollEnabled={false}
+          style={styles.grid}
+        />
+      </Stack>
     </Page>
   )
 }
 
 const createStyles = (theme: Theme) => StyleSheet.create({
-  section: {
-    gap: theme.tokens.spacing.sm,
-  },
   sectionTitle: {
     paddingHorizontal: theme.tokens.spacing.xs,
   },

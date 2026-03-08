@@ -64,7 +64,8 @@ export const deleteSpot = async (id: string) => {
 interface CreateTrailData {
   name: string;
   description: string;
-  boundary: Boundary;
+  kind: 'discovery' | 'stumble';
+  boundary?: Boundary;
   discoveryMode: 'free' | 'sequence';
   imageBase64?: string;
   mapImageBase64?: string;
@@ -74,7 +75,7 @@ interface CreateTrailData {
 interface UpdateTrailData {
   name: string;
   description: string;
-  boundary: Boundary;
+  boundary?: Boundary;
   discoveryMode: 'free' | 'sequence';
   imageBase64?: string;
   mapImageBase64?: string;
@@ -84,7 +85,8 @@ interface UpdateTrailData {
 const DEFAULT_TRAIL_OPTIONS = {
   scannerRadius: 200,
   snapRadius: 50,
-  previewMode: "preview" as const,
+  previewMode: 'preview' as const,
+  spotAccess: 'open' as const,
 };
 
 interface TrailSpot { spotId: string; order?: number }
@@ -121,6 +123,7 @@ export const reorderTrailSpots = async (trailId: string, orderedSpotIds: string[
 /** Create a new trail */
 export const createTrail = async (data: CreateTrailData) => {
   await api.trail.createTrail({
+    kind: data.kind,
     name: data.name,
     description: data.description,
     boundary: data.boundary,

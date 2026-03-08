@@ -19,14 +19,21 @@ interface ArrowProps {
   fill?: string
   strokeColor?: string
   circleBackground?: string
+  circleBorderRadius?: number
   size?: number
+  shadow?: {
+    color: string
+    offset: { width: number; height: number }
+    opacity: number
+    radius: number
+    elevation: number
+  }
 }
-
 
 /**
  * Arrow component for displaying directional indicator with rotation
  */
-function Arrow({ rotation = 0, fill, strokeColor, circleBackground, size = 18 }: ArrowProps) {
+function Arrow({ rotation = 0, fill, strokeColor, circleBackground, circleBorderRadius = 999, size = 18, shadow }: ArrowProps) {
   const animatedStyle = {
     width: size,
     height: size,
@@ -35,18 +42,21 @@ function Arrow({ rotation = 0, fill, strokeColor, circleBackground, size = 18 }:
 
   return (
     <View style={animatedStyle} id="map-device-arrow">
-      <Svg viewBox={SVG_VIEWBOX}>
-        <Circle
-          cx={CIRCLE_CENTER}
-          cy={CIRCLE_CENTER}
-          r={CIRCLE_RADIUS}
-          fill={circleBackground}
-          stroke={strokeColor}
-          strokeWidth={1.5}
-        />
-        <Polygon fill={fill} points={ARROW_POINTS} />
-      </Svg>
-    </View>
+      <View style={{ borderRadius: circleBorderRadius, shadowColor: shadow?.color, shadowOffset: shadow?.offset, shadowOpacity: shadow?.opacity, shadowRadius: shadow?.radius, elevation: shadow?.elevation }} >
+        <Svg viewBox={SVG_VIEWBOX}>
+          <Circle
+            cx={CIRCLE_CENTER}
+            cy={CIRCLE_CENTER}
+            r={CIRCLE_RADIUS}
+            fill={circleBackground}
+            stroke={strokeColor}
+            strokeWidth={1.1}
+          />
+          <Polygon fill={fill} points={ARROW_POINTS} />
+        </Svg>
+      </View>
+
+    </View >
   )
 }
 
@@ -70,9 +80,11 @@ function MapDeviceMarker({ mode, canvasSize, boundary }: MapDeviceMarkerProps) {
     fill: fillColor,
     strokeColor,
     circleBackground,
+    circleBorderRadius,
     arrowSize,
     markerSize,
     markerBorderRadius,
+    shadow,
   } = mapTheme.device
 
   // Create animated style for scale (if provided)
@@ -126,7 +138,9 @@ function MapDeviceMarker({ mode, canvasSize, boundary }: MapDeviceMarkerProps) {
         fill={fillColor}
         strokeColor={strokeColor}
         circleBackground={circleBackground}
+        circleBorderRadius={circleBorderRadius}
         size={arrowSize}
+        shadow={shadow}
       />
     </Animated.View>
   )

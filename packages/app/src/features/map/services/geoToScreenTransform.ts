@@ -196,12 +196,15 @@ const calculateAdaptiveViewportRadius = (
 }
 
 /**
- * Calculate surface layout position and dimensions within a viewport
- * @param surfaceBoundary The boundary of the surface/trail
- * @param viewportBoundary The viewport boundary
- * @param viewportSize The viewport pixel dimensions
+ * Calculate the pixel rect of a trail image within a canvas viewport.
+ * The result describes where the trail image should be positioned (left/top)
+ * and how large it should be (width/height) in canvas pixel space.
+ * Values may be negative or exceed canvas size — clip with overflow:hidden on the parent.
+ * @param trailBoundary Geographic boundary of the trail (= image extent)
+ * @param canvasBoundary Geographic boundary currently visible on canvas
+ * @param canvasSize Canvas pixel dimensions
  */
-const calculateSurfaceLayout = (
+const calculateSurfaceImageLayout = (
   surfaceBoundary: GeoBoundary,
   viewportBoundary: GeoBoundary,
   viewportSize: ScreenSize
@@ -282,6 +285,39 @@ const calculateZoomLimits = (
   }
 }
 
+/**
+ * Projects a compass bearing from the container center to the container edge.
+ * Useful for rendering off-screen indicators at the map border.
+ * @param bearing Geographic bearing in degrees (0 = North/Up, 90 = East/Right)
+ * @param size Container size in pixels
+ * @param margin Distance from the edge in pixels
+ */
+const projectBearingToBorder = (
+  bearing: number,
+  size: ScreenSize,
+  margin = 24
+): ScreenPosition => {
+  const cx = size.width / 2
+  const cy = size.height / 2
+
+  // Convert geographic bearing (0=North=Up) to standard math angle (0=East=Right)
+  const angle = ((bearing - 90 + 360) % 360) * (Math.PI / 180)
+  const dx = Math.cos(angle)
+  const dy = Math.sin(angle)
+
+  const halfW = size.width / 2 - margin
+  const halfH = size.height / 2 - margin
+
+  const tx = dx !== 0 ? halfW / Math.abs(dx) : Infinity
+  const ty = dy !== 0 ? halfH / Math.abs(dy) : Infinity
+  const t = Math.min(tx, ty)
+
+  return {
+    x: Math.round(cx + dx * t),
+    y: Math.round(cy + dy * t),
+  }
+}
+
 export const mapUtils = {
   coordinatesToPosition,
   positionToCoordinates,
@@ -290,7 +326,8 @@ export const mapUtils = {
   metersToPixels,
   calculateDeviceViewportBoundary,
   calculateAdaptiveViewportRadius,
-  calculateSurfaceLayout,
+  calculateSurfaceImageLayout,
   calculateMetersPerPixel,
   calculateZoomLimits,
+  projectBearingToBorder,
 }

@@ -14,7 +14,7 @@ function MapTrailPath({ boundary, size }: MapTrailPathProps) {
   const spots = useMapSpotsViewModel()
   const scale = useMapCompensatedScale()
   const points = useMemo(() =>
-    spots.map(spot => spot.location),
+    spots.filter(spot => spot.source !== 'created').map(spot => spot.location),
     [spots]
   )
   const mapTheme = useMapTheme()

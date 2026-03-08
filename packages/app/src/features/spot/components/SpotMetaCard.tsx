@@ -17,7 +17,7 @@ interface SpotMetaCardProps {
  * Summary card for a spot showing creator, rating and key timestamps.
  */
 function SpotMetaCard({ spotId, createdBy, createdAt, discoveredAt }: SpotMetaCardProps) {
-  const { styles, theme } = useTheme(useStyles)
+  const { styles } = useTheme(useStyles)
   const { locales } = useLocalization()
 
   return (
@@ -27,7 +27,6 @@ function SpotMetaCard({ spotId, createdBy, createdAt, discoveredAt }: SpotMetaCa
           <Text variant="caption">{locales.spot.creator}</Text>
           <AccountSmartCard
             accountId={createdBy}
-            variant="secondary"
             style={styles.accountCard}
           />
         </View>
@@ -40,11 +39,11 @@ function SpotMetaCard({ spotId, createdBy, createdAt, discoveredAt }: SpotMetaCa
       <View style={styles.row}>
         <View style={styles.cell}>
           <Text variant="caption">{locales.spot.created}</Text>
-          <Text variant="body">{formatDate(createdAt)}</Text>
+          <Text variant="body">{formatDate(createdAt) ?? '-'}</Text>
         </View>
         <View style={styles.cell}>
           <Text variant="caption">{locales.discovery.discovered}</Text>
-          <Text variant="body">{formatDate(discoveredAt)}</Text>
+          <Text variant="body">{formatDate(discoveredAt) ?? '-'}</Text>
         </View>
       </View>
     </View>
@@ -54,7 +53,6 @@ function SpotMetaCard({ spotId, createdBy, createdAt, discoveredAt }: SpotMetaCa
 const useStyles = createThemedStyles(theme => ({
   rating: {
     alignSelf: 'flex-start',
-    paddingVertical: theme.tokens.spacing.sm
   },
   container: {
     borderWidth: 1,
@@ -69,6 +67,7 @@ const useStyles = createThemedStyles(theme => ({
   },
   cell: {
     flex: 1,
+    gap: theme.tokens.spacing.sm,
   },
   accountCard: {
     paddingHorizontal: 0,

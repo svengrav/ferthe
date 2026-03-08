@@ -8,13 +8,13 @@ import { ThemeBase } from './types'
 export const DARK_THEME = {
   white: '#FFFFFF',
   black: '#000000',
-  dark: 'rgb(10, 10, 15)',
-  background: 'rgb(20, 20, 30)',
+  dark: 'rgb(10, 10, 10)',
+  background: 'rgb(18, 18, 20)',
   onBackground: '#FFFFFF',
   primary: '#ffffff',
   secondary: '#696969',
   divider: '#7a7a7a38',
-  surface: 'rgb(25, 25, 35)',
+  surface: 'rgb(26, 26, 30)',
   disabled: '#7a7a7a',
   onDisabled: '#535353',
   primaryVariant: '',
@@ -49,7 +49,7 @@ export const LIGHT_THEME = {
 
 export const UI_DIMENSIONS = {
   HEADER_HEIGHT: 60,
-  NAV_HEIGHT: 56,
+  NAV_HEIGHT: 60,
   BOTTOM_SHEET_HEIGHT: 80,
   OVERLAY_TRANSPARENCY: 0.5,
   PAGE_PADDING: 16,
@@ -110,6 +110,13 @@ export const createTypography = (theme: ThemeBase) => {
       color: theme.colors.onBackground,
       paddingVertical: 8,
     },
+    subtitle: {
+      fontSize: 14,
+      lineHeight: 18,
+      fontWeight: '400' as const,
+      fontFamily: 'Inter_400Regular',
+      color: theme.deriveColor(theme.colors.onBackground, 0.4),
+    },
     section: {
       fontSize: 14,
       paddingVertical: 8,
@@ -118,16 +125,9 @@ export const createTypography = (theme: ThemeBase) => {
       fontFamily: 'Inter_400Regular',
       color: theme.colors.onBackground,
     },
-    subtitle: {
-      fontSize: 16,
-      lineHeight: 22,
-      fontWeight: '400' as const,
-      fontFamily: 'Inter_400Regular',
-      color: theme.colors.onSurface,
-    },
     body: {
-      fontSize: 15,
-      lineHeight: 22,
+      fontSize: 14,
+      lineHeight: 22, // 1.5 line height for better readability
       fontWeight: '400' as const,
       fontFamily: 'Inter_400Regular',
       color: theme.colors.onSurface,

@@ -37,6 +37,7 @@ export const makeDiscovery = (overrides: Partial<Discovery> = {}): Discovery => 
 export const makeTrail = (overrides: Partial<Trail> = {}): Trail => ({
   id: 'trail-1',
   slug: 'trail-1',
+  kind: 'discovery',
   name: 'Test Trail',
   description: 'A test trail',
   map: {},
@@ -45,6 +46,7 @@ export const makeTrail = (overrides: Partial<Trail> = {}): Trail => ({
     scannerRadius: 100,
     discoveryMode: 'free',
     previewMode: 'hidden',
+    spotAccess: 'open' as const,
   },
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),

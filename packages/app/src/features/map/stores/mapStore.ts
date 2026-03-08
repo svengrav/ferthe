@@ -18,7 +18,8 @@ export interface MapState {
   surface: {
     boundary: GeoBoundary
     image?: string
-    layout: { left: number; top: number; width: number; height: number }
+    /** Pixel rect of the trail image within canvas space. May extend beyond canvas bounds — clip with overflow:hidden. */
+    imageLayout: { left: number; top: number; width: number; height: number }
   }
   canvas: {
     size: { width: number; height: number }
@@ -65,7 +66,7 @@ export const useMapStore = create<MapState & MapActions>(set => ({
   surface: {
     boundary: DEFAULT_BOUNDARY,
     image: undefined,
-    layout: { left: 0, top: 0, width: 550, height: 550 },
+    imageLayout: { left: 0, top: 0, width: 550, height: 550 },
   },
 
   canvas: {
@@ -124,12 +125,16 @@ export const useMapContainerSize = () => useMapStore(useShallow(state => state.c
 // Surface (map image area)
 export const useMapSurface = () => useMapStore(useShallow(state => state.surface))
 export const useMapSurfaceBoundary = () => useMapStore(useShallow(state => state.surface.boundary))
-export const useMapSurfaceLayout = () => useMapStore(useShallow(state => state.surface.layout))
+export const useMapSurfaceImageLayout = () => useMapStore(useShallow(state => state.surface.imageLayout))
 
 // Canvas (device-centered canvas mode)
 export const useMapCanvas = () => useMapStore(useShallow(state => state.canvas))
+export const useMapCanvasBoundary = () => useMapStore(useShallow(state => state.canvas.boundary))
 export const useMapCanvasDimensions = () => useMapStore(useShallow(state => state.canvas.size))
 export const useMapCanvasScale = () => useMapStore(state => state.canvas.scale.init)
+export const useMapCanvasScaleConfig = () => useMapStore(useShallow(state => state.canvas.scale))
+export const useMapCanvasImage = () => useMapStore(state => state.canvas.image)
+export const useMapCanvasRadius = () => useMapStore(state => state.canvas.radius)
 
 // Overview (full trail overview mode)
 export const useMapOverview = () => useMapStore(useShallow(state => state.overview))

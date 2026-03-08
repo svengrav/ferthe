@@ -14,7 +14,13 @@ const createMarkerContainerStyle = (theme: MapTheme) => ({
   borderRadius: theme.spot.borderRadius,
   width: theme.spot.size,
   height: theme.spot.size + theme.spot.heightOffset,
-  borderWidth: theme.spot.borderWidth,
+  // borderWidth: theme.spot.borderWidth * 0.2,
+  // borderColor: theme.spot.backgroundColor,
+  shadowColor: 'black',
+  shadowOffset: { width: 1, height: 2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 4,
+  elevation: 3,
   backgroundColor: theme.spot.backgroundColor,
   overflow: 'hidden' as const,
   justifyContent: 'center' as const,
@@ -65,10 +71,12 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
     }))
   }, [spots, boundary, size.width, size.height])
 
-  // Pre-create styles based on theme
-  const markerStyle = createMarkerContainerStyle(theme)
-  const imageStyle = createImageStyle(theme)
-  const fallbackStyle = createFallbackStyle(theme)
+  // Pre-create styles based on theme (memoized to avoid new refs every render)
+  const { markerStyle, imageStyle, fallbackStyle } = useMemo(() => ({
+    markerStyle: createMarkerContainerStyle(theme),
+    imageStyle: createImageStyle(theme),
+    fallbackStyle: createFallbackStyle(theme),
+  }), [theme])
 
   // Render spot marker at pre-calculated position
   const renderSpotMarker = (
@@ -79,6 +87,7 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
 
     return (
       <Animated.View
+        id={'map-spot'}
         key={spot.id || index}
         style={[
           {

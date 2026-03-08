@@ -23,6 +23,7 @@ interface ImageProps {
   onLoad?: () => void
   resizeMode?: 'cover' | 'contain' | 'stretch' | 'repeat' | 'center'
   showLoader?: boolean
+  blurRadius?: number
 }
 
 /**
@@ -45,6 +46,7 @@ export function Image({
   onLoad,
   resizeMode = 'cover',
   showLoader = true,
+  blurRadius = 0
 }: ImageProps) {
   const { styles } = useTheme(useStyles)
   const { theme } = useTheme()
@@ -89,6 +91,7 @@ export function Image({
         transition={{ duration: 250 }}
         onLoad={handleLoad}
         onError={handleError}
+        blurRadius={blurRadius}
       />
 
       {/* Loading indicator */}

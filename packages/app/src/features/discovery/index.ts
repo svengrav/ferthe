@@ -9,10 +9,6 @@ export {
 } from './stores/discoveryTrailStore'
 
 export {
-  getDiscoveryContent, getDiscoveryContentActions, useDiscoveryContent
-} from './stores/discoveryContentStore'
-
-export {
   getSpotRatingActions,
   getSpotRatingSummary,
   useSpotRatingSummary
@@ -22,6 +18,5 @@ export { default as DiscoveryStats } from './components/DiscoveryStats'
 export { useDiscoveryStats } from './hooks/useDiscoveryStats'
 
 export { default as SpotRating } from '../spot/components/SpotRating'
-export { default as DiscoveryUserContentSection } from './components/DiscoveryUserContentSection'
 export { useDiscoveryEventCard } from './hooks/useDiscovery'
 

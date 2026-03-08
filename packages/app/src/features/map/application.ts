@@ -39,16 +39,29 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
     const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
 
+    // Stumble trails have no fixed boundary — keep canvas centered on device
+    if (!trail.boundary) {
+      const canvasBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, currentState.canvas.radius)
+      setSurface({ boundary: canvasBoundary })
+      setCanvas({ boundary: canvasBoundary })
+      setDevice({
+        location: device.location,
+        heading: device.heading,
+        direction: getCompass(device.heading).direction,
+      })
+      return
+    }
+
     // Update canvas boundary based on device location with current adaptive radius
     const newCanvasBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, currentState.canvas.radius)
-    const surfaceLayout = mapUtils.calculateSurfaceLayout(
+    const imageLayout = mapUtils.calculateSurfaceImageLayout(
       currentState.surface.boundary,
       newCanvasBoundary,
       currentState.canvas.size
     )
 
     setSnap(snapState)
-    setSurface({ boundary: trail?.boundary, layout: surfaceLayout })
+    setSurface({ boundary: trail?.boundary, imageLayout })
     setCanvas({ boundary: newCanvasBoundary })
     setDevice({
       location: device.location,
@@ -89,6 +102,47 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
       return
     }
 
+    // Stumble trails have no fixed boundary — initialize a device-centered viewport
+    if (!trail.boundary) {
+      const stumbleRadius = trail.options?.scannerRadius || defaults.initialViewRadius
+      const canvasBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, stumbleRadius)
+      const imageLayout = mapUtils.calculateSurfaceImageLayout(canvasBoundary, canvasBoundary, currentCanvas.size)
+      const canvasZoomLimits = mapUtils.calculateZoomLimits(
+        canvasBoundary,
+        { width: defaults.canvas.width, height: defaults.canvas.height },
+        getMapState().container.size,
+        defaults.zoom.maxMeters
+      )
+      setState({
+        status: 'ready',
+        snap: { startPoint: device.location, endPoint: device.location, intensity: 0 },
+        surface: { boundary: canvasBoundary, image: undefined, imageLayout },
+        canvas: {
+          ...currentCanvas,
+          radius: stumbleRadius,
+          boundary: canvasBoundary,
+          image: trail?.viewport?.image?.url,
+          scale: {
+            init: calculateScaleForRadius(stumbleRadius, defaults.initialViewRadius),
+            min: canvasZoomLimits.min,
+            max: canvasZoomLimits.max,
+          },
+        },
+        overview: {
+          scale: { init: 1, min: defaults.overview.scale.min, max: defaults.overview.scale.max },
+          offset: { x: 0, y: 0 },
+          image: trail?.overview?.image?.url,
+        },
+        device: {
+          location: device.location,
+          heading: device.heading ?? 0,
+          direction: getCompass(device.heading ?? 0).direction,
+        },
+        scanner: { radius: stumbleRadius },
+      })
+      return
+    }
+
     const lastDiscoverySpotLocation = discoveryService.getLastDiscoverySpotLocation(lastDiscovery, spots)
     const snapState = calculateMapSnap(spots, device.location, snap?.intensity, lastDiscoverySpotLocation)
 
@@ -96,7 +150,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     const adaptiveRadius = mapUtils.calculateAdaptiveViewportRadius(trail.boundary)
 
     const initialCanvasBoundary = mapUtils.calculateDeviceViewportBoundary(device.location, adaptiveRadius)
-    const initialSurfaceLayout = mapUtils.calculateSurfaceLayout(
+    const initialImageLayout = mapUtils.calculateSurfaceImageLayout(
       trail.boundary,
       initialCanvasBoundary,
       currentCanvas.size
@@ -109,7 +163,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
     const canvasZoomLimits = mapUtils.calculateZoomLimits(
       initialCanvasBoundary,
       { width: defaults.canvas.width, height: defaults.canvas.height },
-      currentCanvas.size,
+      getMapState().container.size,
       defaults.zoom.maxMeters
     )
 
@@ -120,7 +174,7 @@ export function createMapApplication(options: MapApplicationOptions = {}): MapAp
       surface: {
         boundary: trail.boundary,
         image: trail?.map?.image?.url,
-        layout: initialSurfaceLayout,
+        imageLayout: initialImageLayout,
       },
 
       canvas: {

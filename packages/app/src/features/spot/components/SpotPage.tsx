@@ -1,14 +1,15 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 import { useAccountId } from '@app/features/account'
-import { Button, ContentBlockList, Page, PageTab, PageTabs, Stack, Text } from '@app/shared/components'
+import { Button, ContentBlockList, Page, PageTab, PageTabs, SectionHeader, Spacer, Stack, Text } from '@app/shared/components'
 import { useRemoveDialog } from '@app/shared/components/dialog/Dialog'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { Theme, useTheme } from '@app/shared/theme'
 
 import DiscoveryStats from '@app/features/discovery/components/DiscoveryStats'
-import DiscoveryUserContentSection from '@app/features/discovery/components/DiscoveryUserContentSection'
+import StoryUserContentSection from '@app/features/story/components/StoryUserContentSection'
+import SpotStories from '@app/features/spot/components/SpotStories'
 import { LocationChip } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
@@ -42,7 +43,7 @@ function SpotPage(props: SpotPageProps) {
   const { spotId, onClose } = props
   const { styles, theme } = useTheme(createStyles)
   const { locales } = useLocalization()
-  const context = getAppContextStore()
+  const { storyApplication, spotApplication, discoveryApplication } = getAppContextStore()
   const { width, height } = useSpotCardDimensions()
   const { spot, discovery, isLoading } = useSpotWithDiscovery(spotId)
   const accountId = useAccountId()
@@ -50,12 +51,18 @@ function SpotPage(props: SpotPageProps) {
   const { openDialog, closeDialog } = useRemoveDialog()
 
   const isOwner = spot?.createdBy === accountId
+  const [storiesRefreshKey, setStoriesRefreshKey] = useState(0)
 
   // Fetch full spot data (including contentBlocks) and rating summary on open
   useEffect(() => {
-    context.spotApplication.getSpot(spotId)
-    context.discoveryApplication.getSpotRatingSummary(spotId)
+    spotApplication.getSpot(spotId)
+    discoveryApplication.getSpotRatingSummary(spotId)
   }, [spotId])
+
+  // Load existing story once the discovery is available
+  useEffect(() => {
+    if (discovery?.id) storyApplication.getSpotStory(discovery.id)
+  }, [discovery?.id])
 
   const handleEdit = () => {
     if (!spot) return
@@ -68,7 +75,7 @@ function SpotPage(props: SpotPageProps) {
     openDialog({
       message: `${locales.common.delete} "${spot.name}"?`,
       onConfirm: async () => {
-        const result = await context.spotApplication.deleteSpot(spotId)
+        const result = await spotApplication.deleteSpot(spotId)
         if (result.success) {
           closeDialog()
           onClose?.()
@@ -93,7 +100,7 @@ function SpotPage(props: SpotPageProps) {
       {spot && (
         <PageTabs variant="chips" defaultTab="overview">
           <PageTab id="overview" label={locales.trails.overview}>
-            <Stack spacing='lg'>
+            <Stack spacing='lg' style={styles.tabContent}>
               <SpotCard
                 style={{ alignSelf: 'center' }}
                 width={width}
@@ -110,22 +117,41 @@ function SpotPage(props: SpotPageProps) {
                 createdAt={spot.createdAt}
                 discoveredAt={discovery?.discoveredAt}
               />
+              <Spacer />
+              <SectionHeader title={'Description'} />
 
-
-              <Text variant='section'>Description</Text>
-              <Text variant='body'>{spot.description}</Text>
+              <Text variant='body'>{spot.description === "" ? '-' : spot.description}</Text>
 
               {spot.contentBlocks && spot.contentBlocks.length > 0 && (
                 <ContentBlockList blocks={spot.contentBlocks} />
               )}
 
-
-              {discovery && <DiscoveryUserContentSection id={discovery.id} />}
-
             </Stack>
           </PageTab>
           <PageTab id="stats" label={locales.trails.stats.name}>
-            {discovery && <DiscoveryStats discoveryId={discovery?.id} />}
+            <View style={styles.tabContent}>
+              {discovery && <DiscoveryStats discoveryId={discovery?.id} />}
+            </View>
+          </PageTab>
+          <PageTab id="stories" label={locales.discovery.stories}>
+            <View style={styles.tabContent}>
+              {discovery && (
+                <StoryUserContentSection
+                  storyContextId={discovery.id}
+                  onSave={async (data) => {
+                    const result = await storyApplication.upsertSpotStory(discovery.id, data)
+                    if (result.success) setStoriesRefreshKey(k => k + 1)
+                    return result.success ?? false
+                  }}
+                  onDelete={async (storyId) => {
+                    const result = await storyApplication.deleteStory(storyId, discovery.id)
+                    if (result.success) setStoriesRefreshKey(k => k + 1)
+                    return result.success ?? false
+                  }}
+                />
+              )}
+              <SpotStories spotId={spotId} refreshKey={storiesRefreshKey} />
+            </View>
           </PageTab>
         </PageTabs>
       )}
@@ -136,8 +162,9 @@ function SpotPage(props: SpotPageProps) {
 const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    gap: theme.tokens.spacing.sm,
-    paddingBottom: theme.tokens.spacing.lg
+  },
+  tabContent: {
+    paddingBottom: theme.tokens.spacing.xl,
   },
   image: {
     borderRadius: theme.tokens.borderRadius.md,

@@ -1,11 +1,11 @@
 import { Store } from '@core/store/storeFactory.ts'
-import { CommunityMember, Discovery, DiscoveryContent, DiscoveryProfile, StoredSpot } from '@shared/contracts/index.ts'
+import { CommunityMember, Discovery, DiscoveryProfile, Story, StoredSpot } from '@shared/contracts/index.ts'
 
 export interface AccountMergeCompositeOptions {
   discoveryStore: Store<Discovery>
   spotStore: Store<StoredSpot>
   communityMemberStore: Store<CommunityMember>
-  discoveryContentStore: Store<DiscoveryContent>
+  storyStore: Store<Story>
   discoveryProfileStore: Store<DiscoveryProfile>
 }
 
@@ -19,15 +19,15 @@ export interface AccountMergeComposite {
  * when the phone number is already registered.
  */
 export function createAccountMergeComposite(options: AccountMergeCompositeOptions): AccountMergeComposite {
-  const { discoveryStore, spotStore, communityMemberStore, discoveryContentStore, discoveryProfileStore } = options
+  const { discoveryStore, spotStore, communityMemberStore, storyStore, discoveryProfileStore } = options
 
   return {
     async merge(localAccountId, phoneAccountId) {
-      const [discoveries, spots, members, contents, profiles] = await Promise.all([
+      const [discoveries, spots, members, stories, profiles] = await Promise.all([
         discoveryStore.list(),
         spotStore.list(),
         communityMemberStore.list(),
-        discoveryContentStore.list(),
+        storyStore.list(),
         discoveryProfileStore.list(),
       ])
 
@@ -38,8 +38,8 @@ export function createAccountMergeComposite(options: AccountMergeCompositeOption
           .map(s => spotStore.update(s.id!, { ...s, createdBy: phoneAccountId })),
         ...(members.data ?? []).filter(m => m.accountId === localAccountId)
           .map(m => communityMemberStore.update(m.id, { ...m, accountId: phoneAccountId })),
-        ...(contents.data ?? []).filter(c => c.accountId === localAccountId)
-          .map(c => discoveryContentStore.update(c.id, { ...c, accountId: phoneAccountId })),
+        ...(stories.data ?? []).filter(s => s.accountId === localAccountId)
+          .map(s => storyStore.update(s.id, { ...s, accountId: phoneAccountId })),
         ...(profiles.data ?? []).filter(p => p.accountId === localAccountId)
           .map(p => discoveryProfileStore.delete(p.id)),
       ])

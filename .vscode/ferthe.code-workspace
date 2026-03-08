@@ -34,6 +34,7 @@
     }
   ],
   "settings": {
+    "typescript.referencesCodeLens.enabled": true,
     "deno.codeLens.references": true,
     "deno.enable": true,
     "deno.lint": true,
@@ -41,6 +42,8 @@
     "deno.codeLens.testArgs": [
       "-A",
     ],
+    "deno.codeLens.implementations": true,
+    "deno.codeLens.referencesAllFunctions": true,
     "files.exclude": {
       "**/.git": true,
       "**/.expo": true,
@@ -56,10 +59,10 @@
       "**/dist": true,
       "**/.vite": true
     },
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit",
-      "source.organizeImports": "explicit"
-    },
+    // "editor.codeActionsOnSave": {
+    //   "source.fixAll.eslint": "explicit",
+    //   "source.organizeImports": "explicit"
+    // },
     "files.watcherExclude": {
       "**/node_modules/**": true,
       "**/.git/**": true,

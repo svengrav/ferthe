@@ -58,7 +58,58 @@ export const createDeviceConnector = (): DeviceConnector => {
     return { granted }
   }
 
-  const initializeLocationTracking = async () => {
+  // Web-specific location tracking using native browser geolocation API
+  let webWatchId: number | null = null
+
+  const initializeWebLocationTracking = async () => {
+    try {
+      if (webWatchId !== null) {
+        navigator.geolocation.clearWatch(webWatchId)
+        webWatchId = null
+      }
+
+      // Get initial position
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+        })
+      })
+
+      const { latitude, longitude } = position.coords
+      if (!isValidCoordinate(latitude, longitude)) {
+        logger.error('Invalid initial coordinates:', latitude, longitude)
+        return
+      }
+
+      const initialDevice = { heading: 0, location: { lat: latitude, lon: longitude } }
+      lastDeviceUpdate = { ...initialDevice }
+      emitUpdate(initialDevice)
+
+      // Watch position
+      webWatchId = navigator.geolocation.watchPosition(
+        pos => {
+          try {
+            const { latitude, longitude } = pos.coords
+            if (!isValidCoordinate(latitude, longitude)) return
+            const updatedDevice = { ...lastDeviceUpdate, location: { lat: latitude, lon: longitude } }
+            emitIfSignificant(updatedDevice)
+          } catch (error) {
+            logger.error('Location update error:', error)
+          }
+        },
+        error => logger.error('Web geolocation watch error:', error.message),
+        { enableHighAccuracy: true }
+      )
+
+      logger.log('Web location tracking initialized')
+    } catch (error) {
+      logger.error('Failed to initialize web location tracking:', error)
+    }
+  }
+
+  // Native location tracking using expo-location
+  const initializeNativeLocationTracking = async () => {
     try {
       // Clean up existing subscriptions
       if (locationSubscription) {
@@ -121,47 +172,51 @@ export const createDeviceConnector = (): DeviceConnector => {
         }
       )
 
-      // Watch Heading with error handling (only on native platforms)
-      if (Platform.OS !== 'web') {
-        headingSubscription = await Location.watchHeadingAsync(headingData => {
-          try {
-            const rawHeading = headingData.magHeading ?? headingData.trueHeading ?? 0
+      // Watch Heading
+      headingSubscription = await Location.watchHeadingAsync(headingData => {
+        try {
+          const rawHeading = headingData.magHeading ?? headingData.trueHeading ?? 0
 
-            // Apply Exponential Moving Average for smooth transitions
-            if (smoothedHeading === null) {
-              smoothedHeading = rawHeading
-            } else {
-              // Handle circular nature of degrees (0° = 360°)
-              let delta = rawHeading - smoothedHeading
-              if (delta > 180) delta -= 360
-              if (delta < -180) delta += 360
+          // Apply Exponential Moving Average for smooth transitions
+          if (smoothedHeading === null) {
+            smoothedHeading = rawHeading
+          } else {
+            // Handle circular nature of degrees (0° = 360°)
+            let delta = rawHeading - smoothedHeading
+            if (delta > 180) delta -= 360
+            if (delta < -180) delta += 360
 
-              smoothedHeading = (smoothedHeading + SMOOTHING_FACTOR * delta + 360) % 360
-            }
-
-            // Round to 10° increments for less jitter
-            const roundedHeading = Math.round(smoothedHeading / 10) * 10
-
-            // Only update if heading changed significantly (10° threshold)
-            if (Math.abs(roundedHeading - lastDeviceUpdate.heading) >= 10) {
-              const updatedDevice = {
-                ...lastDeviceUpdate, // Keep the current location
-                heading: roundedHeading,
-              }
-              emitIfSignificant(updatedDevice)
-            }
-          } catch (error) {
-            logger.error('Heading update error:', error)
+            smoothedHeading = (smoothedHeading + SMOOTHING_FACTOR * delta + 360) % 360
           }
-        })
-      } else {
-        logger.log('Heading tracking not supported on web platform')
-      }
+
+          // Round to 10° increments for less jitter
+          const roundedHeading = Math.round(smoothedHeading / 10) * 10
+
+          // Only update if heading changed significantly (10° threshold)
+          if (Math.abs(roundedHeading - lastDeviceUpdate.heading) >= 10) {
+            const updatedDevice = {
+              ...lastDeviceUpdate, // Keep the current location
+              heading: roundedHeading,
+            }
+            emitIfSignificant(updatedDevice)
+          }
+        } catch (error) {
+          logger.error('Heading update error:', error)
+        }
+      })
 
       // Start health check to monitor subscriptions
       startHealthCheck()
     } catch (error) {
       logger.error('Failed to initialize location tracking:', error)
+    }
+  }
+
+  const initializeLocationTracking = async () => {
+    if (Platform.OS === 'web') {
+      await initializeWebLocationTracking()
+    } else {
+      await initializeNativeLocationTracking()
     }
   }
 
@@ -185,14 +240,21 @@ export const createDeviceConnector = (): DeviceConnector => {
       healthCheckInterval = null
     }
 
-    if (locationSubscription) {
-      locationSubscription.remove()
-      locationSubscription = null
-    }
+    if (Platform.OS === 'web') {
+      if (webWatchId !== null) {
+        navigator.geolocation.clearWatch(webWatchId)
+        webWatchId = null
+      }
+    } else {
+      if (locationSubscription) {
+        locationSubscription.remove()
+        locationSubscription = null
+      }
 
-    if (headingSubscription) {
-      headingSubscription.remove()
-      headingSubscription = null
+      if (headingSubscription) {
+        headingSubscription.remove()
+        headingSubscription = null
+      }
     }
   }
 

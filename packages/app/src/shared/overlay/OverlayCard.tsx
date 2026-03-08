@@ -9,7 +9,6 @@ interface OverlayCardProps {
   children: React.ReactNode
   title?: string
   onClose?: () => void
-  scrollable?: boolean
   inset?: 'none' | 'sm' | 'md' | 'lg'
   keyboardAware?: boolean
 }
@@ -19,33 +18,34 @@ interface OverlayCardProps {
  * Use this for small, focused interactions like forms, confirmations, or settings.
  */
 function OverlayCard(props: OverlayCardProps) {
-  const { children, title, onClose, scrollable = false, inset = 'md', keyboardAware = false } = props
+  const { children, title, onClose, inset = 'md', keyboardAware = false } = props
   const { styles, theme } = useTheme(createStyles)
 
-  const insetValue = theme.tokens.inset[inset]
-  const ContentContainer = scrollable ? ScrollView : View
-  const contentProps = scrollable
-    ? { contentContainerStyle: [styles.scrollContent, { paddingHorizontal: insetValue }], keyboardShouldPersistTaps: 'handled' as const }
-    : { style: [styles.content, { paddingHorizontal: insetValue }] }
-
-  const cardContent = (
-    <View style={styles.container}>
-      {(title || onClose) && (
-        <View style={styles.header}>
-          <View style={styles.headerLeading} />
-          <View style={styles.headerTitle}>
-            {title && <Text variant='title'>{title}</Text>}
+  const cardContent =
+    <View style={styles.wrapper}>
+      <View style={[styles.container, { paddingHorizontal: theme.tokens.inset[inset], paddingBottom: theme.tokens.inset[inset] }]} id='overlay-card'>
+        {(title || onClose) && (
+          <View style={[styles.header]} id='overlay-card-header'>
+            {/* <View style={styles.headerLeading} /> */}
+            <View style={styles.headerTitle}>
+              {title && <Text variant='title'>{title}</Text>}
+            </View>
+            <View style={styles.headerTrailing}>
+              {onClose && <Button
+                icon="close"
+                variant='secondary'
+                onPress={onClose}
+                style={{ marginRight: inset === 'none' ? 4 : 0 }}
+              />}
+            </View>
           </View>
-          <View style={styles.headerTrailing}>
-            {onClose && <Button icon="close" variant='secondary' onPress={onClose} />}
-          </View>
-        </View>
-      )}
-      <ContentContainer {...contentProps}>
-        {children}
-      </ContentContainer>
+        )}
+        <ScrollView contentContainerStyle={[styles.scrollContent]} keyboardShouldPersistTaps='handled' id={`overlay-card-content`}>
+          {children}
+        </ScrollView>
+      </View>
     </View>
-  )
+
 
   if (keyboardAware) {
     return (
@@ -67,24 +67,22 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
+  wrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: theme.tokens.inset.md,
+  },
   container: {
-    marginHorizontal: theme.tokens.inset.md,
+    maxHeight: '100%',
     borderRadius: theme.tokens.borderRadius.md,
-    backgroundColor: theme.colors.surface,
-    alignSelf: 'center',
-    position: 'absolute',
-    top: '50%',
-    transform: [{ translateY: "-50%" }],
-    left: theme.tokens.inset.md,
-    right: theme.tokens.inset.md,
-    padding: theme.tokens.inset.sm
+    backgroundColor: theme.colors.surface
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: theme.dimensions.HEADER_HEIGHT - 10,
-    paddingHorizontal: theme.tokens.inset.md,
+    paddingVertical: theme.tokens.spacing.lg,
+    marginBottom: theme.tokens.spacing.sm,
   },
   headerLeading: {
     minWidth: 44,
@@ -92,7 +90,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   },
   headerTitle: {
     flex: 1,
-    alignItems: 'center',
   },
   headerTrailing: {
     minWidth: 44,

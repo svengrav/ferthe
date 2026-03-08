@@ -1,4 +1,4 @@
-import { LoadingSpinner, Page } from '@app/shared/components'
+import { Button, LoadingSpinner, Page } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
@@ -13,7 +13,10 @@ import MapLayerSwitch from './MapLayerSwitch'
 import MapOverview from './MapOverview'
 import MapToolbar from './MapToolbar'
 import { MapTrailSelector } from './MapTrailSelector'
+import { MapBottomBar } from './MapBottomBar'
 import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
+import { useCreateSpotPage } from '@app/features/spot/creation/components/SpotCreationPage'
+import { useDeviceLocation } from '@app/features/sensor/stores/sensorStore'
 
 function MapScreen() {
   const { styles } = useTheme(useStyles)
@@ -59,11 +62,17 @@ function MapScreen() {
   }
 
   const { showSettings } = useSettingsPage()
+  const { showCreateSpotPage } = useCreateSpotPage()
+  const device = useDeviceLocation()
 
   return (
     <Page inset='none' options={[{ label: locales.navigation.settings, onPress: () => showSettings() }]}>
       <View style={styles?.container} >
-        <MapToolbar center={<MapCompass />} trailing={<MapLayerSwitch />} />
+        <MapToolbar
+          leading={<Button icon='add' onPress={() => showCreateSpotPage(device.location)} />}
+          center={<MapCompass />}
+          trailing={<MapLayerSwitch />}
+        />
         <MapDistanceWarning />
         <View style={styles?.map} onLayout={onLayout}>
           {status !== 'ready' ? (
@@ -74,8 +83,9 @@ function MapScreen() {
             </Animated.View>
           )}
         </View>
-        <MapTrailSelector />
+        <MapBottomBar />
       </View>
+      <MapTrailSelector />
     </Page>
   )
 }

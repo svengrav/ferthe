@@ -36,6 +36,7 @@ function Header(props: HeaderProps) {
 
 const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
+    marginTop: theme.tokens.spacing.md,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',

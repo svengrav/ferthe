@@ -23,7 +23,7 @@ const SPOT_IMAGE_BORDER_RADIUS = 16
 /**
  * Padding inside spot container frame
  */
-const SPOT_PADDING = 8
+const SPOT_PADDING = 0
 
 /**
  * Reference width for a standard spot card.

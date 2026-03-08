@@ -553,8 +553,8 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
   const getPublicProfile = async (context: AccountContext, targetAccountId: string): Promise<Result<AccountPublicProfile>> => {
     const result = await getAccount({ ...context, accountId: targetAccountId })
     if (!result.success || !result.data) return createErrorResult('ACCOUNT_NOT_FOUND')
-    const { id, displayName, avatar } = result.data
-    return createSuccessResult({ accountId: id!, displayName, avatar, spotCount: 0 })
+    const { id, displayName, avatar, description } = result.data
+    return createSuccessResult({ accountId: id!, displayName, avatar, description, spotCount: 0, trailCount: 0, avgRating: 0, ratingCount: 0 })
   }
 
   // Register or update a device token for push notifications

@@ -8,6 +8,7 @@
     "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/bytes@1": "1.0.6",
     "jsr:@std/crypto@1": "1.0.5",
+    "jsr:@std/dotenv@*": "0.225.6",
     "jsr:@std/dotenv@~0.225.6": "0.225.6",
     "jsr:@std/encoding@1": "1.0.10",
     "jsr:@std/encoding@^1.0.10": "1.0.10",
@@ -15,8 +16,10 @@
     "jsr:@std/internal@^1.0.12": "1.0.12",
     "jsr:@std/media-types@1": "1.1.0",
     "jsr:@std/path@1": "1.1.4",
+    "jsr:@std/path@^1.1.4": "1.1.4",
     "jsr:@tajpouria/cors@^1.2.1": "1.2.1",
     "npm:@azure/cosmos@4": "4.9.1",
+    "npm:@azure/data-tables@^13.3.0": "13.3.2",
     "npm:@azure/identity@4": "4.13.0",
     "npm:@azure/keyvault-secrets@4": "4.10.0_@azure+core-rest-pipeline@1.22.2",
     "npm:@azure/storage-blob@^12.29.1": "12.31.0_@azure+core-client@1.10.1_@azure+core-rest-pipeline@1.22.2",
@@ -66,7 +69,7 @@
         "jsr:@std/bytes",
         "jsr:@std/http",
         "jsr:@std/media-types",
-        "jsr:@std/path",
+        "jsr:@std/path@1",
         "npm:path-to-regexp"
       ]
     },
@@ -217,6 +220,20 @@
         "fast-json-stable-stringify",
         "priorityqueuejs",
         "semaphore",
+        "tslib"
+      ]
+    },
+    "@azure/data-tables@13.3.2": {
+      "integrity": "sha512-PZ8e4SnCpTQEbQ1P+CK6NR7Vhb86Jw1S1qJi2IcF1ij4qiPX2b4vIemwNPkYg/gZGMqKbxkPvGRpRmEbBYdXuA==",
+      "dependencies": [
+        "@azure/core-auth",
+        "@azure/core-client",
+        "@azure/core-paging",
+        "@azure/core-rest-pipeline",
+        "@azure/core-tracing",
+        "@azure/core-util",
+        "@azure/core-xml",
+        "@azure/logger",
         "tslib"
       ]
     },
@@ -2997,6 +3014,7 @@
       "packages/core": {
         "dependencies": [
           "jsr:@std/assert@^1.0.19",
+          "npm:@azure/data-tables@^13.3.0",
           "npm:gray-matter@^4.0.3",
           "npm:sharp@~0.34.5",
           "npm:zod@^4.3.6"

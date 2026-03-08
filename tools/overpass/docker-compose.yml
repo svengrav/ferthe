@@ -1,0 +1,25 @@
+services:
+  overpass:
+    image: wiktorn/overpass-api
+    container_name: ferthe-overpass
+    restart: unless-stopped
+    ports:
+      - "8088:80"
+    environment:
+      # Region extract URL from GeoFabrik. Change to your target region.
+      # Full list: https://download.geofabrik.de/
+      OVERPASS_PLANET_URL: ${OVERPASS_PLANET_URL:-https://download.geofabrik.de/europe/germany/bayern-latest.osm.bz2}
+      OVERPASS_META: "no"
+      OVERPASS_MODE: "clone"
+      OVERPASS_RULES_LOAD: "10"
+    volumes:
+      - overpass-data:/db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 300s # initial import takes time
+
+volumes:
+  overpass-data:

@@ -28,13 +28,7 @@ export function CommunityList({
 
   return (
     <View style={styles.listSection}>
-      <View style={styles.header}>
-        <Text variant="section">My Communities</Text>
-        <View style={styles.actions}>
-          <Button icon="person-add" onPress={onJoinPress} />
-          <Button icon="add" onPress={useCommunityCreatorCard().showCommunityCreatorCard} />
-        </View>
-      </View>
+
 
       {communities.length === 0 ? (
         renderEmptyState()

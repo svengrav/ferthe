@@ -11,10 +11,11 @@ import { logger } from '@app/shared/utils/logger'
 import { getMapThemeDefaults } from '../../config/mapThemeDefaults.ts'
 import { useViewportGestures } from '../../hooks/useViewportGestures.ts'
 import { mapUtils } from '../../services/geoToScreenTransform.ts'
-import { getMapCanvasActions, getMapState, useMapCanvas, useMapSurfaceBoundary } from '../../stores/mapStore.ts'
+import { getMapCanvasActions, getMapState, useMapCanvasBoundary, useMapCanvasDimensions, useMapCanvasImage, useMapCanvasRadius, useMapCanvasScaleConfig, useMapSurfaceBoundary } from '../../stores/mapStore.ts'
 import { MapCanvasDebug } from './MapCanvasDebug.tsx'
-import { MapCompensatedScaleContext } from './MapCompensatedScale.tsx'
+import { MapCompensatedScaleContext, MapScaleProvider, useMapScale } from './MapCompensatedScale.tsx'
 import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
+import MapScaleBar from './MapScaleBar.tsx'
 
 interface MapCanvasViewportProps {
   children: ReactNode
@@ -31,7 +32,9 @@ interface MapCanvasViewportProps {
 function MapCanvasViewport(props: MapCanvasViewportProps) {
   const { children, onLayout } = props
   const { styles } = useTheme(useStyles)
-  const { size, boundary, image } = useMapCanvas()
+  const boundary = useMapCanvasBoundary()
+  const size = useMapCanvasDimensions()
+  const image = useMapCanvasImage()
   const surfaceBoundary = useMapSurfaceBoundary()
   const { sensorApplication } = getAppContextStore()
   const actions = getMapCanvasActions()
@@ -51,9 +54,9 @@ function MapCanvasViewport(props: MapCanvasViewportProps) {
     actions.setCanvas({ scale: { ...currentScale, init: s }, offset: { x: tx, y: ty } })
   }
 
-  const { scale: viewportScale } = useMapCanvas()  // Reactive hook for scale updates
+  const viewportScale = useMapCanvasScaleConfig()
 
-  const { gesture, animatedStyles, compensatedScale } = useViewportGestures({
+  const { gesture, animatedStyles, compensatedScale, scale } = useViewportGestures({
     width: size.width,
     height: size.height,
     initialScale: viewportScale.init,
@@ -72,32 +75,45 @@ function MapCanvasViewport(props: MapCanvasViewportProps) {
 
   return (
     <MapCompensatedScaleContext.Provider value={compensatedScale}>
-      <View style={styles?.container} onLayout={handleLayout} id='device-viewport-content'>
-        {/* Static viewport background image */}
-        {image && (
-          <View style={styles?.backgroundContainer}>
-            <Image
-              source={{ uri: image }}
-              width={size.width}
-              height={size.height}
-              style={styles?.backgroundImage}
-              showLoader={false}
-            />
-          </View>
-        )}
+      <MapScaleProvider value={scale}>
+        <View style={styles?.container} onLayout={handleLayout} id='device-viewport-content'>
+          {/* Static viewport background image */}
+          {image && (
+            <View style={styles?.backgroundContainer}>
+              <Image
+                source={{ uri: image }}
+                width={size.width}
+                height={size.height}
+                style={styles?.backgroundImage}
+                showLoader={false}
+              />
+            </View>
+          )}
 
-        <GestureHandlerRootView style={size}>
-          <GestureDetector gesture={gesture}>
-            <Animated.View style={[size, animatedStyles, { overflow: 'hidden' }]}>
-              {children}
-            </Animated.View>
-          </GestureDetector>
-        </GestureHandlerRootView>
+          <GestureHandlerRootView style={size}>
+            <GestureDetector gesture={gesture}>
+              <Animated.View style={[size, animatedStyles, { overflow: 'hidden' }]}>
+                {children}
+              </Animated.View>
+            </GestureDetector>
+          </GestureHandlerRootView>
 
-        {config.debug.enableMapDebug && <MapCanvasDebug animatedStyles={animatedStyles} />}
-      </View>
+          <MapCanvasScaleBar />
+          {config.debug.enableMapDebug && <MapCanvasDebug animatedStyles={animatedStyles} />}
+        </View>
+      </MapScaleProvider>
     </MapCompensatedScaleContext.Provider>
   )
+}
+
+/** Scale bar for canvas mode — reads scale + radius from context/store */
+function MapCanvasScaleBar() {
+  const scale = useMapScale()
+  const size = useMapCanvasDimensions()
+  const radius = useMapCanvasRadius()
+  if (!scale) return null
+  const metersPerPixelAtScale1 = (2 * radius) / size.width
+  return <MapScaleBar scale={scale} metersPerPixelAtScale1={metersPerPixelAtScale1} />
 }
 
 const { canvas } = getMapThemeDefaults()

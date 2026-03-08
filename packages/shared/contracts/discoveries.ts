@@ -117,24 +117,6 @@ export const DiscoveryTrailSchema = z.object({
   trail: z.unknown().optional(), // Trail field: validated at app layer (can't import due to circular dependency)
 })
 
-/**
- * Discovery content visibility enum
- */
-export const DiscoveryContentVisibilitySchema = z.enum(['private', 'public'])
-
-/**
- * Discovery content schema
- */
-export const DiscoveryContentSchema = z.object({
-  id: guard.idString,
-  discoveryId: guard.idString,
-  accountId: guard.idString,
-  image: ImageReferenceSchema.optional(),
-  comment: z.string().max(10000).optional(),
-  visibility: DiscoveryContentVisibilitySchema,
-  createdAt: z.date(),
-  updatedAt: z.date(),
-})
 
 // ──────────────────────────────────────────────────────────────
 // TypeScript Types (Inferred from Zod Schemas)
@@ -150,19 +132,6 @@ export type DiscoveryStats = z.infer<typeof DiscoveryStatsSchema>
 export type ClueSource = z.infer<typeof ClueSourceSchema>
 export type Clue = z.infer<typeof ClueSchema>
 export type DiscoveryTrail = z.infer<typeof DiscoveryTrailSchema>
-export type DiscoveryContentVisibility = z.infer<typeof DiscoveryContentVisibilitySchema>
-export type DiscoveryContent = z.infer<typeof DiscoveryContentSchema>
-
-/**
- * Request schema for creating or updating discovery content
- */
-export const UpsertDiscoveryContentRequestSchema = z.object({
-  imageUrl: z.string().url().optional(),
-  comment: z.string().max(10000).optional(),
-  visibility: DiscoveryContentVisibilitySchema.optional(),
-})
-
-export type UpsertDiscoveryContentRequest = z.infer<typeof UpsertDiscoveryContentRequestSchema>
 
 // ──────────────────────────────────────────────────────────────
 // Application Contract (unchanged)
@@ -185,9 +154,6 @@ export interface DiscoveryApplicationContract {
   getDiscoveryTrailStats: (context: AccountContext, trailId: string) => Promise<Result<TrailStats>>
   getDiscoveryProfile: (context: AccountContext) => Promise<Result<DiscoveryProfile>>
   updateDiscoveryProfile: (context: AccountContext, updateData: DiscoveryProfileUpdateData) => Promise<Result<DiscoveryProfile>>
-  getDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryContent | undefined>>
-  upsertDiscoveryContent: (context: AccountContext, discoveryId: string, content: { imageUrl?: string; comment?: string; visibility?: DiscoveryContentVisibility }) => Promise<Result<DiscoveryContent>>
-  deleteDiscoveryContent: (context: AccountContext, discoveryId: string) => Promise<Result<void>>
   // Rating methods (delegated to SpotApplication with access control)
   rateSpot: (context: AccountContext, spotId: string, rating: number) => Promise<Result<SpotRating>>
   removeSpotRating: (context: AccountContext, spotId: string) => Promise<Result<void>>

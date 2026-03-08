@@ -26,15 +26,14 @@ import {
 import { FeedbackRequestSchema, LanguageSchema } from '@shared/contracts/content.ts'
 import {
   ClueSchema,
-  DiscoveryContentSchema,
   DiscoveryLocationRecordSchema,
   DiscoverySchema,
   DiscoveryStatsSchema,
   DiscoveryTrailSchema,
   LocationWithDirectionSchema,
-  UpsertDiscoveryContentRequestSchema,
   WelcomeDiscoveryResultSchema,
 } from '@shared/contracts/discoveries.ts'
+import { StorySchema, upsertStoryRequestSchema } from '@shared/contracts/stories.ts'
 import { DiscoveryProfileSchema, DiscoveryProfileUpdateDataSchema } from '@shared/contracts/discoveryProfile.ts'
 import { ResultSchema } from '@shared/contracts/results.ts'
 import { ScanEventSchema } from '@shared/contracts/sensors.ts'
@@ -54,6 +53,7 @@ import {
   UpdateTrailRequestSchema,
 } from '@shared/contracts/trails.ts'
 import { TrailSpotSchema } from '@shared/contracts/trailSpots.ts'
+import { StumbleSuggestionSchema, StumbleVisitSchema } from '@shared/contracts/stumble.ts'
 import { GeoLocationSchema } from '@shared/geo/types.ts'
 import { z } from 'zod'
 import type { RouteRegistry } from './types.ts'
@@ -434,34 +434,83 @@ export const routes = {
       params: z.object({ discoveryId: z.string() }),
       output: ResultSchema(DiscoveryStatsSchema),
     },
-    getDiscoveryContent: {
-      version: 'v1',
-      method: 'GET',
-      path: '/discovery/discoveries/:discoveryId/content',
-      params: z.object({ discoveryId: z.string() }),
-      output: ResultSchema(DiscoveryContentSchema.optional()),
-    },
-    upsertDiscoveryContent: {
-      version: 'v1',
-      method: 'PUT',
-      path: '/discovery/discoveries/:discoveryId/content',
-      params: z.object({ discoveryId: z.string() }),
-      input: UpsertDiscoveryContentRequestSchema,
-      output: ResultSchema(DiscoveryContentSchema),
-    },
-    deleteDiscoveryContent: {
-      version: 'v1',
-      method: 'DELETE',
-      path: '/discovery/discoveries/:discoveryId/content',
-      params: z.object({ discoveryId: z.string() }),
-      output: ResultSchema(z.void()),
-    },
     createWelcome: {
       version: 'v1',
       method: 'POST',
       path: '/discovery/welcome',
       input: z.object({ location: GeoLocationSchema }),
       output: ResultSchema(WelcomeDiscoveryResultSchema),
+    },
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // Story Routes
+  // ─────────────────────────────────────────────────────────────
+  story: {
+    getSpotStory: {
+      version: 'v1',
+      method: 'GET',
+      path: '/story/discoveries/:discoveryId',
+      params: z.object({ discoveryId: z.string() }),
+      output: ResultSchema(StorySchema.optional()),
+    },
+    getTrailStory: {
+      version: 'v1',
+      method: 'GET',
+      path: '/story/trails/:trailId',
+      params: z.object({ trailId: z.string() }),
+      output: ResultSchema(StorySchema.optional()),
+    },
+    upsertSpotStory: {
+      version: 'v1',
+      method: 'PUT',
+      path: '/story/discoveries/:discoveryId',
+      params: z.object({ discoveryId: z.string() }),
+      input: upsertStoryRequestSchema,
+      output: ResultSchema(StorySchema),
+    },
+    upsertTrailStory: {
+      version: 'v1',
+      method: 'PUT',
+      path: '/story/trails/:trailId',
+      params: z.object({ trailId: z.string() }),
+      input: upsertStoryRequestSchema,
+      output: ResultSchema(StorySchema),
+    },
+    deleteStory: {
+      version: 'v1',
+      method: 'DELETE',
+      path: '/story/:storyId',
+      params: z.object({ storyId: z.string() }),
+      output: ResultSchema(z.void()),
+    },
+    listPublicStoriesBySpot: {
+      version: 'v1',
+      method: 'GET',
+      path: '/story/spots/:spotId/stories',
+      params: z.object({ spotId: z.string() }),
+      output: ResultSchema(z.array(StorySchema)),
+    },
+    listPublicStoriesByTrail: {
+      version: 'v1',
+      method: 'GET',
+      path: '/story/trails/:trailId/stories',
+      params: z.object({ trailId: z.string() }),
+      output: ResultSchema(z.array(StorySchema)),
+    },
+    likeStory: {
+      version: 'v1',
+      method: 'POST',
+      path: '/story/:storyId/like',
+      params: z.object({ storyId: z.string() }),
+      output: ResultSchema(StorySchema),
+    },
+    unlikeStory: {
+      version: 'v1',
+      method: 'DELETE',
+      path: '/story/:storyId/like',
+      params: z.object({ storyId: z.string() }),
+      output: ResultSchema(StorySchema),
     },
   },
 
@@ -740,6 +789,41 @@ export const routes = {
       path: '/content/feedback',
       input: FeedbackRequestSchema,
       output: ResultSchema(SuccessSchema),
+    },
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // Stumble Routes
+  // ─────────────────────────────────────────────────────────────
+  stumble: {
+    getSuggestions: {
+      version: 'v1',
+      method: 'GET',
+      path: '/stumble/suggestions',
+      query: z.object({
+        lat: z.coerce.number(),
+        lon: z.coerce.number(),
+        radius: z.coerce.number().optional(),
+        preferences: z.string(), // comma-separated StumblePreference values
+        language: z.string().optional(),
+      }),
+      output: ResultSchema(z.array(StumbleSuggestionSchema)),
+    },
+    recordVisit: {
+      version: 'v1',
+      method: 'POST',
+      path: '/stumble/visits',
+      input: z.object({
+        poiId: z.string(),
+        spotId: z.string().optional(),
+      }),
+      output: ResultSchema(StumbleVisitSchema),
+    },
+    getVisits: {
+      version: 'v1',
+      method: 'GET',
+      path: '/stumble/visits',
+      output: ResultSchema(z.array(StumbleVisitSchema)),
     },
   },
 

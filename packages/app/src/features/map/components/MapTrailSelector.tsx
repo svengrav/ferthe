@@ -1,5 +1,6 @@
 import { FlatList, StyleSheet, View } from 'react-native'
 import { GestureDetector } from 'react-native-gesture-handler'
+import { useLocalization } from '@app/shared/localization'
 
 import { useDiscoveryTrail } from '@app/features/discovery'
 import { useTrails } from '@app/features/trail'
@@ -11,31 +12,36 @@ import { Theme, useTheme } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
 
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
+import { isStumbleTrail } from '@app/features/stumble'
 import { useSwipeUpGesture } from '../hooks/useSwipeUpGesture'
+import TrailList from '@app/features/trail/components/TrailList'
 
 /**
  * Hook to open/close the trail list card overlay.
  */
 export const useMapTrailListCard = () => {
   const trails = useTrails()
-  const { discoveryApplication } = getAppContextStore()
+  const { discoveryApplication, stumbleApplication } = getAppContextStore()
+  const { locales } = useLocalization()
 
   return {
     showTrailListCard: () => {
       const cardId = 'map-trail-list-card'
       return setOverlay(
         cardId,
-        <MapTrailListCard
-          onClose={() => closeOverlay('map-trail-list-card')}
-          trails={trails}
-          onSelectTrail={(trail) => {
-            discoveryApplication.setActiveTrail(trail.id)
-            closeOverlay(cardId)
-          }}
-        />,
+        <OverlayCard title={locales.map.selectTrail} onClose={() => closeOverlay(cardId)} >
+          <MapTrailListCard
+            onClose={() => closeOverlay(cardId)}
+            trails={trails}
+            onSelectTrail={(trail) => {
+              closeOverlay(cardId)
+              discoveryApplication.setActiveTrail(trail.id)
+
+            }}
+          />
+        </OverlayCard>
       )
     },
-    closeTrailListCard: () => closeOverlay('map-trail-list-card'),
   }
 }
 
@@ -46,27 +52,16 @@ interface MapTrailListCardProps {
 }
 
 /**
- * Overlay card displaying a list of available trails for selection.
+ * Overlay card displaying all available trails for selection.
+ * Stumble trails (kind='stumble') are managed in the backend like any other trail.
  */
-function MapTrailListCard(props: MapTrailListCardProps) {
-  const { trails, onSelectTrail, onClose } = props
-  const { styles } = useTheme(createStyles)
-
-  const renderTrailItem = ({ item }: { item: Trail }) => (
-    <TrailItem
-      trail={item}
-      onPress={() => onSelectTrail(item)}
-    />
-  )
+function MapTrailListCard({ trails, onSelectTrail, onClose }: MapTrailListCardProps) {
 
   return (
-    <OverlayCard title='Select card' onClose={onClose} inset='none'>
-      <FlatList
-        data={trails}
-        renderItem={renderTrailItem}
-        keyExtractor={item => item.id}
-      />
-    </OverlayCard>
+    <TrailList
+      trails={trails}
+      onOpenTrail={(item) => onSelectTrail(item)}
+    />
   )
 }
 
@@ -86,7 +81,7 @@ const useMapTrailSelector = () => {
 
 /**
  * Bottom sheet selector for switching between trails on the map.
- * Displays the currently active trail and allows swipe-up gesture to open trail list.
+ * Supports swipe-up gesture to open the trail list.
  */
 export const MapTrailSelector = () => {
   const { styles } = useTheme(createStyles)
@@ -94,7 +89,7 @@ export const MapTrailSelector = () => {
   const swipeGesture = useSwipeUpGesture(openTrailSelector)
 
   return (
-    <GestureDetector gesture={swipeGesture} >
+    <GestureDetector gesture={swipeGesture}>
       <View style={styles.selector} id="map">
         {selectedTrail && (
           <TrailItem
@@ -118,9 +113,6 @@ const createStyles = (theme: Theme) => StyleSheet.create({
   selector: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    borderTopColor: theme.colors.divider,
-    backgroundColor: theme.colors.surface,
-    borderTopWidth: 1,
-
+    backgroundColor: theme.colors.background
   },
 })

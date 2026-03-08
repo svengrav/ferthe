@@ -86,6 +86,7 @@ async function enrichTrailWithImages(
   return {
     id: trailEntity.id,
     slug: trailEntity.slug,
+    kind: trailEntity.kind,
     name: trailEntity.name,
     description: trailEntity.description,
     map: {
@@ -98,7 +99,7 @@ async function enrichTrailWithImages(
       image: overviewImage,
     } : undefined,
     image,
-    boundary: trailEntity.boundary || { northEast: { lat: 0, lon: 0 }, southWest: { lat: 0, lon: 0 } },
+    boundary: trailEntity.boundary,
     options: trailEntity.options,
     createdBy: trailEntity.createdBy,
     createdAt: trailEntity.createdAt,
@@ -292,13 +293,14 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
             return {
               id: withBoundary.id,
               slug: withBoundary.slug,
+              kind: withBoundary.kind,
               name: withBoundary.name,
               description: withBoundary.description,
               map: { image: undefined },
               viewport: undefined,
               overview: undefined,
               image: undefined,
-              boundary: withBoundary.boundary || { northEast: { lat: 0, lon: 0 }, southWest: { lat: 0, lon: 0 } },
+              boundary: withBoundary.boundary,
               options: withBoundary.options,
               createdBy: withBoundary.createdBy,
               createdAt: withBoundary.createdAt,
@@ -350,6 +352,7 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
         const trailEntity: StoredTrail = {
           id,
           slug,
+          kind: trailData.kind,
           name: trailData.name,
           description: trailData.description,
           map: { imageBlobPath: mapImageBlobPath },
@@ -444,8 +447,20 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
       }
     },
 
-    addSpotToTrail: async (_context: AccountContext, trailId: string, spotId: string, order?: number): Promise<Result<StoredTrailSpot>> => {
+    addSpotToTrail: async (context: AccountContext, trailId: string, spotId: string, order?: number): Promise<Result<StoredTrailSpot>> => {
       try {
+        // Enforce spotAccess policy
+        const trailResult = await trailStore.get(trailId)
+        if (!trailResult.success || !trailResult.data) {
+          return { success: false, error: { message: 'Trail not found', code: 'TRAIL_NOT_FOUND' } }
+        }
+        const spotAccess = trailResult.data.options.spotAccess ?? 'open'
+        const isOwner = trailResult.data.createdBy === context.accountId
+        const isAdmin = context.role === 'admin'
+        if (spotAccess !== 'open' && !isOwner && !isAdmin) {
+          return { success: false, error: { message: 'Not allowed to add spots to this trail', code: 'SPOT_ACCESS_DENIED' } }
+        }
+
         // Check if relationship already exists
         const existingResult = await trailSpotStore.list()
         if (existingResult.success) {

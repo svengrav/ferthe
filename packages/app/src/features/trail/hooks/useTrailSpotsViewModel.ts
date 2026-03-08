@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { getSpotsById, useSpotPreviewsById } from '@app/features/spot/stores/spotStore'
+import { useSpotsById, useSpotPreviewsById } from '@app/features/spot/stores/spotStore'
 import { useTrailSpotIds } from '@app/features/trail/stores/trailStore'
 import { TrailSpotRowVM } from '../types/viewModels'
 
@@ -15,7 +15,7 @@ import { TrailSpotRowVM } from '../types/viewModels'
  */
 export function useTrailSpotsViewModel(trailId: string): TrailSpotRowVM[] {
   const trailSpotIds = useTrailSpotIds(trailId)
-  const spotsById = getSpotsById()
+  const spotsById = useSpotsById()
   const previewsById = useSpotPreviewsById()
 
   return useMemo(() => {
@@ -35,18 +35,17 @@ export function useTrailSpotsViewModel(trailId: string): TrailSpotRowVM[] {
           image: spot.image,
           blurredImage: undefined,
         })
-      } else if (preview) {
-        // Undiscovered spot - only preview available
+      } else {
+        // Undiscovered spot - show as locked (with or without blur image)
         viewModels.push({
-          id: preview.id,
+          id: preview?.id ?? spotId,
           order: index,
           discovered: false,
           title: undefined,
           image: undefined,
-          blurredImage: preview.blurredImage,
+          blurredImage: preview?.blurredImage,
         })
       }
-      // If neither spot nor preview exists, skip (shouldn't happen in practice)
     })
 
     return viewModels

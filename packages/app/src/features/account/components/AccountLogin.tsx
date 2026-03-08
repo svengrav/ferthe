@@ -56,7 +56,7 @@ function AccountLogin(props: AccountLoginProps) {
         </View>
 
         {/* Divider */}
-        <Divider text={locales.auth.orCreateLocal} />
+        <Divider label={locales.auth.orCreateLocal} />
 
         {/* Local Account Section */}
         <View>

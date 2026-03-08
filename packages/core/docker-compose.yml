@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  # Ferthe Core API
+  ferthe-core-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ferthe-core-api
+    ports:
+      - "${CORE_PORT:-7000}:7000"
+    env_file:
+      - .env.production
+    environment:
+      # Override system settings if needed
+      - PRODUCTION=true
+      - PORT=7000
+      - HOST=0.0.0.0
+      - CONTENT_DIR=/content
+    networks:
+      - core-network
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7000/core/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+networks:
+  core-network:
+    driver: bridge

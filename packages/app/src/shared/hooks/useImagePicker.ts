@@ -3,6 +3,10 @@ import * as ImagePicker from 'expo-image-picker'
 import { useState } from 'react'
 import { Platform } from 'react-native'
 
+interface UseImagePickerOptions {
+  aspect?: [number, number]
+}
+
 interface UseImagePickerResult {
   selectedImageUri: string | null
   pickImage: () => Promise<void>
@@ -13,10 +17,10 @@ interface UseImagePickerResult {
 /**
  * Hook to pick images from device gallery/camera roll
  * Native only - returns URI that can be read as base64
- * 
+ *
  * Reusable across features that need image selection
  */
-export const useImagePicker = (): UseImagePickerResult => {
+export const useImagePicker = (options?: UseImagePickerOptions): UseImagePickerResult => {
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -40,6 +44,7 @@ export const useImagePicker = (): UseImagePickerResult => {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images', 'livePhotos'],
         allowsEditing: true,
+        aspect: options?.aspect,
         quality: 0.8,
       })
 

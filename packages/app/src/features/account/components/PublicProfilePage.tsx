@@ -61,7 +61,25 @@ function PublicProfilePage(props: PublicProfilePageProps) {
             <Text variant="heading" size="lg">{profile?.spotCount ?? 0}</Text>
             <Text variant="caption">{locales.account.spots}</Text>
           </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCell}>
+            <Text variant="heading" size="lg">{profile?.trailCount ?? 0}</Text>
+            <Text variant="caption">{locales.account.trails}</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCell}>
+            <Text variant="heading" size="lg">
+              {profile?.ratingCount ? `${profile.avgRating.toFixed(1)} ★` : '–'}
+            </Text>
+            <Text variant="caption">{`${profile?.ratingCount ?? 0} ${locales.account.ratings}`}</Text>
+          </View>
         </View>
+
+        {/* Description */}
+        <Text variant="section">{locales.account.description}</Text>
+        {profile?.description ? (
+          <Text variant="body">{profile.description}</Text>
+        ) : null}
       </Stack>
     </Page>
   )
@@ -85,6 +103,12 @@ const useStyles = createThemedStyles(theme => ({
   statCell: {
     alignItems: 'center',
     gap: theme.tokens.spacing.xs,
+    flex: 1,
+  },
+  statDivider: {
+    width: 1,
+    alignSelf: 'stretch',
+    backgroundColor: theme.colors.divider,
   },
 }))
 

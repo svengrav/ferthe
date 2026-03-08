@@ -61,14 +61,14 @@ const useStyles = createThemedStyles(theme => ({
   },
   description: {
     marginBottom: theme.tokens.spacing.md,
-    color: theme.deriveColor(theme.colors.onSurface, 0.6),
+    color: theme.deriveColor(theme.colors.onSurface, 0.3),
   },
   emptyContainer: {
     padding: theme.tokens.inset.lg,
     alignItems: 'center',
   },
   emptyText: {
-    color: theme.deriveColor(theme.colors.onSurface, 0.6),
+    color: theme.deriveColor(theme.colors.onSurface, 0.3),
   },
 }))
 

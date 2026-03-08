@@ -154,6 +154,7 @@ export function TrailEditorPanel(props: TrailEditorPanelProps) {
           initialData={{
             name: trail.name,
             description: trail.description,
+            kind: trail.kind ?? "discovery",
             discoveryMode: trail.options?.discoveryMode ?? "free",
           }}
           existingImageUrl={trail.image?.url}

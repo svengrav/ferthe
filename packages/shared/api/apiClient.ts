@@ -8,11 +8,13 @@ import type { Community, CommunityMember, SharedDiscovery } from '../contracts/c
 import type { ActivateTrailResult, DiscoveryState } from '../contracts/composites.ts'
 import type { FirebaseConfig } from '../contracts/config.ts'
 import type { FeedbackRequest } from '../contracts/content.ts'
-import type { Clue, Discovery, DiscoveryContent, DiscoveryLocationRecord, DiscoverySpot, DiscoveryStats, DiscoveryTrail, LocationWithDirection, UpsertDiscoveryContentRequest, WelcomeDiscoveryResult } from '../contracts/discoveries.ts'
+import type { Clue, Discovery, DiscoveryLocationRecord, DiscoverySpot, DiscoveryStats, DiscoveryTrail, LocationWithDirection, WelcomeDiscoveryResult } from '../contracts/discoveries.ts'
+import type { Story, UpsertStoryRequest } from '../contracts/stories.ts'
 import type { DiscoveryProfile, DiscoveryProfileUpdateData } from '../contracts/discoveryProfile.ts'
 import type { Result } from '../contracts/results.ts'
 import type { ScanEvent } from '../contracts/sensors.ts'
 import type { CreateSpotRequest, RatingSummary, Spot, SpotPreview, SpotRating, UpdateSpotRequest } from '../contracts/spots.ts'
+import type { StumbleSuggestionResult, StumbleSuggestionsQuery, StumbleVisit } from '../contracts/stumble.ts'
 import type { CreateTrailRequest, Trail, TrailRating, TrailStats, UpdateTrailRequest } from '../contracts/trails.ts'
 import type { StoredTrailSpot, TrailSpot } from '../contracts/trailSpots.ts'
 import type { GeoLocation } from '../geo/index.ts'
@@ -163,17 +165,37 @@ export function createApiClient(config: HttpClientConfig) {
       getDiscoveryStats: (discoveryId: string) =>
         call<DiscoveryStats>(() => client.get(buildPath(routes.discovery.getDiscoveryStats.path, { discoveryId }))),
 
-      getDiscoveryContent: (discoveryId: string) =>
-        call<DiscoveryContent | undefined>(() => client.get(buildPath(routes.discovery.getDiscoveryContent.path, { discoveryId }))),
-
-      upsertDiscoveryContent: (discoveryId: string, body: UpsertDiscoveryContentRequest) =>
-        call<DiscoveryContent>(() => client.put(buildPath(routes.discovery.upsertDiscoveryContent.path, { discoveryId }), body)),
-
-      deleteDiscoveryContent: (discoveryId: string) =>
-        call<void>(() => client.delete(buildPath(routes.discovery.deleteDiscoveryContent.path, { discoveryId }))),
-
       createWelcome: (location: GeoLocation) =>
         call<WelcomeDiscoveryResult>(() => client.post(routes.discovery.createWelcome.path, { location })),
+    },
+
+    story: {
+      getSpotStory: (discoveryId: string) =>
+        call<Story | undefined>(() => client.get(buildPath(routes.story.getSpotStory.path, { discoveryId }))),
+
+      getTrailStory: (trailId: string) =>
+        call<Story | undefined>(() => client.get(buildPath(routes.story.getTrailStory.path, { trailId }))),
+
+      upsertSpotStory: (discoveryId: string, body: UpsertStoryRequest) =>
+        call<Story>(() => client.put(buildPath(routes.story.upsertSpotStory.path, { discoveryId }), body)),
+
+      upsertTrailStory: (trailId: string, body: UpsertStoryRequest) =>
+        call<Story>(() => client.put(buildPath(routes.story.upsertTrailStory.path, { trailId }), body)),
+
+      deleteStory: (storyId: string) =>
+        call<void>(() => client.delete(buildPath(routes.story.deleteStory.path, { storyId }))),
+
+      listPublicStoriesBySpot: (spotId: string) =>
+        call<Story[]>(() => client.get<Story[]>(buildPath(routes.story.listPublicStoriesBySpot.path, { spotId }))),
+
+      listPublicStoriesByTrail: (trailId: string) =>
+        call<Story[]>(() => client.get<Story[]>(buildPath(routes.story.listPublicStoriesByTrail.path, { trailId }))),
+
+      likeStory: (storyId: string) =>
+        call<Story>(() => client.post(buildPath(routes.story.likeStory.path, { storyId }), {})),
+
+      unlikeStory: (storyId: string) =>
+        call<Story>(() => client.delete(buildPath(routes.story.unlikeStory.path, { storyId }))),
     },
 
     account: {
@@ -292,6 +314,17 @@ export function createApiClient(config: HttpClientConfig) {
 
       activateTrail: (trailId: string) =>
         call<ActivateTrailResult>(() => client.post(routes.composite.activateTrail.path, { trailId })),
+    },
+
+    stumble: {
+      getSuggestions: (query: StumbleSuggestionsQuery) =>
+        call<StumbleSuggestionResult[]>(() => client.get<StumbleSuggestionResult[]>(routes.stumble.getSuggestions.path, query)),
+
+      recordVisit: (poiId: string, spotId?: string) =>
+        call<StumbleVisit>(() => client.post(routes.stumble.recordVisit.path, { poiId, spotId })),
+
+      getVisits: () =>
+        call<StumbleVisit[]>(() => client.get<StumbleVisit[]>(routes.stumble.getVisits.path)),
     },
   }
 }

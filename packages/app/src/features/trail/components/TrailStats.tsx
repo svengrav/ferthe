@@ -1,4 +1,4 @@
-import { Icon, ProgressBar, Stack, Text } from '@app/shared/components'
+import { Icon, ProgressBar, SectionHeader, Stack, Text } from '@app/shared/components'
 import { LoadingSpinner } from '@app/shared/components/activityIndicator/ActivityIndicator'
 import { useLocalization } from '@app/shared/localization'
 import { Theme, useTheme } from '@app/shared/theme'
@@ -41,6 +41,15 @@ function TrailStats(props: TrailStatsProps) {
   }
 
   if (!stats) {
+    if (!loading && !error) {
+      return (
+        <View style={[styles?.emptyContainer, style]}>
+          <Text variant="body" style={styles.emptyText}>
+            {locales.trails.noStatsAvailable}
+          </Text>
+        </View>
+      )
+    }
     return null
   }
 
@@ -70,7 +79,6 @@ function TrailStats(props: TrailStatsProps) {
     <View style={[styles.container, style]}>
       <Stack spacing='lg'>
         <Text variant="section">{locales.trails.stats.name}</Text>
-
         {/* Progress */}
         <View style={styles.statRow}>
           <Icon name="map" size='md' color={theme.colors.primary} />
@@ -139,6 +147,13 @@ const formatDuration = (seconds: number): string => {
 }
 
 const createStyles = (theme: Theme) => StyleSheet.create({
+  emptyContainer: {
+    padding: theme.tokens.inset.lg,
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: theme.deriveColor(theme.colors.onSurface, 0.3),
+  },
   container: {
     flex: 1,
   },

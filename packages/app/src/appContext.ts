@@ -9,6 +9,8 @@ import { createMapApplication, MapApplication } from './features/map/application
 import { createSensorApplication, SensorApplication } from './features/sensor/application'
 import { DeviceConnector } from './features/sensor/device/types'
 import { createSpotApplication, SpotApplication } from './features/spot/application'
+import { createStoryApplication, StoryApplication } from './features/story/application'
+import { createStumbleApplication, StumbleApplication } from './features/stumble/stumbleApplication'
 import { createTrailApplication, TrailApplication } from './features/trail/application'
 import { SecureStoreConnector } from './shared/device/secureStoreConnector'
 import { logger } from './shared/utils/logger'
@@ -21,12 +23,14 @@ export interface AppContext {
     checkStatus: () => Promise<StatusResult>
   }
   discoveryApplication: DiscoveryApplication
+  storyApplication: StoryApplication
   trailApplication: TrailApplication
   sensorApplication: SensorApplication
   spotApplication: SpotApplication
   mapApplication: MapApplication
   accountApplication: AccountApplication
   communityApplication: CommunityApplication
+  stumbleApplication: StumbleApplication
 }
 
 interface AppConfiguration {
@@ -69,6 +73,8 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
 
   const spotApplication = createSpotApplication({ api })
 
+  const storyApplication = createStoryApplication({ api })
+
   const mapApplication = createMapApplication({
     sensor: sensorApplication,
     discoveryApplication,
@@ -84,12 +90,14 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
       checkStatus: apiContext.system.checkStatus,
     },
     discoveryApplication,
+    storyApplication,
     trailApplication,
     sensorApplication,
     spotApplication,
     mapApplication,
     accountApplication,
     communityApplication,
+    stumbleApplication: createStumbleApplication({ api }),
   }
 }
 

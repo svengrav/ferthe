@@ -1,4 +1,4 @@
-import { Icon, ProgressBar, Stack, Text } from '@app/shared/components'
+import { Icon, ProgressBar, SectionHeader, Stack, Text } from '@app/shared/components'
 import { LoadingSpinner } from '@app/shared/components/activityIndicator/ActivityIndicator'
 import { useLocalization } from '@app/shared/localization'
 import { Theme, useTheme } from '@app/shared/theme'
@@ -47,7 +47,7 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
   return (
     <View style={[styles.container, style]}>
       <Stack spacing='lg'>
-        <Text variant="section">{locales.discovery.stats.name}</Text>
+        <SectionHeader title={locales.trails.stats.name} style={{ marginBottom: theme.tokens.spacing.lg }} subtitle='Your discovery stats' />
 
         {/* Rank */}
         <View style={styles.statRow}>

@@ -51,15 +51,11 @@ interface CommunityCreatorCardProps {
 
 export function CommunityCreatorCard({ onClose }: CommunityCreatorCardProps) {
   const trails = useTrails()
-  const { locales } = useLocalization()
   const { handleCreate } = useCommunityCreator()
 
   return (
     <OverlayCard title='Create Community' onClose={onClose} keyboardAware={true}>
-      <Stack spacing="lg">
-        <Text variant="heading">{locales.community.createNewCommunity}</Text>
-        <CommunityEditor trails={trails} onSubmit={handleCreate} />
-      </Stack>
+      <CommunityEditor trails={trails} onSubmit={handleCreate} />
     </OverlayCard>
   )
 }

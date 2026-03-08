@@ -65,6 +65,11 @@ const createClueStyles = (theme: MapTheme, clueSize: number, scaleValue: number)
     backgroundColor: theme.clue.fill,
     borderWidth: theme.clue.strokeWidth * scaleValue,
     borderColor: theme.clue.strokeColor,
+    shadowColor: 'black',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   clueImage: {
     width: clueSize,
@@ -72,6 +77,11 @@ const createClueStyles = (theme: MapTheme, clueSize: number, scaleValue: number)
     borderRadius: clueSize / 2,
     borderWidth: theme.clue.strokeWidth * scaleValue,
     borderColor: theme.clue.strokeColor,
+    shadowColor: 'black',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
 })
 
@@ -120,7 +130,7 @@ const ClueDiscoveryRadius = memo(({ clue, boundary, size, scale, theme, clueSize
           left: (clueSize - circle.width) / 2,
           top: (clueSize - circle.height) / 2,
           borderRadius: circle.width / 2,
-          backgroundColor: 'gray'
+          backgroundColor: 'white'
         }
       ]}
     />
@@ -262,15 +272,17 @@ const useScanCluesWithLifecycle = (scanClues: Clue[], deviceLocation: { lat: num
 /**
  * Hook to sync SharedValue to React state for style calculations
  */
-const useSharedValueAsNumber = (sharedValue: any): number => {
+const useSharedValueAsNumber = (sharedValue: any, precision = 20): number => {
   const [value, setValue] = useState(1)
 
   useAnimatedReaction(
-    () => sharedValue.value,
-    (current) => {
-      scheduleOnRN(setValue, current)
+    () => Math.round(sharedValue.value * precision) / precision,
+    (current, previous) => {
+      if (current !== previous) {
+        scheduleOnRN(setValue, current)
+      }
     },
-    [sharedValue]
+    [sharedValue, precision]
   )
 
   return value

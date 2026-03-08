@@ -1,34 +1,30 @@
-import { useDiscoveryTrailId } from '@app/features/discovery/stores/discoveryTrailStore'
-import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
 import { Theme, useThemeStore } from '@app/shared/theme'
 import { View } from 'react-native'
-import { useMapCanvas, useMapSurface } from '../stores/mapStore.ts'
+import { useMapCanvas } from '../stores/mapStore.ts'
 import { MapTheme, useMapTheme } from '../stores/mapThemeStore.ts'
 import { MapCanvasViewport } from '../surface/components/MapCanvasViewport.tsx'
 import MapCenterMarker from '../surface/components/MapCenterMarker.tsx'
 import MapClues from '../surface/components/MapClues.tsx'
 import MapDeviceMarker from '../surface/components/MapDeviceMarker.tsx'
+import MapDiscoveryBorderIndicators from '../surface/components/MapDiscoveryBorderIndicators.tsx'
 import MapSnap from '../surface/components/MapSnap.tsx'
 import MapSpots from '../surface/components/MapSpots.tsx'
 import MapSurface from '../surface/components/MapSurface.tsx'
+import MapTrailBorderIndicator from '../surface/components/MapTrailBorderIndicator.tsx'
 import MapTrailPath from '../surface/components/MapTrailPath.tsx'
-import MapDeviceCords from './MapDeviceCords.tsx'
-import { MapScanner, MapScannerControl } from './MapScanner.tsx'
+import { MapScanner } from './MapScanner.tsx'
+import { MapStumbleOverlay } from '../surface/components/MapStumbleOverlay'
 
 
 export function MapCanvas() {
-  const { sensorApplication } = getAppContextStore()
-  const surface = useMapSurface()
   const { size, boundary } = useMapCanvas()
-  const trailId = useDiscoveryTrailId()
   const mapTheme = useMapTheme()
   const theme = useThemeStore()
-  const styles = createStyles(theme, mapTheme, surface.layout)
+  const styles = createStyles(theme, mapTheme)
 
   return (
     <>
       <View style={[styles.contentContainer]} id='map-content' >
-        <MapDeviceCords />
         <MapCanvasViewport>
           <MapSurface />
           <MapTrailPath boundary={boundary} size={size} />
@@ -37,15 +33,17 @@ export function MapCanvas() {
           <MapCenterMarker />
           <MapSpots boundary={boundary} size={size} />
           <MapScanner />
+          <MapStumbleOverlay />
           <MapDeviceMarker mode="canvas" canvasSize={size} />
         </MapCanvasViewport>
-        <MapScannerControl startScan={() => trailId && sensorApplication.startScan(trailId)} />
+        <MapTrailBorderIndicator />
+        <MapDiscoveryBorderIndicators />
       </View>
     </>
   )
 }
 
-const createStyles = (theme: Theme, mapTheme: MapTheme, size: { width: number; height: number }) => ({
+const createStyles = (theme: Theme, mapTheme: MapTheme) => ({
   coordinates: {
     zIndex: 10,
     padding: 8,
@@ -58,8 +56,6 @@ const createStyles = (theme: Theme, mapTheme: MapTheme, size: { width: number; h
   },
   map: {
     borderRadius: 10,
-    width: size.width,
-    height: size.height,
     backgroundColor: theme.deriveColor(theme.colors.surface, 0.2),
     position: 'relative' as const,
   },

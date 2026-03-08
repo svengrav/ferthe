@@ -1,7 +1,7 @@
 export type Constants = ReturnType<typeof createConstants>
 
 type ProductionType = 'production' | 'development'
-type StoreType = 'cosmos' | 'json' | 'memory'
+type StoreType = 'cosmos' | 'json' | 'memory' | 'table'
 
 export function createConstants() {
   const isProduction = Deno.env.get('PRODUCTION')?.toLowerCase() === 'true'
@@ -15,7 +15,7 @@ export function createConstants() {
       origins: ['http://localhost:8081', 'http://localhost:7000', 'https://ferthe.eu'],
     },
     store: {
-      type: isProduction ? 'cosmos' : 'json' as StoreType,
+      type: isProduction ? 'table' : 'json' as StoreType,
       cosmosDatabase: isProduction ? 'ferthe-core-prod-v1' : 'ferthe-core-dev-v1',
       jsonBaseDirectory: '../../_data/core',
     },
@@ -57,6 +57,7 @@ export const STORE_IDS = {
   DISCOVERIES: 'discovery-collection',
   DISCOVERY_PROFILES: 'discovery-profile-collection',
   DISCOVERY_CONTENTS: 'discovery-content-collection',
+  STORIES: 'story-collection',
   SPOT_RATINGS: 'spot-ratings',
   TRAIL_RATINGS: 'trail-ratings',
   SENSOR_SCANS: 'sensor-scans',
@@ -64,4 +65,6 @@ export const STORE_IDS = {
   COMMUNITY_MEMBERS: 'community-members',
   COMMUNITY_DISCOVERIES: 'community-discoveries',
   DEVICE_TOKENS: 'device-tokens',
+  STUMBLE_POIS: 'stumble-pois',
+  STUMBLE_VISITS: 'stumble-visits',
 } as const

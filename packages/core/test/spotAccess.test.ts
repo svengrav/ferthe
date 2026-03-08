@@ -52,6 +52,7 @@ Deno.test({
 
     await t.step('Setup: create trail and add spot', async () => {
       const result = await creatorClient.trail.createTrail({
+        kind: 'discovery',
         name: 'Test Trail',
         description: 'Trail for access control tests',
         boundary: {
@@ -63,6 +64,7 @@ Deno.test({
           scannerRadius: 100,
           discoveryMode: 'free',
           previewMode: 'hidden',
+          spotAccess: 'open' as const,
         },
       })
 

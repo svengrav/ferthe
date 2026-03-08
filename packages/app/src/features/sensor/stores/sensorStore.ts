@@ -2,6 +2,7 @@ import { DeviceLocation } from '@app/features/sensor/device/types'
 import { StoreActions, StoreState } from '@app/shared/stores/types'
 import { ScanEvent } from '@shared/contracts'
 import { create } from 'zustand'
+import { useShallow } from 'zustand/react/shallow'
 
 type SensorStatus = 'uninitialized' | 'permission-required' | 'location-unavailable' | 'ready' | 'error'
 
@@ -76,3 +77,4 @@ export const getDeviceLocation = () => sensorStore.getState().device
 export const getSensorData = () => sensorStore.getState()
 
 export const useDeviceLocation = () => sensorStore(state => state.device)
+export const useDeviceGeoLocation = () => sensorStore(useShallow(state => state.device.location))

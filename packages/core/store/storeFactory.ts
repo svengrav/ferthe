@@ -3,6 +3,7 @@ import { createCosmosStore } from './cosmosStore.ts'
 import { createEnhancedStore, StoreOperationResult } from './enhancedStore.ts'
 import { createJsonStore } from './jsonStore.ts'
 import { createMemoryStore } from './memoryStore.ts'
+import { createAzureTableStore } from './azureTableStore.ts'
 import { StoreInterface, StoreItem } from './storeInterface.ts'
 
 export interface Store<T extends StoreItem> {
@@ -13,7 +14,7 @@ export interface Store<T extends StoreItem> {
   list(options?: QueryOptions): Promise<StoreOperationResult<T[]>>
 }
 
-export type STORE_TYPES = 'memory' | 'cosmos' | 'json'
+export type STORE_TYPES = 'memory' | 'cosmos' | 'json' | 'table'
 
 export type COSMOS_CONFIG = {
   connectionString: string
@@ -24,7 +25,11 @@ export type JSON_CONFIG = {
   baseDirectory: string
 }
 
-export function createStoreConnector(type?: STORE_TYPES, options?: COSMOS_CONFIG | JSON_CONFIG): StoreInterface {
+export type TABLE_CONFIG = {
+  connectionString: string
+}
+
+export function createStoreConnector(type?: STORE_TYPES, options?: COSMOS_CONFIG | JSON_CONFIG | TABLE_CONFIG): StoreInterface {
   if (type === 'memory') {
     return createMemoryStore()
   }
@@ -34,6 +39,9 @@ export function createStoreConnector(type?: STORE_TYPES, options?: COSMOS_CONFIG
   if (type === 'json') {
     return createJsonStore(options as JSON_CONFIG)
   }
+  if (type === 'table') {
+    return createAzureTableStore(options as TABLE_CONFIG)
+  }
   return createMemoryStore()
 }
 
@@ -41,20 +49,10 @@ export function createStore<T extends StoreItem>(connector: StoreInterface, cont
   const enhancedStore = createEnhancedStore(connector)
 
   return {
-    async create(item: T): Promise<StoreOperationResult<T>> {
-      return enhancedStore.create<T>(container, item)
-    },
-    async get(id: string): Promise<StoreOperationResult<T>> {
-      return enhancedStore.get<T>(container, id)
-    },
-    async update(id: string, item: T): Promise<StoreOperationResult<T>> {
-      return enhancedStore.update<T>(container, id, item)
-    },
-    async delete(id: string): Promise<StoreOperationResult<void>> {
-      return enhancedStore.delete(container, id)
-    },
-    async list(options?: QueryOptions): Promise<StoreOperationResult<T[]>> {
-      return enhancedStore.list<T>(container, options)
-    },
+    create: (item: T) => enhancedStore.create<T>(container, item),
+    get: (id: string) => enhancedStore.get<T>(container, id),
+    update: (id: string, item: T) => enhancedStore.update<T>(container, id, item),
+    delete: (id: string) => enhancedStore.delete(container, id),
+    list: (options?: QueryOptions) => enhancedStore.list<T>(container, options),
   }
 }

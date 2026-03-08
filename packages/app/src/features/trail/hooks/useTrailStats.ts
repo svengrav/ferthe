@@ -31,6 +31,8 @@ export const useTrailStats = (trailId: string): UseTrailStatsResult => {
 
       if (result.success && result.data) {
         getTrailStoreActions().setTrailStats(trailId, result.data)
+      } else if (result.error?.code === 'TRAIL_HAS_NO_SPOTS') {
+        // Trail exists but has no spots yet — not an error, just no stats available
       } else {
         const errorMessage = result.error?.message || 'Failed to fetch trail stats'
         logger.error('Error fetching trail stats:', errorMessage)

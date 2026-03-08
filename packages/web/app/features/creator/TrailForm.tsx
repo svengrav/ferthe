@@ -11,11 +11,12 @@ import {
 interface TrailFormData {
   name: string;
   description: string;
+  kind: "discovery" | "stumble";
   discoveryMode: "free" | "sequence";
   imageBase64?: string;
   mapImageBase64?: string;
   canvasImageBase64?: string;
-  boundary: {
+  boundary?: {
     northEast: { lat: number; lon: number };
     southWest: { lat: number; lon: number };
   };
@@ -30,7 +31,7 @@ interface TrailFormProps {
   /** Existing canvas background image URL (edit mode) */
   existingCanvasImageUrl?: string;
   boundary?: TrailFormData["boundary"];
-  onBoundaryChange?: (boundary: TrailFormData["boundary"]) => void;
+  onBoundaryChange?: (boundary: NonNullable<TrailFormData["boundary"]>) => void;
   onDiscoveryModeChange?: (mode: "free" | "sequence") => void;
   onSubmit: (data: TrailFormData) => Promise<void>;
   onCancel: () => void;
@@ -53,6 +54,9 @@ export function TrailForm(
   const [description, setDescription] = useState(
     initialData?.description ?? "",
   );
+  const [kind, setKind] = useState<"discovery" | "stumble">(
+    initialData?.kind ?? "discovery",
+  );
   const [discoveryMode, setDiscoveryMode] = useState<"free" | "sequence">(
     initialData?.discoveryMode ?? "free",
   );
@@ -67,11 +71,10 @@ export function TrailForm(
   >(
     initialData?.canvasImageBase64,
   );
-  const [boundary, setBoundary] = useState(
-    externalBoundary ?? initialData?.boundary ?? {
-      northEast: { lat: 0, lon: 0 },
-      southWest: { lat: 0, lon: 0 },
-    },
+  const [boundary, setBoundary] = useState<
+    NonNullable<TrailFormData["boundary"]> | undefined
+  >(
+    externalBoundary ?? initialData?.boundary,
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -94,6 +97,7 @@ export function TrailForm(
   // Longitude degrees are shorter than latitude degrees by factor cos(lat),
   // so we correct for that to match the GroundOverlay rendering.
   const mapImageAspectRatio = (() => {
+    if (!boundary) return 1;
     const lngSpan = boundary.northEast.lon - boundary.southWest.lon;
     const latSpan = boundary.northEast.lat - boundary.southWest.lat;
     if (latSpan <= 0 || lngSpan <= 0) return 1;
@@ -102,7 +106,7 @@ export function TrailForm(
     return (lngSpan * mercatorCorrection) / latSpan;
   })();
 
-  const updateBoundary = (next: typeof boundary) => {
+  const updateBoundary = (next: NonNullable<TrailFormData["boundary"]>) => {
     setBoundary(next);
     onBoundaryChange?.(next);
   };
@@ -119,11 +123,12 @@ export function TrailForm(
       await onSubmit({
         name,
         description,
+        kind,
         discoveryMode,
         imageBase64,
         mapImageBase64,
         canvasImageBase64,
-        boundary,
+        boundary: boundary ?? undefined,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save trail");
@@ -178,6 +183,17 @@ export function TrailForm(
         />
       </FormField>
 
+      <FormField label="Trail Kind">
+        <select
+          value={kind}
+          onChange={(e) => setKind(e.target.value as "discovery" | "stumble")}
+          className={INPUT_CLASS}
+        >
+          <option value="discovery">Discovery</option>
+          <option value="stumble">Stumble</option>
+        </select>
+      </FormField>
+
       <FormField label="Discovery Mode">
         <select
           value={discoveryMode}
@@ -193,77 +209,96 @@ export function TrailForm(
         </select>
       </FormField>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium">Boundary</label>
-        <div className="grid grid-cols-2 gap-2">
-          <FormField label="North Lat" small>
-            <input
-              type="number"
-              step="any"
-              value={boundary.northEast.lat}
-              onChange={(e) =>
-                updateBoundary({
-                  ...boundary,
-                  northEast: {
-                    ...boundary.northEast,
-                    lat: parseFloat(e.target.value),
-                  },
-                })}
-              className={INPUT_CLASS}
-            />
-          </FormField>
-          <FormField label="East Lon" small>
-            <input
-              type="number"
-              step="any"
-              value={boundary.northEast.lon}
-              onChange={(e) =>
-                updateBoundary({
-                  ...boundary,
-                  northEast: {
-                    ...boundary.northEast,
-                    lon: parseFloat(e.target.value),
-                  },
-                })}
-              className={INPUT_CLASS}
-            />
-          </FormField>
+      {/* Boundary — only relevant for discovery trails */}
+      {kind === "discovery" && (
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Boundary</label>
+          <div className="grid grid-cols-2 gap-2">
+            <FormField label="North Lat" small>
+              <input
+                type="number"
+                step="any"
+                value={boundary?.northEast.lat ?? 0}
+                onChange={(e) =>
+                  updateBoundary({
+                    ...boundary ??
+                      {
+                        northEast: { lat: 0, lon: 0 },
+                        southWest: { lat: 0, lon: 0 },
+                      },
+                    northEast: {
+                      ...(boundary?.northEast ?? { lat: 0, lon: 0 }),
+                      lat: parseFloat(e.target.value),
+                    },
+                  })}
+                className={INPUT_CLASS}
+              />
+            </FormField>
+            <FormField label="East Lon" small>
+              <input
+                type="number"
+                step="any"
+                value={boundary?.northEast.lon ?? 0}
+                onChange={(e) =>
+                  updateBoundary({
+                    ...boundary ??
+                      {
+                        northEast: { lat: 0, lon: 0 },
+                        southWest: { lat: 0, lon: 0 },
+                      },
+                    northEast: {
+                      ...(boundary?.northEast ?? { lat: 0, lon: 0 }),
+                      lon: parseFloat(e.target.value),
+                    },
+                  })}
+                className={INPUT_CLASS}
+              />
+            </FormField>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <FormField label="South Lat" small>
+              <input
+                type="number"
+                step="any"
+                value={boundary?.southWest.lat ?? 0}
+                onChange={(e) =>
+                  updateBoundary({
+                    ...boundary ??
+                      {
+                        northEast: { lat: 0, lon: 0 },
+                        southWest: { lat: 0, lon: 0 },
+                      },
+                    southWest: {
+                      ...(boundary?.southWest ?? { lat: 0, lon: 0 }),
+                      lat: parseFloat(e.target.value),
+                    },
+                  })}
+                className={INPUT_CLASS}
+              />
+            </FormField>
+            <FormField label="West Lon" small>
+              <input
+                type="number"
+                step="any"
+                value={boundary?.southWest.lon ?? 0}
+                onChange={(e) =>
+                  updateBoundary({
+                    ...boundary ??
+                      {
+                        northEast: { lat: 0, lon: 0 },
+                        southWest: { lat: 0, lon: 0 },
+                      },
+                    southWest: {
+                      ...(boundary?.southWest ?? { lat: 0, lon: 0 }),
+                      lon: parseFloat(e.target.value),
+                    },
+                  })}
+                className={INPUT_CLASS}
+              />
+            </FormField>
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <FormField label="South Lat" small>
-            <input
-              type="number"
-              step="any"
-              value={boundary.southWest.lat}
-              onChange={(e) =>
-                updateBoundary({
-                  ...boundary,
-                  southWest: {
-                    ...boundary.southWest,
-                    lat: parseFloat(e.target.value),
-                  },
-                })}
-              className={INPUT_CLASS}
-            />
-          </FormField>
-          <FormField label="West Lon" small>
-            <input
-              type="number"
-              step="any"
-              value={boundary.southWest.lon}
-              onChange={(e) =>
-                updateBoundary({
-                  ...boundary,
-                  southWest: {
-                    ...boundary.southWest,
-                    lon: parseFloat(e.target.value),
-                  },
-                })}
-              className={INPUT_CLASS}
-            />
-          </FormField>
-        </div>
-      </div>
+      )}
 
       <ErrorMessage error={error} />
       <FormActions loading={loading} onCancel={onCancel} />

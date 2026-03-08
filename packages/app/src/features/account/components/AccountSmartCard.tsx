@@ -1,41 +1,13 @@
 import { Avatar, Card, Text } from '@app/shared/components'
-import { ThemedConfig, VariantOf, createThemedStyles, themedVariants, useTheme, useVariants } from '@app/shared/theme'
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
+import { createThemedStyles, useTheme } from '@app/shared/theme'
+import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { usePublicProfile } from '../stores/publicProfileStore'
 import { usePublicProfilePage } from './PublicProfilePage'
 
 const AVATAR_SIZE = 44
 
-const cardConfig = {
-  variants: {
-    variant: {
-      primary: (t: any) => ({ backgroundColor: t.colors.primary }),
-      secondary: (t: any) => ({ backgroundColor: t.colors.surface }),
-      outlined: () => ({ backgroundColor: 'transparent' }),
-    },
-  },
-  defaultVariants: { variant: 'secondary' as const },
-} satisfies ThemedConfig<ViewStyle>
-
-const nameConfig = {
-  variants: {
-    variant: {
-      primary: (t: any) => ({ color: t.colors.onPrimary }),
-      secondary: (t: any) => ({ color: t.colors.onSurface }),
-      outlined: (t: any) => ({ color: t.colors.onSurface }),
-    },
-  },
-  defaultVariants: { variant: 'secondary' as const },
-} satisfies ThemedConfig<ViewStyle>
-
-const cardVariants = themedVariants<ViewStyle>(cardConfig)
-const nameVariants = themedVariants(nameConfig)
-
-type AccountCardVariant = VariantOf<typeof cardConfig>
-
 interface AccountSmartCardProps {
-  accountId: string
-  variant?: AccountCardVariant
+  accountId?: string
   style?: StyleProp<ViewStyle>
   onPress?: () => void
 }
@@ -44,28 +16,25 @@ interface AccountSmartCardProps {
  * Compact account card showing avatar, display name and spot count.
  * Fetches public profile from API if not yet in store.
  */
-function AccountSmartCard({ accountId, variant = 'secondary', style, onPress }: AccountSmartCardProps) {
+function AccountSmartCard({ accountId, style, onPress }: AccountSmartCardProps) {
   const { styles } = useTheme(useStyles)
   const profile = usePublicProfile(accountId)
   const { showPublicProfile } = usePublicProfilePage()
 
-  const cardStyle = useVariants(cardVariants, { variant })
-  const nameStyle = useVariants(nameVariants, { variant })
-
   const handlePress = onPress ?? (() => accountId && showPublicProfile(accountId))
 
   return (
-    <Card onPress={handlePress} style={{ ...cardStyle, ...StyleSheet.flatten(style) }} >
+    <Pressable onPress={handlePress} style={{ ...StyleSheet.flatten(style) }} >
       <View style={styles.content} id="account-smart-card">
-        <Avatar size={AVATAR_SIZE} avatar={profile?.avatar} label={profile?.displayName} variant={variant} />
+        <Avatar size={AVATAR_SIZE} avatar={profile?.avatar} label={profile?.displayName} />
         <View style={styles.info}>
-          <Text variant="label" style={nameStyle}>{profile?.displayName ?? 'Fox'}</Text>
+          <Text variant="label" >{profile?.displayName ?? 'Fox'}</Text>
           <View style={styles.stats}>
             <Text variant="body" size="sm">{profile?.spotCount ?? 0} Spots</Text>
           </View>
         </View>
       </View>
-    </Card>
+    </Pressable>
   )
 }
 

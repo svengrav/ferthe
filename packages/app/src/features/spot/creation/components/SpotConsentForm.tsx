@@ -24,7 +24,7 @@ function SpotConsentForm(props: SpotConsentFormProps) {
 
       <View style={styles.textBox}>
         <ScrollView nestedScrollEnabled showsVerticalScrollIndicator={false}>
-          <Text variant="body">{locales.spotCreation.consentText}</Text>
+          <Text variant="body" style={styles.text}>{locales.spotCreation.consentText}</Text>
         </ScrollView>
       </View>
 
@@ -52,6 +52,9 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     maxHeight: 200,
     borderWidth: 1,
     borderColor: theme.colors.divider,
+  },
+  text: {
+    color: theme.deriveColor(theme.colors.onSurface),
   },
 })
 

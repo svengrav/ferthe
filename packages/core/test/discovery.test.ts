@@ -56,6 +56,7 @@ Deno.test({
 
     await t.step('Setup: create trail and add spot', async () => {
       const result = await creatorClient.trail.createTrail({
+        kind: 'discovery',
         name: 'Discovery Trail',
         description: 'Trail for discovery tests',
         boundary: {
@@ -67,6 +68,7 @@ Deno.test({
           scannerRadius: 100,
           discoveryMode: 'free',
           previewMode: 'hidden',
+          spotAccess: 'open' as const,
         },
       })
 
@@ -250,10 +252,43 @@ Deno.test({
       console.log(`✓ Stats: rank=${result.data?.rank}, total=${result.data?.totalDiscoverers}`)
     })
 
+    await t.step('getStats: rank=1 as first discoverer, trailPosition=1, trailTotal=1', async () => {
+      const result = await userAClient.discovery.getDiscoveryStats(discoveryId)
+
+      assertEquals(result.success, true)
+      assertEquals(result.data?.rank, 1, 'User A is the first (and only) discoverer → rank 1')
+      assertEquals(result.data?.totalDiscoverers, 1, 'Only one discoverer so far')
+      assertEquals(result.data?.trailPosition, 1, 'First spot discovered in this trail → position 1')
+      assertEquals(result.data?.trailTotal, 1, 'Trail has exactly 1 spot')
+      console.log(`✓ rank=1, trailPosition=1/1`)
+    })
+
+    await t.step('getStats: user B discovers same spot → user A rank stays 1, user B rank=2', async () => {
+      // User B discovers the same spot
+      const discoverResult = await userBClient.discovery.processLocation(trailId, {
+        location: SPOT_LOCATION,
+      })
+      assertEquals(discoverResult.success, true)
+      const userBDiscoveryId = discoverResult.data!.discoveries[0].id
+
+      // User A should now be rank 1 (discovered first)
+      const statsA = await userAClient.discovery.getDiscoveryStats(discoveryId)
+      assertEquals(statsA.data?.rank, 1, 'User A stays rank 1 (discovered first)')
+      assertEquals(statsA.data?.totalDiscoverers, 2, 'Now 2 discoverers')
+
+      // User B should be rank 2 (discovered second)
+      const statsB = await userBClient.discovery.getDiscoveryStats(userBDiscoveryId)
+      assertEquals(statsB.data?.rank, 2, 'User B is rank 2 (discovered second)')
+      assertEquals(statsB.data?.totalDiscoverers, 2, 'Also sees 2 discoverers')
+      assertEquals(statsB.data?.trailPosition, 1, 'User B also at trail position 1')
+
+      console.log(`✓ rank ordering correct after second discoverer`)
+    })
+
     // ── Content lifecycle ─────────────────────────────────────────────────────
 
     await t.step('getContent returns undefined before upsert', async () => {
-      const result = await userAClient.discovery.getDiscoveryContent(discoveryId)
+      const result = await userAClient.story.getSpotStory(discoveryId)
 
       assertEquals(result.success, true)
       assertEquals(result.data, undefined, 'No content before upsert')
@@ -261,7 +296,7 @@ Deno.test({
     })
 
     await t.step('upsertContent creates content with comment', async () => {
-      const result = await userAClient.discovery.upsertDiscoveryContent(discoveryId, {
+      const result = await userAClient.story.upsertSpotStory(discoveryId, {
         comment: 'Amazing spot!',
         visibility: 'public',
       })
@@ -274,7 +309,7 @@ Deno.test({
     })
 
     await t.step('upsertContent updates existing content', async () => {
-      const result = await userAClient.discovery.upsertDiscoveryContent(discoveryId, {
+      const result = await userAClient.story.upsertSpotStory(discoveryId, {
         comment: 'Updated comment',
         visibility: 'private',
       })
@@ -286,7 +321,7 @@ Deno.test({
     })
 
     await t.step('getContent returns updated content', async () => {
-      const result = await userAClient.discovery.getDiscoveryContent(discoveryId)
+      const result = await userAClient.story.getSpotStory(discoveryId)
 
       assertEquals(result.success, true)
       assertEquals(result.data?.comment, 'Updated comment')
@@ -295,14 +330,15 @@ Deno.test({
     })
 
     await t.step('deleteContent removes the content', async () => {
-      const result = await userAClient.discovery.deleteDiscoveryContent(discoveryId)
+      const story = await userAClient.story.getSpotStory(discoveryId)
+      const result = await userAClient.story.deleteStory(story.data!.id)
 
       assertEquals(result.success, true)
       console.log('✓ Content deleted')
     })
 
     await t.step('getContent returns undefined after delete', async () => {
-      const result = await userAClient.discovery.getDiscoveryContent(discoveryId)
+      const result = await userAClient.story.getSpotStory(discoveryId)
 
       assertEquals(result.success, true)
       assertEquals(result.data, undefined, 'Content must be gone after delete')

@@ -21,6 +21,7 @@ export interface Trail {
   id: string;
   name: string;
   description?: string;
+  kind?: 'discovery' | 'stumble';
   image?: { id: string; url: string };
   map?: { image?: { id: string; url: string } };
   viewport?: { image?: { id: string; url: string } };

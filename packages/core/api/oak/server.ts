@@ -26,6 +26,7 @@ const extractParamNames = (url: string): string[] => {
 export interface OakServerInstance {
   readonly app: Application
   start: () => Promise<void>
+  stop: () => void
 }
 
 export const createOakServer = (config: OakServerConfig = {}): OakServerInstance => {
@@ -33,15 +34,16 @@ export const createOakServer = (config: OakServerConfig = {}): OakServerInstance
 
   const app = new Application()
   const router = new Router()
+  const abortController = new AbortController()
 
   // CORS Middleware
   app.use(async (ctx: Context, next) => {
     const origin = ctx.request.headers.get('Origin')
-    
+
     if (origins.length === 0 || (origin && origins.includes(origin))) {
       ctx.response.headers.set('Access-Control-Allow-Origin', origin || '*')
     }
-    
+
     ctx.response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
     ctx.response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
     ctx.response.headers.set('Access-Control-Allow-Credentials', 'true')
@@ -82,7 +84,7 @@ export const createOakServer = (config: OakServerConfig = {}): OakServerInstance
         const value = ctx.params[name]
         if (value) params[name] = value
       })
-      
+
       const isPublic = route.config?.isPublic ?? false
       await route.handler(ctx, params, isPublic)
     }
@@ -111,11 +113,12 @@ export const createOakServer = (config: OakServerConfig = {}): OakServerInstance
 
   const start = async () => {
     console.log(`Oak server starting on ${host}:${port}`)
-    await app.listen({ hostname: host, port })
+    await app.listen({ hostname: host, port, signal: abortController.signal })
   }
 
   return {
     app,
     start,
+    stop: () => abortController.abort(),
   }
 }

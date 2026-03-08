@@ -1,5 +1,5 @@
 import { Theme, useTheme } from '@app/shared/theme'
-import { ActivityIndicator, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
+import { ActivityIndicator, KeyboardAvoidingView, Platform, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Button from '../button/Button'
@@ -17,6 +17,7 @@ interface PageProps {
   inset?: Inset
   loading?: boolean
   onBack?: () => void
+  keyboardAware?: boolean
 }
 
 /**
@@ -26,7 +27,7 @@ interface PageProps {
  * Shows loading indicator when loading=true.
  */
 function Page(props: PageProps) {
-  const { children, title, style, options, scrollable = false, trailing, leading, inset = 'md', loading = false, onBack } = props
+  const { children, title, style, options, scrollable = false, trailing, leading, inset = 'md', loading = false, onBack, keyboardAware = false } = props
   const { styles, theme } = useTheme(createStyles)
   const insets = useSafeAreaInsets()
 
@@ -37,14 +38,14 @@ function Page(props: PageProps) {
   // Dynamic content container based on scrollable prop
   const ContentContainer = scrollable ? ScrollView : View
   const contentProps = scrollable
-    ? { contentContainerStyle: [{ flexGrow: 1 }] }
+    ? { contentContainerStyle: [{ flexGrow: 1, paddingBottom: 12 }] }
     : {}
 
-  return (
-    <View style={[styles.page, { paddingTop: insets.top, paddingBottom: inset !== 'none' ? insets.bottom : 0 }, style]}>
+  const pageContent = (
+    <View style={[styles.page, { paddingTop: insets.top }, style]}>
       <PageHeader title={title} options={options} trailing={trailing} leading={resolvedLeading} />
 
-      <ContentContainer style={[styles.container, { paddingHorizontal: insetValue }]} {...contentProps}>
+      <ContentContainer style={[styles.container, { paddingHorizontal: insetValue, paddingBottom: inset === 'none' ? 0 : insets.bottom }]} {...contentProps}>
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -55,6 +56,19 @@ function Page(props: PageProps) {
       </ContentContainer>
     </View>
   )
+
+  if (keyboardAware) {
+    return (
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        {pageContent}
+      </KeyboardAvoidingView>
+    )
+  }
+
+  return pageContent
 }
 
 const createStyles = (theme: Theme) =>
@@ -66,7 +80,6 @@ const createStyles = (theme: Theme) =>
     container: {
       flex: 1,
       width: '100%',
-      backgroundColor: theme.colors.background,
     },
     loadingContainer: {
       flex: 1,
