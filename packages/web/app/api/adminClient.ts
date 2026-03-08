@@ -38,8 +38,8 @@ export const getAdminRole = (): string | null =>
 // ── API clients ────────────────────────────────────────────────────────────────
 
 export const api = createApiClient({
-  baseUrl: '/core/api/v1',
+  baseUrl: '/api/v1',
   getAuthToken: getAdminToken,
 })
 
-export const contentApi = createApiClient({ baseUrl: '/core/api/v1' })
+export const contentApi = createApiClient({ baseUrl: '/api/v1' })

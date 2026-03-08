@@ -89,7 +89,7 @@ const sendPushNotification = async (options: PushOptions) => {
   const config = await createConfig()
 
   // Check for Firebase service account
-  if (!config.secrets.firebaseServiceAccount) {
+  if (!config.secrets.firebase.serviceAccount) {
     console.error('❌ Error: Firebase service account is not configured')
     console.log('')
     console.log('Set FIREBASE_SERVICE_ACCOUNT in .env file as JSON string:')
@@ -106,7 +106,7 @@ const sendPushNotification = async (options: PushOptions) => {
   // Create store connector
   console.log('💾 Connecting to data store...')
   const storeConnector = createStoreConnector(config.constants.store.type, {
-    connectionString: config.secrets.cosmosConnectionString,
+    connectionString: config.secrets.azure.cosmosConnectionString,
     database: config.constants.store.cosmosDatabase,
     baseDirectory: config.constants.store.jsonBaseDirectory,
   })
@@ -142,7 +142,7 @@ const sendPushNotification = async (options: PushOptions) => {
   console.log('')
 
   // Create Firebase connector and notification service
-  const firebaseConnector = createFirebaseConnector(config.secrets.firebaseServiceAccount)
+  const firebaseConnector = createFirebaseConnector(config.secrets.firebase.serviceAccount)
   const notificationService = createNotificationService({
     deviceTokenStore,
     firebaseConnector,

@@ -1,8 +1,27 @@
-import { DefaultAzureCredential } from '@azure/identity'
+import { DefaultAzureCredential, ClientSecretCredential } from '@azure/identity'
 import { SecretClient } from '@azure/keyvault-secrets'
 
-export const createKeyVaultConnector = (keyVaultName: string) => {
-  const credential = new DefaultAzureCredential()
+interface KeyVaultConnectorOptions {
+  keyVaultName: string
+  clientId?: string
+  clientSecret?: string
+  tenantId?: string
+}
+
+export const createKeyVaultConnector = (keyVaultNameOrOptions: string | KeyVaultConnectorOptions) => {
+  const options = typeof keyVaultNameOrOptions === 'string'
+    ? { keyVaultName: keyVaultNameOrOptions }
+    : keyVaultNameOrOptions
+
+  const { keyVaultName, clientId, clientSecret, tenantId } = options
+
+  // Use ClientSecretCredential if credentials provided, otherwise DefaultAzureCredential
+  const credential = (clientId && clientSecret && tenantId)
+    ? new ClientSecretCredential(tenantId, clientId, clientSecret, {
+      additionallyAllowedTenants: ['*'], // Allow multi-tenant access
+    })
+    : new DefaultAzureCredential()
+
   const secretClient: SecretClient = new SecretClient(`https://${keyVaultName}.vault.azure.net`, credential)
 
   return {
@@ -12,6 +31,10 @@ export const createKeyVaultConnector = (keyVaultName: string) => {
         name: secretName,
         value: secret.value,
       }
+    },
+
+    setSecret: async (secretName: string, value: string): Promise<void> => {
+      await secretClient.setSecret(secretName, value)
     },
   }
 }

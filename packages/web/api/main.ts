@@ -307,7 +307,7 @@ router.post("/api/admin/dev-login", async (context) => {
     }
 
     // Create a session with Core API
-    const response = await fetch(`${CORE_API_URL}/core/api/v1/account/dev-session`, {
+    const response = await fetch(`${CORE_API_URL}/api/v1/account/dev-session`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -343,7 +343,7 @@ adminRouter.get("/:endpoint(.*)", async (context) => {
     const url = new URL(context.request.url);
     const queryString = url.search;
 
-    const coreUrl = `${CORE_API_URL}/core/api/${endpoint}${queryString}`;
+    const coreUrl = `${CORE_API_URL}/api/${endpoint}${queryString}`;
 
     const response = await fetch(coreUrl, {
       method: "GET",
@@ -368,7 +368,7 @@ adminRouter.post("/:endpoint(.*)", async (context) => {
     const endpoint = context.params.endpoint;
     const body = await context.request.body.json();
 
-    const coreUrl = `${CORE_API_URL}/core/api/${endpoint}`;
+    const coreUrl = `${CORE_API_URL}/api/${endpoint}`;
 
     const response = await fetch(coreUrl, {
       method: "POST",
@@ -394,7 +394,7 @@ adminRouter.put("/:endpoint(.*)", async (context) => {
     const endpoint = context.params.endpoint;
     const body = await context.request.body.json();
 
-    const coreUrl = `${CORE_API_URL}/core/api/${endpoint}`;
+    const coreUrl = `${CORE_API_URL}/api/${endpoint}`;
 
     const response = await fetch(coreUrl, {
       method: "PUT",
@@ -419,7 +419,7 @@ adminRouter.delete("/:endpoint(.*)", async (context) => {
   try {
     const endpoint = context.params.endpoint;
 
-    const coreUrl = `${CORE_API_URL}/core/api/${endpoint}`;
+    const coreUrl = `${CORE_API_URL}/api/${endpoint}`;
 
     const response = await fetch(coreUrl, {
       method: "DELETE",

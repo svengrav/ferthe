@@ -3,12 +3,12 @@ import { ConfigContext, ExpoConfig } from 'expo/config'
 export default ({ config }: ConfigContext): ExpoConfig => ({
   name: 'ferthe',
   slug: 'ferthe',
-  version: '0.0.1',
+  version: '0.5.1',
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'dark',
   newArchEnabled: true,
-  backgroundColor: 'rgb(18, 18, 20)',
+  backgroundColor: '#121214',
   plugins: [
     "expo-asset",
     "expo-secure-store",
@@ -36,12 +36,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   splash: {
     image: './assets/splash-icon.png',
     resizeMode: 'contain',
-    backgroundColor: 'rgb(18, 18, 20)',
+    backgroundColor: '#121214',
   },
   ios: {
     bundleIdentifier: 'de.ferthe.app',
-    supportsTablet: true,
-    googleServicesFile: './GoogleService-Info.plist',
+    // supportsTablet: true,
+    // googleServicesFile: './GoogleService-Info.plist',
     entitlements: {
       'aps-environment': 'production',
     },
@@ -52,7 +52,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: 'rgb(18, 18, 20)',
+      backgroundColor: '#121214',
     },
     package: 'de.ferthe.app',
     googleServicesFile: './google-services.json',

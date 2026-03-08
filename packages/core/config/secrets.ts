@@ -1,5 +1,5 @@
-import * as dotenv from 'dotenv'
 import { createKeyVaultConnector } from '../connectors/azureKeyVaultConnector.ts'
+import { KEY_VAULT_CONFIG } from './keyVaultConfig.ts'
 
 export interface FirebaseServiceAccount {
   client_email: string
@@ -10,79 +10,81 @@ export interface FirebaseServiceAccount {
 export interface Secrets {
   jwtSecret: string
   phoneHashSalt: string
-  cosmosConnectionString: string
-  storageConnectionString: string
-  twilioAuthToken: string
-  firebaseServiceAccount: FirebaseServiceAccount | null
-  azureMapsKey: string
-  googleMapsApiKey: string
+  azure: {
+    storageConnectionString: string
+    tableConnectionString: string
+    cosmosConnectionString: string
+    mapsApiKey: string
+  }
+  google: {
+    mapsApiKey: string
+  }
+  twilio: {
+    accountSid: string
+    verifyServiceId: string
+    authToken: string
+  }
+  firebase: {
+    serviceAccount: FirebaseServiceAccount | null
+    apiKey: string
+    appId: string
+    projectId: string
+    messagingSenderId: string
+    storageBucket: string
+    databaseURL: string
+  }
 }
 
-interface SecretSource {
-  type: 'env' | 'keyvault'
-  keyVaultName?: string
+/**
+ * Load secrets from Key Vault JSON-Secret using Service Principal authentication
+ */
+async function loadSecretsFromKeyVault(keyVaultName: string, clientSecret: string): Promise<Secrets> {
+  console.log(`Loading secrets from Key Vault (${KEY_VAULT_CONFIG.secretName})...`)
+
+  const keyVault = createKeyVaultConnector({
+    keyVaultName,
+    clientId: KEY_VAULT_CONFIG.clientId,
+    clientSecret,
+    tenantId: KEY_VAULT_CONFIG.tenantId,
+  })
+
+  const { value } = await keyVault.getSecret(KEY_VAULT_CONFIG.secretName)
+
+  if (!value) {
+    throw new Error(`Secret "${KEY_VAULT_CONFIG.secretName}" not found in vault "${keyVaultName}"`)
+  }
+
+  const secrets = JSON.parse(value) as Secrets
+  console.log('✅ Secrets loaded from Key Vault')
+  return secrets
 }
 
-const getSecretSource = (): SecretSource => {
-  const isProduction = Deno.env.get('PRODUCTION')?.toLowerCase() === 'true'
-  return isProduction
-    ? { type: 'keyvault', keyVaultName: 'kv-ferthe-core' }
-    : { type: 'env' }
+/**
+ * Load secrets from local _config.json file for development
+ */
+async function loadSecretsFromLocalConfig(): Promise<Secrets> {
+  console.log('Loading secrets from local _config.json...')
+
+  try {
+    const configPath = new URL('../../..', import.meta.url).pathname + '/_config.json'
+    const configText = await Deno.readTextFile(configPath)
+    const secrets = JSON.parse(configText) as Secrets
+    console.log('✅ Secrets loaded from _config.json')
+    return secrets
+  } catch (error) {
+    console.error('Failed to load _config.json:', error)
+    throw new Error('Local config file _config.json not found. Please create it from the template or set AZURE_CLIENT_SECRET to use Key Vault.')
+  }
 }
 
 export async function loadSecrets(): Promise<Secrets> {
-  dotenv.config()
-  const source = getSecretSource()
+  const clientSecret = Deno.env.get('AZURE_CLIENT_SECRET')
+  const keyVaultName = Deno.env.get('AZURE_KEYVAULT_NAME') || KEY_VAULT_CONFIG.defaultVaultName
 
-  if (source.type === 'keyvault' && source.keyVaultName) {
-    console.log('Loading secrets from Azure Key Vault...')
-    const keyVault = createKeyVaultConnector(source.keyVaultName)
-
-    const [jwt, phone, cosmos, storage, twilio, azureMaps, googlePlaces] = await Promise.all([
-      keyVault.getSecret('api-jwt-sign-key'),
-      keyVault.getSecret('api-phone-hash-salt-key'),
-      keyVault.getSecret('cstr-cdb-ferthe-core'),
-      keyVault.getSecret('key-stferthecore'),
-      keyVault.getSecret('key-twilio-phone-verify'),
-      keyVault.getSecret('key-azure-maps'),
-      keyVault.getSecret('key-google-places'),
-    ])
-
-    // Firebase service account from Key Vault (JSON string)
-    let firebaseServiceAccount: FirebaseServiceAccount | null = null
-    try {
-      const fbSecret = await keyVault.getSecret('key-google-firebase-adminsdk')
-      if (fbSecret.value) firebaseServiceAccount = JSON.parse(fbSecret.value)
-    } catch { /* Firebase push is optional */ }
-
-    return {
-      jwtSecret: jwt.value || '',
-      phoneHashSalt: phone.value || '',
-      cosmosConnectionString: cosmos.value || '',
-      storageConnectionString: storage.value || '',
-      twilioAuthToken: twilio.value || '',
-      firebaseServiceAccount,
-      azureMapsKey: azureMaps.value || '',
-      googleMapsApiKey: googlePlaces.value || '',
-    }
+  // Load from Key Vault (production) or local _config.json (development)
+  if (clientSecret) {
+    return await loadSecretsFromKeyVault(keyVaultName, clientSecret)
   }
 
-  // Load from .env
-  // Firebase service account from env (JSON string or null)
-  let firebaseServiceAccount: FirebaseServiceAccount | null = null
-  try {
-    const fbJson = Deno.env.get('FIREBASE_SERVICE_ACCOUNT')
-    if (fbJson) firebaseServiceAccount = JSON.parse(fbJson)
-  } catch { /* Firebase push is optional in dev */ }
-
-  return {
-    jwtSecret: Deno.env.get('JWT_SECRET') || 'dev-jwt-secret-key',
-    phoneHashSalt: Deno.env.get('PHONE_HASH_SALT') || 'dev-phone-salt',
-    cosmosConnectionString: Deno.env.get('COSMOS_CONNECTION_STRING') || '',
-    storageConnectionString: Deno.env.get('AZURE_STORAGE_CONNECTION_STRING') || '',
-    twilioAuthToken: Deno.env.get('TWILIO_AUTH_TOKEN') || '',
-    firebaseServiceAccount,
-    azureMapsKey: Deno.env.get('AZURE_MAPS_KEY') || '',
-    googleMapsApiKey: Deno.env.get('GOOGLE_MAPS_API_KEY') || '',
-  }
+  return await loadSecretsFromLocalConfig()
 }

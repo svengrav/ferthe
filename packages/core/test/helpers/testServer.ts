@@ -17,7 +17,7 @@ import type { AccountRole } from '@shared/contracts/index.ts'
 // ── Config ────────────────────────────────────────────────────────────────────
 
 export const TEST_PORT = 9877
-export const BASE_URL = `http://localhost:${TEST_PORT}/core/api/v1`
+export const BASE_URL = `http://localhost:${TEST_PORT}/api/v1`
 
 const TEST_JWT_SECRET = 'test-jwt-secret-integration'
 
@@ -76,7 +76,7 @@ export async function startTestServer(options: TestServerOptions = {}): Promise<
     origins: ['*'],
     host: '127.0.0.1',
     port: TEST_PORT,
-    prefix: '/core/api',
+    prefix: '/api',
     logger: false,
   })
 

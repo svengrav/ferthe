@@ -3013,10 +3013,21 @@
     "members": {
       "packages/core": {
         "dependencies": [
+          "jsr:@oak/oak@17",
           "jsr:@std/assert@^1.0.19",
+          "jsr:@std/dotenv@0.225",
+          "jsr:@std/path@^1.1.4",
+          "npm:@azure/cosmos@4",
           "npm:@azure/data-tables@^13.3.0",
+          "npm:@azure/identity@4",
+          "npm:@azure/keyvault-secrets@4",
+          "npm:@azure/storage-blob@^12.29.1",
+          "npm:dotenv@16",
           "npm:gray-matter@^4.0.3",
+          "npm:jimp@0.22.12",
+          "npm:path@~0.12.7",
           "npm:sharp@~0.34.5",
+          "npm:twilio@^5.11.2",
           "npm:zod@^4.3.6"
         ]
       },

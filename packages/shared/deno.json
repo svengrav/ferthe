@@ -1,5 +1,6 @@
 {
   "imports": {
+    "@shared/": "./",
     "@shared/contracts": "../contracts/index.ts"
   }
 }

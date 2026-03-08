@@ -13,7 +13,7 @@ export function createAppConfig() {
     environment: (isProduction ? 'production' : 'development') as Environment,
 
     api: {
-      endpoint: process.env.EXPO_PUBLIC_API_URL || 'https://foxhole.ferthe.eu/core/api/v1',
+      endpoint: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:7000/api/v1',
       timeout: parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '5000'),
     },
 

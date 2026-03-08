@@ -26,8 +26,8 @@
   ],
   "nodeModulesDir": "auto",
   "imports": {
-    "@shared/": "./packages/shared/",
-    "@core/": "./packages/core/",
+    "@shared/": "./../shared/",
+    "@core/": "./",
     "@azure/storage-blob": "npm:@azure/storage-blob@^12.29.1",
     "@azure/cosmos": "npm:@azure/cosmos@^4",
     "@azure/identity": "npm:@azure/identity@^4",

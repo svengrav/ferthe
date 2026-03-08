@@ -18,6 +18,7 @@
   },
   "imports": {
     "@/": "./",
+    "@shared/": "../shared/",
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.4",
     "@heroicons/react": "npm:@heroicons/react@^2.2.0",
     "@oak/oak": "jsr:@oak/oak@^17.1.4",

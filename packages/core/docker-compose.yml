@@ -4,8 +4,8 @@ services:
   # Ferthe Core API
   ferthe-core-api:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: core/Dockerfile
     container_name: ferthe-core-api
     ports:
       - "${CORE_PORT:-7000}:7000"
@@ -23,7 +23,7 @@ services:
     volumes:
       - ./logs:/app/logs
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7000/core/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:7000/api/v1/status"]
       interval: 30s
       timeout: 3s
       retries: 3

@@ -20,13 +20,13 @@ const run = async () => {
   switch (constants.store.type) {
     case 'cosmos':
       storeConfig = {
-        connectionString: secrets.cosmosConnectionString,
+        connectionString: secrets.azure.cosmosConnectionString,
         database: constants.store.cosmosDatabase,
       }
       break
     case 'table':
       storeConfig = {
-        connectionString: secrets.storageConnectionString,
+        connectionString: secrets.azure.tableConnectionString,
       }
       break
     case 'json':
@@ -40,15 +40,15 @@ const run = async () => {
 
   // Create runtime connector instances
   const connectors: CoreConnectors = {
-    poiConnector: createGooglePlacesConnector(config.secrets.googleMapsApiKey),
+    poiConnector: createGooglePlacesConnector(config.secrets.google.mapsApiKey),
     storeConnector: createStoreConnector(constants.store.type, storeConfig),
     smsConnector: createTwilioSMSConnector({
-      authToken: secrets.twilioAuthToken,
-      accountSid: constants.twilio.accountSid,
-      verifyServiceId: constants.twilio.verifyServiceId,
+      authToken: secrets.twilio.authToken,
+      accountSid: secrets.twilio.accountSid,
+      verifyServiceId: secrets.twilio.verifyServiceId,
     }),
     storageConnector: createAzureStorageConnector(
-      secrets.storageConnectionString,
+      secrets.azure.storageConnectionString,
       constants.storage.containerName,
       {
         sasExpiryMinutes: constants.storage.sasExpiryMinutes,
@@ -68,7 +68,7 @@ const run = async () => {
     origins: constants.api.origins,
     host: constants.api.host,
     port: constants.api.port,
-    prefix: '/core/api',
+    prefix: '/api',
   })
 
   await server.start()

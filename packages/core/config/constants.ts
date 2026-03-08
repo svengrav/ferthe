@@ -11,17 +11,13 @@ export function createConstants() {
     api: {
       host: Deno.env.get('HOST') || '0.0.0.0',
       port: Number(Deno.env.get('PORT')) || 7000,
-      prefix: '/core/api',
-      origins: ['http://localhost:8081', 'http://localhost:7000', 'https://ferthe.eu'],
+      prefix: '/api',
+      origins: ['http://localhost:8081', 'http://localhost:7000', 'https://ferthe.de'],
     },
     store: {
       type: isProduction ? 'table' : 'json' as StoreType,
       cosmosDatabase: isProduction ? 'ferthe-core-prod-v1' : 'ferthe-core-dev-v1',
       jsonBaseDirectory: '../../_data/core',
-    },
-    twilio: {
-      accountSid: Deno.env.get('TWILIO_ACCOUNT_SID') || 'ACbc7e6616309b1343392a088525d4f7df',
-      verifyServiceId: Deno.env.get('TWILIO_VERIFY_SERVICE_SID') || 'VA0e3f1ea84078e623af55f01e0aa6bf85',
     },
     storage: {
       containerName: 'resources',
@@ -32,14 +28,6 @@ export function createConstants() {
     },
     content: {
       dir: Deno.env.get('CONTENT_DIR') ?? '../web/content',
-    },
-    firebase: {
-      apiKey: Deno.env.get('FIREBASE_API_KEY') || '',
-      appId: Deno.env.get('FIREBASE_APP_ID') || '',
-      projectId: Deno.env.get('FIREBASE_PROJECT_ID') || '',
-      messagingSenderId: Deno.env.get('FIREBASE_MESSAGING_SENDER_ID') || '',
-      storageBucket: Deno.env.get('FIREBASE_STORAGE_BUCKET') || '',
-      databaseURL: Deno.env.get('FIREBASE_DATABASE_URL') || '',
     },
   }
 }

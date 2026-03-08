@@ -16,7 +16,7 @@ import { createApiClient } from '@shared/api'
 import { assertEquals, assertExists, assertNotEquals } from '@std/assert'
 import { createTestClient, TEST_PORT, useTestServer } from './helpers/testServer.ts'
 
-const BASE_URL = `http://localhost:${TEST_PORT}/core/api/v1`
+const BASE_URL = `http://localhost:${TEST_PORT}/api/v1`
 
 // Public client — no auth token, used only for public endpoints
 const publicClient = createApiClient({ baseUrl: BASE_URL, getAuthToken: () => '' })

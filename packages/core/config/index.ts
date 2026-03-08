@@ -17,4 +17,5 @@ export async function createConfig(): Promise<Config> {
 
 export * from './constants.ts'
 export * from './secrets.ts'
+export * from './keyVaultConfig.ts'
 

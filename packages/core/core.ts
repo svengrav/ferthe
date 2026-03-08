@@ -93,7 +93,14 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     jwtService: createJWTService({ secret: config.secrets.jwtSecret }),
     smsService: createSMSService({ phoneSalt: config.secrets.phoneHashSalt }),
     imageApplication: imageApplication,
-    firebaseConfig: config.constants.firebase,
+    firebaseConfig: {
+      apiKey: config.secrets.firebase.apiKey,
+      appId: config.secrets.firebase.appId,
+      projectId: config.secrets.firebase.projectId,
+      messagingSenderId: config.secrets.firebase.messagingSenderId,
+      storageBucket: config.secrets.firebase.storageBucket,
+      databaseURL: config.secrets.firebase.databaseURL,
+    },
     onDelete: createAccountDeleteComposite({ discoveryStore, spotStore, communityMemberStore, storyStore, discoveryProfileStore }).delete,
     onMerge: createAccountMergeComposite({ discoveryStore, spotStore, communityMemberStore, storyStore, discoveryProfileStore }).merge,
   })
@@ -152,8 +159,8 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
 
   // Firebase push connector (optional, requires service account)
   let firebaseConnector: FirebaseConnector | undefined
-  if (config.secrets.firebaseServiceAccount) {
-    firebaseConnector = createFirebaseConnector(config.secrets.firebaseServiceAccount)
+  if (config.secrets.firebase.serviceAccount) {
+    firebaseConnector = createFirebaseConnector(config.secrets.firebase.serviceAccount)
     console.log('[Firebase] Push notification connector initialized')
   } else {
     console.log('[Firebase] No service account configured — push notifications disabled')
