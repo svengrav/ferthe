@@ -87,6 +87,26 @@
       }
     },
     {
+      "label": "test:core",
+      "type": "shell",
+      "command": "deno task test",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/core"
+      },
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "test:app",
+      "type": "shell",
+      "command": "npm run test",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/app"
+      },
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
       "label": "tsc:app",
       "type": "shell",
       "command": "npx tsc --noEmit",

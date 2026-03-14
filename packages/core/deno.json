@@ -1,6 +1,10 @@
 {
   "tasks": {
-    "dev": "deno run ./index.ts"
+    "dev": "deno run ./index.ts",
+    "check": "deno check",
+    "test": "deno test -A --ignore=test/smoke.test.ts",
+    "test:smoke": "deno test -A test/smoke.test.ts",
+    "lint": "deno lint"
   },
   "lint": {
     "rules": {
