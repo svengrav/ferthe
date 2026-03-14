@@ -49,7 +49,7 @@ export function createStumbleApplication(options: StumbleApplicationOptions): St
         id: createDeterministicId(accountId, poiId),
         poiId,
         accountId,
-        visitedAt: Date.now(),
+        visitedAt: Math.floor(Date.now() / 1000),
         spotId,
       }
       const result = await visitStore.create(visit)
