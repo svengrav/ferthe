@@ -77,9 +77,9 @@ interface UpdateTrailData {
   description: string;
   boundary?: Boundary;
   discoveryMode: 'free' | 'sequence';
-  imageBase64?: string;
-  mapImageBase64?: string;
-  canvasImageBase64?: string;
+  imageBase64?: string | null;
+  mapImageBase64?: string | null;
+  canvasImageBase64?: string | null;
 }
 
 const DEFAULT_TRAIL_OPTIONS = {
@@ -141,9 +141,9 @@ export const updateTrail = async (id: string, data: UpdateTrailData) => {
     name: data.name,
     description: data.description,
     boundary: data.boundary,
-    imageBase64: data.imageBase64,
-    mapImageBase64: data.mapImageBase64,
-    canvasImageBase64: data.canvasImageBase64,
+    imageBase64: data.imageBase64 ?? undefined,
+    mapImageBase64: data.mapImageBase64 ?? undefined,
+    canvasImageBase64: data.canvasImageBase64 ?? undefined,
     options: { ...DEFAULT_TRAIL_OPTIONS, discoveryMode: data.discoveryMode },
   });
 };

@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react'
-import { StyleSheet } from 'react-native'
+import { Keyboard, StyleSheet } from 'react-native'
 
-import { getDeviceLocation } from '@app/features/sensor'
 import { getTrailSpotIds } from '@app/features/trail'
 import { Button, Page, showSnackbar, Stack, StepIndicator, Text } from '@app/shared/components'
 import { useImageToBase64 } from '@app/shared/hooks/useImageToBase64'
@@ -11,6 +10,7 @@ import { Theme, useTheme } from '@app/shared/theme'
 
 import { useLocalization } from '@app/shared/localization'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
+import { useDeviceGeoLocation } from '@app/features/sensor/stores/sensorStore'
 import { GeoLocation } from '@shared/geo'
 import { Spot } from '@shared/contracts'
 import { SpotContentFormValues, SpotOptionsFormValues } from '../services/spotFormSchema'
@@ -76,6 +76,7 @@ function SpotFormPage(props: SpotFormPageProps) {
   const { styles } = useTheme(createStyles)
   const { convertToBase64 } = useImageToBase64()
   const nav = useStepNavigation(isEditMode ? EDIT_STEPS : CREATE_STEPS)
+  const deviceLocation = useDeviceGeoLocation()
 
   // Collected data from completed steps
   const [contentData, setContentData] = useState<SpotContentFormValues | null>(null)
@@ -129,6 +130,7 @@ function SpotFormPage(props: SpotFormPageProps) {
   // --- Step completion handlers ---
 
   const openConsentOverlay = (content: SpotContentFormValues, options: SpotOptionsFormValues) => {
+    Keyboard.dismiss()
     setOverlay(
       CONSENT_OVERLAY_KEY,
       <OverlayCard onClose={() => closeOverlay(CONSENT_OVERLAY_KEY)} title={locales.spotCreation.createSpot} >
@@ -147,7 +149,11 @@ function SpotFormPage(props: SpotFormPageProps) {
     setError(undefined)
     if (skipToConsentRef.current) {
       skipToConsentRef.current = false
-      openConsentOverlay(data, optionsData ?? optionsDefaults)
+      if (isEditMode) {
+        handleEditSubmit(data, optionsData ?? optionsDefaults)
+      } else {
+        openConsentOverlay(data, optionsData ?? optionsDefaults)
+      }
     } else {
       nav.goNext()
     }
@@ -173,8 +179,7 @@ function SpotFormPage(props: SpotFormPageProps) {
     setError(undefined)
 
     try {
-      const device = getDeviceLocation()
-      const location = initialLocation ?? device.location
+      const location = initialLocation ?? deviceLocation
 
       if (!location || (location.lat === 0 && location.lon === 0)) {
         setError(locales.spotCreation.locationRequired)

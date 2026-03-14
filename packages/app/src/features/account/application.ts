@@ -7,12 +7,12 @@ import {
   AccountUpdateData,
   DevicePlatform,
   DeviceToken,
-  FirebaseConfig,
   Result,
   SessionValidationResult,
   SMSCodeRequest,
   SMSVerificationResult,
 } from '@shared/contracts'
+import settingsStore from '@app/features/settings/stores/settingsStore'
 import { SecureStoreConnector } from '../../shared/device/secureStoreConnector'
 import { AccountServiceActions } from './services/accountService'
 import { getAccountActions, getSession } from './stores/accountStore'
@@ -30,7 +30,6 @@ export interface AccountApplication {
   getAccount: () => Promise<Result<Account | null>>
   updateAccount: (data: AccountUpdateData) => Promise<Result<Account>>
   upgradeToPhoneAccount: (phoneNumber: string, code: string) => Promise<Result<AccountSession>>
-  getFirebaseConfig: () => Promise<Result<FirebaseConfig>>
   registerDeviceToken: (token: string, platform: DevicePlatform) => Promise<Result<DeviceToken>>
   removeDeviceToken: (token: string) => Promise<Result<void>>
   uploadAvatar: (base64Data: string) => Promise<Result<Account>>
@@ -152,7 +151,9 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
 
     createLocalAccount: async () => {
       const accountSession = await api.account.createLocalAccount()
-      syncStoreWithSession(accountSession.data).catch(error => {
+      // Reset onboarding flag for new accounts
+      settingsStore.getState().setFlag({ hasSeenOnboarding: false })
+      await syncStoreWithSession(accountSession.data).catch(error => {
         logger.error('Failed to sync store with new account session:', error)
       })
       return accountSession
@@ -213,12 +214,6 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         await syncStoreWithSession(result.data)
       }
       return result
-    },
-
-    getFirebaseConfig: () => {
-      const session = getSession()
-      if (!session) return Promise.resolve({ success: false, data: undefined })
-      return api.account.getFirebaseConfig()
     },
 
     registerDeviceToken: (token: string, platform: DevicePlatform) => {

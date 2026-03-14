@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { APIContext, createApiContext } from '../api'
 import { config } from '../config'
 import { getSession } from '../features/account'
+import settingsStore from '../features/settings/stores/settingsStore'
 import { logger } from '../shared/utils/logger'
 import { useInitStore } from './initStore'
 
@@ -24,9 +25,16 @@ export function useBackendInitialization() {
       try {
         logger.log('[BackendInit] Creating API context...')
 
+        const devOverride = __DEV__
+          ? settingsStore.getState().settings.devApiEndpoint
+          : undefined
+        const apiEndpoint = devOverride ?? config.api.endpoint
+
+        logger.log(`[BackendInit] Using endpoint: ${apiEndpoint}`)
+
         const api = createApiContext({
           getAccountSession: getSession,
-          apiEndpoint: config.api.endpoint,
+          apiEndpoint,
           timeout: config.api.timeout,
         })
 

@@ -1,3 +1,4 @@
+import { config } from '@app/config'
 import { APIContext } from '@app/api/apiContext'
 import { ApiClient } from '@shared/api'
 import { AccountSession } from '@shared/contracts'
@@ -13,7 +14,7 @@ import { createStoryApplication, StoryApplication } from './features/story/appli
 import { createStumbleApplication, StumbleApplication } from './features/stumble/stumbleApplication'
 import { createTrailApplication, TrailApplication } from './features/trail/application'
 import { SecureStoreConnector } from './shared/device/secureStoreConnector'
-import { logger } from './shared/utils/logger'
+import { initLogger, logger } from './shared/utils/logger'
 
 export interface AppContext {
   readonly config: AppConfiguration
@@ -48,6 +49,7 @@ let appInstance: AppContext | null = null
 export function createAppContext(config: AppConfiguration = {}): AppContext {
   const { environment = 'production', apiContext, connectors = {}, initialSession } = config
 
+  initLogger(environment === 'development')
   logger.log(`Initializing ferthe-app with environment: ${environment}`)
   if (!apiContext) throw new Error('Core context is required to initialize the app context')
 

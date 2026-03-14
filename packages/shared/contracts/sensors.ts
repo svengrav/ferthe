@@ -3,7 +3,7 @@ import { GeoLocationSchema } from '@shared/geo/types.ts'
 import { z } from 'zod'
 import { AccountContext } from './accounts.ts'
 import { ClueSchema } from './discoveries.ts'
-import { Result } from './results.ts'
+import { QueryOptions, Result } from './results.ts'
 import { guard } from './strings.ts'
 
 /**
@@ -25,6 +25,6 @@ export const ScanEventSchema = z.object({
 export type ScanEvent = z.infer<typeof ScanEventSchema>
 
 export interface SensorApplicationContract {
-  listScanEvents: (context: AccountContext, trailId: string) => Promise<Result<ScanEvent[]>>
+  listScanEvents: (context: AccountContext, trailId?: string, options?: QueryOptions) => Promise<Result<ScanEvent[]>>
   createScanEvent: (context: AccountContext, location: GeoLocation, trailId?: string) => Promise<Result<ScanEvent>>
 }

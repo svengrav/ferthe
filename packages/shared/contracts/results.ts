@@ -22,7 +22,7 @@ export const ResultMetaSchema = z.object({
   total: z.number().optional(), // Total count for pagination
   hasMore: z.boolean().optional(), // More results available
   limit: z.number().optional(),
-  offset: z.number().optional(),
+  nextCursor: z.string().optional(), // Cursor for next page
 })
 
 export const ResultSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
@@ -37,7 +37,7 @@ export const ResultSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 export const QueryOptionsSchema = z.object({
   // Pagination
   limit: guard.nonNegativeInt.optional(),
-  offset: guard.nonNegativeInt.optional(),
+  cursor: z.string().optional(),
 
   // Sorting
   sortBy: guard.shortText.optional(),

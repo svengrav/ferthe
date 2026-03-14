@@ -17,4 +17,5 @@ export interface Settings {
   theme: ThemeMode
   language: LanguageOptions
   flags: AppFlags
+  devApiEndpoint?: string
 }

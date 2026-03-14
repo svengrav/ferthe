@@ -1,8 +1,8 @@
 import { createThemedStyles, useTheme } from '@app/shared/theme'
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
+import { useBackHandler } from '@app/shared/navigation/useBackHandler'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useOverlayStore } from './useOverlayStore'
 
 // Animation constants
@@ -52,6 +52,16 @@ const useOverlayAnimation = (visible: boolean) => {
 function OverlayProvider() {
   const overlayStore = useOverlayStore()
 
+  const handleBack = useCallback(() => {
+    if (overlayStore.overlays.length > 0) {
+      overlayStore.pop()
+      return true
+    }
+    return false
+  }, [overlayStore.overlays.length])
+
+  useBackHandler(handleBack)
+
   if (overlayStore.overlays?.length > 0) {
     return overlayStore.overlays.map((overlayItem) => {
       const settings = overlayItem.settings || {}
@@ -88,7 +98,7 @@ interface OverlayProps {
  * Der Content bestimmt selbst seine Größe und Darstellung.
  */
 function Overlay(props: OverlayProps) {
-  const { visible, onClose, showBackdrop = true, closeOnBackdropPress = false, children, style } = props
+  const { visible, onClose, showBackdrop = true, closeOnBackdropPress = true, children, style } = props
   const { styles } = useTheme(useStyles)
   const { animatedContainerStyle, shouldRender } = useOverlayAnimation(visible ?? true)
 

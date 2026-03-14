@@ -1,7 +1,7 @@
 import { Button, Text } from '@app/shared/components'
 import { Theme, useTheme } from '@app/shared/theme'
 import { Community } from '@shared/contracts/communities'
-import { FlatList, StyleSheet, View } from 'react-native'
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native'
 import CommunityCard from './CommunityCard'
 import { useCommunityCreatorCard } from './CommunityCreatorCard.tsx'
 
@@ -9,6 +9,8 @@ interface CommunityListProps {
   communities: Community[]
   isLoading: boolean
   onRefresh: () => void
+  onEndReached?: () => void
+  loadingMore?: boolean
   onJoinPress: () => void
 }
 
@@ -16,6 +18,8 @@ export function CommunityList({
   communities,
   isLoading,
   onRefresh,
+  onEndReached,
+  loadingMore,
   onJoinPress,
 }: CommunityListProps) {
   const { styles } = useTheme(createStyles)
@@ -40,6 +44,9 @@ export function CommunityList({
           contentContainerStyle={styles.listContent}
           refreshing={isLoading}
           onRefresh={onRefresh}
+          onEndReached={onEndReached}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={loadingMore ? <ActivityIndicator style={{ paddingVertical: 16 }} /> : undefined}
         />
       )}
     </View>

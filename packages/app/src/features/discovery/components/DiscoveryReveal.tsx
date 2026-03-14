@@ -1,3 +1,4 @@
+import { Image } from 'expo-image'
 import { ReactNode, useState } from 'react'
 import { Pressable, StyleSheet } from 'react-native'
 import Animated, {
@@ -73,10 +74,10 @@ export function DiscoveryReveal(props: DiscoveryRevealProps) {
       {blurredImage && (
         <Animated.View style={[themedStyles.blurredOverlay, overlayAnimatedStyle, { display: isRevealed ? 'none' : 'flex' }]}>
           <DiscoveryRevealButton onPress={handlePress} />
-          <Animated.Image
-            source={{ uri: blurredImage.url }}
+          <Image
+            source={{ uri: blurredImage.url, cacheKey: blurredImage.id }}
             style={themedStyles.image}
-            resizeMode='cover'
+            contentFit='cover'
           />
         </Animated.View>
       )}

@@ -123,7 +123,7 @@ const createStyles = (theme: Theme) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 8,
+      gap: 4,
     },
     disabled: {
       backgroundColor: theme.colors.background,

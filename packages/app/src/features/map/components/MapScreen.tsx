@@ -66,14 +66,18 @@ function MapScreen() {
   const device = useDeviceLocation()
 
   return (
-    <Page inset='none' options={[{ label: locales.navigation.settings, onPress: () => showSettings() }]}>
+    <Page
+      screen
+      inset='none'
+      options={[{ label: locales.navigation.settings, onPress: () => showSettings() }]}
+    >
       <View style={styles?.container} >
         <MapToolbar
           leading={<Button icon='add' onPress={() => showCreateSpotPage(device.location)} />}
           center={<MapCompass />}
           trailing={<MapLayerSwitch />}
         />
-        <MapDistanceWarning />
+        {activeLayer === 'CANVAS' && <MapDistanceWarning />}
         <View style={styles?.map} onLayout={onLayout}>
           {status !== 'ready' ? (
             <LoadingSpinner />
@@ -83,7 +87,7 @@ function MapScreen() {
             </Animated.View>
           )}
         </View>
-        <MapBottomBar />
+        {activeLayer === 'CANVAS' && <MapBottomBar />}
       </View>
       <MapTrailSelector />
     </Page>

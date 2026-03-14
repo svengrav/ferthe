@@ -58,14 +58,9 @@ export function applyQueryOptions<T extends Record<string, any>>(
     })
   }
 
-  // Apply pagination
-  const offset = options.offset || 0
-  const limit = options.limit
-
-  if (limit !== undefined) {
-    result = result.slice(offset, offset + limit)
-  } else if (offset > 0) {
-    result = result.slice(offset)
+  // Apply limit
+  if (options.limit !== undefined) {
+    result = result.slice(0, options.limit)
   }
 
   return result
@@ -122,10 +117,8 @@ export function buildCosmosQuery(options?: QueryOptions): {
     parts.push(`ORDER BY c.${options.sortBy} ${order}`)
   }
 
-  // OFFSET LIMIT
-  if (options.offset !== undefined && options.limit !== undefined) {
-    parts.push(`OFFSET ${options.offset} LIMIT ${options.limit}`)
-  } else if (options.limit !== undefined) {
+  // LIMIT
+  if (options.limit !== undefined) {
     parts.push(`OFFSET 0 LIMIT ${options.limit}`)
   }
 

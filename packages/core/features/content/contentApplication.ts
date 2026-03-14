@@ -4,8 +4,10 @@
  */
 
 import { logger } from '@core/shared/logger.ts'
+import { paginateResult } from '@core/shared/pagination.ts'
 import type { BlogPost, ContentPage } from '@shared/contracts/content.ts'
 import type { Result } from '@shared/contracts/results.ts'
+import type { QueryOptions } from '@shared/contracts/results.ts'
 import { join, resolve } from 'node:path'
 import { parseMarkdown, sortByDateDesc, toBlogPost, toContentPage } from './contentService.ts'
 
@@ -13,7 +15,7 @@ import { parseMarkdown, sortByDateDesc, toBlogPost, toContentPage } from './cont
 
 export interface ContentApplicationActions {
   getPage(language: string, page: string): Promise<Result<ContentPage>>
-  listBlogPosts(language: string): Promise<Result<BlogPost[]>>
+  listBlogPosts(language: string, options?: QueryOptions): Promise<Result<BlogPost[]>>
   getBlogPost(language: string, slug: string): Promise<Result<BlogPost>>
   submitFeedback(
     name: string | undefined,
@@ -46,7 +48,7 @@ export function createContentApplication(contentDir: string): ContentApplication
       }
     },
 
-    async listBlogPosts(language) {
+    async listBlogPosts(language, options?: QueryOptions) {
       const blogDir = resolve(contentDir, 'blog')
       const posts: BlogPost[] = []
 
@@ -63,7 +65,8 @@ export function createContentApplication(contentDir: string): ContentApplication
             // Skip unreadable files
           }
         }
-        return { success: true, data: sortByDateDesc(posts) }
+        const sorted = sortByDateDesc(posts)
+        return paginateResult(sorted, options, p => p.slug)
       } catch {
         return { success: true, data: [] }
       }

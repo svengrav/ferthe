@@ -4,7 +4,6 @@ import { Platform, View } from "react-native"
 import { getMapThemeDefaults } from "../../config/mapThemeDefaults"
 import { useMapCanvasDimensions, useMapSurface } from "../../stores/mapStore"
 import MapSurfaceNoiseOverlay from "./MapSurfaceNoiseOverlay"
-import { useMapScale } from "./MapCompensatedScale"
 
 /**
  * MapSurface renders the trail map background image.
@@ -16,7 +15,6 @@ function MapSurface() {
   const { styles, theme } = useTheme(useStyles)
   const { image, imageLayout } = useMapSurface()
   const canvasSize = useMapCanvasDimensions()
-  const scale = useMapScale()
 
   return (
     <View
@@ -25,7 +23,6 @@ function MapSurface() {
     >
       {image && (
         <Image
-          blurRadius={(scale?.get() || 1) * 0.3}
           source={{ uri: image }}
           width={imageLayout.width}
           height={imageLayout.height}

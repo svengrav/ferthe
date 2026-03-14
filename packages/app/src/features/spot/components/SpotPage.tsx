@@ -11,6 +11,7 @@ import DiscoveryStats from '@app/features/discovery/components/DiscoveryStats'
 import StoryUserContentSection from '@app/features/story/components/StoryUserContentSection'
 import SpotStories from '@app/features/spot/components/SpotStories'
 import { LocationChip } from '@app/shared/components'
+import { useExternalMap } from '@app/shared/hooks'
 import { useLocalization } from '@app/shared/localization'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import SpotCard from '../card/components/SpotCard'
@@ -46,6 +47,7 @@ function SpotPage(props: SpotPageProps) {
   const { storyApplication, spotApplication, discoveryApplication } = getAppContextStore()
   const { width, height } = useSpotCardDimensions()
   const { spot, discovery, isLoading } = useSpotWithDiscovery(spotId)
+  const { openMap } = useExternalMap(spot?.location)
   const accountId = useAccountId()
   const { showEditSpotPage } = useEditSpotPage()
   const { openDialog, closeDialog } = useRemoveDialog()
@@ -109,7 +111,7 @@ function SpotPage(props: SpotPageProps) {
                 blurredImage={spot.blurredImage}
                 title={spot.name}
               />
-              <LocationChip location={spot.location} style={{ alignSelf: 'center' }} />
+              <LocationChip location={spot.location} style={{ alignSelf: 'center' }} onPress={() => openMap(spot.location)} />
 
               <SpotMetaCard
                 spotId={spotId}

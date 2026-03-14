@@ -3,10 +3,10 @@ import { Text } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { View } from 'react-native'
-import { TrailSpotRowVM } from '../types/viewModels'
+import { TrailSpotViewModel } from '../types/viewModels'
 
 interface TrailSpotsProps {
-  spots: TrailSpotRowVM[]
+  spots: TrailSpotViewModel[]
 }
 
 /**

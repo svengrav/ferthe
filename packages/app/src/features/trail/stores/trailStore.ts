@@ -11,6 +11,7 @@ const toById = <T extends { id: string }>(items: T[]): Record<string, T> =>
 
 interface TrailActions extends StoreActions {
   setTrails: (trails: Trail[]) => void
+  upsertTrails: (trails: Trail[]) => void
   setTrailSpotIds: (trailId: string, spotIds: string[]) => void
   setTrailStats: (trailId: string, stats: TrailStats) => void
 }
@@ -34,7 +35,8 @@ export const trailStore = create<TrailState & TrailActions>(set => ({
   trailStats: {},
 
   setStatus: status => set({ status }),
-  setTrails: trails => set({ byId: toById(trails) }),
+  setTrails: trails => set({ byId: toById(trails), updatedAt: new Date(), status: 'ready' }),
+  upsertTrails: trails => set(state => ({ byId: { ...state.byId, ...toById(trails) }, updatedAt: new Date() })),
   setTrailSpotIds: (trailId, spotIds) => set(state => ({
     trailSpotIds: { ...state.trailSpotIds, [trailId]: spotIds },
   })),
@@ -54,6 +56,7 @@ export const useTrailSpotIds = (trailId: string) => trailStore(state => state.tr
 
 export const getTrailStoreActions = () => ({
   setTrails: trailStore.getState().setTrails,
+  upsertTrails: trailStore.getState().upsertTrails,
   setStatus: trailStore.getState().setStatus,
   setTrailSpotIds: trailStore.getState().setTrailSpotIds,
   setTrailStats: trailStore.getState().setTrailStats,

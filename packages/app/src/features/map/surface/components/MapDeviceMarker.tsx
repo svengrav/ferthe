@@ -116,6 +116,7 @@ function MapDeviceMarker({ mode, canvasSize, boundary }: MapDeviceMarkerProps) {
 
   return (
     <Animated.View
+      pointerEvents={'none'}
       id="map-device-marker"
       style={[
         {

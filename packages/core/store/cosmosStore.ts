@@ -1,7 +1,7 @@
 import { createCosmosConnector } from '@core/connectors/cosmos/cosmosConnector.ts'
 import { QueryOptions } from '@shared/contracts/index.ts'
 import { buildCosmosQuery } from './queryUtils.ts'
-import { StoreInterface, StoreItem } from './storeInterface.ts'
+import { ListResult, StoreInterface, StoreItem } from './storeInterface.ts'
 
 interface CosmosStoreOptions {
   connectionString?: string
@@ -39,13 +39,30 @@ export function createCosmosStore(options?: CosmosStoreOptions): StoreInterface 
       }
     },
 
-    async list<T extends StoreItem>(container: string, options?: QueryOptions): Promise<T[]> {
+    async list<T extends StoreItem>(container: string, options?: QueryOptions): Promise<ListResult<T>> {
       try {
-        const { query, parameters } = buildCosmosQuery(options)
-        return await connector.queryItems<T>(container, query, parameters)
+        // Get all filtered items (without pagination) to compute total
+        const { query: allQuery, parameters: allParams } = buildCosmosQuery({ ...options, limit: undefined })
+        const allItems = await connector.queryItems<T>(container, allQuery, allParams)
+        const total = allItems.length
+        // Apply cursor pagination
+        const cursor = options?.cursor
+        const limit = options?.limit
+        let startIndex = 0
+        if (cursor) {
+          const cursorIndex = allItems.findIndex(item => item.id === cursor)
+          startIndex = cursorIndex >= 0 ? cursorIndex + 1 : 0
+        }
+        const data = limit !== undefined
+          ? allItems.slice(startIndex, startIndex + limit)
+          : allItems.slice(startIndex)
+        const nextCursor = limit !== undefined && startIndex + limit < total
+          ? data[data.length - 1]?.id
+          : undefined
+        return { data, total, nextCursor }
       } catch (error) {
         console.error(`Error listing items from ${container}:`, error)
-        return []
+        return { data: [], total: 0 }
       }
     },
     async update<T extends StoreItem>(container: string, id: string, item: Partial<T>): Promise<T | undefined> {
@@ -74,7 +91,7 @@ export function createCosmosStore(options?: CosmosStoreOptions): StoreInterface 
 
     async deleteAll(container: string): Promise<void> {
       try {
-        const items = await this.list(container)
+        const { data: items } = await this.list(container)
         await Promise.all(items.map(item => this.delete(container, item.id)))
       } catch (error) {
         console.error(`Error deleting all items from ${container}:`, error)

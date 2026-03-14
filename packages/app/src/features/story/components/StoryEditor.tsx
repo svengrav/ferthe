@@ -42,7 +42,7 @@ interface StoryEditorCardProps {
 function StoryEditorCard({ existingStory, onSubmit, onClose }: StoryEditorCardProps) {
   const { styles, theme } = useTheme(useStyles)
   const { locales } = useLocalization()
-  const { selectedImageUri, pickImage, clearImage, isLoading: isPickingImage } = useImagePicker()
+  const { selectedImageUri, pickImage, takePhoto, clearImage, isLoading: isPickingImage } = useImagePicker()
   const { convertToBase64, isConverting } = useImageToBase64()
 
   const [comment, setComment] = useState(existingStory?.comment ?? '')
@@ -96,7 +96,7 @@ function StoryEditorCard({ existingStory, onSubmit, onClose }: StoryEditorCardPr
 
   if (!styles) return null
 
-  const title = isEditing ? locales.discovery.editYourDiscovery : locales.discovery.documentYourDiscovery
+  const title = isEditing ? locales.discovery.editYourDiscovery : locales.discovery.shareYourStory
 
   return (
     <OverlayCard title={title} onClose={onClose} keyboardAware={true}>
@@ -110,12 +110,22 @@ function StoryEditorCard({ existingStory, onSubmit, onClose }: StoryEditorCardPr
           </View>
         )}
 
-        <Button
-          label={isPickingImage ? locales.discovery.pickingImage : locales.discovery.pickImageFromDevice}
-          variant="outlined"
-          onPress={pickImage}
-          disabled={isLoading || isPickingImage}
-        />
+        <View style={styles.photoActions}>
+          <Button
+            label={isPickingImage ? locales.discovery.pickingImage : locales.spotCreation.chooseFromGallery}
+            icon="image"
+            variant="outlined"
+            onPress={pickImage}
+            disabled={isLoading || isPickingImage}
+          />
+          <Button
+            icon="camera"
+            label={locales.spotCreation.takePhoto}
+            variant="outlined"
+            onPress={takePhoto}
+            disabled={isLoading || isPickingImage}
+          />
+        </View>
 
         <Field helperText={locales.discovery.shareYourStory}>
           <TextInput
@@ -156,6 +166,7 @@ function StoryEditorCard({ existingStory, onSubmit, onClose }: StoryEditorCardPr
 
 const useStyles = createThemedStyles(theme => ({
   container: { gap: 12 },
+  photoActions: { flexDirection: 'row' as const, gap: theme.tokens.spacing.sm },
   imagePreviewContainer: { gap: 8, alignItems: 'center' },
   imagePreview: {
     width: '100%',

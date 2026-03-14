@@ -10,6 +10,10 @@ import { createThemedStyles, useTheme } from '../../theme';
 const LABEL_MAX_LENGTH = 2
 const LABEL_SIZE_RATIO = 0.4
 
+// Tracks image IDs that have been successfully loaded at least once.
+// Persists across remounts so revisited pages show images instantly.
+const loadedIds = new Set<string>()
+
 type LoadingState = 'loading' | 'loaded' | 'error'
 
 interface ImageProps {
@@ -45,20 +49,24 @@ export function Image({
   onError,
   onLoad,
   resizeMode = 'cover',
-  showLoader = true,
+  showLoader = false,
   blurRadius = 0
 }: ImageProps) {
   const { styles } = useTheme(useStyles)
   const { theme } = useTheme()
-  const [loadingState, setLoadingState] = useState<LoadingState>('loading')
 
   // Determine URI and label
   const isImageReference = source && 'id' in source
   const uri = isImageReference ? source.url : source?.uri
+  const cacheKey = isImageReference ? source.id : undefined
   const effectiveLabel = label || (isImageReference ? source.label : undefined)
   const labelText = effectiveLabel ? effectiveLabel.substring(0, LABEL_MAX_LENGTH).toUpperCase() : ''
 
+  const alreadyLoaded = isImageReference && loadedIds.has(source.id)
+  const [loadingState, setLoadingState] = useState<LoadingState>(alreadyLoaded ? 'loaded' : 'loading')
+
   const handleLoad = () => {
+    if (isImageReference) loadedIds.add(source.id)
     setLoadingState('loaded')
     onLoad?.()
   }
@@ -85,10 +93,10 @@ export function Image({
   return (
     <View style={[containerStyle, style]} id="image-container">
       <ExpoImage
-        source={{ uri }}
+        source={{ uri, cacheKey }}
         style={styles.image}
         contentFit={resizeMode as ImageContentFit}
-        transition={{ duration: 250 }}
+        transition={alreadyLoaded ? undefined : { duration: 250 }}
         onLoad={handleLoad}
         onError={handleError}
         blurRadius={blurRadius}

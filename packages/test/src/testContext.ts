@@ -62,9 +62,9 @@ export const createTestContext = () => {
       await memoryStoreConnector.create(storeIds.DISCOVERIES, discovery)
     })
 
-    testState.dataSet.trails = await memoryStoreConnector.list(storeIds.TRAILS)
-    testState.dataSet.spots = await memoryStoreConnector.list(storeIds.TRAIL_SPOTS)
-    testState.dataSet.discoveries = await memoryStoreConnector.list(storeIds.DISCOVERIES)
+    testState.dataSet.trails = (await memoryStoreConnector.list(storeIds.TRAILS)).data
+    testState.dataSet.spots = (await memoryStoreConnector.list(storeIds.TRAIL_SPOTS)).data
+    testState.dataSet.discoveries = (await memoryStoreConnector.list(storeIds.DISCOVERIES)).data
   }
 
   const createSession = async () => {

@@ -150,20 +150,23 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
 
     async getSpots(context?: AccountContext, options?: QueryOptions): Promise<Result<Spot[]>> {
       try {
-        // Admin with creator-app audience bypasses createdBy filter to see all spots
+        // Admin with creator-app audience sees all spots; authenticated users see only their own
         const isAdminCreator = context?.role === 'admin' && context?.client === 'creator'
-        const effectiveOptions = isAdminCreator && options?.filters?.['createdBy']
-          ? { ...options, filters: { ...options.filters, createdBy: undefined } }
-          : options
+        const shouldFilterByOwner = context && context.accountType !== 'public' && !isAdminCreator
+
+        const effectiveOptions: QueryOptions = {
+          sortBy: 'createdAt',
+          sortOrder: 'desc',
+          ...options,
+          ...(shouldFilterByOwner ? { filters: { ...options?.filters, createdBy: context!.accountId } } : {}),
+        }
+
         const spotsResult = await spotStore.list(effectiveOptions)
         if (!spotsResult.success) {
           return { success: false, error: { message: 'Failed to list spots', code: 'GET_SPOTS_ERROR' } }
         }
 
-        let spots = (spotsResult.data || [])
-          // Admin with creator-app audience sees all spots; others only see their own
-          .filter(spot => !context || context.accountType === 'public' || isAdminCreator || spot.createdBy === context.accountId)
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        let spots = spotsResult.data ?? []
 
         // Check if images should be enriched
         const shouldEnrichImages = options?.exclude?.includes('images') ? false :
@@ -175,7 +178,7 @@ export function createSpotApplication(config: SpotApplicationConfig): SpotApplic
           )
         }
 
-        return { success: true, data: spots }
+        return { success: true, data: spots, meta: spotsResult.meta }
       } catch (error: any) {
         return { success: false, error: { message: error.message, code: 'GET_SPOTS_ERROR' } }
       }

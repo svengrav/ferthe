@@ -17,7 +17,6 @@ import {
   ClientAudience,
   DevicePlatform,
   DeviceToken,
-  FirebaseConfig,
   Result,
   SMSCodeRequest,
   SMSVerificationResult,
@@ -43,13 +42,12 @@ interface AccountApplicationOptions {
   smsService?: SMSService
   jwtService?: JWTService
   imageApplication?: ImageApplicationContract
-  firebaseConfig?: FirebaseConfig
   onDelete?: (accountId: string) => Promise<void>
   onMerge?: (localAccountId: string, phoneAccountId: string) => Promise<void>
 }
 
 export function createAccountApplication(options: AccountApplicationOptions): AccountApplicationContract {
-  const { accountStore, accountSessionStore, twilioVerificationStore, deviceTokenStore, smsConnector, smsService = createSMSService(), jwtService, imageApplication, firebaseConfig, onDelete, onMerge } = options
+  const { accountStore, accountSessionStore, twilioVerificationStore, deviceTokenStore, smsConnector, smsService = createSMSService(), jwtService, imageApplication, onDelete, onMerge } = options
   const { createJWT, verifyJWT } = jwtService || createJWTService()
 
   // Helper functions
@@ -142,6 +140,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     accountType: data.accountType,
     isPhoneVerified: data.isPhoneVerified,
     role: data.role,
+    flags: data.flags,
   })
 
   // API methods
@@ -358,6 +357,7 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
         ...account,
         displayName: data.displayName ?? account.displayName,
         description: data.description ?? account.description,
+        flags: data.flags ? { ...(account.flags ?? {}), ...data.flags } : account.flags,
         updatedAt: new Date(),
       }
 
@@ -482,23 +482,6 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
       return createSuccessResult(authSession)
     } catch (error: unknown) {
       return createErrorResult('CREATE_DEV_SESSION_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
-    }
-  }
-
-  const getFirebaseConfig = async (context: AccountContext): Promise<Result<FirebaseConfig>> => {
-    try {
-      if (!firebaseConfig) {
-        return createErrorResult('ACCOUNT_NOT_FOUND')
-      }
-
-      const accountResult = await getAccount(context)
-      if (!accountResult.success || !accountResult.data) {
-        return createErrorResult('ACCOUNT_NOT_FOUND')
-      }
-
-      return createSuccessResult(firebaseConfig)
-    } catch (error: unknown) {
-      return createErrorResult('ACCOUNT_NOT_FOUND', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 
@@ -636,7 +619,6 @@ export function createAccountApplication(options: AccountApplicationOptions): Ac
     updateAccount,
     createLocalAccount,
     upgradeToPhoneAccount,
-    getFirebaseConfig,
     uploadAvatar,
     getPublicProfile,
     registerDeviceToken,

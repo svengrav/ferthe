@@ -130,7 +130,6 @@ const ClueDiscoveryRadius = memo(({ clue, boundary, size, scale, theme, clueSize
           left: (clueSize - circle.width) / 2,
           top: (clueSize - circle.height) / 2,
           borderRadius: circle.width / 2,
-          backgroundColor: 'white'
         }
       ]}
     />
@@ -203,7 +202,7 @@ const AnimatedClue = memo(({ clue, delay, isExiting, boundary, size, scale, them
       <ClueDiscoveryRadius clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} clueSize={clueSize} />
       <ClueDebugCircles clue={clue} boundary={boundary} size={size} scale={scale} theme={theme} clueSize={clueSize} />
       {clue.image?.micro?.url ? (
-        <Image source={{ uri: clue.image.micro.url }} style={styles.clueImage} />
+        <Image source={{ uri: clue.image.micro.url, cacheKey: clue.image.micro.id }} style={styles.clueImage} />
       ) : (
         <View style={styles.clueMarker} />
       )}
@@ -330,7 +329,7 @@ function MapClues({ boundary, size }: MapCluesProps) {
             <ClueDiscoveryRadius clue={clue} boundary={boundary} size={size} scale={scaleValue} theme={theme} clueSize={clueSize} />
             <ClueDebugCircles clue={clue} boundary={boundary} size={size} scale={scaleValue} theme={theme} clueSize={clueSize} />
             {clue.image?.micro?.url ? (
-              <Image source={{ uri: clue.image.micro.url }} style={styles.clueImage} />
+              <Image source={{ uri: clue.image.micro.url, cacheKey: clue.image.micro.id }} style={styles.clueImage} />
             ) : (
               <View style={styles.clueMarker} />
             )}

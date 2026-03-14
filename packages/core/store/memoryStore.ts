@@ -1,7 +1,7 @@
 import { createCuid2 } from '@core/utils/idGenerator.ts'
 import { QueryOptions } from '@shared/contracts/index.ts'
 import { applyQueryOptions } from './queryUtils.ts'
-import { StoreInterface, StoreItem } from './storeInterface.ts'
+import { ListResult, StoreInterface, StoreItem } from './storeInterface.ts'
 
 /**
  * Creates a memory storage implementation using the unified StoreInterface
@@ -52,14 +52,31 @@ export const createMemoryStore = (): StoreInterface => {
       }
     },
 
-    async list<T extends Record<string, any>>(container: string, options?: QueryOptions): Promise<T[]> {
+    async list<T extends Record<string, any>>(container: string, options?: QueryOptions): Promise<ListResult<T>> {
       try {
         ensureContainerInitialized(container)
         const items = [...(MEMORY_STORAGE[container] as T[])]
-        return applyQueryOptions(items, options)
+        // Filter and sort without pagination to get accurate total
+        const filteredAndSorted = applyQueryOptions(items, { ...options, limit: undefined })
+        const total = filteredAndSorted.length
+        // Apply cursor pagination
+        const cursor = options?.cursor
+        const limit = options?.limit
+        let startIndex = 0
+        if (cursor) {
+          const cursorIndex = filteredAndSorted.findIndex(item => item.id === cursor)
+          startIndex = cursorIndex >= 0 ? cursorIndex + 1 : 0
+        }
+        const data = limit !== undefined
+          ? filteredAndSorted.slice(startIndex, startIndex + limit)
+          : filteredAndSorted.slice(startIndex)
+        const nextCursor = limit !== undefined && startIndex + limit < total
+          ? data[data.length - 1]?.id
+          : undefined
+        return { data, total, nextCursor }
       } catch (error) {
         console.error(`Error listing items from memory storage (${container}):`, error)
-        return []
+        return { data: [], total: 0 }
       }
     },
 

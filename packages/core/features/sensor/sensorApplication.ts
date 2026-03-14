@@ -1,5 +1,5 @@
 import { Store } from '@core/store/storeFactory.ts'
-import { AccountContext, createErrorResult, createSuccessResult, Discovery, Result, ScanEvent, SensorApplicationContract, SpotApplicationContract, TrailApplicationContract } from '@shared/contracts'
+import { AccountContext, createErrorResult, createSuccessResult, Discovery, QueryOptions, Result, ScanEvent, SensorApplicationContract, SpotApplicationContract, TrailApplicationContract } from '@shared/contracts'
 import { GeoLocation } from '@shared/geo'
 import { createSensorService, SensorServiceType } from './sensorService.ts'
 
@@ -60,14 +60,14 @@ export function createSensorApplication({ sensorService = createSensorService(),
     }
   }
 
-  const listScanEvents = async (context: AccountContext, trailId: string): Promise<Result<ScanEvent[]>> => {
+  const listScanEvents = async (context: AccountContext, trailId?: string, options?: QueryOptions): Promise<Result<ScanEvent[]>> => {
     try {
       const userId = context.accountId
       if (!userId) {
         return createErrorResult('ACCOUNT_ID_REQUIRED')
       }
 
-      const scanEventsResult = await scanStore.list()
+      const scanEventsResult = await scanStore.list(options)
       if (!scanEventsResult.success) {
         return createErrorResult('LIST_SCAN_EVENTS_ERROR')
       }

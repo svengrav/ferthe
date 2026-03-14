@@ -2,7 +2,7 @@ import type { QueryOptions } from '@shared/contracts/results.ts'
 
 /**
  * Parses flat URL query parameters into a typed QueryOptions object.
- * Handles type conversions: limit/offset → number, include/exclude → comma-separated arrays.
+ * Handles type conversions: limit → number, include/exclude → comma-separated arrays.
  * Domain-specific params (e.g. trailId) are ignored — only QueryOptions fields are extracted.
  */
 export const parseQueryOptions = (query?: Record<string, string>): QueryOptions | undefined => {
@@ -12,7 +12,7 @@ export const parseQueryOptions = (query?: Record<string, string>): QueryOptions 
   let hasOptions = false
 
   if (query.limit) { options.limit = parseInt(query.limit, 10); hasOptions = true }
-  if (query.offset) { options.offset = parseInt(query.offset, 10); hasOptions = true }
+  if (query.cursor) { options.cursor = query.cursor; hasOptions = true }
   if (query.sortBy) { options.sortBy = query.sortBy; hasOptions = true }
   if (query.sortOrder === 'asc' || query.sortOrder === 'desc') { options.sortOrder = query.sortOrder; hasOptions = true }
   if (query.search) { options.search = query.search; hasOptions = true }

@@ -84,7 +84,7 @@ export const serializeQueryOptions = (options?: QueryOptions): Record<string, st
   const params: Record<string, string> = {}
 
   if (options.limit !== undefined) params.limit = String(options.limit)
-  if (options.offset !== undefined) params.offset = String(options.offset)
+  if (options.cursor) params.cursor = options.cursor
   if (options.sortBy) params.sortBy = options.sortBy
   if (options.sortOrder) params.sortOrder = options.sortOrder
   if (options.search) params.search = options.search

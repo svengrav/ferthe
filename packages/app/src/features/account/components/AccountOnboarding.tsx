@@ -1,15 +1,13 @@
 import { getDeviceLocation } from '@app/features/sensor'
-import settingsStore, { useOnboardingFlag } from '@app/features/settings/stores/settingsStore'
+import settingsStore from '@app/features/settings/stores/settingsStore'
 import { Button, FertheLogo, Stack, Text } from '@app/shared/components'
 import { useStepNavigation } from '@app/shared/hooks'
 import { closeOverlay, OverlayCard, OverlayContainer, setOverlay } from '@app/shared/overlay'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
-import { useEffect } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useAccount } from '../stores/accountStore'
 
 const ONBOARDING_KEY = 'onboarding'
 
@@ -131,12 +129,17 @@ const useStyles = createThemedStyles(theme => ({
  * Safe to call outside React components (uses store directly).
  */
 export function showOnboardingIfNeeded() {
+  if (__DEV__) return
+
   const { settings, setFlag } = settingsStore.getState()
   if (settings.flags?.hasSeenOnboarding) return
 
   const handleDone = () => {
     setFlag({ hasSeenOnboarding: true })
     closeOverlay(ONBOARDING_KEY)
+    // Persist flag remotely so reinstalls don't re-trigger onboarding
+    getAppContextStore().accountApplication.updateAccount({ flags: { hasCompletedOnboarding: true } })
+      .catch(err => logger.error('showOnboardingIfNeeded: failed to persist flag', err))
     triggerWelcomeDiscovery()
   }
 
@@ -144,15 +147,8 @@ export function showOnboardingIfNeeded() {
 }
 
 export function useAccountOnboarding() {
-  const { hasSeenOnboarding } = useOnboardingFlag()
-  const account = useAccount()
-
-  useEffect(() => {
-    if (!account) return
-    if (hasSeenOnboarding) return
-
-    showOnboardingIfNeeded()
-  }, [account, hasSeenOnboarding])
+  // Onboarding is triggered by useDataInitialization after remote flag sync.
+  // This hook is kept as a placeholder for future account-related init logic.
 }
 
 /**

@@ -1,5 +1,6 @@
 import Icon from '@app/shared/components/icon/Icon'
 import Text from '@app/shared/components/text/Text'
+import { useLocalization } from '@app/shared/localization'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { RatingSummary } from '@shared/contracts'
 import { useState } from 'react'
@@ -23,6 +24,7 @@ function StarRating({
   size = 24,
 }: StarRatingProps) {
   const { styles, theme } = useTheme(useStyles)
+  const { locales } = useLocalization()
   const [hoveredStar, setHoveredStar] = useState<number | null>(null)
 
   if (!styles) return null
@@ -30,14 +32,18 @@ function StarRating({
   const userRating = summary?.userRating ?? 0
   const average = summary?.average ?? 0
   const count = summary?.count ?? 0
+  const hasUserRating = !!summary?.userRating
 
-  // Show hovered stars during interaction, otherwise show user's rating
-  const displayRating = hoveredStar !== null ? hoveredStar : userRating
+  // Hover > own rating > community average
+  const displayRating = hoveredStar !== null ? hoveredStar : (hasUserRating ? userRating : Math.round(average))
+  const isShowingUserRating = hoveredStar !== null || hasUserRating
 
   const renderStar = (position: number) => {
     const isFilled = displayRating >= position
     const iconName = isFilled ? 'star' : 'star-border'
-    const color = isFilled ? theme.colors.primary : theme.colors.onSurface
+    const color = isFilled
+      ? (isShowingUserRating ? theme.colors.primary : theme.opacity(theme.colors.onSurface, 0.4))
+      : theme.colors.onSurface
 
     return (
       <Pressable
@@ -64,7 +70,11 @@ function StarRating({
         {[1, 2, 3, 4, 5].map(renderStar)}
       </View>
       <Text style={styles.summary}>
-        {average.toFixed(1)} ({count})
+        {hasUserRating
+          ? `${locales.common.yourRating}: ${userRating}★ · Ø ${average.toFixed(1)} (${count})`
+          : count > 0
+            ? `Ø ${average.toFixed(1)} (${count})`
+            : locales.common.tapToRate}
       </Text>
     </View>
   )

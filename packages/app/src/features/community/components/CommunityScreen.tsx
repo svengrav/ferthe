@@ -1,12 +1,11 @@
 import AccountPage from '@app/features/account/components/AccountPage'
 import { useAccountData } from '@app/features/account/stores/accountStore'
+import { useCommunities } from '../stores/communityStore'
+import { useCommunityPagination } from '../hooks/useCommunityPagination'
 import { Avatar, Button, Page, SectionHeader, Stack } from '@app/shared/components'
 import { Header } from '@app/shared/components/'
 import { useLocalization } from '@app/shared/localization'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
-import { getAppContextStore } from '@app/shared/stores/appContextStore'
-import { useEffect } from 'react'
-import { useCommunityData, useCommunityStatus } from '../stores/communityStore'
 import { useCommunityJoinCard } from './CommunityJoin'
 import { CommunityList } from './CommunityList'
 import { useCommunityCreatorCard } from './CommunityCreatorCard'
@@ -19,24 +18,12 @@ const AVATAR_SIZE = 160
 function CommunitiesScreen() {
   const { locales } = useLocalization()
   const { account } = useAccountData()
-  const { communities } = useCommunityData()
-  const status = useCommunityStatus()
-  const { communityApplication } = getAppContextStore()
+  const communities = useCommunities()
   const { showCommunityJoinCard } = useCommunityJoinCard()
   const { showCommunityCreatorCard } = useCommunityCreatorCard()
 
-  // Initialize communities on mount
-  useEffect(() => {
-    if (status === 'uninitialized') {
-      communityApplication.requestCommunities()
-    }
-  }, [status, communityApplication])
+  const pagination = useCommunityPagination()
 
-  const handleRefresh = () => {
-    communityApplication.requestCommunities()
-  }
-
-  // Open account view overlay
   const handleOpenAccountOverlay = () => {
     setOverlay('accountView', <AccountPage onBack={() => closeOverlay('accountView')} />)
   }
@@ -59,8 +46,10 @@ function CommunitiesScreen() {
         />
         <CommunityList
           communities={communities}
-          isLoading={status === 'loading'}
-          onRefresh={handleRefresh}
+          isLoading={pagination.isRefreshing}
+          onRefresh={pagination.refresh}
+          onEndReached={pagination.loadMore}
+          loadingMore={pagination.isLoading}
           onJoinPress={showCommunityJoinCard}
         />
       </Stack>

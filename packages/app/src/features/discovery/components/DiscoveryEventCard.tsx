@@ -14,9 +14,9 @@ import Animated, {
   withDelay,
   withTiming
 } from 'react-native-reanimated'
+import { useSpotPage } from '@app/features/spot/components/SpotPage'
 import { DiscoveryEventState } from '../services/types'
 import { discoveryStore } from '../stores/discoveryStore'
-import { useDiscoveryCardPage } from './DiscoveryCardPage'
 import { DiscoveryReveal, RevealMode } from './DiscoveryReveal'
 import DiscoveryStats from './DiscoveryStats'
 
@@ -101,7 +101,7 @@ function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCa
   const { width, height, padding } = useSpotCardDimensions({ variant: 'card' })
   const { titleAnimatedStyle, triggerReveal } = useDiscoveryAnimations(mode)
   const [isFlipped, setIsFlipped] = useState(false)
-  const { showDiscoveryCardDetails } = useDiscoveryCardPage()
+  const { showSpotPage } = useSpotPage()
   const { showCommunityShare } = useCommunityShareDialog()
 
   if (!styles) return null
@@ -132,7 +132,7 @@ function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCa
           <Button
             icon='zoom-out-map'
             variant='secondary'
-            onPress={() => showDiscoveryCardDetails(card)}
+            onPress={() => showSpotPage(card.spotId)}
           />
           {hasDiscovery && (
             <Button
@@ -181,16 +181,14 @@ function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCa
       id="card-frame"
     >
       <SpotContainer width={width} height={height} withShadow={true}>
-        <SpotGradientFrame padding={6}>
+        <SpotGradientFrame padding={padding}>
           {/* Close and view details buttons */}
           <View style={styles.buttonContainer}>
-            {hasDiscovery && (
-              <Button
-                icon='zoom-out-map'
-                variant='secondary'
-                onPress={() => showDiscoveryCardDetails(card)}
-              />
-            )}
+            <Button
+              icon='zoom-out-map'
+              variant='secondary'
+              onPress={() => showSpotPage(card.spotId)}
+            />
             {hasDiscovery && (
               <Button
                 icon='share'
@@ -217,7 +215,7 @@ function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCa
               <Text style={styles.backTitle}>{card.title}</Text>
               <Text style={styles.backText} numberOfLines={2}>{card.description}</Text>
             </View>
-            {isFlipped && <DiscoveryStats discoveryId={card.discoveryId} animationDelay={400} style={{ marginTop: 14 }} />}
+            {isFlipped && hasDiscovery && <DiscoveryStats discoveryId={card.discoveryId} animationDelay={400} style={{ marginTop: 14 }} />}
           </ScrollView>
 
           {/* Flip button bottom right */}

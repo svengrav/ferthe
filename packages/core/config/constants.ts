@@ -1,11 +1,10 @@
 export type Constants = ReturnType<typeof createConstants>
 
 type ProductionType = 'production' | 'development'
-type StoreType = 'cosmos' | 'json' | 'memory' | 'table'
+type StoreType = 'cosmos' | 'json' | 'memory' | 'table' | 'postgres'
 
 export function createConstants() {
   const isProduction = Deno.env.get('PRODUCTION')?.toLowerCase() === 'true'
-
   return {
     environment: isProduction ? 'production' : 'development' as ProductionType,
     api: {
@@ -15,9 +14,11 @@ export function createConstants() {
       origins: ['http://localhost:8081', 'http://localhost:7000', 'https://ferthe.de'],
     },
     store: {
-      type: isProduction ? 'table' : 'json' as StoreType,
+      type: (Deno.env.get('STORE_TYPE') || (isProduction ? 'table' : 'json')) as StoreType,
       cosmosDatabase: isProduction ? 'ferthe-core-prod-v1' : 'ferthe-core-dev-v1',
       jsonBaseDirectory: '../../_data/core',
+      supabaseUrl: Deno.env.get('SUPABASE_URL'),
+      supabaseKey: Deno.env.get('SUPABASE_KEY'),
     },
     storage: {
       containerName: 'resources',
@@ -29,6 +30,13 @@ export function createConstants() {
     content: {
       dir: Deno.env.get('CONTENT_DIR') ?? '../web/content',
     },
+    system: {
+      defaultDiscoveryTrailId: 'stx4j9k2n000101mh8d4k9n2q',
+      welcomeSpot: {
+        imageBlobPath: '06r5e44o2rlelaqybh0b.webp',
+        blurredImageBlobPath: '06r5e44o2rlelaqybh0b-blurred.webp',
+      },
+    },
   }
 }
 
@@ -36,23 +44,22 @@ export function createConstants() {
  * Store IDs for different data collections.
  */
 export const STORE_IDS = {
-  TRAILS: 'trail-collection',
-  SPOTS: 'spot-collection',
-  TRAIL_SPOTS: 'trail-spot-relations',
-  ACCOUNTS: 'account-collection',
-  ACCOUNT_SESSIONS: 'account-sessions',
-  ACCOUNT_SMS_CODES: 'account-sms-codes',
-  DISCOVERIES: 'discovery-collection',
-  DISCOVERY_PROFILES: 'discovery-profile-collection',
-  DISCOVERY_CONTENTS: 'discovery-content-collection',
-  STORIES: 'story-collection',
-  SPOT_RATINGS: 'spot-ratings',
-  TRAIL_RATINGS: 'trail-ratings',
-  SENSOR_SCANS: 'sensor-scans',
-  COMMUNITIES: 'community-collection',
-  COMMUNITY_MEMBERS: 'community-members',
-  COMMUNITY_DISCOVERIES: 'community-discoveries',
-  DEVICE_TOKENS: 'device-tokens',
-  STUMBLE_POIS: 'stumble-pois',
-  STUMBLE_VISITS: 'stumble-visits',
+  TRAILS: 'trails',
+  SPOTS: 'spots',
+  TRAIL_SPOTS: 'trail_spots',
+  ACCOUNTS: 'accounts',
+  ACCOUNT_SESSIONS: 'account_sessions',
+  ACCOUNT_SMS_CODES: 'account_sms_codes',
+  DISCOVERIES: 'discoveries',
+  DISCOVERY_PROFILES: 'discovery_profiles',
+  STORIES: 'stories',
+  SPOT_RATINGS: 'spot_ratings',
+  TRAIL_RATINGS: 'trail_ratings',
+  SENSOR_SCANS: 'sensor_scans',
+  COMMUNITIES: 'communities',
+  COMMUNITY_MEMBERS: 'community_members',
+  COMMUNITY_DISCOVERIES: 'community_discoveries',
+  DEVICE_TOKENS: 'device_tokens',
+  STUMBLE_POIS: 'stumble_pois',
+  STUMBLE_VISITS: 'stumble_visits',
 } as const

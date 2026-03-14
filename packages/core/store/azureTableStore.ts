@@ -1,6 +1,6 @@
 import { QueryOptions } from '@shared/contracts/index.ts'
 import { createAzureTableConnector, AzureTableConnector } from '@core/connectors/azureTableConnector.ts'
-import { StoreInterface, StoreItem } from './storeInterface.ts'
+import { ListResult, StoreInterface, StoreItem } from './storeInterface.ts'
 import { logger } from '@core/shared/logger.ts'
 
 interface AzureTableStoreOptions {
@@ -55,8 +55,7 @@ export function createAzureTableStore(options: AzureTableStoreOptions): StoreInt
 
     // Pagination
     if (options?.limit !== undefined) {
-      const offset = options.offset || 0
-      result = result.slice(offset, offset + options.limit)
+      result = result.slice(0, options.limit)
     }
 
     return result
@@ -81,16 +80,29 @@ export function createAzureTableStore(options: AzureTableStoreOptions): StoreInt
       }
     },
 
-    async list<T extends StoreItem>(container: string, options?: QueryOptions): Promise<T[]> {
+    async list<T extends StoreItem>(container: string, options?: QueryOptions): Promise<ListResult<T>> {
       try {
         const filter = buildTableFilter(options)
         const items = await connector.queryItems<T>(container, filter)
-
-        // Apply in-memory filters for sorting, pagination, etc.
-        return applyInMemoryFilters(items, options)
+        // Apply in-memory filters/sort without pagination to get accurate total
+        const sortedAndFiltered = applyInMemoryFilters(items, { ...options, limit: undefined })
+        const total = sortedAndFiltered.length
+        // Apply cursor pagination
+        const cursor = options?.cursor
+        const limit = options?.limit
+        let startIndex = 0
+        if (cursor) {
+          const idx = sortedAndFiltered.findIndex((item: any) => item.id === cursor)
+          startIndex = idx >= 0 ? idx + 1 : 0
+        }
+        const data = limit !== undefined
+          ? sortedAndFiltered.slice(startIndex, startIndex + limit)
+          : sortedAndFiltered.slice(startIndex)
+        const nextCursor = limit !== undefined && startIndex + limit < total ? data[data.length - 1]?.id : undefined
+        return { data, total, nextCursor }
       } catch (error) {
         logger.error(`Error listing items from ${container}:`, error)
-        return []
+        return { data: [], total: 0 }
       }
     },
 
@@ -120,7 +132,7 @@ export function createAzureTableStore(options: AzureTableStoreOptions): StoreInt
 
     async deleteAll(container: string): Promise<void> {
       try {
-        const items = await this.list(container)
+        const { data: items } = await this.list(container)
         await Promise.all(items.map(item => this.delete(container, item.id)))
       } catch (error) {
         logger.error(`Error deleting all items from ${container}:`, error)

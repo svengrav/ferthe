@@ -6,7 +6,7 @@ import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { useDiscoveryStats } from '../hooks/useDiscoveryStats'
 
 interface DiscoveryStatsProps {
-  discoveryId: string
+  discoveryId: string | undefined
   animationDelay?: number
   style?: StyleProp<ViewStyle>
 }
@@ -20,6 +20,8 @@ function DiscoveryStats(props: DiscoveryStatsProps) {
   const { locales } = useLocalization()
   const { styles, theme } = useTheme(createStyles)
   const { stats, loading, error } = useDiscoveryStats(discoveryId)
+
+  if (!discoveryId) return null
 
   if (loading) {
     return (

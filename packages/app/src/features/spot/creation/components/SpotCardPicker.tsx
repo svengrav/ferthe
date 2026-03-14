@@ -28,8 +28,8 @@ interface SpotCardPickerProps {
 function SpotCardPicker({ name, imageUri, onChange }: SpotCardPickerProps) {
   const { locales } = useLocalization()
   const { styles } = useTheme(createStyles)
-  const { selectedImageUri, pickImage } = useImagePicker()
-  const { width, height } = useSpotCardDimensions({ variant: 'card' })
+  const { selectedImageUri, pickImage, takePhoto } = useImagePicker()
+  const { width, height, padding } = useSpotCardDimensions({ variant: 'card' })
 
   const previewImage: ImageReference | undefined = imageUri
     ? { id: 'preview', url: imageUri }
@@ -43,7 +43,7 @@ function SpotCardPicker({ name, imageUri, onChange }: SpotCardPickerProps) {
   return (
     <View style={styles.container}>
       <SpotContainer width={width} height={height} borderRadius={10} withShadow>
-        <SpotGradientFrame padding={4}>
+        <SpotGradientFrame padding={padding}>
           <SpotTitle title={name} />
           {previewImage ? (
             <SpotImage source={previewImage} borderRadius={10} />
@@ -54,9 +54,15 @@ function SpotCardPicker({ name, imageUri, onChange }: SpotCardPickerProps) {
             <View style={styles.overlay}>
               <Button
                 icon="image"
-                label={locales.spotCreation.addPhoto}
+                label={locales.spotCreation.chooseFromGallery}
                 variant="outlined"
                 onPress={pickImage}
+              />
+              <Button
+                icon="camera"
+                label={locales.spotCreation.takePhoto}
+                variant="outlined"
+                onPress={takePhoto}
               />
             </View>
           )}
@@ -66,16 +72,21 @@ function SpotCardPicker({ name, imageUri, onChange }: SpotCardPickerProps) {
       {imageUri && (
         <View style={styles.changePhotoRow}>
           <Button
-            label={locales.spotCreation.changePhoto}
+            icon='photo'
+            label={locales.spotCreation.chooseFromGallery}
             variant="outlined"
-            size="sm"
             onPress={pickImage}
+          />
+          <Button
+            icon='camera'
+            label={'Camera'}
+            variant="outlined"
+            onPress={takePhoto}
           />
           <Button
             label={locales.common.delete}
             icon="close"
             variant="outlined"
-            size="sm"
             onPress={() => onChange(undefined)}
           />
         </View>

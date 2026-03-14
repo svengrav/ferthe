@@ -14,13 +14,13 @@ const createMarkerContainerStyle = (theme: MapTheme) => ({
   borderRadius: theme.spot.borderRadius,
   width: theme.spot.size,
   height: theme.spot.size + theme.spot.heightOffset,
-  // borderWidth: theme.spot.borderWidth * 0.2,
+  // borderWidth: theme.spot.borderWidth * 0.1,
   // borderColor: theme.spot.backgroundColor,
   shadowColor: 'black',
-  shadowOffset: { width: 1, height: 2 },
-  shadowOpacity: 0.3,
-  shadowRadius: 4,
-  elevation: 3,
+  shadowOffset: { width: 3, height: 2 },
+  shadowOpacity: 0.5,
+  shadowRadius: 3,
+  elevation: 10,
   backgroundColor: theme.spot.backgroundColor,
   overflow: 'hidden' as const,
   justifyContent: 'center' as const,
@@ -67,7 +67,6 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
     return spots.map(spot => ({
       spot,
       position: mapUtils.coordinatesToPosition(spot.location, boundary, size),
-      isPublic: spot.source === 'public', // Visual distinction for public spots
     }))
   }, [spots, boundary, size.width, size.height])
 
@@ -80,7 +79,7 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
 
   // Render spot marker at pre-calculated position
   const renderSpotMarker = (
-    { spot, position, isPublic }: { spot: MapSpot; position: { x: number; y: number }; isPublic: boolean },
+    { spot, position }: { spot: MapSpot; position: { x: number; y: number } },
     index: number
   ) => {
     const spotInitial = spot.name[0]
@@ -94,8 +93,7 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
             position: 'absolute',
             left: position.x - theme.spot.offsetX,
             top: position.y - theme.spot.offsetY,
-            zIndex: isPublic ? 98 : 99, // Public spots slightly below discovered
-            opacity: isPublic ? 0.7 : 1, // Visual distinction for public spots
+            zIndex: 99,
           },
           scaleStyle
         ]}
@@ -104,7 +102,7 @@ function MapSpots({ boundary, size }: MapSpotsProps) {
           <View style={markerStyle}>
             {spot.image?.url ? (
               <Image
-                source={{ uri: spot.image.url }}
+                source={spot.image}
                 style={imageStyle}
                 resizeMode="cover"
                 showLoader={false}

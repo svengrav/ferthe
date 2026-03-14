@@ -1,12 +1,14 @@
 import { Theme, useTheme } from '@app/shared/theme'
-import { ActivityIndicator, KeyboardAvoidingView, Platform, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
+import { ActivityIndicator, KeyboardAvoidingView, NativeScrollEvent, NativeSyntheticEvent, Platform, RefreshControl, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Button from '../button/Button'
 import { Inset, Option } from '../types'
 import { PageHeader } from './PageHeader'
 
-interface PageProps {
+const END_REACHED_THRESHOLD = 200
+
+export interface PageProps {
   children?: React.ReactNode
   title?: string
   style?: StyleProp<ViewStyle>
@@ -18,6 +20,11 @@ interface PageProps {
   loading?: boolean
   onBack?: () => void
   keyboardAware?: boolean
+  onRefresh?: () => void
+  refreshing?: boolean
+  onEndReached?: () => void
+  /** Apply bottom safe-area inset. Use in overlays that live outside the Navigator. */
+  screen?: boolean
 }
 
 /**
@@ -27,7 +34,7 @@ interface PageProps {
  * Shows loading indicator when loading=true.
  */
 function Page(props: PageProps) {
-  const { children, title, style, options, scrollable = false, trailing, leading, inset = 'md', loading = false, onBack, keyboardAware = false } = props
+  const { children, title, style, options, scrollable = false, trailing, leading, inset = 'md', loading = false, onBack, keyboardAware = false, onRefresh, refreshing = false, onEndReached, screen = false } = props
   const { styles, theme } = useTheme(createStyles)
   const insets = useSafeAreaInsets()
 
@@ -35,17 +42,32 @@ function Page(props: PageProps) {
 
   const insetValue = theme.tokens.inset[inset]
 
+  const handleScroll = onEndReached
+    ? (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent
+      if (layoutMeasurement.height + contentOffset.y >= contentSize.height - END_REACHED_THRESHOLD) {
+        onEndReached()
+      }
+    }
+    : undefined
+
   // Dynamic content container based on scrollable prop
   const ContentContainer = scrollable ? ScrollView : View
   const contentProps = scrollable
-    ? { contentContainerStyle: [{ flexGrow: 1, paddingBottom: 12 }] }
+    ? {
+      contentContainerStyle: [{ flexGrow: 1, paddingBottom: 12 }],
+      ...(onRefresh ? { refreshControl: <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> } : {}),
+      ...(handleScroll ? { onScroll: handleScroll, scrollEventThrottle: 400 } : {}),
+    }
     : {}
+
+  const bottomPadding = !screen && inset !== 'none' ? insets.bottom : 0
 
   const pageContent = (
     <View style={[styles.page, { paddingTop: insets.top }, style]}>
       <PageHeader title={title} options={options} trailing={trailing} leading={resolvedLeading} />
 
-      <ContentContainer style={[styles.container, { paddingHorizontal: insetValue, paddingBottom: inset === 'none' ? 0 : insets.bottom }]} {...contentProps}>
+      <ContentContainer style={[styles.container, { paddingHorizontal: insetValue, paddingBottom: bottomPadding }]} {...contentProps}>
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={theme.colors.primary} />

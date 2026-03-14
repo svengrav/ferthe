@@ -9,7 +9,7 @@ import { ImageReference } from '@shared/contracts'
  * ViewModel for a single spot row in the trail spots list.
  * Combines spot data with discovery context and trail order.
  */
-export interface TrailSpotRowVM {
+export interface TrailSpotViewModel {
   id: string
   order: number
   discovered: boolean

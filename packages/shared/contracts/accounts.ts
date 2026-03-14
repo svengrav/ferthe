@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { FirebaseConfig } from './config.ts'
 import { ImageReferenceSchema } from './images.ts'
 import { Result } from './results.ts'
 import { guard } from './strings.ts'
@@ -58,6 +57,7 @@ export const AccountSchema = z.object({
   accountType: AccountTypeSchema,
   isPhoneVerified: z.boolean(),
   role: AccountRoleSchema.optional(),
+  flags: z.record(z.string(), z.unknown()).optional(),
 })
 
 /**
@@ -76,6 +76,7 @@ export const AccountContextSchema = z.object({
 export const AccountUpdateDataSchema = z.object({
   displayName: guard.shortTextOptional,
   description: guard.mediumTextOptional,
+  flags: z.record(z.string(), z.unknown()).optional(),
 })
 
 /**
@@ -201,9 +202,6 @@ export interface AccountApplicationContract {
 
   // Avatar management
   uploadAvatar: (context: AccountContext, base64Data: string) => Promise<Result<Account>>
-
-  // Configuration - Require authenticated context
-  getFirebaseConfig: (context: AccountContext) => Promise<Result<FirebaseConfig>>
 
   // Public profile
   getPublicProfile: (context: AccountContext, accountId: string) => Promise<Result<AccountPublicProfile>>

@@ -8,7 +8,7 @@ import { SpotCardList } from '@app/features/spot/components/index.ts'
 import { getAppContextStore } from '@app/shared/stores/appContextStore.ts'
 import { useSettingsPage } from '../../settings/components/SettingsPage'
 import { useDiscoveries, useDiscoveryStatus } from '../stores/discoveryStore'
-import { useDiscoveryCardPage } from './DiscoveryCardPage.tsx'
+import { useDiscoveryEventCardOverlay } from './DiscoveryEventCard'
 
 // Status constants
 const STATUS_UNINITIALIZED = 'uninitialized'
@@ -48,7 +48,7 @@ const useDiscoveryScreen = () => {
 function DiscoveryScreen() {
   const { locales } = useLocalization()
   const { showSettings } = useSettingsPage()
-  const { showDiscoveryCardDetails } = useDiscoveryCardPage()
+  const { showDiscoveryEventCard } = useDiscoveryEventCardOverlay()
 
   const {
     cards,
@@ -69,7 +69,7 @@ function DiscoveryScreen() {
         }))}
         onPress={(item) => {
           const card = cards.find(c => c.spotId === item.id)
-          if (card) showDiscoveryCardDetails(card)
+          if (card) showDiscoveryEventCard(card.spotId)
         }}
         refreshing={isLoading}
         onRefresh={requestDiscoveryState}

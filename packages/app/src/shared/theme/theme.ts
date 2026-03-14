@@ -13,7 +13,7 @@ export const DARK_THEME = {
   onBackground: '#FFFFFF',
   primary: '#ffffff',
   secondary: '#696969',
-  divider: '#7a7a7a38',
+  divider: '#93939338',
   surface: 'rgb(26, 26, 30)',
   disabled: '#7a7a7a',
   onDisabled: '#535353',

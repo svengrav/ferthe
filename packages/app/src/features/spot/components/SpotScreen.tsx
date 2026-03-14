@@ -5,7 +5,7 @@ import { useLocalization } from '@app/shared/localization'
 import { Theme, useTheme } from '@app/shared/theme'
 import { StyleSheet } from 'react-native'
 import { useCreateSpotPage } from '../creation/components/SpotCreationPage.tsx'
-import { useSpotScreenViewModel } from '../hooks/useSpotScreenViewModel'
+import { useSpotScreen } from '../hooks/useSpotScreenViewModel'
 import SpotCardList from './SpotCardList'
 import { useSpotPage } from './SpotPage'
 
@@ -20,13 +20,17 @@ function SpotScreen() {
   const { showSpotPage } = useSpotPage()
   const { showCreateSpotPage } = useCreateSpotPage()
 
-  const { mySpots, discoveredSpots } = useSpotScreenViewModel()
+  const { mySpots, discoveredSpots, isLoading, refresh, myLoadMore, myLoadingMore, loadMore, loadingMore } = useSpotScreen()
 
   const handleSpotPress = (item: { id: string }) => showSpotPage(item.id)
 
   return (
     <Page
+      screen
       scrollable
+      onRefresh={refresh}
+      refreshing={isLoading}
+      onEndReached={loadMore}
       options={[{ label: locales.navigation.settings, onPress: showSettings }]}
     >
       <Header
@@ -43,6 +47,8 @@ function SpotScreen() {
           items={mySpots}
           onPress={handleSpotPress}
           emptyLabel={locales.spotCreation.noSpots}
+          onEndReached={myLoadMore}
+          loadingMore={myLoadingMore}
           horizontal
         />
       </Stack>
@@ -57,6 +63,7 @@ function SpotScreen() {
           items={discoveredSpots}
           onPress={handleSpotPress}
           emptyLabel={locales.discovery.noDiscoveries}
+          loadingMore={loadingMore}
           scrollEnabled={false}
           style={styles.grid}
         />

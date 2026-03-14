@@ -13,9 +13,9 @@ interface TrailFormData {
   description: string;
   kind: "discovery" | "stumble";
   discoveryMode: "free" | "sequence";
-  imageBase64?: string;
-  mapImageBase64?: string;
-  canvasImageBase64?: string;
+  imageBase64?: string | null;
+  mapImageBase64?: string | null;
+  canvasImageBase64?: string | null;
   boundary?: {
     northEast: { lat: number; lon: number };
     southWest: { lat: number; lon: number };
@@ -60,14 +60,17 @@ export function TrailForm(
   const [discoveryMode, setDiscoveryMode] = useState<"free" | "sequence">(
     initialData?.discoveryMode ?? "free",
   );
-  const [imageBase64, setImageBase64] = useState<string | undefined>(
+  // null = explicitly removed, undefined = not changed, string = new value
+  const [imageBase64, setImageBase64] = useState<string | null | undefined>(
     initialData?.imageBase64,
   );
-  const [mapImageBase64, setMapImageBase64] = useState<string | undefined>(
+  const [mapImageBase64, setMapImageBase64] = useState<
+    string | null | undefined
+  >(
     initialData?.mapImageBase64,
   );
   const [canvasImageBase64, setCanvasImageBase64] = useState<
-    string | undefined
+    string | null | undefined
   >(
     initialData?.canvasImageBase64,
   );
@@ -89,9 +92,16 @@ export function TrailForm(
     externalBoundary?.southWest.lon,
   ]);
 
-  const displayImage = imageBase64 ?? existingImageUrl;
-  const displayMapImage = mapImageBase64 ?? existingMapImageUrl;
-  const displayCanvasImage = canvasImageBase64 ?? existingCanvasImageUrl;
+  // undefined = not changed (use existing URL), null = explicitly removed (show empty), string = new
+  const displayImage = imageBase64 === undefined
+    ? existingImageUrl
+    : (imageBase64 ?? undefined);
+  const displayMapImage = mapImageBase64 === undefined
+    ? existingMapImageUrl
+    : (mapImageBase64 ?? undefined);
+  const displayCanvasImage = canvasImageBase64 === undefined
+    ? existingCanvasImageUrl
+    : (canvasImageBase64 ?? undefined);
 
   // Aspect ratio of map image must match the visual rectangle on the Mercator map.
   // Longitude degrees are shorter than latitude degrees by factor cos(lat),
@@ -143,7 +153,7 @@ export function TrailForm(
       <ImageUpload
         label="Trail Image"
         value={displayImage}
-        onChange={setImageBase64}
+        onChange={(v) => setImageBase64(v ?? null)}
         aspectRatio={1}
       />
 
@@ -151,7 +161,7 @@ export function TrailForm(
       <ImageUpload
         label="Map Image"
         value={displayMapImage}
-        onChange={setMapImageBase64}
+        onChange={(v) => setMapImageBase64(v ?? null)}
         aspectRatio={mapImageAspectRatio}
       />
 
@@ -159,7 +169,7 @@ export function TrailForm(
       <ImageUpload
         label="Canvas Image"
         value={displayCanvasImage}
-        onChange={setCanvasImageBase64}
+        onChange={(v) => setCanvasImageBase64(v ?? null)}
         aspectRatio={1}
       />
 

@@ -16,6 +16,10 @@ export interface Secrets {
     cosmosConnectionString: string
     mapsApiKey: string
   }
+  supabase?: {
+    url: string
+    key: string
+  }
   google: {
     mapsApiKey: string
   }

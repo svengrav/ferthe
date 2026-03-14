@@ -3,7 +3,7 @@ import { useLocalization } from '@app/shared/localization'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
 import { Trail } from '@shared/contracts'
 import { useRef, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, StyleProp, View, ViewStyle } from 'react-native'
 import { TrailAvatar } from './TrailAvatar'
 
 // Avatar constants
@@ -30,15 +30,18 @@ const useTrailItem = (trail: Trail) => {
 }
 
 interface TrailCardProps {
+  onAvatarPress?: (trail: Trail) => void
   onPress?: (trail: Trail) => void
-  actions?: React.ReactNode
+  trailing?: React.ReactNode
   trail: Trail
+  style?: StyleProp<ViewStyle>
 }
 
 /**
  * Trail card component displaying trail information with context menu and overlay
  */
-function TrailItem({ trail, actions, onPress }: TrailCardProps) {
+function TrailItem(props: TrailCardProps) {
+  const { trail, trailing, onPress, onAvatarPress, style } = props
   const { styles } = useTheme(useStyles)
   const {
     cardRef,
@@ -48,9 +51,9 @@ function TrailItem({ trail, actions, onPress }: TrailCardProps) {
   const itemTap = onPress
 
   return (
-    <Pressable onPress={() => itemTap?.(trail)} onLongPress={openContextMenu} id="trail-item-container" style={styles.container} ref={cardRef}>
+    <Pressable onPress={() => itemTap?.(trail)} onLongPress={openContextMenu} id="trail-item-container" style={[styles.container, style]} ref={cardRef}>
       <View style={styles.content} id="trail-card-content">
-        <TrailAvatar source={trail.image} label={trail.name} />
+        <TrailAvatar source={trail.image} label={trail.name} onPress={() => onAvatarPress?.(trail)} />
         <View style={styles.textContainer}>
           <Text variant='label'>{trail.name} </Text>
           <Text
@@ -63,7 +66,7 @@ function TrailItem({ trail, actions, onPress }: TrailCardProps) {
           </Text>
         </View>
         <View>
-          {actions}
+          {trailing}
         </View>
       </View>
     </Pressable>
@@ -73,7 +76,6 @@ function TrailItem({ trail, actions, onPress }: TrailCardProps) {
 const useStyles = createThemedStyles(theme => ({
   container: {
     padding: theme.tokens.spacing.md,
-    flex: 1,
     alignItems: 'stretch',
     justifyContent: 'center',
   },

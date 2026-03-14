@@ -21,17 +21,17 @@ const MAP_THEME_DEFAULT = {
     circleBorderRadius: 999,
     shadow: {
       color: 'black',
-      offset: { width: 0, height: 0 },
-      opacity: 0.5,
+      offset: { width: 2, height: 1 },
+      opacity: 0.6,
       radius: 4,
-      elevation: 0,
+      elevation: 1,
     },
   },
   spot: {
     strokeColor: 'transparent',
     fill: '#ffffff',
     strokeWidth: 1.5,
-    size: 15,
+    size: 20,
     borderRadius: 4,
     borderWidth: 0.5,
     backgroundColor: '#e0e0e0ff',
@@ -75,8 +75,8 @@ const MAP_THEME_DEFAULT = {
   surface: {
     imageOpacity: 1,
     noise: {
-      scaleThreshold: 1.5,
-      scaleRange: 1.5,
+      scaleThreshold: 1.0,
+      scaleRange: 1.0,
       maxOpacity: 0.3,
       baseFrequency: 0.65,
       // How strongly turbulence displaces image pixels — higher = more abstract color bleed

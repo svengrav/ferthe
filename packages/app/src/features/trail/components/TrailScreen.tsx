@@ -1,11 +1,11 @@
 import { useSettingsPage } from '@app/features/settings'
-import { useTrails, useTrailStatus } from '@app/features/trail/stores/trailStore'
-import { Page, Stack } from '@app/shared/components'
-import Header from '@app/shared/components/header/Header'
+import { isStumbleTrail } from '@app/features/stumble'
+import { useTrails } from '@app/features/trail/stores/trailStore'
+import { useTrailPagination } from '@app/features/trail/hooks/useTrailPagination'
+import { Button, Page, Stack, Text } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization'
 import { Trail } from '@shared/contracts'
-import { useEffect } from 'react'
-import { getAppContextStore } from '@app/shared/stores/appContextStore'
+import TrailItem from './TrailItem'
 import TrailList from './TrailList'
 import { useTrailPage } from './TrailPage'
 
@@ -14,42 +14,33 @@ import { useTrailPage } from './TrailPage'
  */
 const useTrailScreen = () => {
   const trails = useTrails()
-  const status = useTrailStatus()
-  const { trailApplication } = getAppContextStore()
   const { showTrailPage } = useTrailPage()
+  const pagination = useTrailPagination()
 
-  // Initialize trail data if needed
-  useEffect(() => {
-    if (status === 'uninitialized') {
-      trailApplication.requestTrailState()
-    }
-  }, [status, trailApplication])
+  const handleOpenTrail = (trail: Trail) => showTrailPage(trail)
 
-  const handleRefresh = () => {
-    trailApplication.requestTrailState()
-  }
-
-  const handleOpenTrail = (trail: Trail) => {
-    showTrailPage(trail)
-  }
-
-  const isRefreshing = status === 'loading'
+  const stumbleTrails = trails.filter(isStumbleTrail)
+  const regularTrails = trails.filter(t => !isStumbleTrail(t))
 
   return {
-    trails,
-    isRefreshing,
-    handleRefresh,
+    stumbleTrails,
+    regularTrails,
+    isRefreshing: pagination.isRefreshing,
+    loadingMore: pagination.isLoading,
+    handleRefresh: pagination.refresh,
+    loadMore: pagination.loadMore,
     handleOpenTrail,
   }
 }
 
 /**
  * Trail screen component that displays a list of available trails.
+ * Stumble trails appear above the regular trail list.
  * Shows an intro screen when no trails are available and includes settings access.
  */
 function TrailScreen() {
   const { locales } = useLocalization()
-  const { trails, isRefreshing, handleRefresh, handleOpenTrail } = useTrailScreen()
+  const { stumbleTrails, regularTrails, isRefreshing, loadingMore, handleRefresh, loadMore, handleOpenTrail } = useTrailScreen()
   const { showSettings } = useSettingsPage()
 
   const pageOptions = [
@@ -57,14 +48,28 @@ function TrailScreen() {
   ]
 
   return (
-    <Page options={pageOptions}>
+    <Page
+      screen
+      options={pageOptions}
+    >
       <Stack>
-        <Header title={locales.trails.yourTrails} />
+        <Text variant="heading">Stumble</Text>
+        {stumbleTrails.map(trail => (
+          <TrailItem
+            key={trail.id}
+            trail={trail}
+            onPress={() => handleOpenTrail(trail)}
+            trailing={<Button icon="chevron-right" variant="secondary" onPress={() => handleOpenTrail(trail)} />}
+          />
+        ))}
+        <Text variant="heading">{locales.trails.yourTrails}</Text>
         <TrailList
-          trails={trails}
+          trails={regularTrails}
           isRefreshing={isRefreshing}
           onRefresh={handleRefresh}
-          onOpenTrail={handleOpenTrail}
+          onEndReached={loadMore}
+          loadingMore={loadingMore}
+          onPress={handleOpenTrail}
         />
       </Stack>
     </Page>

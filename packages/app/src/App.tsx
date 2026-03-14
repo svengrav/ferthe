@@ -5,6 +5,7 @@ import '@expo/metro-runtime'
 // ---------------------------------------
 import { Snackbar, SplashView } from '@app/shared/components'
 import { Navigation } from '@app/shared/navigation/Navigation'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import * as SplashScreen from 'expo-splash-screen'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -13,6 +14,8 @@ import { useInitializationPipeline } from './init/useInitializationPipeline'
 import { OverlayProvider } from './shared/overlay'
 
 SplashScreen.preventAutoHideAsync()
+
+const queryClient = new QueryClient()
 
 export default function App() {
   const { isReady } = useInitializationPipeline()
@@ -23,14 +26,16 @@ export default function App() {
   }
 
   return (
-    <SafeAreaProvider>
-      <GestureHandlerRootView>
-        <Snackbar />
-        <AccountAuthWrapper>
-          <Navigation />
-        </AccountAuthWrapper>
-        <OverlayProvider />
-      </GestureHandlerRootView>
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <GestureHandlerRootView>
+          <Snackbar />
+          <AccountAuthWrapper>
+            <Navigation />
+          </AccountAuthWrapper>
+          <OverlayProvider />
+        </GestureHandlerRootView>
+      </SafeAreaProvider>
+    </QueryClientProvider>
   )
 }

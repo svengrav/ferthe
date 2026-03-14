@@ -1,5 +1,6 @@
 import { Store } from '@core/store/storeFactory.ts'
-import { AccountContext, AccountProfileCompositeContract, Community, CommunityApplicationContract, CommunityMember, createErrorResult, createSuccessResult, Discovery, Result, SharedDiscovery, StoredTrailSpot } from '@shared/contracts'
+import { paginateResult } from '@core/shared/pagination.ts'
+import { AccountContext, AccountProfileCompositeContract, Community, CommunityApplicationContract, CommunityMember, createErrorResult, createSuccessResult, Discovery, QueryOptions, Result, SharedDiscovery, StoredTrailSpot } from '@shared/contracts'
 import { CommunityServiceActions, createCommunityService } from './communityService.ts'
 import { CommunityStore } from './communityStore.ts'
 
@@ -193,7 +194,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     }
   }
 
-  const listCommunities = async (context: AccountContext): Promise<Result<Community[]>> => {
+  const listCommunities = async (context: AccountContext, options?: QueryOptions): Promise<Result<Community[]>> => {
     try {
       const accountId = context.accountId
       if (!accountId) {
@@ -217,13 +218,13 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
         communitiesResult.data || []
       )
 
-      return createSuccessResult(communities)
+      return paginateResult(communities, options)
     } catch (error: unknown) {
       return createErrorResult('GET_COMMUNITIES_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 
-  const listCommunityMembers = async (context: AccountContext, communityId: string): Promise<Result<CommunityMember[]>> => {
+  const listCommunityMembers = async (context: AccountContext, communityId: string, options?: QueryOptions): Promise<Result<CommunityMember[]>> => {
     try {
       const membersResult = await communityStore.members.list()
       if (!membersResult.success) {
@@ -250,7 +251,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
         profile: profileMap.get(member.accountId)!,
       }))
 
-      return createSuccessResult(enrichedMembers)
+      return paginateResult(enrichedMembers, options, m => m.accountId)
     } catch (error: unknown) {
       return createErrorResult('GET_MEMBERS_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }
@@ -365,7 +366,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
     }
   }
 
-  const getSharedDiscoveries = async (context: AccountContext, communityId: string): Promise<Result<Discovery[]>> => {
+  const getSharedDiscoveries = async (context: AccountContext, communityId: string, options?: QueryOptions): Promise<Result<Discovery[]>> => {
     try {
       const accountId = context.accountId
       if (!accountId) {
@@ -402,7 +403,7 @@ export function createCommunityApplication(options: CommunityApplicationOptions)
       const discoveries = (discoveriesResult.data || [])
         .filter(d => sharedDiscoveryIds.includes(d.id))
 
-      return createSuccessResult(discoveries)
+      return paginateResult(discoveries, options)
     } catch (error: unknown) {
       return createErrorResult('GET_SHARED_DISCOVERIES_ERROR', { originalError: error instanceof Error ? error.message : 'Unknown error' })
     }

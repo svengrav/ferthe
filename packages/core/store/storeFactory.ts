@@ -4,6 +4,7 @@ import { createEnhancedStore, StoreOperationResult } from './enhancedStore.ts'
 import { createJsonStore } from './jsonStore.ts'
 import { createMemoryStore } from './memoryStore.ts'
 import { createAzureTableStore } from './azureTableStore.ts'
+import { createPostgresStore } from './postgresStore.ts'
 import { StoreInterface, StoreItem } from './storeInterface.ts'
 
 export interface Store<T extends StoreItem> {
@@ -14,7 +15,7 @@ export interface Store<T extends StoreItem> {
   list(options?: QueryOptions): Promise<StoreOperationResult<T[]>>
 }
 
-export type STORE_TYPES = 'memory' | 'cosmos' | 'json' | 'table'
+export type STORE_TYPES = 'memory' | 'cosmos' | 'json' | 'table' | 'postgres'
 
 export type COSMOS_CONFIG = {
   connectionString: string
@@ -29,7 +30,12 @@ export type TABLE_CONFIG = {
   connectionString: string
 }
 
-export function createStoreConnector(type?: STORE_TYPES, options?: COSMOS_CONFIG | JSON_CONFIG | TABLE_CONFIG): StoreInterface {
+export type POSTGRES_CONFIG = {
+  supabaseUrl: string
+  supabaseKey: string
+}
+
+export function createStoreConnector(type?: STORE_TYPES, options?: COSMOS_CONFIG | JSON_CONFIG | TABLE_CONFIG | POSTGRES_CONFIG): StoreInterface {
   if (type === 'memory') {
     return createMemoryStore()
   }
@@ -41,6 +47,9 @@ export function createStoreConnector(type?: STORE_TYPES, options?: COSMOS_CONFIG
   }
   if (type === 'table') {
     return createAzureTableStore(options as TABLE_CONFIG)
+  }
+  if (type === 'postgres') {
+    return createPostgresStore(options as POSTGRES_CONFIG)
   }
   return createMemoryStore()
 }

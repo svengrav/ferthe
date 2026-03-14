@@ -1,11 +1,19 @@
 import { QueryOptions } from '@shared/contracts/index.ts'
-import { StoreInterface, StoreItem } from './storeInterface.ts'
+import { ListResult, StoreInterface, StoreItem } from './storeInterface.ts'
+
+export interface PaginationMeta {
+  total: number
+  hasMore: boolean
+  limit?: number
+  nextCursor?: string
+}
 
 export interface StoreOperationResult<T> {
   success: boolean
   data?: T
   code?: 'CREATED' | 'ALREADY_EXISTS' | 'NOT_FOUND' | 'ERROR' | 'UPDATED' | 'DELETED'
   message?: string
+  meta?: PaginationMeta
 }
 
 /**
@@ -78,10 +86,17 @@ export const createEnhancedStore = (baseStore: StoreInterface): EnhancedStoreInt
 
     async list<T extends StoreItem>(container: string, options?: QueryOptions): Promise<StoreOperationResult<T[]>> {
       try {
-        const result = await baseStore.list<T>(container, options)
+        const { data, total, nextCursor }: ListResult<T> = await baseStore.list<T>(container, options)
+        const limit = options?.limit
         return {
           success: true,
-          data: result,
+          data,
+          meta: {
+            total,
+            hasMore: nextCursor !== undefined,
+            limit,
+            nextCursor,
+          },
         }
       } catch (error: any) {
         return {

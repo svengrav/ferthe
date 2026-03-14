@@ -1,9 +1,8 @@
-import { useTheme } from '@app/shared/theme'
-import { LinearGradient } from 'expo-linear-gradient'
 import { ReactNode } from 'react'
 import { StyleSheet, View } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import { Theme, useTheme } from '@app/shared/theme'
 
-// const DEFAULT_GRADIENT_COLORS = ['#a341fffd', 'rgba(65, 73, 185, 0.767)'] as const
 const DEFAULT_GRADIENT_COLORS = ['rgba(69, 69, 69, 0.66)', 'rgba(46, 46, 46, 0.767)'] as const
 
 interface SpotGradientFrameProps {
@@ -13,27 +12,18 @@ interface SpotGradientFrameProps {
 }
 
 /**
- * Gradient frame wrapper with padding that creates frame effect.
- * The padding creates space between gradient background and inner content.
- * Default gradient colors are discovery/spot themed.
- * 
- * Usage:
- * <SpotContainer width={300} height={450}>
- *   <SpotGradientFrame padding={6}>
- *     <SpotImage />
- *   </SpotGradientFrame>
- * </SpotContainer>
+ * Gradient frame wrapper that creates a border-like frame effect.
+ * The padding controls the space between the gradient border and the inner content.
  */
-function SpotGradientFrame({ colors = DEFAULT_GRADIENT_COLORS, children, padding = 0 }: SpotGradientFrameProps) {
-  const { theme } = useTheme()
+function SpotGradientFrame(props: SpotGradientFrameProps) {
+  const { colors = DEFAULT_GRADIENT_COLORS, children, padding = 0 } = props
+  const { styles, theme } = useTheme(createStyles)
+
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={colors}
-        style={styles.gradient}
-      />
+      <LinearGradient colors={colors} style={styles.gradient} />
       <View style={{ padding, flex: 1 }}>
-        <View style={{ flex: 1, borderRadius: 10, overflow: 'hidden', backgroundColor: theme.colors.background }}>
+        <View style={[styles.inner]}>
           {children}
         </View>
       </View>
@@ -41,7 +31,7 @@ function SpotGradientFrame({ colors = DEFAULT_GRADIENT_COLORS, children, padding
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
     position: 'relative',
@@ -52,6 +42,12 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  inner: {
+    flex: 1,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: theme.colors.background
   },
 })
 

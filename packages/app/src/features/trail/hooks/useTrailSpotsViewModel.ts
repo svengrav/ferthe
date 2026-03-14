@@ -2,52 +2,47 @@ import { useMemo } from 'react'
 
 import { useSpotsById, useSpotPreviewsById } from '@app/features/spot/stores/spotStore'
 import { useTrailSpotIds } from '@app/features/trail/stores/trailStore'
-import { TrailSpotRowVM } from '../types/viewModels'
+import { Spot, SpotPreview } from '@shared/contracts'
+import { TrailSpotViewModel } from '../types/viewModels'
 
-/**
- * Facade hook that composes trail spot data for UI display.
- * Merges spot previews, discovered spots, and trail order into a unified view model.
- * 
- * This is the orchestration layer that prevents components from accessing multiple stores.
- * 
- * @param trailId - ID of the trail to load spots for
- * @returns Array of TrailSpotRowVM sorted by trail order
- */
-export function useTrailSpotsViewModel(trailId: string): TrailSpotRowVM[] {
+export function buildTrailSpotsViewModel(
+  trailSpotIds: string[],
+  spotsById: Record<string, Spot>,
+  previewsById: Record<string, SpotPreview>,
+): TrailSpotViewModel[] {
+  return trailSpotIds.map((spotId, index) => {
+    const spot = spotsById[spotId]
+    const preview = previewsById[spotId]
+
+    if (spot) {
+      return {
+        id: spot.id,
+        order: index,
+        discovered: true,
+        title: spot.name,
+        image: spot.image,
+        blurredImage: undefined,
+      }
+    }
+
+    return {
+      id: preview?.id ?? spotId,
+      order: index,
+      discovered: false,
+      title: undefined,
+      image: undefined,
+      blurredImage: preview?.blurredImage,
+    }
+  })
+}
+
+export function useTrailSpotsViewModel(trailId: string): TrailSpotViewModel[] {
   const trailSpotIds = useTrailSpotIds(trailId)
   const spotsById = useSpotsById()
   const previewsById = useSpotPreviewsById()
 
-  return useMemo(() => {
-    const viewModels: TrailSpotRowVM[] = []
-
-    trailSpotIds.forEach((spotId, index) => {
-      const spot = spotsById[spotId]
-      const preview = previewsById[spotId]
-
-      if (spot) {
-        // Discovered spot - full data available
-        viewModels.push({
-          id: spot.id,
-          order: index,
-          discovered: true,
-          title: spot.name,
-          image: spot.image,
-          blurredImage: undefined,
-        })
-      } else {
-        // Undiscovered spot - show as locked (with or without blur image)
-        viewModels.push({
-          id: preview?.id ?? spotId,
-          order: index,
-          discovered: false,
-          title: undefined,
-          image: undefined,
-          blurredImage: preview?.blurredImage,
-        })
-      }
-    })
-
-    return viewModels
-  }, [trailSpotIds, spotsById, previewsById])
+  return useMemo(
+    () => buildTrailSpotsViewModel(trailSpotIds, spotsById, previewsById),
+    [trailSpotIds, spotsById, previewsById],
+  )
 }

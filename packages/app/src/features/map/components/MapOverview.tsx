@@ -8,7 +8,7 @@ import { GeoBoundary } from '@shared/geo'
 import { getMapDefaults } from '../config/mapDefaults'
 import { useOverlayGestures } from '../hooks/useOverlayGestures'
 import { mapUtils } from '../services/geoToScreenTransform'
-import { getMapStoreActions, useMapContainerSize, useMapOverview, useMapSurfaceBoundary } from '../stores/mapStore'
+import { getMapStoreActions, useMapContainerSize, useMapOverview, useMapSurface, useMapSurfaceBoundary } from '../stores/mapStore'
 import MapClues from '../surface/components/MapClues'
 import { MapCompensatedScaleProvider } from '../surface/components/MapCompensatedScale'
 import MapDeviceMarker from '../surface/components/MapDeviceMarker'
@@ -16,7 +16,7 @@ import MapScaleBar from '../surface/components/MapScaleBar'
 import MapSpots from '../surface/components/MapSpots'
 import MapTrailPath from '../surface/components/MapTrailPath'
 
-const OVERVIEW_IMAGE_OPACITY = 0.7
+const OVERVIEW_IMAGE_OPACITY = 1
 
 /**
  * Overlay component for Overview mode
@@ -27,6 +27,8 @@ function MapOverview() {
   const trailBoundary = useMapSurfaceBoundary()
   const screenSize = useMapContainerSize()
   const overview = useMapOverview()
+  const surface = useMapSurface()
+  const backgroundImage = overview.image ?? surface.image
   const { setOverview } = getMapStoreActions()
   const defaults = getMapDefaults()
 
@@ -76,10 +78,10 @@ function MapOverview() {
         <GestureDetector gesture={gesture}>
           <Animated.View style={[styles?.mapSurface, dynamicSurfaceStyle, animatedStyle]}>
             {/* Trail overview background image */}
-            {overview.image && (
+            {backgroundImage && (
               <View style={styles?.backgroundContainer}>
                 <Image
-                  source={{ uri: overview.image }}
+                  source={{ uri: backgroundImage }}
                   width={canvasSize.width}
                   height={canvasSize.height}
                   style={styles?.backgroundImage}

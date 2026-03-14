@@ -24,20 +24,24 @@ export function useMapSpotsViewModel(): MapSpot[] {
   const spotsById = spotStore(state => state.byId)
 
   const mapSpots = useMemo(() => {
-    return spotIds
+    // Include discovery trail spots + all locally created spots (not yet in trail)
+    const createdSpotIds = Object.values(spotsById)
+      .filter(s => s.source === 'created')
+      .map(s => s.id)
+    const allSpotIds = Array.from(new Set([...spotIds, ...createdSpotIds]))
+
+    return allSpotIds
       .map(spotId => {
         const spot = spotsById[spotId]
         if (!spot) return undefined
 
-        const mapSpot: MapSpot = {
+        return {
           id: spot.id,
           location: spot.location,
           name: spot.name,
           image: spot.image,
           source: spot.source,
-        }
-
-        return mapSpot
+        } satisfies MapSpot
       })
       .filter(Boolean) as MapSpot[]
   }, [spotIds, spotsById])

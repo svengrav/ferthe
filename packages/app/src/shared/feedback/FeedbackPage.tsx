@@ -4,10 +4,12 @@ import { ScrollView, View } from 'react-native'
 import { useAccountId } from '@app/features/account'
 import { getAppContextStore } from '@app/shared/stores/appContextStore'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
+import type { Theme } from '@app/shared/theme'
 import { logger } from '@app/shared/utils/logger'
-import { Button, Text } from '../components'
+import { Button, Divider, Text } from '../components'
 import TextInput from '../components/textInput/TextInput'
 import { useLocalization } from '../localization'
+import { closeOverlay, OverlayCard, setOverlay } from '../overlay'
 
 type FeedbackType = 'other' | 'bug' | 'report' | 'feedback'
 type Status = 'idle' | 'submitting' | 'success' | 'error'
@@ -15,6 +17,25 @@ type Status = 'idle' | 'submitting' | 'success' | 'error'
 interface FeedbackPageProps {
   onClose: () => void
 }
+
+const FEEDBACK_KEY = 'feedback'
+
+export function useFeedbackPage() {
+  const { locales } = useLocalization()
+  const closeFeedback = () => closeOverlay(FEEDBACK_KEY)
+
+  const showFeedback = () =>
+    setOverlay(
+      FEEDBACK_KEY,
+      <OverlayCard title={locales.feedback.title} onClose={closeFeedback}>
+        <FeedbackPage onClose={closeFeedback} />
+      </OverlayCard>,
+      { showBackdrop: true, closeOnBackdropPress: true },
+    )
+
+  return { showFeedback, closeFeedback, label: locales.feedback.title }
+}
+
 
 /**
  * Feedback form page, mirroring the web FeedbackForm.
@@ -73,9 +94,13 @@ function FeedbackPage({ onClose }: FeedbackPageProps) {
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      {/* Description */}
+      <Text variant='body'>{t.description}</Text>
+      <Divider />
+
       {/* Name */}
       <View style={styles.field}>
-        <Text variant="label" style={styles.label}>Name <Text style={styles.optional}>(optional)</Text></Text>
+        <Text variant="label" style={styles.label}>{t.nameLabel} <Text style={styles.optional}>{t.optionalLabel}</Text></Text>
         <TextInput
           value={name}
           onChangeText={setName}
@@ -87,7 +112,7 @@ function FeedbackPage({ onClose }: FeedbackPageProps) {
 
       {/* Email */}
       <View style={styles.field}>
-        <Text variant="label" style={styles.label}>Email <Text style={styles.optional}>(optional)</Text></Text>
+        <Text variant="label" style={styles.label}>{t.emailLabel} <Text style={styles.optional}>{t.optionalLabel}</Text></Text>
         <TextInput
           value={email}
           onChangeText={setEmail}
@@ -142,9 +167,8 @@ function FeedbackPage({ onClose }: FeedbackPageProps) {
   )
 }
 
-const createStyles = createThemedStyles((theme: any) => ({
+const createStyles = createThemedStyles((theme: Theme) => ({
   container: {
-    padding: theme.tokens.spacing.lg,
     gap: theme.tokens.spacing.md,
   },
   field: {
@@ -154,7 +178,7 @@ const createStyles = createThemedStyles((theme: any) => ({
     color: theme.colors.onSurface,
   },
   optional: {
-    color: theme.colors.onSurfaceSubtle ?? theme.colors.onBackground,
+    color: theme.colors.onSurface ?? theme.colors.onBackground,
     fontWeight: 'normal',
   },
   typeRow: {

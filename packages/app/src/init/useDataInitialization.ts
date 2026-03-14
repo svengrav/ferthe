@@ -2,6 +2,9 @@ import { useAppContextStore } from '@app/shared/stores/appContextStore'
 import { logger } from '@app/shared/utils/logger'
 import { useEffect, useRef } from 'react'
 import { useSession } from '../features/account/stores/accountStore'
+import { showOnboardingIfNeeded } from '../features/account/components/AccountOnboarding'
+import settingsStore from '../features/settings/stores/settingsStore'
+import { useInitStore } from './initStore'
 
 /**
  * Hook that reactively loads trail and discovery data when a session is available.
@@ -11,6 +14,7 @@ import { useSession } from '../features/account/stores/accountStore'
 export function useDataInitialization() {
   const session = useSession()
   const { context } = useAppContextStore()
+  const { setDataReady } = useInitStore()
   const hasLoadedRef = useRef(false)
 
   useEffect(() => {
@@ -32,10 +36,18 @@ export function useDataInitialization() {
         await context?.trailApplication.requestTrailState()
         await context?.discoveryApplication.requestDiscoveryState()
 
+        // Sync hasSeenOnboarding from remote account flags (survives reinstall)
+        const accountResult = await context?.accountApplication.getAccount()
+        if (accountResult?.data?.flags?.hasCompletedOnboarding) {
+          settingsStore.getState().setFlag({ hasSeenOnboarding: true })
+        }
+
         hasLoadedRef.current = true
+        setDataReady()
         logger.log('[DataInit] Data loaded successfully')
 
-
+        // Show onboarding AFTER flag sync to avoid race condition
+        showOnboardingIfNeeded()
       } catch (error) {
         logger.error('[DataInit] Failed to load data:', error)
       }

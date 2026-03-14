@@ -82,6 +82,7 @@ export function createDiscoveryStateComposite(options: DiscoveryStateCompositeOp
 
         // Sequential: active trail depends on profile
         let activeTrail: ActiveTrailRef | undefined
+        let publicSpotsFromTrail: SpotSummary[] = []
         if (lastActiveTrailId) {
           const trailResult = await discoveryApplication.getDiscoveryTrail(context, lastActiveTrailId)
           if (trailResult.data) {
@@ -93,16 +94,21 @@ export function createDiscoveryStateComposite(options: DiscoveryStateCompositeOp
               previewClues: trailResult.data.previewClues || [],
               createdAt: trailResult.data.createdAt,
             }
+            publicSpotsFromTrail = trailResult.data.spots
+              .filter(s => s.source === 'public')
+              .map(s => toSpotSummary(s))
           }
         }
 
-        // Merge discovered spots + created spots (deduplicated by id, created takes priority)
+        // Merge discovered + created + public spots (deduplicated by id, created takes priority)
         const discoveredSpots = (spotsResult.data || []).map(toSpotSummary)
         const createdSpots = (createdSpotsResult.data || []).map(createdSpotToSpotSummary)
-        const discoveredSpotIds = new Set(createdSpots.map(s => s.id))
+        const createdSpotIds = new Set(createdSpots.map(s => s.id))
+        const publicSpotIds = new Set(publicSpotsFromTrail.map(s => s.id))
         const mergedSpots = [
           ...createdSpots,
-          ...discoveredSpots.filter(s => !discoveredSpotIds.has(s.id)),
+          ...publicSpotsFromTrail.filter(s => !createdSpotIds.has(s.id)),
+          ...discoveredSpots.filter(s => !createdSpotIds.has(s.id) && !publicSpotIds.has(s.id)),
         ]
 
         return createSuccessResult({

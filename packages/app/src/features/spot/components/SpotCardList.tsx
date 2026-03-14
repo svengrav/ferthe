@@ -1,6 +1,6 @@
 import { Text } from '@app/shared/components'
 import { ReactElement, useState } from 'react'
-import { FlatList, LayoutChangeEvent, StyleSheet, View } from 'react-native'
+import { ActivityIndicator, FlatList, LayoutChangeEvent, StyleSheet, View } from 'react-native'
 import SpotCard from '../card/components/SpotCard'
 import { useSpotCardDimensions } from '../card/hooks/useSpotCardDimensions'
 import { useSpotPage } from './SpotPage'
@@ -54,6 +54,8 @@ interface SpotCardListProps<T extends SpotCardListItem> {
   onPress?: (item: T) => void
   onRefresh?: () => void
   refreshing?: boolean
+  onEndReached?: () => void
+  loadingMore?: boolean
   columns?: number
   gap?: number
   padding?: number
@@ -69,6 +71,8 @@ function SpotCardList<T extends SpotCardListItem>({
   onPress,
   onRefresh,
   refreshing,
+  onEndReached,
+  loadingMore,
   columns = DEFAULT_COLUMNS,
   gap = DEFAULT_GAP,
   scrollEnabled = true,
@@ -168,17 +172,23 @@ function SpotCardList<T extends SpotCardListItem>({
           numColumns={columns}
           refreshing={refreshing}
           onRefresh={onRefresh}
+          onEndReached={onEndReached}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={loadingMore ? <ActivityIndicator style={{ paddingVertical: 16 }} /> : undefined}
           columnWrapperStyle={columns > 1 ? { gap } : undefined}
           contentContainerStyle={styles.listContainer}
           ItemSeparatorComponent={() => <View style={{ height: gap }} />}
         />
       ) : (
         // Avoid nested ScrollView: render plain grid when scroll is disabled (e.g. inside Page scrollable)
-        chunk(items, columns).map((row, rowIndex) => (
-          <View key={rowIndex} style={[styles.row, { gap, marginTop: rowIndex > 0 ? gap : 0 }]}>
-            {row.map(item => renderItem ? renderItem(item, resolvedWidth, resolvedHeight) : defaultRenderItem(item))}
-          </View>
-        ))
+        <>
+          {chunk(items, columns).map((row, rowIndex) => (
+            <View key={rowIndex} style={[styles.row, { gap, marginTop: rowIndex > 0 ? gap : 0 }]}>
+              {row.map(item => renderItem ? renderItem(item, resolvedWidth, resolvedHeight) : defaultRenderItem(item))}
+            </View>
+          ))}
+          {loadingMore && <ActivityIndicator style={{ paddingVertical: 16 }} />}
+        </>
       ))}
     </View>
   )

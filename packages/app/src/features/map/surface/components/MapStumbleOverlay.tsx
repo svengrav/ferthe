@@ -13,8 +13,7 @@ import { useIsStumbleTrail } from '@app/features/stumble'
 import { useStumbleReachedCard } from '@app/features/stumble/components/StumbleReachedCard'
 import { useDeviceGeoLocation } from '@app/features/sensor/stores/sensorStore'
 import { geoUtils } from '@shared/geo'
-
-const REACH_RADIUS_METERS = 5
+import { STUMBLE_REACH_RADIUS_METERS } from '@app/features/stumble/config'
 
 /**
  * Renders Stumble Mode suggestion markers on the map canvas.
@@ -35,7 +34,7 @@ export function MapStumbleOverlay() {
   const markerPositions = useMemo(() =>
     suggestions.map(s => {
       const center = mapUtils.coordinatesToPosition(s.location, boundary, size)
-      const circle = mapUtils.calculateCircleDimensions(s.location, REACH_RADIUS_METERS, boundary, size)
+      const circle = mapUtils.calculateCircleDimensions(s.location, STUMBLE_REACH_RADIUS_METERS, boundary, size)
       return { suggestion: s, center, circleDiameter: circle.width }
     }),
     [suggestions, boundary, size]
@@ -46,7 +45,7 @@ export function MapStumbleOverlay() {
     markerPositions.map(m => ({
       ...m,
       isReached: deviceLocation
-        ? geoUtils.calculateDistance(deviceLocation, m.suggestion.location) <= REACH_RADIUS_METERS
+        ? geoUtils.calculateDistance(deviceLocation, m.suggestion.location) <= STUMBLE_REACH_RADIUS_METERS
         : false,
     })),
     [markerPositions, deviceLocation]

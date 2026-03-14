@@ -8,10 +8,12 @@ import { Theme, useTheme } from '@app/shared/theme'
 
 import useSettings from '../hooks/useSettings'
 import { LanguageOptions, Settings, ThemeMode } from '../types/types'
+import DevSettingsSection from './DevSettingsSection'
 
 const settingsSchema = z.object({
   language: z.enum(LanguageOptions),
   theme: z.enum(ThemeMode),
+  devApiEndpoint: z.string().optional(),
 })
 
 type SettingsFormValues = z.infer<typeof settingsSchema>
@@ -87,6 +89,7 @@ function SettingsPage(props: SettingsFormProps) {
             />
           </View>
         </View>
+        {__DEV__ && <DevSettingsSection />}
       </Form>
     </Page>
   )

@@ -1,4 +1,6 @@
 import { extractBlobPathFromUrl } from '@core/shared/images/imageService.ts'
+import { logger } from '@core/shared/logger.ts'
+import { paginateResult } from '@core/shared/pagination.ts'
 import { Store } from '@core/store/storeFactory.ts'
 import { createCuid2 } from '@core/utils/idGenerator.ts'
 import { createSlug } from '@core/utils/slug.ts'
@@ -51,7 +53,7 @@ async function enrichTrailWithImages(
   }
 
   // Generate fresh URL for map image
-  if (trailEntity.map.imageBlobPath) {
+  if (trailEntity.map?.imageBlobPath) {
     const mapUrlResult = await imageApplication.refreshImageUrl(context, trailEntity.map.imageBlobPath)
     if (mapUrlResult.success && mapUrlResult.data) {
       mapImage = {
@@ -215,7 +217,7 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
       }
     },
 
-    getTrailSpots: async (context: AccountContext, trailId: string): Promise<Result<TrailSpot[]>> => {
+    getTrailSpots: async (context: AccountContext, trailId: string, options?: QueryOptions): Promise<Result<TrailSpot[]>> => {
       try {
         const trailSpotsResult = await trailSpotStore.list()
         if (!trailSpotsResult.success) {
@@ -253,7 +255,7 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
           } : undefined,
         }))
 
-        return { success: true, data: trailSpots }
+        return paginateResult(trailSpots, options, s => s.spotId)
       } catch (error: unknown) {
         return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'GET_TRAIL_SPOTS_ERROR' } }
       }
@@ -309,8 +311,9 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
           })
         )
 
-        return { success: true, data: enrichedTrails }
+        return { success: true, data: enrichedTrails, meta: trailsResult.meta }
       } catch (error: unknown) {
+        logger.error('List trails error', { error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined })
         return { success: false, error: { message: error instanceof Error ? error.message : 'Unknown error', code: 'LIST_TRAILS_ERROR' } }
       }
     },
@@ -392,7 +395,7 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
         if (!existingResult.success || !existingResult.data) {
           return { success: false, error: { message: 'Trail not found', code: 'TRAIL_NOT_FOUND' } }
         }
-        const extra = trailData as unknown as { imageBase64?: string; mapImageBase64?: string; canvasImageBase64?: string }
+        const extra = trailData as unknown as { imageBase64?: string | null; mapImageBase64?: string | null; canvasImageBase64?: string | null }
 
         const updates: Partial<StoredTrail> = {
           name: trailData.name,
@@ -401,22 +404,30 @@ export function createTrailApplication({ trailStore, trailSpotStore, trailRating
           updatedAt: new Date(),
         }
 
-        // Process base64 trail image if provided
-        if (extra.imageBase64) {
+        // Process base64 trail image if provided, or clear if explicitly removed (null)
+        if (extra.imageBase64 === null) {
+          updates.imageBlobPath = undefined
+        } else if (extra.imageBase64) {
           const result = await imageApplication.processAndStore(context, 'trail', trailId, extra.imageBase64, {})
           if (result.success && result.data) updates.imageBlobPath = result.data.blobPath
         }
 
-        // Process base64 map image if provided
-        if (extra.mapImageBase64) {
+        // Process base64 map image if provided, or clear if explicitly removed (null)
+        if (extra.mapImageBase64 === null) {
+          updates.map = { ...(existingResult.data.map ?? {}) }
+          delete (updates.map as Record<string, unknown>)['imageBlobPath']
+        } else if (extra.mapImageBase64) {
           const result = await imageApplication.processAndStore(context, 'trail-surface', trailId, extra.mapImageBase64, {})
           if (result.success && result.data) {
             updates.map = { ...(existingResult.data.map ?? {}), imageBlobPath: result.data.blobPath }
           }
         }
 
-        // Process base64 canvas (viewport) image if provided
-        if (extra.canvasImageBase64) {
+        // Process base64 canvas (viewport) image if provided, or clear if explicitly removed (null)
+        if (extra.canvasImageBase64 === null) {
+          updates.viewport = { ...(existingResult.data.viewport ?? {}) }
+          delete (updates.viewport as Record<string, unknown>)['imageBlobPath']
+        } else if (extra.canvasImageBase64) {
           const result = await imageApplication.processAndStore(context, 'trail-canvas', trailId, extra.canvasImageBase64, {})
           if (result.success && result.data) {
             updates.viewport = { ...(existingResult.data.viewport ?? {}), imageBlobPath: result.data.blobPath }

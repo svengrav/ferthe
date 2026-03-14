@@ -1,6 +1,7 @@
 import { SensorApplicationActions } from '@core/features/sensor'
 import { SpotApplicationActions } from '@core/features/spot/spotApplication.ts'
 import { Store } from '@core/store/storeFactory'
+import { paginateResult } from '@core/shared/pagination.ts'
 import { createDeterministicId } from '@core/utils/idGenerator.ts'
 import {
   AccountContext,
@@ -25,18 +26,10 @@ import {
   WelcomeDiscoveryResult
 } from '@shared/contracts'
 import { GeoLocation } from '@shared/geo'
+import { createConstants } from '@core/config/constants.ts'
 import { createDiscoveryService, DiscoveryServiceActions } from './discoveryService.ts'
-/**
- * Default discovery trail ID used when creating new profiles
- */
-const DEFAULT_DISCOVERY_TRAIL_ID = 'clx4j9k2n000101mh8d4k9n2q'
 
-/**
- * Pre-uploaded welcome spot image blob paths (uploaded once via tools/upload-image.ts).
- * Image type: spot, Owner: system
- */
-const WELCOME_SPOT_IMAGE_BLOB_PATH = '06r5e44o2rlelaqybh0b.webp'
-const WELCOME_SPOT_BLURRED_IMAGE_BLOB_PATH = '06r5e44o2rlelaqybh0b-blurred.webp'
+const { system } = createConstants()
 
 interface DiscoveryApplicationOptions {
   discoveryService: DiscoveryServiceActions
@@ -96,20 +89,15 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
 
       const queryOptions = {
         ...options,
-        filters: { ...options?.filters, accountId },
+        filters: { ...options?.filters, accountId, ...(trailId ? { trailId } : {}) },
       }
 
       const discoveriesResult = await discoveryStore.list(queryOptions)
       if (!discoveriesResult.success) {
         return createErrorResult('GET_DISCOVERIES_ERROR')
       }
-      const discoveries = discoveriesResult.data || []
 
-      const result = trailId
-        ? discoveries.filter(d => d.trailId === trailId)
-        : discoveries
-
-      return createSuccessResult(result)
+      return { success: true, data: discoveriesResult.data ?? [], meta: discoveriesResult.meta }
     } catch (error: any) {
       return createErrorResult('GET_DISCOVERIES_ERROR', { originalError: error.message })
     }
@@ -193,7 +181,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
     }
   }
 
-  const getDiscoveredPreviewClues = async (context: AccountContext, trailId: string): Promise<Result<Clue[]>> => {
+  const getDiscoveredPreviewClues = async (context: AccountContext, trailId: string, options?: QueryOptions): Promise<Result<Clue[]>> => {
     try {
       const accountId = context.accountId
       if (!accountId) {
@@ -218,8 +206,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       }
       const discoveries = discoveriesResult.data || []
 
-      const result = discoveryService.getCluesBasedOnPreviewMode(accountId, trailResult.data, discoveries, spotsResult.data || [], spotIdsResult.data)
-      return createSuccessResult(result)
+      const clues = discoveryService.getCluesBasedOnPreviewMode(accountId, trailResult.data, discoveries, spotsResult.data || [], spotIdsResult.data)
+      return paginateResult(clues, options)
     } catch (error: any) {
       return createErrorResult('GET_CLUES_ERROR', { originalError: error.message })
     }
@@ -284,7 +272,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       const newProfile: DiscoveryProfile = {
         id: accountId,
         accountId,
-        lastActiveTrailId: DEFAULT_DISCOVERY_TRAIL_ID,
+        lastActiveTrailId: system.defaultDiscoveryTrailId,
         createdAt: now,
         updatedAt: now,
       }
@@ -526,8 +514,8 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         name: 'Willkommen!',
         description: 'An diesem Ort hast du ferthe zum ersten Mal gestartet. Willkommen!',
         location,
-        imageBlobPath: WELCOME_SPOT_IMAGE_BLOB_PATH,
-        blurredImageBlobPath: WELCOME_SPOT_BLURRED_IMAGE_BLOB_PATH,
+        imageBlobPath: system.welcomeSpot.imageBlobPath,
+        blurredImageBlobPath: system.welcomeSpot.blurredImageBlobPath,
         options: { discoveryRadius: 0, clueRadius: 0 },
         source: 'created',
         createdBy: accountId,
@@ -544,7 +532,7 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
         id: welcomeDiscoveryId,
         accountId,
         spotId: spotResult.data.id,
-        trailId: DEFAULT_DISCOVERY_TRAIL_ID,
+        trailId: system.defaultDiscoveryTrailId,
         discoveredAt: now,
         createdAt: now,
         updatedAt: now,

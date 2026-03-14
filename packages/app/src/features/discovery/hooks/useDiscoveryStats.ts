@@ -15,16 +15,18 @@ interface UseDiscoveryStatsResult {
 /**
  * Hook to fetch and cache DiscoveryStats for a given discovery.
  * Stats are cached in the discoveryStore to avoid redundant API calls.
+ * Returns empty result when discoveryId is not set (e.g. own spots).
  */
-export const useDiscoveryStats = (discoveryId: string): UseDiscoveryStatsResult => {
+export const useDiscoveryStats = (discoveryId: string | undefined): UseDiscoveryStatsResult => {
   const { locales } = useLocalization()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const context = getAppContextStore()
 
-  const stats = discoveryStore(state => state.discoveryStats[discoveryId] || null)
+  const stats = discoveryStore(state => discoveryId ? state.discoveryStats[discoveryId] || null : null)
 
   const fetchStats = async () => {
+    if (!discoveryId) return
     try {
       setLoading(true)
       setError(null)
@@ -48,7 +50,7 @@ export const useDiscoveryStats = (discoveryId: string): UseDiscoveryStatsResult 
   }
 
   useEffect(() => {
-    if (!stats && !loading) {
+    if (discoveryId && !stats && !loading) {
       fetchStats()
     }
   }, [discoveryId])

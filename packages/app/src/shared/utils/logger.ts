@@ -1,14 +1,20 @@
 /**
  * Simple Singleton Logger
  * API-kompatibel mit logger.log/error/warn
+ *
+ * Initialisierung einmalig beim App-Start via initLogger()
  */
-
-import { config } from '@app/config'
 
 type LogLevel = 'log' | 'warn' | 'error' | 'group'
 
+let _enabled = false
+
+export const initLogger = (isEnabled: boolean): void => {
+  _enabled = isEnabled
+}
+
 const write = (level: LogLevel, ...args: any[]): void => {
-  if (!config.debug.enableLogger) return
+  if (!_enabled) return
 
   const timestamp = new Date().toISOString()
   const prefix = `[${timestamp}]`

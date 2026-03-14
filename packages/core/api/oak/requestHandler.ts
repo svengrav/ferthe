@@ -94,6 +94,7 @@ function sendApiResponse<T>(ctx: Context, result: Result<T>): void {
     ctx.response.body = {
       success: true,
       data: result.data,
+      ...(result.meta ? { meta: result.meta } : {}),
       timestamp: new Date().toISOString(),
     }
   } else {

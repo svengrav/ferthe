@@ -436,6 +436,12 @@ const createDiscoveryTrail = (accountId: string, trail: Trail, discoveries: Disc
   const trailDiscoveries = getDiscoveries(accountId, discoveries, trail.id)
   const discoveredSpots = getDiscoveredSpots(accountId, discoveries, spots, trail.id)
 
+  // Include public spots (not owned by user, not already discovered)
+  const discoveredSpotIds = new Set(discoveredSpots.map(s => s.id))
+  const publicSpots: DiscoverySpot[] = spots
+    .filter(s => s.options?.visibility === 'public' && s.createdBy !== accountId && !discoveredSpotIds.has(s.id))
+    .map(s => ({ ...s, discoveryId: '', discoveredAt: new Date(0), source: 'public' as const }))
+
   // Get all preview clues first
   const allClues = getCluesBasedOnPreviewMode(accountId, trail, discoveries, spots, trailSpotIds)
 
@@ -450,7 +456,7 @@ const createDiscoveryTrail = (accountId: string, trail: Trail, discoveries: Disc
 
   return {
     trail,
-    spots: discoveredSpots,
+    spots: [...discoveredSpots, ...publicSpots],
     clues: [],
     previewClues: filteredClues,
     discoveries: trailDiscoveries,

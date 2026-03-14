@@ -3,8 +3,8 @@ import { Image, StyleSheet, View } from 'react-native'
 
 import { useImagePicker } from '@app/shared/hooks/useImagePicker'
 import { Theme, useTheme } from '@app/shared/theme'
-import Button from '../button/Button'
 import Field from '../field/Field'
+import PictureButtons from './PictureButtons'
 
 interface ImagePickerFieldProps {
   /** Current image URI (local or remote) */
@@ -15,10 +15,6 @@ interface ImagePickerFieldProps {
   label?: string
   /** Label when image is already selected (defaults to label) */
   changeLabel?: string
-  /** Button text for initial pick action */
-  pickButtonLabel?: string
-  /** Button text for change action when image is shown */
-  changeButtonLabel?: string
   /** Image preview height */
   imageHeight?: number
 }
@@ -33,12 +29,10 @@ function ImagePickerField(props: ImagePickerFieldProps) {
     onChange,
     label,
     changeLabel,
-    pickButtonLabel,
-    changeButtonLabel,
     imageHeight = 200,
   } = props
   const { styles } = useTheme(createStyles)
-  const { selectedImageUri, pickImage, clearImage } = useImagePicker()
+  const { selectedImageUri, pickImage, takePhoto, clearImage } = useImagePicker()
 
   // Sync picked image into controlled value
   useEffect(() => {
@@ -54,30 +48,21 @@ function ImagePickerField(props: ImagePickerFieldProps) {
       {displayImage ? (
         <View style={styles.imageContainer}>
           <Image source={{ uri: displayImage }} style={[styles.image, { height: imageHeight }]} />
-          <View style={styles.imageActions}>
-            <Button
-              label={changeButtonLabel ?? changeLabel}
-              variant="outlined"
-              size="sm"
-              onPress={pickImage}
-            />
-            <Button
-              icon="close"
-              variant="outlined"
-              size="sm"
-              onPress={() => {
-                clearImage()
-                onChange(undefined)
-              }}
-            />
-          </View>
+          <PictureButtons
+            style={styles.imageActions}
+            onGallery={pickImage}
+            onCamera={takePhoto}
+            onRemove={() => {
+              clearImage()
+              onChange(undefined)
+            }}
+          />
         </View>
       ) : (
-        <Button
-          label={pickButtonLabel ?? label}
-          icon="image"
-          variant="outlined"
-          onPress={pickImage}
+        <PictureButtons
+          style={styles.pickActions}
+          onGallery={pickImage}
+          onCamera={takePhoto}
         />
       )}
     </Field>
@@ -97,6 +82,10 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: theme.tokens.spacing.sm,
+  },
+  pickActions: {
+    flexDirection: 'row',
+    gap: theme.tokens.spacing.sm,
   },
 })
 

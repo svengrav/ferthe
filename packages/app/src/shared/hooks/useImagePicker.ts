@@ -10,6 +10,7 @@ interface UseImagePickerOptions {
 interface UseImagePickerResult {
   selectedImageUri: string | null
   pickImage: () => Promise<void>
+  takePhoto: () => Promise<void>
   clearImage: () => void
   isLoading: boolean
 }
@@ -59,6 +60,38 @@ export const useImagePicker = (options?: UseImagePickerOptions): UseImagePickerR
     }
   }
 
+  const takePhoto = async () => {
+    if (Platform.OS === 'web') {
+      logger.warn('Camera is only available on native platforms')
+      return
+    }
+
+    try {
+      setIsLoading(true)
+
+      const { status } = await ImagePicker.requestCameraPermissionsAsync()
+      if (status !== 'granted') {
+        logger.warn('Permission to access camera was denied')
+        setIsLoading(false)
+        return
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: options?.aspect,
+        quality: 0.8,
+      })
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setSelectedImageUri(result.assets[0].uri)
+      }
+    } catch (error) {
+      logger.error('Error taking photo:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const clearImage = () => {
     setSelectedImageUri(null)
   }
@@ -66,6 +99,7 @@ export const useImagePicker = (options?: UseImagePickerOptions): UseImagePickerR
   return {
     selectedImageUri,
     pickImage,
+    takePhoto,
     clearImage,
     isLoading,
   }

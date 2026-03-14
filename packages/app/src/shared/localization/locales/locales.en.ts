@@ -25,6 +25,8 @@ const en = {
     status: 'Status',
     created: 'Created',
     saved: 'Saved',
+    tapToRate: 'Tap to rate',
+    yourRating: 'Yours',
   },
   errors: {
     generic: 'An error has occurred.',
@@ -119,7 +121,7 @@ const en = {
     chooseLanguage: 'Choose your language',
   },
   about: {
-    followYourTrail: 'Follow the trail...',
+    followYourTrail: 'Follow your trail...',
     fertheWebsite: 'ferthe.de',
     storyIntro: 'Somewhere in Münster, in the heart of Europe, a fox picks up a trail. Not in haste, but with intent. Focused. Curious. Always moving forward.',
     aboutText:
@@ -233,7 +235,6 @@ const en = {
     noDiscoveries: 'No discoveries yet',
     discoveriesSubtitle: 'All your Discoveries',
     editYourDiscovery: 'Edit your discovery',
-    documentYourDiscovery: 'Document your discovery',
     pickingImage: 'Picking image...',
     pickImageFromDevice: 'Pick Image from Device',
     shareYourStory: 'Share your story',
@@ -287,7 +288,7 @@ const en = {
     addPhoto: 'Add Photo',
     changePhoto: 'Change Photo',
     takePhoto: 'Take Photo',
-    chooseFromGallery: 'Choose from Gallery',
+    chooseFromGallery: 'Gallery',
     visibility: 'Visibility',
     visibilityPreview: 'Preview',
     visibilityPreviewDescription: 'Shows clue on map',
@@ -358,8 +359,12 @@ const en = {
   },
   feedback: {
     title: 'Feedback',
+    description: 'What works well? Where can we improve? Your feedback helps us make the project better for you.',
+    nameLabel: 'Name',
     namePlaceholder: 'Your name',
+    emailLabel: 'Email',
     emailPlaceholder: 'your@email.com',
+    optionalLabel: '(optional)',
     typeLabel: 'Type',
     typeGeneral: 'General',
     typeBug: 'Bug',

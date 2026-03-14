@@ -62,8 +62,11 @@ function MapSurfaceNoiseOverlay({ width, height, left, top, imageUrl }: MapSurfa
   const grainImage = useImage(GRAIN_TEXTURE)
 
   const opacity = useDerivedValue(() => {
-    if (!scale) return 0
-    const t = (scale.value - scaleThreshold) / scaleRange
+    if (!scale || !image) return 0
+    const naturalWidth = image.width()
+    if (naturalWidth === 0) return 0
+    const pixelRatio = (width * scale.value) / naturalWidth
+    const t = (pixelRatio - scaleThreshold) / scaleRange
     return Math.min(Math.max(t, 0), 1) * maxOpacity
   })
 

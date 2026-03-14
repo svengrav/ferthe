@@ -4,7 +4,7 @@ import { QueryOptions } from '@shared/contracts/index.ts'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import { applyQueryOptions } from './queryUtils.ts'
-import { StoreInterface } from './storeInterface.ts'
+import { ListResult, StoreInterface } from './storeInterface.ts'
 
 interface JsonStoreOptions {
   baseDirectory?: string
@@ -87,10 +87,23 @@ export function createJsonStore(options: JsonStoreOptions = {}): StoreInterface 
       }
     },
 
-    async list<T extends UniqueItem>(container: string, options?: QueryOptions): Promise<T[]> {
+    async list<T extends UniqueItem>(container: string, options?: QueryOptions): Promise<ListResult<T>> {
       try {
-        const data = await readData<T>(container)
-        return applyQueryOptions(data, options)
+        const allData = await readData<T>(container)
+        const filteredAndSorted = applyQueryOptions(allData, { ...options, limit: undefined })
+        const total = filteredAndSorted.length
+        const cursor = options?.cursor
+        const limit = options?.limit
+        let startIndex = 0
+        if (cursor) {
+          const idx = filteredAndSorted.findIndex((item: any) => item.id === cursor)
+          startIndex = idx >= 0 ? idx + 1 : 0
+        }
+        const data = limit !== undefined
+          ? filteredAndSorted.slice(startIndex, startIndex + limit)
+          : filteredAndSorted.slice(startIndex)
+        const nextCursor = limit !== undefined && startIndex + limit < total ? data[data.length - 1]?.id : undefined
+        return { data, total, nextCursor }
       } catch (error) {
         throw new Error(`Failed to list items: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }

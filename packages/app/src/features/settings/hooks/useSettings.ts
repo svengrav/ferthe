@@ -12,6 +12,7 @@ function useSettings() {
       ...settings,
       theme: values.theme,
       language: values.language,
+      devApiEndpoint: values.devApiEndpoint ?? settings?.devApiEndpoint,
     }
     setLocalization(values.language)
     setTheme(values.theme)
@@ -25,6 +26,7 @@ function useSettings() {
       id: Date.now().toString(),
       theme: settings?.theme || ThemeMode.Dark,
       language: settings?.language || LanguageOptions.English,
+      devApiEndpoint: settings?.devApiEndpoint ?? 'http://localhost:7000/api/v1',
     },
     handleSubmit,
   }

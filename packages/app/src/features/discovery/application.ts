@@ -15,10 +15,10 @@ import { getDiscoveryTrailActions, getDiscoveryTrailData, getDiscoveryTrailId } 
 import { getSpotRatingActions } from './stores/spotRatingStore'
 
 /**
- * Default discovery trail slug used when no specific trail is set.
- * This is used to initialize the discovery application with a default trail.
+ * Default trail kind used when no specific trail is set.
+ * Falls back to any available trail if none of this kind is found.
  */
-const DEFAULT_DISCOVERY_SLUG = 'discovery-trail-2025'
+const DEFAULT_TRAIL_KIND = 'stumble'
 
 export interface DiscoveryApplication {
   setActiveTrail: (id: string) => void
@@ -123,9 +123,9 @@ export function createDiscoveryApplication(options: DiscoveryApplicationOptions)
       return
     }
 
-    const defaultTrail = trails.find(t => t.slug === DEFAULT_DISCOVERY_SLUG) ?? trails[0]
-    if (defaultTrail.slug !== DEFAULT_DISCOVERY_SLUG) {
-      logger.warn(`Default trail '${DEFAULT_DISCOVERY_SLUG}' not found, falling back to '${defaultTrail.slug}'`)
+    const defaultTrail = trails.find(t => t.kind === DEFAULT_TRAIL_KIND) ?? trails[0]
+    if (defaultTrail.kind !== DEFAULT_TRAIL_KIND) {
+      logger.warn(`Default trail kind '${DEFAULT_TRAIL_KIND}' not found, falling back to '${defaultTrail.slug}'`)
     }
 
     await setActiveTrail(defaultTrail.id)

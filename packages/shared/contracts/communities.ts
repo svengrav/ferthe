@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { AccountContext, AccountPublicProfileSchema } from './accounts.ts'
 import { Discovery } from './discoveries.ts'
-import { Result } from './results.ts'
+import { QueryOptions, Result } from './results.ts'
 import { guard } from './strings.ts'
 
 // ──────────────────────────────────────────────────────────────
@@ -94,9 +94,9 @@ export interface CommunityApplicationContract {
   updateCommunity: (context: AccountContext, communityId: string, input: { name: string; trailIds: string[] }) => Promise<Result<Community>>
   removeCommunity: (context: AccountContext, communityId: string) => Promise<Result<void>>
   getCommunity: (context: AccountContext, communityId: string) => Promise<Result<Community | undefined>>
-  listCommunities: (context: AccountContext) => Promise<Result<Community[]>>
-  listCommunityMembers: (context: AccountContext, communityId: string) => Promise<Result<CommunityMember[]>>
+  listCommunities: (context: AccountContext, options?: QueryOptions) => Promise<Result<Community[]>>
+  listCommunityMembers: (context: AccountContext, communityId: string, options?: QueryOptions) => Promise<Result<CommunityMember[]>>
   shareDiscovery: (context: AccountContext, discoveryId: string, communityId: string) => Promise<Result<SharedDiscovery>>
   unshareDiscovery: (context: AccountContext, discoveryId: string, communityId: string) => Promise<Result<void>>
-  getSharedDiscoveries: (context: AccountContext, communityId: string) => Promise<Result<Discovery[]>>
+  getSharedDiscoveries: (context: AccountContext, communityId: string, options?: QueryOptions) => Promise<Result<Discovery[]>>
 }

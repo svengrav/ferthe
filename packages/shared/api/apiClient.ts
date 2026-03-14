@@ -6,7 +6,6 @@
 import type { Account, AccountPublicProfile, AccountSession, AccountUpdateData, ClientAudience, DeviceToken, SessionValidationResult, SMSCodeRequest, SMSVerificationResult } from '../contracts/accounts.ts'
 import type { Community, CommunityMember, SharedDiscovery } from '../contracts/communities.ts'
 import type { ActivateTrailResult, DiscoveryState } from '../contracts/composites.ts'
-import type { FirebaseConfig } from '../contracts/config.ts'
 import type { FeedbackRequest } from '../contracts/content.ts'
 import type { Clue, Discovery, DiscoveryLocationRecord, DiscoverySpot, DiscoveryStats, DiscoveryTrail, LocationWithDirection, WelcomeDiscoveryResult } from '../contracts/discoveries.ts'
 import type { Story, UpsertStoryRequest } from '../contracts/stories.ts'
@@ -27,12 +26,6 @@ const buildPath = (template: string, params?: Record<string, string>): string =>
     ? Object.entries(params).reduce((path, [k, v]) => path.replace(`:${k}`, v), template)
     : template
 
-export interface PageMeta {
-  hasMore: boolean
-  nextCursor?: string
-  limit?: number
-}
-
 // Passes through the server Result<T> envelope; catches network/parse errors
 async function call<T>(fn: () => Promise<Result<T>>): Promise<Result<T>> {
   try {
@@ -43,8 +36,8 @@ async function call<T>(fn: () => Promise<Result<T>>): Promise<Result<T>> {
   }
 }
 
-// Same as call() — Result<T[]> from server is passed through directly
-async function callPaged<T>(fn: () => Promise<Result<T[]>>, _query?: { limit?: number }): Promise<Result<T[]>> {
+// Same as call() but typed for list results
+async function callPaged<T>(fn: () => Promise<Result<T[]>>): Promise<Result<T[]>> {
   try {
     return await fn()
   } catch (err) {
@@ -54,6 +47,15 @@ async function callPaged<T>(fn: () => Promise<Result<T[]>>, _query?: { limit?: n
 }
 
 export type { HttpClientConfig as ApiClientConfig }
+
+/** Standard pagination + sorting params used by all list endpoints */
+export interface ListQuery {
+  limit?: number
+  offset?: number
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+  [key: string]: string | number | undefined
+}
 
 export function createApiClient(config: HttpClientConfig) {
   const client = new HttpClient(config)
@@ -65,11 +67,11 @@ export function createApiClient(config: HttpClientConfig) {
     },
 
     spot: {
-      listSpots: (query?: { limit?: number; cursor?: string | null; orderBy?: string }) =>
-        callPaged<Spot>(() => client.get<Spot[]>(routes.spot.listSpots.path, query as any), query),
+      listSpots: (query?: ListQuery) =>
+        callPaged<Spot>(() => client.get<Spot[]>(routes.spot.listSpots.path, query)),
 
-      listPreviews: (query?: { limit?: number; cursor?: string | null; ids?: string }) =>
-        callPaged<SpotPreview>(() => client.get<SpotPreview[]>(routes.spot.listPreviews.path, query as any), query),
+      listPreviews: (query?: ListQuery & { ids?: string }) =>
+        callPaged<SpotPreview>(() => client.get<SpotPreview[]>(routes.spot.listPreviews.path, query)),
 
       getSpot: (id: string) =>
         call<Spot | undefined>(() => client.get(buildPath(routes.spot.getSpot.path, { id }))),
@@ -100,8 +102,8 @@ export function createApiClient(config: HttpClientConfig) {
     },
 
     trail: {
-      listTrails: (query?: { limit?: number; cursor?: string | null; createdBy?: string }) =>
-        callPaged<Trail>(() => client.get<Trail[]>(routes.trail.listTrails.path, query as any), query),
+      listTrails: (query?: ListQuery & { createdBy?: string }) =>
+        callPaged<Trail>(() => client.get<Trail[]>(routes.trail.listTrails.path, query)),
 
       getTrail: (id: string) =>
         call<Trail | undefined>(() => client.get(buildPath(routes.trail.getTrail.path, { id }))),
@@ -115,8 +117,8 @@ export function createApiClient(config: HttpClientConfig) {
       deleteTrail: (id: string) =>
         call<void>(() => client.delete(buildPath(routes.trail.deleteTrail.path, { id }))),
 
-      getTrailSpots: (trailId: string, _query?: { limit?: number; cursor?: string | null }) =>
-        callPaged<TrailSpot>(() => client.get<TrailSpot[]>(buildPath(routes.trail.getTrailSpots.path, { trailId }))),
+      getTrailSpots: (trailId: string, query?: ListQuery) =>
+        callPaged<TrailSpot>(() => client.get<TrailSpot[]>(buildPath(routes.trail.getTrailSpots.path, { trailId }), query)),
 
       getTrailStats: (trailId: string) =>
         call<TrailStats>(() => client.get(buildPath(routes.trail.getTrailStats.path, { trailId }))),
@@ -141,17 +143,17 @@ export function createApiClient(config: HttpClientConfig) {
       processLocation: (trailId: string, locationWithDirection: LocationWithDirection) =>
         call<DiscoveryLocationRecord>(() => client.post(routes.discovery.processLocation.path, { trailId, locationWithDirection })),
 
-      listDiscoveries: (query?: { trailId?: string; limit?: number; cursor?: string | null }) =>
-        callPaged<Discovery>(() => client.get<Discovery[]>(routes.discovery.listDiscoveries.path, query as any), query),
+      listDiscoveries: (query?: ListQuery & { trailId?: string }) =>
+        callPaged<Discovery>(() => client.get<Discovery[]>(routes.discovery.listDiscoveries.path, query)),
 
       getDiscovery: (id: string) =>
         call<Discovery | undefined>(() => client.get(buildPath(routes.discovery.getDiscovery.path, { id }))),
 
-      listDiscoveredSpots: (query?: { trailId?: string; limit?: number; cursor?: string | null }) =>
-        callPaged<DiscoverySpot>(() => client.get<DiscoverySpot[]>(routes.discovery.listDiscoveredSpots.path, query as any), query),
+      listDiscoveredSpots: (query?: ListQuery & { trailId?: string }) =>
+        callPaged<DiscoverySpot>(() => client.get<DiscoverySpot[]>(routes.discovery.listDiscoveredSpots.path, query)),
 
-      listPreviewClues: (trailId: string, _query?: { limit?: number; cursor?: string | null }) =>
-        callPaged<Clue>(() => client.get<Clue[]>(buildPath(routes.discovery.listPreviewClues.path, { trailId }))),
+      listPreviewClues: (trailId: string, query?: ListQuery) =>
+        callPaged<Clue>(() => client.get<Clue[]>(buildPath(routes.discovery.listPreviewClues.path, { trailId }), query)),
 
       getDiscoveryTrail: (trailId: string) =>
         call<DiscoveryTrail>(() => client.get(buildPath(routes.discovery.getDiscoveryTrail.path, { trailId }))),
@@ -232,9 +234,6 @@ export function createApiClient(config: HttpClientConfig) {
       upgradeToPhoneAccount: (phoneNumber: string, code: string) =>
         call<AccountSession>(() => client.post(routes.account.upgradeToPhoneAccount.path, { phoneNumber, code })),
 
-      getFirebaseConfig: () =>
-        call<FirebaseConfig>(() => client.get(routes.account.getFirebaseConfig.path)),
-
       registerDeviceToken: (token: string, platform?: 'ios' | 'android' | 'web') =>
         call<DeviceToken>(() => client.post(routes.account.registerDeviceToken.path, { token, platform })),
 
@@ -255,8 +254,8 @@ export function createApiClient(config: HttpClientConfig) {
       joinCommunity: (inviteCode: string) =>
         call<Community>(() => client.post(routes.community.joinCommunity.path, { inviteCode })),
 
-      listCommunities: (_query?: { limit?: number; cursor?: string | null }) =>
-        callPaged<Community>(() => client.get<Community[]>(routes.community.listCommunities.path)),
+      listCommunities: (query?: ListQuery) =>
+        callPaged<Community>(() => client.get<Community[]>(routes.community.listCommunities.path, query)),
 
       getCommunity: (communityId: string) =>
         call<Community | undefined>(() => client.get(buildPath(routes.community.getCommunity.path, { communityId }))),
@@ -270,8 +269,8 @@ export function createApiClient(config: HttpClientConfig) {
       deleteCommunity: (communityId: string) =>
         call<void>(() => client.delete(buildPath(routes.community.deleteCommunity.path, { communityId }))),
 
-      listMembers: (communityId: string, _query?: { limit?: number; cursor?: string | null }) =>
-        callPaged<CommunityMember>(() => client.get<CommunityMember[]>(buildPath(routes.community.listMembers.path, { communityId }))),
+      listMembers: (communityId: string, query?: ListQuery) =>
+        callPaged<CommunityMember>(() => client.get<CommunityMember[]>(buildPath(routes.community.listMembers.path, { communityId }), query)),
 
       shareDiscovery: (communityId: string, discoveryId: string) =>
         call<SharedDiscovery>(() => client.post(buildPath(routes.community.shareDiscovery.path, { communityId, discoveryId }))),
@@ -279,13 +278,13 @@ export function createApiClient(config: HttpClientConfig) {
       unshareDiscovery: (communityId: string, discoveryId: string) =>
         call<void>(() => client.delete(buildPath(routes.community.unshareDiscovery.path, { communityId, discoveryId }))),
 
-      listSharedDiscoveries: (communityId: string, _query?: { limit?: number; cursor?: string | null }) =>
-        callPaged<Discovery>(() => client.get<Discovery[]>(buildPath(routes.community.listSharedDiscoveries.path, { communityId }))),
+      listSharedDiscoveries: (communityId: string, query?: ListQuery) =>
+        callPaged<Discovery>(() => client.get<Discovery[]>(buildPath(routes.community.listSharedDiscoveries.path, { communityId }), query)),
     },
 
     sensor: {
-      listScans: (query?: { trailId?: string; limit?: number; cursor?: string | null }) =>
-        callPaged<ScanEvent>(() => client.get<ScanEvent[]>(routes.sensor.listScans.path, query as any), query),
+      listScans: (query?: ListQuery & { trailId?: string }) =>
+        callPaged<ScanEvent>(() => client.get<ScanEvent[]>(routes.sensor.listScans.path, query)),
 
       createScan: (body?: { userPosition?: GeoLocation; trailId?: string }) =>
         call<ScanEvent>(() => client.post(routes.sensor.createScan.path, body)),
@@ -295,8 +294,8 @@ export function createApiClient(config: HttpClientConfig) {
       getPage: (language: 'en' | 'de', page: string) =>
         call<{ content: string }>(() => client.get(buildPath(routes.content.getPage.path, { language, page }))),
 
-      listBlogPosts: (language: 'en' | 'de', _query?: { limit?: number; cursor?: string | null }) =>
-        callPaged<{ slug: string; title: string; date: string; excerpt?: string }>(() => client.get<{ slug: string; title: string; date: string; excerpt?: string }[]>(buildPath(routes.content.listBlogPosts.path, { language }))),
+      listBlogPosts: (language: 'en' | 'de', query?: ListQuery) =>
+        callPaged<{ slug: string; title: string; date: string; excerpt?: string }>(() => client.get<{ slug: string; title: string; date: string; excerpt?: string }[]>(buildPath(routes.content.listBlogPosts.path, { language }), query)),
 
       getBlogPost: (language: 'en' | 'de', slug: string) =>
         call<{ slug: string; title: string; content: string; date: string }>(() => client.get(buildPath(routes.content.getBlogPost.path, { language, slug }))),
@@ -306,8 +305,8 @@ export function createApiClient(config: HttpClientConfig) {
     },
 
     composite: {
-      listAccessibleSpots: (query?: { trailId?: string; limit?: number; cursor?: string | null }) =>
-        callPaged<Spot>(() => client.get<Spot[]>(routes.composite.listAccessibleSpots.path, query as any), query),
+      listAccessibleSpots: (query?: ListQuery & { trailId?: string }) =>
+        callPaged<Spot>(() => client.get<Spot[]>(routes.composite.listAccessibleSpots.path, query)),
 
       getDiscoveryState: () =>
         call<DiscoveryState>(() => client.get(routes.composite.getDiscoveryState.path)),

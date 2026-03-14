@@ -1,25 +1,17 @@
-import { getAppContextStore } from '@app/shared/stores/appContextStore'
-import { useEffect, useState } from 'react'
+import { useDiscoveredSpotPagination } from './useDiscoveredSpotPagination'
+import { useMySpotsPagination } from './useMySpotsPagination'
 import { useSpots } from '../stores/spotStore'
 
 /**
  * ViewModel hook for SpotScreen.
- * Fetches discovered spots independently of trail state and renders from spotStore.
+ * "My Spots" loads all (typically few items).
+ * "Discoveries" uses paginated loading.
  */
-export function useSpotScreenViewModel() {
-  const { discoveryApplication } = getAppContextStore()
+export function useSpotScreen() {
   const spots = useSpots()
-  const [isLoading, setIsLoading] = useState(false)
 
-  const load = async () => {
-    setIsLoading(true)
-    await discoveryApplication.requestSpotScreenData()
-    setIsLoading(false)
-  }
-
-  useEffect(() => {
-    load()
-  }, [])
+  const myPagination = useMySpotsPagination()
+  const discoveredPagination = useDiscoveredSpotPagination()
 
   const toItem = (spot: typeof spots[number]) => ({
     id: spot.id,
@@ -35,7 +27,14 @@ export function useSpotScreenViewModel() {
   return {
     mySpots,
     discoveredSpots,
-    isLoading,
-    refresh: load,
+    isLoading: myPagination.isRefreshing || discoveredPagination.isRefreshing,
+    myLoadMore: myPagination.loadMore,
+    myLoadingMore: myPagination.isLoading,
+    loadMore: discoveredPagination.loadMore,
+    loadingMore: discoveredPagination.isLoading,
+    refresh: () => {
+      myPagination.refresh()
+      discoveredPagination.refresh()
+    },
   }
 }

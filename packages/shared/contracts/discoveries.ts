@@ -148,7 +148,7 @@ export interface DiscoveryApplicationContract {
   getDiscovery: (context: AccountContext, discoveryId: string) => Promise<Result<Discovery | undefined>>
   getDiscoveredSpotIds: (context: AccountContext, trailId?: string) => Promise<Result<string[]>>
   getDiscoveredSpots: (context: AccountContext, trailId?: string, options?: QueryOptions) => Promise<Result<DiscoverySpot[]>>
-  getDiscoveredPreviewClues: (context: AccountContext, trailId: string) => Promise<Result<Clue[]>>
+  getDiscoveredPreviewClues: (context: AccountContext, trailId: string, options?: QueryOptions) => Promise<Result<Clue[]>>
   getDiscoveryTrail: (context: AccountContext, trailId: string, userLocation?: GeoLocation) => Promise<Result<DiscoveryTrail>>
   getDiscoveryStats: (context: AccountContext, discoveryId: string) => Promise<Result<DiscoveryStats>>
   getDiscoveryTrailStats: (context: AccountContext, trailId: string) => Promise<Result<TrailStats>>

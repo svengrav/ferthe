@@ -1,3 +1,5 @@
+import { json } from "node:stream/consumers";
+import { logger } from "../index.ts";
 import { Constants, createConstants } from './constants.ts'
 import { loadSecrets, Secrets } from './secrets.ts'
 
@@ -18,4 +20,5 @@ export async function createConfig(): Promise<Config> {
 export * from './constants.ts'
 export * from './secrets.ts'
 export * from './keyVaultConfig.ts'
+export * from './storeConfig.ts'
 

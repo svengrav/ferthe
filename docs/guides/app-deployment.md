@@ -58,11 +58,12 @@ cd packages/app
 npx expo-doctor
 npx tsc --noEmit
 
+# Build for development (APK)
+eas build --platform android --profile development
+
 # Build for Play Store (AAB)
 eas build --platform android --profile production
 
-# Alternative: Local build
-eas build --platform android --profile production --local
 ```
 
 ### After Build

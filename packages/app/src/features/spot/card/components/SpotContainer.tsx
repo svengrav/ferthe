@@ -57,7 +57,7 @@ const useStyles = createThemedStyles(theme => ({
   container: {
     position: 'relative',
     overflow: 'hidden',
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.dark,
   },
   shadow: {
     elevation: 8,

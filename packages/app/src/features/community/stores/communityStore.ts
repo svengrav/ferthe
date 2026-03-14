@@ -11,6 +11,7 @@ interface CommunityState extends StoreState {
 
 interface CommunityActions extends StoreActions {
   setCommunities: (communities: Community[]) => void
+  upsertCommunities: (communities: Community[]) => void
   setMembers: (members: CommunityMember[]) => void
   setActiveCommunity: (communityId: string | undefined) => void
   addCommunity: (community: Community) => void
@@ -32,6 +33,13 @@ export const communityStore = create<CommunityState & CommunityActions>(set => (
   // Actions
   setStatus: status => set({ status }),
   setCommunities: communities => set({ communities, updatedAt: new Date(), status: 'ready' }),
+  upsertCommunities: communities => set(state => ({
+    communities: [
+      ...state.communities.filter(c => !communities.find(n => n.id === c.id)),
+      ...communities,
+    ],
+    updatedAt: new Date(),
+  })),
   setMembers: members => set({ members }),
   setActiveCommunity: activeCommunityId => set({ activeCommunityId }),
   addCommunity: community =>
@@ -64,6 +72,7 @@ export const getCommunityData = () => ({
 
 export const getCommunityActions = () => ({
   setCommunities: communityStore.getState().setCommunities,
+  upsertCommunities: communityStore.getState().upsertCommunities,
   setMembers: communityStore.getState().setMembers,
   setActiveCommunity: communityStore.getState().setActiveCommunity,
   addCommunity: communityStore.getState().addCommunity,

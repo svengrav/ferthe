@@ -29,7 +29,6 @@ import {
   DiscoveryState,
   DiscoveryStats,
   DiscoveryTrail,
-  FirebaseConfig,
   RatingSummary,
   ScanEvent,
   SharedDiscovery,
@@ -155,8 +154,8 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       deleteTrail: asyncRequestHandler<void, { id: string }, never>(async ({ params, context }) => {
         return await trailApplication.deleteTrail(context, params!.id)
       }),
-      getTrailSpots: asyncRequestHandler<TrailSpot[]>(async ({ context, params }) => {
-        return await trailApplication.getTrailSpots(context, params!.trailId)
+      getTrailSpots: asyncRequestHandler<TrailSpot[]>(async ({ context, params, query }) => {
+        return await trailApplication.getTrailSpots(context, params!.trailId, parseQueryOptions(query))
       }),
       getTrailStats: asyncRequestHandler<TrailStats, { trailId: string }>(async ({ context, params }) => {
         return await discoveryApplication.getDiscoveryTrailStats(context, params!.trailId)
@@ -192,8 +191,8 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       listDiscoveredSpots: asyncRequestHandler<DiscoverySpot[]>(async ({ context: session, query }) => {
         return await discoveryApplication.getDiscoveredSpots(session, query?.trailId, parseQueryOptions(query))
       }),
-      listPreviewClues: asyncRequestHandler<Clue[], { trailId: string }>(async ({ context: session, params }) => {
-        return await discoveryApplication.getDiscoveredPreviewClues(session, params!.trailId)
+      listPreviewClues: asyncRequestHandler<Clue[], { trailId: string }>(async ({ context: session, params, query }) => {
+        return await discoveryApplication.getDiscoveredPreviewClues(session, params!.trailId, parseQueryOptions(query))
       }),
       getDiscoveryTrail: asyncRequestHandler<DiscoveryTrail, { trailId: string }>(async ({ context: session, params }) => {
         return await discoveryApplication.getDiscoveryTrail(session, params!.trailId)
@@ -278,9 +277,6 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       upgradeToPhoneAccount: asyncRequestHandler(async ({ context, body }) => {
         return await accountApplication.upgradeToPhoneAccount(context, body?.phoneNumber, body?.code)
       }),
-      getFirebaseConfig: asyncRequestHandler<FirebaseConfig>(async ({ context }) => {
-        return await accountApplication.getFirebaseConfig(context)
-      }),
       registerDeviceToken: asyncRequestHandler<DeviceToken>(async ({ context, body }) => {
         return await accountApplication.registerDeviceToken(context, body?.token, body?.platform)
       }),
@@ -310,8 +306,8 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       joinCommunity: asyncRequestHandler<Community>(async ({ context, body }) => {
         return await communityApplication.joinCommunity(context, body?.inviteCode)
       }),
-      listCommunities: asyncRequestHandler<Community[]>(async ({ context }) => {
-        return await communityApplication.listCommunities(context)
+      listCommunities: asyncRequestHandler<Community[]>(async ({ context, query }) => {
+        return await communityApplication.listCommunities(context, parseQueryOptions(query))
       }),
       getCommunity: asyncRequestHandler<Community | undefined, { communityId: string }>(async ({ context, params }) => {
         return await communityApplication.getCommunity(context, params!.communityId)
@@ -325,8 +321,8 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       deleteCommunity: asyncRequestHandler<void, { communityId: string }>(async ({ context, params }) => {
         return await communityApplication.removeCommunity(context, params!.communityId)
       }),
-      listMembers: asyncRequestHandler<CommunityMember[], { communityId: string }>(async ({ context, params }) => {
-        return await communityApplication.listCommunityMembers(context, params!.communityId)
+      listMembers: asyncRequestHandler<CommunityMember[], { communityId: string }>(async ({ context, params, query }) => {
+        return await communityApplication.listCommunityMembers(context, params!.communityId, parseQueryOptions(query))
       }),
       shareDiscovery: asyncRequestHandler<SharedDiscovery, { communityId: string; discoveryId: string }>(async ({ context, params }) => {
         return await communityApplication.shareDiscovery(context, params!.discoveryId, params!.communityId)
@@ -334,15 +330,15 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       unshareDiscovery: asyncRequestHandler<void, { communityId: string; discoveryId: string }>(async ({ context, params }) => {
         return await communityApplication.unshareDiscovery(context, params!.discoveryId, params!.communityId)
       }),
-      listSharedDiscoveries: asyncRequestHandler<Discovery[], { communityId: string }>(async ({ context, params }) => {
-        return await communityApplication.getSharedDiscoveries(context, params!.communityId)
+      listSharedDiscoveries: asyncRequestHandler<Discovery[], { communityId: string }>(async ({ context, params, query }) => {
+        return await communityApplication.getSharedDiscoveries(context, params!.communityId, parseQueryOptions(query))
       }),
     },
 
     /** Sensor Handlers */
     sensor: {
       listScans: asyncRequestHandler(async ({ context, query }) => {
-        return await sensorApplication.listScanEvents(context, query?.trailId)
+        return await sensorApplication.listScanEvents(context, query?.trailId, parseQueryOptions(query))
       }),
       createScan: asyncRequestHandler<ScanEvent>(async ({ context: session, body }) => {
         return await sensorApplication.createScanEvent(session, body?.userPosition, body?.trailId)
@@ -354,8 +350,8 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       getPage: asyncRequestHandler(async ({ params }) => {
         return await contentApplication.getPage(params!.language, params!.page)
       }),
-      listBlogPosts: asyncRequestHandler(async ({ params }) => {
-        return await contentApplication.listBlogPosts(params!.language)
+      listBlogPosts: asyncRequestHandler(async ({ params, query }) => {
+        return await contentApplication.listBlogPosts(params!.language, parseQueryOptions(query))
       }),
       getBlogPost: asyncRequestHandler(async ({ params }) => {
         return await contentApplication.getBlogPost(params!.language, params!.slug)

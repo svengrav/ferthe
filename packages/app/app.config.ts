@@ -1,7 +1,9 @@
 import { ConfigContext, ExpoConfig } from 'expo/config'
 
+const isDev = process.env.EXPO_PUBLIC_ENVIRONMENT === 'development'
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
-  name: 'ferthe',
+  name: isDev ? 'ferthe dev' : 'ferthe',
   slug: 'ferthe',
   version: '0.5.1',
   orientation: 'portrait',
@@ -54,7 +56,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#121214',
     },
-    package: 'de.ferthe.app',
+    package: isDev ? 'de.ferthe.app.dev' : 'de.ferthe.app',
     googleServicesFile: './google-services.json',
   },
   web: {

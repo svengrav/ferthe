@@ -1,7 +1,7 @@
 import { logger } from '@app/shared/utils/logger'
 import type { ApiClient } from '@shared/api'
-import { CreateSpotRequest, Result, Spot, UpdateSpotRequest } from '@shared/contracts'
-import { getSpotStoreActions } from './stores/spotStore'
+import { CreateSpotRequest, DiscoverySpot, Result, Spot, UpdateSpotRequest } from '@shared/contracts'
+import { getSpotStoreActions, getSpots } from './stores/spotStore'
 
 export interface SpotApplication {
   requestSpotsByTrail: (trailId: string) => Promise<void>
@@ -11,6 +11,8 @@ export interface SpotApplication {
   createSpot: (request: CreateSpotRequest) => Promise<Result<Spot>>
   updateSpot: (spotId: string, updates: UpdateSpotRequest) => Promise<Result<Spot>>
   deleteSpot: (spotId: string) => Promise<Result<void>>
+  fetchDiscoveredSpots: (query: { limit: number; cursor?: string }) => Promise<Result<DiscoverySpot[]>>
+  handleDiscoveredSpots: (items: DiscoverySpot[], isRefresh: boolean) => void
 }
 
 interface SpotApplicationOptions {
@@ -20,6 +22,19 @@ interface SpotApplicationOptions {
 export function createSpotApplication(options: SpotApplicationOptions): SpotApplication {
   const { api } = options
   const { setStatus, setSpots, upsertSpot, removeSpot } = getSpotStoreActions()
+
+  const fetchDiscoveredSpots = (query: { limit: number; cursor?: string }) =>
+    api.discovery.listDiscoveredSpots(query)
+
+  const handleDiscoveredSpots = (items: DiscoverySpot[], isRefresh: boolean) => {
+    if (isRefresh) {
+      const createdSpots = getSpots().filter(s => s.source === 'created')
+      setSpots(createdSpots)
+    }
+    items.forEach(({ discoveryId, discoveredAt, ...spot }) => {
+      upsertSpot({ ...spot, source: spot.source ?? 'discovery' } as any)
+    })
+  }
 
   const requestSpotsByTrail = async (trailId: string) => {
     setStatus('loading')
@@ -74,7 +89,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
     logger.log('SpotApplication: Creating spot', request.content.name)
     const result = await api.spot.createSpot(request)
     if (result.success && result.data) {
-      upsertSpot(result.data)
+      upsertSpot({ ...result.data, source: 'created' })
       logger.log('SpotApplication: Spot created', result.data.id)
     }
     return result as Result<Spot>
@@ -108,5 +123,7 @@ export function createSpotApplication(options: SpotApplicationOptions): SpotAppl
     createSpot,
     updateSpot,
     deleteSpot,
+    fetchDiscoveredSpots,
+    handleDiscoveredSpots,
   }
 }

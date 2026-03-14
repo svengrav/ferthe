@@ -30,7 +30,6 @@ export default Chip
 
 const chipStyle = themedVariants({
   base: {
-    alignSelf: 'flex-start',
     flexDirection: 'row',
     borderRadius: 16,
   },

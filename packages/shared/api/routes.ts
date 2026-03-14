@@ -20,9 +20,6 @@ import {
   ActivateTrailResultSchema,
   DiscoveryStateSchema,
 } from '@shared/contracts/composites.ts'
-import {
-  FirebaseConfigSchema,
-} from '@shared/contracts/config.ts'
 import { FeedbackRequestSchema, LanguageSchema } from '@shared/contracts/content.ts'
 import {
   ClueSchema,
@@ -63,12 +60,13 @@ import type { RouteRegistry } from './types.ts'
 // ──────────────────────────────────────────────────────────────
 
 /**
- * Base list query schema
+ * Base list query schema — matches ListQuery in apiClient and parseQueryOptions in core
  */
 export const ListQuerySchema = z.object({
-  limit: z.number().optional(),
-  cursor: z.string().nullable().optional(),
-  orderBy: z.string().optional(),
+  limit: z.coerce.number().optional(),
+  cursor: z.string().optional(),
+  sortBy: z.string().optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
 })
 
 /**
@@ -599,12 +597,6 @@ export const routes = {
       path: '/account/actions/upgrade-to-phone',
       input: z.object({ phoneNumber: z.string(), code: z.string() }),
       output: ResultSchema(AccountSessionSchema),
-    },
-    getFirebaseConfig: {
-      version: 'v1',
-      method: 'GET',
-      path: '/account/config/firebase',
-      output: ResultSchema(FirebaseConfigSchema),
     },
     registerDeviceToken: {
       version: 'v1',
