@@ -8,18 +8,23 @@ import { memo, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import Animated, { Easing, useAnimatedReaction, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
+import { getMapDefaults } from '../../config/mapDefaults'
+import { getMapThemeDefaults } from '../../config/mapThemeDefaults'
 import { mapUtils } from '../../services/geoToScreenTransform'
 import { useMapDevice } from '../../stores/mapStore'
 import { MapTheme, useMapTheme } from '../../stores/mapThemeStore'
 import { useMapCompensatedScale } from './MapCompensatedScale'
 
-const CLUE_SIZE = 20
+const { clue: clueDefaults } = getMapThemeDefaults()
+const { clue: clueConfig } = getMapDefaults()
+
+const CLUE_SIZE = clueDefaults.size
 const FADE_IN_DURATION = 300
 const SCALE_DURATION = 400
 const FADE_OUT_DURATION = 500
 const INITIAL_SCALE = 0.85
-const RIPPLE_DELAY_FACTOR = 15
-const MAX_RIPPLE_DELAY = 1000
+const RIPPLE_DELAY_FACTOR = clueConfig.rippleDelayFactor
+const MAX_RIPPLE_DELAY = clueConfig.maxRippleDelay
 const DEBUG_RADIUS_CIRCLES = [50, 100, 150]
 
 /**

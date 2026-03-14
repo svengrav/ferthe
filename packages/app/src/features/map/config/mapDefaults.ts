@@ -39,6 +39,12 @@ const MAP_DEFAULT = {
     maxMeters: 50,
   },
 
+  // Clue scan animation behavior
+  clue: {
+    rippleDelayFactor: 15,
+    maxRippleDelay: 1000,
+  },
+
   // Scanner detection radius in meters
   radius: 3000,
 

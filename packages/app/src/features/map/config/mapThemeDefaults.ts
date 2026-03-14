@@ -48,8 +48,9 @@ const MAP_THEME_DEFAULT = {
   },
   clue: {
     strokeColor: '#ffffff',
-    fill: 'transparent',
-    strokeWidth: 1.5,
+    fill: '#0000008c',
+    strokeWidth: 1,
+    size: 20,
   },
   trail: {
     strokeColor: '#ffffff73',
