@@ -28,10 +28,7 @@
       "name": "🟨 web",
       "path": "../packages/web/"
     },
-    {
-      "name": "🟪 test",
-      "path": "../packages/test/"
-    }
+
   ],
   "settings": {
     "typescript.referencesCodeLens.enabled": true,

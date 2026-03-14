@@ -1,25 +1,35 @@
 {
   "version": "2.0.0",
   "tasks": [
+    // Tasks to start the development environment
     {
-      "label": "kill:all",
+      "label": "start:core",
       "type": "shell",
-      "command": "fuser -k 7000/tcp 7001/tcp 7002/tcp 7003/tcp 8081/tcp 7009/tcp 2>/dev/null; pkill -f 'deno.*main.ts' 2>/dev/null; pkill -f 'deno.*--inspect' 2>/dev/null; pkill -f 'metro' 2>/dev/null; exit 0",
-      "presentation": {
-        "reveal": "silent",
-        "panel": "shared"
+      "command": "deno task dev",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/core"
       },
-      "problemMatcher": []
+      "dependsOrder": "sequence",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Oak server starting",
+        }
+      }
     },
     {
-      "label": "app:start",
+      "label": "start:app",
       "type": "shell",
       "command": "npm run dev",
       "options": {
         "cwd": "${workspaceFolder}/packages/app"
       },
       "dependsOn": [
-        "storage:start"
+        "start:storage"
       ],
       "dependsOrder": "sequence",
       "isBackground": true,
@@ -35,7 +45,7 @@
       }
     },
     {
-      "label": "storage:start",
+      "label": "start:storage",
       "type": "shell",
       "command": "deno run --allow-all ${workspaceFolder}/tools/start-localstorage.ts",
       "group": "build",
@@ -55,9 +65,13 @@
       }
     },
     {
-      "label": "dev:start",
+      "label": "start:web",
       "type": "shell",
-      "command": "deno run --allow-all ${workspaceFolder}/tools/startDev.ts",
+      "command": "deno run dev",
+      "dependsOrder": "sequence",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/web"
+      },
       "isBackground": true,
       "problemMatcher": {
         "pattern": {
@@ -65,24 +79,8 @@
         },
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "Starting",
-          "endsPattern": "Bundled|Metro|listening"
-        }
-      }
-    },
-    {
-      "label": "sandbox:export",
-      "type": "shell",
-      "command": "deno run -A ${workspaceFolder}/packages/test/src/sandbox/export.ts",
-      "isBackground": true,
-      "problemMatcher": {
-        "pattern": {
-          "regexp": "."
-        },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": "Starting",
-          "endsPattern": "Bundled|Metro|listening"
+          "beginsPattern": "VITE|starting",
+          "endsPattern": "ready in|Local:|http://localhost"
         }
       }
     },
@@ -107,7 +105,7 @@
       "problemMatcher": "$tsc"
     },
     {
-      "label": "tsc:app",
+      "label": "check:app",
       "type": "shell",
       "command": "npx tsc --noEmit",
       "options": {
@@ -117,7 +115,7 @@
       "problemMatcher": "$tsc"
     },
     {
-      "label": "tsc:core",
+      "label": "check:core",
       "type": "shell",
       "command": "deno check",
       "options": {
@@ -127,7 +125,7 @@
       "problemMatcher": "$tsc"
     },
     {
-      "label": "tsc:web",
+      "label": "check:web",
       "type": "shell",
       "command": "deno check",
       "options": {
@@ -137,11 +135,11 @@
       "problemMatcher": "$tsc"
     },
     {
-      "label": "tsc:all",
+      "label": "check:all",
       "dependsOn": [
-        "tsc:app",
-        "tsc:core",
-        "tsc:web"
+        "check:app",
+        "check:core",
+        "check:web"
       ],
       "group": {
         "kind": "build",
@@ -150,30 +148,20 @@
       "problemMatcher": []
     },
     {
-      "label": "web:start",
-      "type": "shell",
-      "command": "deno run dev",
-      "dependsOrder": "sequence",
-      "options": {
-        "cwd": "${workspaceFolder}/packages/web"
-      },
-      "isBackground": true,
-      "problemMatcher": {
-        "pattern": {
-          "regexp": "."
-        },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": "VITE|starting",
-          "endsPattern": "ready in|Local:|http://localhost"
-        }
-      }
-    },
-    {
-      "label": "web:deploy",
+      "label": "deploy:web",
       "type": "shell",
       "command": "cd ${workspaceFolder}/packages/web && bash deploy.bash",
       "group": "build",
+    },
+    {
+      "label": "kill:all",
+      "type": "shell",
+      "command": "fuser -k 7000/tcp 7001/tcp 7002/tcp 7003/tcp 8081/tcp 7009/tcp 2>/dev/null; pkill -f 'deno.*main.ts' 2>/dev/null; pkill -f 'deno.*--inspect' 2>/dev/null; pkill -f 'metro' 2>/dev/null; exit 0",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
     },
   ]
 }

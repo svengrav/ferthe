@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "deno run ./index.ts",
+    "dev": "deno run -A --watch --inspect=127.0.0.1:7009 ./main.ts",
     "check": "deno check",
     "test": "deno test -A --ignore=test/smoke.test.ts",
     "test:smoke": "deno test -A test/smoke.test.ts",
