@@ -48,7 +48,7 @@ const de: LocalizationSet = {
     map: 'Karte',
     about: 'ferthe',
     account: 'Konto',
-    socials: 'Soziales',
+    socials: 'Feed',
   },
   trails: {
     yourTrails: 'Pfade',
@@ -226,6 +226,7 @@ const de: LocalizationSet = {
     placeholder: 'C',
     noDiscoveriesYet: 'Noch keine Entdeckungen geteilt',
     shareFromProfile: 'Teile Entdeckungen aus deinem Profil, um sie hier zu sehen',
+    noCommunities: 'Noch keine Communities. Erstelle oder tritt einer bei!',
     overview: 'Übersicht',
     members: 'Mitglieder',
     inviteCode: 'Einladungscode',

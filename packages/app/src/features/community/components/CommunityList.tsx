@@ -1,9 +1,9 @@
-import { Button, Text } from '@app/shared/components'
+import { Text } from '@app/shared/components'
+import { useLocalization } from '@app/shared/localization'
 import { Theme, useTheme } from '@app/shared/theme'
 import { Community } from '@shared/contracts/communities'
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native'
 import CommunityCard from './CommunityCard'
-import { useCommunityCreatorCard } from './CommunityCreatorCard.tsx'
 
 interface CommunityListProps {
   communities: Community[]
@@ -11,7 +11,6 @@ interface CommunityListProps {
   onRefresh: () => void
   onEndReached?: () => void
   loadingMore?: boolean
-  onJoinPress: () => void
 }
 
 export function CommunityList({
@@ -20,20 +19,18 @@ export function CommunityList({
   onRefresh,
   onEndReached,
   loadingMore,
-  onJoinPress,
 }: CommunityListProps) {
   const { styles } = useTheme(createStyles)
+  const { locales } = useLocalization()
 
   const renderEmptyState = () => (
     <Text variant="body" style={styles.emptyState}>
-      No communities yet. Create or join one!
+      {locales.community.noCommunities}
     </Text>
   )
 
   return (
     <View style={styles.listSection}>
-
-
       {communities.length === 0 ? (
         renderEmptyState()
       ) : (
@@ -56,16 +53,6 @@ export function CommunityList({
 const createStyles = (theme: Theme) => StyleSheet.create({
   listSection: {
     flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 8,
   },
   listContent: {
     gap: 12,

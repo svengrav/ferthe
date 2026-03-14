@@ -50,7 +50,6 @@ function CommunitiesScreen() {
           onRefresh={pagination.refresh}
           onEndReached={pagination.loadMore}
           loadingMore={pagination.isLoading}
-          onJoinPress={showCommunityJoinCard}
         />
       </Stack>
     </Page>

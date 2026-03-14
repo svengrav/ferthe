@@ -46,7 +46,7 @@ const en = {
     map: 'Map',
     about: 'ferthe',
     account: 'Account',
-    socials: 'Socials',
+    socials: 'Feed',
   },
   trails: {
     yourTrails: 'Trails',
@@ -225,6 +225,7 @@ const en = {
     placeholder: 'C',
     noDiscoveriesYet: 'No discoveries shared yet',
     shareFromProfile: 'Share discoveries from your profile to see them here',
+    noCommunities: 'No communities yet. Create or join one!',
     overview: 'Overview',
     members: 'Members',
     inviteCode: 'Invite Code',
