@@ -39,6 +39,8 @@ import {
   SpotRating,
   StoredTrailSpot,
   Story,
+  StumbleFeedback,
+  StumbleFeedbackVote,
   StumblePreference,
   StumbleSuggestionResult,
   StumbleVisit,
@@ -382,7 +384,7 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       getSuggestions: asyncRequestHandler<StumbleSuggestionResult[]>(async ({ query }) => {
         const lat = Number(query?.lat)
         const lon = Number(query?.lon)
-        const radius = Number(query?.radius) || 800
+        const radius = Number(query?.radius) || 0
         const preferences = (query?.preferences as string ?? '').split(',').filter(Boolean) as StumblePreference[]
         const language = query?.language as string | undefined
         return await stumbleApplication.getSuggestions(lat, lon, radius, preferences, language)
@@ -393,6 +395,13 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
       }),
       getVisits: asyncRequestHandler<StumbleVisit[]>(async ({ context }) => {
         return await stumbleApplication.getVisits(context.accountId!)
+      }),
+      submitFeedback: asyncRequestHandler<StumbleFeedback>(async ({ context, body }) => {
+        const { poiId, vote } = body as { poiId: string; vote: StumbleFeedbackVote }
+        return await stumbleApplication.submitFeedback(context.accountId!, poiId, vote)
+      }),
+      getFeedback: asyncRequestHandler<StumbleFeedback[]>(async ({ context }) => {
+        return await stumbleApplication.getFeedback(context.accountId!)
       }),
     },
   }

@@ -2,8 +2,10 @@
 
 ## Definition
 
-- A Trail is a collection of spots forming a route or thematic experience.
-- Trails define discovery rules, map presentation, and progression.
+A Trail is a collection of spots forming a route or thematic experience.
+Trails define discovery rules, map presentation, and progression. 
+
+Users can follow a trail to get trail updates notifications about new spots, and to track their discovery progress. Trails can be created by the ferthe team or by users (future feature).
 
 ## Properties
 
@@ -42,3 +44,9 @@
 
 - Trail Completed Animation when the last spot of a trail is discovered.
 - Trail Completed Badge visible in profile and on the map.
+
+## Use Cases
+
+- A user can create a trail to share a themed route (e.g. "Best Street Art in Berlin") with friends or the public.
+- A user can create a trail with all football stadiums for one season. Fans gather all stadiums to get the "Stadium Hunter" badge.
+- A user can create a trail for a podcast. He creates a spot for every episode and shares the trail with listeners. Listeners discover the trail by visiting the locations mentioned in the episodes.

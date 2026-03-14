@@ -1,4 +1,4 @@
-import { StumblePreference, StumbleSuggestion, StumbleSuggestionResult } from '@shared/contracts'
+import { StumbleFeedbackVote, StumblePreference, StumbleSuggestionResult } from '@shared/contracts'
 import { create } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -8,6 +8,8 @@ interface StumbleState {
   suggestions: StumbleSuggestionResult[]
   selectedPreferences: StumblePreference[]
   visitedPoiIds: Set<string>
+  /** User's feedback per POI: poiId → vote */
+  feedbackMap: Map<string, StumbleFeedbackVote>
   error: string | undefined
 }
 
@@ -18,6 +20,7 @@ interface StumbleActions {
   setSelectedPreferences: (preferences: StumblePreference[]) => void
   markVisited: (poiId: string) => void
   setVisitedPoiIds: (ids: string[]) => void
+  setFeedback: (poiId: string, vote: StumbleFeedbackVote) => void
   setError: (error: string | undefined) => void
   reset: () => void
 }
@@ -30,6 +33,7 @@ export const stumbleStore = create<StumbleState & StumbleActions>(set => ({
   suggestions: [],
   selectedPreferences: DEFAULT_PREFERENCES,
   visitedPoiIds: new Set(),
+  feedbackMap: new Map(),
   error: undefined,
 
   setActive: isActive => set({ isActive }),
@@ -38,8 +42,13 @@ export const stumbleStore = create<StumbleState & StumbleActions>(set => ({
   setSelectedPreferences: selectedPreferences => set({ selectedPreferences }),
   markVisited: poiId => set(state => ({ visitedPoiIds: new Set([...state.visitedPoiIds, poiId]) })),
   setVisitedPoiIds: ids => set({ visitedPoiIds: new Set(ids) }),
+  setFeedback: (poiId, vote) => set(state => {
+    const next = new Map(state.feedbackMap)
+    next.set(poiId, vote)
+    return { feedbackMap: next }
+  }),
   setError: error => set({ error }),
-  reset: () => set({ isActive: false, suggestions: [], visitedPoiIds: new Set(), error: undefined, isLoading: false }),
+  reset: () => set({ isActive: false, suggestions: [], visitedPoiIds: new Set(), feedbackMap: new Map(), error: undefined, isLoading: false }),
 }))
 
 export const useStumbleActive = () => stumbleStore(state => state.isActive)
@@ -47,6 +56,7 @@ export const useStumbleLoading = () => stumbleStore(state => state.isLoading)
 export const useStumbleSuggestions = () => stumbleStore(useShallow(state => state.suggestions))
 export const useStumblePreferences = () => stumbleStore(useShallow(state => state.selectedPreferences))
 export const useStumbleVisitedPoiIds = () => stumbleStore(state => state.visitedPoiIds)
+export const useStumbleFeedbackMap = () => stumbleStore(state => state.feedbackMap)
 export const useStumbleError = () => stumbleStore(state => state.error)
 
 export const getStumbleActions = () => ({
@@ -56,6 +66,7 @@ export const getStumbleActions = () => ({
   setSelectedPreferences: stumbleStore.getState().setSelectedPreferences,
   markVisited: stumbleStore.getState().markVisited,
   setVisitedPoiIds: stumbleStore.getState().setVisitedPoiIds,
+  setFeedback: stumbleStore.getState().setFeedback,
   setError: stumbleStore.getState().setError,
   reset: stumbleStore.getState().reset,
 })
