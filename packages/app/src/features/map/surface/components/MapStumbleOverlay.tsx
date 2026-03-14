@@ -8,12 +8,16 @@ import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSequence, w
 import { useMapCanvasBoundary, useMapCanvasDimensions } from '../../stores/mapStore'
 import { useMapCompensatedScale } from './MapCompensatedScale'
 import { mapUtils } from '../../services/geoToScreenTransform'
-import { useStumbleSuggestions, useStumbleVisitedPoiIds } from '@app/features/stumble/stumbleStore'
+import { useStumbleSuggestions, useStumbleVisitedPoiIds, getStumbleActions } from '@app/features/stumble/stumbleStore'
 import { useIsStumbleTrail } from '@app/features/stumble'
 import { useStumbleReachedCard } from '@app/features/stumble/components/StumbleReachedCard'
 import { useDeviceGeoLocation } from '@app/features/sensor/stores/sensorStore'
 import { geoUtils } from '@shared/geo'
 import { STUMBLE_REACH_RADIUS_METERS } from '@app/features/stumble/config'
+import { center } from '@shopify/react-native-skia'
+
+const DOT_SIZE = 6
+const DOT_RADIUS = DOT_SIZE / 2
 
 /**
  * Renders Stumble Mode suggestion markers on the map canvas.
@@ -51,11 +55,18 @@ export function MapStumbleOverlay() {
     [markerPositions, deviceLocation]
   )
 
+  // Reset shown tracking when suggestions change (stumble mode toggled)
+  useEffect(() => {
+    shownRef.current = new Set()
+  }, [suggestions])
+
   // Auto-show card when user first enters range of a POI
   useEffect(() => {
     for (const { suggestion, isReached } of positions) {
-      if (isReached && !shownRef.current.has(suggestion.id)) {
-        shownRef.current.add(suggestion.id)
+      const id = suggestion.id
+      if (isReached && !shownRef.current.has(id) && !visitedPoiIds.has(id)) {
+        shownRef.current.add(id)
+        getStumbleActions().markVisited(id)
         showStumbleReachedCard(suggestion)
         break // show one at a time
       }
@@ -125,9 +136,10 @@ const StumbleMarker = memo(function StumbleMarker({ suggestion, cx, cy, diameter
   }), [compensatedScale])
 
   const radius = diameter / 2
+  const labelTop = isVisited ? DOT_RADIUS + 4 : radius + 4
 
   return (
-    <Animated.View
+    <View
       style={[
         styles.wrapper,
         {
@@ -135,60 +147,87 @@ const StumbleMarker = memo(function StumbleMarker({ suggestion, cx, cy, diameter
           left: cx,
           top: cy,
         },
-        scaleStyle,
       ]}
     >
+      {/* Outer ring — uses geo-pixel size directly, no scale compensation */}
+      {!isVisited && (
+        <Animated.View
+          style={[
+            styles.circle,
+            isReached && styles.circleReached,
+            { borderRadius: radius, width: diameter, height: diameter, left: -radius, top: -radius },
+            animatedStyle,
+          ]}
+        />
+      )}
+
+      {/* Center dot — compensated scale to stay constant visual size */}
       <Animated.View
         style={[
-          styles.circle,
-          isReached && styles.circleReached,
-          isVisited && styles.circleVisited,
-          { borderRadius: radius, width: diameter, height: diameter, left: -radius, top: -radius },
+          styles.dot,
+          isVisited && styles.dotVisited,
           animatedStyle,
+          scaleStyle,
         ]}
       />
-      {/* Category label centered below the circle */}
-      <View style={[styles.nameTag, { top: radius + 4 }]}>
+
+      {/* Category label — static centering via stylesheet translateX */}
+      <View style={[styles.nameTag, { top: labelTop }]}>
         <Text variant="caption" style={[styles.name, isVisited && styles.nameVisited]}>
-          {isVisited ? '✓ ' : ''}{locales.stumble.categories[suggestion.category]}
+          {locales.stumble.categories[suggestion.category]}
         </Text>
       </View>
-    </Animated.View>
+    </View>
   )
 })
 
 const createStyles = (theme: Theme) => StyleSheet.create({
   wrapper: {
     position: 'absolute',
-    zIndex: 200,
+    zIndex: 100,
   },
   circle: {
     position: 'absolute',
     borderWidth: 1.5,
     borderColor: theme.colors.secondary,
-    backgroundColor: theme.deriveColor(theme.colors.secondary, 0.12),
+    backgroundColor: theme.opacity(theme.colors.dark, 0.8),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   circleReached: {
     borderColor: theme.colors.primary,
-    backgroundColor: theme.deriveColor(theme.colors.primary, 0.2),
+    backgroundColor: theme.opacity(theme.colors.primary, 0.5),
     borderWidth: 2,
   },
   circleVisited: {
     borderColor: theme.colors.onSurface,
-    backgroundColor: theme.deriveColor(theme.colors.onSurface, 0.08),
+    backgroundColor: theme.opacity(theme.colors.dark, 0.5),
     borderStyle: 'dashed',
+  },
+  dot: {
+    position: 'absolute',
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: DOT_RADIUS,
+    backgroundColor: theme.colors.primary,
+    left: -DOT_RADIUS,
+    top: -DOT_RADIUS,
+  },
+  dotVisited: {
+    backgroundColor: theme.colors.secondary,
   },
   nameTag: {
     position: 'absolute',
     transform: [{ translateX: "-50%" }],
     alignItems: 'center',
-    backgroundColor: theme.deriveColor(theme.colors.surface, 0.9),
+    backgroundColor: theme.opacity(theme.colors.dark, 0.8),
     paddingHorizontal: 4,
     paddingVertical: 2,
     borderRadius: 4,
+    zIndex: 105
   },
   name: {
-    color: theme.colors.onSurface,
+    color: theme.colors.light,
     fontSize: 10,
   },
   nameVisited: {
