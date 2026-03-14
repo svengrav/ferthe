@@ -37,7 +37,7 @@ export const Flippable = ({ width, height, front, back, style, flipped, onTap }:
   }, [flipped])
 
   const frontAnimatedStyle = useAnimatedStyle(() => {
-    const rotateY = interpolate(rotation.value, [0, 180], [0, 180])
+    const rotateY = interpolate(rotation.value, [0, 180], [0, -180])
     return {
       transform: [
         { perspective: 1000 },
@@ -47,7 +47,7 @@ export const Flippable = ({ width, height, front, back, style, flipped, onTap }:
   })
 
   const backAnimatedStyle = useAnimatedStyle(() => {
-    const rotateY = interpolate(rotation.value, [0, 180], [180, 360])
+    const rotateY = interpolate(rotation.value, [0, 180], [-180, -360])
     return {
       transform: [
         { perspective: 1000 },

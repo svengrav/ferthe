@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics'
 import { Image } from 'expo-image'
 import { ReactNode, useState } from 'react'
 import { Pressable, StyleSheet } from 'react-native'
@@ -64,6 +65,7 @@ export function DiscoveryReveal(props: DiscoveryRevealProps) {
   const { overlayAnimatedStyle, triggerReveal } = useRevealAnimations(handleRevealComplete)
 
   const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
     triggerReveal()
     onReveal()
   }

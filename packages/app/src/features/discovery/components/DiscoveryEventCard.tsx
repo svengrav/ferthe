@@ -5,15 +5,17 @@ import { Button, Text } from '@app/shared/components'
 import { Flippable } from '@app/shared/components/animation/Flippable'
 import { closeOverlay, setOverlay } from '@app/shared/overlay'
 import { createThemedStyles, useTheme } from '@app/shared/theme'
+import * as Haptics from 'expo-haptics'
 import { useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
+import { Gesture, GestureDetector, ScrollView } from 'react-native-gesture-handler'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withTiming
 } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 import { useSpotPage } from '@app/features/spot/components/SpotPage'
 import { DiscoveryEventState } from '../services/types'
 import { discoveryStore } from '../stores/discoveryStore'
@@ -22,6 +24,7 @@ import DiscoveryStats from './DiscoveryStats'
 
 const FADE_IN_DELAY = 2000
 const ANIMATION_DURATION = 600
+const SWIPE_THRESHOLD = -60
 const CLOSE_BUTTON_TOP = 10
 const CLOSE_BUTTON_RIGHT = 10
 const CLOSE_BUTTON_Z_INDEX = 4
@@ -210,6 +213,8 @@ function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCa
             style={styles.backScrollView}
             contentContainerStyle={styles.backContentContainer}
             id='scroll'
+            horizontal={false}
+            directionalLockEnabled={true}
           >
             <View style={styles.backContent}>
               <Text style={styles.backTitle}>{card.title}</Text>
@@ -231,14 +236,29 @@ function DiscoveryEventCard({ card, mode = 'reveal', onClose }: DiscoveryEventCa
     </View>
   )
 
+  const swipeGesture = Gesture.Pan()
+    .activeOffsetX([-20, 20])
+    .onEnd((event) => {
+      'worklet'
+      if (event.translationX < SWIPE_THRESHOLD) {
+        scheduleOnRN(setIsFlipped, true)
+      } else if (event.translationX > -SWIPE_THRESHOLD) {
+        scheduleOnRN(setIsFlipped, false)
+      }
+    })
+
   return (
-    <Flippable
-      width={width}
-      height={height}
-      flipped={isFlipped}
-      front={renderFrondend()}
-      back={renderBackend()}
-    />
+    <GestureDetector gesture={swipeGesture}>
+      <View collapsable={false}>
+        <Flippable
+          width={width}
+          height={height}
+          flipped={isFlipped}
+          front={renderFrondend()}
+          back={renderBackend()}
+        />
+      </View>
+    </GestureDetector>
   )
 }
 
