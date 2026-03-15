@@ -67,4 +67,5 @@ export const STORE_IDS = {
   STUMBLE_POIS: 'stumble_pois',
   STUMBLE_VISITS: 'stumble_visits',
   STUMBLE_FEEDBACK: 'stumble_feedback',
+  system_app_updates: 'system_app_updates',
 } as const

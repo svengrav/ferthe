@@ -61,3 +61,21 @@ export interface HttpRoute<
  * Type-safe route definition helper
  */
 export type RouteRegistry<D extends string = string, K extends string = string> = Record<D, Record<K, HttpRoute>>;
+
+/**
+ * Result of a backend status/health check
+ */
+export interface StatusCheckResult {
+  available: boolean
+  latency?: number
+  error?: string
+}
+
+/** Standard pagination + sorting params used by all list endpoints */
+export interface ListQuery {
+  limit?: number
+  offset?: number
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+  [key: string]: string | number | undefined
+}

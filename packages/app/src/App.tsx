@@ -9,7 +9,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import * as SplashScreen from 'expo-splash-screen'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SystemUpdatePage } from './features/system/SystemUpdatePage'
 import AccountAuthWrapper from './features/account/components/AccountAuthWrapper'
+import { SystemWrapper } from './features/system/SystemWrapper'
 import { useInitializationPipeline } from './init/useInitializationPipeline'
 import { OverlayProvider } from './shared/overlay'
 
@@ -20,7 +22,6 @@ const queryClient = new QueryClient()
 export default function App() {
   const { isReady } = useInitializationPipeline()
 
-
   if (!isReady) {
     return <SplashView />
   }
@@ -29,11 +30,13 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
         <GestureHandlerRootView>
-          <Snackbar />
-          <AccountAuthWrapper>
-            <Navigation />
-          </AccountAuthWrapper>
-          <OverlayProvider />
+          <SystemWrapper>
+            <Snackbar />
+            <AccountAuthWrapper>
+              <Navigation />
+            </AccountAuthWrapper>
+            <OverlayProvider />
+          </SystemWrapper>
         </GestureHandlerRootView>
       </SafeAreaProvider>
     </QueryClientProvider>

@@ -51,46 +51,41 @@ function Page(props: PageProps) {
     }
     : undefined
 
-  // Dynamic content container based on scrollable prop
-  const ContentContainer = scrollable ? ScrollView : View
-  const contentProps = scrollable
-    ? {
-      contentContainerStyle: [{ flexGrow: 1, paddingBottom: 12 }],
-      ...(onRefresh ? { refreshControl: <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> } : {}),
-      ...(handleScroll ? { onScroll: handleScroll, scrollEventThrottle: 400 } : {}),
-    }
-    : {}
-
   const bottomPadding = !screen && inset !== 'none' ? insets.bottom : 0
 
-  const pageContent = (
+  const renderScrollableContent = () => (
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ flexGrow: 1, paddingHorizontal: insetValue, paddingBottom: bottomPadding }}
+      {...(onRefresh ? { refreshControl: <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> } : {})}
+      {...(handleScroll ? { onScroll: handleScroll, scrollEventThrottle: 400 } : {})}
+    >
+      {loading ? <View style={styles.loadingContainer}><ActivityIndicator size="large" color={theme.colors.primary} /></View> : children}
+    </ScrollView>
+  )
+
+  const renderStaticContent = () => (
+    <View style={[styles.container, { paddingHorizontal: insetValue, paddingBottom: bottomPadding }]}>
+      {loading ? <View style={styles.loadingContainer}><ActivityIndicator size="large" color={theme.colors.primary} /></View> : children}
+    </View>
+  )
+
+  const page = (
     <View style={[styles.page, { paddingTop: insets.top }, style]}>
       <PageHeader title={title} options={options} trailing={trailing} leading={resolvedLeading} />
-
-      <ContentContainer style={[styles.container, { paddingHorizontal: insetValue, paddingBottom: bottomPadding }]} {...contentProps}>
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-          </View>
-        ) : (
-          children
-        )}
-      </ContentContainer>
+      {scrollable ? renderScrollableContent() : renderStaticContent()}
     </View>
   )
 
   if (keyboardAware) {
     return (
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        {pageContent}
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        {page}
       </KeyboardAvoidingView>
     )
   }
 
-  return pageContent
+  return page
 }
 
 const createStyles = (theme: Theme) =>

@@ -2,7 +2,7 @@ import { useSettingsPage } from '@app/features/settings'
 import { isStumbleTrail } from '@app/features/stumble'
 import { useTrails } from '@app/features/trail/stores/trailStore'
 import { useTrailPagination } from '@app/features/trail/hooks/useTrailPagination'
-import { Button, Page, Stack, Text } from '@app/shared/components'
+import { Button, Header, Page, Stack, Text } from '@app/shared/components'
 import { useLocalization } from '@app/shared/localization'
 import { Trail } from '@shared/contracts'
 import TrailItem from './TrailItem'
@@ -53,7 +53,7 @@ function TrailScreen() {
       options={pageOptions}
     >
       <Stack>
-        <Text variant="heading">Stumble</Text>
+        <Header title={'Stumble'} />
         {stumbleTrails.map(trail => (
           <TrailItem
             key={trail.id}

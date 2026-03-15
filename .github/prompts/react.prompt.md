@@ -35,6 +35,10 @@ Follow this structure:
 - Check if the component contains statless logic, if yes, check if a feature service is already existing, if not, create a new one and move the logic there.
 - Check if the component contains complex logic for UI, if yes, extract it to a custom hook. 
 
+# Tests
+- Check if tests could be usefull and give a recommendation. If there are already tests, check if they are testing the important logic and if they are testing the right things.
+- Test should check complex and business logic in hooks / services / applications. No need to test simple components.
+
 # Styles
 - Remove not used styles.
 - Place styles outside the component.

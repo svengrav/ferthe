@@ -10,13 +10,13 @@ import { parseQueryOptions } from '@core/api/oak/queryOptions.ts'
 import { createAsyncRequestHandler } from '@core/api/oak/requestHandler.ts'
 import { routes as sharedRoutes } from '@shared/api/routes.ts'
 import type { HttpRoute } from '@shared/api/types.ts'
+import type { AppUpdate, AppUpdateInput } from '@shared/contracts/system.ts'
 
 import {
   Account,
   AccountPublicProfile,
   AccountSession,
   ActivateTrailResult,
-  APIContract,
   Clue,
   Community,
   CommunityMember,
@@ -51,6 +51,7 @@ import {
   UpdateSpotRequest,
   WelcomeDiscoveryResult
 } from '@shared/contracts/index.ts'
+import type { CoreContext } from '../core.ts'
 import { manifest } from './manifest.ts'
 import { OakRouteHandler, Route } from './oak/types.ts'
 
@@ -71,8 +72,8 @@ const toOakRoute = (httpRoute: HttpRoute, handler: HandlerFn): Route => ({
 /**
  * Create handler registry: domain → routeId → handler function
  */
-const createHandlers = (ctx: APIContract): Record<string, Record<string, HandlerFn>> => {
-  const { discoveryApplication, storyApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication, contentApplication, spotAccessComposite, discoveryStateComposite, accountProfileComposite, stumbleApplication } = ctx
+const createHandlers = (ctx: CoreContext): Record<string, Record<string, HandlerFn>> => {
+  const { discoveryApplication, storyApplication, sensorApplication, trailApplication, spotApplication, accountApplication, communityApplication, contentApplication, spotAccessComposite, discoveryStateComposite, accountProfileComposite, stumbleApplication, systemApplication } = ctx
 
   // Create the request handler with account application access
   const asyncRequestHandler = createAsyncRequestHandler(accountApplication)
@@ -85,6 +86,15 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
         success: true,
         data: manifest,
       })),
+      getAppUpdate: asyncRequestHandler<AppUpdate>(async () => {
+        return await systemApplication.getAppUpdate()
+      }),
+      setAppUpdate: asyncRequestHandler<void, never, AppUpdateInput>(async ({ context, body }) => {
+        return await systemApplication.addAppUpdate(context, body!)
+      }),
+      listAppUpdates: asyncRequestHandler<AppUpdate[]>(async ({ context, query }) => {
+        return await systemApplication.listAppUpdates(context, parseQueryOptions(query))
+      }),
       // deno-lint-ignore require-await
       getStatus: asyncRequestHandler(async () => ({
         success: true,
@@ -410,7 +420,7 @@ const createHandlers = (ctx: APIContract): Record<string, Record<string, Handler
 /**
  * Create Oak routes from shared contract + handlers
  */
-const createRoutes = (ctx: APIContract): Route[] => {
+const createRoutes = (ctx: CoreContext): Route[] => {
   const handlers = createHandlers(ctx)
   const oakRoutes: Route[] = []
 

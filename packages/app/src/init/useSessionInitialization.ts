@@ -10,21 +10,17 @@ import { useInitStore } from './initStore'
  */
 export function useSessionInitialization() {
   const { setSessionReady } = useInitStore()
-  const appContextReady = useInitStore(state => state.appContextReady)
   const { context } = useAppContextStore()
 
   useEffect(() => {
-    // Wait for app context to be ready
-    if (!appContextReady || !context) {
+    if (!context) {
       return
     }
 
     async function loadSession() {
       try {
         logger.log('[SessionInit] Loading session from storage...')
-
         await context?.accountApplication.initializeSession()
-
         logger.log('[SessionInit] Session loaded successfully')
         setSessionReady()
       } catch (error) {
@@ -35,5 +31,5 @@ export function useSessionInitialization() {
     }
 
     loadSession()
-  }, [appContextReady, context])
+  }, [context])
 }

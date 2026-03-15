@@ -340,6 +340,15 @@ const de: LocalizationSet = {
     linkLabelPlaceholder: 'Linktext...',
     contentBlocks: 'Inhalt',
   },
+  system: {
+    update: {
+      title: 'Update verfügbar',
+      message: 'Eine neuere Version der App ist erforderlich. Bitte aktualisiere die App über den Store.',
+      action: 'Jetzt aktualisieren',
+      latestChanges: 'Neu in dieser Version',
+      dismiss: 'Später',
+    },
+  },
   feedback: {
     title: 'Feedback',
     description: 'Was funktioniert gut? Wo können wir besser werden? Euer Feedback hilft uns das Projekt für euch zu verbessern.',

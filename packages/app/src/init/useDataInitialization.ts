@@ -15,9 +15,13 @@ export function useDataInitialization() {
   const session = useSession()
   const { context } = useAppContextStore()
   const { setDataReady } = useInitStore()
+  const versionCheckReady = useInitStore(state => state.versionCheckReady)
   const hasLoadedRef = useRef(false)
 
   useEffect(() => {
+    // Wait for version check before any API calls
+    if (!versionCheckReady) return
+
     // No session yet - wait for user to login/create account
     if (!session) {
       hasLoadedRef.current = false
@@ -54,5 +58,5 @@ export function useDataInitialization() {
     }
 
     loadData()
-  }, [session?.accountId, context])
+  }, [session?.accountId, context, versionCheckReady])
 }

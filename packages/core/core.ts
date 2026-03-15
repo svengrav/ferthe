@@ -22,11 +22,13 @@ import { createSensorService } from './features/sensor/sensorService.ts'
 import { createSpotApplication, SpotApplicationActions } from './features/spot/spotApplication.ts'
 import { createStumbleApplication, StumbleApplicationActions } from './features/stumble/stumbleApplication.ts'
 import { createStumbleFeedbackStore, createStumblePoiRepository, createStumblePoiStore } from './features/stumble/stumbleStore.ts'
+import { createSystemApplication, SystemApplication } from './features/system/systemApplication.ts'
 import { PoiConnector } from './connectors/poiConnector.ts'
 import { createTrailApplication } from './features/trail/trailApplication.ts'
 import { createImageApplication } from "./shared/images/imageApplication.ts"
 import { createStore } from './store/storeFactory.ts'
 import { StoreInterface } from './store/storeInterface.ts'
+import type { AppUpdate } from '@shared/contracts/system.ts'
 
 export interface StorageConnector {
   getItemUrl(key: string): Promise<{ id: string; url: string } | null>
@@ -52,6 +54,7 @@ export interface CoreContext extends APIContract {
   notificationService: NotificationService
   contentApplication: ContentApplicationActions
   stumbleApplication: StumbleApplicationActions
+  systemApplication: SystemApplication
 }
 
 export function createCoreContext(config: Config, connectors: CoreConnectors): CoreContext {
@@ -183,6 +186,10 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     defaultRadiusMeters: config.constants.stumble.defaultRadiusMeters,
   })
 
+  const systemApplication = createSystemApplication(
+    createStore<AppUpdate>(storeConnector, STORE_IDS.system_app_updates)
+  )
+
   return {
     config: config,
     discoveryApplication,
@@ -199,5 +206,6 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
     accountProfileComposite,
     contentApplication,
     stumbleApplication,
+    systemApplication,
   }
 }

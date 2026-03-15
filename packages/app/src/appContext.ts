@@ -1,8 +1,6 @@
-import { config } from '@app/config'
 import { APIContext } from '@app/api/apiContext'
-import { ApiClient } from '@shared/api'
+import { ApiClient, type StatusCheckResult } from '@shared/api'
 import { AccountSession } from '@shared/contracts'
-import { StatusResult } from './api/utils'
 import { AccountApplication, createAccountApplication } from './features/account'
 import { CommunityApplication, createCommunityApplication } from './features/community/application'
 import { createDiscoveryApplication, DiscoveryApplication } from './features/discovery/application'
@@ -19,9 +17,10 @@ import { initLogger, logger } from './shared/utils/logger'
 export interface AppContext {
   readonly config: AppConfiguration
   readonly api: ApiClient
+  readonly secureStore?: SecureStoreConnector
   system: {
     isDevelopment: boolean
-    checkStatus: () => Promise<StatusResult>
+    checkStatus: () => Promise<StatusCheckResult>
   }
   discoveryApplication: DiscoveryApplication
   storyApplication: StoryApplication
@@ -87,9 +86,10 @@ export function createAppContext(config: AppConfiguration = {}): AppContext {
   return {
     config: { environment },
     api,
+    secureStore: connectors?.secureStoreConnector,
     system: {
       isDevelopment: config.environment === 'development',
-      checkStatus: apiContext.system.checkStatus,
+      checkStatus: api.system.checkStatus,
     },
     discoveryApplication,
     storyApplication,

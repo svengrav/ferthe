@@ -19,6 +19,9 @@ import type { StoredTrailSpot, TrailSpot } from '../contracts/trailSpots.ts'
 import type { GeoLocation } from '../geo/index.ts'
 import { HttpClient, type HttpClientConfig } from './httpClient.ts'
 import { routes } from './routes.ts'
+import type { ListQuery, StatusCheckResult } from './types.ts'
+import type { AppUpdate } from '@shared/contracts/system.ts'
+export type { HttpClientConfig as ApiClientConfig }
 
 /** Replaces :param segments with values from the params record */
 const buildPath = (template: string, params?: Record<string, string>): string =>
@@ -46,23 +49,29 @@ async function callPaged<T>(fn: () => Promise<Result<T[]>>): Promise<Result<T[]>
   }
 }
 
-export type { HttpClientConfig as ApiClientConfig }
-
-/** Standard pagination + sorting params used by all list endpoints */
-export interface ListQuery {
-  limit?: number
-  offset?: number
-  sortBy?: string
-  sortOrder?: 'asc' | 'desc'
-  [key: string]: string | number | undefined
-}
-
 export function createApiClient(config: HttpClientConfig) {
   const client = new HttpClient(config)
 
   return {
     system: {
+      checkStatus: async (): Promise<StatusCheckResult> => {
+        const start = Date.now()
+        try {
+          const result = await client.get<{ status: string; message: string }>(routes.system.getStatus.path)
+          const latency = Date.now() - start
+          if (result.success) return { available: true, latency }
+          return { available: false, latency, error: result.error?.message }
+        } catch (err) {
+          return { available: false, latency: Date.now() - start, error: err instanceof Error ? err.message : String(err) }
+        }
+      },
+
       getManifest: () => call<{ name: string; version: string; description?: string }>(() => client.get(routes.system.getManifest.path)),
+      getAppUpdate: () => call<AppUpdate>(() => client.get(routes.system.getAppUpdate.path)),
+      setAppUpdate: (body: { version: string; latestAppVersion: string; minAppVersion: string; force: boolean; message?: string; patchNotes?: string[]; storeUrl?: string }) =>
+        call<{ success: boolean }>(() => client.post(routes.system.setAppUpdate.path, body)),
+      listAppUpdates: (query?: ListQuery) =>
+        callPaged<AppUpdate>(() => client.get(routes.system.listAppUpdates.path, query)),
       getStatus: () => call<{ status: string; message: string }>(() => client.get(routes.system.getStatus.path)),
     },
 

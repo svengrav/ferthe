@@ -51,9 +51,14 @@ import {
 } from '@shared/contracts/trails.ts'
 import { TrailSpotSchema } from '@shared/contracts/trailSpots.ts'
 import { StumbleFeedbackSchema, StumbleFeedbackVoteSchema, StumbleSuggestionResultSchema, StumbleVisitSchema } from '@shared/contracts/stumble.ts'
+import { AppUpdateSchema } from '@shared/contracts/system.ts'
+import { DiscoverySpotSchema } from '@shared/contracts/discoveries.ts'
 import { GeoLocationSchema } from '@shared/geo/types.ts'
 import { z } from 'zod'
 import type { RouteRegistry } from './types.ts'
+
+export { AppUpdateSchema }
+export type { AppUpdate } from '@shared/contracts/system.ts'
 
 // ──────────────────────────────────────────────────────────────
 // Query & Params Schemas
@@ -154,19 +159,14 @@ const BlogPostDetailSchema = z.object({
 
 /**
  * Discovery spot (Spot + discovery metadata)
+ * Imported from @shared/contracts/discoveries.ts
  */
-const DiscoverySpotSchema = SpotSchema.extend({
-  discoveredAt: z.date().optional(),
-  discoveryId: z.string(),
-})
 
 /**
  * Central route registry - all API endpoints defined here
  */
 export const routes = {
-  // ─────────────────────────────────────────────────────────────
   // System Routes
-  // ─────────────────────────────────────────────────────────────
   system: {
     getManifest: {
       version: 'v1',
@@ -174,6 +174,35 @@ export const routes = {
       path: '/',
       config: { isPublic: true },
       output: ResultSchema(ManifestSchema),
+    },
+    getAppUpdate: {
+      version: 'v1',
+      method: 'GET',
+      path: '/system/app-update',
+      config: { isPublic: true },
+      output: ResultSchema(AppUpdateSchema),
+    },
+    setAppUpdate: {
+      version: 'v1',
+      method: 'POST',
+      path: '/system/app-update',
+      input: z.object({
+        version: z.string(),
+        latestAppVersion: z.string(),
+        minAppVersion: z.string(),
+        force: z.boolean(),
+        message: z.string().optional(),
+        patchNotes: z.array(z.string()).optional(),
+        storeUrl: z.string().optional(),
+      }),
+      output: ResultSchema(SuccessSchema),
+    },
+    listAppUpdates: {
+      version: 'v1',
+      method: 'GET',
+      path: '/system/app-updates',
+      query: ListQuerySchema,
+      output: ResultSchema(z.array(AppUpdateSchema)),
     },
     getStatus: {
       version: 'v1',
@@ -184,9 +213,7 @@ export const routes = {
     },
   },
 
-  // ─────────────────────────────────────────────────────────────
   // Spot Routes
-  // ─────────────────────────────────────────────────────────────
   spot: {
     listSpots: {
       version: 'v1',
@@ -270,9 +297,7 @@ export const routes = {
     },
   },
 
-  // ─────────────────────────────────────────────────────────────
   // Trail Routes
-  // ─────────────────────────────────────────────────────────────
   trail: {
     listTrails: {
       version: 'v1',
@@ -363,9 +388,7 @@ export const routes = {
     },
   },
 
-  // ─────────────────────────────────────────────────────────────
   // Discovery Routes
-  // ─────────────────────────────────────────────────────────────
   discovery: {
     processLocation: {
       version: 'v1',
@@ -441,9 +464,7 @@ export const routes = {
     },
   },
 
-  // ─────────────────────────────────────────────────────────────
   // Story Routes
-  // ─────────────────────────────────────────────────────────────
   story: {
     getSpotStory: {
       version: 'v1',
@@ -512,9 +533,7 @@ export const routes = {
     },
   },
 
-  // ─────────────────────────────────────────────────────────────
   // Account Routes
-  // ─────────────────────────────────────────────────────────────
   account: {
     requestSMSCode: {
       version: 'v1',
@@ -631,9 +650,7 @@ export const routes = {
     },
   },
 
-  // ─────────────────────────────────────────────────────────────
   // Community Routes
-  // ─────────────────────────────────────────────────────────────
   community: {
     createCommunity: {
       version: 'v1',
@@ -723,9 +740,9 @@ export const routes = {
     },
   },
 
-  // ─────────────────────────────────────────────────────────────
+
   // Sensor Routes
-  // ─────────────────────────────────────────────────────────────
+
   sensor: {
     listScans: {
       version: 'v1',
@@ -746,9 +763,9 @@ export const routes = {
     },
   },
 
-  // ─────────────────────────────────────────────────────────────
+
   // Content Routes
-  // ─────────────────────────────────────────────────────────────
+
   content: {
     getPage: {
       version: 'v1',
@@ -784,9 +801,9 @@ export const routes = {
     },
   },
 
-  // ─────────────────────────────────────────────────────────────
+
   // Stumble Routes
-  // ─────────────────────────────────────────────────────────────
+
   stumble: {
     getSuggestions: {
       version: 'v1',
@@ -835,9 +852,9 @@ export const routes = {
     },
   },
 
-  // ─────────────────────────────────────────────────────────────
+
   // Composite Routes
-  // ─────────────────────────────────────────────────────────────
+
   composite: {
     listAccessibleSpots: {
       version: 'v1',

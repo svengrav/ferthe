@@ -1,27 +1,60 @@
-# Supabase (POSTGRES)
+# Supabase Setup & Migrations
 
-```
-# Install Supabase CLI
+Configure and manage Supabase databases using the CLI. This guide covers installation, project linking, schema deployment, and database migrations.
+
+## Installation
+
+### Install Supabase CLI
+
+```bash
 #!/usr/bin/env bash
 set -e
 
+sudo rm /usr/local/bin/supabase
+rm -rf supabase
 wget -q https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz
 tar -xzf supabase_linux_amd64.tar.gz
 sudo mv supabase /usr/local/bin/
 rm supabase_linux_amd64.tar.gz
-
 supabase --version
+```
 
-# 2. Login
+## Project Setup
+
+### Link Project to Repository
+
+**Steps:**
+
+1. Authenticate with Supabase:
+
+```bash
 supabase login
+```
 
-# 3. Mit deinem Projekt verbinden
+2. Connect to the project:
+
+```bash
 cd /root/workspace/ferthe/packages/core
-supabase link --project-ref lzrtdpybunfjjnrrucyq (https://supabase.com/dashboard/project/lzrtdpybunfjjnrrucyq)
-# Project-Ref findest du im Dashboard unter Settings → General → Reference ID
+supabase link --project-ref lzrtdpybunfjjnrrucyq
+```
 
-# 4. Schema anwenden
+3. Find project reference in Supabase Dashboard:
+   - Navigate to Settings → General → Reference ID
+
+### Deploy Database Schema
+
+Apply schema files in order:
+
+```bash
 cd database
 cat schema/01_extensions.sql schema/02_tables.sql schema/03_indexes.sql schema/04_functions.sql | \
 supabase db execute
+```
+
+## Migrations
+
+Push database changes:
+
+```bash
+supabase db push
 ```

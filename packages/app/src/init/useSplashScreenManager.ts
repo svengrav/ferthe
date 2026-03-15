@@ -19,7 +19,7 @@ export function useSplashScreenManager() {
     logger.log('App initialization started')
   }, [])
 
-  // Hide splash screen when session is ready
+  // Hide splash screen when session and version check are both ready
   useEffect(() => {
     if (!sessionReady) return
 

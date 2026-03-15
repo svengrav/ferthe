@@ -4,6 +4,7 @@
     "jsr:@oak/commons@1": "1.0.1",
     "jsr:@oak/oak@17": "17.2.0",
     "jsr:@oak/oak@^17.1.4": "17.2.0",
+    "jsr:@oak/oak@^17.2.0": "17.2.0",
     "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/assert@^1.0.12": "1.0.19",
     "jsr:@std/assert@^1.0.19": "1.0.19",
@@ -21,20 +22,24 @@
     "jsr:@std/path@^1.1.4": "1.1.4",
     "jsr:@tajpouria/cors@^1.2.1": "1.2.1",
     "npm:@azure/cosmos@4": "4.9.1",
-    "npm:@azure/data-tables@^13.3.0": "13.3.2",
+    "npm:@azure/cosmos@^4.9.1": "4.9.1",
+    "npm:@azure/data-tables@^13.3.2": "13.3.2",
     "npm:@azure/identity@4": "4.13.0",
+    "npm:@azure/identity@^4.13.0": "4.13.0",
     "npm:@azure/keyvault-secrets@4": "4.10.0_@azure+core-rest-pipeline@1.22.2",
+    "npm:@azure/keyvault-secrets@^4.10.0": "4.10.0_@azure+core-rest-pipeline@1.22.2",
     "npm:@azure/storage-blob@^12.29.1": "12.31.0_@azure+core-client@1.10.1_@azure+core-rest-pipeline@1.22.2",
+    "npm:@azure/storage-blob@^12.31.0": "12.31.0_@azure+core-client@1.10.1_@azure+core-rest-pipeline@1.22.2",
     "npm:@deno/vite-plugin@^1.0.4": "1.0.6_vite@5.4.21",
     "npm:@heroicons/react@^2.2.0": "2.2.0_react@19.2.4",
     "npm:@react-google-maps/api@^2.20.3": "2.20.8_react@19.2.4_react-dom@19.2.4__react@19.2.4",
-    "npm:@supabase/supabase-js@2.98.0": "2.98.0",
-    "npm:@supabase/supabase-js@^2.98.0": "2.98.0",
+    "npm:@supabase/supabase-js@^2.99.1": "2.99.1",
     "npm:@tailwindcss/vite@^4.1.17": "4.1.18_vite@5.4.21",
     "npm:@types/react@^19.1.2": "19.2.14",
     "npm:@vitejs/plugin-react@^4.4.1": "4.7.0_vite@5.4.21_@babel+core@7.29.0",
     "npm:clsx@^2.1.1": "2.1.1",
     "npm:dotenv@16": "16.6.1",
+    "npm:dotenv@^16.6.1": "16.6.1",
     "npm:gray-matter@^4.0.3": "4.0.3",
     "npm:jimp@0.22.12": "0.22.12_@jimp+custom@0.22.12",
     "npm:path-to-regexp@^6.3.0": "6.3.0",
@@ -45,10 +50,11 @@
     "npm:react-router-dom@^7.5.1": "7.13.0_react@19.2.4_react-dom@19.2.4__react@19.2.4",
     "npm:react@^19.1.0": "19.2.4",
     "npm:sharp@~0.34.5": "0.34.5",
-    "npm:supabase@^2.77.0": "2.77.0",
+    "npm:supabase@^2.78.1": "2.78.1",
     "npm:tailwind-scrollbar@^4.0.2": "4.0.2_tailwindcss@4.1.18_react@19.2.4",
     "npm:tailwindcss@^4.1.17": "4.1.18",
-    "npm:twilio@^5.11.2": "5.12.1",
+    "npm:twilio@^5.11.2": "5.13.0",
+    "npm:twilio@^5.13.0": "5.13.0",
     "npm:vite@*": "5.4.21",
     "npm:vite@5.4.21": "5.4.21",
     "npm:zod@^4.3.6": "4.3.6",
@@ -1247,26 +1253,26 @@
       "os": ["win32"],
       "cpu": ["x64"]
     },
-    "@supabase/auth-js@2.98.0": {
-      "integrity": "sha512-GBH361T0peHU91AQNzOlIrjUZw9TZbB9YDRiyFgk/3Kvr3/Z1NWUZ2athWTfHhwNNi8IrW00foyFxQD9IO/Trg==",
+    "@supabase/auth-js@2.99.1": {
+      "integrity": "sha512-x7lKKTvKjABJt/FYcRSPiTT01Xhm2FF8RhfL8+RHMkmlwmRQ88/lREupIHKwFPW0W6pTCJqkZb7Yhpw/EZ+fNw==",
       "dependencies": [
         "tslib"
       ]
     },
-    "@supabase/functions-js@2.98.0": {
-      "integrity": "sha512-N/xEyiNU5Org+d+PNCpv+TWniAXRzxIURxDYsS/m2I/sfAB/HcM9aM2Dmf5edj5oWb9GxID1OBaZ8NMmPXL+Lg==",
+    "@supabase/functions-js@2.99.1": {
+      "integrity": "sha512-WQE62W5geYImCO4jzFxCk/avnK7JmOdtqu2eiPz3zOaNiIJajNRSAwMMDgEGd2EMs+sUVYj1LfBjfmW3EzHgIA==",
       "dependencies": [
         "tslib"
       ]
     },
-    "@supabase/postgrest-js@2.98.0": {
-      "integrity": "sha512-v6e9WeZuJijzUut8HyXu6gMqWFepIbaeaMIm1uKzei4yLg9bC9OtEW9O14LE/9ezqNbSAnSLO5GtOLFdm7Bpkg==",
+    "@supabase/postgrest-js@2.99.1": {
+      "integrity": "sha512-gtw2ibJrADvfqrpUWXGNlrYUvxttF4WVWfPpTFKOb2IRj7B6YRWMDgcrYqIuD4ZEabK4m6YKQCCGy6clgf1lPA==",
       "dependencies": [
         "tslib"
       ]
     },
-    "@supabase/realtime-js@2.98.0": {
-      "integrity": "sha512-rOWt28uGyFipWOSd+n0WVMr9kUXiWaa7J4hvyLCIHjRFqWm1z9CaaKAoYyfYMC1Exn3WT8WePCgiVhlAtWC2yw==",
+    "@supabase/realtime-js@2.99.1": {
+      "integrity": "sha512-9EDdy/5wOseGFqxW88ShV9JMRhm7f+9JGY5x+LqT8c7R0X1CTLwg5qie8FiBWcXTZ+68yYxVWunI+7W4FhkWOg==",
       "dependencies": [
         "@types/phoenix",
         "@types/ws",
@@ -1274,15 +1280,15 @@
         "ws"
       ]
     },
-    "@supabase/storage-js@2.98.0": {
-      "integrity": "sha512-tzr2mG+v7ILSAZSfZMSL9OPyIH4z1ikgQ8EcQTKfMRz4EwmlFt3UnJaGzSOxyvF5b+fc9So7qdSUWTqGgeLokQ==",
+    "@supabase/storage-js@2.99.1": {
+      "integrity": "sha512-mf7zPfqofI62SOoyQJeNUVxe72E4rQsbWim6lTDPeLu3lHija/cP5utlQADGrjeTgOUN6znx/rWn7SjrETP1dw==",
       "dependencies": [
         "iceberg-js",
         "tslib"
       ]
     },
-    "@supabase/supabase-js@2.98.0": {
-      "integrity": "sha512-Ohc97CtInLwZyiSASz7tT9/Abm/vqnIbO9REp+PivVUII8UZsuI3bngRQnYgJdFoOIwvaEII1fX1qy8x0CyNiw==",
+    "@supabase/supabase-js@2.99.1": {
+      "integrity": "sha512-5MRoYD9ffXq8F6a036dm65YoSHisC3by/d22mauKE99Vrwf792KxYIIr/iqCX7E4hkuugbPZ5EGYHTB7MKy6Vg==",
       "dependencies": [
         "@supabase/auth-js",
         "@supabase/functions-js",
@@ -2894,8 +2900,8 @@
         "inline-style-parser"
       ]
     },
-    "supabase@2.77.0": {
-      "integrity": "sha512-CTjEkiuXV3ITyhYZm0k3dx/jW4qGTGxVNjInQWk2KO+/dLCpNS6dvX/NKKZQHMb3O9Pyj/3w0XKGusliCizbBg==",
+    "supabase@2.78.1": {
+      "integrity": "sha512-fCIE/LTTr1IGrrYLqYBI3w89QU1qW+mRVtUi/Dmrtj+oXtDX4E8VgfFlXZpoYsXy86cfE9RZXUJVAGgvdNfTPg==",
       "dependencies": [
         "bin-links",
         "https-proxy-agent@7.0.6",
@@ -2924,8 +2930,8 @@
     "tapable@2.3.0": {
       "integrity": "sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg=="
     },
-    "tar@7.5.10": {
-      "integrity": "sha512-8mOPs1//5q/rlkNSPcCegA6hiHJYDmSLEI8aMH/CdSQJNWztHC9WHNam5zdQlfpTwB9Xp7IBEsHfV5LKMJGVAw==",
+    "tar@7.5.11": {
+      "integrity": "sha512-ChjMH33/KetonMTAtpYdgUFr0tbz69Fp2v7zWxQfYZX4g5ZN2nOBXm1R2xyA+lMIKrLKIoKAwFj93jE/avX9cQ==",
       "dependencies": [
         "@isaacs/fs-minipass",
         "chownr",
@@ -2959,8 +2965,8 @@
     "tslib@2.8.1": {
       "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="
     },
-    "twilio@5.12.1": {
-      "integrity": "sha512-EhgWS5o+JWqMEl0KgUaN1oAym2Pr7LYYiIlwQdx+u+vACBdwHRzhHAQD6TRKFMciNUTzgBi266ZNpYbFhnEykQ==",
+    "twilio@5.13.0": {
+      "integrity": "sha512-gg32vK+NGejPK7Txrnwp2lGmpihSfc+YW//WsoS+KiTtiEUe4jjRSK5v89dPhene2OHmnQNi+9SM6bVI47iA/g==",
       "dependencies": [
         "axios",
         "dayjs",
@@ -3181,23 +3187,23 @@
     "members": {
       "packages/core": {
         "dependencies": [
-          "jsr:@oak/oak@17",
+          "jsr:@oak/oak@^17.2.0",
           "jsr:@std/assert@^1.0.19",
-          "jsr:@std/dotenv@0.225",
+          "jsr:@std/dotenv@~0.225.6",
           "jsr:@std/path@^1.1.4",
-          "npm:@azure/cosmos@4",
-          "npm:@azure/data-tables@^13.3.0",
-          "npm:@azure/identity@4",
-          "npm:@azure/keyvault-secrets@4",
-          "npm:@azure/storage-blob@^12.29.1",
-          "npm:@supabase/supabase-js@^2.98.0",
-          "npm:dotenv@16",
+          "npm:@azure/cosmos@^4.9.1",
+          "npm:@azure/data-tables@^13.3.2",
+          "npm:@azure/identity@^4.13.0",
+          "npm:@azure/keyvault-secrets@^4.10.0",
+          "npm:@azure/storage-blob@^12.31.0",
+          "npm:@supabase/supabase-js@^2.99.1",
+          "npm:dotenv@^16.6.1",
           "npm:gray-matter@^4.0.3",
           "npm:jimp@0.22.12",
           "npm:path@~0.12.7",
           "npm:sharp@~0.34.5",
-          "npm:supabase@^2.77.0",
-          "npm:twilio@^5.11.2",
+          "npm:supabase@^2.78.1",
+          "npm:twilio@^5.13.0",
           "npm:zod@^4.3.6"
         ]
       },

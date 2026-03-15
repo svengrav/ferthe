@@ -18,6 +18,7 @@
         "background": {
           "activeOnStart": true,
           "beginsPattern": "Oak server starting",
+          "endsPattern": "Oak server starting"
         }
       }
     },

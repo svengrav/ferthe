@@ -9,6 +9,7 @@ import { useFontInitialization } from "./useFontInitialization"
 import { usePushNotifications } from "./usePushNotifications"
 import { useSessionInitialization } from "./useSessionInitialization"
 import { useSplashScreenManager } from "./useSplashScreenManager"
+import { useVersionCheck } from "./useVersionCheck"
 
 export { useInitStore } from "./initStore"
 
@@ -18,9 +19,12 @@ export function useInitializationPipeline() {
   useBackendInitialization()
   useAppContextInitialization()
   useSessionInitialization()
+  useVersionCheck()
 
   // Splash screen management
   useSplashScreenManager()
+
+  // Version check — runs after backend is ready
 
   // Step 6-7: Parallel initialization of notifications and data
   usePushNotifications()

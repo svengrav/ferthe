@@ -38,7 +38,7 @@ function SpotScreen() {
         trailing={<Button icon="add" onPress={showCreateSpotPage} />}
       />
 
-      <Stack testID="my-spots" spacing='lg'>
+      <Stack testID="my-spots" spacing='lg' >
         <Stack spacing='xs'>
           <Text variant="title" style={styles.sectionTitle}>{locales.spotCreation.yourSpots}</Text>
           <Text variant="subtitle" style={styles.sectionTitle}>{locales.spotCreation.yourSpotsSubtitle}</Text>

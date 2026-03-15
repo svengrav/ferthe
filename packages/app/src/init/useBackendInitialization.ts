@@ -32,18 +32,18 @@ export function useBackendInitialization() {
 
         logger.log(`[BackendInit] Using endpoint: ${apiEndpoint}`)
 
-        const api = createApiContext({
+        const context = createApiContext({
           getAccountSession: getSession,
           apiEndpoint,
           timeout: config.api.timeout,
         })
 
-        _apiContext = api
+        _apiContext = context
 
         // Backend Health Check - wait until available
         logger.log('[BackendInit] Checking backend status...')
         while (true) {
-          const status = await api.system.checkStatus().catch(() => ({ available: false }))
+          const status = await context.api.system.checkStatus().catch(() => ({ available: false }))
 
           if (status.available) {
             logger.log('[BackendInit] Backend is available')

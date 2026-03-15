@@ -358,6 +358,15 @@ const en = {
     linkLabelPlaceholder: 'Link text...',
     contentBlocks: 'Content',
   },
+  system: {
+    update: {
+      title: 'Update Available',
+      message: 'A newer version of the app is required to continue. Please update from the store.',
+      action: 'Update Now',
+      latestChanges: 'What\'s New',
+      dismiss: 'Later',
+    },
+  },
   feedback: {
     title: 'Feedback',
     description: 'What works well? Where can we improve? Your feedback helps us make the project better for you.',

@@ -1,6 +1,5 @@
 import { createApiClient, type ApiClient } from '@shared/api'
 import { AccountSession } from '@shared/contracts'
-import { checkStatus, type StatusResult } from './utils'
 
 export interface ApiContextOptions {
   apiEndpoint: string
@@ -12,9 +11,6 @@ export interface ApiContextOptions {
 export interface APIContext {
   readonly environment: 'production' | 'development' | 'test'
   readonly api: ApiClient
-  readonly system: {
-    checkStatus: () => Promise<StatusResult>
-  }
 }
 
 export function createApiContext(options: ApiContextOptions): APIContext {
@@ -28,8 +24,5 @@ export function createApiContext(options: ApiContextOptions): APIContext {
   return {
     environment,
     api,
-    system: {
-      checkStatus: () => checkStatus(`${apiEndpoint}/status`),
-    },
   }
 }
