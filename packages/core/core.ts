@@ -21,6 +21,7 @@ import { createSensorApplication, SensorApplicationActions } from './features/se
 import { createSensorService } from './features/sensor/sensorService.ts'
 import { createSpotApplication, SpotApplicationActions } from './features/spot/spotApplication.ts'
 import { createStumbleApplication, StumbleApplicationActions } from './features/stumble/stumbleApplication.ts'
+import { createStumbleFeedbackStore, createStumblePoiRepository, createStumblePoiStore } from './features/stumble/stumbleStore.ts'
 import { PoiConnector } from './connectors/poiConnector.ts'
 import { createTrailApplication } from './features/trail/trailApplication.ts'
 import { createImageApplication } from "./shared/images/imageApplication.ts"
@@ -166,9 +167,20 @@ export function createCoreContext(config: Config, connectors: CoreConnectors): C
   const contentApplication = createContentApplication(config.constants.content.dir)
 
   const stumbleVisitStore = createStore<StumbleVisit>(storeConnector, STORE_IDS.STUMBLE_VISITS)
+  const stumblePoiStore = createStumblePoiStore(storeConnector)
+  const stumbleFeedbackStore = createStumbleFeedbackStore(storeConnector)
+  const stumblePoiRepository = createStumblePoiRepository({
+    poiStore: stumblePoiStore,
+    supabaseUrl: config.constants.store.supabaseUrl,
+    supabaseKey: config.constants.store.supabaseKey,
+  })
   const stumbleApplication = createStumbleApplication({
     poiConnector: poiConnector,
+    poiRepository: stumblePoiRepository,
     visitStore: stumbleVisitStore,
+    feedbackStore: stumbleFeedbackStore,
+    maxSuggestions: config.constants.stumble.maxSuggestions,
+    defaultRadiusMeters: config.constants.stumble.defaultRadiusMeters,
   })
 
   return {

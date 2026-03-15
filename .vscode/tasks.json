@@ -1,25 +1,35 @@
 {
   "version": "2.0.0",
   "tasks": [
+    // Tasks to start the development environment
     {
-      "label": "kill:all",
+      "label": "start:core",
       "type": "shell",
-      "command": "fuser -k 7000/tcp 7001/tcp 7002/tcp 7003/tcp 8081/tcp 7009/tcp 2>/dev/null; pkill -f 'deno.*main.ts' 2>/dev/null; pkill -f 'deno.*--inspect' 2>/dev/null; pkill -f 'metro' 2>/dev/null; exit 0",
-      "presentation": {
-        "reveal": "silent",
-        "panel": "shared"
+      "command": "deno task dev",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/core"
       },
-      "problemMatcher": []
+      "dependsOrder": "sequence",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Oak server starting",
+        }
+      }
     },
     {
-      "label": "app:start",
+      "label": "start:app",
       "type": "shell",
       "command": "npm run dev",
       "options": {
         "cwd": "${workspaceFolder}/packages/app"
       },
       "dependsOn": [
-        "storage:start"
+        "start:storage"
       ],
       "dependsOrder": "sequence",
       "isBackground": true,
@@ -35,7 +45,7 @@
       }
     },
     {
-      "label": "storage:start",
+      "label": "start:storage",
       "type": "shell",
       "command": "deno run --allow-all ${workspaceFolder}/tools/start-localstorage.ts",
       "group": "build",
@@ -55,82 +65,7 @@
       }
     },
     {
-      "label": "dev:start",
-      "type": "shell",
-      "command": "deno run --allow-all ${workspaceFolder}/tools/startDev.ts",
-      "isBackground": true,
-      "problemMatcher": {
-        "pattern": {
-          "regexp": "."
-        },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": "Starting",
-          "endsPattern": "Bundled|Metro|listening"
-        }
-      }
-    },
-    {
-      "label": "sandbox:export",
-      "type": "shell",
-      "command": "deno run -A ${workspaceFolder}/packages/test/src/sandbox/export.ts",
-      "isBackground": true,
-      "problemMatcher": {
-        "pattern": {
-          "regexp": "."
-        },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": "Starting",
-          "endsPattern": "Bundled|Metro|listening"
-        }
-      }
-    },
-    {
-      "label": "tsc:app",
-      "type": "shell",
-      "command": "npx tsc --noEmit",
-      "options": {
-        "cwd": "${workspaceFolder}/packages/app"
-      },
-      "group": "build",
-      "problemMatcher": "$tsc"
-    },
-    {
-      "label": "tsc:core",
-      "type": "shell",
-      "command": "deno check",
-      "options": {
-        "cwd": "${workspaceFolder}/packages/core"
-      },
-      "group": "build",
-      "problemMatcher": "$tsc"
-    },
-    {
-      "label": "tsc:web",
-      "type": "shell",
-      "command": "deno check",
-      "options": {
-        "cwd": "${workspaceFolder}/packages/web"
-      },
-      "group": "build",
-      "problemMatcher": "$tsc"
-    },
-    {
-      "label": "tsc:all",
-      "dependsOn": [
-        "tsc:app",
-        "tsc:core",
-        "tsc:web"
-      ],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "web:start",
+      "label": "start:web",
       "type": "shell",
       "command": "deno run dev",
       "dependsOrder": "sequence",
@@ -150,10 +85,101 @@
       }
     },
     {
-      "label": "web:deploy",
+      "label": "test:core",
+      "type": "shell",
+      "command": "deno task test",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/core"
+      },
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "test:app",
+      "type": "shell",
+      "command": "npm run test",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/app"
+      },
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "test:all",
+      "dependsOn": [
+        "test:app",
+        "test:core",
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "check:app",
+      "type": "shell",
+      "command": "npx tsc --noEmit",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/app"
+      },
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "check:core",
+      "type": "shell",
+      "command": "deno check",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/core"
+      },
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "check:web",
+      "type": "shell",
+      "command": "deno check",
+      "options": {
+        "cwd": "${workspaceFolder}/packages/web"
+      },
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "check:all",
+      "dependsOn": [
+        "check:app",
+        "check:core",
+        "check:web"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "deploy:app",
+      "type": "shell",
+      "command": "cd ${workspaceFolder}/packages/app && bash deploy.sh",
+      "group": "build"
+    },
+    {
+      "label": "deploy:web",
       "type": "shell",
       "command": "cd ${workspaceFolder}/packages/web && bash deploy.bash",
       "group": "build",
+    },
+    {
+      "label": "kill:all",
+      "type": "shell",
+      "command": "fuser -k 7000/tcp 7001/tcp 7002/tcp 7003/tcp 8081/tcp 7009/tcp 2>/dev/null; pkill -f 'deno.*main.ts' 2>/dev/null; pkill -f 'deno.*--inspect' 2>/dev/null; pkill -f 'metro' 2>/dev/null; exit 0",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
     },
   ]
 }

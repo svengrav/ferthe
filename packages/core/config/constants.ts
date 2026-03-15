@@ -37,6 +37,10 @@ export function createConstants() {
         blurredImageBlobPath: '06r5e44o2rlelaqybh0b-blurred.webp',
       },
     },
+    stumble: {
+      maxSuggestions: 5,
+      defaultRadiusMeters: 1000,
+    },
   }
 }
 
@@ -62,4 +66,5 @@ export const STORE_IDS = {
   DEVICE_TOKENS: 'device_tokens',
   STUMBLE_POIS: 'stumble_pois',
   STUMBLE_VISITS: 'stumble_visits',
+  STUMBLE_FEEDBACK: 'stumble_feedback',
 } as const

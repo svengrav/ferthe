@@ -1,24 +1,13 @@
 {
   "version": "0.2.0",
-  "configurations": [  
+  "configurations": [
     {
       "name": "🟦 Run API",
-      "request": "launch",
+      "request": "attach",
       "type": "node",
-      "cwd": "${workspaceFolder}/packages/core",
-      "runtimeExecutable": "deno",
-      "runtimeArgs": [
-        "run",
-        "-A",
-        "--watch",
-        "--inspect=127.0.0.1:7009",
-        "main.ts"
-      ],
-      "attachSimplePort": 7009,
-      "env": {
-        "NODE_ENV": "development"
-      },
-      "console": "integratedTerminal",
+      "port": 7009,
+      "preLaunchTask": "start:core",
+      "restart": true,
       "envFile": "${workspaceFolder}/.env",
     },
     {
@@ -27,7 +16,7 @@
       "request": "launch",
       "url": "http://localhost:8081",
       "webRoot": "${workspaceFolder}/packages/app",
-      "preLaunchTask": "app:start",
+      "preLaunchTask": "start:app",
       "sourceMapPathOverrides": {
         "webpack:///./src/*": "${webRoot}/src/*",
         "webpack:///src/*": "${webRoot}/src/*",
@@ -40,7 +29,7 @@
       "request": "launch",
       "url": "http://localhost:7002",
       "webRoot": "${workspaceFolder}/packages/web/app",
-      "preLaunchTask": "web:start"
+      "preLaunchTask": "start:web"
     }
   ],
   "compounds": [
@@ -51,7 +40,6 @@
         "🟥 Run App",
       ],
       "stopAll": true,
-      // "preLaunchTask": "kill:all"
     },
     {
       "name": "🟩 Run Web",
@@ -60,7 +48,6 @@
         "🟨 Run Web",
       ],
       "stopAll": true,
-      // "preLaunchTask": "kill:all"
     }
   ]
 }

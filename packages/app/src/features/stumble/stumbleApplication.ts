@@ -1,12 +1,14 @@
 import { logger } from '@app/shared/utils/logger'
 import { useLocalizationStore } from '@app/shared/localization/useLocalizationStore'
 import { ApiClient } from '@shared/api'
+import { StumbleFeedbackVote } from '@shared/contracts'
 import { getStumbleActions, stumbleStore } from './stumbleStore'
 
 export interface StumbleApplication {
   fetchSuggestions: (lat: number, lon: number, radiusMeters?: number) => Promise<void>
   toggleMode: (lat: number, lon: number) => Promise<void>
   recordVisit: (poiId: string, spotId?: string) => Promise<void>
+  submitFeedback: (poiId: string, vote: StumbleFeedbackVote) => Promise<void>
   syncVisits: () => Promise<void>
   deactivate: () => void
 }
@@ -18,7 +20,7 @@ interface StumbleApplicationOptions {
 export function createStumbleApplication(options: StumbleApplicationOptions): StumbleApplication {
   const { api } = options
 
-  const fetchSuggestions = async (lat: number, lon: number, radiusMeters = 800): Promise<void> => {
+  const fetchSuggestions = async (lat: number, lon: number, radiusMeters = 1000): Promise<void> => {
     const { setLoading, setSuggestions, setError } = getStumbleActions()
     const { selectedPreferences } = stumbleStore.getState()
 
@@ -82,6 +84,20 @@ export function createStumbleApplication(options: StumbleApplicationOptions): St
     getStumbleActions().reset()
   }
 
-  return { fetchSuggestions, toggleMode, recordVisit, syncVisits, deactivate }
+  const submitFeedback = async (poiId: string, vote: StumbleFeedbackVote): Promise<void> => {
+    const { setFeedback } = getStumbleActions()
+
+    // Optimistic UI update
+    setFeedback(poiId, vote)
+
+    const result = await api.stumble.submitFeedback(poiId, vote)
+    if (!result.success) {
+      logger.error('[Stumble] Failed to submit feedback', result.error)
+    } else {
+      logger.log('[Stumble] Feedback submitted', { poiId, vote })
+    }
+  }
+
+  return { fetchSuggestions, toggleMode, recordVisit, submitFeedback, syncVisits, deactivate }
 }
 

@@ -50,7 +50,7 @@ import {
   UpdateTrailRequestSchema,
 } from '@shared/contracts/trails.ts'
 import { TrailSpotSchema } from '@shared/contracts/trailSpots.ts'
-import { StumbleSuggestionSchema, StumbleVisitSchema } from '@shared/contracts/stumble.ts'
+import { StumbleFeedbackSchema, StumbleFeedbackVoteSchema, StumbleSuggestionResultSchema, StumbleVisitSchema } from '@shared/contracts/stumble.ts'
 import { GeoLocationSchema } from '@shared/geo/types.ts'
 import { z } from 'zod'
 import type { RouteRegistry } from './types.ts'
@@ -799,7 +799,7 @@ export const routes = {
         preferences: z.string(), // comma-separated StumblePreference values
         language: z.string().optional(),
       }),
-      output: ResultSchema(z.array(StumbleSuggestionSchema)),
+      output: ResultSchema(z.array(StumbleSuggestionResultSchema)),
     },
     recordVisit: {
       version: 'v1',
@@ -816,6 +816,22 @@ export const routes = {
       method: 'GET',
       path: '/stumble/visits',
       output: ResultSchema(z.array(StumbleVisitSchema)),
+    },
+    submitFeedback: {
+      version: 'v1',
+      method: 'POST',
+      path: '/stumble/feedback',
+      input: z.object({
+        poiId: z.string(),
+        vote: StumbleFeedbackVoteSchema,
+      }),
+      output: ResultSchema(StumbleFeedbackSchema),
+    },
+    getFeedback: {
+      version: 'v1',
+      method: 'GET',
+      path: '/stumble/feedback',
+      output: ResultSchema(z.array(StumbleFeedbackSchema)),
     },
   },
 

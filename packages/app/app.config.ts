@@ -1,11 +1,16 @@
 import { ConfigContext, ExpoConfig } from 'expo/config'
+import { execSync } from 'child_process'
 
 const isDev = process.env.EXPO_PUBLIC_ENVIRONMENT === 'development'
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   name: isDev ? 'ferthe dev' : 'ferthe',
   slug: 'ferthe',
-  version: '0.5.1',
+  version: version({
+    major: 0,
+    minor: 5,
+    build: getBuild(200)
+  }),
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'dark',
@@ -69,3 +74,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
   },
 })
+
+// Version helpers
+const getBuild = (seed: number = 100) => seed + parseInt(process.env.BUILD_VERSION?.toString().trim() || '0', 10)
+const version = (version: { major: number, minor: number, build: number }) => `${version.major}.${version.minor}.${version.build}`

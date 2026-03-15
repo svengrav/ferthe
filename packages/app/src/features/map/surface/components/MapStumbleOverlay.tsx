@@ -6,7 +6,7 @@ import { memo, useEffect, useMemo, useRef } from 'react'
 import { StyleSheet, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated'
 import { useMapCanvasBoundary, useMapCanvasDimensions } from '../../stores/mapStore'
-import { useMapCompensatedScale } from './MapCompensatedScale'
+import { useMapScale } from './MapCompensatedScale'
 import { mapUtils } from '../../services/geoToScreenTransform'
 import { useStumbleSuggestions, useStumbleVisitedPoiIds, getStumbleActions } from '@app/features/stumble/stumbleStore'
 import { useIsStumbleTrail } from '@app/features/stumble'
@@ -104,7 +104,7 @@ interface StumbleMarkerProps {
 const StumbleMarker = memo(function StumbleMarker({ suggestion, cx, cy, diameter, isReached, isVisited }: StumbleMarkerProps) {
   const { styles } = useTheme(createStyles)
   const { locales } = useLocalization()
-  const compensatedScale = useMapCompensatedScale()
+  const rawScale = useMapScale()
 
   const opacity = useSharedValue(1)
 
@@ -132,11 +132,11 @@ const StumbleMarker = memo(function StumbleMarker({ suggestion, cx, cy, diameter
   }))
 
   const scaleStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: compensatedScale.value }],
-  }), [compensatedScale])
+    transform: [{ scale: rawScale ? 1 / rawScale.value : 1 }],
+  }), [rawScale])
 
   const radius = diameter / 2
-  const labelTop = isVisited ? DOT_RADIUS + 4 : radius + 4
+  const labelTop = DOT_RADIUS + 4
 
   return (
     <View

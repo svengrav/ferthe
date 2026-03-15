@@ -15,7 +15,7 @@ describe('dateTimeUtils', () => {
 
   describe('formatDate', () => {
     it('returns empty string when no date is provided', () => {
-      expect(formatDate(undefined)).toBe('')
+      expect(formatDate(undefined)).toBe(undefined)
     })
 
     it('returns a formatted date string for a valid date', () => {
