@@ -160,6 +160,12 @@
       "problemMatcher": []
     },
     {
+      "label": "deploy:app",
+      "type": "shell",
+      "command": "cd ${workspaceFolder}/packages/app && bash deploy.sh",
+      "group": "build"
+    },
+    {
       "label": "deploy:web",
       "type": "shell",
       "command": "cd ${workspaceFolder}/packages/web && bash deploy.bash",
