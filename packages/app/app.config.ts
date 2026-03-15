@@ -9,7 +9,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: version({
     major: 0,
     minor: 5,
-    build: getCommitCount()
+    build: getBuild(200)
   }),
   orientation: 'portrait',
   icon: './assets/icon.png',
@@ -76,5 +76,5 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 })
 
 // Version helpers
-const getCommitCount = (seed: number = 100) => seed + parseInt(execSync('git rev-list --count HEAD').toString().trim(), 10)
+const getBuild = (seed: number = 100) => seed + parseInt(process.env.BUILD_VERSION?.toString().trim() || '0', 10)
 const version = (version: { major: number, minor: number, build: number }) => `${version.major}.${version.minor}.${version.build}`
